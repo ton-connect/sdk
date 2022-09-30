@@ -33,14 +33,19 @@ export class TonConnect {
         this.disconnectSubscriptions.push(callback);
     }
 
+    public onConnectedChange(callback: (isConnected: boolean) => void): void {
+        this.connectSubscriptions.push(() => callback(true));
+        this.disconnectSubscriptions.push(() => callback(false));
+    }
+
     public async connect(): Promise<void> {}
 
     public async sendTransaction(tx: TransactionRequest): Promise<boolean> {
         return Promise.resolve(Boolean(tx));
     }
 
-    public async sign(sign: SignRequest): Promise<string> {
-        return Promise.resolve(sign.message);
+    public async sign(signRequest: SignRequest): Promise<string> {
+        return Promise.resolve(signRequest.message);
     }
 
     public disconnect(): void {}
