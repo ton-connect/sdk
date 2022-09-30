@@ -1,4 +1,7 @@
+import { mergeOptions } from 'src/ton-connect/utils/options';
 import { WidgetController } from 'src/widget';
+import { defaultButtonConfiguration } from 'src/widget/constants/default-button-configuration';
+import { ButtonConfiguration } from 'src/widget/models/button-configuration';
 
 export class Button {
     private walletConnected: boolean;
@@ -7,7 +10,13 @@ export class Button {
 
     private root: HTMLElement | null = null;
 
-    constructor(private readonly widgetController: WidgetController) {
+    private configuration: Required<ButtonConfiguration>;
+
+    constructor(
+        private readonly widgetController: WidgetController,
+        buttonConfiguration?: ButtonConfiguration
+    ) {
+        this.configuration = mergeOptions(buttonConfiguration, defaultButtonConfiguration);
         this.walletConnected = widgetController.connector.connected;
 
         this.subscribeToWalletState();

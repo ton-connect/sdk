@@ -1,10 +1,13 @@
 import { SignRequest, TonConnect, TransactionRequest } from 'src/ton-connect';
+import { WidgetControllerOptions } from 'src/widget/models/widget-controller-options';
 import { Button } from 'src/widget/views';
 
 export class WidgetController {
-    public readonly button = new Button(this);
+    public readonly button: Button;
 
-    constructor(public readonly connector: TonConnect) {}
+    constructor(public readonly connector: TonConnect, options?: WidgetControllerOptions) {
+        this.button = new Button(this, options?.buttonConfiguration);
+    }
 
     /**
      * Opens the modal window and handles a wallet connection
