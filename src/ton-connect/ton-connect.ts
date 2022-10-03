@@ -1,16 +1,17 @@
 import { WalletAlreadyConnectedError } from 'src/errors/ton-connect/wallet-already-connected.error';
 import { DappMetadata, SignRequest, TransactionRequest } from 'src/ton-connect/core';
 import { BridgeConnector } from 'src/ton-connect/core/bridge-connector';
-import { CHAIN } from 'src/ton-connect/core/models/CHAIN';
+import { Account } from 'src/ton-connect/core/models/account';
 import { Session } from 'src/ton-connect/core/session';
 import { Wallet } from 'src/ton-connect/core/models/wallet';
 import { WalletInfo } from 'src/ton-connect/core/models/wallet-info';
-import { TonConnectStorage } from 'src/ton-connect/core/storage';
+import { IStorage } from 'src/ton-connect/core/storage/models/storage.interface';
+import { SessionStorage } from 'src/ton-connect/core/storage/session-storage';
 
 export class TonConnect {
     private readonly dappMetadata: DappMetadata;
 
-    private readonly storage: TonConnectStorage;
+    private readonly storage: SessionStorage;
 
     private bridgeConnector: BridgeConnector | undefined;
 
@@ -18,9 +19,7 @@ export class TonConnect {
 
     private connectSubscriptions: ((walletInfo: WalletInfo) => void)[] = [];
 
-    private accountChangeSubscriptions: ((account: string) => void)[] = [];
-
-    private chainChangeSubscriptions: ((chain: CHAIN) => void)[] = [];
+    private accountChangeSubscriptions: ((account: Account) => void)[] = [];
 
     private disconnectSubscriptions: (() => void)[] = [];
 
@@ -28,21 +27,17 @@ export class TonConnect {
         return this._connected;
     }
 
-    constructor(options?: { dappMetedata?: DappMetadata; storage: TonConnectStorage }) {
+    constructor(options?: { dappMetedata?: DappMetadata; storage?: IStorage }) {
         this.dappMetadata = options?.dappMetedata || this.getWebPageMetadata();
-        this.storage = options?.storage || new TonConnectStorage();
+        this.storage = new SessionStorage(options?.storage);
     }
 
     public onConnect(callback: (walletInfo: WalletInfo) => void): void {
         this.connectSubscriptions.push(callback);
     }
 
-    public onAccountChange(callback: (account: string) => void): void {
+    public onAccountChange(callback: (account: Account) => void): void {
         this.accountChangeSubscriptions.push(callback);
-    }
-
-    public onChainChange(callback: (chain: CHAIN) => void): void {
-        this.chainChangeSubscriptions.push(callback);
     }
 
     public onDisconnect(callback: () => void): void {
