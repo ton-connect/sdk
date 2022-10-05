@@ -1,6 +1,7 @@
 import { WalletAlreadyConnectedError } from 'src/errors/ton-connect/wallet-already-connected.error';
 import { DappMetadata, SignRequest, TransactionRequest } from 'src/ton-connect/core';
-import { BridgeConnector } from 'src/ton-connect/core/bridge-connector';
+import { BridgeConnector } from 'src/ton-connect/core/bridge/bridge-connector';
+import { BridgeEvent } from 'src/ton-connect/core/bridge/models/bridge-event';
 import { Account } from 'src/ton-connect/core/models/account';
 import { Session } from 'src/ton-connect/core/session';
 import { Wallet } from 'src/ton-connect/core/models/wallet';
@@ -9,6 +10,8 @@ import { IStorage } from 'src/ton-connect/core/storage/models/storage.interface'
 import { SessionStorage } from 'src/ton-connect/core/storage/session-storage';
 
 export class TonConnect {
+    private readonly protocolVersion = '0.1';
+
     private readonly dappMetadata: DappMetadata;
 
     private readonly storage: SessionStorage;
@@ -56,10 +59,21 @@ export class TonConnect {
         const [pk, sk] = [Math.random().toString(), Math.random().toString()]; // generate keys;
         const sessionId = Math.random().toString();
 
-        this.bridgeConnector = new BridgeConnector(wallet.bridgeLink);
-        await this.bridgeConnector.registerSession(sessionId);
+        this.bridgeConnector = new BridgeConnector(wallet.bridgeLink, sessionId);
+        await this.bridgeConnector.registerSession();
+        this.bridgeConnector.listen(
+            this.bridgeEventsListener.bind(this),
+            this.bridgeErrorsListener.bind(this)
+        );
 
-        const session = new Session(wallet, sessionId, pk, sk, this.dappMetadata);
+        const session = new Session(
+            wallet,
+            sessionId,
+            pk,
+            sk,
+            this.dappMetadata,
+            this.protocolVersion
+        );
         this.storage.storeSession(session);
 
         return session.generateUniversalLink();
@@ -82,4 +96,13 @@ export class TonConnect {
             name: document?.title
         };
     }
+
+    private bridgeEventsListener(e: BridgeEvent): void {
+        switch (e.name) {
+            case 'connect':
+                this._connected = true;
+        }
+    }
+
+    private bridgeErrorsListener(): void {}
 }

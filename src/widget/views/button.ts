@@ -25,12 +25,12 @@ export class Button {
     private subscribeToWalletState(): void {
         this.widgetController.connector.onConnect(walletInfo => {
             this.walletConnected = true;
-            this.address = walletInfo.address;
+            this.address = walletInfo.account.address;
             this.rerender();
         });
 
         this.widgetController.connector.onAccountChange(account => {
-            this.address = account;
+            this.address = account.address;
             this.rerender();
         });
 

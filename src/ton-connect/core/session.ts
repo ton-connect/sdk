@@ -7,7 +7,8 @@ export class Session {
         public readonly sessionId: string,
         public readonly pk: string,
         public readonly sk: string,
-        public readonly dappMetadata: DappMetadata
+        public readonly dappMetadata: DappMetadata,
+        public readonly protocolVersion: string
     ) {}
 
     public generateUniversalLink(): string {
@@ -15,6 +16,7 @@ export class Session {
         url.searchParams.append('sessionId', this.sessionId);
         url.searchParams.append('pk', this.pk);
         url.searchParams.append('metadata', JSON.stringify(this.dappMetadata));
+        url.searchParams.append('version', this.protocolVersion);
         return url.toString();
     }
 }
