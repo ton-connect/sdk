@@ -1,24 +1,30 @@
-import { WalletAlreadyConnectedError } from 'src/errors/ton-connect/wallet-already-connected.error';
+import { WalletAlreadyConnectedError } from 'src/errors/ton-connect/wallet/wallet-already-connected.error';
+import { WalletNotConnectedError } from 'src/errors/ton-connect/wallet/wallet-not-connected.error';
 import { DappMetadata, SignRequest, TransactionRequest } from 'src/ton-connect/core';
-import { BridgeConnector } from 'src/ton-connect/core/bridge/bridge-connector';
-import { BridgeEvent } from 'src/ton-connect/core/bridge/models/bridge-event';
+import { DappSettings } from 'src/ton-connect/core/models/dapp/dapp-settings';
+import { WalletConnectionSource } from 'src/ton-connect/core/models/wallet-connection-source';
+import { BridgeProvider } from 'src/ton-connect/core/provider/bridge/bridge-provider';
+import { InjectedProvider } from 'src/ton-connect/core/provider/injected/injected-provider';
+import { ProviderError } from 'src/ton-connect/core/provider/models/provider-error';
+import { ProviderEvent } from 'src/ton-connect/core/provider/models/provider-event';
 import { Account } from 'src/ton-connect/core/models/account';
-import { Session } from 'src/ton-connect/core/session';
-import { Wallet } from 'src/ton-connect/core/models/wallet';
+import { Provider } from 'src/ton-connect/core/provider/provider';
 import { WalletInfo } from 'src/ton-connect/core/models/wallet-info';
+import { DefaultStorage } from 'src/ton-connect/core/storage/default-storage';
 import { IStorage } from 'src/ton-connect/core/storage/models/storage.interface';
-import { SessionStorage } from 'src/ton-connect/core/storage/session-storage';
+import { WalletInfoStorage } from 'src/ton-connect/core/storage/wallet-info-storage';
+import { getWalletConnectionSource } from 'src/ton-connect/resources/wallets/utils';
+import { getWebPageMetadata } from 'src/ton-connect/utils/web-api';
+import * as protocol from 'src/ton-connect/resources/protocol.json';
 
 export class TonConnect {
-    private readonly protocolVersion = '0.1';
+    private readonly dappSettings: DappSettings;
 
-    private readonly dappMetadata: DappMetadata;
+    private readonly walletInfoStorage: WalletInfoStorage;
 
-    private readonly storage: SessionStorage;
+    private provider: Provider | null = null;
 
-    private bridgeConnector: BridgeConnector | undefined;
-
-    private _connected = false;
+    private walletInfo: WalletInfo | null = null;
 
     private connectSubscriptions: ((walletInfo: WalletInfo) => void)[] = [];
 
@@ -27,12 +33,25 @@ export class TonConnect {
     private disconnectSubscriptions: (() => void)[] = [];
 
     public get connected(): boolean {
-        return this._connected;
+        return this.provider !== null;
+    }
+
+    public get account(): Account | null {
+        return this.walletInfo?.account || null;
+    }
+
+    public get walletName(): string | null {
+        return this.walletInfo?.walletName || null;
     }
 
     constructor(options?: { dappMetedata?: DappMetadata; storage?: IStorage }) {
-        this.dappMetadata = options?.dappMetedata || this.getWebPageMetadata();
-        this.storage = new SessionStorage(options?.storage);
+        this.dappSettings = {
+            metadata: options?.dappMetedata || getWebPageMetadata(),
+            storage: options?.storage || new DefaultStorage(),
+            protocolVersion: protocol.version
+        };
+
+        this.walletInfoStorage = new WalletInfoStorage(this.dappSettings.storage);
     }
 
     public onConnect(callback: (walletInfo: WalletInfo) => void): void {
@@ -52,31 +71,31 @@ export class TonConnect {
         this.disconnectSubscriptions.push(() => callback(false));
     }
 
-    public async connect(wallet: Wallet): Promise<string> {
+    public async connect<T extends WalletConnectionSource | 'injected'>(
+        wallet: T
+    ): Promise<T extends 'injected' ? void : string>;
+    public async connect(wallet: WalletConnectionSource | 'injected'): Promise<string | void> {
         if (this.connected) {
             throw new WalletAlreadyConnectedError();
         }
-        const [pk, sk] = [Math.random().toString(), Math.random().toString()]; // generate keys;
-        const sessionId = Math.random().toString();
 
-        this.bridgeConnector = new BridgeConnector(wallet.bridgeLink, sessionId);
-        await this.bridgeConnector.registerSession();
-        this.bridgeConnector.listen(
-            this.bridgeEventsListener.bind(this),
-            this.bridgeErrorsListener.bind(this)
-        );
+        const provider = await this.createProvider(wallet);
+        return provider.connect();
+    }
 
-        const session = new Session(
-            wallet,
-            sessionId,
-            pk,
-            sk,
-            this.dappMetadata,
-            this.protocolVersion
-        );
-        this.storage.storeSession(session);
+    public async autoConnect(): Promise<void> {
+        const walletInfo = await this.walletInfoStorage.loadWalletInfo();
+        if (walletInfo && !this.connected) {
+            const wallet =
+                walletInfo.provider === 'injected'
+                    ? 'injected'
+                    : getWalletConnectionSource(walletInfo.walletName);
 
-        return session.generateUniversalLink();
+            const provider = await this.createProvider(wallet);
+            await provider.connect();
+
+            this.onProviderConnected(provider, walletInfo);
+        }
     }
 
     public async sendTransaction(tx: TransactionRequest): Promise<boolean> {
@@ -87,22 +106,63 @@ export class TonConnect {
         return Promise.resolve(signRequest.message);
     }
 
-    public disconnect(): void {}
-
-    private getWebPageMetadata(): DappMetadata {
-        return {
-            url: window?.location.href,
-            icon: window?.location.origin + '/favicon.ico',
-            name: document?.title
-        };
+    public async disconnect(): Promise<void> {
+        if (!this.connected) {
+            throw new WalletNotConnectedError();
+        }
+        await this.provider!.disconnect();
+        this.onProviderDisconnected();
     }
 
-    private bridgeEventsListener(e: BridgeEvent): void {
+    public async createProvider(wallet: WalletConnectionSource | 'injected'): Promise<Provider> {
+        let provider: Provider;
+
+        if (wallet === 'injected') {
+            provider = new InjectedProvider();
+        } else {
+            provider = new BridgeProvider(this.dappSettings, wallet);
+        }
+
+        provider.listen(
+            e => this.providerEventsListener(provider, e),
+            e => this.providerErrorsListener(provider, e)
+        );
+        return provider;
+    }
+
+    private providerEventsListener(provider: Provider, e: ProviderEvent): void {
         switch (e.name) {
             case 'connect':
-                this._connected = true;
+                this.onProviderConnected(provider, e.value);
+                break;
+            case 'accountChange':
+                this.onProviderAccountChange(e.value.account);
+                break;
+            case 'disconnect':
+                this.onProviderDisconnected();
         }
     }
 
-    private bridgeErrorsListener(): void {}
+    private providerErrorsListener(provider: Provider, e: ProviderError): void {
+        console.error(`Provider ${provider} error:`, e);
+    }
+
+    private onProviderConnected(provider: Provider, walletInfo: WalletInfo): void {
+        this.provider = provider;
+        this.walletInfo = walletInfo;
+
+        this.connectSubscriptions.forEach(callback => callback(walletInfo));
+        this.accountChangeSubscriptions.forEach(callback => callback(walletInfo.account));
+    }
+
+    private onProviderDisconnected(): void {
+        this.provider = null;
+        this.walletInfo = null;
+        this.disconnectSubscriptions.forEach(callback => callback());
+    }
+
+    private onProviderAccountChange(account: Account): void {
+        this.accountChangeSubscriptions.forEach(callback => callback(account));
+        this.disconnectSubscriptions.forEach(callback => callback());
+    }
 }

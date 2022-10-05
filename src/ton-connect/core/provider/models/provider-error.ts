@@ -1,4 +1,4 @@
-export type BridgeError = {
+export type ProviderError = {
     name: string;
     value: unknown;
 };

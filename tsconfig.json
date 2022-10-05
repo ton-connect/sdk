@@ -11,6 +11,7 @@
             "ESNext",
             "dom"
         ],
+        "resolveJsonModule": true,
         "experimentalDecorators": true,
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,

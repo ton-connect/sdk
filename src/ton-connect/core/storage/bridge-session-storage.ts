@@ -3,7 +3,7 @@ import { DefaultStorage } from 'src/ton-connect/core/storage/default-storage';
 import { IStorage } from 'src/ton-connect/core/storage/models/storage.interface';
 import { AsStruct } from 'src/ton-connect/utils/types';
 
-export class SessionStorage {
+export class BridgeSessionStorage {
     private readonly storeKey = 'ton-connect-storage';
 
     private readonly storage: IStorage;
