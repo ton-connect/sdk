@@ -1,5 +1,6 @@
-import { ProviderError } from 'src/ton-connect/core/provider/models/provider-error';
-import { ProviderEvent } from 'src/ton-connect/core/provider/models/provider-event';
+import { BridgeError } from 'src/ton-connect/core/provider/bridge/models/bridge-error';
+import { BridgeEvent } from 'src/ton-connect/core/provider/bridge/models/bridge-event';
+import { BridgeMessage } from 'src/ton-connect/core/provider/bridge/models/bridge-message';
 
 export class BridgeGateway {
     private eventSource: EventSource | undefined;
@@ -7,7 +8,7 @@ export class BridgeGateway {
     constructor(
         private readonly bridgeUrl: string,
         public readonly sessionId: string,
-        private readonly listener: (e: ProviderError | ProviderEvent) => void
+        private readonly listener: (bridge: BridgeGateway, msg: BridgeMessage) => void
     ) {}
 
     public async registerSession(): Promise<void> {
@@ -27,19 +28,19 @@ export class BridgeGateway {
 
     private errorsHandler(e: Event): void {
         const parsed = this.parseSSEError(e);
-        this.listener(parsed);
+        this.listener(this, { error: parsed });
     }
 
     private messagesHandler(e: MessageEvent): void {
         const parsed = this.parseSSEEvent(e);
-        this.listener(parsed);
+        this.listener(this, { event: parsed });
     }
 
-    private parseSSEEvent(e: MessageEvent): ProviderEvent {
-        return e as unknown as ProviderEvent;
+    private parseSSEEvent(e: MessageEvent): BridgeEvent {
+        return e as unknown as BridgeEvent;
     }
 
-    private parseSSEError(e: Event): ProviderError {
-        return e as unknown as ProviderError;
+    private parseSSEError(e: Event): BridgeError {
+        return e as unknown as BridgeError;
     }
 }
