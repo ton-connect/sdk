@@ -10,6 +10,7 @@ import { BridgeMessage } from 'src/ton-connect/core/provider/bridge/models/bridg
 import { ProviderError } from 'src/ton-connect/core/provider/models/provider-error';
 import { ProviderEvent } from 'src/ton-connect/core/provider/models/provider-event';
 import { ProviderRequest } from 'src/ton-connect/core/provider/models/provider-request';
+import { ProviderResponse } from 'src/ton-connect/core/provider/models/provider-response';
 import { HTTPProvider } from 'src/ton-connect/core/provider/provider';
 import {
     BridgeSession,
@@ -68,8 +69,8 @@ export class BridgeProvider implements HTTPProvider {
         this.listeners.push({ eventsCallback, errorsCallback });
     }
 
-    public sendRequest(request: ProviderRequest): Promise<void> {
-        return Promise.resolve(void request);
+    public sendRequest(request: ProviderRequest): Promise<ProviderResponse> {
+        return Promise.resolve(request as ProviderResponse);
     }
 
     private async gatewayListener(

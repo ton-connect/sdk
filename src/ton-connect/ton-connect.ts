@@ -3,6 +3,7 @@ import { WalletNotConnectedError } from 'src/errors/ton-connect/wallet/wallet-no
 import { DappMetadata, SignRequest, TransactionRequest } from 'src/ton-connect/core';
 import { DappSettings } from 'src/ton-connect/core/models/dapp/dapp-settings';
 import { WalletConnectionSource } from 'src/ton-connect/core/models/wallet-connection-source';
+import { WalletAppInfo } from 'src/ton-connect/core/models/wallet/wallet-app-info';
 import { BridgeProvider } from 'src/ton-connect/core/provider/bridge/bridge-provider';
 import { InjectedProvider } from 'src/ton-connect/core/provider/injected/injected-provider';
 import { ProviderError } from 'src/ton-connect/core/provider/models/provider-error';
@@ -40,8 +41,8 @@ export class TonConnect {
         return this.walletInfo?.account || null;
     }
 
-    public get walletName(): string | null {
-        return this.walletInfo?.walletName || null;
+    public get walletAppInfo(): WalletAppInfo | null {
+        return this.walletInfo?.appInfo || null;
     }
 
     constructor(options?: { dappMetedata?: DappMetadata; storage?: IStorage }) {
@@ -89,7 +90,7 @@ export class TonConnect {
             const wallet =
                 walletInfo.provider === 'injected'
                     ? 'injected'
-                    : getWalletConnectionSource(walletInfo.walletName);
+                    : getWalletConnectionSource(walletInfo.appInfo.id);
 
             const provider = await this.createProvider(wallet);
             await provider.connect();
