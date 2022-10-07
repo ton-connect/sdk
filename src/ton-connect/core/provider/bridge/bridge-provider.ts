@@ -1,4 +1,9 @@
 import { DappSettings } from 'src/ton-connect/core/models/dapp/dapp-settings';
+import {
+    ActionRequest,
+    RequestType
+} from 'src/ton-connect/core/models/protocol/actions/action-request';
+import { ActionResponse } from 'src/ton-connect/core/models/protocol/actions/action-response';
 import { WalletConnectionSource } from 'src/ton-connect/core/models/wallet-connection-source';
 import { BridgeGateway } from 'src/ton-connect/core/provider/bridge/bridge-gateway';
 import { BridgeError } from 'src/ton-connect/core/provider/bridge/models/bridge-error';
@@ -9,8 +14,6 @@ import {
 import { BridgeMessage } from 'src/ton-connect/core/provider/bridge/models/bridge-message';
 import { ProviderError } from 'src/ton-connect/core/provider/models/provider-error';
 import { ProviderEvent } from 'src/ton-connect/core/provider/models/provider-event';
-import { ProviderRequest } from 'src/ton-connect/core/provider/models/provider-request';
-import { ProviderResponse } from 'src/ton-connect/core/provider/models/provider-response';
 import { HTTPProvider } from 'src/ton-connect/core/provider/provider';
 import {
     BridgeSession,
@@ -58,6 +61,12 @@ export class BridgeProvider implements HTTPProvider {
         return this.generateUniversalLink(sessionSeed);
     }
 
+    public sendRequest<T extends RequestType>(
+        request: ActionRequest<T>
+    ): Promise<ActionResponse<T>> {
+        return Promise.resolve(request as unknown as ActionResponse<T>);
+    }
+
     public disconnect(): Promise<void> {
         return Promise.resolve(undefined);
     }
@@ -67,10 +76,6 @@ export class BridgeProvider implements HTTPProvider {
         errorsCallback?: (e: ProviderError) => void
     ): void {
         this.listeners.push({ eventsCallback, errorsCallback });
-    }
-
-    public sendRequest(request: ProviderRequest): Promise<ProviderResponse> {
-        return Promise.resolve(request as ProviderResponse);
     }
 
     private async gatewayListener(

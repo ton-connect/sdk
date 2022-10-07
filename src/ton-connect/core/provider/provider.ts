@@ -1,8 +1,11 @@
+import {
+    ActionRequest,
+    RequestType
+} from 'src/ton-connect/core/models/protocol/actions/action-request';
+import { ActionResponse } from 'src/ton-connect/core/models/protocol/actions/action-response';
 import { InjectedProvider } from 'src/ton-connect/core/provider/injected/injected-provider';
 import { ProviderError } from 'src/ton-connect/core/provider/models/provider-error';
 import { ProviderEvent } from 'src/ton-connect/core/provider/models/provider-event';
-import { ProviderResponse } from 'src/ton-connect/core/provider/models/provider-response';
-import { ProviderRequest } from './models/provider-request';
 
 export type Provider = InjectedProvider | HTTPProvider;
 
@@ -16,7 +19,7 @@ export interface HTTPProvider extends BaseProvider {
 
 interface BaseProvider {
     disconnect(): Promise<void>;
-    sendRequest(request: ProviderRequest): Promise<ProviderResponse>;
+    sendRequest<T extends RequestType>(request: ActionRequest<T>): Promise<ActionResponse<T>>;
     listen(
         eventsCallback: (e: ProviderEvent) => void,
         errorsCallback?: (e: ProviderError) => void

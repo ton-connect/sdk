@@ -1,7 +1,12 @@
 import { WalletAlreadyConnectedError } from 'src/errors/ton-connect/wallet/wallet-already-connected.error';
 import { WalletNotConnectedError } from 'src/errors/ton-connect/wallet/wallet-not-connected.error';
-import { DappMetadata, SignRequest, TransactionRequest } from 'src/ton-connect/core';
+import { DappMetadata } from 'src/ton-connect/core';
+import { ErrorsParser } from 'src/ton-connect/core/errors-parser';
 import { DappSettings } from 'src/ton-connect/core/models/dapp/dapp-settings';
+import { SendTransactionRequest } from 'src/ton-connect/core/models/protocol/actions/send-transaction/send-transaction-request';
+import { SendTransactionResponse } from 'src/ton-connect/core/models/protocol/actions/send-transaction/send-transaction-response';
+import { SignMessageRequest } from 'src/ton-connect/core/models/protocol/actions/sign-message/sign-message-request';
+import { SignMessageResponse } from 'src/ton-connect/core/models/protocol/actions/sign-message/sign-message-response';
 import { WalletConnectionSource } from 'src/ton-connect/core/models/wallet-connection-source';
 import { WalletAppInfo } from 'src/ton-connect/core/models/wallet/wallet-app-info';
 import { BridgeProvider } from 'src/ton-connect/core/provider/bridge/bridge-provider';
@@ -99,12 +104,26 @@ export class TonConnect {
         }
     }
 
-    public async sendTransaction(tx: TransactionRequest): Promise<boolean> {
-        return Promise.resolve(Boolean(tx));
+    public async sendTransaction(tx: SendTransactionRequest): Promise<SendTransactionResponse> {
+        this.checkConnection();
+        const response = await this.provider!.sendRequest<'send-transaction'>(tx);
+
+        if (response.status === 'error') {
+            ErrorsParser.parseAndThrowError(response.result);
+        }
+
+        return response.result;
     }
 
-    public async sign(signRequest: SignRequest): Promise<string> {
-        return Promise.resolve(signRequest.message);
+    public async sign(signRequest: SignMessageRequest): Promise<SignMessageResponse> {
+        this.checkConnection();
+        const response = await this.provider!.sendRequest<'sign-message'>(signRequest);
+
+        if (response.status === 'error') {
+            ErrorsParser.parseAndThrowError(response.result);
+        }
+
+        return response.result;
     }
 
     public async disconnect(): Promise<void> {
@@ -165,5 +184,11 @@ export class TonConnect {
     private onProviderAccountChange(account: Account): void {
         this.accountChangeSubscriptions.forEach(callback => callback(account));
         this.disconnectSubscriptions.forEach(callback => callback());
+    }
+
+    private checkConnection(): void | never {
+        if (!this.connected) {
+            throw new WalletNotConnectedError();
+        }
     }
 }

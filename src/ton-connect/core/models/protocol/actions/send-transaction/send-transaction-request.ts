@@ -1,4 +1,4 @@
-export interface TransactionRequest {
+export interface SendTransactionRequest {
     deadline: number;
     sendMode: number;
     to: string;

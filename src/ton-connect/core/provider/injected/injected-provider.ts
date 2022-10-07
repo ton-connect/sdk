@@ -1,11 +1,13 @@
 import { WalletNotInjectedError } from 'src/errors/ton-connect/wallet/wallet-not-injected.error';
-import { ActionRequest } from 'src/ton-connect/core/models/protocol/action-request';
+import {
+    ActionRequest,
+    RequestType
+} from 'src/ton-connect/core/models/protocol/actions/action-request';
+import { ActionResponse } from 'src/ton-connect/core/models/protocol/actions/action-response';
 import { WalletAppInfo } from 'src/ton-connect/core/models/wallet/wallet-app-info';
 import { InjectedWalletApi } from 'src/ton-connect/core/provider/injected/models/injected-wallet-api';
 import { ProviderError } from 'src/ton-connect/core/provider/models/provider-error';
 import { ProviderEvent } from 'src/ton-connect/core/provider/models/provider-event';
-import { ProviderRequest } from 'src/ton-connect/core/provider/models/provider-request';
-import { ProviderResponse } from 'src/ton-connect/core/provider/models/provider-response';
 import { InternalProvider } from 'src/ton-connect/core/provider/provider';
 
 interface WindowWithTon extends Window {
@@ -80,10 +82,10 @@ export class InjectedProvider implements InternalProvider {
         this.listeners.push({ eventsCallback, errorsCallback });
     }
 
-    public async sendRequest(request: ProviderRequest): Promise<ProviderResponse> {
-        const actionRequest = request as ActionRequest;
-        const response = await this.injectedWallet.sendRequest(actionRequest);
-        return response as ProviderResponse;
+    public async sendRequest<T extends RequestType>(
+        request: ActionRequest<T>
+    ): Promise<ActionResponse<T>> {
+        return this.injectedWallet.sendRequest(request);
     }
 
     private makeSubscriptions(): void {
