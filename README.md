@@ -1,3 +1,8 @@
-# ton-connect sdk
+# TON Connect SDK
 
-Тут будет реализация sdk, краткий пример использования, документация по sdk и реализация виджета
+⚠️ API is work in progress right now.
+
+## Getting started
+
+TODO: add example on connecting the SDK and UI widget.
+
