@@ -1,0 +1,27 @@
+{
+  "name": "@ton-connect/core",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "../../node_modules/.bin/ttsc"
+  },
+  "dependencies": {
+    "deepmerge": "^4.2.2"
+  },
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.38.1",
+    "@typescript-eslint/parser": "^5.38.1",
+    "eslint": "8.22.0",
+    "eslint-config-airbnb-typescript": "^17.0.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-unused-imports": "^2.0.0",
+    "prettier": "^2.7.1",
+    "ts-loader": "^9.4.1",
+    "ttypescript": "^1.5.13",
+    "typescript": "^4.8.3",
+    "typescript-transform-paths": "^3.3.1"
+  }
+}

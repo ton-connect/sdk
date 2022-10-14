@@ -1,25 +1,18 @@
 {
-  "name": "ton-connect-sdk",
-  "version": "1.0.0",
-  "scripts": {
-    "compile": "ttsc"
-  },
-  "dependencies": {
-    "deepmerge": "^4.2.2"
-  },
+  "name": "ton-connect",
+  "version": "0.0.1",
+  "license": "MIT",
+  "scripts": {},
+  "private": true,
+  "dependencies": {},
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.38.1",
-    "@typescript-eslint/parser": "^5.38.1",
-    "eslint": "8.22.0",
-    "eslint-config-airbnb-typescript": "^17.0.0",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-import": "^2.26.0",
-    "eslint-plugin-prettier": "^4.2.1",
-    "eslint-plugin-unused-imports": "^2.0.0",
-    "prettier": "^2.7.1",
-    "ts-loader": "^9.4.1",
-    "ttypescript": "^1.5.13",
-    "typescript": "^4.8.3",
-    "typescript-transform-paths": "^3.3.1"
-  }
+    "nx": "14.8.5",
+    "@nrwl/cli": "14.8.5",
+    "@nrwl/workspace": "14.8.5",
+    "typescript": "~4.8.2",
+    "prettier": "^2.6.2"
+  },
+  "workspaces": [
+    "packages/**"
+  ]
 }

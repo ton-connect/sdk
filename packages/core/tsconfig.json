@@ -32,8 +32,8 @@
         "sourceMap": true,
         "useUnknownInCatchVariables": false,
         "noUncheckedIndexedAccess": true,
-        "outDir": "lib",
-        "baseUrl": ".",
+        "outDir": "./lib",
+        "baseUrl": "./",
         "paths": {
             "src/*": ["./src/*"]
         },
@@ -45,6 +45,9 @@
         "allowJs": true,
         "skipLibCheck": true
     },
-    "include": ["src"],
-    "exclude": ["__tests__" ,"node_modules", "lib", "types"]
+    "include": [
+      "./src"
+    ],
+    "exclude": [
+      "./__tests__","node_modules", "lib", "types"]
 }

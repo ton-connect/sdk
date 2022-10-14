@@ -5,7 +5,7 @@ import { SendTransactionResponse } from 'src/ton-connect/core/models/protocol/ac
 import { WalletAppInfo } from 'src/ton-connect/core/models/wallet/wallet-app-info';
 import { ITonConnect } from 'src/ton-connect/ton-connect.interface';
 import { WidgetControllerOptions } from 'src/widget/models/widget-controller-options';
-import { Button } from 'src/widget/views';
+import { Button } from './button';
 
 export class TonConnectUi {
     public readonly button: Button;

@@ -1,5 +1,5 @@
 import { mergeOptions } from 'src/ton-connect/utils/options';
-import { TonConnectUi } from 'src/widget';
+import { TonConnectUi } from 'src/widget/index';
 import { defaultButtonConfiguration } from 'src/widget/constants/default-button-configuration';
 import { ButtonConfiguration } from 'src/widget/models/button-configuration';
 
