@@ -1,2 +1,2 @@
-export { WidgetController } from 'src/widget/widget-controller';
+export { TonConnectUi } from 'src/widget/ton-connect-ui';
 export * from './views';

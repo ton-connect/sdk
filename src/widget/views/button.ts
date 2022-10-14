@@ -1,5 +1,5 @@
 import { mergeOptions } from 'src/ton-connect/utils/options';
-import { WidgetController } from 'src/widget';
+import { TonConnectUi } from 'src/widget';
 import { defaultButtonConfiguration } from 'src/widget/constants/default-button-configuration';
 import { ButtonConfiguration } from 'src/widget/models/button-configuration';
 
@@ -13,30 +13,19 @@ export class Button {
     private configuration: Required<ButtonConfiguration>;
 
     constructor(
-        private readonly widgetController: WidgetController,
+        private readonly widgetController: TonConnectUi,
         buttonConfiguration?: ButtonConfiguration
     ) {
         this.configuration = mergeOptions(buttonConfiguration, defaultButtonConfiguration);
-        this.walletConnected = widgetController.connector.connected;
+        this.walletConnected = widgetController.connected;
 
         this.subscribeToWalletState();
     }
 
     private subscribeToWalletState(): void {
-        this.widgetController.connector.onConnect(walletInfo => {
-            this.walletConnected = true;
-            this.address = walletInfo.account.address;
-            this.rerender();
-        });
-
-        this.widgetController.connector.onAccountChange(account => {
-            this.address = account.address;
-            this.rerender();
-        });
-
-        this.widgetController.connector.onDisconnect(() => {
-            this.walletConnected = false;
-            this.address = '';
+        this.widgetController.onStatusChange(walletInfo => {
+            this.walletConnected = !!walletInfo;
+            this.address = walletInfo?.account.address || '';
             this.rerender();
         });
     }
@@ -59,11 +48,14 @@ export class Button {
         `;
     }
 
+    /**
+     * @TODO
+     * @private
+     */
     private getDropdownButtonTemplate(): string {
         return `
         <div>${this.address}</div>
-        <button onclick="${this.widgetController.connector.disconnect}">Disconnect</button>
-        <button onclick="${this.widgetController.switchAccount}">Switch Account</button>
+        <button onclick="${this.widgetController.disconnect}">Disconnect</button>
         `;
     }
 }

@@ -1,4 +1,4 @@
-import { Account } from 'src/ton-connect/core/models/account';
+import { Account } from 'src/ton-connect/core/models/wallet/account';
 import { WalletAppInfo } from 'src/ton-connect/core/models/wallet/wallet-app-info';
 
 export interface WalletInfo {

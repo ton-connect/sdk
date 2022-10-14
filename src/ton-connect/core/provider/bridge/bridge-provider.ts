@@ -4,7 +4,7 @@ import {
     RequestType
 } from 'src/ton-connect/core/models/protocol/actions/action-request';
 import { ActionResponse } from 'src/ton-connect/core/models/protocol/actions/action-response';
-import { WalletConnectionSource } from 'src/ton-connect/core/models/wallet-connection-source';
+import { WalletConnectionSource } from 'src/ton-connect/core/models/wallet/wallet-connection-source';
 import { BridgeGateway } from 'src/ton-connect/core/provider/bridge/bridge-gateway';
 import { BridgeError } from 'src/ton-connect/core/provider/bridge/models/bridge-error';
 import {

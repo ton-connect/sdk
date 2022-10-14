@@ -1,16 +1,15 @@
-import { TonConnect, TransactionRequest, WidgetController } from 'src';
+import { TonConnect, SendTransactionRequest, TonConnectUi } from 'src';
 
-const connector = new TonConnect();
-const widgetController = new WidgetController(connector);
+const tonConnect = new TonConnectUi();
 
 export const App = () => {
     const [walletConnected, setWalletConnected] = useState(false);
 
-    connector.onConnectedChange(setWalletConnected);
+    tonConnect.onStatusChange(walletInfo => setWalletConnected(!!walletInfo));
 
     const buttonRootRef = useRef();
     useLayoutEffect(() => {
-        widgetController.button.render(buttonRootRef.current)
+        tonConnect.button.render(buttonRootRef.current)
     })
 
 
@@ -23,14 +22,14 @@ export const App = () => {
             <main>
                 {
                     walletConnected ?
-                    <button onClick={() => widgetController.sendTransaction(generateRandomTx())}>Send random tx!</button> :
-                    <button onClick={widgetController.connectWallet}>Connect Wallet to send tx</button>
+                    <button onClick={() => tonConnect.sendTransaction(generateRandomTx())}>Send random tx!</button> :
+                    <button onClick={tonConnect.connectWallet}>Connect Wallet to send tx</button>
                 }
             </main>
         </>
     )
 }
 
-function generateRandomTx(): TransactionRequest {
-    return {} as TransactionRequest;
+function generateRandomTx(): SendTransactionRequest {
+    return {} as SendTransactionRequest;
 }
