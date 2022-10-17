@@ -38,6 +38,16 @@ module.exports = {
                         ]
                     }
                 ],
+                'import/extensions': [
+                    'error',
+                    'ignorePackages',
+                    {
+                        js: "never",
+                        jsx: "never",
+                        ts: "never",
+                        tsx: "never"
+                    }
+                ],
                 'import/prefer-default-export': 'off',
                 '@typescript-eslint/no-useless-constructor': 'off',
                 "@typescript-eslint/explicit-function-return-type": 'error',
@@ -75,13 +85,11 @@ module.exports = {
                 indent: 'off',
                 'comma-dangle': 'off',
                 '@typescript-eslint/comma-dangle': ['error', 'never'],
-                // Temporary rules. Remove after full refactoring.
                 'import/no-extraneous-dependencies': 'off',
                 '@typescript-eslint/dot-notation': 'off',
                 'no-restricted-globals': 'off',
                 '@typescript-eslint/no-empty-function': 'off',
                 'no-param-reassign': 'off',
-                // Temporary rules. Remove as fast as it can be.
                 'max-classes-per-file': 'off',
                 radix: ['warn', 'as-needed'],
                 'no-prototype-builtins': 'off',
@@ -156,13 +164,11 @@ module.exports = {
                 indent: 'off',
                 'comma-dangle': 'off',
                 '@typescript-eslint/comma-dangle': ['error', 'never'],
-                // Temporary rules. Remove after full refactoring.
                 'import/no-extraneous-dependencies': 'off',
                 '@typescript-eslint/dot-notation': 'off',
                 'no-restricted-globals': 'off',
                 '@typescript-eslint/no-empty-function': 'off',
                 'no-param-reassign': 'off',
-                // Temporary rules. Remove as fast as it can be.
                 'max-classes-per-file': 'off',
                 radix: ['warn', 'as-needed'],
                 'no-prototype-builtins': 'off',

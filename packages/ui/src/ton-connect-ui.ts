@@ -1,11 +1,14 @@
-import { TonConnect } from 'src/ton-connect';
-import { Account } from 'src/ton-connect/core/models/wallet/account';
-import { SendTransactionRequest } from 'src/ton-connect/core/models/protocol/actions/send-transaction/send-transaction-request';
-import { SendTransactionResponse } from 'src/ton-connect/core/models/protocol/actions/send-transaction/send-transaction-response';
-import { WalletAppInfo } from 'src/ton-connect/core/models/wallet/wallet-app-info';
-import { ITonConnect } from 'src/ton-connect/ton-connect.interface';
-import { WidgetControllerOptions } from 'src/widget/models/widget-controller-options';
-import { Button } from './button';
+import {
+    ITonConnect,
+    SendTransactionRequest,
+    SendTransactionResponse,
+    TonConnect,
+    WalletAppInfo
+} from '@ton-connect/core';
+import type { Account } from '@ton-connect/core';
+import { widgetController } from 'src/app';
+import { Button } from 'src/app/views/button';
+import { TonUiOptions } from 'src/models/ton-ui-options';
 
 export class TonConnectUi {
     public readonly button: Button;
@@ -34,12 +37,16 @@ export class TonConnectUi {
     }
 
     constructor(options?: {
-        uiOptions?: WidgetControllerOptions;
+        uiOptions?: TonUiOptions;
         connector?: ITonConnect;
         autoConnect?: boolean;
+        widgetRoot?: string;
     }) {
-        this.button = new Button(this, options?.uiOptions?.buttonConfiguration);
         this.connector = options?.connector || new TonConnect();
+        this.button = new Button(this, options?.uiOptions?.buttonConfiguration);
+
+        const rootId = this.normalizeWidgetRoot(options?.widgetRoot);
+        widgetController.renderApp(rootId);
 
         if (options?.autoConnect) {
             this.connector.autoConnect();
@@ -60,7 +67,10 @@ export class TonConnectUi {
     /**
      * Opens the modal window and handles a wallet connection.
      */
-    public async connectWallet(): Promise<void> {}
+    public async connectWallet(): Promise<void> {
+        debugger;
+        widgetController.openWalletsModal();
+    }
 
     /**
      * Disconnect wallet and clean localstorage.
@@ -104,4 +114,15 @@ export class TonConnectUi {
 
         return this.connector.sign(signRequest);
     }*/
+
+    private normalizeWidgetRoot(rootId: string | undefined): string {
+        if (!rootId || !document.getElementById(rootId)) {
+            rootId = 'tc-widget-root';
+            const rootElement = document.createElement('div');
+            rootElement.id = rootId;
+            document.body.appendChild(rootElement);
+        }
+
+        return rootId;
+    }
 }

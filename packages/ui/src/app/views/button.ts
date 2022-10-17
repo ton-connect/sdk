@@ -1,7 +1,7 @@
-import { mergeOptions } from 'src/ton-connect/utils/options';
-import { TonConnectUi } from 'src/widget/index';
-import { defaultButtonConfiguration } from 'src/widget/constants/default-button-configuration';
-import { ButtonConfiguration } from 'src/widget/models/button-configuration';
+import { defaultButtonConfiguration } from 'src/app/constants/default-button-configuration';
+import { mergeOptions } from 'src/app/utils/options';
+import { ButtonConfiguration } from 'src/models/button-configuration';
+import { TonConnectUi } from 'src/ton-connect-ui';
 
 export class Button {
     private walletConnected: boolean;

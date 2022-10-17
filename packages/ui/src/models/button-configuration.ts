@@ -1,11 +1,10 @@
-import { Theme } from 'src/widget/models/THEME';
+import { Themed } from 'src/app/models/themed';
 
 export type ButtonSize = 'm' | 'l';
 
 export type ButtonAppearance = 'primary' | 'secondary' | 'flat';
 
-export interface ButtonConfiguration {
-    theme?: Theme;
+export interface ButtonConfiguration extends Partial<Themed> {
     size?: ButtonSize;
     appearance?: ButtonAppearance;
 }

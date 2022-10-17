@@ -9,6 +9,7 @@ module.exports = {
     },
     plugins: ["solid"],
     rules: {
-        "solid/components-return-once": "error"
+        "solid/components-return-once": "error",
+        'import/extensions': ['off'],
     }
 };
