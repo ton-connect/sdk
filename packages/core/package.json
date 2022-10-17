@@ -9,19 +9,14 @@
   },
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
+  "nx": {
+    "tags": ["scope:core"]
+  },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.38.1",
-    "@typescript-eslint/parser": "^5.38.1",
     "eslint": "8.22.0",
-    "eslint-config-airbnb-typescript": "^17.0.0",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-import": "^2.26.0",
-    "eslint-plugin-prettier": "^4.2.1",
-    "eslint-plugin-unused-imports": "^2.0.0",
-    "prettier": "^2.7.1",
+    "eslint-plugin-solid": "^0.7.3",
     "ts-loader": "^9.4.1",
     "ttypescript": "^1.5.13",
-    "typescript": "^4.8.3",
     "typescript-transform-paths": "^3.3.1"
   }
 }

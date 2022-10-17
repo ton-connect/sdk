@@ -8,6 +8,9 @@
     "build": "vite build",
     "serve": "vite preview"
   },
+  "nx": {
+    "tags": ["scope:ui"]
+  },
   "license": "MIT",
   "devDependencies": {
     "typescript": "^4.8.2",
