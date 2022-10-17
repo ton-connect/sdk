@@ -1,7 +1,6 @@
 /* @refresh reload */
 import { render } from 'solid-js/web';
 
-import './index.css';
 import { setActionModalOpen, setWalletsModalOpen } from 'src/app/state/modals-state';
 import App from './App';
 
