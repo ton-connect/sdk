@@ -11,5 +11,9 @@ module.exports = {
     rules: {
         "solid/components-return-once": "error",
         'import/extensions': ['off'],
+        "@typescript-eslint/explicit-function-return-type": [
+            'error',
+            { allowExpressions: true }
+        ]
     }
 };
