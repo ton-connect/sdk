@@ -1,5 +1,6 @@
 import { css, styled } from 'solid-styled-components';
 import { IconButton } from 'src/app/components/icon-button';
+import { media } from 'src/app/styles/media';
 
 export const ModalBackgroundStyled = styled.div`
     display: flex;
@@ -22,6 +23,11 @@ export const ModalWrapperClass = css`
     min-height: 100px;
     width: 440px;
     padding: 44px 56px 24px;
+
+    ${media('mobile')} {
+        /* TODO add mobile layout */
+        background: aqua;
+    }
 `;
 
 export const CloseButtonStyled = styled(IconButton)`
