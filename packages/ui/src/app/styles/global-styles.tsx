@@ -7,6 +7,7 @@ export const GlobalStyles = (): JSXElement => {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
+        font-family: SF Pro, Roboto, sans-serif;
     }
     html, body {
         -webkit-font-smoothing: antialiased;

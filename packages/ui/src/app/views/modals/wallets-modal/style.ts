@@ -1,5 +1,5 @@
 import { styled } from 'solid-styled-components';
 
-export const ModalWrapper = styled('div')`
+export const ModalWrapper = styled.div`
     color: ${props => props.theme?.accentColor || 'blue'};
 `;

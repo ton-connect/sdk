@@ -15,6 +15,7 @@
   "dependencies": {
     "solid-js": "^1.5.1",
     "solid-styled-components": "^0.28.5",
+    "solid-transition-group": "^0.0.11",
     "deepmerge": "^4.2.2",
     "@ton-connect/core": "*"
   },
@@ -23,8 +24,5 @@
     "vite": "^3.0.9",
     "vite-plugin-solid": "^2.3.0",
     "csstype": "^3.1.1"
-  },
-  "resolutions": {
-    "csstype": "3.1.1"
   }
 }

@@ -68,7 +68,6 @@ export class TonConnectUi {
      * Opens the modal window and handles a wallet connection.
      */
     public async connectWallet(): Promise<void> {
-        debugger;
         widgetController.openWalletsModal();
     }
 

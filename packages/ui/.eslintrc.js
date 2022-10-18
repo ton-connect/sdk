@@ -13,7 +13,7 @@ module.exports = {
         'import/extensions': ['off'],
         "@typescript-eslint/explicit-function-return-type": [
             'error',
-            { allowExpressions: true }
+            { allowExpressions: true, allowConciseArrowFunctionExpressionsStartingWithVoid: true }
         ]
     }
 };
