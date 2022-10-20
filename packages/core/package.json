@@ -1,0 +1,22 @@
+{
+  "name": "@ton-connect/core",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "../../node_modules/.bin/ttsc"
+  },
+  "dependencies": {
+    "deepmerge": "^4.2.2"
+  },
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "nx": {
+    "tags": ["scope:core"]
+  },
+  "devDependencies": {
+    "eslint": "8.22.0",
+    "eslint-plugin-solid": "^0.7.3",
+    "ts-loader": "^9.4.1",
+    "ttypescript": "^1.5.13",
+    "typescript-transform-paths": "^3.3.1"
+  }
+}

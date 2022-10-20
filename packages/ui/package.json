@@ -1,0 +1,28 @@
+{
+  "name": "@ton-connect/ui",
+  "version": "0.0.0",
+  "description": "",
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "nx": {
+    "tags": ["scope:ui"]
+  },
+  "license": "MIT",
+  "dependencies": {
+    "solid-js": "^1.5.1",
+    "solid-styled-components": "^0.28.5",
+    "solid-transition-group": "^0.0.11",
+    "deepmerge": "^4.2.2",
+    "@ton-connect/core": "*"
+  },
+  "devDependencies": {
+    "typescript": "^4.8.2",
+    "vite": "^3.0.9",
+    "vite-plugin-solid": "^2.3.0",
+    "csstype": "^3.1.1"
+  }
+}
