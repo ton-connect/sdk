@@ -1,4 +1,4 @@
-import { TonConnect, SendTransactionRequest, TonConnectUi } from 'src';
+import { SendTransactionRequest, TonConnectUi } from '@ton-connect/ui';
 
 const tonConnect = new TonConnectUi();
 
@@ -10,7 +10,7 @@ export const App = () => {
     const buttonRootRef = useRef();
     useLayoutEffect(() => {
         tonConnect.button.render(buttonRootRef.current)
-    })
+    }, [])
 
 
     return (
