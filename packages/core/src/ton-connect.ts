@@ -5,11 +5,9 @@ import {
     Account,
     DappMetadata,
     DappSettings,
+    DeviceInfo,
     SendTransactionRequest,
     SendTransactionResponse,
-    SignMessageRequest,
-    SignMessageResponse,
-    WalletAppInfo,
     WalletConnectionSource,
     WalletInfo
 } from 'src/models';
@@ -44,7 +42,7 @@ export class TonConnect implements ITonConnect {
         return this.walletInfo?.account || null;
     }
 
-    public get walletAppInfo(): WalletAppInfo | null {
+    public get walletAppInfo(): DeviceInfo | null {
         return this.walletInfo?.appInfo || null;
     }
 
@@ -112,16 +110,7 @@ export class TonConnect implements ITonConnect {
         return response.result;
     }
 
-    public async sign(signRequest: SignMessageRequest): Promise<SignMessageResponse> {
-        this.checkConnection();
-        const response = await this.provider!.sendRequest<'sign-message'>(signRequest);
-
-        if (response.status === 'error') {
-            ErrorsParser.parseAndThrowError(response.result);
-        }
-
-        return response.result;
-    }
+    // public async sign(signRequest: SignMessageRequest): Promise<SignMessageResponse> { }
 
     public async disconnect(): Promise<void> {
         if (!this.connected) {

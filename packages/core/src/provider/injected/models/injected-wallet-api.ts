@@ -1,16 +1,11 @@
-import { Account, WalletAppInfo, WalletInfo } from 'src/models';
-import { ActionRequest, RequestType } from 'src/models/protocol/actions/action-request';
-import { ActionResponse } from 'src/models/protocol/actions/action-response';
+import { AppRequest, ConnectRequest, RpcMethod, WalletEvent, WalletResponse } from 'src/models';
+import { DeviceInfo } from 'src/models/protocol/wallet-message/initial-reply/device-info';
+import { InitialReply } from 'src/models/protocol/wallet-message/initial-reply/initial-reply';
 
 export interface InjectedWalletApi {
-    getWalletAppInfo(): WalletAppInfo;
-
-    connect(): Promise<WalletInfo>;
-    sendRequest<T extends RequestType>(request: ActionRequest<T>): Promise<ActionResponse<T>>;
-    disconnect(): void;
-
-    listen: {
-        onAccountChange(callback: (account: Account) => void): void;
-        onDisconnect(callback: () => void): void;
-    };
+    deviceInfo: DeviceInfo;
+    protocolVersion: number;
+    connect(protocolVersion: number, message: ConnectRequest, auto: boolean): Promise<InitialReply>;
+    send<T extends RpcMethod>(message: AppRequest<T>): Promise<WalletResponse<T>>;
+    listen(callback: (event: WalletEvent) => void): void;
 }

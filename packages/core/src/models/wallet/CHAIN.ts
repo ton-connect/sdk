@@ -1,4 +1,4 @@
 export enum CHAIN {
-    MAINNET = 'MAINNET',
-    TESTNET = 'TESTNET'
+    MAINNET = -239,
+    TESTNET = -3
 }

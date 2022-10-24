@@ -1,7 +1,7 @@
-import { Account, WalletAppInfo } from 'src/models';
+import { Account, DeviceInfo } from 'src/models';
 
 export interface WalletInfo {
-    appInfo: WalletAppInfo;
+    appInfo: DeviceInfo;
     provider: 'http' | 'injected';
     account: Account;
 }

@@ -4,5 +4,5 @@ import { IStorage } from 'src/storage/models/storage.interface';
 export interface DappSettings {
     metadata: DappMetadata;
     storage: IStorage;
-    protocolVersion: string;
+    protocolVersion: number;
 }

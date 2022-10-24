@@ -1,26 +1,28 @@
 import { WalletNotInjectedError } from 'src/errors/wallet/wallet-not-injected.error';
-import { WalletAppInfo } from 'src/models';
-import { ActionRequest, RequestType } from 'src/models/protocol/actions/action-request';
-import { ActionResponse } from 'src/models/protocol/actions/action-response';
+import { AppRequest, RpcMethod, WalletResponse, DeviceInfo, ConnectRequest } from 'src/models';
 import { InjectedWalletApi } from 'src/provider/injected/models/injected-wallet-api';
 import { ProviderError } from 'src/provider/models/provider-error';
 import { ProviderEvent } from 'src/provider/models/provider-event';
 import { InternalProvider } from 'src/provider/provider';
+import { IStorage } from 'src/storage/models/storage.interface';
+import * as protocol from 'src/resources/protocol.json';
 
 interface WindowWithTon extends Window {
-    ton?: InjectedWalletApi;
+    tonconnect?: InjectedWalletApi;
 }
 
 export class InjectedProvider implements InternalProvider {
     private static window = window as WindowWithTon;
 
     static isWalletInjected(): boolean {
-        return this.window && 'ton' in this.window && typeof this.window.ton === 'object';
+        return (
+            this.window && 'tonconnect' in this.window && typeof this.window.tonconnect === 'object'
+        );
     }
 
-    static injectedWalletAppInfo(): WalletAppInfo | undefined {
+    static deviceInfo(): DeviceInfo | undefined {
         return InjectedProvider.isWalletInjected()
-            ? InjectedProvider.window.ton!.getWalletAppInfo()
+            ? InjectedProvider.window.tonconnect!.deviceInfo
             : undefined;
     }
 
@@ -33,18 +35,18 @@ export class InjectedProvider implements InternalProvider {
         errorsCallback?: (e: ProviderError) => void;
     }[] = [];
 
-    constructor() {
+    constructor(private readonly storage: IStorage) {
         if (!InjectedProvider.isWalletInjected()) {
             throw new WalletNotInjectedError();
         }
 
-        this.injectedWallet = InjectedProvider.window.ton!;
+        this.injectedWallet = InjectedProvider.window.tonconnect!;
         this.makeSubscriptions();
     }
 
-    public connect(): Promise<void> {
+    public connect(message: ConnectRequest, auto = false): Promise<void> {
         this.injectedWallet
-            .connect()
+            .connect(protocol.version, message, auto)
             .then(walletInfo => {
                 this.listenSubscriptions = true;
                 const connectionEvent: ProviderEvent = {
@@ -79,10 +81,10 @@ export class InjectedProvider implements InternalProvider {
         this.listeners.push({ eventsCallback, errorsCallback });
     }
 
-    public async sendRequest<T extends RequestType>(
-        request: ActionRequest<T>
-    ): Promise<ActionResponse<T>> {
-        return this.injectedWallet.sendRequest(request);
+    public async sendRequest<T extends RpcMethod>(
+        request: AppRequest<T>
+    ): Promise<WalletResponse<T>> {
+        return this.injectedWallet.send(request);
     }
 
     private makeSubscriptions(): void {

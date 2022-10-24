@@ -1,24 +1,18 @@
-import { ActionRequest, RequestType } from 'src/models/protocol/actions/action-request';
-import { ActionResponse } from 'src/models/protocol/actions/action-response';
+import { AppRequest, ConnectRequest, RpcMethod, WalletEvent, WalletResponse } from 'src/models';
 import { InjectedProvider } from 'src/provider/injected/injected-provider';
-import { ProviderError } from 'src/provider/models/provider-error';
-import { ProviderEvent } from 'src/provider/models/provider-event';
 
 export type Provider = InjectedProvider | HTTPProvider;
 
 export interface InternalProvider extends BaseProvider {
-    connect(): Promise<void>;
+    connect(message: ConnectRequest): Promise<void>;
 }
 
 export interface HTTPProvider extends BaseProvider {
-    connect(): Promise<string>;
+    connect(message: ConnectRequest, auto?: boolean): Promise<string>;
 }
 
 interface BaseProvider {
     disconnect(): Promise<void>;
-    sendRequest<T extends RequestType>(request: ActionRequest<T>): Promise<ActionResponse<T>>;
-    listen(
-        eventsCallback: (e: ProviderEvent) => void,
-        errorsCallback?: (e: ProviderError) => void
-    ): void;
+    sendRequest<T extends RpcMethod>(request: AppRequest<T>): Promise<WalletResponse<T>>;
+    listen(eventsCallback: (e: WalletEvent) => void): void;
 }
