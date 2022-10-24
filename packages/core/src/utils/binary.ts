@@ -16,3 +16,21 @@ export function splitToUint8Arrays(array: Uint8Array, index: number): [Uint8Arra
     const subArray2 = array.slice(index);
     return [subArray1, subArray2];
 }
+
+export function toHexString(byteArray: Uint8Array): string {
+    let hexString = '';
+    byteArray.forEach(byte => {
+        hexString += ('0' + (byte & 0xff).toString(16)).slice(-2);
+    });
+    return hexString;
+}
+export function toByteArray(hexString: string): Uint8Array {
+    if (hexString.length % 2 !== 0) {
+        throw new TonConnectError(`Cannot convert ${hexString} to bytesArray`);
+    }
+    const result = new Uint8Array(hexString.length / 2);
+    for (let i = 0; i < hexString.length; i += 2) {
+        result[i / 2] = parseInt(hexString.slice(i, i + 2), 16);
+    }
+    return result;
+}

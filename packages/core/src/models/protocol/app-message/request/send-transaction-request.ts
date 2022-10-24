@@ -1,6 +1,4 @@
-import { AppRequestTemplate } from './app-requset-template';
-
-export interface SendTransactionRequest extends AppRequestTemplate {
+export interface SendTransactionRequest {
     method: 'sendTransaction';
     params: [string];
     id: string;

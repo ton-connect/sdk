@@ -1,6 +1,6 @@
 import { TonConnectError } from 'src/errors/ton-connect.error';
 import { KeyPair } from 'src/models/crypto/keypair';
-import { concatUint8Arrays, splitToUint8Arrays } from 'src/utils/binary';
+import { concatUint8Arrays, splitToUint8Arrays, toHexString } from 'src/utils/binary';
 import nacl, { BoxKeyPair } from 'tweetnacl';
 
 export class SessionKeypair {
@@ -12,7 +12,7 @@ export class SessionKeypair {
 
     constructor(keyPair?: KeyPair) {
         this.keyPair = keyPair ? this.createKeypairFromString(keyPair) : this.createKeypair();
-        this.sessionId = new TextDecoder().decode(this.keyPair.publicKey);
+        this.sessionId = toHexString(this.keyPair.publicKey);
     }
 
     private createKeypair(): BoxKeyPair {
