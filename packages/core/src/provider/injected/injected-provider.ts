@@ -1,8 +1,14 @@
 import { WalletNotInjectedError } from 'src/errors/wallet/wallet-not-injected.error';
-import { AppRequest, RpcMethod, WalletResponse, DeviceInfo, ConnectRequest } from 'src/models';
+import {
+    AppRequest,
+    RpcMethod,
+    WalletResponse,
+    DeviceInfo,
+    ConnectRequest,
+    WalletEvent,
+    ConnectEvent
+} from 'src/models';
 import { InjectedWalletApi } from 'src/provider/injected/models/injected-wallet-api';
-import { ProviderError } from 'src/provider/models/provider-error';
-import { ProviderEvent } from 'src/provider/models/provider-event';
 import { InternalProvider } from 'src/provider/provider';
 import { IStorage } from 'src/storage/models/storage.interface';
 import * as protocol from 'src/resources/protocol.json';
@@ -30,10 +36,7 @@ export class InjectedProvider implements InternalProvider {
 
     private listenSubscriptions = false;
 
-    private listeners: {
-        eventsCallback: (e: ProviderEvent) => void;
-        errorsCallback?: (e: ProviderError) => void;
-    }[] = [];
+    private listeners: Array<(e: WalletEvent) => void> = [];
 
     constructor(private readonly storage: IStorage) {
         if (!InjectedProvider.isWalletInjected()) {
@@ -47,22 +50,22 @@ export class InjectedProvider implements InternalProvider {
     public connect(message: ConnectRequest, auto = false): Promise<void> {
         this.injectedWallet
             .connect(protocol.version, message, auto)
-            .then(walletInfo => {
-                this.listenSubscriptions = true;
-                const connectionEvent: ProviderEvent = {
-                    name: 'connect',
-                    value: walletInfo
-                };
-
-                this.listeners.forEach(listener => listener.eventsCallback(connectionEvent));
+            .then(connectEvent => {
+                if (connectEvent.event === 'connect') {
+                    this.listenSubscriptions = true;
+                }
+                this.listeners.forEach(listener => listener(connectEvent));
             })
             .catch(e => {
-                const providerError: ProviderError = {
-                    name: 'connectionError',
-                    value: e
+                const connectEventError: ConnectEvent = {
+                    event: 'connect_error',
+                    payload: {
+                        code: 0,
+                        message: e?.toString()
+                    }
                 };
 
-                this.listeners.forEach(listener => listener.errorsCallback?.(providerError));
+                this.listeners.forEach(listener => listener(connectEventError));
             });
 
         return Promise.resolve();
@@ -70,15 +73,13 @@ export class InjectedProvider implements InternalProvider {
 
     public disconnect(): Promise<void> {
         this.listenSubscriptions = false;
-        this.injectedWallet.disconnect();
         return Promise.resolve();
     }
 
-    public listen(
-        eventsCallback: (e: ProviderEvent) => void,
-        errorsCallback?: (e: ProviderError) => void
-    ): void {
-        this.listeners.push({ eventsCallback, errorsCallback });
+    public listen(eventsCallback: (e: WalletEvent) => void): () => void {
+        this.listeners.push(eventsCallback);
+        return () =>
+            (this.listeners = this.listeners.filter(listener => listener !== eventsCallback));
     }
 
     public async sendRequest<T extends RpcMethod>(
@@ -88,21 +89,14 @@ export class InjectedProvider implements InternalProvider {
     }
 
     private makeSubscriptions(): void {
-        this.injectedWallet.listen.onAccountChange(
-            account =>
-                this.listenSubscriptions &&
-                this.listeners.forEach(listener =>
-                    listener.eventsCallback({ name: 'accountChange', value: { account } })
-                )
-        );
-
-        this.injectedWallet.listen.onDisconnect(() => {
+        this.injectedWallet.listen(e => {
             if (this.listenSubscriptions) {
-                this.listeners.forEach(listener =>
-                    listener.eventsCallback({ name: 'disconnect', value: {} })
-                );
+                this.listeners.forEach(listener => listener(e));
             }
-            this.listenSubscriptions = false;
+
+            if (e.event === 'disconnect') {
+                this.listenSubscriptions = false;
+            }
         });
     }
 }
