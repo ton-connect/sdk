@@ -5,7 +5,8 @@
     "build": "../../node_modules/.bin/ttsc"
   },
   "dependencies": {
-    "deepmerge": "^4.2.2"
+    "deepmerge": "^4.2.2",
+    "tweetnacl": "^1.0.3"
   },
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
