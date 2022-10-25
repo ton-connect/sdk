@@ -1,4 +1,4 @@
-import { WalletInfo } from 'src/models';
+import { Wallet } from 'src/models';
 import { IStorage } from 'src/storage/models/storage.interface';
 
 export class WalletInfoStorage {
@@ -6,12 +6,12 @@ export class WalletInfoStorage {
 
     constructor(private readonly storage: IStorage) {}
 
-    public async loadWalletInfo(): Promise<WalletInfo | null> {
+    public async loadWalletInfo(): Promise<Wallet | null> {
         const data = await this.storage.getItem(this.storeKey);
         return data && JSON.parse(data);
     }
 
-    public async saveWalletInfo(walletInfo: WalletInfo): Promise<void> {
+    public async saveWalletInfo(walletInfo: Wallet): Promise<void> {
         return this.storage.setItem(this.storeKey, JSON.stringify(walletInfo));
     }
 

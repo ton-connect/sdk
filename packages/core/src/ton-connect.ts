@@ -1,15 +1,19 @@
+import { TonConnectError } from 'src/errors/ton-connect.error';
 import { WalletAlreadyConnectedError } from 'src/errors/wallet/wallet-already-connected.error';
 import { WalletNotConnectedError } from 'src/errors/wallet/wallet-not-connected.error';
 import {
     Account,
+    CHAIN,
+    ConnectEventSuccess,
+    ConnectRequest,
     DappMetadata,
     DappSettings,
-    DeviceInfo,
+    Wallet,
     WalletConnectionSource,
-    WalletInfo
+    WalletEvent
 } from 'src/models';
-import { Connection } from 'src/models/connection';
 import { SendTransactionRequest, SendTransactionResponse } from 'src/models/methods';
+import { TonAddressItemReply } from 'src/models/protocol/wallet-message/wallet-event/connect-event';
 import { SendTransactionRpcResponseSuccess } from 'src/models/protocol/wallet-message/wallet-response/send-transaction-rpc-response';
 import { sendTransactionParser } from 'src/parsers/send-transaction-parser';
 import { BridgeProvider } from 'src/provider/bridge/bridge-provider';
@@ -21,6 +25,7 @@ import { DefaultStorage } from 'src/storage/default-storage';
 import { IStorage } from 'src/storage/models/storage.interface';
 import { WalletInfoStorage } from 'src/storage/wallet-info-storage';
 import { ITonConnect } from 'src/ton-connect.interface';
+import { mergeOptions } from 'src/utils/options';
 import { getWebPageMetadata } from 'src/utils/web-api';
 
 export class TonConnect implements ITonConnect {
@@ -28,28 +33,27 @@ export class TonConnect implements ITonConnect {
 
     private readonly walletInfoStorage: WalletInfoStorage;
 
-    private connection: Connection | null = null;
+    private _wallet: Wallet | null = null;
 
-    private statusChangeSubscriptions: ((walletInfo: WalletInfo | null) => void)[] = [];
+    private provider: Provider | null = null;
+
+    private statusChangeSubscriptions: ((walletInfo: Wallet | null) => void)[] = [];
 
     public get connected(): boolean {
-        return this.connection !== null;
+        return this._wallet !== null;
     }
 
     public get account(): Account | null {
-        return this.walletInfo?.account || null;
+        return this._wallet?.account || null;
     }
 
-    public get walletAppInfo(): DeviceInfo | null {
-        return this.walletInfo?.appInfo || null;
+    public get wallet(): Wallet | null {
+        return this._wallet;
     }
 
-    private get provider(): Provider | null {
-        return this.connection?.provider || null;
-    }
-
-    private get walletInfo(): WalletInfo | null {
-        return this.connection?.walletInfo || null;
+    private set wallet(value: Wallet | null) {
+        this._wallet = value;
+        this.statusChangeSubscriptions.forEach(callback => callback(this._wallet));
     }
 
     constructor(options?: { dappMetedata?: DappMetadata; storage?: IStorage }) {
@@ -62,7 +66,7 @@ export class TonConnect implements ITonConnect {
         this.walletInfoStorage = new WalletInfoStorage(this.dappSettings.storage);
     }
 
-    public onStatusChange(callback: (walletInfo: WalletInfo | null) => void): () => void {
+    public onStatusChange(callback: (walletInfo: Wallet | null) => void): () => void {
         this.statusChangeSubscriptions.push(callback);
         return () =>
             (this.statusChangeSubscriptions = this.statusChangeSubscriptions.filter(
@@ -78,8 +82,10 @@ export class TonConnect implements ITonConnect {
             throw new WalletAlreadyConnectedError();
         }
 
-        const provider = this.createProvider(wallet);
-        return provider.connect();
+        this.provider?.closeConnection();
+        this.provider = this.createProvider(wallet);
+
+        return this.provider.connect(this.createConnectRequest());
     }
 
     public async autoConnect(): Promise<void> {
@@ -112,8 +118,6 @@ export class TonConnect implements ITonConnect {
         );
     }
 
-    // public async sign(signRequest: SignMessageRequest): Promise<SignMessageResponse> { }
-
     public async disconnect(): Promise<void> {
         if (!this.connected) {
             throw new WalletNotConnectedError();
@@ -131,19 +135,16 @@ export class TonConnect implements ITonConnect {
             provider = new BridgeProvider(this.dappSettings, wallet);
         }
 
-        provider.listen(
-            e => this.providerEventsListener(provider, e),
-            e => this.providerErrorsListener(provider, e)
-        );
+        provider.listen(this.walletEventsListener.bind(this));
         return provider;
     }
 
-    private providerEventsListener(provider: Provider, e: ProviderEvent): void {
-        switch (e.name) {
+    private walletEventsListener(e: WalletEvent): void {
+        switch (e.event) {
             case 'connect':
-                this.onProviderConnected(provider, e.value);
+                this.onProviderConnected(e.payload);
                 break;
-            case 'accountChange':
+            case 'connect_error':
                 this.onProviderAccountChange(e.value.account);
                 break;
             case 'disconnect':
@@ -155,26 +156,45 @@ export class TonConnect implements ITonConnect {
         console.error(`Provider ${provider} error:`, e);
     }
 
-    private onProviderConnected(provider: Provider, walletInfo: WalletInfo): void {
-        this.connection = { provider, walletInfo };
+    private onProviderConnected(connectEvent: ConnectEventSuccess['payload']): void {
+        const tonAccountItem: TonAddressItemReply | undefined = connectEvent.items.find(
+            item => item.name === 'ton_addr'
+        ) as TonAddressItemReply | undefined;
+        if (!tonAccountItem) {
+            throw new TonConnectError('ton_addr connection item was not found');
+        }
 
-        this.statusChangeSubscriptions.forEach(callback => callback(walletInfo));
+        this.wallet = {
+            device: connectEvent.device,
+            provider: this.provider!.type,
+            account: {
+                address: tonAccountItem.address,
+                chain: CHAIN.MAINNET // TODO
+            }
+        };
     }
 
     private onProviderDisconnected(): void {
-        this.connection = null;
-        this.statusChangeSubscriptions.forEach(callback => callback(null));
-    }
-
-    private onProviderAccountChange(account: Account): void {
-        const walletInfo = { ...this.connection!.walletInfo, account };
-        this.connection!.walletInfo = walletInfo;
-        this.statusChangeSubscriptions.forEach(callback => callback(walletInfo));
+        this.wallet = null;
     }
 
     private checkConnection(): void | never {
         if (!this.connected) {
             throw new WalletNotConnectedError();
         }
+    }
+
+    private createConnectRequest(): ConnectRequest {
+        const webPageMetadata = getWebPageMetadata();
+        const metadata = mergeOptions(this.dappSettings.metadata, webPageMetadata);
+
+        return {
+            ...metadata,
+            items: [
+                {
+                    name: 'ton_addr'
+                }
+            ]
+        };
     }
 }

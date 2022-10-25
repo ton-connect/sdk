@@ -33,6 +33,10 @@ export class InjectedProvider implements InternalProvider {
             : undefined;
     }
 
+    public readonly type = 'injected';
+
+    private unsubscribeCallback: (() => void) | null = null;
+
     private injectedWallet: InjectedWalletApi;
 
     private listenSubscriptions = false;
@@ -45,7 +49,6 @@ export class InjectedProvider implements InternalProvider {
         }
 
         this.injectedWallet = InjectedProvider.window.tonconnect!;
-        this.makeSubscriptions();
     }
 
     public connect(message: ConnectRequest, auto = false): void {
@@ -53,6 +56,7 @@ export class InjectedProvider implements InternalProvider {
             .connect(protocol.version, message, auto)
             .then(connectEvent => {
                 if (connectEvent.event === 'connect') {
+                    this.makeSubscriptions();
                     this.listenSubscriptions = true;
                 }
                 this.listeners.forEach(listener => listener(connectEvent));
@@ -70,8 +74,16 @@ export class InjectedProvider implements InternalProvider {
             });
     }
 
+    public closeConnection(): void {
+        this.listenSubscriptions = false;
+        this.listeners = [];
+        this.unsubscribeCallback?.();
+    }
+
     public disconnect(): Promise<void> {
         this.listenSubscriptions = false;
+        this.listeners = [];
+        this.unsubscribeCallback?.();
         return Promise.resolve();
     }
 
@@ -88,13 +100,13 @@ export class InjectedProvider implements InternalProvider {
     }
 
     private makeSubscriptions(): void {
-        this.injectedWallet.listen(e => {
+        this.unsubscribeCallback = this.injectedWallet.listen(e => {
             if (this.listenSubscriptions) {
                 this.listeners.forEach(listener => listener(e));
             }
 
             if (e.event === 'disconnect') {
-                this.listenSubscriptions = false;
+                this.disconnect();
             }
         });
     }

@@ -13,5 +13,5 @@ export interface InjectedWalletApi {
     protocolVersion: number;
     connect(protocolVersion: number, message: ConnectRequest, auto: boolean): Promise<ConnectEvent>;
     send<T extends RpcMethod>(message: AppRequest<T>): Promise<WalletResponse<T>>;
-    listen(callback: (event: WalletEvent) => void): void;
+    listen(callback: (event: WalletEvent) => void): () => void;
 }

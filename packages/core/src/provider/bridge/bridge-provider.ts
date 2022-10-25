@@ -20,6 +20,8 @@ import { base64ToBytes, hexToByteArray } from 'src/utils/binary';
 import { WithoutId } from 'src/utils/types';
 
 export class BridgeProvider implements HTTPProvider {
+    public readonly type = 'http';
+
     private readonly sessionStorage: BridgeSessionStorage;
 
     private readonly pendingRequests = new Map<
@@ -80,6 +82,11 @@ export class BridgeProvider implements HTTPProvider {
             this.bridge.send(encodedRequest, this.session.walletPublicKey).catch(reject);
             this.pendingRequests.set(id.toString(), resolve);
         });
+    }
+
+    public closeConnection(): void {
+        this.bridge?.close();
+        this.listeners = [];
     }
 
     public disconnect(): Promise<void> {

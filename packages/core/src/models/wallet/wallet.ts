@@ -1,3 +1,7 @@
-import { WalletConnectionSource, WalletInfo } from 'src/models';
+import { Account, DeviceInfo } from 'src/models';
 
-export type Wallet = WalletInfo & WalletConnectionSource;
+export interface Wallet {
+    device: DeviceInfo;
+    provider: 'http' | 'injected';
+    account: Account;
+}
