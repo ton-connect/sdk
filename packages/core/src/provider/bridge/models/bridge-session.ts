@@ -1,13 +1,9 @@
-import { WalletConnectionSource } from 'src/models';
-import { Keypair } from 'src/models/crypto/keypair';
+import { SessionKeypair } from 'src/crypto/session-crypto';
 
-export interface BridgeSessionSeed {
-    walletConnectionSource: WalletConnectionSource;
-    sessionId: string;
-    keypair: Keypair;
-    protocolVersion: string;
+export interface BridgeSession {
+    sessionKeyPair: SessionKeypair;
+    walletPublicKey: string;
+    bridgeUrl: string;
 }
 
-export interface BridgeSession extends BridgeSessionSeed {
-    walletPk: string;
-}
+export type BridgePartialSession = Omit<BridgeSession, 'walletPublicKey'>;

@@ -6,7 +6,8 @@
   },
   "dependencies": {
     "deepmerge": "^4.2.2",
-    "tweetnacl": "^1.0.3"
+    "tweetnacl": "^1.0.3",
+    "js-base64": "^3.7.2"
   },
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",

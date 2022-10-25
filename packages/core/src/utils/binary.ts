@@ -24,7 +24,7 @@ export function toHexString(byteArray: Uint8Array): string {
     });
     return hexString;
 }
-export function toByteArray(hexString: string): Uint8Array {
+export function hexToByteArray(hexString: string): Uint8Array {
     if (hexString.length % 2 !== 0) {
         throw new TonConnectError(`Cannot convert ${hexString} to bytesArray`);
     }
@@ -33,4 +33,8 @@ export function toByteArray(hexString: string): Uint8Array {
         result[i / 2] = parseInt(hexString.slice(i, i + 2), 16);
     }
     return result;
+}
+
+export function base64ToBytes(base64Encoded: string): Uint8Array {
+    return Uint8Array.from(atob(base64Encoded), c => c.charCodeAt(0));
 }
