@@ -1,4 +1,3 @@
-import { ErrorsParser } from 'src/errors/errors-parser';
 import { WalletAlreadyConnectedError } from 'src/errors/wallet/wallet-already-connected.error';
 import { WalletNotConnectedError } from 'src/errors/wallet/wallet-not-connected.error';
 import {
@@ -6,16 +5,15 @@ import {
     DappMetadata,
     DappSettings,
     DeviceInfo,
-    SendTransactionRequest,
-    SendTransactionResponse,
     WalletConnectionSource,
     WalletInfo
 } from 'src/models';
 import { Connection } from 'src/models/connection';
+import { SendTransactionRequest, SendTransactionResponse } from 'src/models/methods';
+import { SendTransactionRpcResponseSuccess } from 'src/models/protocol/wallet-message/wallet-response/send-transaction-rpc-response';
+import { sendTransactionParser } from 'src/parsers/send-transaction-parser';
 import { BridgeProvider } from 'src/provider/bridge/bridge-provider';
 import { InjectedProvider } from 'src/provider/injected/injected-provider';
-import { ProviderError } from 'src/provider/models/provider-error';
-import { ProviderEvent } from 'src/provider/models/provider-event';
 import { Provider } from 'src/provider/provider';
 import * as protocol from 'src/resources/protocol.json';
 import { getWalletConnectionSource } from 'src/resources/wallets/utils';
@@ -72,15 +70,15 @@ export class TonConnect implements ITonConnect {
             ));
     }
 
-    public async connect<T extends WalletConnectionSource | 'injected'>(
+    public connect<T extends WalletConnectionSource | 'injected'>(
         wallet: T
-    ): Promise<T extends 'injected' ? void : string>;
-    public async connect(wallet: WalletConnectionSource | 'injected'): Promise<string | void> {
+    ): T extends 'injected' ? void : string;
+    public connect(wallet: WalletConnectionSource | 'injected'): string | void {
         if (this.connected) {
             throw new WalletAlreadyConnectedError();
         }
 
-        const provider = await this.createProvider(wallet);
+        const provider = this.createProvider(wallet);
         return provider.connect();
     }
 
@@ -101,13 +99,17 @@ export class TonConnect implements ITonConnect {
 
     public async sendTransaction(tx: SendTransactionRequest): Promise<SendTransactionResponse> {
         this.checkConnection();
-        const response = await this.provider!.sendRequest<'send-transaction'>(tx);
+        const response = await this.provider!.sendRequest(
+            sendTransactionParser.convertToRpcRequest(tx)
+        );
 
-        if (response.status === 'error') {
-            ErrorsParser.parseAndThrowError(response.result);
+        if (sendTransactionParser.isError(response)) {
+            return sendTransactionParser.parseAndThrowError(response);
         }
 
-        return response.result;
+        return sendTransactionParser.convertFromRpcResponse(
+            response as SendTransactionRpcResponseSuccess
+        );
     }
 
     // public async sign(signRequest: SignMessageRequest): Promise<SignMessageResponse> { }
@@ -120,11 +122,11 @@ export class TonConnect implements ITonConnect {
         this.onProviderDisconnected();
     }
 
-    private async createProvider(wallet: WalletConnectionSource | 'injected'): Promise<Provider> {
+    private createProvider(wallet: WalletConnectionSource | 'injected'): Provider {
         let provider: Provider;
 
         if (wallet === 'injected') {
-            provider = new InjectedProvider();
+            provider = new InjectedProvider(this.dappSettings.storage);
         } else {
             provider = new BridgeProvider(this.dappSettings, wallet);
         }

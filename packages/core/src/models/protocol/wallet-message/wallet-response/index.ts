@@ -1,2 +1,2 @@
 export { WalletResponse, RpcResponses } from './wallet-response';
-export { SendTransactionResponse } from './send-transaction-response';
+export { SendTransactionRpcResponse } from 'src/models/protocol/wallet-message/wallet-response/send-transaction-rpc-response';

@@ -1,8 +1,18 @@
 import { RpcMethod } from 'src/models/protocol/rpc-method';
-import { SendTransactionResponse } from './send-transaction-response';
+import {
+    SendTransactionRpcResponseError,
+    SendTransactionRpcResponseSuccess
+} from 'src/models/protocol/wallet-message/wallet-response/send-transaction-rpc-response';
 
 export type RpcResponses = {
-    sendTransaction: SendTransactionResponse;
+    sendTransaction: {
+        error: SendTransactionRpcResponseError;
+        success: SendTransactionRpcResponseSuccess;
+    };
 };
 
-export type WalletResponse<T extends RpcMethod> = RpcResponses[T];
+export type WalletResponseSuccess<T extends RpcMethod> = RpcResponses[T]['success'];
+
+export type WalletResponseError<T extends RpcMethod> = RpcResponses[T]['error'];
+
+export type WalletResponse<T extends RpcMethod> = WalletResponseSuccess<T> | WalletResponseError<T>;

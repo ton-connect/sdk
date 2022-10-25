@@ -1,10 +1,5 @@
-import {
-    Account,
-    SendTransactionRequest,
-    SendTransactionResponse,
-    WalletConnectionSource,
-    WalletInfo
-} from 'src/models';
+import { Account, WalletConnectionSource, WalletInfo } from 'src/models';
+import { SendTransactionRequest, SendTransactionResponse } from 'src/models/methods';
 import { DeviceInfo } from 'src/models/wallet/device-info';
 
 export interface ITonConnect {

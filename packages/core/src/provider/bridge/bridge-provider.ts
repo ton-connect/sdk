@@ -42,8 +42,7 @@ export class BridgeProvider implements HTTPProvider {
         this.sessionStorage = new BridgeSessionStorage(this.dappSettings.storage);
     }
 
-    public async connect(message: ConnectRequest): Promise<string> {
-        //    const session = this.sessionStorage.getSession();
+    public connect(message: ConnectRequest): string {
         this.bridge?.close();
         const sessionKeyPair = new SessionKeypair();
 
@@ -58,7 +57,7 @@ export class BridgeProvider implements HTTPProvider {
             this.gatewayListener.bind(this),
             this.gatewayErrorsListener.bind(this)
         );
-        await this.bridge.registerSession();
+        this.bridge.registerSession();
 
         return this.generateUniversalLink(message);
     }
@@ -85,6 +84,7 @@ export class BridgeProvider implements HTTPProvider {
 
     public disconnect(): Promise<void> {
         this.bridge?.close();
+        this.listeners = [];
         return this.removeBridgeAndSession();
     }
 

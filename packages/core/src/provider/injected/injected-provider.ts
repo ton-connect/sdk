@@ -12,6 +12,7 @@ import { InjectedWalletApi } from 'src/provider/injected/models/injected-wallet-
 import { InternalProvider } from 'src/provider/provider';
 import { IStorage } from 'src/storage/models/storage.interface';
 import * as protocol from 'src/resources/protocol.json';
+import { WithoutId } from 'src/utils/types';
 
 interface WindowWithTon extends Window {
     tonconnect?: InjectedWalletApi;
@@ -47,7 +48,7 @@ export class InjectedProvider implements InternalProvider {
         this.makeSubscriptions();
     }
 
-    public connect(message: ConnectRequest, auto = false): Promise<void> {
+    public connect(message: ConnectRequest, auto = false): void {
         this.injectedWallet
             .connect(protocol.version, message, auto)
             .then(connectEvent => {
@@ -67,8 +68,6 @@ export class InjectedProvider implements InternalProvider {
 
                 this.listeners.forEach(listener => listener(connectEventError));
             });
-
-        return Promise.resolve();
     }
 
     public disconnect(): Promise<void> {
@@ -83,9 +82,9 @@ export class InjectedProvider implements InternalProvider {
     }
 
     public async sendRequest<T extends RpcMethod>(
-        request: AppRequest<T>
-    ): Promise<WalletResponse<T>> {
-        return this.injectedWallet.send(request);
+        request: WithoutId<AppRequest<T>>
+    ): Promise<WithoutId<WalletResponse<T>>> {
+        return this.injectedWallet.send<T>({ ...request, id: '0' });
     }
 
     private makeSubscriptions(): void {

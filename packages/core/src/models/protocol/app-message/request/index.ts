@@ -1,2 +1,2 @@
 export { AppRequest, RpcRequests } from './app-request';
-export { SendTransactionRequest } from './send-transaction-request';
+export { SendTransactionRpcRequest } from 'src/models/protocol/app-message/request/send-transaction-rpc-request';
