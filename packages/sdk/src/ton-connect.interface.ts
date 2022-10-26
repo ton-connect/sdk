@@ -9,7 +9,7 @@ export interface ITonConnect {
     connect<T extends WalletConnectionSource | 'injected'>(
         wallet: T
     ): T extends 'injected' ? void : string;
-    autoConnect(): Promise<void>;
+    autoConnect(): void;
     sendTransaction(tx: SendTransactionRequest): Promise<SendTransactionResponse>;
     // sign(signRequest: SignMessageRequest): Promise<SignMessageResponse>;
     disconnect(): Promise<void>;

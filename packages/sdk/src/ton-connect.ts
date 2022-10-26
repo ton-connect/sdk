@@ -17,10 +17,9 @@ import { sendTransactionParser } from 'src/parsers/send-transaction-parser';
 import { BridgeProvider } from 'src/provider/bridge/bridge-provider';
 import { InjectedProvider } from 'src/provider/injected/injected-provider';
 import { Provider } from 'src/provider/provider';
-import * as protocol from 'src/resources/protocol.json';
+import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { DefaultStorage } from 'src/storage/default-storage';
 import { IStorage } from 'src/storage/models/storage.interface';
-import { WalletInfoStorage } from 'src/storage/wallet-info-storage';
 import { ITonConnect } from 'src/ton-connect.interface';
 import { mergeOptions } from 'src/utils/options';
 import { getWebPageMetadata } from 'src/utils/web-api';
@@ -28,7 +27,7 @@ import { getWebPageMetadata } from 'src/utils/web-api';
 export class TonConnect implements ITonConnect {
     private readonly dappSettings: DappSettings;
 
-    private readonly walletInfoStorage: WalletInfoStorage;
+    private readonly bridgeConnectionStorage: BridgeConnectionStorage;
 
     private _wallet: Wallet | null = null;
 
@@ -58,11 +57,10 @@ export class TonConnect implements ITonConnect {
     constructor(options?: { dappMetedata?: DappMetadata; storage?: IStorage }) {
         this.dappSettings = {
             metadata: options?.dappMetedata || getWebPageMetadata(),
-            storage: options?.storage || new DefaultStorage(),
-            protocolVersion: protocol.version
+            storage: options?.storage || new DefaultStorage()
         };
 
-        this.walletInfoStorage = new WalletInfoStorage(this.dappSettings.storage);
+        this.bridgeConnectionStorage = new BridgeConnectionStorage(this.dappSettings.storage);
     }
 
     public onStatusChange(
@@ -100,19 +98,22 @@ export class TonConnect implements ITonConnect {
         return this.provider.connect(this.createConnectRequest());
     }
 
-    public async autoConnect(): Promise<void> {
-        /*const walletInfo = await this.walletInfoStorage.loadWalletInfo();
-        if (walletInfo && !this.connected) {
-            const wallet =
-                walletInfo.provider === 'injected'
-                    ? 'injected'
-                    : getWalletConnectionSource(walletInfo.appInfo.id);
+    public autoConnect(): void {
+        this._autoConnect();
+    }
 
-            const provider = await this.createProvider(wallet);
-            await provider.connect();
+    public async _autoConnect(): Promise<void> {
+        const bridgeConnection = await this.bridgeConnectionStorage.getConnection();
 
-            this.onProviderConnected(provider, walletInfo);
-        } */
+        let provider: Provider;
+
+        if (bridgeConnection) {
+            provider = await this.createProvider(bridgeConnection.session.walletConnectionSource);
+        } else {
+            provider = await this.createProvider('injected');
+        }
+
+        return provider.autoConnect();
     }
 
     public async sendTransaction(tx: SendTransactionRequest): Promise<SendTransactionResponse> {
@@ -142,9 +143,9 @@ export class TonConnect implements ITonConnect {
         let provider: Provider;
 
         if (wallet === 'injected') {
-            provider = new InjectedProvider(this.dappSettings.storage);
+            provider = new InjectedProvider();
         } else {
-            provider = new BridgeProvider(this.dappSettings, wallet);
+            provider = new BridgeProvider(this.dappSettings.storage, wallet);
         }
 
         provider.listen(this.walletEventsListener.bind(this));

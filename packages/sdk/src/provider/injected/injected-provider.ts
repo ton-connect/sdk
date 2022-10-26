@@ -10,7 +10,6 @@ import {
 } from '@tonconnect/protocol';
 import { InjectedWalletApi } from 'src/provider/injected/models/injected-wallet-api';
 import { InternalProvider } from 'src/provider/provider';
-import { IStorage } from 'src/storage/models/storage.interface';
 import * as protocol from 'src/resources/protocol.json';
 import { WithoutId } from 'src/utils/types';
 
@@ -43,7 +42,7 @@ export class InjectedProvider implements InternalProvider {
 
     private listeners: Array<(e: WalletEvent) => void> = [];
 
-    constructor(private readonly storage: IStorage) {
+    constructor() {
         if (!InjectedProvider.isWalletInjected()) {
             throw new WalletNotInjectedError();
         }
@@ -72,6 +71,19 @@ export class InjectedProvider implements InternalProvider {
 
                 this.listeners.forEach(listener => listener(connectEventError));
             });
+    }
+
+    public async autoConnect(): Promise<void> {
+        try {
+            const connectEvent = await this.injectedWallet.autoConnect();
+            if (connectEvent.event === 'connect') {
+                this.makeSubscriptions();
+                this.listenSubscriptions = true;
+                this.listeners.forEach(listener => listener(connectEvent));
+            }
+        } catch (e) {
+            console.error(e);
+        }
     }
 
     public closeConnection(): void {

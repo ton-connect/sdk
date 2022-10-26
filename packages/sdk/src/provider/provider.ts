@@ -12,7 +12,7 @@ export type Provider = InjectedProvider | HTTPProvider;
 
 export interface InternalProvider extends BaseProvider {
     type: 'injected';
-    connect(message: ConnectRequest, auto?: boolean): void;
+    connect(message: ConnectRequest): void;
 }
 
 export interface HTTPProvider extends BaseProvider {
@@ -21,6 +21,7 @@ export interface HTTPProvider extends BaseProvider {
 }
 
 interface BaseProvider {
+    autoConnect(): Promise<void>;
     closeConnection(): void;
     disconnect(): Promise<void>;
     sendRequest<T extends RpcMethod>(

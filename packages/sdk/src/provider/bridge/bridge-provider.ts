@@ -7,22 +7,25 @@ import {
     WalletEvent,
     WalletResponse,
     WalletMessage,
-    hexToByteArray
+    hexToByteArray,
+    ConnectEventSuccess
 } from '@tonconnect/protocol';
 import { TonConnectError } from 'src/errors/ton-connect.error';
-import { DappSettings, WalletConnectionSource } from 'src/models';
+import { WalletConnectionSource } from 'src/models';
 import { BridgeGateway } from 'src/provider/bridge/bridge-gateway';
 import { BridgeIncomingMessage } from 'src/provider/bridge/models/bridge-incomming-message';
 import { BridgePartialSession, BridgeSession } from 'src/provider/bridge/models/bridge-session';
 import { HTTPProvider } from 'src/provider/provider';
-import { BridgeSessionStorage } from 'src/storage/bridge-session-storage';
+import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
+import { IStorage } from 'src/storage/models/storage.interface';
 import { base64ToBytes } from 'src/utils/binary';
 import { WithoutId } from 'src/utils/types';
+import * as protocol from 'src/resources/protocol.json';
 
 export class BridgeProvider implements HTTPProvider {
     public readonly type = 'http';
 
-    private readonly sessionStorage: BridgeSessionStorage;
+    private readonly connectionStorage: BridgeConnectionStorage;
 
     private readonly pendingRequests = new Map<
         string,
@@ -38,10 +41,10 @@ export class BridgeProvider implements HTTPProvider {
     private listeners: Array<(e: WalletEvent) => void> = [];
 
     constructor(
-        private readonly dappSettings: DappSettings,
+        storage: IStorage,
         private readonly walletConnectionSource: WalletConnectionSource
     ) {
-        this.sessionStorage = new BridgeSessionStorage(this.dappSettings.storage);
+        this.connectionStorage = new BridgeConnectionStorage(storage);
     }
 
     public connect(message: ConnectRequest): string {
@@ -50,7 +53,7 @@ export class BridgeProvider implements HTTPProvider {
 
         this.session = {
             sessionCrypto,
-            bridgeUrl: this.walletConnectionSource.bridgeUrl
+            walletConnectionSource: this.walletConnectionSource
         };
 
         this.bridge = new BridgeGateway(
@@ -62,6 +65,27 @@ export class BridgeProvider implements HTTPProvider {
         this.bridge.registerSession();
 
         return this.generateUniversalLink(message);
+    }
+
+    public async autoConnect(): Promise<void> {
+        this.bridge?.close();
+        const storedConnection = await this.connectionStorage.getConnection();
+        if (!storedConnection) {
+            return;
+        }
+
+        this.session = storedConnection.session;
+
+        this.bridge = new BridgeGateway(
+            this.walletConnectionSource.bridgeUrl,
+            storedConnection.session.sessionCrypto.sessionId,
+            this.gatewayListener.bind(this),
+            this.gatewayErrorsListener.bind(this)
+        );
+
+        await this.bridge.registerSession();
+
+        this.listeners.forEach(listener => listener(storedConnection.connectEvent));
     }
 
     public sendRequest<T extends RpcMethod>(
@@ -122,7 +146,7 @@ export class BridgeProvider implements HTTPProvider {
         }
 
         if (walletMessage.event === 'connect') {
-            await this.updateBridgeAndSession(bridgeIncomingMessage.from);
+            await this.updateSession(walletMessage, bridgeIncomingMessage.from);
         }
 
         this.listeners.forEach(listener => listener(walletMessage));
@@ -132,23 +156,26 @@ export class BridgeProvider implements HTTPProvider {
         throw new TonConnectError(`Bridge error ${e}`);
     }
 
-    private async updateBridgeAndSession(walletPublicKey: string): Promise<void> {
+    private async updateSession(
+        connectEvent: ConnectEventSuccess,
+        walletPublicKey: string
+    ): Promise<void> {
         this.session = {
             ...this.session!,
             walletPublicKey
         };
-        await this.sessionStorage.storeSession(this.session);
+        await this.connectionStorage.storeConnection({ session: this.session, connectEvent });
     }
 
     private async removeBridgeAndSession(): Promise<void> {
         this.session = null;
         this.bridge = null;
-        await this.sessionStorage.removeSession();
+        await this.connectionStorage.removeConnection();
     }
 
     private generateUniversalLink(message: ConnectRequest): string {
         const url = new URL(this.walletConnectionSource.universalLinkBase);
-        url.searchParams.append('v', this.dappSettings.protocolVersion.toString());
+        url.searchParams.append('v', protocol.version.toString());
         url.searchParams.append('id', this.session!.sessionCrypto.sessionId);
         url.searchParams.append('r', Base64.encode(JSON.stringify(message), true));
         return url.toString();
