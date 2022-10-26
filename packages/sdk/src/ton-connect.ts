@@ -139,6 +139,8 @@ export class TonConnect implements ITonConnect {
         this.onWalletDisconnected();
     }
 
+    public isInjectedProviderAvailable = InjectedProvider.isWalletInjected;
+
     private createProvider(wallet: WalletConnectionSource | 'injected'): Provider {
         let provider: Provider;
 

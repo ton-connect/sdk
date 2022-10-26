@@ -2,23 +2,15 @@
 
 ⚠️ API is work in progress right now.
 
-## Init connector and create a universal link
+## Init connector and call autoConnect. If user connected his wallet before, connector will restore connection
 
 ```js
-import TonConnect from 'packages/sdk';
+import TonConnect from '@tonconnect/sdk';
 
 const connector = new TonConnect();
 
-const walletConnectionSource = {
-    universalLinkBase: 'https://app.mycooltonwallet.com',
-    bridgeURL: 'https://bridge.mycooltonwallet.co,'
-}
-
-const uniwersalLink = await connector.connect(walletConnectionSource);
+connector.autoConnect();
 ```
-
-Then you have to show this link to user as QR code, or use it as a deeplink.
-
 
 ## Subscribe to the connection status changes
 ```js
@@ -28,6 +20,30 @@ connector.onStatusChange(
     } 
 );
 ```
+
+
+## Initialize a wallet connection when user clicks to 'connect' button in your app
+### Initialize a remote wallet connection via universal link 
+
+```
+const walletConnectionSource = {
+    universalLinkBase: 'https://app.mycooltonwallet.com',
+    bridgeURL: 'https://bridge.mycooltonwallet.co,'
+}
+
+const uniwersalLink = connector.connect(walletConnectionSource);
+```
+
+Then you have to show this link to user as QR code, or use it as a deeplink. You will receive update in `connector.onStatusChange` when user approves connection in the wallet
+
+### Initialize injected wallet connection 
+
+```
+connector.connect('injected');
+```
+
+
+You will receive update in `connector.onStatusChange` when user approves connection in the wallet
 
 ## Send transaction
 ```js
@@ -55,7 +71,7 @@ try {
     const result = await connetor.sendTransaction(transaction);
     
     // you can use signed boc to find the transaction 
-    const someTxData = await explorerService.getTransaction(result.boc);
+    const someTxData = await myAppExplorerService.getTransaction(result.boc);
     alert('Transaction was sent successfully', someTxData);
 } catch (e) {
     if (e instanceof UserRejectedError) {

@@ -22,7 +22,9 @@ export class InjectedProvider implements InternalProvider {
 
     static isWalletInjected(): boolean {
         return (
-            this.window && 'tonconnect' in this.window && typeof this.window.tonconnect === 'object'
+            InjectedProvider.window &&
+            'tonconnect' in InjectedProvider.window &&
+            typeof InjectedProvider.window.tonconnect === 'object'
         );
     }
 

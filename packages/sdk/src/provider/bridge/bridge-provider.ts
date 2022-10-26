@@ -1,5 +1,5 @@
-import { Base64 } from 'js-base64';
 import {
+    Base64,
     SessionCrypto,
     AppRequest,
     ConnectRequest,
@@ -18,7 +18,6 @@ import { BridgePartialSession, BridgeSession } from 'src/provider/bridge/models/
 import { HTTPProvider } from 'src/provider/provider';
 import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { IStorage } from 'src/storage/models/storage.interface';
-import { base64ToBytes } from 'src/utils/binary';
 import { WithoutId } from 'src/utils/types';
 import * as protocol from 'src/resources/protocol.json';
 
@@ -127,7 +126,7 @@ export class BridgeProvider implements HTTPProvider {
     private async gatewayListener(bridgeIncomingMessage: BridgeIncomingMessage): Promise<void> {
         const walletMessage: WalletMessage = JSON.parse(
             this.session!.sessionCrypto.decrypt(
-                base64ToBytes(bridgeIncomingMessage.message),
+                Base64.decode(bridgeIncomingMessage.message).toUint8Array(),
                 hexToByteArray(bridgeIncomingMessage.from)
             )
         );

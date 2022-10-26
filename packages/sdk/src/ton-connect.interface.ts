@@ -11,6 +11,6 @@ export interface ITonConnect {
     ): T extends 'injected' ? void : string;
     autoConnect(): void;
     sendTransaction(tx: SendTransactionRequest): Promise<SendTransactionResponse>;
-    // sign(signRequest: SignMessageRequest): Promise<SignMessageResponse>;
     disconnect(): Promise<void>;
+    isInjectedProviderAvailable(): boolean;
 }
