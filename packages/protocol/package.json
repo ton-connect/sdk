@@ -1,6 +1,6 @@
 {
   "name": "@tonconnect/protocol",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ton-connect/sdk.git"
@@ -16,24 +16,20 @@
     "Connect",
     "Tonkeeper"
   ],
-  "engines": {
-    "node": ">=16"
-  },
   "author": "tonconnect",
   "license": "Apache-2.0",
   "scripts": {
     "build": "npx rimraf lib && tsc"
   },
-  "dependencies": {
-    "typescript": "^4.8.2"
-  },
+  "files": [
+    "lib"
+  ],
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
+  "dependencies": { },
+  "devDependencies": {
+  },
   "nx": {
     "tags": ["scope:protocol"]
-  },
-  "devDependencies": {
-    "eslint": "8.22.0",
-    "rimraf": "^3.0.2"
   }
 }
