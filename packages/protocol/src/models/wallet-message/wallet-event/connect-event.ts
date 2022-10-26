@@ -21,7 +21,8 @@ export interface ConnectEventError {
 
 export enum CONNECT_EVENT_ERROR_CODES {
     UNKNOWN_ERROR = 0,
-    USER_REJECTS_ERROR = 1
+    USER_REJECTS_ERROR = 1,
+    AUTO_CONNECT_UNKNOWN_APP_ERROR = 2
 }
 
 export type ConnectItemReply = TonAddressItemReply | TonProofItemReply;

@@ -1,4 +1,4 @@
-import { SendTransactionRequest, TonConnectUi } from '@ton-connect/ui';
+import { SendTransactionRequest, TonConnectUi } from '@tonconnect/ui';
 
 const tonConnect = new TonConnectUi();
 

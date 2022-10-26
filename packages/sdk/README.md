@@ -1,6 +1,6 @@
 # TON Connect SDK core
 
-⚠️ API is work in progress right now.
+⚠️ SDK is work in progress right now.
 
 ## Init connector and call autoConnect. If user connected his wallet before, connector will restore connection
 
