@@ -1,8 +1,10 @@
-import { AppRequest, RpcMethod, WalletResponse } from 'src/models';
 import {
+    AppRequest,
+    RpcMethod,
+    WalletResponse,
     WalletResponseError,
     WalletResponseSuccess
-} from 'src/models/protocol/wallet-message/wallet-response/wallet-response';
+} from '@ton-connect/protocol';
 import { WithoutId } from 'src/utils/types';
 
 export abstract class RpcParser<T extends RpcMethod> {

@@ -1,12 +1,19 @@
-import { SendTransactionRpcRequest } from 'src/models';
-import { SendTransactionRequest, SendTransactionResponse } from 'src/models/methods';
 import {
-    sendTransactionErrors,
+    SEND_TRANSACTION_ERROR_CODES,
+    SendTransactionRpcRequest,
     SendTransactionRpcResponseError,
     SendTransactionRpcResponseSuccess
-} from 'src/models/protocol/wallet-message/wallet-response/send-transaction-rpc-response';
+} from '@ton-connect/protocol';
+import { UserRejectsError } from 'src/errors';
+import { UnknownError } from 'src/errors/unknown.error';
+import { SendTransactionRequest, SendTransactionResponse } from 'src/models/methods';
 import { RpcParser } from 'src/parsers/rpc-parser';
 import { WithoutId } from 'src/utils/types';
+
+const sendTransactionErrors = {
+    [SEND_TRANSACTION_ERROR_CODES.UNKNOWN_ERROR]: UnknownError,
+    [SEND_TRANSACTION_ERROR_CODES.USER_REJECTS_ERROR]: UserRejectsError
+};
 
 class SendTransactionParser extends RpcParser<'sendTransaction'> {
     convertToRpcRequest(request: SendTransactionRequest): WithoutId<SendTransactionRpcRequest> {

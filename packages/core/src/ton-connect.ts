@@ -1,26 +1,23 @@
+import {
+    ConnectEventError,
+    ConnectEventSuccess,
+    ConnectRequest,
+    SendTransactionRpcResponseSuccess,
+    TonAddressItemReply,
+    WalletEvent,
+    CHAIN
+} from '@ton-connect/protocol';
 import { TonConnectError } from 'src/errors/ton-connect.error';
 import { WalletAlreadyConnectedError } from 'src/errors/wallet/wallet-already-connected.error';
 import { WalletNotConnectedError } from 'src/errors/wallet/wallet-not-connected.error';
-import {
-    Account,
-    CHAIN,
-    ConnectEventSuccess,
-    ConnectRequest,
-    DappMetadata,
-    DappSettings,
-    Wallet,
-    WalletConnectionSource,
-    WalletEvent
-} from 'src/models';
+import { Account, DappMetadata, DappSettings, Wallet, WalletConnectionSource } from 'src/models';
 import { SendTransactionRequest, SendTransactionResponse } from 'src/models/methods';
-import { TonAddressItemReply } from 'src/models/protocol/wallet-message/wallet-event/connect-event';
-import { SendTransactionRpcResponseSuccess } from 'src/models/protocol/wallet-message/wallet-response/send-transaction-rpc-response';
+import { connectErrorsParser } from 'src/parsers/connect-errors-parser';
 import { sendTransactionParser } from 'src/parsers/send-transaction-parser';
 import { BridgeProvider } from 'src/provider/bridge/bridge-provider';
 import { InjectedProvider } from 'src/provider/injected/injected-provider';
 import { Provider } from 'src/provider/provider';
 import * as protocol from 'src/resources/protocol.json';
-import { getWalletConnectionSource } from 'src/resources/wallets/utils';
 import { DefaultStorage } from 'src/storage/default-storage';
 import { IStorage } from 'src/storage/models/storage.interface';
 import { WalletInfoStorage } from 'src/storage/wallet-info-storage';
@@ -38,6 +35,8 @@ export class TonConnect implements ITonConnect {
     private provider: Provider | null = null;
 
     private statusChangeSubscriptions: ((walletInfo: Wallet | null) => void)[] = [];
+
+    private statusChangeErrorSubscriptions: ((err: TonConnectError) => void)[] = [];
 
     public get connected(): boolean {
         return this._wallet !== null;
@@ -66,12 +65,25 @@ export class TonConnect implements ITonConnect {
         this.walletInfoStorage = new WalletInfoStorage(this.dappSettings.storage);
     }
 
-    public onStatusChange(callback: (walletInfo: Wallet | null) => void): () => void {
+    public onStatusChange(
+        callback: (wallet: Wallet | null) => void,
+        errorsHandler?: (err: TonConnectError) => void
+    ): () => void {
         this.statusChangeSubscriptions.push(callback);
-        return () =>
-            (this.statusChangeSubscriptions = this.statusChangeSubscriptions.filter(
+        if (errorsHandler) {
+            this.statusChangeErrorSubscriptions.push(errorsHandler);
+        }
+
+        return () => {
+            this.statusChangeSubscriptions = this.statusChangeSubscriptions.filter(
                 item => item !== callback
-            ));
+            );
+            if (errorsHandler) {
+                this.statusChangeErrorSubscriptions = this.statusChangeErrorSubscriptions.filter(
+                    item => item !== errorsHandler
+                );
+            }
+        };
     }
 
     public connect<T extends WalletConnectionSource | 'injected'>(
@@ -89,7 +101,7 @@ export class TonConnect implements ITonConnect {
     }
 
     public async autoConnect(): Promise<void> {
-        const walletInfo = await this.walletInfoStorage.loadWalletInfo();
+        /*const walletInfo = await this.walletInfoStorage.loadWalletInfo();
         if (walletInfo && !this.connected) {
             const wallet =
                 walletInfo.provider === 'injected'
@@ -100,7 +112,7 @@ export class TonConnect implements ITonConnect {
             await provider.connect();
 
             this.onProviderConnected(provider, walletInfo);
-        }
+        } */
     }
 
     public async sendTransaction(tx: SendTransactionRequest): Promise<SendTransactionResponse> {
@@ -123,7 +135,7 @@ export class TonConnect implements ITonConnect {
             throw new WalletNotConnectedError();
         }
         await this.provider!.disconnect();
-        this.onProviderDisconnected();
+        this.onWalletDisconnected();
     }
 
     private createProvider(wallet: WalletConnectionSource | 'injected'): Provider {
@@ -142,21 +154,17 @@ export class TonConnect implements ITonConnect {
     private walletEventsListener(e: WalletEvent): void {
         switch (e.event) {
             case 'connect':
-                this.onProviderConnected(e.payload);
+                this.onWalletConnected(e.payload);
                 break;
             case 'connect_error':
-                this.onProviderAccountChange(e.value.account);
+                this.onWalletConnectError(e.payload);
                 break;
             case 'disconnect':
-                this.onProviderDisconnected();
+                this.onWalletDisconnected();
         }
     }
 
-    private providerErrorsListener(provider: Provider, e: ProviderError): void {
-        console.error(`Provider ${provider} error:`, e);
-    }
-
-    private onProviderConnected(connectEvent: ConnectEventSuccess['payload']): void {
+    private onWalletConnected(connectEvent: ConnectEventSuccess['payload']): void {
         const tonAccountItem: TonAddressItemReply | undefined = connectEvent.items.find(
             item => item.name === 'ton_addr'
         ) as TonAddressItemReply | undefined;
@@ -174,7 +182,12 @@ export class TonConnect implements ITonConnect {
         };
     }
 
-    private onProviderDisconnected(): void {
+    private onWalletConnectError(connectEventError: ConnectEventError['payload']): void {
+        const error = connectErrorsParser.parseError(connectEventError);
+        this.statusChangeErrorSubscriptions.forEach(errorsHandler => errorsHandler(error));
+    }
+
+    private onWalletDisconnected(): void {
         this.wallet = null;
     }
 

@@ -1,7 +1,7 @@
-import { SessionKeypair } from 'src/crypto/session-crypto';
+import { SessionCrypto } from '@ton-connect/protocol';
 
 export interface BridgeSession {
-    sessionKeyPair: SessionKeypair;
+    sessionCrypto: SessionCrypto;
     walletPublicKey: string;
     bridgeUrl: string;
 }

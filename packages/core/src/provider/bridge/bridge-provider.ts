@@ -1,22 +1,22 @@
 import { Base64 } from 'js-base64';
-import { SessionKeypair } from 'src/crypto/session-crypto';
-import { TonConnectError } from 'src/errors/ton-connect.error';
 import {
+    SessionCrypto,
     AppRequest,
     ConnectRequest,
-    DappSettings,
     RpcMethod,
-    WalletConnectionSource,
     WalletEvent,
-    WalletResponse
-} from 'src/models';
-import { WalletMessage } from 'src/models/protocol/wallet-message/wallet-message';
+    WalletResponse,
+    WalletMessage,
+    hexToByteArray
+} from '@ton-connect/protocol';
+import { TonConnectError } from 'src/errors/ton-connect.error';
+import { DappSettings, WalletConnectionSource } from 'src/models';
 import { BridgeGateway } from 'src/provider/bridge/bridge-gateway';
 import { BridgeIncomingMessage } from 'src/provider/bridge/models/bridge-incomming-message';
 import { BridgePartialSession, BridgeSession } from 'src/provider/bridge/models/bridge-session';
 import { HTTPProvider } from 'src/provider/provider';
 import { BridgeSessionStorage } from 'src/storage/bridge-session-storage';
-import { base64ToBytes, hexToByteArray } from 'src/utils/binary';
+import { base64ToBytes } from 'src/utils/binary';
 import { WithoutId } from 'src/utils/types';
 
 export class BridgeProvider implements HTTPProvider {
@@ -46,16 +46,16 @@ export class BridgeProvider implements HTTPProvider {
 
     public connect(message: ConnectRequest): string {
         this.bridge?.close();
-        const sessionKeyPair = new SessionKeypair();
+        const sessionCrypto = new SessionCrypto();
 
         this.session = {
-            sessionKeyPair,
+            sessionCrypto,
             bridgeUrl: this.walletConnectionSource.bridgeUrl
         };
 
         this.bridge = new BridgeGateway(
             this.walletConnectionSource.bridgeUrl,
-            sessionKeyPair.sessionId,
+            sessionCrypto.sessionId,
             this.gatewayListener.bind(this),
             this.gatewayErrorsListener.bind(this)
         );
@@ -74,7 +74,7 @@ export class BridgeProvider implements HTTPProvider {
                 throw new TonConnectError('Trying to send bridge request without session');
             }
 
-            const encodedRequest = this.session!.sessionKeyPair.encrypt(
+            const encodedRequest = this.session!.sessionCrypto.encrypt(
                 JSON.stringify(request),
                 hexToByteArray(this.session.walletPublicKey)
             );
@@ -102,7 +102,7 @@ export class BridgeProvider implements HTTPProvider {
 
     private async gatewayListener(bridgeIncomingMessage: BridgeIncomingMessage): Promise<void> {
         const walletMessage: WalletMessage = JSON.parse(
-            this.session!.sessionKeyPair.decrypt(
+            this.session!.sessionCrypto.decrypt(
                 base64ToBytes(bridgeIncomingMessage.message),
                 hexToByteArray(bridgeIncomingMessage.from)
             )
@@ -149,7 +149,7 @@ export class BridgeProvider implements HTTPProvider {
     private generateUniversalLink(message: ConnectRequest): string {
         const url = new URL(this.walletConnectionSource.universalLinkBase);
         url.searchParams.append('v', this.dappSettings.protocolVersion.toString());
-        url.searchParams.append('id', this.session!.sessionKeyPair.sessionId);
+        url.searchParams.append('id', this.session!.sessionCrypto.sessionId);
         url.searchParams.append('r', Base64.encode(JSON.stringify(message), true));
         return url.toString();
     }

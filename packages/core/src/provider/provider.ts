@@ -1,4 +1,10 @@
-import { AppRequest, ConnectRequest, RpcMethod, WalletEvent, WalletResponse } from 'src/models';
+import {
+    AppRequest,
+    ConnectRequest,
+    RpcMethod,
+    WalletEvent,
+    WalletResponse
+} from '@ton-connect/protocol';
 import { InjectedProvider } from 'src/provider/injected/injected-provider';
 import { WithoutId } from 'src/utils/types';
 

@@ -1,4 +1,4 @@
-import { SessionKeypair } from 'src/crypto/session-crypto';
+import { SessionCrypto } from '@ton-connect/protocol';
 import { BridgeSession } from 'src/provider/bridge/models/bridge-session';
 import { BridgeSessionRaw } from 'src/provider/bridge/models/bridge-session-raw';
 import { IStorage } from 'src/storage/models/storage.interface';
@@ -10,7 +10,7 @@ export class BridgeSessionStorage {
 
     public async storeSession(session: BridgeSession): Promise<void> {
         const rawSession: BridgeSessionRaw = {
-            sessionKeyPair: session.sessionKeyPair.stringifyKeypair(),
+            sessionKeyPair: session.sessionCrypto.stringifyKeypair(),
             walletPublicKey: session.walletPublicKey,
             bridgeUrl: session.bridgeUrl
         };
@@ -28,9 +28,9 @@ export class BridgeSessionStorage {
         }
 
         const rawSession: BridgeSessionRaw = JSON.parse(stored);
-        const sessionKeyPair = new SessionKeypair(rawSession.sessionKeyPair);
+        const sessionCrypto = new SessionCrypto(rawSession.sessionKeyPair);
         return {
-            sessionKeyPair,
+            sessionCrypto,
             bridgeUrl: rawSession.bridgeUrl,
             walletPublicKey: rawSession.walletPublicKey
         };

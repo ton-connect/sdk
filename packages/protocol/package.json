@@ -1,0 +1,39 @@
+{
+  "name": "@ton-connect/protocol",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ton-connect/sdk.git"
+  },
+  "homepage": "https://github.com/ton-connect/sdk/tree/main/packages/protocol",
+  "bugs": {
+    "url": "https://github.com/ton-connect/sdk/issues"
+  },
+  "keywords": [
+    "TON",
+    "Wallet",
+    "ton-connect",
+    "Connect",
+    "Tonkeeper"
+  ],
+  "engines": {
+    "node": ">=16"
+  },
+  "author": "tonconnect",
+  "license": "Apache-2.0",
+  "scripts": {
+    "build": "npx rimraf lib && tsc"
+  },
+  "dependencies": {
+    "typescript": "^4.8.2"
+  },
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "nx": {
+    "tags": ["scope:protocol"]
+  },
+  "devDependencies": {
+    "eslint": "8.22.0",
+    "rimraf": "^3.0.2"
+  }
+}

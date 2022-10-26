@@ -7,7 +7,7 @@ import {
     ConnectRequest,
     WalletEvent,
     ConnectEvent
-} from 'src/models';
+} from '@ton-connect/protocol';
 import { InjectedWalletApi } from 'src/provider/injected/models/injected-wallet-api';
 import { InternalProvider } from 'src/provider/provider';
 import { IStorage } from 'src/storage/models/storage.interface';
