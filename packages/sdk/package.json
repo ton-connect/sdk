@@ -1,14 +1,35 @@
 {
   "name": "@tonconnect/sdk",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "scripts": {
     "build": "npx rimraf lib && ttsc"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ton-connect/sdk.git"
+  },
+  "homepage": "https://github.com/ton-connect/sdk/tree/main/packages/sdk",
+  "bugs": {
+    "url": "https://github.com/ton-connect/sdk/issues"
+  },
+  "keywords": [
+    "TON",
+    "Wallet",
+    "ton-connect",
+    "Connect",
+    "Tonkeeper",
+    "sdk"
+  ],
+  "author": "tonconnect",
+  "license": "Apache-2.0",
   "dependencies": {
     "deepmerge": "^4.2.2",
     "tweetnacl": "^1.0.3",
-    "@tonconnect/protocol": "*"
+    "@tonconnect/protocol": "^0.0.3"
   },
+  "files": [
+    "lib"
+  ],
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "nx": {

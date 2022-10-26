@@ -1,3 +1,3 @@
-import { TonConnectError } from 'src/errors/ton-connect.error';
+import { generateError } from 'src/errors/generate-error';
 
-export class WalletAlreadyConnectedError extends TonConnectError {}
+export const WalletAlreadyConnectedError = generateError();

@@ -15,7 +15,7 @@ export class BridgeConnectionStorage {
         const rawSession: BridgeSessionRaw = {
             sessionKeyPair: connection.session.sessionCrypto.stringifyKeypair(),
             walletPublicKey: connection.session.walletPublicKey,
-            bridgeUrl: connection.session.bridgeUrl
+            walletConnectionSource: connection.session.walletConnectionSource
         };
 
         const rawConnection: BridgeConnectionRaw = {
@@ -41,7 +41,7 @@ export class BridgeConnectionStorage {
             connectEvent: rawConnection.connectEvent,
             session: {
                 sessionCrypto,
-                bridgeUrl: rawConnection.session.bridgeUrl,
+                walletConnectionSource: rawConnection.session.walletConnectionSource,
                 walletPublicKey: rawConnection.session.walletPublicKey
             }
         };
