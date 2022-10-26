@@ -1,4 +1,4 @@
-import { CHAIN } from '@ton-connect/protocol';
+import { CHAIN } from '@tonconnect/protocol';
 
 export interface Account {
     address: string;

@@ -6,7 +6,7 @@ import {
     TonAddressItemReply,
     WalletEvent,
     CHAIN
-} from '@ton-connect/protocol';
+} from '@tonconnect/protocol';
 import { TonConnectError } from 'src/errors/ton-connect.error';
 import { WalletAlreadyConnectedError } from 'src/errors/wallet/wallet-already-connected.error';
 import { WalletNotConnectedError } from 'src/errors/wallet/wallet-not-connected.error';

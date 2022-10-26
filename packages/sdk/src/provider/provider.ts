@@ -4,7 +4,7 @@ import {
     RpcMethod,
     WalletEvent,
     WalletResponse
-} from '@ton-connect/protocol';
+} from '@tonconnect/protocol';
 import { InjectedProvider } from 'src/provider/injected/injected-provider';
 import { WithoutId } from 'src/utils/types';
 

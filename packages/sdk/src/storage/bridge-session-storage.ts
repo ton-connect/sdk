@@ -1,4 +1,4 @@
-import { SessionCrypto } from '@ton-connect/protocol';
+import { SessionCrypto } from '@tonconnect/protocol';
 import { BridgeSession } from 'src/provider/bridge/models/bridge-session';
 import { BridgeSessionRaw } from 'src/provider/bridge/models/bridge-session-raw';
 import { IStorage } from 'src/storage/models/storage.interface';

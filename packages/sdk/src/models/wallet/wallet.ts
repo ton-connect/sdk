@@ -1,4 +1,4 @@
-import { DeviceInfo } from '@ton-connect/protocol';
+import { DeviceInfo } from '@tonconnect/protocol';
 import { Account } from 'src/models';
 
 export interface Wallet {

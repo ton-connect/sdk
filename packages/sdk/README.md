@@ -5,7 +5,7 @@
 ## Init connector and create a universal link
 
 ```js
-import TonConnect from '@ton-connect/core';
+import TonConnect from 'packages/sdk';
 
 const connector = new TonConnect();
 

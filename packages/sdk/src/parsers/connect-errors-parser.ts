@@ -1,7 +1,7 @@
 import { UserRejectsError } from 'src/errors';
 import { TonConnectError } from 'src/errors/ton-connect.error';
 import { UnknownError } from 'src/errors/unknown.error';
-import { ConnectEventError } from '@ton-connect/protocol';
+import { ConnectEventError } from '@tonconnect/protocol';
 
 class ConnectErrorsParser {
     private readonly errorsCodes = {

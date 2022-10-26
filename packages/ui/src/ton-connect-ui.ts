@@ -4,8 +4,8 @@ import {
     SendTransactionResponse,
     TonConnect,
     WalletAppInfo
-} from '@ton-connect/core';
-import type { Account } from '@ton-connect/core';
+} from '../../sdk';
+import type { Account } from '../../sdk';
 import { widgetController } from 'src/app';
 import { Button } from 'src/app/views/button';
 import { TonUiOptions } from 'src/models/ton-ui-options';

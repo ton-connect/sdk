@@ -1,19 +1,19 @@
 {
-  "name": "@ton-connect/core",
+  "name": "@tonconnect/sdk",
   "version": "1.0.0",
   "scripts": {
-    "build": "../../node_modules/.bin/ttsc"
+    "build": "npx rimraf lib && ttsc"
   },
   "dependencies": {
     "deepmerge": "^4.2.2",
     "tweetnacl": "^1.0.3",
     "js-base64": "^3.7.2",
-    "@ton-connect/protocol": "*"
+    "@tonconnect/protocol": "*"
   },
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "nx": {
-    "tags": ["scope:core"]
+    "tags": ["scope:sdk"]
   },
   "devDependencies": {
     "eslint": "8.22.0",

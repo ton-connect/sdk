@@ -3,7 +3,7 @@ import {
     SendTransactionRpcRequest,
     SendTransactionRpcResponseError,
     SendTransactionRpcResponseSuccess
-} from '@ton-connect/protocol';
+} from '@tonconnect/protocol';
 import { UserRejectsError } from 'src/errors';
 import { UnknownError } from 'src/errors/unknown.error';
 import { SendTransactionRequest, SendTransactionResponse } from 'src/models/methods';

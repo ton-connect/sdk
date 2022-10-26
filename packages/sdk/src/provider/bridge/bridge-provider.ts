@@ -8,7 +8,7 @@ import {
     WalletResponse,
     WalletMessage,
     hexToByteArray
-} from '@ton-connect/protocol';
+} from '@tonconnect/protocol';
 import { TonConnectError } from 'src/errors/ton-connect.error';
 import { DappSettings, WalletConnectionSource } from 'src/models';
 import { BridgeGateway } from 'src/provider/bridge/bridge-gateway';

@@ -13,13 +13,13 @@ export default defineConfig({
     port: 3000,
   },
   optimizeDeps: {
-    include: ['@ton-connect/core'],
+    include: ['@tonconnect/sdk'],
     exclude: ['csstype']
   },
   build: {
     target: 'esnext',
     commonjsOptions: {
-      include: [/@ton-connect\/core/, /node_modules/]
+      include: [/@tonconnect\/sdk/, /node_modules/]
     }
   },
 });

@@ -6,7 +6,7 @@ import {
     RpcMethod,
     WalletEvent,
     WalletResponse
-} from '@ton-connect/protocol';
+} from '@tonconnect/protocol';
 
 export interface InjectedWalletApi {
     deviceInfo: DeviceInfo;
