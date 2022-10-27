@@ -1,4 +1,5 @@
 import { BridgeIncomingMessage } from 'src/provider/bridge/models/bridge-incomming-message';
+import { addPathToUrl } from 'src/utils/url';
 
 export class BridgeGateway {
     private readonly ssePath = 'events';
@@ -11,23 +12,15 @@ export class BridgeGateway {
 
     private isClosed = false;
 
-    private readonly bridgeUrl: string;
-
     constructor(
-        bridgeUrl: string,
+        private readonly bridgeUrl: string,
         public readonly sessionId: string,
         private readonly listener: (msg: BridgeIncomingMessage) => void,
         private readonly errorsListener: (err: Event) => void
-    ) {
-        if (bridgeUrl.slice(-1) === '/') {
-            this.bridgeUrl = bridgeUrl.slice(0, -1);
-        } else {
-            this.bridgeUrl = bridgeUrl;
-        }
-    }
+    ) {}
 
     public async registerSession(): Promise<void> {
-        const url = new URL(`${this.bridgeUrl}/${this.ssePath}`);
+        const url = new URL(addPathToUrl(this.bridgeUrl, this.ssePath));
         url.searchParams.append('client_id', this.sessionId);
         this.eventSource = new EventSource(url);
 
@@ -42,7 +35,7 @@ export class BridgeGateway {
     }
 
     public async send(message: Uint8Array, receiver: string, ttl?: number): Promise<void> {
-        const url = new URL(`${this.bridgeUrl}/${this.postPath}`);
+        const url = new URL(addPathToUrl(this.bridgeUrl, this.postPath));
         url.searchParams.append('client_id', this.sessionId);
         url.searchParams.append('to', receiver);
         url.searchParams.append('ttl', (ttl || this.defaultTtl).toString());

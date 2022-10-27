@@ -20,9 +20,12 @@ import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { IStorage } from 'src/storage/models/storage.interface';
 import { WithoutId } from 'src/utils/types';
 import * as protocol from 'src/resources/protocol.json';
+import { addPathToUrl } from 'src/utils/url';
 
 export class BridgeProvider implements HTTPProvider {
     public readonly type = 'http';
+
+    private readonly universalLinkPath = 'ton-connect';
 
     private readonly connectionStorage: BridgeConnectionStorage;
 
@@ -173,7 +176,11 @@ export class BridgeProvider implements HTTPProvider {
     }
 
     private generateUniversalLink(message: ConnectRequest): string {
-        const url = new URL(this.walletConnectionSource.universalLinkBase);
+        const urlString = addPathToUrl(
+            this.walletConnectionSource.universalLinkBase,
+            this.universalLinkPath
+        );
+        const url = new URL(urlString);
         url.searchParams.append('v', protocol.version.toString());
         url.searchParams.append('id', this.session!.sessionCrypto.sessionId);
         url.searchParams.append('r', Base64.encode(JSON.stringify(message), true));

@@ -5,7 +5,6 @@ import {
     SendTransactionRpcResponseSuccess,
     TonAddressItemReply,
     WalletEvent,
-    CHAIN,
     TonProofItemReply,
     ConnectItem
 } from '@tonconnect/protocol';
@@ -112,16 +111,16 @@ export class TonConnect implements ITonConnect {
     public async _autoConnect(): Promise<void> {
         const bridgeConnection = await this.bridgeConnectionStorage.getConnection();
 
-        let provider: Provider;
-
         if (bridgeConnection) {
-            provider = await this.createProvider(bridgeConnection.session.walletConnectionSource);
-            return provider.autoConnect();
+            this.provider = await this.createProvider(
+                bridgeConnection.session.walletConnectionSource
+            );
+            return this.provider.autoConnect();
         }
 
         if (InjectedProvider.isWalletInjected()) {
-            provider = await this.createProvider('injected');
-            return provider.autoConnect();
+            this.provider = await this.createProvider('injected');
+            return this.provider.autoConnect();
         }
     }
 
@@ -194,7 +193,7 @@ export class TonConnect implements ITonConnect {
             provider: this.provider!.type,
             account: {
                 address: tonAccountItem.address,
-                chain: CHAIN.MAINNET // TODO
+                chain: tonAccountItem.network
             }
         };
 
