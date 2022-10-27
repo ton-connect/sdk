@@ -116,11 +116,13 @@ export class TonConnect implements ITonConnect {
 
         if (bridgeConnection) {
             provider = await this.createProvider(bridgeConnection.session.walletConnectionSource);
-        } else {
-            provider = await this.createProvider('injected');
+            return provider.autoConnect();
         }
 
-        return provider.autoConnect();
+        if (InjectedProvider.isWalletInjected()) {
+            provider = await this.createProvider('injected');
+            return provider.autoConnect();
+        }
     }
 
     public async sendTransaction(tx: SendTransactionRequest): Promise<SendTransactionResponse> {

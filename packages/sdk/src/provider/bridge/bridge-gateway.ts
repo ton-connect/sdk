@@ -27,7 +27,7 @@ export class BridgeGateway {
     }
 
     public async registerSession(): Promise<void> {
-        const url = new URL(`this.bridgeUrl/${this.ssePath}`);
+        const url = new URL(`${this.bridgeUrl}/${this.ssePath}`);
         url.searchParams.append('client_id', this.sessionId);
         this.eventSource = new EventSource(url);
 
@@ -42,7 +42,7 @@ export class BridgeGateway {
     }
 
     public async send(message: Uint8Array, receiver: string, ttl?: number): Promise<void> {
-        const url = new URL(`this.bridgeUrl/${this.postPath}`);
+        const url = new URL(`${this.bridgeUrl}/${this.postPath}`);
         url.searchParams.append('client_id', this.sessionId);
         url.searchParams.append('to', receiver);
         url.searchParams.append('ttl', (ttl || this.defaultTtl).toString());
