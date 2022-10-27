@@ -1,8 +1,9 @@
 {
   "name": "@tonconnect/sdk",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "scripts": {
-    "build": "npx rimraf lib && ttsc"
+    "build": "npx rimraf lib && ttsc",
+    "build:production": "npx rimraf lib && ttsc --sourceMap false"
   },
   "repository": {
     "type": "git",
@@ -25,7 +26,7 @@
   "dependencies": {
     "deepmerge": "^4.2.2",
     "tweetnacl": "^1.0.3",
-    "@tonconnect/protocol": "^0.0.3"
+    "@tonconnect/protocol": "^0.0.4"
   },
   "files": [
     "lib"

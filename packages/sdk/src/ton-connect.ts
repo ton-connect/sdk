@@ -5,13 +5,16 @@ import {
     SendTransactionRpcResponseSuccess,
     TonAddressItemReply,
     WalletEvent,
-    CHAIN
+    CHAIN,
+    TonProofItemReply,
+    ConnectItem
 } from '@tonconnect/protocol';
 import { TonConnectError } from 'src/errors/ton-connect.error';
 import { WalletAlreadyConnectedError } from 'src/errors/wallet/wallet-already-connected.error';
 import { WalletNotConnectedError } from 'src/errors/wallet/wallet-not-connected.error';
 import { Account, DappMetadata, DappSettings, Wallet, WalletConnectionSource } from 'src/models';
 import { SendTransactionRequest, SendTransactionResponse } from 'src/models/methods';
+import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
 import { connectErrorsParser } from 'src/parsers/connect-errors-parser';
 import { sendTransactionParser } from 'src/parsers/send-transaction-parser';
 import { BridgeProvider } from 'src/provider/bridge/bridge-provider';
@@ -85,9 +88,13 @@ export class TonConnect implements ITonConnect {
     }
 
     public connect<T extends WalletConnectionSource | 'injected'>(
-        wallet: T
+        wallet: T,
+        request?: ConnectAdditionalRequest
     ): T extends 'injected' ? void : string;
-    public connect(wallet: WalletConnectionSource | 'injected'): string | void {
+    public connect(
+        wallet: WalletConnectionSource | 'injected',
+        request?: ConnectAdditionalRequest
+    ): string | void {
         if (this.connected) {
             throw new WalletAlreadyConnectedError();
         }
@@ -95,7 +102,7 @@ export class TonConnect implements ITonConnect {
         this.provider?.closeConnection();
         this.provider = this.createProvider(wallet);
 
-        return this.provider.connect(this.createConnectRequest());
+        return this.provider.connect(this.createConnectRequest(request));
     }
 
     public autoConnect(): void {
@@ -171,11 +178,16 @@ export class TonConnect implements ITonConnect {
         const tonAccountItem: TonAddressItemReply | undefined = connectEvent.items.find(
             item => item.name === 'ton_addr'
         ) as TonAddressItemReply | undefined;
+
+        const tonProofItem: TonProofItemReply | undefined = connectEvent.items.find(
+            item => item.name === 'ton_proof'
+        ) as TonProofItemReply | undefined;
+
         if (!tonAccountItem) {
             throw new TonConnectError('ton_addr connection item was not found');
         }
 
-        this.wallet = {
+        const wallet: Wallet = {
             device: connectEvent.device,
             provider: this.provider!.type,
             account: {
@@ -183,6 +195,14 @@ export class TonConnect implements ITonConnect {
                 chain: CHAIN.MAINNET // TODO
             }
         };
+
+        if (tonProofItem) {
+            wallet.connectItems = {
+                tonProof: tonProofItem.signature
+            };
+        }
+
+        this.wallet = wallet;
     }
 
     private onWalletConnectError(connectEventError: ConnectEventError['payload']): void {
@@ -200,17 +220,26 @@ export class TonConnect implements ITonConnect {
         }
     }
 
-    private createConnectRequest(): ConnectRequest {
+    private createConnectRequest(request?: ConnectAdditionalRequest): ConnectRequest {
         const webPageMetadata = getWebPageMetadata();
         const metadata = mergeOptions(this.dappSettings.metadata, webPageMetadata);
 
+        const items: ConnectItem[] = [
+            {
+                name: 'ton_addr'
+            }
+        ];
+
+        if (request) {
+            items.push({
+                name: 'ton_proof',
+                payload: request.tonProof
+            });
+        }
+
         return {
             ...metadata,
-            items: [
-                {
-                    name: 'ton_addr'
-                }
-            ]
+            items
         };
     }
 }

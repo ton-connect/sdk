@@ -1,6 +1,6 @@
 {
   "name": "@tonconnect/protocol",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ton-connect/sdk.git"
@@ -19,7 +19,8 @@
   "author": "tonconnect",
   "license": "Apache-2.0",
   "scripts": {
-    "build": "npx rimraf lib && tsc"
+    "build": "npx rimraf lib && tsc",
+    "build:production": "npx rimraf lib && tsc --sourceMap false"
   },
   "files": [
     "lib"
