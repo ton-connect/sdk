@@ -20,6 +20,7 @@ export interface ConnectEventError {
 }
 
 export enum CONNECT_EVENT_ERROR_CODES {
+    BAD_REQUEST = -1,
     UNKNOWN_ERROR = 0,
     USER_REJECTS_ERROR = 1,
     AUTO_CONNECT_UNKNOWN_APP_ERROR = 2

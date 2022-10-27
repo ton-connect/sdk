@@ -15,6 +15,8 @@ export interface SendTransactionRpcResponseError extends WalletResponseTemplateE
 }
 
 export enum SEND_TRANSACTION_ERROR_CODES {
+    BAD_REQUEST = -1,
     UNKNOWN_ERROR = 0,
-    USER_REJECTS_ERROR = 1
+    USER_REJECTS_ERROR = 1,
+    UNKNOWN_APP = 2
 }
