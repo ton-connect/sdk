@@ -48,6 +48,7 @@ module.exports = {
                         tsx: "never"
                     }
                 ],
+                '@typescript-eslint/no-use-before-define': 'off',
                 'import/prefer-default-export': 'off',
                 '@typescript-eslint/no-useless-constructor': 'off',
                 "@typescript-eslint/explicit-function-return-type": 'error',

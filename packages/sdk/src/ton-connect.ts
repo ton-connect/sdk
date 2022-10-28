@@ -65,9 +65,9 @@ export class TonConnect implements ITonConnect {
         this.statusChangeSubscriptions.forEach(callback => callback(this._wallet));
     }
 
-    constructor(options?: { dappMetedata?: DappMetadata; storage?: IStorage }) {
+    constructor(options?: { dappMetedata?: Partial<DappMetadata>; storage?: IStorage }) {
         this.dappSettings = {
-            metadata: options?.dappMetedata || getWebPageMetadata(),
+            metadata: mergeOptions(options?.dappMetedata, getWebPageMetadata()),
             storage: options?.storage || new DefaultStorage()
         };
 

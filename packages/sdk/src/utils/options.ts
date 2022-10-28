@@ -8,5 +8,5 @@ export function mergeOptions<T>(options: Partial<T> | undefined | null, defaultO
     const overwriteMerge = (_: unknown[], sourceArray: unknown[], __: unknown): unknown[] =>
         sourceArray;
 
-    return deepmerge(options, defaultOptions, { arrayMerge: overwriteMerge });
+    return deepmerge(defaultOptions, options, { arrayMerge: overwriteMerge });
 }
