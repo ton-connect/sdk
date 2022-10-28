@@ -39,14 +39,23 @@ export class TonConnect implements ITonConnect {
 
     private statusChangeErrorSubscriptions: ((err: TonConnectError) => void)[] = [];
 
+    /**
+     * Shows if the wallet is connected right now.
+     */
     public get connected(): boolean {
         return this._wallet !== null;
     }
 
+    /**
+     * Current connected account or null if no account is connected.
+     */
     public get account(): Account | null {
         return this._wallet?.account || null;
     }
 
+    /**
+     * Current connected wallet or null if no account is connected.
+     */
     public get wallet(): Wallet | null {
         return this._wallet;
     }
@@ -65,6 +74,17 @@ export class TonConnect implements ITonConnect {
         this.bridgeConnectionStorage = new BridgeConnectionStorage(this.dappSettings.storage);
     }
 
+    /**
+     * Indicates if the injected wallet is available.
+     */
+    public isInjectedProviderAvailable = InjectedProvider.isWalletInjected;
+
+    /**
+     * Allows to subscribe to connection status changes and handle connection errors.
+     * @param callback will be called after connections status changes with actual wallet or null.
+     * @param errorsHandler (optional) will be called with some instance of TonConnectError when connect error is received.
+     * @returns unsubscribe callback.
+     */
     public onStatusChange(
         callback: (wallet: Wallet | null) => void,
         errorsHandler?: (err: TonConnectError) => void
@@ -86,6 +106,12 @@ export class TonConnect implements ITonConnect {
         };
     }
 
+    /**
+     * Generates universal link for an external wallet and subscribes to the wallet's bridge, or sends connect request to the injected wallet.
+     * @param wallet wallet's bridge url and universal link for an external wallet or 'injected' for the injected wallet.
+     * @param request (optional) additional request to pass to the wallet while connect (currently only ton_proof is available).
+     * @returns universal link if external wallet was passed or void for the injected wallet.
+     */
     public connect<T extends WalletConnectionSource | 'injected'>(
         wallet: T,
         request?: ConnectAdditionalRequest
@@ -104,11 +130,48 @@ export class TonConnect implements ITonConnect {
         return this.provider.connect(this.createConnectRequest(request));
     }
 
+    /**
+     * Try to restore existing session and reconnect to the corresponding wallet. Call it immediately when your app is loaded.
+     */
     public autoConnect(): void {
         this._autoConnect();
     }
 
-    public async _autoConnect(): Promise<void> {
+    /**
+     * Asks connected wallet to sign and send the transaction.
+     * @param transaction transaction to send.
+     * @returns signed transaction boc that allows you to find the transaction in the blockchain.
+     * If user rejects transaction, method will throw the corresponding error.
+     */
+    public async sendTransaction(
+        transaction: SendTransactionRequest
+    ): Promise<SendTransactionResponse> {
+        this.checkConnection();
+        const response = await this.provider!.sendRequest(
+            sendTransactionParser.convertToRpcRequest(transaction)
+        );
+
+        if (sendTransactionParser.isError(response)) {
+            return sendTransactionParser.parseAndThrowError(response);
+        }
+
+        return sendTransactionParser.convertFromRpcResponse(
+            response as SendTransactionRpcResponseSuccess
+        );
+    }
+
+    /**
+     * Disconnect form thw connected wallet and drop current session.
+     */
+    public async disconnect(): Promise<void> {
+        if (!this.connected) {
+            throw new WalletNotConnectedError();
+        }
+        await this.provider!.disconnect();
+        this.onWalletDisconnected();
+    }
+
+    private async _autoConnect(): Promise<void> {
         const bridgeConnection = await this.bridgeConnectionStorage.getConnection();
 
         if (bridgeConnection) {
@@ -123,31 +186,6 @@ export class TonConnect implements ITonConnect {
             return this.provider.autoConnect();
         }
     }
-
-    public async sendTransaction(tx: SendTransactionRequest): Promise<SendTransactionResponse> {
-        this.checkConnection();
-        const response = await this.provider!.sendRequest(
-            sendTransactionParser.convertToRpcRequest(tx)
-        );
-
-        if (sendTransactionParser.isError(response)) {
-            return sendTransactionParser.parseAndThrowError(response);
-        }
-
-        return sendTransactionParser.convertFromRpcResponse(
-            response as SendTransactionRpcResponseSuccess
-        );
-    }
-
-    public async disconnect(): Promise<void> {
-        if (!this.connected) {
-            throw new WalletNotConnectedError();
-        }
-        await this.provider!.disconnect();
-        this.onWalletDisconnected();
-    }
-
-    public isInjectedProviderAvailable = InjectedProvider.isWalletInjected;
 
     private createProvider(wallet: WalletConnectionSource | 'injected'): Provider {
         let provider: Provider;

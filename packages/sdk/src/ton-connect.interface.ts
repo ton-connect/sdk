@@ -1,18 +1,66 @@
+import { TonConnectError } from 'src/errors';
 import { Account, WalletConnectionSource, Wallet } from 'src/models';
 import { SendTransactionRequest, SendTransactionResponse } from 'src/models/methods';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
 
 export interface ITonConnect {
+    /**
+     * Shows if the wallet is connected right now.
+     */
     connected: boolean;
+
+    /**
+     * Current connected account or null if no account is connected.
+     */
     account: Account | null;
+
+    /**
+     * Current connected wallet or null if no account is connected.
+     */
     wallet: Wallet | null;
-    onStatusChange(callback: (walletInfo: Wallet | null) => void): () => void;
+
+    /**
+     * Indicates if the injected wallet is available.
+     */
+    isInjectedProviderAvailable(): boolean;
+
+    /**
+     * Allows to subscribe to connection status changes and handle connection errors.
+     * @param callback will be called after connections status changes with actual wallet or null.
+     * @param errorsHandler (optional) will be called with some instance of TonConnectError when connect error is received.
+     * @returns unsubscribe callback.
+     */
+    onStatusChange(
+        callback: (walletInfo: Wallet | null) => void,
+        errorsHandler?: (err: TonConnectError) => void
+    ): () => void;
+
+    /**
+     * Generates universal link for an external wallet and subscribes to the wallet's bridge, or sends connect request to the injected wallet.
+     * @param wallet wallet's bridge url and universal link for an external wallet or 'injected' for the injected wallet.
+     * @param request (optional) additional request to pass to the wallet while connect (currently only ton_proof is available).
+     * @returns universal link if external wallet was passed or void for the injected wallet.
+     */
     connect<T extends WalletConnectionSource | 'injected'>(
         wallet: T,
         request?: ConnectAdditionalRequest
     ): T extends 'injected' ? void : string;
+
+    /**
+     * Try to restore existing session and reconnect to the corresponding wallet. Call it immediately when your app is loaded.
+     */
     autoConnect(): void;
-    sendTransaction(tx: SendTransactionRequest): Promise<SendTransactionResponse>;
+
+    /**
+     * Disconnect form thw connected wallet and drop current session.
+     */
     disconnect(): Promise<void>;
-    isInjectedProviderAvailable(): boolean;
+
+    /**
+     * Asks connected wallet to sign and send the transaction.
+     * @param transaction transaction to send.
+     * @returns signed transaction boc that allows you to find the transaction in the blockchain.
+     * If user rejects transaction, method will throw the corresponding error.
+     */
+    sendTransaction(transaction: SendTransactionRequest): Promise<SendTransactionResponse>;
 }
