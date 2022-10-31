@@ -1,11 +1,17 @@
 import { Buffer } from 'buffer';
 
 function encodeBuffer(buffer: Buffer, urlSafe: boolean): string {
-    return buffer.toString(urlSafe ? 'base64url' : 'base64');
+    const encoded = buffer.toString('base64');
+    if (!urlSafe) {
+        return encoded;
+    }
+
+    return encodeURIComponent(encoded);
 }
 
 function decodeToBuffer(message: string, urlSafe: boolean): Buffer {
-    return Buffer.from(message, urlSafe ? 'base64url' : 'base64');
+    const value = urlSafe ? decodeURIComponent(message) : message;
+    return Buffer.from(value, 'base64');
 }
 
 function encode(value: string | object | Uint8Array, urlSafe = true): string {

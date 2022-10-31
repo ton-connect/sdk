@@ -1,7 +1,13 @@
 import { KeyPair } from './key-pair';
 import { concatUint8Arrays, hexToByteArray, splitToUint8Arrays, toHexString } from '../utils';
 import nacl, { BoxKeyPair } from 'tweetnacl';
-import crypto from 'crypto';
+
+if (typeof require === 'function' && typeof global === 'object') {
+    try {
+        // noinspection JSConstantReassignment
+        global.crypto = require('crypto');
+    } catch (err) {}
+}
 
 export class SessionCrypto {
     private readonly nonceLength = 24;

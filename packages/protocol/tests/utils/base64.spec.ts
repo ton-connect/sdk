@@ -3,7 +3,7 @@ import { Base64 } from 'src/utils';
 describe('Base64 tests', () => {
     it('Should encode string correctly', () => {
         const sourceString = 'test=string example: { a: "_b&%" }';
-        const expectedEncoded = 'dGVzdD1zdHJpbmcgZXhhbXBsZTogeyBhOiAiX2ImJSIgfQ';
+        const expectedEncoded = 'dGVzdD1zdHJpbmcgZXhhbXBsZTogeyBhOiAiX2ImJSIgfQ%3D%3D';
 
         const encoded = Base64.encode(sourceString);
         expect(encoded).toEqual(expectedEncoded);
@@ -18,7 +18,7 @@ describe('Base64 tests', () => {
             }
         };
 
-        const expectedEncoded = 'eyJhIjoiMTIzJiQlLT0iLCJiIjpbMSwyXSwiYyI6eyJ4IjpudWxsfX0';
+        const expectedEncoded = 'eyJhIjoiMTIzJiQlLT0iLCJiIjpbMSwyXSwiYyI6eyJ4IjpudWxsfX0%3D';
 
         const encoded = Base64.encode(sourceObject);
         expect(encoded).toEqual(expectedEncoded);
@@ -38,7 +38,7 @@ describe('Base64 tests', () => {
 
     it('Should decode string correctly', () => {
         const expectedString = 'test=string example: { a: "_b&%" }';
-        const encoded = 'dGVzdD1zdHJpbmcgZXhhbXBsZTogeyBhOiAiX2ImJSIgfQ';
+        const encoded = 'dGVzdD1zdHJpbmcgZXhhbXBsZTogeyBhOiAiX2ImJSIgfQ%3D';
 
         const decoded = Base64.decode(encoded);
         expect(decoded.toString()).toEqual(expectedString);
