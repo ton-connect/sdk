@@ -3,7 +3,10 @@
     "compilerOptions": {
         "outDir": "./lib",
         "baseUrl": "./",
-        "rootDir": "src"
+        "rootDir": "src",
+        "paths":{
+            "crypto":["node_modules/crypto-browserify"]
+        }
     },
     "include": [
       "./src"

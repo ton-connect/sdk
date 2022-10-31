@@ -112,10 +112,10 @@ module.exports = {
             }
         },
         {
-            files: ['__tests__/**/*.ts'],
+            files: ['tests/**/*.ts'],
             parser: '@typescript-eslint/parser',
             parserOptions: {
-                project: './tsconfig.test.json',
+                project: './packages/*/tsconfig.test.json',
                 tsconfigRootDir: __dirname,
                 createDefaultProgram: true
             },

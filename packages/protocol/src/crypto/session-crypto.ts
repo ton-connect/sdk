@@ -1,6 +1,7 @@
 import { KeyPair } from './key-pair';
-import { concatUint8Arrays, splitToUint8Arrays, toHexString } from '../utils';
+import { concatUint8Arrays, hexToByteArray, splitToUint8Arrays, toHexString } from '../utils';
 import nacl, { BoxKeyPair } from 'tweetnacl';
+import crypto from 'crypto';
 
 export class SessionCrypto {
     private readonly nonceLength = 24;
@@ -20,8 +21,8 @@ export class SessionCrypto {
 
     private createKeypairFromString(keyPair: KeyPair): BoxKeyPair {
         return {
-            publicKey: new TextEncoder().encode(keyPair.publicKey),
-            secretKey: new TextEncoder().encode(keyPair.secretKey)
+            publicKey: hexToByteArray(keyPair.publicKey),
+            secretKey: hexToByteArray(keyPair.secretKey)
         };
     }
 
@@ -61,8 +62,8 @@ export class SessionCrypto {
 
     public stringifyKeypair(): KeyPair {
         return {
-            publicKey: new TextDecoder().decode(this.keyPair.publicKey),
-            secretKey: new TextDecoder().decode(this.keyPair.secretKey)
+            publicKey: toHexString(this.keyPair.publicKey),
+            secretKey: toHexString(this.keyPair.secretKey)
         };
     }
 }

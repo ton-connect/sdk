@@ -1,82 +1,50 @@
-function toUrlSafe(str: string): string {
-    return encodeURIComponent(str);
+import { Buffer } from 'buffer';
+
+function encodeBuffer(buffer: Buffer, urlSafe: boolean): string {
+    return buffer.toString(urlSafe ? 'base64url' : 'base64');
 }
 
-function fromUrlSafe(str: string): string {
-    return decodeURIComponent(str);
+function decodeToBuffer(message: string, urlSafe: boolean): Buffer {
+    return Buffer.from(message, urlSafe ? 'base64url' : 'base64');
 }
 
-function encodeString(str: string): string {
-    if (typeof btoa === 'function') {
-        return btoa(str);
-    } else if (
-        typeof Buffer !== 'undefined' &&
-        Buffer !== null &&
-        typeof Buffer.from === 'function'
-    ) {
-        const buff = Buffer.from(str, 'base64');
-        return buff.toString('ascii');
-    } else {
-        throw new Error('Base64 is not supported in your environment');
-    }
-}
-
-function decodeToString(encoded: string): string {
-    if (typeof atob === 'function') {
-        return atob(fromUrlSafe(encoded));
-    } else if (
-        typeof Buffer !== 'undefined' &&
-        Buffer !== null &&
-        typeof Buffer.from === 'function'
-    ) {
-        const buff = Buffer.from(fromUrlSafe(encoded));
-        return buff.toString('base64');
-    } else {
-        throw new Error('Base64 is not supported in your environment');
-    }
-}
-
-function encodeObject(obj: object): string {
-    return encodeString(JSON.stringify(obj));
-}
-
-function encode(value: string | object | Uint8Array, urlSafe = false): string {
-    if (value instanceof Uint8Array) {
-        value = new TextDecoder().decode(value);
+function encode(value: string | object | Uint8Array, urlSafe = true): string {
+    if (!(value instanceof Uint8Array) && !(typeof value === 'string')) {
+        value = JSON.stringify(value);
     }
 
-    const encoded = typeof value === 'string' ? encodeString(value) : encodeObject(value);
+    const buffer = Buffer.from(value);
 
-    if (!urlSafe) {
-        return encoded;
-    }
-
-    return toUrlSafe(encoded);
+    return encodeBuffer(buffer, urlSafe);
 }
 
 function decode(
     value: string,
-    urlSafe = false
+    urlSafe = true
 ): {
     toString(): string;
     toObject<T>(): T | null;
     toUint8Array(): Uint8Array;
 } {
-    const decoded = urlSafe ? fromUrlSafe(decodeToString(value)) : decodeToString(value);
+    const decodedBuffer = decodeToBuffer(value, urlSafe);
 
     return {
         toString(): string {
-            return decoded;
+            return decodedBuffer.toString('utf-8');
         },
         toObject<T>(): T | null {
             try {
-                return JSON.parse(decoded) as T;
+                return JSON.parse(decodedBuffer.toString('utf-8')) as T;
             } catch (e) {
                 return null;
             }
         },
         toUint8Array(): Uint8Array {
-            return new TextEncoder().encode(decoded);
+            return new Uint8Array(
+                decodedBuffer.buffer,
+                decodedBuffer.byteOffset,
+                decodedBuffer.byteLength / Uint8Array.BYTES_PER_ELEMENT
+            );
         }
     };
 }
