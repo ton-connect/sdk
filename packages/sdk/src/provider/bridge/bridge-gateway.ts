@@ -1,3 +1,4 @@
+import { TonConnectError } from 'src/errors';
 import { BridgeIncomingMessage } from 'src/provider/bridge/models/bridge-incomming-message';
 import { addPathToUrl } from 'src/utils/url';
 
@@ -56,9 +57,17 @@ export class BridgeGateway {
         }
     }
 
-    private messagesHandler(e: MessageEvent<BridgeIncomingMessage>): void {
+    private messagesHandler(e: MessageEvent<string>): void {
         if (!this.isClosed) {
-            this.listener(e.data);
+            let bridgeIncomingMessage: BridgeIncomingMessage;
+
+            try {
+                bridgeIncomingMessage = JSON.parse(e.data);
+            } catch (e) {
+                throw new TonConnectError(`Bridge message parse failed, message ${e.data}`);
+            }
+
+            this.listener(bridgeIncomingMessage);
         }
     }
 }
