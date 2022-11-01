@@ -101,7 +101,7 @@ export class BridgeProvider implements HTTPProvider {
             }
 
             const encodedRequest = this.session!.sessionCrypto.encrypt(
-                JSON.stringify(request),
+                JSON.stringify({ ...request, id }),
                 hexToByteArray(this.session.walletPublicKey)
             );
 
@@ -135,15 +135,14 @@ export class BridgeProvider implements HTTPProvider {
         );
 
         if (!('event' in walletMessage)) {
-            const resolve = this.pendingRequests.get(walletMessage.id);
+            const id = walletMessage.id.toString();
+            const resolve = this.pendingRequests.get(id);
             if (!resolve) {
-                throw new TonConnectError(
-                    `Response id ${walletMessage.id} doesn't match any request's id`
-                );
+                throw new TonConnectError(`Response id ${id} doesn't match any request's id`);
             }
 
             resolve(walletMessage);
-            this.pendingRequests.delete(walletMessage.id);
+            this.pendingRequests.delete(id);
             return;
         }
 
