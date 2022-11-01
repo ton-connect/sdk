@@ -1,3 +1,4 @@
+import { Base64 } from '@tonconnect/protocol';
 import { TonConnectError } from 'src/errors';
 import { BridgeIncomingMessage } from 'src/provider/bridge/models/bridge-incomming-message';
 import { addPathToUrl } from 'src/utils/url';
@@ -42,7 +43,7 @@ export class BridgeGateway {
         url.searchParams.append('ttl', (ttl || this.defaultTtl).toString());
         await fetch(url, {
             method: 'post',
-            body: message
+            body: Base64.encode(message)
         });
     }
 
