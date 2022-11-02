@@ -11,13 +11,13 @@ export const IconButtonStyled = styled.button`
     border: none;
     cursor: pointer;
 
-    transition: transform 0.15s ease-in-out;
+    transition: transform 0.1s ease-in-out;
 
     &:hover {
-        transform: scale(1.03);
+        transform: scale(1.04);
     }
 
     &:active {
-        transform: scale(0.95);
+        transform: scale(0.96);
     }
 `;

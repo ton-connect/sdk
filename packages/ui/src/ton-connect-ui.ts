@@ -3,9 +3,9 @@ import {
     SendTransactionRequest,
     SendTransactionResponse,
     TonConnect,
-    WalletAppInfo
-} from '../../sdk';
-import type { Account } from '../../sdk';
+    Wallet
+} from '@tonconnect/sdk';
+import type { Account } from '@tonconnect/sdk';
 import { widgetController } from 'src/app';
 import { Button } from 'src/app/views/button';
 import { TonUiOptions } from 'src/models/ton-ui-options';
@@ -32,8 +32,8 @@ export class TonConnectUi {
     /**
      * Curren connected wallet app or null
      */
-    public get walletAppInfo(): WalletAppInfo | null {
-        return this.connector.walletAppInfo;
+    public get wallet(): Wallet | null {
+        return this.connector.wallet;
     }
 
     constructor(options?: {

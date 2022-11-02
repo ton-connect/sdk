@@ -2,7 +2,7 @@ import { Component, JSXElement } from 'solid-js';
 import { ButtonStyled } from 'src/app/components/button/style';
 import { Styleable } from 'src/app/models/styleable';
 
-interface ButtonProps extends Styleable {
+export interface ButtonProps extends Styleable {
     appearance?: 'primary' | 'secondary';
     size?: 's' | 'm' | 'l';
     children: JSXElement;

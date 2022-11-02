@@ -4,7 +4,7 @@ import { useTheme } from 'solid-styled-components';
 import { Styleable } from 'src/app/models/styleable';
 import { TextStyled } from './style';
 
-interface TextProps extends Styleable {
+export interface TextProps extends Styleable {
     children: JSXElement;
     fontSize?: Property.FontSize;
     fontWeight?: Property.FontWeight;

@@ -1,12 +1,14 @@
+import cn from 'classnames';
 import { Component, JSXElement, Show } from 'solid-js';
 import { Transition } from 'solid-transition-group';
 import clickOutsideDirective from 'src/app/directives/click-outside';
 import keyPressedDirective from 'src/app/directives/key-pressed';
+import { Styleable } from 'src/app/models/styleable';
 import { CloseButtonStyled, ModalBackgroundStyled, ModalWrapperClass } from './style';
 const clickOutside = clickOutsideDirective;
 const keyPressed = keyPressedDirective;
 
-interface ModalProps {
+export interface ModalProps extends Styleable {
     children: JSXElement;
     opened: boolean;
     onClose: () => void;
@@ -30,7 +32,7 @@ export const Modal: Component<ModalProps> = props => {
             <Show when={props.opened}>
                 <ModalBackgroundStyled>
                     <div
-                        class={ModalWrapperClass}
+                        class={cn(ModalWrapperClass, props.class)}
                         use:clickOutside={() => props.onClose()}
                         use:keyPressed={() => props.onClose()}
                     >

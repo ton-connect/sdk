@@ -13,6 +13,9 @@ export const GlobalStyles = (): JSXElement => {
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
     }
+    li {
+        list-style: none;
+    }
   `;
     return <Styles />;
 };

@@ -16,6 +16,7 @@
     "solid-js": "^1.5.1",
     "solid-styled-components": "^0.28.5",
     "solid-transition-group": "^0.0.11",
+    "classnames": "^2.3.2",
     "deepmerge": "^4.2.2",
     "@tonconnect/sdk": "*"
   },
