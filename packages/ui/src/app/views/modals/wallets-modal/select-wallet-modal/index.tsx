@@ -1,12 +1,11 @@
 import { Component, For } from 'solid-js';
 import { H1, H2 } from 'src/app/components';
+import { UiWallet } from 'src/app/models/ui-wallet';
 import { WalletItem } from 'src/app/views/modals/wallets-modal/select-wallet-modal/wallet-item';
 import { ButtonStyled, SelectWalletModalStyled, UlStyled } from './style';
 // import * as walletsList from 'src/app/constants/wallets-list.json';
 
-interface SelectWalletModalProps {}
-
-const walletsList = [
+const walletsList: UiWallet[] = [
     {
         iconUrl: '/icon.png',
         name: 'TonKeeper'
@@ -39,7 +38,11 @@ const walletsList = [
         iconUrl: '/icon.png',
         name: 'Ton HOLD wallet free version'
     }
-];
+] as UiWallet[];
+
+interface SelectWalletModalProps {
+    onSelect: (wallet: UiWallet) => void;
+}
 
 export const SelectWalletModal: Component<SelectWalletModalProps> = props => {
     return (
@@ -53,7 +56,7 @@ export const SelectWalletModal: Component<SelectWalletModalProps> = props => {
                             <WalletItem
                                 iconUrl={wallet.iconUrl}
                                 name={wallet.name}
-                                onClick={() => {}}
+                                onClick={() => props.onSelect(wallet)}
                             />
                         </li>
                     )}

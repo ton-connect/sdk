@@ -9,7 +9,7 @@ interface WalletItemProps {
 
 export const WalletItem: Component<WalletItemProps> = props => {
     return (
-        <WalletItemStyled>
+        <WalletItemStyled onClick={() => props.onClick()}>
             <img src={props.iconUrl} alt="" />
             <StyledText>{props.name}</StyledText>
         </WalletItemStyled>
