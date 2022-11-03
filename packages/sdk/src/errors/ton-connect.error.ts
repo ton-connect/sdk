@@ -1,7 +1,7 @@
 export class TonConnectError extends Error {
-    constructor(message?: string) {
-        super(message);
+    constructor(...args: ConstructorParameters<typeof Error>) {
+        super(...args);
 
-        Object.setPrototypeOf(this, Error.prototype);
+        Object.setPrototypeOf(this, TonConnectError.prototype);
     }
 }

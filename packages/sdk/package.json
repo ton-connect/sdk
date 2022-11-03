@@ -1,6 +1,6 @@
 {
   "name": "@tonconnect/sdk",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "scripts": {
     "build": "npx rimraf lib && ttsc",
     "build:production": "npx rimraf lib && ttsc --sourceMap false"

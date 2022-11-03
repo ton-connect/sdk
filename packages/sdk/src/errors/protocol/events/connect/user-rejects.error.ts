@@ -1,3 +1,9 @@
-import { generateError } from 'src/errors/generate-error';
+import { TonConnectError } from 'src/errors/ton-connect.error';
 
-export const UserRejectsError = generateError();
+export class UserRejectsError extends TonConnectError {
+    constructor(...args: ConstructorParameters<typeof TonConnectError>) {
+        super(...args);
+
+        Object.setPrototypeOf(this, UserRejectsError.prototype);
+    }
+}

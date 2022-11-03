@@ -1,3 +1,9 @@
-import { generateError } from 'src/errors/generate-error';
+import { TonConnectError } from 'src/errors/ton-connect.error';
 
-export const LocalstorageNotFoundError = generateError();
+export class LocalstorageNotFoundError extends TonConnectError {
+    constructor(...args: ConstructorParameters<typeof TonConnectError>) {
+        super(...args);
+
+        Object.setPrototypeOf(this, LocalstorageNotFoundError.prototype);
+    }
+}
