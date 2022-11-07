@@ -43,7 +43,7 @@ export class BridgeProvider implements HTTPProvider {
     private listeners: Array<(e: WalletEvent) => void> = [];
 
     constructor(
-        storage: IStorage,
+        private readonly storage: IStorage,
         private readonly walletConnectionSource: WalletConnectionSource
     ) {
         this.connectionStorage = new BridgeConnectionStorage(storage);
@@ -59,6 +59,7 @@ export class BridgeProvider implements HTTPProvider {
         };
 
         this.bridge = new BridgeGateway(
+            this.storage,
             this.walletConnectionSource.bridgeUrl,
             sessionCrypto.sessionId,
             this.gatewayListener.bind(this),
@@ -79,6 +80,7 @@ export class BridgeProvider implements HTTPProvider {
         this.session = storedConnection.session;
 
         this.bridge = new BridgeGateway(
+            this.storage,
             this.walletConnectionSource.bridgeUrl,
             storedConnection.session.sessionCrypto.sessionId,
             this.gatewayListener.bind(this),

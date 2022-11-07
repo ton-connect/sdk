@@ -1,6 +1,8 @@
 import { Base64 } from '@tonconnect/protocol';
 import { TonConnectError } from 'src/errors';
 import { BridgeIncomingMessage } from 'src/provider/bridge/models/bridge-incomming-message';
+import { BridgeGatewayStorage } from 'src/storage/bridge-gateway-storage';
+import { IStorage } from 'src/storage/models/storage.interface';
 import { addPathToUrl } from 'src/utils/url';
 
 export class BridgeGateway {
@@ -14,16 +16,27 @@ export class BridgeGateway {
 
     private isClosed = false;
 
+    private readonly bridgeGatewayStorage: BridgeGatewayStorage;
+
     constructor(
+        storage: IStorage,
         private readonly bridgeUrl: string,
         public readonly sessionId: string,
         private readonly listener: (msg: BridgeIncomingMessage) => void,
         private readonly errorsListener: (err: Event) => void
-    ) {}
+    ) {
+        this.bridgeGatewayStorage = new BridgeGatewayStorage(storage);
+    }
 
     public async registerSession(): Promise<void> {
         const url = new URL(addPathToUrl(this.bridgeUrl, this.ssePath));
         url.searchParams.append('client_id', this.sessionId);
+
+        const lastEventId = await this.bridgeGatewayStorage.getLastEventId();
+        if (lastEventId) {
+            url.searchParams.append('last_event_id', lastEventId);
+        }
+
         this.eventSource = new EventSource(url);
 
         return new Promise((resolve, reject) => {
@@ -58,7 +71,9 @@ export class BridgeGateway {
         }
     }
 
-    private messagesHandler(e: MessageEvent<string>): void {
+    private async messagesHandler(e: MessageEvent<string>): Promise<void> {
+        await this.bridgeGatewayStorage.storeLastEventId(e.lastEventId);
+
         if (!this.isClosed) {
             let bridgeIncomingMessage: BridgeIncomingMessage;
 
