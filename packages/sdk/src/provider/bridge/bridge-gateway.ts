@@ -1,7 +1,7 @@
 import { Base64 } from '@tonconnect/protocol';
 import { TonConnectError } from 'src/errors';
 import { BridgeIncomingMessage } from 'src/provider/bridge/models/bridge-incomming-message';
-import { BridgeGatewayStorage } from 'src/storage/bridge-gateway-storage';
+import { HttpBridgeGatewayStorage } from 'src/storage/http-bridge-gateway-storage';
 import { IStorage } from 'src/storage/models/storage.interface';
 import { addPathToUrl } from 'src/utils/url';
 
@@ -16,7 +16,7 @@ export class BridgeGateway {
 
     private isClosed = false;
 
-    private readonly bridgeGatewayStorage: BridgeGatewayStorage;
+    private readonly bridgeGatewayStorage: HttpBridgeGatewayStorage;
 
     constructor(
         storage: IStorage,
@@ -25,7 +25,7 @@ export class BridgeGateway {
         private readonly listener: (msg: BridgeIncomingMessage) => void,
         private readonly errorsListener: (err: Event) => void
     ) {
-        this.bridgeGatewayStorage = new BridgeGatewayStorage(storage);
+        this.bridgeGatewayStorage = new HttpBridgeGatewayStorage(storage);
     }
 
     public async registerSession(): Promise<void> {

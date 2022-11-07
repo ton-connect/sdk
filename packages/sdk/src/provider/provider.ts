@@ -21,7 +21,7 @@ export interface HTTPProvider extends BaseProvider {
 }
 
 interface BaseProvider {
-    autoConnect(): Promise<void>;
+    restoreConnection(): Promise<void>;
     closeConnection(): void;
     disconnect(): Promise<void>;
     sendRequest<T extends RpcMethod>(

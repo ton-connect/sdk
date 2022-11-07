@@ -3,7 +3,6 @@ import {
     AppRequest,
     RpcMethod,
     WalletResponse,
-    DeviceInfo,
     ConnectRequest,
     WalletEvent,
     ConnectEvent
@@ -11,27 +10,47 @@ import {
 import { InjectedWalletApi } from 'src/provider/injected/models/injected-wallet-api';
 import { InternalProvider } from 'src/provider/provider';
 import * as protocol from 'src/resources/protocol.json';
+import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
+import { IStorage } from 'src/storage/models/storage.interface';
 import { WithoutId } from 'src/utils/types';
 
-interface WindowWithTon extends Window {
-    tonconnect?: InjectedWalletApi;
-}
+type WindowWithTon<T extends string> = {
+    [key in T]: {
+        tonconnect: InjectedWalletApi;
+    };
+} & Window;
 
-export class InjectedProvider implements InternalProvider {
-    private static window = window as WindowWithTon;
+export class InjectedProvider<T extends string = string> implements InternalProvider {
+    private static window = window;
 
-    static isWalletInjected(): boolean {
-        return (
-            InjectedProvider.window &&
-            'tonconnect' in InjectedProvider.window &&
-            typeof InjectedProvider.window.tonconnect === 'object'
-        );
+    public static async fromStorage(storage: IStorage): Promise<InjectedProvider> {
+        const bridgeConnectionStorage = new BridgeConnectionStorage(storage);
+        const connection = await bridgeConnectionStorage.getInjectedConnection();
+        return new InjectedProvider(connection.jsBridgeKey);
     }
 
-    static deviceInfo(): DeviceInfo | undefined {
-        return InjectedProvider.isWalletInjected()
-            ? InjectedProvider.window.tonconnect!.deviceInfo
-            : undefined;
+    public static isWalletInjected(injectedWalletKey: string): boolean {
+        return InjectedProvider.isWindowContainsWallet(this.window, injectedWalletKey);
+    }
+
+    public static isInsideWalletBrowser(injectedWalletKey: string): boolean {
+        if (InjectedProvider.isWindowContainsWallet(this.window, injectedWalletKey)) {
+            return this.window[injectedWalletKey]!.tonconnect.isWalletBrowser;
+        }
+
+        return false;
+    }
+
+    private static isWindowContainsWallet<T extends string>(
+        window: Window,
+        injectedWalletKey: string
+    ): window is WindowWithTon<T> {
+        return (
+            window &&
+            injectedWalletKey in window &&
+            typeof window[injectedWalletKey as keyof Window] === 'object' &&
+            'tonconnect' in window[injectedWalletKey as keyof Window]
+        );
     }
 
     public readonly type = 'injected';
@@ -44,12 +63,13 @@ export class InjectedProvider implements InternalProvider {
 
     private listeners: Array<(e: WalletEvent) => void> = [];
 
-    constructor() {
-        if (!InjectedProvider.isWalletInjected()) {
+    constructor(injectedWalletKey: T) {
+        const window: Window | WindowWithTon<T> = InjectedProvider.window;
+        if (!InjectedProvider.isWindowContainsWallet(window, injectedWalletKey)) {
             throw new WalletNotInjectedError();
         }
 
-        this.injectedWallet = InjectedProvider.window.tonconnect!;
+        this.injectedWallet = window[injectedWalletKey]!.tonconnect!;
     }
 
     public connect(message: ConnectRequest, auto = false): void {
@@ -75,9 +95,9 @@ export class InjectedProvider implements InternalProvider {
             });
     }
 
-    public async autoConnect(): Promise<void> {
+    public async restoreConnection(): Promise<void> {
         try {
-            const connectEvent = await this.injectedWallet.autoConnect();
+            const connectEvent = await this.injectedWallet.restoreConnection();
             if (connectEvent.event === 'connect') {
                 this.makeSubscriptions();
                 this.listenSubscriptions = true;

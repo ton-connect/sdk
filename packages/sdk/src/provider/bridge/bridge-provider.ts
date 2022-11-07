@@ -8,11 +8,13 @@ import {
     WalletResponse,
     WalletMessage,
     hexToByteArray,
-    ConnectEventSuccess
+    ConnectEventSuccess,
+    TonAddressItemReply
 } from '@tonconnect/protocol';
 import { TonConnectError } from 'src/errors/ton-connect.error';
-import { WalletConnectionSource } from 'src/models';
+import { WalletConnectionSourceHTTP } from 'src/models/wallet/wallet-connection-source';
 import { BridgeGateway } from 'src/provider/bridge/bridge-gateway';
+import { BridgeConnectionHttp } from 'src/provider/bridge/models/bridge-connection';
 import { BridgeIncomingMessage } from 'src/provider/bridge/models/bridge-incomming-message';
 import { BridgePartialSession, BridgeSession } from 'src/provider/bridge/models/bridge-session';
 import { HTTPProvider } from 'src/provider/provider';
@@ -23,6 +25,12 @@ import * as protocol from 'src/resources/protocol.json';
 import { addPathToUrl } from 'src/utils/url';
 
 export class BridgeProvider implements HTTPProvider {
+    public static async fromStorage(storage: IStorage): Promise<BridgeProvider> {
+        const bridgeConnectionStorage = new BridgeConnectionStorage(storage);
+        const connection = await bridgeConnectionStorage.getHttpConnection();
+        return new BridgeProvider(storage, connection.session.walletConnectionSource);
+    }
+
     public readonly type = 'http';
 
     private readonly universalLinkPath = 'ton-connect';
@@ -44,7 +52,7 @@ export class BridgeProvider implements HTTPProvider {
 
     constructor(
         private readonly storage: IStorage,
-        private readonly walletConnectionSource: WalletConnectionSource
+        private readonly walletConnectionSource: WalletConnectionSourceHTTP
     ) {
         this.connectionStorage = new BridgeConnectionStorage(storage);
     }
@@ -70,9 +78,9 @@ export class BridgeProvider implements HTTPProvider {
         return this.generateUniversalLink(message);
     }
 
-    public async autoConnect(): Promise<void> {
+    public async restoreConnection(): Promise<void> {
         this.bridge?.close();
-        const storedConnection = await this.connectionStorage.getConnection();
+        const storedConnection = await this.connectionStorage.getHttpConnection();
         if (!storedConnection) {
             return;
         }
@@ -167,7 +175,24 @@ export class BridgeProvider implements HTTPProvider {
             ...this.session!,
             walletPublicKey
         };
-        await this.connectionStorage.storeConnection({ session: this.session, connectEvent });
+
+        const tonAddrItem: TonAddressItemReply = connectEvent.payload.items.find(
+            item => item.name === 'ton_addr'
+        ) as TonAddressItemReply;
+
+        const connectEventToSave: BridgeConnectionHttp['connectEvent'] = {
+            ...connectEvent,
+            payload: {
+                ...connectEvent.payload,
+                items: [tonAddrItem]
+            }
+        };
+
+        await this.connectionStorage.storeConnection({
+            type: 'http',
+            session: this.session,
+            connectEvent: connectEventToSave
+        });
     }
 
     private async removeBridgeAndSession(): Promise<void> {

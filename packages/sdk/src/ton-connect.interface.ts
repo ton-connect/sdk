@@ -2,6 +2,8 @@ import { TonConnectError } from 'src/errors';
 import { Account, WalletConnectionSource, Wallet } from 'src/models';
 import { SendTransactionRequest, SendTransactionResponse } from 'src/models/methods';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
+import { JSBridgeWalletConfig, WalletConfig } from 'src/models/wallet/wallet-config';
+import { WalletConnectionSourceJS } from 'src/models/wallet/wallet-connection-source';
 
 export interface ITonConnect {
     /**
@@ -20,9 +22,17 @@ export interface ITonConnect {
     wallet: Wallet | null;
 
     /**
-     * Indicates if the injected wallet is available.
+     * Allows to get information about supported wallets
      */
-    isInjectedProviderAvailable(): boolean;
+    walletsList: {
+        getWalletsList: () => Promise<WalletConfig[]>;
+        getInjectedWalletsList: () => Promise<JSBridgeWalletConfig[]>;
+    };
+
+    /**
+     * If app is opened in some wallet's browser returns that wallet config. Else returns null;
+     */
+    inWhichWalletBrowser(): Promise<JSBridgeWalletConfig | null>;
 
     /**
      * Allows to subscribe to connection status changes and handle connection errors.
@@ -37,19 +47,19 @@ export interface ITonConnect {
 
     /**
      * Generates universal link for an external wallet and subscribes to the wallet's bridge, or sends connect request to the injected wallet.
-     * @param wallet wallet's bridge url and universal link for an external wallet or 'injected' for the injected wallet.
+     * @param wallet wallet's bridge url and universal link for an external wallet or jsBridge key for the injected wallet.
      * @param request (optional) additional request to pass to the wallet while connect (currently only ton_proof is available).
      * @returns universal link if external wallet was passed or void for the injected wallet.
      */
-    connect<T extends WalletConnectionSource | 'injected'>(
+    connect<T extends WalletConnectionSource>(
         wallet: T,
         request?: ConnectAdditionalRequest
-    ): T extends 'injected' ? void : string;
+    ): T extends WalletConnectionSourceJS ? void : string;
 
     /**
      * Try to restore existing session and reconnect to the corresponding wallet. Call it immediately when your app is loaded.
      */
-    autoConnect(): void;
+    restoreConnection(): Promise<void>;
 
     /**
      * Disconnect form thw connected wallet and drop current session.

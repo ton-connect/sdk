@@ -4,6 +4,7 @@
 
 Use it to connect your app to TON wallets via TonConnect protocol. 
 You can find more details and the protocol specification in the [docs](https://github.com/ton-connect/docs).
+See the example of sdk usage [here](https://github.com/ton-connect/demo-dapp).
 
 ## Get started
 `npm i @tonconnect/sdk`
@@ -15,7 +16,7 @@ import TonConnect from '@tonconnect/sdk';
 
 const connector = new TonConnect();
 
-connector.autoConnect();
+connector.restoreConnection();
 ```
 
 ## Subscribe to the connection status changes
@@ -25,6 +26,53 @@ connector.onStatusChange(
         // update state/reactive variables to show updates in the ui
     } 
 );
+```
+
+## Fetch wallets list
+
+TonConnect is build to support different wallets. You can fetch all supported wallets list and show a custom wallet selection dialog for user
+
+```ts
+const { allWalletsList, injectedWalletsList, remoteConnectionWalletsList } = await connector.walletsList.getWalletsConfig();
+
+/* allWalletsList is 
+{
+    name: string;
+    imageUrl: string;
+    tondns?: string;
+    aboutUrl: string;
+    universalLinkBase?: string;
+    bridgeUrl?: string;
+    jsBridgeKey?: string;
+}[] 
+
+injectedWalletsList is (all injected to the page available wallets)
+{
+    name: string;
+    imageUrl: string;
+    tondns?: string;
+    aboutUrl: string;
+    jsBridgeKey: string;
+}[] 
+
+remoteConnectionWalletsList is (all wallets available via http bridge (QR code))
+{
+    name: string;
+    imageUrl: string;
+    tondns?: string;
+    aboutUrl: string;
+    universalLinkBase: string;
+    bridgeUrl: string;
+}[] 
+ */
+```
+
+### Check if your app is opened inside some wallet's browser
+
+If your app is opened inside some wallet's browser you shouldn't show a wallet selection dialog. Just connect dapp to the host-wallet when 'connect' button is clicked 
+
+```ts
+const walletConnectionSourceOrNull = await connector.inWhichWalletBrowser();
 ```
 
 
@@ -44,9 +92,11 @@ Then you have to show this link to user as QR code, or use it as a deeplink. You
 
 ### Initialize injected wallet connection
 ```ts
-if (connector.isInjectedProviderAvailable()) {
-    connector.connect('injected');
+const walletConnectionSource = {
+    jsBridgeKey: 'tonkeeper'
 }
+
+connector.connect(walletConnectionSource);
 ```
 
 You will receive an update in `connector.onStatusChange` when user approves connection in the wallet
@@ -63,12 +113,12 @@ const transaction = {
         {
             address: "0:412410771DA82CBA306A55FA9E0D43C9D245E38133CB58F1457DFB8D5CD8892F",
             amount: "20000000",
-            initState: "base64bocblahblahblah=="
+            initState: "base64bocblahblahblah==" // just for instance. Replace with your transaction initState or remove
         },
         {
             address: "0:E69F10CC84877ABF539F83F879291E5CA169451BA7BCE91A37A5CED3AB8080D3",
             amount: "60000000",
-            payload: "base64bocblahblahblah=="
+            payload: "base64bocblahblahblah==" // just for instance. Replace with your transaction payload or remove
         }
     ]
 }

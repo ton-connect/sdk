@@ -1,6 +1,6 @@
 import { IStorage } from 'src/storage/models/storage.interface';
 
-export class BridgeGatewayStorage {
+export class HttpBridgeGatewayStorage {
     private readonly storeKey = 'ton-connect-storage_http-bridge-gateway';
 
     constructor(private readonly storage: IStorage) {}
