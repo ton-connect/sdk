@@ -5,7 +5,7 @@ import nacl, { BoxKeyPair } from 'tweetnacl';
 if (typeof require === 'function' && typeof global === 'object') {
     try {
         // noinspection JSConstantReassignment
-        global.crypto = require('crypto');
+        global.crypto = require('crypto').webcrypto;
     } catch (err) {}
 }
 

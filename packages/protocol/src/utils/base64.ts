@@ -14,7 +14,7 @@ function decodeToBuffer(message: string, urlSafe: boolean): Buffer {
     return Buffer.from(value, 'base64');
 }
 
-function encode(value: string | object | Uint8Array, urlSafe = true): string {
+function encode(value: string | object | Uint8Array, urlSafe = false): string {
     if (!(value instanceof Uint8Array) && !(typeof value === 'string')) {
         value = JSON.stringify(value);
     }
@@ -26,7 +26,7 @@ function encode(value: string | object | Uint8Array, urlSafe = true): string {
 
 function decode(
     value: string,
-    urlSafe = true
+    urlSafe = false
 ): {
     toString(): string;
     toObject<T>(): T | null;
