@@ -33,9 +33,9 @@ connector.onStatusChange(
 TonConnect is build to support different wallets. You can fetch all supported wallets list and show a custom wallet selection dialog for user
 
 ```ts
-const { allWalletsList, injectedWalletsList, remoteConnectionWalletsList } = await connector.walletsList.getWalletsConfig();
+const walletsList = await connector.getWallets();
 
-/* allWalletsList is 
+/* walletsList is 
 {
     name: string;
     imageUrl: string;
@@ -44,37 +44,11 @@ const { allWalletsList, injectedWalletsList, remoteConnectionWalletsList } = awa
     universalLinkBase?: string;
     bridgeUrl?: string;
     jsBridgeKey?: string;
-}[] 
-
-injectedWalletsList is (all injected to the page available wallets)
-{
-    name: string;
-    imageUrl: string;
-    tondns?: string;
-    aboutUrl: string;
-    jsBridgeKey: string;
-}[] 
-
-remoteConnectionWalletsList is (all wallets available via http bridge (QR code))
-{
-    name: string;
-    imageUrl: string;
-    tondns?: string;
-    aboutUrl: string;
-    universalLinkBase: string;
-    bridgeUrl: string;
+    injected?: boolean; // true if this wallet is injected to the webpage
+    embedded?: boolean; // true if dapp is opened inside this wallet's browser
 }[] 
  */
 ```
-
-### Check if your app is opened inside some wallet's browser
-
-If your app is opened inside some wallet's browser you shouldn't show a wallet selection dialog. Just connect dapp to the host-wallet when 'connect' button is clicked 
-
-```ts
-const walletConnectionSourceOrNull = await connector.inWhichWalletBrowser();
-```
-
 
 ## Initialize a wallet connection when user clicks to 'connect' button in your app
 ### Initialize a remote wallet connection via universal link 
