@@ -31,7 +31,7 @@ export class WalletsListManager {
             return null;
         }
 
-        return injectedWallets[0]!;
+        return injectedWallets[0]!.embedded ? injectedWallets[0]! : null;
     }
 
     private async fetchWalletsList(): Promise<WalletInfo[]> {
