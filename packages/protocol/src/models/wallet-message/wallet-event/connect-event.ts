@@ -36,5 +36,10 @@ export interface TonAddressItemReply {
 
 export interface TonProofItemReply {
     name: 'ton_proof';
-    signature: string;
+    proof: {
+        timestamp: number;
+        domain: string;
+        payload: string;
+        signature: string;
+    };
 }
