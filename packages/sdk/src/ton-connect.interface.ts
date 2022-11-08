@@ -2,7 +2,7 @@ import { TonConnectError } from 'src/errors';
 import { Account, WalletConnectionSource, Wallet } from 'src/models';
 import { SendTransactionRequest, SendTransactionResponse } from 'src/models/methods';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
-import { JSBridgeWalletConfig, WalletConfig } from 'src/models/wallet/wallet-config';
+import { WalletInfo } from 'src/models/wallet/wallet-info';
 import { WalletConnectionSourceJS } from 'src/models/wallet/wallet-connection-source';
 
 export interface ITonConnect {
@@ -22,17 +22,9 @@ export interface ITonConnect {
     wallet: Wallet | null;
 
     /**
-     * Allows to get information about supported wallets
+     * Returns available wallets list.
      */
-    walletsList: {
-        getWalletsList: () => Promise<WalletConfig[]>;
-        getInjectedWalletsList: () => Promise<JSBridgeWalletConfig[]>;
-    };
-
-    /**
-     * If app is opened in some wallet's browser returns that wallet config. Else returns null;
-     */
-    inWhichWalletBrowser(): Promise<JSBridgeWalletConfig | null>;
+    getWallets(): Promise<WalletInfo[]>;
 
     /**
      * Allows to subscribe to connection status changes and handle connection errors.

@@ -1,26 +1,43 @@
 import { FetchWalletsError } from 'src/errors/wallets-manager/fetch-wallets.error';
 import {
-    HTTPBridgeWalletConfig,
-    JSBridgeWalletConfig,
-    WalletConfig,
-    WalletConfigDTO
-} from 'src/models/wallet/wallet-config';
+    WalletInfoRemote,
+    WalletInfoInjected,
+    WalletInfo,
+    WalletInfoDTO,
+    isWalletInfoInjected
+} from 'src/models/wallet/wallet-info';
 import { InjectedProvider } from 'src/provider/injected/injected-provider';
 
 export class WalletsListManager {
-    private walletsListCache: WalletConfig[] | null = null;
+    private walletsListCache: Promise<WalletInfo[]> | null = null;
 
     private readonly walletsListSource =
         'https://raw.githubusercontent.com/ton-connect/wallets-list/main/wallets.json';
 
-    public async getWalletsList(): Promise<WalletConfig[]> {
-        if (this.walletsListCache) {
-            return this.walletsListCache;
+    public async getWallets(): Promise<WalletInfo[]> {
+        if (!this.walletsListCache) {
+            this.walletsListCache = this.fetchWalletsList();
+            this.walletsListCache.catch(() => (this.walletsListCache = null));
         }
 
+        return this.walletsListCache;
+    }
+
+    public async getEmbeddedWallet(): Promise<WalletInfoInjected | null> {
+        const walletsList = await this.getWallets();
+        const injectedWallets = walletsList.filter(isWalletInfoInjected);
+
+        if (injectedWallets.length !== 1) {
+            return null;
+        }
+
+        return injectedWallets[0]!;
+    }
+
+    private async fetchWalletsList(): Promise<WalletInfo[]> {
         try {
             const walletsResponse = await fetch(this.walletsListSource);
-            const walletsList: WalletConfigDTO[] = await walletsResponse.json();
+            const walletsList: WalletInfoDTO[] = await walletsResponse.json();
 
             if (
                 !Array.isArray(walletsList) ||
@@ -29,66 +46,40 @@ export class WalletsListManager {
                 throw new FetchWalletsError('Wrong wallets list format');
             }
 
-            this.walletsListCache = this.walletConfigDTOListToWalletConfigList(walletsList);
-            return this.walletsListCache;
+            return this.walletConfigDTOListToWalletConfigList(walletsList);
         } catch (e) {
             throw new FetchWalletsError(e);
         }
     }
 
-    public async getInjectedWalletsList(): Promise<JSBridgeWalletConfig[]> {
-        const walletsList = (await this.getWalletsList()).filter(this.isInjectedWallet);
-        return walletsList.filter(wallet => InjectedProvider.isWalletInjected(wallet.jsBridgeKey));
-    }
-
-    public async getRemoteConnectionWalletsList(): Promise<HTTPBridgeWalletConfig[]> {
-        return (await this.getWalletsList()).filter(this.isRemoteConnectionWallet);
-    }
-
-    public async getWalletsConfig(): Promise<{
-        allWalletsList: WalletConfig[];
-        injectedWalletsList: JSBridgeWalletConfig[];
-        remoteConnectionWalletsList: HTTPBridgeWalletConfig[];
-    }> {
-        const allWalletsList = await this.getWalletsList();
-        const [injectedWalletsList, remoteConnectionWalletsList] = await Promise.all([
-            this.getInjectedWalletsList(),
-            this.getRemoteConnectionWalletsList()
-        ]);
-
-        return {
-            allWalletsList,
-            injectedWalletsList,
-            remoteConnectionWalletsList
-        };
-    }
-
-    private walletConfigDTOListToWalletConfigList(
-        walletConfigDTO: WalletConfigDTO[]
-    ): WalletConfig[] {
+    private walletConfigDTOListToWalletConfigList(walletConfigDTO: WalletInfoDTO[]): WalletInfo[] {
         return walletConfigDTO.map(walletConfigDTO => {
-            const walletConfig: WalletConfig = {
+            const walletConfig: WalletInfo = {
                 name: walletConfigDTO.name,
                 imageUrl: walletConfigDTO.image,
                 aboutUrl: walletConfigDTO.about_url,
                 tondns: walletConfigDTO.tondns
-            } as WalletConfig;
+            } as WalletInfo;
 
             if ('bridge_url' in walletConfigDTO) {
-                (walletConfig as HTTPBridgeWalletConfig).bridgeUrl = walletConfigDTO.bridge_url;
-                (walletConfig as HTTPBridgeWalletConfig).universalLinkBase =
-                    walletConfigDTO.universal_url;
+                (walletConfig as WalletInfoRemote).bridgeUrl = walletConfigDTO.bridge_url;
+                (walletConfig as WalletInfoRemote).universalLink = walletConfigDTO.universal_url;
             }
 
             if ('js_bridge_key' in walletConfigDTO) {
-                (walletConfig as JSBridgeWalletConfig).jsBridgeKey = walletConfigDTO.js_bridge_key;
+                const jsBridgeKey = walletConfigDTO.js_bridge_key;
+                (walletConfig as WalletInfoInjected).jsBridgeKey = jsBridgeKey;
+                (walletConfig as WalletInfoInjected).injected =
+                    InjectedProvider.isWalletInjected(jsBridgeKey);
+                (walletConfig as WalletInfoInjected).embedded =
+                    InjectedProvider.isInsideWalletBrowser(jsBridgeKey);
             }
 
             return walletConfig;
         });
     }
 
-    private isCorrectWalletConfigDTO(value: unknown): value is WalletConfigDTO {
+    private isCorrectWalletConfigDTO(value: unknown): value is WalletInfoDTO {
         if (!value || !(typeof value === 'object')) {
             return false;
         }
@@ -105,18 +96,6 @@ export class WalletsListManager {
         const containsHttpBridge = 'bridge_url' in value;
         const containsJsBridge = 'js_bridge_key' in value;
 
-        if (!(containsHttpBridge && containsUniversalUrl) && !containsJsBridge) {
-            return false;
-        }
-
-        return true;
-    }
-
-    private isInjectedWallet(wallet: WalletConfig): wallet is JSBridgeWalletConfig {
-        return 'jsBridgeKey' in wallet;
-    }
-
-    private isRemoteConnectionWallet(wallet: WalletConfig): wallet is HTTPBridgeWalletConfig {
-        return 'bridgeUrl' in wallet;
+        return (containsHttpBridge && containsUniversalUrl) || containsJsBridge;
     }
 }

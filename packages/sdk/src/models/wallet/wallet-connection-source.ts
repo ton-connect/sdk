@@ -1,7 +1,7 @@
 export type WalletConnectionSource = WalletConnectionSourceHTTP | WalletConnectionSourceJS;
 
 export interface WalletConnectionSourceHTTP {
-    universalLinkBase: string;
+    universalLink: string;
     bridgeUrl: string;
 }
 

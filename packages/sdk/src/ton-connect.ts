@@ -11,10 +11,16 @@ import {
 import { TonConnectError } from 'src/errors/ton-connect.error';
 import { WalletAlreadyConnectedError } from 'src/errors/wallet/wallet-already-connected.error';
 import { WalletNotConnectedError } from 'src/errors/wallet/wallet-not-connected.error';
-import { Account, DappMetadata, DappSettings, Wallet, WalletConnectionSource } from 'src/models';
+import {
+    Account,
+    DappMetadata,
+    DappSettings,
+    Wallet,
+    WalletConnectionSource,
+    WalletInfo
+} from 'src/models';
 import { SendTransactionRequest, SendTransactionResponse } from 'src/models/methods';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
-import { JSBridgeWalletConfig } from 'src/models/wallet/wallet-config';
 import {
     isWalletConnectionSourceJS,
     WalletConnectionSourceJS
@@ -33,7 +39,7 @@ import { getWebPageMetadata } from 'src/utils/web-api';
 import { WalletsListManager } from 'src/wallets-list-manager';
 
 export class TonConnect implements ITonConnect {
-    public walletsList = new WalletsListManager();
+    private readonly walletsList = new WalletsListManager();
 
     private readonly dappSettings: DappSettings;
 
@@ -83,19 +89,10 @@ export class TonConnect implements ITonConnect {
     }
 
     /**
-     * Indicates if the injected wallet is available.
+     * Returns available wallets list.
      */
-    public async inWhichWalletBrowser(): Promise<JSBridgeWalletConfig | null> {
-        const injectedWalletsList = await this.walletsList.getInjectedWalletsList();
-        if (injectedWalletsList.length !== 1) {
-            return null;
-        }
-
-        if (!InjectedProvider.isInsideWalletBrowser(injectedWalletsList[0]!.jsBridgeKey)) {
-            return null;
-        }
-
-        return injectedWalletsList[0]!;
+    public getWallets(): Promise<WalletInfo[]> {
+        return this.walletsList.getWallets();
     }
 
     /**
@@ -153,9 +150,9 @@ export class TonConnect implements ITonConnect {
      * Try to restore existing session and reconnect to the corresponding wallet. Call it immediately when your app is loaded.
      */
     public async restoreConnection(): Promise<void> {
-        const [bridgeConnectionType, injectedWalletsList] = await Promise.all([
+        const [bridgeConnectionType, embeddedWallet] = await Promise.all([
             this.bridgeConnectionStorage.storedConnectionType(),
-            this.walletsList.getInjectedWalletsList()
+            this.walletsList.getEmbeddedWallet()
         ]);
 
         switch (bridgeConnectionType) {
@@ -166,9 +163,8 @@ export class TonConnect implements ITonConnect {
                 this.provider = await InjectedProvider.fromStorage(this.dappSettings.storage);
                 break;
             default:
-                if (injectedWalletsList.length === 1) {
-                    // DApp probably opened in the wallet's browser. Should try smart auto connect
-                    this.provider = await this.createProvider(injectedWalletsList[0]!);
+                if (embeddedWallet) {
+                    this.provider = await this.createProvider(embeddedWallet);
                 } else {
                     return;
                 }
@@ -262,7 +258,7 @@ export class TonConnect implements ITonConnect {
 
         if (tonProofItem) {
             wallet.connectItems = {
-                tonProof: tonProofItem.signature
+                tonProof: tonProofItem.proof
             };
         }
 

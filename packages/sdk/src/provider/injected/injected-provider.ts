@@ -109,16 +109,22 @@ export class InjectedProvider<T extends string = string> implements InternalProv
     }
 
     public closeConnection(): void {
-        this.listenSubscriptions = false;
-        this.listeners = [];
-        this.unsubscribeCallback?.();
+        if (this.listenSubscriptions) {
+            this.injectedWallet.disconnect();
+        }
+        this.closeAllListeners();
     }
 
     public disconnect(): Promise<void> {
+        this.closeAllListeners();
+        this.injectedWallet.disconnect();
+        return Promise.resolve();
+    }
+
+    private closeAllListeners(): void {
         this.listenSubscriptions = false;
         this.listeners = [];
         this.unsubscribeCallback?.();
-        return Promise.resolve();
     }
 
     public listen(eventsCallback: (e: WalletEvent) => void): () => void {
