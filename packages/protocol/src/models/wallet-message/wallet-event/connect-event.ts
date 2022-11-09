@@ -39,7 +39,7 @@ export interface TonProofItemReply {
     proof: {
         timestamp: number;
         domain: {
-            lengthBytes: string;
+            lengthBytes: number;
             value: string;
         };
         payload: string;
