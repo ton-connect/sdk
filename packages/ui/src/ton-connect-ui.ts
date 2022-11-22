@@ -7,12 +7,9 @@ import {
 } from '@tonconnect/sdk';
 import type { Account } from '@tonconnect/sdk';
 import { widgetController } from 'src/app';
-import { Button } from 'src/app/views/button';
 import { TonUiOptions } from 'src/models/ton-ui-options';
 
 export class TonConnectUi {
-    public readonly button: Button;
-
     private readonly connector: ITonConnect;
 
     /**
@@ -40,16 +37,19 @@ export class TonConnectUi {
         uiOptions?: TonUiOptions;
         connector?: ITonConnect;
         autoConnect?: boolean;
-        widgetRoot?: string;
+        widgetRootId?: string;
+        buttonRootId?: string;
     }) {
         this.connector = options?.connector || new TonConnect();
-        this.button = new Button(this, options?.uiOptions?.buttonConfiguration);
 
-        const rootId = this.normalizeWidgetRoot(options?.widgetRoot);
-        widgetController.renderApp(rootId);
+        const rootId = this.normalizeWidgetRoot(options?.widgetRootId);
+        const buttonRoot = options?.buttonRootId
+            ? document.getElementById(options.buttonRootId)
+            : null;
+        widgetController.renderApp(rootId, buttonRoot, this);
 
         if (options?.autoConnect) {
-            this.connector.autoConnect();
+            this.connector.restoreConnection();
         }
     }
 

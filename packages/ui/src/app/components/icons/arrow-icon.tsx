@@ -19,7 +19,8 @@ export const ArrowIcon: Component<ArrowIconProps> = props => {
     const direction = (): 'left' | 'right' | 'top' | 'bottom' => props.direction || 'left';
 
     const Svg = styled('svg')<{ svgDirection: 'left' | 'right' | 'top' | 'bottom' }>`
-        transform: rotate(${props => rotationDegrees[props.svgDirection]});
+        transform: rotate(${props => rotationDegrees[props.svgDirection]}deg);
+        transition: transform 0.1s ease-in-out;
     `;
 
     return (

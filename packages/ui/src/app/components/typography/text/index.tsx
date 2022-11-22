@@ -9,6 +9,7 @@ export interface TextProps extends Styleable {
     fontSize?: Property.FontSize;
     fontWeight?: Property.FontWeight;
     lineHeight?: Property.LineHeight;
+    letterSpacing?: Property.LetterSpacing;
     color?: Property.Color;
 }
 
@@ -21,7 +22,8 @@ export const Text: Component<TextProps> = inputs => {
         {
             fontSize: '14px',
             fontWeight: '510',
-            lineHeight: '130%'
+            lineHeight: '130%',
+            letterSpacing: '-0.154px'
         },
         inputs
     );
@@ -30,6 +32,7 @@ export const Text: Component<TextProps> = inputs => {
             fontSize={props.fontSize}
             fontWeight={props.fontWeight}
             lineHeight={props.lineHeight}
+            letterSpacing={props.letterSpacing}
             color={color()}
             class={props.class}
         >

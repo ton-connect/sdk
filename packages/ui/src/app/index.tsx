@@ -2,6 +2,7 @@
 import { render } from 'solid-js/web';
 
 import { setActionModalOpen, setWalletsModalOpen } from 'src/app/state/modals-state';
+import { TonConnectUi } from 'src/ton-connect-ui';
 import App from './App';
 
 export const widgetController = {
@@ -9,6 +10,13 @@ export const widgetController = {
     closeWalletsModal: (): void => void setWalletsModalOpen(false),
     openActionsModal: (): void => void setActionModalOpen(true),
     closeActionsModal: (): void => void setActionModalOpen(false),
-    renderApp: (root: string): (() => void) =>
-        render(() => <App />, document.getElementById(root) as HTMLElement)
+    renderApp: (
+        root: string,
+        buttonRoot: HTMLElement | null,
+        widgetController: TonConnectUi
+    ): (() => void) =>
+        render(
+            () => <App buttonRoot={buttonRoot} widgetController={widgetController} />,
+            document.getElementById(root) as HTMLElement
+        )
 };

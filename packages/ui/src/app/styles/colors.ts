@@ -6,6 +6,7 @@ export type ThemeColors = {
     primary: Color;
     secondary: Color;
     transparentSecondary: Color;
+    backgroundPrimary: Color;
     backgroundSecondary: Color;
     font: {
         primary: Color;
@@ -17,6 +18,7 @@ export const generateColors = (accentColor: Color): ThemeColors => ({
     primary: accentColor,
     secondary: `rgba(${hexToRgb(accentColor)}, 0.16)`,
     transparentSecondary: 'rgba(122, 137, 153, 0.12)',
+    backgroundPrimary: '#FFFFFF',
     backgroundSecondary: '#EFF1F3',
     font: {
         primary: '#0F0F0F',
