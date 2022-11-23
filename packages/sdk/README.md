@@ -59,7 +59,7 @@ const walletConnectionSource = {
     bridgeURL: 'https://bridge.mycooltonwallet.com,'
 }
 
-const uniwersalLink = connector.connect(walletConnectionSource);
+const universalLink = connector.connect(walletConnectionSource);
 ```
 
 Then you have to show this link to user as QR code, or use it as a deeplink. You will receive an update in `connector.onStatusChange` when user approves connection in the wallet
