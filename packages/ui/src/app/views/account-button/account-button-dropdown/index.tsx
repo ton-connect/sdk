@@ -5,6 +5,7 @@ import { DisconnectIcon } from 'src/app/components/icons/disconnect-icon';
 import { Styleable } from 'src/app/models/styleable';
 import { ConnectorContext } from 'src/app/state/connector.context';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
+import { toUserFriendlyAddress } from 'src/app/utils/address';
 import { copyToClipboard } from 'src/app/utils/copy-to-clipboard';
 import { AccountButtonDropdownStyled, MenuButtonStyled, UlStyled } from './style';
 
@@ -25,7 +26,8 @@ export const AccountButtonDropdown: Component<AccountButtonDropdownProps> = prop
     const [isCopiedShown, setIsCopiedShown] = createSignal(false);
 
     const onCopy = async (): Promise<void> => {
-        await copyToClipboard(tonConnectUi.account!.address);
+        const userFriendlyAddress = toUserFriendlyAddress(tonConnectUi.account!.address);
+        await copyToClipboard(userFriendlyAddress);
         setIsCopiedShown(true);
 
         setTimeout(() => setIsCopiedShown(false), 1000);

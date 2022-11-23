@@ -2,6 +2,7 @@ import { Component, createSignal, onCleanup, onMount, Show, useContext } from 's
 import { ArrowIcon, Text, TonIcon } from 'src/app/components';
 import { ConnectorContext } from 'src/app/state/connector.context';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
+import { toUserFriendlyAddress } from 'src/app/utils/address';
 import { AccountButtonStyled, DropdownContainerStyled, DropdownStyled } from './style';
 
 interface AccountButtonProps {}
@@ -17,7 +18,8 @@ export const AccountButton: Component<AccountButtonProps> = () => {
 
     const normalizedAddress = (): string => {
         if (address()) {
-            return address().slice(0, 5) + '...' + address().slice(-3);
+            const userFriendlyAddress = toUserFriendlyAddress(address());
+            return userFriendlyAddress.slice(0, 4) + '...' + userFriendlyAddress.slice(-4);
         }
 
         return '';
@@ -68,8 +70,10 @@ export const AccountButton: Component<AccountButtonProps> = () => {
                         onClick={() => setIsOpened(v => !v)}
                         ref={buttonRef}
                     >
-                        <span>{normalizedAddress()}</span>
-                        <ArrowIcon direction={isOpened() ? 'top' : 'bottom'} />
+                        <Text fontSize="15px" letterSpacing="-0.24px" fontWeight="590">
+                            {normalizedAddress()}
+                        </Text>
+                        <ArrowIcon direction="bottom" />
                     </AccountButtonStyled>
                     <DropdownStyled
                         hidden={!isOpened()}

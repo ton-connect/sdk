@@ -6,6 +6,10 @@ export const AccountButtonStyled = styled(Button)`
     display: flex;
     align-items: center;
     gap: 9px;
+
+    &:hover:not(:active) {
+        transform: scale(1);
+    }
 `;
 
 export const DropdownContainerStyled = styled.div`
