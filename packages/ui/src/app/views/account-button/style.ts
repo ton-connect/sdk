@@ -7,8 +7,14 @@ export const AccountButtonStyled = styled(Button)`
     align-items: center;
     gap: 9px;
 
+    transition: background-color 0.1s ease-in-out;
+
     &:hover:not(:active) {
         transform: scale(1);
+    }
+
+    &:hover {
+        background-color: ${props => props.theme!.colors.backgroundSecondary};
     }
 `;
 
@@ -21,9 +27,14 @@ export const DropdownContainerStyled = styled.div`
 
 export const DropdownStyled = styled(AccountButtonDropdown)<{ hidden: boolean }>`
     box-sizing: border-box;
-    margin-top: 12px;
     overflow: hidden;
+    margin-top: 20px;
 
-    max-height: ${props => (props.hidden ? 0 : '128px')};
-    transition: max-height 0.3s ease-in-out;
+    transform: ${props => (props.hidden ? 'unset' : 'translateY(-8px)')};
+    opacity: ${props => (props.hidden ? '0' : '1')};
+    max-height: ${props => (props.hidden ? '0' : '140px')};
+    transition: ${props =>
+        `max-height 0s ${
+            props.hidden ? '0.15s' : '0s'
+        }, transform 0.15s ease-in-out, opacity 0.15s ease-in-out`};
 `;
