@@ -1,7 +1,9 @@
+import { ITonConnect } from '@tonconnect/sdk';
 import { Show } from 'solid-js';
 import type { Component } from 'solid-js';
 import { Portal } from 'solid-js/web';
 import { ThemeProvider } from 'solid-styled-components';
+import { ConnectorContext } from 'src/app/state/connector.context';
 import { actionModalOpen } from 'src/app/state/modals-state';
 import { themeState } from 'src/app/state/theme-state';
 import { GlobalStyles } from 'src/app/styles/global-styles';
@@ -13,24 +15,27 @@ import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 
 export type AppProps = {
     buttonRoot: HTMLElement | null;
-    widgetController: TonConnectUi;
+    tonConnectUI: TonConnectUi;
+    connector: ITonConnect;
 };
 
 const App: Component<AppProps> = props => {
     return (
-        <TonConnectUiContext.Provider value={props.widgetController}>
-            <GlobalStyles />
-            <ThemeProvider theme={themeState}>
-                <Show when={props.buttonRoot}>
-                    <Portal mount={props.buttonRoot!}>
-                        <AccountButton widgetController={props.widgetController} />
-                    </Portal>
-                </Show>
-                <WalletsModal />
-                <Show when={actionModalOpen()}>
-                    <ActionsModal />
-                </Show>
-            </ThemeProvider>
+        <TonConnectUiContext.Provider value={props.tonConnectUI}>
+            <ConnectorContext.Provider value={props.connector}>
+                <GlobalStyles />
+                <ThemeProvider theme={themeState}>
+                    <Show when={props.buttonRoot}>
+                        <Portal mount={props.buttonRoot!}>
+                            <AccountButton />
+                        </Portal>
+                    </Show>
+                    <WalletsModal />
+                    <Show when={actionModalOpen()}>
+                        <ActionsModal />
+                    </Show>
+                </ThemeProvider>
+            </ConnectorContext.Provider>
         </TonConnectUiContext.Provider>
     );
 };

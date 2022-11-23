@@ -1,13 +1,14 @@
-import { Component, createSignal, Show } from 'solid-js';
+import { Component, createSignal, Show, useContext } from 'solid-js';
 import { ArrowIcon, Text, TonIcon } from 'src/app/components';
-import { TonConnectUi } from 'src/ton-connect-ui';
+import { ConnectorContext } from 'src/app/state/connector.context';
+import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { AccountButtonStyled } from './style';
 
-interface AccountButtonProps {
-    widgetController: TonConnectUi;
-}
+interface AccountButtonProps {}
 
-export const AccountButton: Component<AccountButtonProps> = props => {
+export const AccountButton: Component<AccountButtonProps> = () => {
+    const connector = useContext(ConnectorContext)!;
+    const tonConnectUI = useContext(TonConnectUiContext)!;
     const [isOpened, setIsOpened] = createSignal(false);
     const [address, setAddress] = createSignal('');
 
@@ -19,7 +20,7 @@ export const AccountButton: Component<AccountButtonProps> = props => {
         return '';
     };
 
-    props.widgetController.onStatusChange(wallet => {
+    connector.onStatusChange(wallet => {
         if (!wallet) {
             setIsOpened(false);
             setAddress('');
@@ -32,10 +33,7 @@ export const AccountButton: Component<AccountButtonProps> = props => {
     return (
         <>
             <Show when={!address()}>
-                <AccountButtonStyled
-                    appearance="flat"
-                    onClick={() => props.widgetController.connectWallet()}
-                >
+                <AccountButtonStyled appearance="flat" onClick={() => tonConnectUI.connectWallet()}>
                     <TonIcon />
                     <Text fontSize="15px" letterSpacing="-0.24px" fontWeight="590">
                         Connect wallet

@@ -2,7 +2,7 @@ import { WalletInfoRemote } from '@tonconnect/sdk';
 import { Component, useContext } from 'solid-js';
 import { Button, H1, H2 } from 'src/app/components';
 import { QRCode } from 'src/app/components/qr-code';
-import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
+import { ConnectorContext } from 'src/app/state/connector.context';
 import {
     GetWalletStyled,
     QRBackgroundStyled,
@@ -17,13 +17,11 @@ export interface QrCodeModalProps {
 }
 
 export const QrCodeModal: Component<QrCodeModalProps> = props => {
-    const tonConnectUI = useContext(TonConnectUiContext);
-    const universalLink = tonConnectUI!.connector.connect({
+    const connector = useContext(ConnectorContext)!;
+    const universalLink = connector.connect({
         universalLink: props.wallet.universalLink,
         bridgeUrl: props.wallet.bridgeUrl
     });
-
-    debugger;
 
     return (
         <QrCodeModalStyled>

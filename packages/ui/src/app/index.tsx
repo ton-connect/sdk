@@ -1,4 +1,5 @@
 /* @refresh reload */
+import { ITonConnect } from '@tonconnect/sdk';
 import { render } from 'solid-js/web';
 
 import { setActionModalOpen, setWalletsModalOpen } from 'src/app/state/modals-state';
@@ -13,10 +14,11 @@ export const widgetController = {
     renderApp: (
         root: string,
         buttonRoot: HTMLElement | null,
-        widgetController: TonConnectUi
+        tonConnectUI: TonConnectUi,
+        connector: ITonConnect
     ): (() => void) =>
         render(
-            () => <App buttonRoot={buttonRoot} widgetController={widgetController} />,
+            () => <App buttonRoot={buttonRoot} tonConnectUI={tonConnectUI} connector={connector} />,
             document.getElementById(root) as HTMLElement
         )
 };

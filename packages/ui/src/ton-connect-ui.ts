@@ -11,7 +11,7 @@ import { widgetController } from 'src/app';
 import { TonUiOptions } from 'src/models/ton-ui-options';
 
 export class TonConnectUi {
-    public readonly connector: ITonConnect;
+    private readonly connector: ITonConnect;
 
     /**
      * Current connection status
@@ -47,7 +47,7 @@ export class TonConnectUi {
         const buttonRoot = options?.buttonRootId
             ? document.getElementById(options.buttonRootId)
             : null;
-        widgetController.renderApp(rootId, buttonRoot, this);
+        widgetController.renderApp(rootId, buttonRoot, this, this.connector);
 
         if (options?.autoConnect) {
             this.connector.restoreConnection();
