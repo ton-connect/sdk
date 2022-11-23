@@ -3,14 +3,15 @@ import {
     SendTransactionRequest,
     SendTransactionResponse,
     TonConnect,
-    Wallet
+    Wallet,
+    WalletInfo
 } from '@tonconnect/sdk';
 import type { Account } from '@tonconnect/sdk';
 import { widgetController } from 'src/app';
 import { TonUiOptions } from 'src/models/ton-ui-options';
 
 export class TonConnectUi {
-    private readonly connector: ITonConnect;
+    public readonly connector: ITonConnect;
 
     /**
      * Current connection status
@@ -41,7 +42,7 @@ export class TonConnectUi {
         buttonRootId?: string;
     }) {
         this.connector = options?.connector || new TonConnect();
-
+        this.getWallets();
         const rootId = this.normalizeWidgetRoot(options?.widgetRootId);
         const buttonRoot = options?.buttonRootId
             ? document.getElementById(options.buttonRootId)
@@ -51,6 +52,14 @@ export class TonConnectUi {
         if (options?.autoConnect) {
             this.connector.restoreConnection();
         }
+    }
+
+    /**
+     * Returns available wallets list.
+     */
+    public async getWallets(): Promise<WalletInfo[]> {
+        debugger;
+        return this.connector.getWallets();
     }
 
     /**

@@ -1,7 +1,8 @@
-import { Component } from 'solid-js';
+import { WalletInfoRemote } from '@tonconnect/sdk';
+import { Component, useContext } from 'solid-js';
 import { Button, H1, H2 } from 'src/app/components';
 import { QRCode } from 'src/app/components/qr-code';
-import { UiWallet } from 'src/app/models/ui-wallet';
+import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import {
     GetWalletStyled,
     QRBackgroundStyled,
@@ -11,13 +12,18 @@ import {
 } from './style';
 
 export interface QrCodeModalProps {
-    wallet: UiWallet;
+    wallet: WalletInfoRemote;
     onBackClick: () => void;
 }
 
 export const QrCodeModal: Component<QrCodeModalProps> = props => {
-    const universalLink =
-        'https://app.tonkeeper.com/ton-connect?v=2&id=9ceaf3c0cbeb7850dc67b058e47d2d1bd280ebce709dfff6ca4b5deb5bac465d&r=eyJ1cmwiOiJodHRwczovL3Rvbi1jb25uZWN0LmdpdGh1Yi5pby9kZW1vLWRhcHAvIiwiaWNvbiI6Imh0dHBzOi8vdG9uLWNvbm5lY3QuZ2l0aHViLmlvL2RlbW8tZGFwcC9mYXZpY29uLmljbyIsIm5hbWUiOiJEZW1vIERhcHAiLCJpdGVtcyI6W3sibmFtZSI6InRvbl9hZGRyIn1dfQ%253D%253D';
+    const tonConnectUI = useContext(TonConnectUiContext);
+    const universalLink = tonConnectUI!.connector.connect({
+        universalLink: props.wallet.universalLink,
+        bridgeUrl: props.wallet.bridgeUrl
+    });
+
+    debugger;
 
     return (
         <QrCodeModalStyled>
@@ -25,7 +31,7 @@ export const QrCodeModal: Component<QrCodeModalProps> = props => {
             <H1>Connect with {props.wallet.name}</H1>
             <H2>Scan QR code with your phone’s or {props.wallet.name}’s camera.</H2>
             <QRBackgroundStyled>
-                <QRCode sourceUrl={universalLink} imageUrl={props.wallet.iconUrl} />
+                <QRCode sourceUrl={universalLink} imageUrl={props.wallet.imageUrl} />
             </QRBackgroundStyled>
             <GetWalletStyled>
                 <TextStyled>Don't have {props.wallet.name}?</TextStyled>

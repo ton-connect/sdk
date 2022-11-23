@@ -8,6 +8,7 @@ export const UlStyled = styled.ul`
     margin: 0 auto 24px;
     width: fit-content;
     max-width: 100%;
+    min-height: 140px;
     overflow: auto;
     padding: 0 24px;
 

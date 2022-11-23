@@ -1,16 +1,16 @@
+import { WalletInfo, WalletInfoRemote } from '@tonconnect/sdk';
 import { Component, createSignal, Show } from 'solid-js';
-import { UiWallet } from 'src/app/models/ui-wallet';
 import { setWalletsModalOpen, walletsModalOpen } from 'src/app/state/modals-state';
 import { QrCodeModal } from 'src/app/views/modals/wallets-modal/qr-code-modal';
 import { SelectWalletModal } from 'src/app/views/modals/wallets-modal/select-wallet-modal';
 import { ModalWrapper, StyledModal } from './style';
 
 export const WalletsModal: Component = () => {
-    const [selectedWallet, setSelectedWallet] = createSignal<UiWallet | null>(null);
+    const [selectedWallet, setSelectedWallet] = createSignal<WalletInfo | null>(null);
 
     const onClose = (): void => {
-        setSelectedWallet(null);
         setWalletsModalOpen(false);
+        setSelectedWallet(null);
     };
 
     return (
@@ -21,7 +21,7 @@ export const WalletsModal: Component = () => {
                 </Show>
                 <Show when={selectedWallet()} keyed={false}>
                     <QrCodeModal
-                        wallet={selectedWallet()!}
+                        wallet={selectedWallet() as WalletInfoRemote}
                         onBackClick={() => setSelectedWallet(null)}
                     />
                 </Show>

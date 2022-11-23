@@ -9,6 +9,7 @@ import { AccountButton } from 'src/app/views/account-button';
 import { ActionsModal, WalletsModal } from 'src/app/views/modals';
 import './styles/style.d.ts';
 import { TonConnectUi } from 'src/ton-connect-ui';
+import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 
 export type AppProps = {
     buttonRoot: HTMLElement | null;
@@ -17,7 +18,7 @@ export type AppProps = {
 
 const App: Component<AppProps> = props => {
     return (
-        <>
+        <TonConnectUiContext.Provider value={props.widgetController}>
             <GlobalStyles />
             <ThemeProvider theme={themeState}>
                 <Show when={props.buttonRoot}>
@@ -30,7 +31,7 @@ const App: Component<AppProps> = props => {
                     <ActionsModal />
                 </Show>
             </ThemeProvider>
-        </>
+        </TonConnectUiContext.Provider>
     );
 };
 
