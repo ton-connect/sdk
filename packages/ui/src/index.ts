@@ -9,9 +9,8 @@ function dev(): void {
         'afterbegin',
         `<div id="button-root" style="float: right; margin: 20px;"></div>`
     );
-    const tc = new TonConnectUi({ buttonRootId: 'button-root' });
-    tc.connectWallet();
-    (window as any).openWallet = tc.connectWallet.bind(tc);
+    new TonConnectUi({ buttonRootId: 'button-root', autoConnect: true });
+    //tc.connectWallet();
     setThemeState({
         accentColor: 'red'
     });

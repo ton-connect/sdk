@@ -2,7 +2,7 @@ import { Component, createSignal, Show, useContext } from 'solid-js';
 import { ArrowIcon, Text, TonIcon } from 'src/app/components';
 import { ConnectorContext } from 'src/app/state/connector.context';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
-import { AccountButtonStyled } from './style';
+import { AccountButtonStyled, DropdownContainerStyled, DropdownStyled } from './style';
 
 interface AccountButtonProps {}
 
@@ -41,10 +41,16 @@ export const AccountButton: Component<AccountButtonProps> = () => {
                 </AccountButtonStyled>
             </Show>
             <Show when={address()}>
-                <AccountButtonStyled appearance="flat" onClick={() => setIsOpened(v => !v)}>
-                    <span>{normalizedAddress()}</span>
-                    <ArrowIcon direction={isOpened() ? 'top' : 'bottom'} />
-                </AccountButtonStyled>
+                <DropdownContainerStyled>
+                    <AccountButtonStyled appearance="flat" onClick={() => setIsOpened(v => !v)}>
+                        <span>{normalizedAddress()}</span>
+                        <ArrowIcon direction={isOpened() ? 'top' : 'bottom'} />
+                    </AccountButtonStyled>
+                    <DropdownStyled
+                        hidden={!isOpened()}
+                        onDisconnectClick={() => connector.disconnect()}
+                    />
+                </DropdownContainerStyled>
             </Show>
         </>
     );
