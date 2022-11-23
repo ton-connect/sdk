@@ -2,13 +2,16 @@ import { styled } from 'solid-styled-components';
 
 export const AccountButtonDropdownStyled = styled.div`
     width: 256px;
-    padding: 8px;
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.16);
     border-radius: 16px;
 
     background-color: ${props => props.theme!.colors.backgroundPrimary}
            
     color: ${props => props.theme!.colors.font.primary}
+`;
+
+export const UlStyled = styled.ul`
+    padding: 8px;
 `;
 
 export const MenuButtonStyled = styled.button`
@@ -23,13 +26,13 @@ export const MenuButtonStyled = styled.button`
     border-radius: 8px;
     cursor: pointer;
 
-    transition: background-color 0.1s ease-in-out;
+    transition: background-color, transform 0.1s ease-in-out;
 
     &:hover {
         background-color: ${props => props.theme!.colors.backgroundSecondary};
     }
 
-    /*&:active {
+    &:active {
         transform: scale(0.96);
-    }*/
+    }
 `;

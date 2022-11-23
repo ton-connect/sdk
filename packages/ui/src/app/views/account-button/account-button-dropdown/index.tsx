@@ -3,9 +3,10 @@ import { Text } from 'src/app/components';
 import { CopyIcon } from 'src/app/components/icons/copy-icon';
 import { DisconnectIcon } from 'src/app/components/icons/disconnect-icon';
 import { Styleable } from 'src/app/models/styleable';
+import { ConnectorContext } from 'src/app/state/connector.context';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { copyToClipboard } from 'src/app/utils/copy-to-clipboard';
-import { AccountButtonDropdownStyled, MenuButtonStyled } from './style';
+import { AccountButtonDropdownStyled, MenuButtonStyled, UlStyled } from './style';
 
 const MenuItemText: Component<{ children: JSXElement }> = props => (
     <Text fontSize="15px" letterSpacing="-0.24px" fontWeight="590">
@@ -14,11 +15,13 @@ const MenuItemText: Component<{ children: JSXElement }> = props => (
 );
 
 export interface AccountButtonDropdownProps extends Styleable {
-    onDisconnectClick: () => void;
+    onClose: () => void;
+    ref: HTMLDivElement | undefined;
 }
 
 export const AccountButtonDropdown: Component<AccountButtonDropdownProps> = props => {
     const tonConnectUi = useContext(TonConnectUiContext)!;
+    const connector = useContext(ConnectorContext)!;
     const [isCopiedShown, setIsCopiedShown] = createSignal(false);
 
     const onCopy = async (): Promise<void> => {
@@ -28,9 +31,14 @@ export const AccountButtonDropdown: Component<AccountButtonDropdownProps> = prop
         setTimeout(() => setIsCopiedShown(false), 1000);
     };
 
+    const onDisconnect = (): void => {
+        connector.disconnect();
+        props.onClose();
+    };
+
     return (
-        <AccountButtonDropdownStyled class={props.class}>
-            <ul>
+        <AccountButtonDropdownStyled ref={props.ref} class={props.class}>
+            <UlStyled>
                 <li>
                     <MenuButtonStyled onClick={() => onCopy()}>
                         <CopyIcon />
@@ -43,12 +51,12 @@ export const AccountButtonDropdown: Component<AccountButtonDropdownProps> = prop
                     </MenuButtonStyled>
                 </li>
                 <li>
-                    <MenuButtonStyled onClick={() => props.onDisconnectClick()}>
+                    <MenuButtonStyled onClick={() => onDisconnect()}>
                         <DisconnectIcon />
                         <MenuItemText>Disconnect</MenuItemText>
                     </MenuButtonStyled>
                 </li>
-            </ul>
+            </UlStyled>
         </AccountButtonDropdownStyled>
     );
 };

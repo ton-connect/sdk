@@ -16,6 +16,10 @@ export const DropdownContainerStyled = styled.div`
 `;
 
 export const DropdownStyled = styled(AccountButtonDropdown)<{ hidden: boolean }>`
-    display: ${props => (props.hidden ? 'none' : 'block')};
+    box-sizing: border-box;
     margin-top: 12px;
+    overflow: hidden;
+
+    max-height: ${props => (props.hidden ? 0 : '128px')};
+    transition: max-height 0.3s ease-in-out;
 `;
