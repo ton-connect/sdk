@@ -86,7 +86,7 @@ export class TonConnect implements ITonConnect {
             storage: options?.storage || new DefaultStorage()
         };
 
-        if (this.dappSettings.metadata.url) {
+        if (!this.dappSettings.metadata.url) {
             throw new DappMetadataError(
                 'Dapp url must be specified if window.location.origin is undefined.'
             );
