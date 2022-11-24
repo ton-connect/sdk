@@ -32,8 +32,6 @@ export class BridgeProvider implements HTTPProvider {
 
     public readonly type = 'http';
 
-    private readonly universalLinkPath = 'ton-connect';
-
     private readonly connectionStorage: BridgeConnectionStorage;
 
     private readonly pendingRequests = new Map<

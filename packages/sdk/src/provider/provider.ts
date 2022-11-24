@@ -5,10 +5,9 @@ import {
     WalletEvent,
     WalletResponse
 } from '@tonconnect/protocol';
-import { InjectedProvider } from 'src/provider/injected/injected-provider';
 import { WithoutId } from 'src/utils/types';
 
-export type Provider = InjectedProvider | HTTPProvider;
+export type Provider = InternalProvider | HTTPProvider;
 
 export interface InternalProvider extends BaseProvider {
     type: 'injected';

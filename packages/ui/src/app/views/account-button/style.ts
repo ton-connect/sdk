@@ -1,6 +1,7 @@
 import { styled } from 'solid-styled-components';
 import { Button } from 'src/app/components';
 import { AccountButtonDropdown } from 'src/app/views/account-button/account-button-dropdown';
+import { Notifications } from 'src/app/views/account-button/notifications';
 
 export const AccountButtonStyled = styled(Button)`
     display: flex;
@@ -37,4 +38,8 @@ export const DropdownStyled = styled(AccountButtonDropdown)<{ hidden: boolean }>
         `max-height 0s ${
             props.hidden ? '0.15s' : '0s'
         }, transform 0.15s ease-in-out, opacity 0.15s ease-in-out`};
+`;
+
+export const NotificationsStyled = styled(Notifications)`
+    margin-top: 12px;
 `;

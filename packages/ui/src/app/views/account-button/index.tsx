@@ -3,7 +3,12 @@ import { ArrowIcon, Text, TonIcon } from 'src/app/components';
 import { ConnectorContext } from 'src/app/state/connector.context';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { toUserFriendlyAddress } from 'src/app/utils/address';
-import { AccountButtonStyled, DropdownContainerStyled, DropdownStyled } from './style';
+import {
+    AccountButtonStyled,
+    DropdownContainerStyled,
+    DropdownStyled,
+    NotificationsStyled
+} from './style';
 
 interface AccountButtonProps {}
 
@@ -81,6 +86,7 @@ export const AccountButton: Component<AccountButtonProps> = () => {
                         ref={dropDownRef}
                     />
                 </DropdownContainerStyled>
+                <NotificationsStyled />
             </Show>
         </>
     );
