@@ -8,6 +8,7 @@ import {
     TonProofItemReply,
     ConnectItem
 } from '@tonconnect/protocol';
+import { DappMetadataError } from 'src/errors/dapp/dapp-metadata.error';
 import { TonConnectError } from 'src/errors/ton-connect.error';
 import { WalletAlreadyConnectedError } from 'src/errors/wallet/wallet-already-connected.error';
 import { WalletNotConnectedError } from 'src/errors/wallet/wallet-not-connected.error';
@@ -84,6 +85,12 @@ export class TonConnect implements ITonConnect {
             metadata: mergeOptions(options?.dappMetedata, getWebPageMetadata()),
             storage: options?.storage || new DefaultStorage()
         };
+
+        if (this.dappSettings.metadata.url) {
+            throw new DappMetadataError(
+                'Dapp url must be specified if window.location.origin is undefined.'
+            );
+        }
 
         this.bridgeConnectionStorage = new BridgeConnectionStorage(this.dappSettings.storage);
     }
