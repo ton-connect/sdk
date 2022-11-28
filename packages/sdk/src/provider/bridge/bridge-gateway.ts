@@ -1,13 +1,13 @@
-import { Base64, isNode } from '@tonconnect/protocol';
+import { Base64 } from '@tonconnect/protocol';
 import { TonConnectError } from 'src/errors';
 import { BridgeIncomingMessage } from 'src/provider/bridge/models/bridge-incomming-message';
 import { HttpBridgeGatewayStorage } from 'src/storage/http-bridge-gateway-storage';
 import { IStorage } from 'src/storage/models/storage.interface';
 import { addPathToUrl } from 'src/utils/url';
+import { isNode } from 'src/utils/web-api';
 
 if (isNode()) {
     try {
-        // noinspection JSConstantReassignment
         eval("global.EventSource = require('eventsource')");
         eval("global.fetch = require('node-fetch')");
     } catch (err) {

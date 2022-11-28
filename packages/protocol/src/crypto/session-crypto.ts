@@ -1,11 +1,6 @@
+import { isNode } from 'src/utils/web-api';
 import { KeyPair } from './key-pair';
-import {
-    concatUint8Arrays,
-    hexToByteArray,
-    isNode,
-    splitToUint8Arrays,
-    toHexString
-} from '../utils';
+import { concatUint8Arrays, hexToByteArray, splitToUint8Arrays, toHexString } from '../utils';
 import nacl, { BoxKeyPair } from 'tweetnacl';
 
 if (isNode()) {
