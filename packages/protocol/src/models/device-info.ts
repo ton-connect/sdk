@@ -1,5 +1,9 @@
+import { Feature } from 'src/models/feature';
+
 export interface DeviceInfo {
     platform: 'iphone' | 'ipad' | 'android' | 'windows' | 'mac' | 'linux' | 'browser';
-    app: string;
-    version: string;
+    appName: string; // e.g. "Tonkeeper"
+    appVersion: string; // e.g. "2.3.367"
+    maxProtocolVersion: number;
+    features: Feature[];
 }

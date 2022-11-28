@@ -23,10 +23,11 @@ export enum CONNECT_EVENT_ERROR_CODES {
     UNKNOWN_ERROR = 0,
     BAD_REQUEST_ERROR = 1,
     UNKNOWN_APP_ERROR = 100,
-    USER_REJECTS_ERROR = 300
+    USER_REJECTS_ERROR = 300,
+    METHOD_NOT_SUPPORTED = 400
 }
 
-export type ConnectItemReply = TonAddressItemReply | TonProofItemReply;
+export type ConnectItemReply = TonAddressItemReply | TonProofItemReply | ConnectItemReplyError;
 
 export interface TonAddressItemReply {
     name: 'ton_addr';
@@ -46,3 +47,18 @@ export interface TonProofItemReply {
         signature: string;
     };
 }
+
+type ErrorableItemsNames = TonAddressItemReply['name'];
+
+export enum CONNECT_ITEM_ERROR_CODES {
+    UNKNOWN_ERROR = 0,
+    METHOD_NOT_SUPPORTED = 400
+}
+
+export type ConnectItemReplyError = {
+    name: ErrorableItemsNames;
+    error: {
+        code: CONNECT_ITEM_ERROR_CODES;
+        message?: string;
+    };
+};
