@@ -16,10 +16,6 @@ export function getDocument(): Document | undefined {
     return document;
 }
 
-export function isNode(): boolean {
-    return typeof require === 'function' && typeof global === 'object';
-}
-
 export function getWebPageMetadata(): DappMetadata {
     return {
         url: getWindow()?.location.origin || '',

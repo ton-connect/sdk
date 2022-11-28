@@ -1,11 +1,16 @@
 import { KeyPair } from './key-pair';
-import { concatUint8Arrays, hexToByteArray, splitToUint8Arrays, toHexString } from '../utils';
+import {
+    concatUint8Arrays,
+    hexToByteArray,
+    isNode,
+    splitToUint8Arrays,
+    toHexString
+} from '../utils';
 import nacl, { BoxKeyPair } from 'tweetnacl';
 
-if (typeof require === 'function' && typeof global === 'object') {
+if (isNode()) {
     try {
-        // noinspection JSConstantReassignment
-        global.crypto = require('crypto').webcrypto;
+        eval("global.crypto = require('crypto').webcrypto");
     } catch (err) {}
 }
 

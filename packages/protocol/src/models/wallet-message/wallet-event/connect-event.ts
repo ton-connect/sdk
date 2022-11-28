@@ -27,7 +27,7 @@ export enum CONNECT_EVENT_ERROR_CODES {
     METHOD_NOT_SUPPORTED = 400
 }
 
-export type ConnectItemReply = TonAddressItemReply | TonProofItemReply | ConnectItemReplyError;
+export type ConnectItemReply = TonAddressItemReply | TonProofItemReply;
 
 export interface TonAddressItemReply {
     name: 'ton_addr';
@@ -35,7 +35,9 @@ export interface TonAddressItemReply {
     network: CHAIN;
 }
 
-export interface TonProofItemReply {
+export type TonProofItemReply = TonProofItemReplySuccess | TonProofItemReplyError;
+
+export interface TonProofItemReplySuccess {
     name: 'ton_proof';
     proof: {
         timestamp: number;
@@ -48,15 +50,15 @@ export interface TonProofItemReply {
     };
 }
 
-type ErrorableItemsNames = TonAddressItemReply['name'];
+export type TonProofItemReplyError = ConnectItemReplyError<TonProofItemReplySuccess['name']>;
 
 export enum CONNECT_ITEM_ERROR_CODES {
     UNKNOWN_ERROR = 0,
     METHOD_NOT_SUPPORTED = 400
 }
 
-export type ConnectItemReplyError = {
-    name: ErrorableItemsNames;
+export type ConnectItemReplyError<T> = {
+    name: T;
     error: {
         code: CONNECT_ITEM_ERROR_CODES;
         message?: string;
