@@ -161,7 +161,7 @@ export class BridgeProvider implements HTTPProvider {
     }
 
     private async gatewayErrorsListener(e: Event): Promise<void> {
-        throw new TonConnectError(`Bridge error ${e}`);
+        throw new TonConnectError(`Bridge error ${JSON.stringify(e)}`);
     }
 
     private async updateSession(

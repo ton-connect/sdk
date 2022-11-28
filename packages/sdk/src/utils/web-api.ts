@@ -1,14 +1,39 @@
 import { DappMetadata } from 'src/models';
 
+export function getWindow(): Window | undefined {
+    if (typeof window === 'undefined') {
+        return undefined;
+    }
+
+    return window;
+}
+
+export function getDocument(): Document | undefined {
+    if (typeof document === 'undefined') {
+        return undefined;
+    }
+
+    return document;
+}
+
+export function isNode(): boolean {
+    return typeof require === 'function' && typeof global === 'object';
+}
+
 export function getWebPageMetadata(): DappMetadata {
     return {
-        url: window?.location.origin || '',
+        url: getWindow()?.location.origin || '',
         icon: getIconUrl(),
-        name: document?.title || 'Unknown dapp'
+        name: getDocument()?.title || 'Unknown dapp'
     };
 }
 
 function getIconUrl(): string {
+    const document = getDocument();
+    if (!document) {
+        return '';
+    }
+
     const appleTouchIcons = document.querySelectorAll<HTMLLinkElement>(
         "link[rel='apple-touch-icon']"
     );

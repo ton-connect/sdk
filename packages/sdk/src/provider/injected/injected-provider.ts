@@ -13,6 +13,7 @@ import * as protocol from 'src/resources/protocol.json';
 import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { IStorage } from 'src/storage/models/storage.interface';
 import { WithoutId } from 'src/utils/types';
+import { getWindow } from 'src/utils/web-api';
 
 type WindowWithTon<T extends string> = {
     [key in T]: {
@@ -21,7 +22,7 @@ type WindowWithTon<T extends string> = {
 } & Window;
 
 export class InjectedProvider<T extends string = string> implements InternalProvider {
-    private static window = window;
+    private static window = getWindow();
 
     public static async fromStorage(storage: IStorage): Promise<InjectedProvider> {
         const bridgeConnectionStorage = new BridgeConnectionStorage(storage);
@@ -42,11 +43,11 @@ export class InjectedProvider<T extends string = string> implements InternalProv
     }
 
     private static isWindowContainsWallet<T extends string>(
-        window: Window,
+        window: Window | undefined,
         injectedWalletKey: string
     ): window is WindowWithTon<T> {
         return (
-            window &&
+            !!window &&
             injectedWalletKey in window &&
             typeof window[injectedWalletKey as keyof Window] === 'object' &&
             'tonconnect' in window[injectedWalletKey as keyof Window]
@@ -64,7 +65,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
     private listeners: Array<(e: WalletEvent) => void> = [];
 
     constructor(injectedWalletKey: T) {
-        const window: Window | WindowWithTon<T> = InjectedProvider.window;
+        const window: Window | undefined | WindowWithTon<T> = InjectedProvider.window;
         if (!InjectedProvider.isWindowContainsWallet(window, injectedWalletKey)) {
             throw new WalletNotInjectedError();
         }

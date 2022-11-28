@@ -4,6 +4,17 @@ import { BridgeIncomingMessage } from 'src/provider/bridge/models/bridge-incommi
 import { HttpBridgeGatewayStorage } from 'src/storage/http-bridge-gateway-storage';
 import { IStorage } from 'src/storage/models/storage.interface';
 import { addPathToUrl } from 'src/utils/url';
+import { isNode } from 'src/utils/web-api';
+
+if (isNode()) {
+    try {
+        // noinspection JSConstantReassignment
+        global.EventSource = require('eventsource');
+        global.fetch = require('node-fetch');
+    } catch (err) {
+        console.error(err);
+    }
+}
 
 export class BridgeGateway {
     private readonly ssePath = 'events';
@@ -37,7 +48,7 @@ export class BridgeGateway {
             url.searchParams.append('last_event_id', lastEventId);
         }
 
-        this.eventSource = new EventSource(url);
+        this.eventSource = new EventSource(url.toString());
 
         return new Promise((resolve, reject) => {
             this.eventSource!.onerror = reject;
