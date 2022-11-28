@@ -6,6 +6,6 @@ export interface Wallet {
     provider: 'http' | 'injected';
     account: Account;
     connectItems?: {
-        tonProof?: TonProofItemReply['proof'];
+        tonProof?: TonProofItemReply;
     };
 }

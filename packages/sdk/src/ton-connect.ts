@@ -265,7 +265,7 @@ export class TonConnect implements ITonConnect {
 
         if (tonProofItem) {
             wallet.connectItems = {
-                tonProof: tonProofItem.proof
+                tonProof: tonProofItem
             };
         }
 
