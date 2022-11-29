@@ -2,7 +2,9 @@
 
 ⚠️ TonConnect is currently in beta testing. Use it at your own risk.
 
-ℹ️ If you want to integrate TonConnect to your dApp, you should use [@tonconnect/sdk](https://www.npmjs.com/package/@tonconnect/sdk)  
+ℹ️ If you want to integrate TonConnect to your dApp, you should use [@tonconnect/sdk](https://www.npmjs.com/package/@tonconnect/sdk)
+
+[Latest API documentation](https://ton-connect.github.io/sdk/modules/_tonconnect_protocol.html)
 
 ## Summary
 Package contains protocol requests, responses and event models and encoding, decoding functions.

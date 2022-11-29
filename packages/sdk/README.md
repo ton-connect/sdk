@@ -6,6 +6,8 @@ Use it to connect your app to TON wallets via TonConnect protocol.
 You can find more details and the protocol specification in the [docs](https://github.com/ton-connect/docs).
 See the example of sdk usage [here](https://github.com/ton-connect/demo-dapp).
 
+[Latest API documentation](https://ton-connect.github.io/sdk/modules/_tonconnect_sdk.html)
+
 # Get started
 ## Install package
 `npm i @tonconnect/sdk`
