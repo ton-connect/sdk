@@ -1,9 +1,9 @@
 {
   "name": "@tonconnect/sdk",
-  "version": "0.0.32",
+  "version": "0.0.34",
   "scripts": {
-    "build": "npx rimraf lib && ttsc",
-    "build:production": "npx rimraf lib && ttsc --sourceMap false"
+    "build": "npx rimraf lib && ttsc && npx rimraf dist &&  webpack --mode development",
+    "build:production": "npx rimraf lib && ttsc --sourceMap false && npx rimraf dist &&  webpack --mode production"
   },
   "repository": {
     "type": "git",
@@ -28,10 +28,11 @@
     "tweetnacl": "^1.0.3",
     "eventsource": "^2.0.2",
     "node-fetch": "^2.6.7",
-    "@tonconnect/protocol": "^0.0.19"
+    "@tonconnect/protocol": "^0.0.20"
   },
   "files": [
-    "lib"
+    "lib",
+    "dist"
   ],
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
@@ -41,7 +42,11 @@
   "devDependencies": {
     "ts-loader": "^9.4.1",
     "ttypescript": "^1.5.13",
-    "typescript-transform-paths": "^3.3.1"
+    "typescript-transform-paths": "^3.3.1",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.0",
+    "webpack-bundle-analyzer": "^4.7.0",
+    "tsconfig-paths-webpack-plugin": "^3.5.2"
   },
   "typedoc": {
     "entryPoint": "./src/index.ts"

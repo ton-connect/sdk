@@ -1,5 +1,6 @@
 ../../.idea
 
+dist
 lib
 node_modules
 .env

@@ -1,7 +1,7 @@
-import { Buffer } from 'buffer';
+import nacl from 'tweetnacl-util';
 
-function encodeBuffer(buffer: Buffer, urlSafe: boolean): string {
-    const encoded = buffer.toString('base64');
+function encodeUint8Array(value: Uint8Array, urlSafe: boolean): string {
+    const encoded = nacl.encodeBase64(value);
     if (!urlSafe) {
         return encoded;
     }
@@ -9,19 +9,28 @@ function encodeBuffer(buffer: Buffer, urlSafe: boolean): string {
     return encodeURIComponent(encoded);
 }
 
-function decodeToBuffer(message: string, urlSafe: boolean): Buffer {
-    const value = urlSafe ? decodeURIComponent(message) : message;
-    return Buffer.from(value, 'base64');
+function decodeToUint8Array(value: string, urlSafe: boolean): Uint8Array {
+    if (urlSafe) {
+        value = decodeURIComponent(value);
+    }
+
+    return nacl.decodeBase64(value);
 }
 
 function encode(value: string | object | Uint8Array, urlSafe = false): string {
-    if (!(value instanceof Uint8Array) && !(typeof value === 'string')) {
-        value = JSON.stringify(value);
+    let uint8Array: Uint8Array;
+
+    if (value instanceof Uint8Array) {
+        uint8Array = value;
+    } else {
+        if (typeof value !== 'string') {
+            value = JSON.stringify(value);
+        }
+
+        uint8Array = nacl.decodeUTF8(value);
     }
 
-    const buffer = Buffer.from(value);
-
-    return encodeBuffer(buffer, urlSafe);
+    return encodeUint8Array(uint8Array, urlSafe);
 }
 
 function decode(
@@ -32,25 +41,21 @@ function decode(
     toObject<T>(): T | null;
     toUint8Array(): Uint8Array;
 } {
-    const decodedBuffer = decodeToBuffer(value, urlSafe);
+    const decodedUint8Array = decodeToUint8Array(value, urlSafe);
 
     return {
         toString(): string {
-            return decodedBuffer.toString('utf-8');
+            return nacl.encodeUTF8(decodedUint8Array);
         },
         toObject<T>(): T | null {
             try {
-                return JSON.parse(decodedBuffer.toString('utf-8')) as T;
+                return JSON.parse(nacl.encodeUTF8(decodedUint8Array)) as T;
             } catch (e) {
                 return null;
             }
         },
         toUint8Array(): Uint8Array {
-            return new Uint8Array(
-                decodedBuffer.buffer,
-                decodedBuffer.byteOffset,
-                decodedBuffer.byteLength / Uint8Array.BYTES_PER_ELEMENT
-            );
+            return decodedUint8Array;
         }
     };
 }

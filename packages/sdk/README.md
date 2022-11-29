@@ -8,8 +8,21 @@ See the example of sdk usage [here](https://github.com/ton-connect/demo-dapp).
 
 [Latest API documentation](https://ton-connect.github.io/sdk/modules/_tonconnect_sdk.html)
 
-# Get started
-## Install package
+# Getting started
+## Installation with cdn
+Add the script to your HTML file:
+```html
+<script src="https://unpkg.com/@tonconnect/sdk@latest/dist/tonconnect-sdk.min.js"></script>
+```
+
+You can find `TonConnect` in global variable `TonConnectSDK`, e.g.
+```html
+<script>
+    const connector = new TonConnectSDK.TonConnect();
+</script>
+```
+
+## Installation with npm
 `npm i @tonconnect/sdk`
 
 ## Init connector and call autoConnect. If user connected his wallet before, connector will restore the connection

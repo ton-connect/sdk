@@ -1,6 +1,6 @@
 {
   "name": "@tonconnect/protocol",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ton-connect/sdk.git"
@@ -29,7 +29,7 @@
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "buffer": "^6.0.3"
+    "tweetnacl-util": "^0.15.1"
   },
   "devDependencies": {
     "jest": "^29.2.2",
