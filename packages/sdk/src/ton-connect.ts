@@ -12,16 +12,10 @@ import { DappMetadataError } from 'src/errors/dapp/dapp-metadata.error';
 import { TonConnectError } from 'src/errors/ton-connect.error';
 import { WalletAlreadyConnectedError } from 'src/errors/wallet/wallet-already-connected.error';
 import { WalletNotConnectedError } from 'src/errors/wallet/wallet-not-connected.error';
-import {
-    Account,
-    DappMetadata,
-    DappSettings,
-    Wallet,
-    WalletConnectionSource,
-    WalletInfo
-} from 'src/models';
+import { Account, Wallet, WalletConnectionSource, WalletInfo } from 'src/models';
 import { SendTransactionRequest, SendTransactionResponse } from 'src/models/methods';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
+import { TonConnectOptions } from 'src/models/ton-connect-options';
 import {
     isWalletConnectionSourceJS,
     WalletConnectionSourceJS
@@ -33,7 +27,6 @@ import { InjectedProvider } from 'src/provider/injected/injected-provider';
 import { Provider } from 'src/provider/provider';
 import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { DefaultStorage } from 'src/storage/default-storage';
-import { IStorage } from 'src/storage/models/storage.interface';
 import { ITonConnect } from 'src/ton-connect.interface';
 import { mergeOptions } from 'src/utils/options';
 import { getWebPageMetadata } from 'src/utils/web-api';
@@ -42,7 +35,7 @@ import { WalletsListManager } from 'src/wallets-list-manager';
 export class TonConnect implements ITonConnect {
     private readonly walletsList = new WalletsListManager();
 
-    private readonly dappSettings: DappSettings;
+    private readonly dappSettings: Required<TonConnectOptions>;
 
     private readonly bridgeConnectionStorage: BridgeConnectionStorage;
 
@@ -80,13 +73,13 @@ export class TonConnect implements ITonConnect {
         this.statusChangeSubscriptions.forEach(callback => callback(this._wallet));
     }
 
-    constructor(options?: { dappMetedata?: Partial<DappMetadata>; storage?: IStorage }) {
+    constructor(options?: TonConnectOptions) {
         this.dappSettings = {
-            metadata: mergeOptions(options?.dappMetedata, getWebPageMetadata()),
+            dappMetedata: mergeOptions(options?.dappMetedata, getWebPageMetadata()),
             storage: options?.storage || new DefaultStorage()
         };
 
-        if (!this.dappSettings.metadata.url) {
+        if (!this.dappSettings.dappMetedata.url) {
             throw new DappMetadataError(
                 'Dapp url must be specified if window.location.origin is undefined.'
             );
@@ -289,7 +282,7 @@ export class TonConnect implements ITonConnect {
 
     private createConnectRequest(request?: ConnectAdditionalRequest): ConnectRequest {
         const webPageMetadata = getWebPageMetadata();
-        const metadata = mergeOptions(this.dappSettings.metadata, webPageMetadata);
+        const metadata = mergeOptions(this.dappSettings.dappMetedata, webPageMetadata);
 
         const items: ConnectItem[] = [
             {

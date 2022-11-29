@@ -1,6 +1,6 @@
 {
   "name": "@tonconnect/protocol",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ton-connect/sdk.git"
@@ -38,5 +38,8 @@
   },
   "nx": {
     "tags": ["scope:protocol"]
+  },
+  "typedoc": {
+    "entryPoint": "./src/index.ts"
   }
 }

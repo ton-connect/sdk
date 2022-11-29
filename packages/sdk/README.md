@@ -6,7 +6,8 @@ Use it to connect your app to TON wallets via TonConnect protocol.
 You can find more details and the protocol specification in the [docs](https://github.com/ton-connect/docs).
 See the example of sdk usage [here](https://github.com/ton-connect/demo-dapp).
 
-## Get started
+# Get started
+## Install package
 `npm i @tonconnect/sdk`
 
 ## Init connector and call autoConnect. If user connected his wallet before, connector will restore the connection
@@ -45,7 +46,7 @@ const walletsList = await connector.getWallets();
     bridgeUrl?: string;
     jsBridgeKey?: string;
     injected?: boolean; // true if this wallet is injected to the webpage
-    embedded?: boolean; // true if dapp is opened inside this wallet's browser
+    embedded?: boolean; // true if the dapp is opened inside this wallet's browser
 }[] 
  */
 ```

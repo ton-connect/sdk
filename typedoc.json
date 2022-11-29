@@ -1,0 +1,11 @@
+{
+  "entryPointStrategy": "packages",
+  "entryPoints": [
+    "packages/sdk",
+    "packages/protocol"
+  ],
+  "excludeInternal": true,
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "tsconfig": "tsconfig.base.json"
+}

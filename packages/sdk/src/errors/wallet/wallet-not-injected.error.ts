@@ -1,5 +1,8 @@
 import { TonConnectError } from 'src/errors/ton-connect.error';
 
+/**
+ * Thrown when there is an attempt to connect to the injected wallet while it is not exists in the webpage.
+ */
 export class WalletNotInjectedError extends TonConnectError {
     constructor(...args: ConstructorParameters<typeof TonConnectError>) {
         super(...args);
