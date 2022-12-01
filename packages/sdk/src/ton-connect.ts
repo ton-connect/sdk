@@ -183,9 +183,11 @@ export class TonConnect implements ITonConnect {
     public async sendTransaction(
         transaction: SendTransactionRequest
     ): Promise<SendTransactionResponse> {
+        const { validUntil, ...tx } = transaction;
+
         this.checkConnection();
         const response = await this.provider!.sendRequest(
-            sendTransactionParser.convertToRpcRequest(transaction)
+            sendTransactionParser.convertToRpcRequest({ ...tx, valid_until: validUntil })
         );
 
         if (sendTransactionParser.isError(response)) {

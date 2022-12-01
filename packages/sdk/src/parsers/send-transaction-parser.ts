@@ -19,7 +19,9 @@ const sendTransactionErrors: Partial<Record<CONNECT_EVENT_ERROR_CODES, typeof To
 };
 
 class SendTransactionParser extends RpcParser<'sendTransaction'> {
-    convertToRpcRequest(request: SendTransactionRequest): WithoutId<SendTransactionRpcRequest> {
+    convertToRpcRequest(
+        request: Omit<SendTransactionRequest, 'validUntil'> & { valid_until: number }
+    ): WithoutId<SendTransactionRpcRequest> {
         return {
             method: 'sendTransaction',
             params: [JSON.stringify(request)]

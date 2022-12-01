@@ -2,7 +2,7 @@ export interface SendTransactionRequest {
     /**
      * Sending transaction deadline in unix epoch seconds.
      */
-    valid_until: number;
+    validUntil: number;
 
     /**
      * Messages to send: min is 1, max is 4.
@@ -21,7 +21,7 @@ export interface SendTransactionRequest {
         /**
          * Contract specific data to add to the transaction.
          */
-        initState?: string;
+        stateInit?: string;
 
         /**
          * Contract specific data to add to the transaction.
