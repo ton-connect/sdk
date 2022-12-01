@@ -1,4 +1,4 @@
-import { Feature } from 'src/models/feature';
+import { Feature } from './feature';
 
 export interface DeviceInfo {
     platform: 'iphone' | 'ipad' | 'android' | 'windows' | 'mac' | 'linux' | 'browser';
