@@ -93,7 +93,7 @@ You will receive an update in `connector.onStatusChange` when user approves conn
 
 ## Send transaction
 ```ts
-if (!connetor.connected) {
+if (!connector.connected) {
     alert('Please connect wallet to send the transaction!');
 }
 
@@ -114,7 +114,7 @@ const transaction = {
 }
 
 try {
-    const result = await connetor.sendTransaction(transaction);
+    const result = await connector.sendTransaction(transaction);
     
     // you can use signed boc to find the transaction 
     const someTxData = await myAppExplorerService.getTransaction(result.boc);
