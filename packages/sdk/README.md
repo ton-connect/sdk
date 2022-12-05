@@ -165,6 +165,7 @@ To authorize user in your backend with TonConnect you can use following schema:
     connector.connect(walletConnectionSource, { tonProof: "<your-fetched-payload>" });
 ```
 Note that you can use `tonProof` only with `connector.connect()` method. This feature is not available in `connector.restoreConnection()`.
+
 3. Read a signed result after user approves connection:
 ```ts
 connector.onStatusChange(wallet => {
