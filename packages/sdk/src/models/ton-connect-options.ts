@@ -1,4 +1,3 @@
-import { DappMetadata } from 'src/models/dapp/dapp-metadata';
 import { IStorage } from 'src/storage/models/storage.interface';
 
 /**
@@ -6,10 +5,10 @@ import { IStorage } from 'src/storage/models/storage.interface';
  */
 export interface TonConnectOptions {
     /**
-     * Dapp metadata that will be displayed in the user's wallet.
-     * Options will be merged with the [defaults]{@link ./dapp/dappMetedata.ts} if there are some empty fields.
+     * Url to the [manifest]{@link https://github.com/ton-connect/docs/blob/main/requests-responses.md#app-manifest} with the Dapp metadata that will be displayed in the user's wallet.
+     * If not passed, manifest from `${window.location.origin}/tonconnect-manifest.json` will be taken.
      */
-    dappMetedata?: Partial<DappMetadata>;
+    manifestUrl?: string;
 
     /**
      * Storage to save protocol data. For browser default is `localStorage`. If you use SDK with nodeJS, you have to specify this field.

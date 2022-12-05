@@ -15,6 +15,11 @@ Add the script to your HTML file:
 <script src="https://unpkg.com/@tonconnect/sdk@latest/dist/tonconnect-sdk.min.js"></script>
 ```
 
+ℹ️ If you don't want auto-update the library, pass concrete version instead of `latest`, e.g. 
+```html
+<script src="https://unpkg.com/@tonconnect/sdk@0.0.34/dist/tonconnect-sdk.min.js"></script>
+```
+
 You can find `TonConnect` in global variable `TonConnectSDK`, e.g.
 ```html
 <script>
@@ -25,7 +30,8 @@ You can find `TonConnect` in global variable `TonConnectSDK`, e.g.
 ## Installation with npm
 `npm i @tonconnect/sdk`
 
-## Init connector and call autoConnect. If user connected his wallet before, connector will restore the connection
+# Usage
+## Init connector and call restoreConnection. If user connected his wallet before, connector will restore the connection
 
 ```ts
 import TonConnect from '@tonconnect/sdk';
@@ -33,6 +39,29 @@ import TonConnect from '@tonconnect/sdk';
 const connector = new TonConnect();
 
 connector.restoreConnection();
+```
+
+## Add the tonconnect-manifest
+App needs to have its manifest to pass meta information to the wallet. Manifest is a JSON file named as `tonconnect-manifest.json` following format:
+
+```json
+{
+  "url": "<app-url>",                        // required
+  "name": "<app-name>",                      // required
+  "iconUrl": "<app-icon-url>",               // required
+  "termsOfUseUrl": "<terms-of-use-url>",     // optional
+  "privacyPolicyUrl": "<privacy-policy-url>" // optional
+}
+```
+
+Best practice is to place the manifest in the root of your app, e.g. `https://myapp.com/tonconnect-manifest.json`. It allows the wallet to handle your app better and improve the UX connected to your app.
+Make sure that manifest is available to GET by its URL.
+
+[See details](https://github.com/ton-connect/docs/blob/main/requests-responses.md#app-manifest)
+
+If your manifest placed not in the root of your app, you can specify its path:
+```ts
+    const connector = new TonConnect({ manifestUrl: 'https://myApp.com/assets/tonconnect-manifest.json' });
 ```
 
 ## Subscribe to the connection status changes
@@ -127,3 +156,71 @@ try {
     }
 }
 ```
+
+# Backend authorization
+To authorize user in your backend with TonConnect you can use following schema:
+1. Fetch auth payload from your backend. It might be any random value. Backend must save information that this payload was sent to the client to check payload correctness later.
+2. Connect to the wallet when user clicks to the connection button:
+```ts
+    connector.connect(walletConnectionSource, { tonProof: "<your-fetched-payload>" });
+```
+Note that you can use `tonProof` only with `connector.connect()` method. This feature is not available in `connector.restoreConnection()`.
+3. Read a signed result after user approves connection:
+```ts
+connector.onStatusChange(wallet => {
+			if (!wallet) {
+				return;
+			}
+
+			const tonProof = wallet.connectItems?.tonProof;
+
+			if (tonProof) {
+				if ('proof' in tonProof) {
+                    // send proo to your backend
+					// e.g. myBackendCheckProof(tonProof.proof, wallet.account);
+					return;
+				}
+
+				console.error(tonProof.error);
+			}
+		});
+```
+4. Send proof and user's account data to your backend. Backend should check the proof correctness and check that payload inside the proof was generated before. After all checks backend should return an auth token to the client. Notice that `Account` contains the `walletStateInit` property which can be helpful for your backend to get user's public key if user's wallet contract doesn't support corresponding get method.
+5. Client saves the auth token in the `localStorage` and use it to access to auth-required endpoints. Client should delete the token when user disconnects the wallet.
+
+[See an example of a dapp using backend authorization](https://github.com/ton-connect/demo-dapp-with-backend). 
+
+[See an example of the dapp backend](https://github.com/ton-connect/demo-dapp-backend). 
+
+
+# Use with NodeJS
+You can use the SDK in frontend apps and in backend apps created with NodeJS. 
+
+## Installation
+`npm i @tonconnect/sdk`
+
+## Init connector
+When you use the SDK in backend, you have to pass `manifestUrl` and `IStorage` implementation to the TonConnect constructor.
+
+[See more about the manifest](##add-the-tonconnect-manifest).
+
+```ts
+import TonConnect from '@tonconnect/sdk';
+
+const storage: IStorage = <your implementation of the IStorage>
+
+const connector = new TonConnect({ manifestUrl, storage });
+```
+
+Your storage should implement following interface:
+```ts
+export interface IStorage {
+    setItem(key: string, value: string): Promise<void>;
+    getItem(key: string): Promise<string | null>;
+    removeItem(key: string): Promise<void>;
+}
+```
+
+[See details about IStorage in the API documentation](https://ton-connect.github.io/sdk/interfaces/_tonconnect_sdk.IStorage.html).
+
+Other steps are the same as for browser apps.

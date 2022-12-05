@@ -9,6 +9,8 @@ import {
     ConnectItem
 } from '@tonconnect/protocol';
 import { DappMetadataError } from 'src/errors/dapp/dapp-metadata.error';
+import { ManifestContentErrorError } from 'src/errors/protocol/events/connect/manifest-content-error.error';
+import { ManifestNotFoundError } from 'src/errors/protocol/events/connect/manifest-not-found.error';
 import { TonConnectError } from 'src/errors/ton-connect.error';
 import { WalletAlreadyConnectedError } from 'src/errors/wallet/wallet-already-connected.error';
 import { WalletNotConnectedError } from 'src/errors/wallet/wallet-not-connected.error';
@@ -28,8 +30,7 @@ import { Provider } from 'src/provider/provider';
 import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { DefaultStorage } from 'src/storage/default-storage';
 import { ITonConnect } from 'src/ton-connect.interface';
-import { mergeOptions } from 'src/utils/options';
-import { getWebPageMetadata } from 'src/utils/web-api';
+import { getWebPageManifest } from 'src/utils/web-api';
 import { WalletsListManager } from 'src/wallets-list-manager';
 
 export class TonConnect implements ITonConnect {
@@ -75,13 +76,13 @@ export class TonConnect implements ITonConnect {
 
     constructor(options?: TonConnectOptions) {
         this.dappSettings = {
-            dappMetedata: mergeOptions(options?.dappMetedata, getWebPageMetadata()),
+            manifestUrl: options?.manifestUrl || getWebPageManifest(),
             storage: options?.storage || new DefaultStorage()
         };
 
-        if (!this.dappSettings.dappMetedata.url) {
+        if (!this.dappSettings.manifestUrl) {
             throw new DappMetadataError(
-                'Dapp url must be specified if window.location.origin is undefined.'
+                'Dapp tonconnect-manifest.json must be specified if window.location.origin is undefined. See more https://github.com/ton-connect/docs/blob/main/requests-responses.md#app-manifest'
             );
         }
 
@@ -254,7 +255,8 @@ export class TonConnect implements ITonConnect {
             provider: this.provider!.type,
             account: {
                 address: tonAccountItem.address,
-                chain: tonAccountItem.network
+                chain: tonAccountItem.network,
+                walletStateInit: tonAccountItem.walletStateInit
             }
         };
 
@@ -270,6 +272,11 @@ export class TonConnect implements ITonConnect {
     private onWalletConnectError(connectEventError: ConnectEventError['payload']): void {
         const error = connectErrorsParser.parseError(connectEventError);
         this.statusChangeErrorSubscriptions.forEach(errorsHandler => errorsHandler(error));
+
+        if (error instanceof ManifestNotFoundError || error instanceof ManifestContentErrorError) {
+            console.error(error);
+            throw error;
+        }
     }
 
     private onWalletDisconnected(): void {
@@ -283,9 +290,6 @@ export class TonConnect implements ITonConnect {
     }
 
     private createConnectRequest(request?: ConnectAdditionalRequest): ConnectRequest {
-        const webPageMetadata = getWebPageMetadata();
-        const metadata = mergeOptions(this.dappSettings.dappMetedata, webPageMetadata);
-
         const items: ConnectItem[] = [
             {
                 name: 'ton_addr'
@@ -300,7 +304,7 @@ export class TonConnect implements ITonConnect {
         }
 
         return {
-            ...metadata,
+            manifestUrl: this.dappSettings.manifestUrl,
             items
         };
     }

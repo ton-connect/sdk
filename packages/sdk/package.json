@@ -1,6 +1,6 @@
 {
   "name": "@tonconnect/sdk",
-  "version": "0.0.36",
+  "version": "0.0.37",
   "scripts": {
     "build": "npx rimraf lib && ttsc && npx rimraf dist &&  webpack --mode development",
     "build:production": "npx rimraf lib && ttsc --sourceMap false && npx rimraf dist &&  webpack --mode production"
@@ -28,7 +28,7 @@
     "tweetnacl": "^1.0.3",
     "eventsource": "^2.0.2",
     "node-fetch": "^2.6.7",
-    "@tonconnect/protocol": "^0.0.21"
+    "@tonconnect/protocol": "^0.0.22"
   },
   "files": [
     "lib",
