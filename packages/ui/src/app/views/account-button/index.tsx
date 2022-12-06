@@ -30,7 +30,7 @@ export const AccountButton: Component<AccountButtonProps> = () => {
         return '';
     };
 
-    connector.onStatusChange(wallet => {
+    const unsubscribe = connector.onStatusChange(wallet => {
         if (!wallet) {
             setIsOpened(false);
             setAddress('');
@@ -56,7 +56,10 @@ export const AccountButton: Component<AccountButtonProps> = () => {
         document.body.addEventListener('click', onClick);
     });
 
-    onCleanup(() => document.body.removeEventListener('click', onClick));
+    onCleanup(() => {
+        document.body.removeEventListener('click', onClick);
+        unsubscribe();
+    });
 
     return (
         <>
