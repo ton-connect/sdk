@@ -26,15 +26,15 @@ export const LoaderIcon: Component<LoaderIconProps> = props => {
 
     return (
         <svg
-            width="17"
-            height="18"
-            viewBox="0 0 17 18"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             class={cn(svgClass, props.class)}
         >
             <path
-                d="M4.00002 15.9282C7.82636 18.1373 12.7191 16.8263 14.9282 13C17.1374 9.17364 15.8264 4.28092 12 2.07178C8.17368 -0.137363 3.28096 1.17364 1.07182 4.99998"
+                d="M8.00002 18.9282C11.8264 21.1373 16.7191 19.8263 18.9282 16C21.1374 12.1736 19.8264 7.28092 16 5.07178C12.1737 2.86264 7.28096 4.17364 5.07182 7.99998"
                 stroke={fill()}
                 stroke-width="1.8"
                 stroke-linecap="round"

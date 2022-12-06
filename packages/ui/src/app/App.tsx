@@ -4,7 +4,6 @@ import type { Component } from 'solid-js';
 import { Portal } from 'solid-js/web';
 import { ThemeProvider } from 'solid-styled-components';
 import { ConnectorContext } from 'src/app/state/connector.context';
-import { actionModalOpen } from 'src/app/state/modals-state';
 import { themeState } from 'src/app/state/theme-state';
 import { GlobalStyles } from 'src/app/styles/global-styles';
 import { AccountButton } from 'src/app/views/account-button';
@@ -31,9 +30,7 @@ const App: Component<AppProps> = props => {
                         </Portal>
                     </Show>
                     <WalletsModal />
-                    <Show when={actionModalOpen()}>
-                        <ActionsModal />
-                    </Show>
+                    <ActionsModal />
                 </ThemeProvider>
             </ConnectorContext.Provider>
         </TonConnectUiContext.Provider>

@@ -1,9 +1,11 @@
 import { Component } from 'solid-js';
-import { LoaderIcon } from 'src/app/components';
 import { Notification } from 'src/app/components/notification';
+import { LoaderIconStyled } from 'src/app/views/account-button/notifications/confirm-operation-notification/style';
 
 interface ConfirmOperationNotificationProps {}
 
 export const ConfirmOperationNotification: Component<ConfirmOperationNotificationProps> = () => {
-    return <Notification icon={<LoaderIcon />}>Confirm operation in your wallet</Notification>;
+    return (
+        <Notification icon={<LoaderIconStyled />}>Confirm operation in your wallet</Notification>
+    );
 };
