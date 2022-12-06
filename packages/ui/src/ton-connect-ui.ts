@@ -9,9 +9,14 @@ import {
 import type { Account } from '@tonconnect/sdk';
 import { widgetController } from 'src/app';
 import { TonUiOptions } from 'src/models/ton-ui-options';
+import { WalletInfoStorage } from 'src/storage';
 
 export class TonConnectUi {
+    private readonly walletInfoStorage = new WalletInfoStorage();
+
     private readonly connector: ITonConnect;
+
+    private _walletInfo: WalletInfo | null = null;
 
     /**
      * Current connection status
@@ -34,10 +39,17 @@ export class TonConnectUi {
         return this.connector.wallet;
     }
 
+    /**
+     * Curren connected wallet's info or null
+     */
+    public get walletInfo(): WalletInfo | null {
+        return this._walletInfo;
+    }
+
     constructor(options?: {
         uiOptions?: TonUiOptions;
         connector?: ITonConnect;
-        autoConnect?: boolean;
+        restoreConnection?: boolean;
         widgetRootId?: string;
         buttonRootId?: string;
     }) {
@@ -49,7 +61,9 @@ export class TonConnectUi {
             : null;
         widgetController.renderApp(rootId, buttonRoot, this, this.connector);
 
-        if (options?.autoConnect) {
+        this.subscribeToWalletChange();
+
+        if (options?.restoreConnection) {
             this.connector.restoreConnection();
         }
     }
@@ -84,6 +98,7 @@ export class TonConnectUi {
      * Disconnect wallet and clean localstorage.
      */
     public disconnect(): Promise<void> {
+        this.walletInfoStorage.removeWalletInfo();
         return this.connector.disconnect();
     }
 
@@ -109,6 +124,27 @@ export class TonConnectUi {
     ): Promise<SendTransactionResponse> {
         void options;
         return this.connector.sendTransaction(tx);
+    }
+
+    private subscribeToWalletChange(): void {
+        this.connector.onStatusChange(wallet => {
+            if (wallet) {
+                this.updateWalletInfo();
+            } else {
+                this.walletInfoStorage.removeWalletInfo();
+            }
+        });
+    }
+
+    private updateWalletInfo(): void {
+        const lastSelectedWalletInfo = widgetController.getSelectedWalletInfo();
+
+        if (lastSelectedWalletInfo) {
+            this._walletInfo = lastSelectedWalletInfo;
+            this.walletInfoStorage.setWalletInfo(lastSelectedWalletInfo);
+        } else {
+            this._walletInfo = this.walletInfoStorage.getWalletInfo();
+        }
     }
 
     /**
