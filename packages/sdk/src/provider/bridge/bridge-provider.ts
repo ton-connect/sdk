@@ -157,6 +157,10 @@ export class BridgeProvider implements HTTPProvider {
             await this.updateSession(walletMessage, bridgeIncomingMessage.from);
         }
 
+        if (walletMessage.event === 'disconnect') {
+            await this.removeBridgeAndSession();
+        }
+
         this.listeners.forEach(listener => listener(walletMessage));
     }
 
