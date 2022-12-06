@@ -3,11 +3,13 @@ import {
     SendTransactionRequest,
     SendTransactionResponse,
     TonConnect,
+    TonConnectError,
     Wallet,
     WalletInfo
 } from '@tonconnect/sdk';
 import type { Account } from '@tonconnect/sdk';
 import { widgetController } from 'src/app';
+import { TonConnectUIError } from 'src/errors/ton-connect-ui.error';
 import { TonUiOptions } from 'src/models/ton-ui-options';
 import { WalletInfoStorage } from 'src/storage';
 
@@ -72,26 +74,35 @@ export class TonConnectUi {
      * Returns available wallets list.
      */
     public async getWallets(): Promise<WalletInfo[]> {
-        debugger;
         return this.connector.getWallets();
     }
 
     /**
      * Subscribe to connection status change
-     * @param callback subscription callback
      * @return function which has to be called to unsubscribe
      */
     public onStatusChange(
-        callback: Parameters<ITonConnect['onStatusChange']>[0]
+        ...parameters: Parameters<ITonConnect['onStatusChange']>
     ): ReturnType<ITonConnect['onStatusChange']> {
-        return this.connector.onStatusChange(callback);
+        return this.connector.onStatusChange(...parameters);
     }
 
     /**
      * Opens the modal window and handles a wallet connection.
      */
-    public async connectWallet(): Promise<void> {
+    public connectWallet(): Promise<Wallet> {
         widgetController.openWalletsModal();
+
+        return new Promise((resolve, reject) => {
+            const unsubscribe = this.connector.onStatusChange(wallet => {
+                unsubscribe!();
+                if (wallet) {
+                    resolve(wallet);
+                } else {
+                    reject(new TonConnectUIError('Wallet was not connected'));
+                }
+            }, reject);
+        });
     }
 
     /**
@@ -103,27 +114,39 @@ export class TonConnectUi {
     }
 
     /**
-     * @todo
-     * Opens the modal window and handles an account switching
-     * Will not be available in the first version
-     */
-    // public switchAccount(): void {}
-
-    /**
      * Opens the modal window and handles the tx sending
      * @param tx
      * @param options
      */
     public async sendTransaction(
         tx: SendTransactionRequest,
-        options: {
+        options?: {
             showModalBefore: boolean;
             showSuccessModalAfter: boolean;
             showErrorModalAfter: boolean;
         }
     ): Promise<SendTransactionResponse> {
-        void options;
-        return this.connector.sendTransaction(tx);
+        if (options?.showModalBefore) {
+            widgetController.openActionsModal('confirm-transaction');
+        }
+        try {
+            const result = await this.connector.sendTransaction(tx);
+            if (options?.showSuccessModalAfter) {
+                widgetController.openActionsModal('transaction-sent');
+            }
+
+            return result;
+        } catch (e) {
+            if (options?.showErrorModalAfter) {
+                widgetController.openActionsModal('transaction-canceled');
+            }
+            if (e instanceof TonConnectError) {
+                throw e;
+            } else {
+                console.error(e);
+                throw new TonConnectUIError('Unhandled error:' + e);
+            }
+        }
     }
 
     private subscribeToWalletChange(): void {
@@ -146,18 +169,6 @@ export class TonConnectUi {
             this._walletInfo = this.walletInfoStorage.getWalletInfo();
         }
     }
-
-    /**
-     * @todo
-     * Opens the modal window and handles the message signing
-     * Will not be available in the first version
-     */
-    /*public async sign(signRequest: SignMessageRequest): Promise<SignMessageResponse> {
-        // const widget = new Widget();
-        // open modal widget
-
-        return this.connector.sign(signRequest);
-    }*/
 
     private normalizeWidgetRoot(rootId: string | undefined): string {
         if (!rootId || !document.getElementById(rootId)) {

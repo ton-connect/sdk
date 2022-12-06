@@ -1,16 +1,16 @@
 import { Component, createEffect, createSignal, For, Match, on, Switch } from 'solid-js';
 import { TransitionGroup } from 'solid-transition-group';
 import { ActionModalName, actionModalOpen } from 'src/app/state/modals-state';
-import { ConfirmOperationNotification } from 'src/app/views/account-button/notifications/confirm-operation-notification';
-import { ErrorTransactionNotification } from 'src/app/views/account-button/notifications/error-transaction-notification';
-import { SuccessTransactionNotification } from 'src/app/views/account-button/notifications/success-transaction-notification';
+import { ConfirmOperationNotification } from './confirm-operation-notification';
+import { ErrorTransactionNotification } from './error-transaction-notification';
+import { SuccessTransactionNotification } from './success-transaction-notification';
 import { NotificationClass, NotificationsStyled } from './style';
 
 interface NotificationsProps {}
 
 export const Notifications: Component<NotificationsProps> = () => {
     let lastId = -1;
-    const liveTimeoutMs = 3000;
+    const liveTimeoutMs = 4500;
 
     const [openedNotifications, setOpenedNotifications] = createSignal<
         { id: number; action: ActionModalName }[]
