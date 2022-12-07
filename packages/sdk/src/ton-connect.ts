@@ -6,7 +6,8 @@ import {
     TonAddressItemReply,
     WalletEvent,
     TonProofItemReply,
-    ConnectItem
+    ConnectItem,
+    Feature
 } from '@tonconnect/protocol';
 import { DappMetadataError } from 'src/errors/dapp/dapp-metadata.error';
 import { ManifestContentErrorError } from 'src/errors/protocol/events/connect/manifest-content-error.error';
@@ -14,6 +15,7 @@ import { ManifestNotFoundError } from 'src/errors/protocol/events/connect/manife
 import { TonConnectError } from 'src/errors/ton-connect.error';
 import { WalletAlreadyConnectedError } from 'src/errors/wallet/wallet-already-connected.error';
 import { WalletNotConnectedError } from 'src/errors/wallet/wallet-not-connected.error';
+import { WalletNotSupportFeatureError } from 'src/errors/wallet/wallet-not-support-feature.error';
 import { Account, Wallet, WalletConnectionSource, WalletInfo } from 'src/models';
 import { SendTransactionRequest, SendTransactionResponse } from 'src/models/methods';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
@@ -184,9 +186,10 @@ export class TonConnect implements ITonConnect {
     public async sendTransaction(
         transaction: SendTransactionRequest
     ): Promise<SendTransactionResponse> {
-        const { validUntil, ...tx } = transaction;
-
         this.checkConnection();
+        this.checkFeatureSupport('SendTransaction');
+
+        const { validUntil, ...tx } = transaction;
         const response = await this.provider!.sendRequest(
             sendTransactionParser.convertToRpcRequest({ ...tx, valid_until: validUntil })
         );
@@ -286,6 +289,12 @@ export class TonConnect implements ITonConnect {
     private checkConnection(): void | never {
         if (!this.connected) {
             throw new WalletNotConnectedError();
+        }
+    }
+
+    private checkFeatureSupport(feature: Feature): void | never {
+        if (!this.wallet?.device.features.includes(feature)) {
+            throw new WalletNotSupportFeatureError();
         }
     }
 
