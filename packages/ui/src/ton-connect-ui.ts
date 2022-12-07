@@ -10,7 +10,7 @@ import {
 import type { Account } from '@tonconnect/sdk';
 import { widgetController } from 'src/app';
 import { TonConnectUIError } from 'src/errors/ton-connect-ui.error';
-import { TonUiOptions } from 'src/models/ton-ui-options';
+import { TonConnectUiOptions } from 'src/models/ton-connect-ui-options';
 import { WalletInfoStorage } from 'src/storage';
 
 export class TonConnectUi {
@@ -48,14 +48,15 @@ export class TonConnectUi {
         return this._walletInfo;
     }
 
-    constructor(options?: {
-        uiOptions?: TonUiOptions;
-        connector?: ITonConnect;
-        restoreConnection?: boolean;
-        widgetRootId?: string;
-        buttonRootId?: string;
-    }) {
-        this.connector = options?.connector || new TonConnect();
+    constructor(options?: TonConnectUiOptions) {
+        if (options && 'connector' in options && options.connector) {
+            this.connector = options.connector;
+        } else if (options && 'manifestUrl' in options && options.manifestUrl) {
+            this.connector = new TonConnect({ manifestUrl: options.manifestUrl });
+        } else {
+            this.connector = new TonConnect();
+        }
+
         this.getWallets();
         const rootId = this.normalizeWidgetRoot(options?.widgetRootId);
         const buttonRoot = options?.buttonRootId
@@ -126,7 +127,7 @@ export class TonConnectUi {
             showErrorModalAfter: boolean;
         }
     ): Promise<SendTransactionResponse> {
-        if (options?.showModalBefore) {
+        if (options?.showModalBefore || !options) {
             widgetController.openActionsModal('confirm-transaction');
         }
         try {
