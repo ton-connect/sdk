@@ -13,6 +13,10 @@ export const ModalBackgroundStyled = styled.div`
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.4);
+
+    ${media('mobile')} {
+        align-items: flex-end;
+    }
 `;
 
 export const ModalWrapperClass = css`
@@ -25,8 +29,8 @@ export const ModalWrapperClass = css`
     padding: 44px 56px 24px;
 
     ${media('mobile')} {
-        /* TODO add mobile layout */
-        background: aqua;
+        width: 100%;
+        border-radius: 24px 24px 0 0;
     }
 `;
 
