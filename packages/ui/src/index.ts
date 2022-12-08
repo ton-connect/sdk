@@ -10,10 +10,10 @@ async function dev(): Promise<void> {
         restoreConnection: false,
         manifestUrl: 'https://ton-connect.github.io/demo-dapp/tonconnect-manifest.json'
     });
-    /*setTimeout(() => {
-        widgetController.openActionsModal('confirm-transaction');
+    /* setTimeout(() => {
+        widgetController.openActionsModal('transaction-canceled');
     }, 500);
-    setTimeout(() => {
+    /*setTimeout(() => {
         widgetController.openActionsModal('transaction-sent');
     }, 1000);
 

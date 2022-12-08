@@ -1,19 +1,15 @@
 import { styled } from 'solid-styled-components';
-import { Button, H1, SuccessIcon, Text } from 'src/app/components';
+import { Button, H1, Text } from 'src/app/components';
 
 export const ActionModalStyled = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
+    padding-bottom: 20px;
 `;
 
 export const H1Styled = styled(H1)`
     margin-top: 19px;
-`;
-
-export const SuccessIconStyled = styled(SuccessIcon)`
-    height: 66px;
-    width: 66px;
 `;
 
 export const TextStyled = styled(Text)`
@@ -29,5 +25,4 @@ export const TextStyled = styled(Text)`
 
 export const ButtonStyled = styled(Button)`
     margin-top: 32px;
-    margin-bottom: 20px;
 `;

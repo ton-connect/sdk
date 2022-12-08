@@ -12,6 +12,7 @@ export const ConfirmTransactionModal: Component<ConfirmTransactionModalProps> = 
             title="Confirm transaction in your wallet"
             icon={<LoaderIconStyled fill="#7A899970" />}
             onClose={() => props.onClose()}
+            showButton={false}
         >
             After confirmation, checking usually takes some time.
         </ActionModal>

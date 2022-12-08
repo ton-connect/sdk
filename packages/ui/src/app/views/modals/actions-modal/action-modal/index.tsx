@@ -1,4 +1,4 @@
-import { Component, JSXElement } from 'solid-js';
+import { Component, JSXElement, Show } from 'solid-js';
 import { ActionModalStyled, ButtonStyled, H1Styled, TextStyled } from './style';
 
 interface ActionModalProps {
@@ -6,6 +6,7 @@ interface ActionModalProps {
     icon: JSXElement;
     children?: JSXElement;
     onClose: () => void;
+    showButton?: boolean;
 }
 
 export const ActionModal: Component<ActionModalProps> = props => {
@@ -18,9 +19,11 @@ export const ActionModal: Component<ActionModalProps> = props => {
             ) : (
                 props.children
             )}
-            <ButtonStyled appearance="secondary" onClick={() => props.onClose()}>
-                Close
-            </ButtonStyled>
+            <Show when={props.showButton !== false}>
+                <ButtonStyled appearance="secondary" onClick={() => props.onClose()}>
+                    Close
+                </ButtonStyled>
+            </Show>
         </ActionModalStyled>
     );
 };
