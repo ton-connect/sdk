@@ -206,7 +206,7 @@ export class BridgeProvider implements HTTPProvider {
         const url = new URL(this.walletConnectionSource.universalLink);
         url.searchParams.append('v', protocol.version.toString());
         url.searchParams.append('id', this.session!.sessionCrypto.sessionId);
-        url.searchParams.append('r', Base64.encode(JSON.stringify(message), true));
+        url.searchParams.append('r', JSON.stringify(message));
         return url.toString();
     }
 }
