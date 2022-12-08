@@ -5,6 +5,20 @@ const maxWidth = {
     tablet: 1020
 };
 
+export function isDevice(device: keyof typeof maxWidth | 'desktop'): boolean {
+    const width = window.innerWidth;
+
+    switch (device) {
+        case 'desktop':
+            return width > maxWidth.tablet;
+        case 'tablet':
+            return width > maxWidth.mobile;
+        default:
+        case 'mobile':
+            return width <= maxWidth.mobile;
+    }
+}
+
 export function media(device: Device): string {
     switch (device) {
         case 'mobile':

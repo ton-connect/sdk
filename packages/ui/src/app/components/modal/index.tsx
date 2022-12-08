@@ -4,6 +4,7 @@ import { Transition } from 'solid-transition-group';
 import clickOutsideDirective from 'src/app/directives/click-outside';
 import keyPressedDirective from 'src/app/directives/key-pressed';
 import { Styleable } from 'src/app/models/styleable';
+import { isDevice } from 'src/app/styles/media';
 import { CloseButtonStyled, ModalBackgroundStyled, ModalWrapperClass } from './style';
 const clickOutside = clickOutsideDirective;
 const keyPressed = keyPressedDirective;
@@ -18,15 +19,42 @@ export const Modal: Component<ModalProps> = props => {
     return (
         <Transition
             onBeforeEnter={el => {
+                const duration = isDevice('mobile') ? 200 : 100;
+
                 el.animate([{ opacity: 0 }, { opacity: 1 }], {
-                    duration: 100
+                    duration
                 });
+
+                if (isDevice('mobile')) {
+                    el.firstElementChild!.animate(
+                        [{ transform: 'translateY(390px)' }, { transform: 'translateY(0)' }],
+                        {
+                            duration
+                        }
+                    );
+                }
             }}
             onExit={(el, done) => {
-                const a = el.animate([{ opacity: 1 }, { opacity: 0 }], {
-                    duration: 100
+                const duration = isDevice('mobile') ? 200 : 100;
+
+                const backgroundAnimation = el.animate([{ opacity: 1 }, { opacity: 0 }], {
+                    duration
                 });
-                a.finished.then(done);
+
+                if (isDevice('mobile')) {
+                    const contentAnimation = el.firstElementChild!.animate(
+                        [{ transform: 'translateY(0)' }, { transform: 'translateY(390px)' }],
+                        {
+                            duration
+                        }
+                    );
+
+                    Promise.all([backgroundAnimation.finished, contentAnimation.finished]).then(
+                        done
+                    );
+                } else {
+                    backgroundAnimation.finished.then(done);
+                }
             }}
         >
             <Show when={props.opened}>

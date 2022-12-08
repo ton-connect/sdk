@@ -1,5 +1,6 @@
 import { styled } from 'solid-styled-components';
 import { Text } from 'src/app/components';
+import { media } from 'src/app/styles/media';
 
 export const WalletItemStyled = styled.button`
     cursor: pointer;
@@ -24,6 +25,16 @@ export const WalletItemStyled = styled.button`
         border-radius: 18px;
 
         margin-bottom: 8px;
+
+        ${media('mobile')} {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+        }
+    }
+
+    ${media('mobile')} {
+        padding: 10px 10px 20px 10px;
     }
 `;
 
