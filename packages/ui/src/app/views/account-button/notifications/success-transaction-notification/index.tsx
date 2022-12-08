@@ -10,7 +10,8 @@ export const SuccessTransactionNotification: Component<
 > = props => {
     return (
         <Notification
-            text="It will take a few seconds until it is confirmed by the network"
+            header={{ translationKey: 'notifications.transactionSent.header' }}
+            text={{ translationKey: 'notifications.transactionSent.text' }}
             icon={<SuccessIconStyled />}
             class={props.class}
         >

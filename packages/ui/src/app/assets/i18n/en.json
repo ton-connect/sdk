@@ -1,0 +1,23 @@
+{
+  "button": {
+    "connectWallet": "Connect Wallet",
+    "dropdown": {
+      "copy": "Copy address",
+      "copied": "Address copied!",
+      "disconnect": "Disconnect"
+    }
+  },
+  "notifications": {
+    "confirm": {
+      "header": "Confirm operation in your wallet"
+    },
+    "transactionSent": {
+      "header": "Transaction sent",
+      "text": "It will take a few seconds until it is confirmed by the network"
+    },
+    "transactionCanceled": {
+      "header": "Transaction cancelled",
+      "text": "The transaction was canceled because there were no expected changes in the blockchain"
+    }
+  }
+}

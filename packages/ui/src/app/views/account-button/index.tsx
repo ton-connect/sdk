@@ -66,7 +66,12 @@ export const AccountButton: Component<AccountButtonProps> = () => {
             <Show when={!address()}>
                 <AccountButtonStyled appearance="flat" onClick={() => tonConnectUI.connectWallet()}>
                     <TonIcon />
-                    <Text fontSize="15px" letterSpacing="-0.24px" fontWeight="590">
+                    <Text
+                        translationKey="button.connectWallet"
+                        fontSize="15px"
+                        letterSpacing="-0.24px"
+                        fontWeight="590"
+                    >
                         Connect wallet
                     </Text>
                 </AccountButtonStyled>

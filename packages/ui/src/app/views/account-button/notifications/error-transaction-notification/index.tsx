@@ -8,7 +8,8 @@ interface ErrorTransactionNotificationProps extends Styleable {}
 export const ErrorTransactionNotification: Component<ErrorTransactionNotificationProps> = props => {
     return (
         <Notification
-            text="The transaction was canceled because there were no expected changes in the blockchain."
+            header={{ translationKey: 'notifications.transactionCanceled.header' }}
+            text={{ translationKey: 'notifications.transactionCanceled.text' }}
             icon={<ErrorIconStyled />}
             class={props.class}
         >

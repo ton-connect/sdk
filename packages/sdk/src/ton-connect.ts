@@ -276,6 +276,8 @@ export class TonConnect implements ITonConnect {
         const error = connectErrorsParser.parseError(connectEventError);
         this.statusChangeErrorSubscriptions.forEach(errorsHandler => errorsHandler(error));
 
+        console.debug(error);
+
         if (error instanceof ManifestNotFoundError || error instanceof ManifestContentErrorError) {
             console.error(error);
             throw error;

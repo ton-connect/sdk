@@ -7,7 +7,11 @@ interface ConfirmOperationNotificationProps extends Styleable {}
 
 export const ConfirmOperationNotification: Component<ConfirmOperationNotificationProps> = props => {
     return (
-        <Notification class={props.class} icon={<LoaderIconStyled />}>
+        <Notification
+            header={{ translationKey: 'notifications.confirm.header' }}
+            class={props.class}
+            icon={<LoaderIconStyled />}
+        >
             Confirm operation in your wallet
         </Notification>
     );

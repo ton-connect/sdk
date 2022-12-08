@@ -1,11 +1,13 @@
+import { useI18n } from '@solid-primitives/i18n';
 import { Property } from 'csstype';
-import { Component, JSXElement, mergeProps } from 'solid-js';
+import { Component, mergeProps } from 'solid-js';
 import { useTheme } from 'solid-styled-components';
 import { Styleable } from 'src/app/models/styleable';
+import { Translateable } from 'src/app/models/translateable';
 import { TextStyled } from './style';
 
-export interface TextProps extends Styleable {
-    children: JSXElement;
+export interface TextProps extends Styleable, Translateable {
+    children?: string;
     fontSize?: Property.FontSize;
     fontWeight?: Property.FontWeight;
     lineHeight?: Property.LineHeight;
@@ -15,6 +17,7 @@ export interface TextProps extends Styleable {
 
 export const Text: Component<TextProps> = inputs => {
     const theme = useTheme();
+    const [t] = useI18n();
 
     const color = (): Property.Color => inputs.color || theme.colors.font.primary;
 
@@ -36,7 +39,9 @@ export const Text: Component<TextProps> = inputs => {
             color={color()}
             class={props.class}
         >
-            {props.children}
+            {props.translationKey
+                ? t(props.translationKey, props.translationValues, props.children)
+                : props.children}
         </TextStyled>
     );
 };
