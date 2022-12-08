@@ -1,4 +1,7 @@
 {
+  "common": {
+    "close": "Закрыть"
+  },
   "button": {
     "connectWallet": "Подключить кошелек",
     "dropdown": {
@@ -32,5 +35,13 @@
       "dontHave": "Не установлен {{ name }}?",
       "get": "Скачать"
     }
+  },
+  "actionModal": {
+    "confirmTransaction": {
+      "header": "Подтвердите транзакцию в кошельке",
+      "text": "Отправка транзакции после подтверждения может занять некоторое время"
+    },
+    "transactionSent": "$notifications.transactionSent",
+    "transactionCanceled": "$notifications.transactionCanceled"
   }
 }

@@ -9,12 +9,11 @@ interface ConfirmTransactionModalProps {
 export const ConfirmTransactionModal: Component<ConfirmTransactionModalProps> = props => {
     return (
         <ActionModal
-            title="Confirm transaction in your wallet"
+            headerTranslationKey="actionModal.confirmTransaction.header"
+            textTranslationKey="actionModal.confirmTransaction.text"
             icon={<LoaderIconStyled fill="#7A899970" />}
             onClose={() => props.onClose()}
             showButton={false}
-        >
-            After confirmation, checking usually takes some time.
-        </ActionModal>
+        />
     );
 };

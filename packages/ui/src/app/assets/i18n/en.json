@@ -1,4 +1,7 @@
 {
+  "common": {
+    "close": "Close"
+  },
   "button": {
     "connectWallet": "Connect Wallet",
     "dropdown": {
@@ -32,5 +35,13 @@
       "dontHave": "Don't have {{ name }}?",
       "get": "GET"
     }
+  },
+  "actionModal": {
+    "confirmTransaction": {
+      "header": "Confirm transaction in your wallet",
+      "text": "After confirmation, checking usually takes some time."
+    },
+    "transactionSent": "$notifications.transactionSent",
+    "transactionCanceled": "$notifications.transactionCanceled"
   }
 }

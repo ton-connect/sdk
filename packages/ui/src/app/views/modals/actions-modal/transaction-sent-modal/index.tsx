@@ -9,11 +9,10 @@ interface TransactionSentModalProps {
 export const TransactionSentModal: Component<TransactionSentModalProps> = props => {
     return (
         <ActionModal
-            title="Transaction sent"
+            headerTranslationKey="actionModal.transactionSent.header"
+            textTranslationKey="actionModal.transactionSent.text"
             icon={<SuccessIconStyled />}
             onClose={() => props.onClose()}
-        >
-            It will take a few seconds until it is confirmed by the network
-        </ActionModal>
+        />
     );
 };

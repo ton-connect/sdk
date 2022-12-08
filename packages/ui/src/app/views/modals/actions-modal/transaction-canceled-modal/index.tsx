@@ -9,11 +9,10 @@ interface TransactionCanceledModalProps {
 export const TransactionCanceledModal: Component<TransactionCanceledModalProps> = props => {
     return (
         <ActionModal
-            title="Transaction cancelled"
+            headerTranslationKey="actionModal.transactionCanceled.header"
+            textTranslationKey="actionModal.transactionCanceled.text"
             icon={<ErrorIconStyled />}
             onClose={() => props.onClose()}
-        >
-            The transaction was canceled because there were no expected changes in the blockchain.
-        </ActionModal>
+        />
     );
 };
