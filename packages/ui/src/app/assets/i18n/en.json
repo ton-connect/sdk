@@ -19,5 +19,18 @@
       "header": "Transaction cancelled",
       "text": "The transaction was canceled because there were no expected changes in the blockchain"
     }
+  },
+  "walletModal": {
+    "selectWalletModal": {
+      "connectWallet": "Connect a wallet",
+      "selectWallet": "Select your wallet from the options to get started.",
+      "learnMore": "Learn more"
+    },
+    "qrCodeModal": {
+      "connectWith": "Connect with {{ name }}",
+      "scan": "Scan QR code with your phone’s or {{ name }}’s camera.",
+      "dontHave": "Don't have {{ name }}?",
+      "get": "GET"
+    }
   }
 }

@@ -1,11 +1,11 @@
 import { useI18n } from '@solid-primitives/i18n';
-import { Component } from 'solid-js';
+import { Component, JSXElement } from 'solid-js';
 import { Styleable } from 'src/app/models/styleable';
 import { Translateable } from 'src/app/models/translateable';
 import { H1Styled } from './style';
 
 export interface H1Props extends Styleable, Translateable {
-    children?: string;
+    children?: JSXElement;
 }
 
 export const H1: Component<H1Props> = props => {
@@ -13,7 +13,7 @@ export const H1: Component<H1Props> = props => {
     return (
         <H1Styled class={props.class}>
             {props.translationKey
-                ? t(props.translationKey, props.translationValues, props.children)
+                ? t(props.translationKey, props.translationValues, props.children?.toString())
                 : props.children}
         </H1Styled>
     );
