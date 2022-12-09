@@ -12,34 +12,34 @@
   },
   "notifications": {
     "confirm": {
-      "header": "Confirm operation in your wallet"
+      "header": "Confirm action in your wallet"
     },
     "transactionSent": {
       "header": "Transaction sent",
-      "text": "It will take a few seconds until it is confirmed by the network"
+      "text": "Your transaction has been sent to the network and will be processed in a few seconds."
     },
     "transactionCanceled": {
-      "header": "Transaction cancelled",
-      "text": "The transaction was canceled because there were no expected changes in the blockchain"
+      "header": "Action cancelled",
+      "text": "The action was canceled because there were no expected changes in the blockchain."
     }
   },
   "walletModal": {
     "selectWalletModal": {
-      "connectWallet": "Connect a wallet",
-      "selectWallet": "Select your wallet from the options to get started.",
+      "connectWallet": "Connect a Wallet",
+      "selectWallet": "Choose your preferred wallet from the options to get started.",
       "learnMore": "Learn more"
     },
     "qrCodeModal": {
       "connectWith": "Connect with {{ name }}",
-      "scan": "Scan QR code with your phone’s or {{ name }}’s camera.",
+      "scan": "Scan QR code with your phone’s or {{ name }}’s camera.",
       "dontHave": "Don't have {{ name }}?",
       "get": "GET"
     }
   },
   "actionModal": {
     "confirmTransaction": {
-      "header": "Confirm transaction in your wallet",
-      "text": "After confirmation, checking usually takes some time."
+      "header": "Confirm action in your wallet",
+      "text": "Checking after confirmation usually takes some time."
     },
     "transactionSent": "$notifications.transactionSent",
     "transactionCanceled": "$notifications.transactionCanceled"
