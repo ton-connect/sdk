@@ -24,6 +24,7 @@
     }
   },
   "walletModal": {
+    "loading":  "Wallets list is loading",
     "selectWalletModal": {
       "connectWallet": "Connect a Wallet",
       "selectWallet": "Choose your preferred wallet from the options to get started.",
@@ -32,6 +33,8 @@
     "qrCodeModal": {
       "connectWith": "Connect with {{ name }}",
       "scan": "Scan QR code with your phone’s or {{ name }}’s camera.",
+      "openWallet": "Open {{ name }}",
+      "openExtension": "Open Extension",
       "dontHave": "Don't have {{ name }}?",
       "get": "GET"
     }

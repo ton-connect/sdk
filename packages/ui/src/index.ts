@@ -1,5 +1,4 @@
 /* @refresh reload */
-import { widgetController } from 'src/app';
 import { setThemeState } from 'src/app/state/theme-state';
 import { TonConnectUi } from 'src/ton-connect-ui';
 
@@ -11,7 +10,8 @@ async function dev(): Promise<void> {
         restoreConnection: true,
         manifestUrl: 'https://ton-connect.github.io/demo-dapp/tonconnect-manifest.json'
     });
-    setTimeout(() => {
+    await tc.connectWallet();
+    /*setTimeout(() => {
         widgetController.openActionsModal('confirm-transaction');
     }, 500);
     setTimeout(() => {
@@ -20,7 +20,7 @@ async function dev(): Promise<void> {
 
     setTimeout(() => {
         widgetController.openActionsModal('transaction-canceled');
-    }, 1500);
+    }, 1500);*/
     /*try {
         await tc.connectWallet();
 

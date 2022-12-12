@@ -1,5 +1,5 @@
 import { styled } from 'solid-styled-components';
-import { IconButton, Text } from 'src/app/components';
+import { Button, IconButton, Text } from 'src/app/components';
 
 export const QrCodeModalStyled = styled.div`
     padding: 0 24px;
@@ -12,13 +12,24 @@ export const StyledIconButton = styled(IconButton)`
 `;
 
 export const QRBackgroundStyled = styled.div`
-    margin-bottom: 31px;
+    margin-bottom: 16px;
     background-color: ${props => props.theme!.colors.backgroundSecondary};
     border-radius: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 10px 0;
+`;
+
+export const ButtonsContainerStyled = styled.div`
+    display: flex;
+    gap: 16px;
+    height: 56px;
+    margin-bottom: 24px;
+`;
+
+export const ActionButtonStyled = styled(Button)`
+    width: 100%;
 `;
 
 export const GetWalletStyled = styled.div`

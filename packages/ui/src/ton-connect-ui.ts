@@ -12,6 +12,8 @@ import { widgetController } from 'src/app';
 import { TonConnectUIError } from 'src/errors/ton-connect-ui.error';
 import { TonConnectUiOptions } from 'src/models/ton-connect-ui-options';
 import { WalletInfoStorage } from 'src/storage';
+import { isDevice } from 'src/app/styles/media';
+import { openLinkBlank } from 'src/app/utils/web-api';
 
 export class TonConnectUi {
     private readonly walletInfoStorage = new WalletInfoStorage();
@@ -127,6 +129,14 @@ export class TonConnectUi {
             showErrorModalAfter: boolean;
         }
     ): Promise<SendTransactionResponse> {
+        if (!this.connected || !this.walletInfo) {
+            throw new TonConnectUIError('Connect wallet to send a transaction.');
+        }
+
+        if (!isDevice('desktop') && 'universalLink' in this.walletInfo) {
+            openLinkBlank(this.walletInfo.universalLink);
+        }
+
         if (options?.showModalBefore || !options) {
             widgetController.openActionsModal('confirm-transaction');
         }

@@ -24,6 +24,7 @@
     }
   },
   "walletModal": {
+    "loading":  "Список кошельков загружается",
     "selectWalletModal": {
       "connectWallet": "Подключите кошелёк",
       "selectWallet": "Выберите свой кошелёк из предложенных ниже.",
@@ -32,6 +33,8 @@
     "qrCodeModal": {
       "connectWith": "Подключиться с помощью {{ name }}",
       "scan": "Отсканируйте QR-код камерой телефона или приложения {{ name }}.",
+      "openWallet": "Открыть {{ name }}",
+      "openExtension": "Открыть расширение",
       "dontHave": "У вас нет {{ name }}?",
       "get": "Скачать"
     }
