@@ -1,3 +1,4 @@
+import type { Account } from '@tonconnect/sdk';
 import {
     ITonConnect,
     SendTransactionRequest,
@@ -7,13 +8,18 @@ import {
     Wallet,
     WalletInfo
 } from '@tonconnect/sdk';
-import type { Account } from '@tonconnect/sdk';
 import { widgetController } from 'src/app';
 import { TonConnectUIError } from 'src/errors/ton-connect-ui.error';
-import { TonConnectUiOptions } from 'src/models/ton-connect-ui-options';
+import { TonConnectUiCreateOptions } from 'src/models/ton-connect-ui-create-options';
 import { WalletInfoStorage } from 'src/storage';
 import { isDevice } from 'src/app/styles/media';
-import { openLinkBlank } from 'src/app/utils/web-api';
+import { getSystemTheme, openLinkBlank, subscribeToThemeChange } from 'src/app/utils/web-api';
+import { TonConnectUiOptions } from 'src/models/ton-connect-ui-options';
+import { setThemeState } from 'src/app/state/theme-state';
+import { mergeOptions } from 'src/app/utils/options';
+import { THEME } from 'src/app/models/THEME';
+import { setAppState } from 'src/app/state/app.state';
+import { unwrap } from 'solid-js/store';
 
 export class TonConnectUi {
     private readonly walletInfoStorage = new WalletInfoStorage();
@@ -21,6 +27,8 @@ export class TonConnectUi {
     private readonly connector: ITonConnect;
 
     private _walletInfo: WalletInfo | null = null;
+
+    private systemThemeChangeUnsubscribe: (() => void) | null = null;
 
     /**
      * Current connection status
@@ -50,7 +58,50 @@ export class TonConnectUi {
         return this._walletInfo;
     }
 
-    constructor(options?: TonConnectUiOptions) {
+    public set uiOptions(options: TonConnectUiOptions) {
+        this.checkButtonRootExist(options.buttonRootId);
+        let theme: THEME | undefined;
+        if (options.theme === 'SYSTEM') {
+            theme = getSystemTheme();
+
+            if (!this.systemThemeChangeUnsubscribe) {
+                this.systemThemeChangeUnsubscribe = subscribeToThemeChange(theme =>
+                    setThemeState({ theme })
+                );
+            }
+        } else {
+            theme =
+                options.theme === 'DARK'
+                    ? THEME.DARK
+                    : options.theme === 'LIGHT'
+                    ? THEME.LIGHT
+                    : undefined;
+            this.systemThemeChangeUnsubscribe?.();
+        }
+
+        setThemeState(state =>
+            mergeOptions({ theme, accentColor: options.accentColor }, unwrap(state))
+        );
+
+        setAppState(state => {
+            const merged = mergeOptions(
+                {
+                    language: options.language,
+                    buttonConfiguration: options.buttonConfiguration,
+                    widgetConfiguration: options.widgetConfiguration
+                },
+                unwrap(state)
+            );
+
+            if (options.buttonRootId !== undefined) {
+                merged.buttonRootId = options.buttonRootId;
+            }
+
+            return merged;
+        });
+    }
+
+    constructor(options?: TonConnectUiCreateOptions) {
         if (options && 'connector' in options && options.connector) {
             this.connector = options.connector;
         } else if (options && 'manifestUrl' in options && options.manifestUrl) {
@@ -61,16 +112,17 @@ export class TonConnectUi {
 
         this.getWallets();
         const rootId = this.normalizeWidgetRoot(options?.widgetRootId);
-        const buttonRoot = options?.buttonRootId
-            ? document.getElementById(options.buttonRootId)
-            : null;
-        widgetController.renderApp(rootId, buttonRoot, this, this.connector);
 
         this.subscribeToWalletChange();
 
         if (options?.restoreConnection) {
             this.connector.restoreConnection();
         }
+
+        this.uiOptions = options || {};
+        setAppState({ connector: this.connector });
+
+        widgetController.renderApp(rootId, this);
     }
 
     /**
@@ -190,5 +242,15 @@ export class TonConnectUi {
         }
 
         return rootId;
+    }
+
+    private checkButtonRootExist(buttonRootId: string | null | undefined): void | never {
+        if (buttonRootId == null) {
+            return;
+        }
+
+        if (!document.getElementById(buttonRootId)) {
+            throw new TonConnectUIError(`${buttonRootId} element not found in the document.`);
+        }
     }
 }

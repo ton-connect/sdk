@@ -31,8 +31,13 @@ import {
 import { openLinkBlank } from 'src/app/utils/web-api';
 import { isDevice } from 'src/app/styles/media';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
+import { useI18n } from '@solid-primitives/i18n';
+import { appState } from 'src/app/state/app.state';
 
 export const WalletsModal: Component = () => {
+    const { locale } = useI18n()[1];
+    createEffect(() => locale(appState.language));
+
     const connector = useContext(ConnectorContext)!;
     const tonConnectUI = useContext(TonConnectUiContext);
     const [walletsList] = createResource(() => tonConnectUI!.getWallets());

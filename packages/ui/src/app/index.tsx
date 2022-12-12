@@ -1,5 +1,5 @@
 /* @refresh reload */
-import { ITonConnect, WalletInfo } from '@tonconnect/sdk';
+import { WalletInfo } from '@tonconnect/sdk';
 import { render } from 'solid-js/web';
 
 import {
@@ -17,14 +17,9 @@ export const widgetController = {
     openActionsModal: (modal: ActionModalName): void => void setActionModalOpen(modal),
     closeActionsModal: (): void => void setActionModalOpen(null),
     getSelectedWalletInfo: (): WalletInfo | null => lastSelectedWalletInfo(),
-    renderApp: (
-        root: string,
-        buttonRoot: HTMLElement | null,
-        tonConnectUI: TonConnectUi,
-        connector: ITonConnect
-    ): (() => void) =>
+    renderApp: (root: string, tonConnectUI: TonConnectUi): (() => void) =>
         render(
-            () => <App buttonRoot={buttonRoot} tonConnectUI={tonConnectUI} connector={connector} />,
+            () => <App tonConnectUI={tonConnectUI} />,
             document.getElementById(root) as HTMLElement
         )
 };

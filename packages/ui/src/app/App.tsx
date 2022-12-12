@@ -1,4 +1,3 @@
-import { ITonConnect } from '@tonconnect/sdk';
 import { Show } from 'solid-js';
 import type { Component } from 'solid-js';
 import { Portal } from 'solid-js/web';
@@ -13,24 +12,23 @@ import './styles/style.d.ts';
 import { TonConnectUi } from 'src/ton-connect-ui';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { createI18nContext, I18nContext } from '@solid-primitives/i18n';
+import { appState } from 'src/app/state/app.state';
 
 export type AppProps = {
-    buttonRoot: HTMLElement | null;
     tonConnectUI: TonConnectUi;
-    connector: ITonConnect;
 };
 
 const App: Component<AppProps> = props => {
-    const translations = createI18nContext(i18nDictionary, 'ru');
+    const translations = createI18nContext(i18nDictionary, appState.language);
 
     return (
         <I18nContext.Provider value={translations}>
             <TonConnectUiContext.Provider value={props.tonConnectUI}>
-                <ConnectorContext.Provider value={props.connector}>
+                <ConnectorContext.Provider value={appState.connector}>
                     <GlobalStyles />
                     <ThemeProvider theme={themeState}>
-                        <Show when={props.buttonRoot}>
-                            <Portal mount={props.buttonRoot!}>
+                        <Show when={appState.buttonRootId}>
+                            <Portal mount={document.getElementById(appState.buttonRootId!)!}>
                                 <AccountButton />
                             </Portal>
                         </Show>
