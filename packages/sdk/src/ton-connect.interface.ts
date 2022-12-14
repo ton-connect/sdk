@@ -4,6 +4,7 @@ import { SendTransactionRequest, SendTransactionResponse } from 'src/models/meth
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
 import { WalletInfo } from 'src/models/wallet/wallet-info';
 import { WalletConnectionSourceJS } from 'src/models/wallet/wallet-connection-source';
+import { SendTransactionOptions } from 'src/models/methods/send-transaction/send-transaction-options';
 
 export interface ITonConnect {
     /**
@@ -61,8 +62,12 @@ export interface ITonConnect {
     /**
      * Asks connected wallet to sign and send the transaction.
      * @param transaction transaction to send.
+     * @param options request options
      * @returns signed transaction boc that allows you to find the transaction in the blockchain.
      * If user rejects transaction, method will throw the corresponding error.
      */
-    sendTransaction(transaction: SendTransactionRequest): Promise<SendTransactionResponse>;
+    sendTransaction(
+        transaction: SendTransactionRequest,
+        options: SendTransactionOptions
+    ): Promise<SendTransactionResponse>;
 }

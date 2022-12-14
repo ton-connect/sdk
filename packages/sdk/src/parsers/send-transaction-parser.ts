@@ -1,5 +1,6 @@
 import {
     CONNECT_EVENT_ERROR_CODES,
+    ReturnStrategy,
     SEND_TRANSACTION_ERROR_CODES,
     SendTransactionRpcRequest,
     SendTransactionRpcResponseError,
@@ -20,11 +21,13 @@ const sendTransactionErrors: Partial<Record<CONNECT_EVENT_ERROR_CODES, typeof To
 
 class SendTransactionParser extends RpcParser<'sendTransaction'> {
     convertToRpcRequest(
-        request: Omit<SendTransactionRequest, 'validUntil'> & { valid_until: number }
+        request: Omit<SendTransactionRequest, 'validUntil'> & { valid_until: number },
+        returnStrategy: ReturnStrategy
     ): WithoutId<SendTransactionRpcRequest> {
         return {
             method: 'sendTransaction',
-            params: [JSON.stringify(request)]
+            params: [JSON.stringify(request)],
+            return: returnStrategy
         };
     }
 
