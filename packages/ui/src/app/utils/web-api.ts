@@ -1,4 +1,4 @@
-import { THEME } from 'src/app/models/THEME';
+import { THEME } from 'src/models/THEME';
 
 export function openLink(href: string, target = '_self'): void {
     window.open(href, target, 'noreferrer noopener');

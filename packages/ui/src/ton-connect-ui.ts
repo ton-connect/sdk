@@ -17,9 +17,9 @@ import { getSystemTheme, openLinkBlank, subscribeToThemeChange } from 'src/app/u
 import { TonConnectUiOptions } from 'src/models/ton-connect-ui-options';
 import { setThemeState } from 'src/app/state/theme-state';
 import { mergeOptions } from 'src/app/utils/options';
-import { THEME } from 'src/app/models/THEME';
 import { setAppState } from 'src/app/state/app.state';
 import { unwrap } from 'solid-js/store';
+import { THEME } from 'src/models/THEME';
 
 export class TonConnectUi {
     private readonly walletInfoStorage = new WalletInfoStorage();

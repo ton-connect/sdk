@@ -1,4 +1,4 @@
-import { Themed } from 'src/app/models/themed';
+import { Themed } from 'src/models/themed';
 
 export type ButtonSize = 'm' | 'l';
 

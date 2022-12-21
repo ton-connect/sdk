@@ -11,6 +11,21 @@
   "nx": {
     "tags": ["scope:ui"]
   },
+  "files": [
+    "lib",
+    "dist"
+  ],
+  "main": "./lib/index.umd.cjs",
+  "module": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "require": "./lib/index.umd.cjs",
+      "import": "./lib/index.js",
+      "default": "./lib/index.js"
+    }
+  },
   "license": "MIT",
   "dependencies": {
     "solid-js": "^1.5.1",
@@ -28,6 +43,8 @@
     "eslint-plugin-solid": "^0.7.3",
     "vite": "^3.0.9",
     "vite-plugin-solid": "^2.3.0",
-    "csstype": "^3.1.1"
+    "csstype": "^3.1.1",
+    "vite-plugin-dts": "^1.7.1",
+    "@types/node": "^18.11.17"
   }
 }

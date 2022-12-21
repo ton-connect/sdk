@@ -1,5 +1,5 @@
-import { Themed } from 'src/app/models/themed';
 import { WalletsListConfiguration } from 'src/models/wallets-list-configuration';
+import { Themed } from 'src/models/themed';
 
 export type ModalSize = 'm' | 'l';
 

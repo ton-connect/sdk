@@ -1,9 +1,9 @@
-import { Locales } from 'src/app/i18n';
 import { ButtonConfiguration } from 'src/models/button-configuration';
 import { WidgetConfiguration } from 'src/models/widget-configuration';
-import { Theme } from 'src/app/models/THEME';
 import { Property } from 'csstype';
 import Color = Property.Color;
+import { Theme } from 'src/models/THEME';
+import { Locales } from 'src/models/locales';
 
 export interface TonConnectUiOptions {
     theme?: Theme;
