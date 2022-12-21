@@ -86,7 +86,7 @@ const walletsList = await connector.getWallets();
     imageUrl: string;
     tondns?: string;
     aboutUrl: string;
-    universalLinkBase?: string;
+    universalLink?: string;
     bridgeUrl?: string;
     jsBridgeKey?: string;
     injected?: boolean; // true if this wallet is injected to the webpage
@@ -100,8 +100,8 @@ const walletsList = await connector.getWallets();
 
 ```ts
 const walletConnectionSource = {
-    universalLinkBase: 'https://app.mycooltonwallet.com',
-    bridgeURL: 'https://bridge.mycooltonwallet.com,'
+    universalLink: 'https://app.mycooltonwallet.com',
+    bridgeUrl: 'https://bridge.mycooltonwallet.com'
 }
 
 const universalLink = connector.connect(walletConnectionSource);
@@ -127,12 +127,12 @@ if (!connector.connected) {
 }
 
 const transaction = {
-    valid_until: 1658253458,
+    validUntil: 1658253458,
     messages: [
         {
             address: "0:412410771DA82CBA306A55FA9E0D43C9D245E38133CB58F1457DFB8D5CD8892F",
             amount: "20000000",
-            initState: "base64bocblahblahblah==" // just for instance. Replace with your transaction initState or remove
+            stateInit: "base64bocblahblahblah==" // just for instance. Replace with your transaction initState or remove
         },
         {
             address: "0:E69F10CC84877ABF539F83F879291E5CA169451BA7BCE91A37A5CED3AB8080D3",
@@ -177,7 +177,7 @@ connector.onStatusChange(wallet => {
 
 			if (tonProof) {
 				if ('proof' in tonProof) {
-                    // send proo to your backend
+                    // send proof to your backend
 					// e.g. myBackendCheckProof(tonProof.proof, wallet.account);
 					return;
 				}
