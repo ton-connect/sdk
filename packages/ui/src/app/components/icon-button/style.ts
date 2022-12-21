@@ -1,6 +1,7 @@
 import { styled } from 'solid-styled-components';
 
 export const IconButtonStyled = styled.button`
+    padding: 0;
     display: flex;
     justify-content: center;
     align-items: center;

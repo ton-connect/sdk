@@ -16,6 +16,9 @@ export const GlobalStyles = (): JSXElement => {
     li {
         list-style: none;
     }
+    button {
+        outline: none;
+    }
   `;
     return <Styles />;
 };

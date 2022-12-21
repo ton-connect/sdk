@@ -23,7 +23,7 @@ export default defineConfig({
     port: 3000,
   },
   optimizeDeps: {
-    include: ['@tonconnect/sdk'],
+    /*include: ['@tonconnect/sdk'],*/
     exclude: ['csstype']
   },
   build: {
@@ -31,9 +31,10 @@ export default defineConfig({
     outDir: 'lib',
     emptyOutDir: true,
     minify: true,
-    commonjsOptions: {
-      include: [/@tonconnect\/sdk/, /node_modules/]
-    },
+/*    commonjsOptions: {
+      include: [/@tonconnect\/sdk/, /node_modules/],
+      transformMixedEsModules: true
+    },*/
     lib: {
       entry: path.resolve('src/ton-connect-ui.ts'),
       name: '@tonconnect/ui',

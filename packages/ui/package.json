@@ -1,6 +1,6 @@
 {
   "name": "@tonconnect/ui",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "",
   "scripts": {
     "start": "vite --host",
@@ -11,6 +11,26 @@
   "nx": {
     "tags": ["scope:ui"]
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ton-connect/sdk.git"
+  },
+  "homepage": "https://github.com/ton-connect/sdk/tree/main/packages/ui",
+  "bugs": {
+    "url": "https://github.com/ton-connect/sdk/issues"
+  },
+  "keywords": [
+    "TON",
+    "Wallet",
+    "ton-connect",
+    "tonconnect",
+    "Connect",
+    "Tonkeeper",
+    "sdk",
+    "UI"
+  ],
+  "author": "tonconnect",
+  "license": "Apache-2.0",
   "files": [
     "lib",
     "dist"
@@ -23,10 +43,9 @@
       "types": "./lib/index.d.ts",
       "require": "./lib/index.umd.cjs",
       "import": "./lib/index.js",
-      "default": "./lib/index.js"
+      "default": "./lib/index.umd.cjs"
     }
   },
-  "license": "MIT",
   "dependencies": {
     "solid-js": "^1.5.1",
     "solid-styled-components": "^0.28.5",
@@ -35,7 +54,7 @@
     "qrcode-generator": "^1.4.4",
     "deepmerge": "^4.2.2",
     "is-plain-object": "^5.0.0",
-    "@tonconnect/sdk": "^0.0.39",
+    "@tonconnect/sdk": "../sdk",
     "@solid-primitives/i18n": "^1.1.2"
   },
   "devDependencies": {
