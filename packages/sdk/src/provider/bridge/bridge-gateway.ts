@@ -78,19 +78,30 @@ export class BridgeGateway {
 
     private errorsHandler(e: Event): void {
         if (!this.isClosed) {
+            if (this.eventSource?.readyState === EventSource.CLOSED) {
+                this.eventSource.close();
+                this.registerSession();
+                return;
+            }
+
+            if (this.eventSource?.readyState === EventSource.CONNECTING) {
+                console.debug('[TON_CONNET_SDK_ERROR]: Bridge error', JSON.stringify(e));
+                return;
+            }
+
             this.errorsListener(e);
         }
     }
 
     private async messagesHandler(e: MessageEvent<string>): Promise<void> {
+        if (e.data === this.heartbeatMessage) {
+            return;
+        }
+
         await this.bridgeGatewayStorage.storeLastEventId(e.lastEventId);
 
         if (!this.isClosed) {
             let bridgeIncomingMessage: BridgeIncomingMessage;
-
-            if (e.data === this.heartbeatMessage) {
-                return;
-            }
 
             try {
                 bridgeIncomingMessage = JSON.parse(e.data);

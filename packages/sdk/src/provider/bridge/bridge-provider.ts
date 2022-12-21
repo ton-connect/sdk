@@ -21,7 +21,7 @@ import { HTTPProvider } from 'src/provider/provider';
 import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { IStorage } from 'src/storage/models/storage.interface';
 import { WithoutId } from 'src/utils/types';
-import * as protocol from 'src/resources/protocol.json';
+import { PROTOCOL_VERSION } from 'src/resources/protocol';
 
 export class BridgeProvider implements HTTPProvider {
     public static async fromStorage(storage: IStorage): Promise<BridgeProvider> {
@@ -204,7 +204,7 @@ export class BridgeProvider implements HTTPProvider {
 
     private generateUniversalLink(message: ConnectRequest): string {
         const url = new URL(this.walletConnectionSource.universalLink);
-        url.searchParams.append('v', protocol.version.toString());
+        url.searchParams.append('v', PROTOCOL_VERSION.toString());
         url.searchParams.append('id', this.session!.sessionCrypto.sessionId);
         url.searchParams.append('r', JSON.stringify(message));
         return url.toString();

@@ -9,11 +9,11 @@ import {
 } from '@tonconnect/protocol';
 import { InjectedWalletApi } from 'src/provider/injected/models/injected-wallet-api';
 import { InternalProvider } from 'src/provider/provider';
-import * as protocol from 'src/resources/protocol.json';
 import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { IStorage } from 'src/storage/models/storage.interface';
 import { WithoutId } from 'src/utils/types';
 import { getWindow } from 'src/utils/web-api';
+import { PROTOCOL_VERSION } from 'src/resources/protocol';
 
 type WindowWithTon<T extends string> = {
     [key in T]: {
@@ -75,7 +75,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
 
     public connect(message: ConnectRequest, auto = false): void {
         this.injectedWallet
-            .connect(protocol.version, message, auto)
+            .connect(PROTOCOL_VERSION, message, auto)
             .then(connectEvent => {
                 if (connectEvent.event === 'connect') {
                     this.makeSubscriptions();
