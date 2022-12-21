@@ -1,9 +1,9 @@
 {
   "name": "@tonconnect/sdk",
-  "version": "0.0.43",
+  "version": "0.0.44",
   "scripts": {
-    "build": "npx rimraf lib && ttsc && npx rimraf dist &&  webpack --mode development",
-    "build:production": "npx rimraf lib && ttsc --sourceMap false && npx rimraf dist &&  webpack --mode production"
+    "build": "npx rimraf lib && ttsc --outDir ./lib/cjs && ttsc --module esnext --outDir ./lib/esm && npx rimraf dist &&  webpack --mode development",
+    "build:production": "npx rimraf lib && ttsc --project tsconfig.cjs.json --sourceMap false && ttsc --project tsconfig.esm.json --sourceMap false && npx rimraf dist &&  webpack --mode production"
   },
   "repository": {
     "type": "git",
@@ -28,14 +28,23 @@
     "tweetnacl": "^1.0.3",
     "eventsource": "^2.0.2",
     "node-fetch": "^2.6.7",
-    "@tonconnect/protocol": "^0.0.24"
+    "@tonconnect/protocol": "^0.0.25"
   },
   "files": [
     "lib",
     "dist"
   ],
-  "main": "./lib/index.js",
-  "types": "./lib/index.d.ts",
+  "main": "./lib/cjs/index.js",
+  "module": "./lib/esm/index.js",
+  "types": "./lib/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/types/index.d.ts",
+      "require": "./lib/cjs/index.js",
+      "import": "./lib/esm/index.js",
+      "default": "./lib/cjs/index.js"
+    }
+  },
   "nx": {
     "tags": ["scope:sdk"]
   },

@@ -19,6 +19,8 @@ export class BridgeGateway {
 
     private readonly postPath = 'message';
 
+    private readonly heartbeatMessage = 'heartbeat';
+
     private readonly defaultTtl = 300;
 
     private eventSource: EventSource | undefined;
@@ -85,6 +87,10 @@ export class BridgeGateway {
 
         if (!this.isClosed) {
             let bridgeIncomingMessage: BridgeIncomingMessage;
+
+            if (e.data === this.heartbeatMessage) {
+                return;
+            }
 
             try {
                 bridgeIncomingMessage = JSON.parse(e.data);

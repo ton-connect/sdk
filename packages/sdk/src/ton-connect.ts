@@ -34,7 +34,6 @@ import { DefaultStorage } from 'src/storage/default-storage';
 import { ITonConnect } from 'src/ton-connect.interface';
 import { getWebPageManifest } from 'src/utils/web-api';
 import { WalletsListManager } from 'src/wallets-list-manager';
-import { SendTransactionOptions } from 'src/models/methods/send-transaction/send-transaction-options';
 
 export class TonConnect implements ITonConnect {
     private readonly walletsList = new WalletsListManager();
@@ -181,23 +180,18 @@ export class TonConnect implements ITonConnect {
     /**
      * Asks connected wallet to sign and send the transaction.
      * @param transaction transaction to send.
-     * @param options request options
      * @returns signed transaction boc that allows you to find the transaction in the blockchain.
      * If user rejects transaction, method will throw the corresponding error.
      */
     public async sendTransaction(
-        transaction: SendTransactionRequest,
-        options: SendTransactionOptions
+        transaction: SendTransactionRequest
     ): Promise<SendTransactionResponse> {
         this.checkConnection();
         this.checkFeatureSupport('SendTransaction');
 
         const { validUntil, ...tx } = transaction;
         const response = await this.provider!.sendRequest(
-            sendTransactionParser.convertToRpcRequest(
-                { ...tx, valid_until: validUntil },
-                options?.return || 'back'
-            )
+            sendTransactionParser.convertToRpcRequest({ ...tx, valid_until: validUntil })
         );
 
         if (sendTransactionParser.isError(response)) {
@@ -322,8 +316,7 @@ export class TonConnect implements ITonConnect {
 
         return {
             manifestUrl: this.dappSettings.manifestUrl,
-            items,
-            return: request?.return || 'back'
+            items
         };
     }
 }
