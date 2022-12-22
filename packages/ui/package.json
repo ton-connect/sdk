@@ -5,7 +5,7 @@
   "scripts": {
     "start": "vite --host",
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && rollup -c rollup.config.mjs",
     "serve": "vite preview"
   },
   "nx": {
@@ -63,7 +63,8 @@
     "vite": "^3.0.9",
     "vite-plugin-solid": "^2.3.0",
     "csstype": "^3.1.1",
-    "vite-plugin-dts": "^1.7.1",
-    "@types/node": "^18.11.17"
+    "@types/node": "^18.11.17",
+    "rollup-plugin-dts": "^5.0.0",
+    "rollup": "^3.8.0"
   }
 }

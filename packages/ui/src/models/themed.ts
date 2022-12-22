@@ -1,5 +1,5 @@
 import { Property } from 'csstype';
-import Color = Property.Color;
+type Color = Property.Color;
 import { Theme } from 'src/models/THEME';
 
 export interface Themed {

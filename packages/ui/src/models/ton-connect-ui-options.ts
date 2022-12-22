@@ -1,7 +1,7 @@
 import { ButtonConfiguration } from 'src/models/button-configuration';
 import { WidgetConfiguration } from 'src/models/widget-configuration';
 import { Property } from 'csstype';
-import Color = Property.Color;
+type Color = Property.Color;
 import { Theme } from 'src/models/THEME';
 import { Locales } from 'src/models/locales';
 

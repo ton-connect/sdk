@@ -8,7 +8,7 @@ import {
     Wallet,
     WalletInfo
 } from '@tonconnect/sdk';
-import { widgetController } from 'src/app';
+import { widgetController } from 'src/app/widget-controller';
 import { TonConnectUIError } from 'src/errors/ton-connect-ui.error';
 import { TonConnectUiCreateOptions } from 'src/models/ton-connect-ui-create-options';
 import { WalletInfoStorage } from 'src/storage';

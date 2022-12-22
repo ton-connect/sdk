@@ -1,4 +1,3 @@
-/* @refresh reload */
 import { WalletInfo } from '@tonconnect/sdk';
 import { render } from 'solid-js/web';
 

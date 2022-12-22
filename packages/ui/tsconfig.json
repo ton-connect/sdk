@@ -5,13 +5,19 @@
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
     "types": ["vite/client", "node"],
-    "noEmit": true,
-    "isolatedModules": true,
+    "emitDeclarationOnly": true,
+    "noEmit": false,
+    "isolatedModules": false,
     "baseUrl": "./",
     "paths": {
       "src/*": ["./src/*"]
     },
     "rootDir": "src",
+    "outDir": "./lib",
+    "plugins": [
+      { "transform": "typescript-transform-paths" },
+      { "transform": "typescript-transform-paths", "afterDeclarations": true }
+    ]
   },
   "include": [
     "./src"
