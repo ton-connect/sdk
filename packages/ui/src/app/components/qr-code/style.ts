@@ -6,6 +6,10 @@ export const QrCodeStyled = styled.div`
     > div:first-child {
         height: 276px;
         width: 276px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     rect {
