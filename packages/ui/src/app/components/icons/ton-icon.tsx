@@ -1,12 +1,14 @@
 import type { Property } from 'csstype';
 import { Component } from 'solid-js';
+import { useTheme } from 'solid-styled-components';
 
 interface TonIconProps {
     fill?: Property.Color;
 }
 
 export const TonIcon: Component<TonIconProps> = props => {
-    const fill = (): string => props.fill || '#0F0F0F';
+    const theme = useTheme();
+    const fill = (): string => props.fill || theme.colors.font.primary;
 
     return (
         <svg

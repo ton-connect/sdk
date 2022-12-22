@@ -1,12 +1,14 @@
 import type { Property } from 'csstype';
 import { Component } from 'solid-js';
+import { useTheme } from 'solid-styled-components';
 
 interface CloseIconProps {
     fill?: Property.Color;
 }
 
 export const CloseIcon: Component<CloseIconProps> = props => {
-    const fill = (): string => props.fill || '#7A8999';
+    const theme = useTheme();
+    const fill = (): string => props.fill || theme.colors.font.third;
 
     return (
         <svg

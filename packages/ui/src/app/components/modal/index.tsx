@@ -6,6 +6,7 @@ import keyPressedDirective from 'src/app/directives/key-pressed';
 import { Styleable } from 'src/app/models/styleable';
 import { isDevice } from 'src/app/styles/media';
 import { CloseButtonStyled, ModalBackgroundStyled, ModalWrapperClass } from './style';
+import { css, useTheme } from 'solid-styled-components';
 const clickOutside = clickOutsideDirective;
 const keyPressed = keyPressedDirective;
 
@@ -16,6 +17,7 @@ export interface ModalProps extends Styleable {
 }
 
 export const Modal: Component<ModalProps> = props => {
+    const theme = useTheme();
     return (
         <Transition
             onBeforeEnter={el => {
@@ -60,7 +62,13 @@ export const Modal: Component<ModalProps> = props => {
             <Show when={props.opened}>
                 <ModalBackgroundStyled>
                     <div
-                        class={cn(ModalWrapperClass, props.class)}
+                        class={cn(
+                            ModalWrapperClass,
+                            props.class,
+                            css`
+                                background-color: ${theme.colors.backgroundPrimary};
+                            `
+                        )}
                         use:clickOutside={() => props.onClose()}
                         use:keyPressed={() => props.onClose()}
                     >

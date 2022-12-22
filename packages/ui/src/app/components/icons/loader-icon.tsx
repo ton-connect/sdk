@@ -1,7 +1,7 @@
 import cn from 'classnames';
 import type { Property } from 'csstype';
 import { Component } from 'solid-js';
-import { css, keyframes } from 'solid-styled-components';
+import {css, keyframes, useTheme} from 'solid-styled-components';
 import { Styleable } from 'src/app/models/styleable';
 
 export interface LoaderIconProps extends Styleable {
@@ -9,7 +9,8 @@ export interface LoaderIconProps extends Styleable {
 }
 
 export const LoaderIcon: Component<LoaderIconProps> = props => {
-    const fill = (): string => props.fill || '#7A8999';
+    const theme = useTheme();
+    const fill = (): string => props.fill || theme.colors.font.third;
 
     const rotateAnimation = keyframes`
         0% {

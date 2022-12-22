@@ -1,6 +1,6 @@
 import type { Property } from 'csstype';
 import { Component } from 'solid-js';
-import { styled } from 'solid-styled-components';
+import { styled, useTheme } from 'solid-styled-components';
 
 interface ArrowIconProps {
     fill?: Property.Color;
@@ -15,7 +15,8 @@ const rotationDegrees = {
 };
 
 export const ArrowIcon: Component<ArrowIconProps> = props => {
-    const fill = (): Property.Color => props.fill || '#7A8999';
+    const theme = useTheme();
+    const fill = (): Property.Color => props.fill || theme.colors.font.third;
     const direction = (): 'left' | 'right' | 'top' | 'bottom' => props.direction || 'left';
 
     const Svg = styled('svg')<{ svgDirection: 'left' | 'right' | 'top' | 'bottom' }>`

@@ -1,13 +1,15 @@
 import type { Property } from 'csstype';
 import { Component } from 'solid-js';
 import { Styleable } from 'src/app/models/styleable';
+import { useTheme } from 'solid-styled-components';
 
 export interface ErrorIconProps extends Styleable {
     fill?: Property.Color;
 }
 
 export const ErrorIcon: Component<ErrorIconProps> = props => {
-    const fill = (): string => props.fill || '#7A8999';
+    const theme = useTheme();
+    const fill = (): string => props.fill || theme.colors.font.third;
 
     return (
         <svg

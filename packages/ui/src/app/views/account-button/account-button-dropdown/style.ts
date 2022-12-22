@@ -11,6 +11,7 @@ export const AccountButtonDropdownStyled = styled.div`
 `;
 
 export const UlStyled = styled.ul`
+    background-color: ${props => props.theme!.colors.backgroundPrimary};
     padding: 8px;
 `;
 

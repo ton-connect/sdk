@@ -1,5 +1,7 @@
 /* @refresh reload */
 import { TonConnectUi } from 'src/ton-connect-ui';
+import { THEME } from 'src/models/THEME';
+import {widgetController} from "src/app";
 
 export { TonConnectUi, TonConnectUi as default } from './ton-connect-ui';
 
@@ -9,14 +11,15 @@ async function dev(): Promise<void> {
         restoreConnection: true,
         manifestUrl: 'https://ton-connect.github.io/demo-dapp/tonconnect-manifest.json'
     });
-    tc.connectWallet();
+    //tc.connectWallet();
 
     setTimeout(() => {
         tc.uiOptions = {
-            language: 'ru'
+            language: 'ru',
+            theme: THEME.DARK
         };
-    }, 1000);
-    /*setTimeout(() => {
+    }, 0);
+    setTimeout(() => {
         widgetController.openActionsModal('confirm-transaction');
     }, 500);
     setTimeout(() => {
@@ -25,7 +28,7 @@ async function dev(): Promise<void> {
 
     setTimeout(() => {
         widgetController.openActionsModal('transaction-canceled');
-    }, 1500);*/
+    }, 1500);
     /*try {
         await tc.connectWallet();
 

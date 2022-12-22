@@ -15,7 +15,7 @@ import { WalletInfoStorage } from 'src/storage';
 import { isDevice } from 'src/app/styles/media';
 import { getSystemTheme, openLinkBlank, subscribeToThemeChange } from 'src/app/utils/web-api';
 import { TonConnectUiOptions } from 'src/models/ton-connect-ui-options';
-import { setThemeState } from 'src/app/state/theme-state';
+import { setTheme } from 'src/app/state/theme-state';
 import { mergeOptions } from 'src/app/utils/options';
 import { setAppState } from 'src/app/state/app.state';
 import { unwrap } from 'solid-js/store';
@@ -66,7 +66,7 @@ export class TonConnectUi {
 
             if (!this.systemThemeChangeUnsubscribe) {
                 this.systemThemeChangeUnsubscribe = subscribeToThemeChange(theme =>
-                    setThemeState({ theme })
+                    setTheme(theme)
                 );
             }
         } else {
@@ -79,9 +79,11 @@ export class TonConnectUi {
             this.systemThemeChangeUnsubscribe?.();
         }
 
-        setThemeState(state =>
+        /* setThemeState(state =>
             mergeOptions({ theme, accentColor: options.accentColor }, unwrap(state))
-        );
+        );*/
+
+        setTheme(theme!);
 
         setAppState(state => {
             const merged = mergeOptions(

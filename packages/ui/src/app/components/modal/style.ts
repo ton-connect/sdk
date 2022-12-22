@@ -21,7 +21,6 @@ export const ModalBackgroundStyled = styled.div`
 
 export const ModalWrapperClass = css`
     position: relative;
-    background: #ffffff;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 16px 64px rgba(0, 0, 0, 0.16);
     border-radius: 24px;
     min-height: 100px;
