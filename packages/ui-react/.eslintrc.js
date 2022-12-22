@@ -1,19 +1,28 @@
 module.exports = {
-    extends: ["../../.eslintrc.js", "plugin:solid/typescript"],
+    extends: ["../../.eslintrc.js", 'plugin:react/recommended'],
     parserOptions: {
         "sourceType": "module",
-        "ecmaVersion": 2020,
+        "ecmaVersion": "latest",
         ecmaFeatures: {
             jsx: true
         }
     },
-    plugins: ["solid"],
+    plugins: ['react', 'react-hooks'],
     rules: {
-        "solid/components-return-once": "error",
+        "react/react-in-jsx-scope": "off",
         'import/extensions': ['off'],
         "@typescript-eslint/explicit-function-return-type": [
-            'error',
-            { allowExpressions: true, allowConciseArrowFunctionExpressionsStartingWithVoid: true }
+            'error', {
+                allowExpressions: true,
+                allowTypedFunctionExpressions: true,
+                allowConciseArrowFunctionExpressionsStartingWithVoid: true,
+                allowDirectConstAssertionInArrowFunctions: true
+            }
         ]
-    }
+    },
+    settings: {
+        react: {
+            version: 'detect',
+        },
+    },
 };
