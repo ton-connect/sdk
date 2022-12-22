@@ -9,7 +9,8 @@
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "@tonconnect/ui": "../ui"
+    "@tonconnect/ui": "../ui",
+    "@tonconnect/sdk": "^0.0.44"
 
   },
   "devDependencies": {
@@ -19,7 +20,8 @@
     "typescript": "^4.9.3",
     "vite": "^4.0.0",
     "eslint-plugin-react": "^7.31.11",
-    "eslint-plugin-react-hooks": "^4.6.0"
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "csstype": "^3.1.1"
   },
   "nx": {
     "tags": ["scope:ui-react"]
