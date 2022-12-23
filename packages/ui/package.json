@@ -54,7 +54,7 @@
     "qrcode-generator": "^1.4.4",
     "deepmerge": "^4.2.2",
     "is-plain-object": "^5.0.0",
-    "@tonconnect/sdk": "^0.0.44",
+    "@tonconnect/sdk": "^0.0.45",
     "@solid-primitives/i18n": "^1.1.2",
     "@floating-ui/dom": "^1.0.12",
     "solid-floating-ui": "^0.2.0"

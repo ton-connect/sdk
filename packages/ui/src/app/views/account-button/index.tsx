@@ -2,7 +2,7 @@ import { Component, createSignal, onCleanup, onMount, Show, useContext } from 's
 import { ArrowIcon, Text, TonIcon } from 'src/app/components';
 import { ConnectorContext } from 'src/app/state/connector.context';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
-import { toUserFriendlyAddress } from 'src/app/utils/address';
+import { toUserFriendlyAddress } from '@tonconnect/sdk';
 import {
     AccountButtonStyled,
     DropdownContainerStyled,
