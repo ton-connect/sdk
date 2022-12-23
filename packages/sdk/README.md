@@ -1,7 +1,5 @@
 # TON Connect SDK
 
-⚠️ TonConnect is currently in beta testing. Use it at your own risk.
-
 Use it to connect your app to TON wallets via TonConnect protocol. 
 You can find more details and the protocol specification in the [docs](https://github.com/ton-connect/docs).
 See the example of sdk usage [here](https://github.com/ton-connect/demo-dapp).
