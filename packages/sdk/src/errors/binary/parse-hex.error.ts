@@ -1,6 +1,6 @@
-import { TonConnectUIError } from 'src/errors/ton-connect-ui.error';
+import { TonConnectError } from 'src/errors';
 
-export class ParseHexError extends TonConnectUIError {
+export class ParseHexError extends TonConnectError {
     constructor(...args: ConstructorParameters<typeof Error>) {
         super(...args);
 

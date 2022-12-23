@@ -1,6 +1,5 @@
-import { WrongAddressError } from 'src/errors/address/wrong-address.error';
-import { Base64EncodeError } from 'src/errors/binary/base64-encode.error';
-import { ParseHexError } from 'src/errors/binary/parse-hex.error';
+import { WrongAddressError, ParseHexError } from 'src/errors';
+import { Base64 } from '@tonconnect/protocol';
 
 export function toUserFriendlyAddress(hexAddress: string): string {
     const { wc, hex } = parseHexAddress(hexAddress);
@@ -15,9 +14,7 @@ export function toUserFriendlyAddress(hexAddress: string): string {
     addressWithChecksum.set(addr);
     addressWithChecksum.set(crc16(addr), 34);
 
-    let addressBase64 = stringToBase64(
-        String.fromCharCode.apply(null, addressWithChecksum as unknown as number[])
-    );
+    let addressBase64 = Base64.encode(addressWithChecksum);
 
     return addressBase64.replace(/\+/g, '-').replace(/\//g, '_');
 }
@@ -102,16 +99,4 @@ function hexToBytes(hex: string): Uint8Array {
         result[i] = toByteMap[hexSubstring]!;
     }
     return result;
-}
-
-function stringToBase64(str: string): string {
-    if (typeof btoa === 'function') {
-        return btoa(str);
-    }
-
-    if (typeof Buffer?.from === 'function') {
-        return Buffer.from(str, 'binary').toString('base64');
-    }
-
-    throw new Base64EncodeError('Neither Buffer nor btoa is not supported in the your environment');
 }
