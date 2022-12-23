@@ -9,6 +9,10 @@ import {
     DropdownStyled,
     NotificationsStyled
 } from './style';
+import { Portal } from 'solid-js/web';
+import { useFloating } from 'solid-floating-ui';
+import { autoUpdate } from '@floating-ui/dom';
+import { Transition } from 'solid-transition-group';
 
 interface AccountButtonProps {}
 
@@ -19,7 +23,14 @@ export const AccountButton: Component<AccountButtonProps> = () => {
     const [address, setAddress] = createSignal('');
 
     let dropDownRef: HTMLDivElement | undefined;
-    let buttonRef: HTMLButtonElement | undefined;
+
+    const [floating, setFloating] = createSignal<HTMLDivElement | undefined>();
+    const [anchor, setAnchor] = createSignal<HTMLButtonElement | undefined>();
+
+    const position = useFloating(anchor, floating, {
+        whileElementsMounted: autoUpdate,
+        placement: 'bottom-end'
+    });
 
     const normalizedAddress = (): string => {
         if (address()) {
@@ -44,7 +55,7 @@ export const AccountButton: Component<AccountButtonProps> = () => {
         if (!address() || !isOpened()) {
             return;
         }
-        const clickToButton = buttonRef!.contains(e.target as Node);
+        const clickToButton = anchor()!.contains(e.target as Node);
         const clickToDropdown = dropDownRef!.contains(e.target as Node);
 
         if (!clickToButton && !clickToDropdown) {
@@ -81,20 +92,60 @@ export const AccountButton: Component<AccountButtonProps> = () => {
                     <AccountButtonStyled
                         appearance="flat"
                         onClick={() => setIsOpened(v => !v)}
-                        ref={buttonRef}
+                        ref={setAnchor}
                     >
                         <Text fontSize="15px" letterSpacing="-0.24px" fontWeight="590">
                             {normalizedAddress()}
                         </Text>
                         <ArrowIcon direction="bottom" />
                     </AccountButtonStyled>
-                    <DropdownStyled
-                        hidden={!isOpened()}
-                        onClose={() => setIsOpened(false)}
-                        ref={dropDownRef}
-                    />
+                    <Portal>
+                        <div
+                            ref={setFloating}
+                            style={{
+                                position: position.strategy,
+                                top: `${position.y ?? 0}px`,
+                                left: `${position.x ?? 0}px`,
+                                'z-index': 999
+                            }}
+                        >
+                            <Transition
+                                onBeforeEnter={el => {
+                                    el.animate(
+                                        [
+                                            { opacity: 0, transform: 'translateY(-8px)' },
+                                            { opacity: 1, transform: 'translateY(0)' }
+                                        ],
+                                        {
+                                            duration: 150
+                                        }
+                                    );
+                                }}
+                                onExit={(el, done) => {
+                                    const a = el.animate(
+                                        [
+                                            { opacity: 1, transform: 'translateY(0)' },
+                                            { opacity: 0, transform: 'translateY(-8px)' }
+                                        ],
+                                        {
+                                            duration: 150
+                                        }
+                                    );
+                                    a.finished.then(done);
+                                }}
+                            >
+                                <Show when={isOpened()}>
+                                    <DropdownStyled
+                                        hidden={!isOpened()}
+                                        onClose={() => setIsOpened(false)}
+                                        ref={dropDownRef}
+                                    />
+                                </Show>
+                            </Transition>
+                            <NotificationsStyled />
+                        </div>
+                    </Portal>
                 </DropdownContainerStyled>
-                <NotificationsStyled />
             </Show>
         </>
     );

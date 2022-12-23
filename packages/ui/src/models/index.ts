@@ -1,17 +1,18 @@
-export { ButtonConfiguration, ButtonSize, ButtonAppearance } from './button-configuration';
-export { Locales } from './locales';
-export { Themed } from './themed';
-export { THEME, Theme } from './THEME';
-export {
+export type { ButtonConfiguration, ButtonSize, ButtonAppearance } from './button-configuration';
+export type { Locales } from './locales';
+export type { Themed } from './themed';
+export { THEME } from './THEME';
+export type { Theme } from './THEME';
+export type {
     TonConnectUiCreateOptions,
     TonConnectUiOptionsWithManifest,
     TonConnectUiOptionsWithConnector,
     TonConnectUiCreateOptionsBase
 } from './ton-connect-ui-create-options';
-export { TonConnectUiOptions } from './ton-connect-ui-options';
-export {
+export type { TonConnectUiOptions } from './ton-connect-ui-options';
+export type {
     WalletsListConfiguration,
     WalletsListConfigurationExplicit,
     WalletsListConfigurationImplicit
 } from './wallets-list-configuration';
-export { WidgetConfiguration } from './widget-configuration';
+export type { WidgetConfiguration } from './widget-configuration';

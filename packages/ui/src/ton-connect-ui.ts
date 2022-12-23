@@ -19,7 +19,6 @@ import { setTheme } from 'src/app/state/theme-state';
 import { mergeOptions } from 'src/app/utils/options';
 import { setAppState } from 'src/app/state/app.state';
 import { unwrap } from 'solid-js/store';
-import { THEME } from 'src/models/THEME';
 
 export class TonConnectUi {
     private readonly walletInfoStorage = new WalletInfoStorage();
@@ -60,9 +59,9 @@ export class TonConnectUi {
 
     public set uiOptions(options: TonConnectUiOptions) {
         this.checkButtonRootExist(options.buttonRootId);
-        let theme: THEME | undefined;
+
         if (options.theme === 'SYSTEM') {
-            theme = getSystemTheme();
+            setTheme(getSystemTheme());
 
             if (!this.systemThemeChangeUnsubscribe) {
                 this.systemThemeChangeUnsubscribe = subscribeToThemeChange(theme =>
@@ -70,20 +69,15 @@ export class TonConnectUi {
                 );
             }
         } else {
-            theme =
-                options.theme === 'DARK'
-                    ? THEME.DARK
-                    : options.theme === 'LIGHT'
-                    ? THEME.LIGHT
-                    : undefined;
-            this.systemThemeChangeUnsubscribe?.();
+            if (options.theme) {
+                this.systemThemeChangeUnsubscribe?.();
+                setTheme(options.theme);
+            }
         }
 
         /* setThemeState(state =>
             mergeOptions({ theme, accentColor: options.accentColor }, unwrap(state))
         );*/
-
-        setTheme(theme!);
 
         setAppState(state => {
             const merged = mergeOptions(
@@ -109,7 +103,9 @@ export class TonConnectUi {
         } else if (options && 'manifestUrl' in options && options.manifestUrl) {
             this.connector = new TonConnect({ manifestUrl: options.manifestUrl });
         } else {
-            this.connector = new TonConnect();
+            throw new TonConnectUIError(
+                'You have to specify a `manifestUrl` or a `connector` in the options.'
+            );
         }
 
         this.getWallets();
@@ -117,7 +113,7 @@ export class TonConnectUi {
 
         this.subscribeToWalletChange();
 
-        if (options?.restoreConnection) {
+        if (options?.restoreConnection !== false) {
             this.connector.restoreConnection();
         }
 

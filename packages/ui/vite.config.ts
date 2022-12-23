@@ -23,7 +23,7 @@ export default defineConfig({
     emptyOutDir: true,
     minify: true,
     lib: {
-      entry: path.resolve('src/ton-connect-ui.ts'),
+      entry: path.resolve('src/index.ts'),
       name: '@tonconnect/ui',
       fileName: format => {
         return format === 'es' ? 'index.js' : 'index.umd.js'

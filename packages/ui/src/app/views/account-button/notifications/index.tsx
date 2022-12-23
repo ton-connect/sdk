@@ -4,11 +4,12 @@ import { ActionModalName, actionModalOpen } from 'src/app/state/modals-state';
 import { ConfirmOperationNotification } from './confirm-operation-notification';
 import { ErrorTransactionNotification } from './error-transaction-notification';
 import { SuccessTransactionNotification } from './success-transaction-notification';
-import { NotificationClass, NotificationsStyled } from './style';
+import { NotificationClass } from './style';
+import { Styleable } from 'src/app/models/styleable';
 
-interface NotificationsProps {}
+export interface NotificationsProps extends Styleable {}
 
-export const Notifications: Component<NotificationsProps> = () => {
+export const Notifications: Component<NotificationsProps> = props => {
     let lastId = -1;
     const liveTimeoutMs = 4500;
 
@@ -35,7 +36,7 @@ export const Notifications: Component<NotificationsProps> = () => {
     );
 
     return (
-        <NotificationsStyled>
+        <div class={props.class}>
             <TransitionGroup
                 onBeforeEnter={el => {
                     el.animate(
@@ -77,6 +78,6 @@ export const Notifications: Component<NotificationsProps> = () => {
                     )}
                 </For>
             </TransitionGroup>
-        </NotificationsStyled>
+        </div>
     );
 };

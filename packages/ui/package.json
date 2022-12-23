@@ -55,7 +55,9 @@
     "deepmerge": "^4.2.2",
     "is-plain-object": "^5.0.0",
     "@tonconnect/sdk": "^0.0.44",
-    "@solid-primitives/i18n": "^1.1.2"
+    "@solid-primitives/i18n": "^1.1.2",
+    "@floating-ui/dom": "^1.0.12",
+    "solid-floating-ui": "^0.2.0"
   },
   "devDependencies": {
     "typescript": "^4.8.2",

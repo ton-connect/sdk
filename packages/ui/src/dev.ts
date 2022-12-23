@@ -1,6 +1,7 @@
 /* @refresh reload */
 import { TonConnectUi } from 'src/ton-connect-ui';
 import { THEME } from 'src/models/THEME';
+import { widgetController } from 'src/app/widget-controller';
 
 async function dev(): Promise<void> {
     const tc = new TonConnectUi({
@@ -9,7 +10,15 @@ async function dev(): Promise<void> {
         manifestUrl: 'https://ton-connect.github.io/demo-dapp/tonconnect-manifest.json',
         theme: THEME.LIGHT
     });
-    tc.connectWallet();
+
+    setTimeout(() => {
+        widgetController.openActionsModal('confirm-transaction');
+    }, 500);
+    setTimeout(() => {
+        widgetController.openActionsModal('transaction-sent');
+    }, 1000);
+
+    //  tc.connectWallet();
     /*
     setTimeout(() => {
         tc.uiOptions = {

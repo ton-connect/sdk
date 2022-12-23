@@ -7,7 +7,7 @@ export interface ButtonProps extends Styleable {
     size?: 's' | 'm' | 'l';
     children: JSXElement;
     onClick: () => void;
-    ref?: HTMLButtonElement | undefined;
+    ref?: HTMLButtonElement | ((el: HTMLButtonElement) => void) | undefined;
 }
 
 export const Button: Component<ButtonProps> = props => {

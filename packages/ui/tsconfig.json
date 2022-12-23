@@ -13,11 +13,7 @@
       "src/*": ["./src/*"]
     },
     "rootDir": "src",
-    "outDir": "./lib",
-    "plugins": [
-      { "transform": "typescript-transform-paths" },
-      { "transform": "typescript-transform-paths", "afterDeclarations": true }
-    ]
+    "outDir": "./lib"
   },
   "include": [
     "./src"

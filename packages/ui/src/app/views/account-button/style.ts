@@ -29,17 +29,11 @@ export const DropdownContainerStyled = styled.div`
 export const DropdownStyled = styled(AccountButtonDropdown)<{ hidden: boolean }>`
     box-sizing: border-box;
     overflow: hidden;
-    margin-top: 20px;
-
-    transform: ${props => (props.hidden ? 'unset' : 'translateY(-8px)')};
-    opacity: ${props => (props.hidden ? '0' : '1')};
-    max-height: ${props => (props.hidden ? '0' : '140px')};
-    transition: ${props =>
-        `max-height 0s ${
-            props.hidden ? '0.15s' : '0s'
-        }, transform 0.15s ease-in-out, opacity 0.15s ease-in-out`};
+    margin-top: 12px;
 `;
 
 export const NotificationsStyled = styled(Notifications)`
-    margin-top: 12px;
+    > div:first-child {
+        margin-top: 20px;
+    }
 `;
