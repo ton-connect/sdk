@@ -1,8 +1,8 @@
 import { createContext, FunctionComponent, memo } from 'react';
 import { Locales, Theme, TonConnectUi } from '@tonconnect/ui';
 import { ITonConnect } from '@tonconnect/sdk';
-import { Property } from 'csstype';
-import Color = Property.Color;
+import type * as CSS from 'csstype';
+type Color = CSS.Property.Color;
 
 export const TonConnectUIContext = createContext<TonConnectUi | null>(null);
 
@@ -24,6 +24,7 @@ export interface TonConnectUIProviderPropsBase {
     theme: Theme;
     accentColor: Color;
     language: Locales;
+    widgetRootId: string;
 }
 
 const TonConnectUIProvider: FunctionComponent<TonConnectUIProviderProps> = ({

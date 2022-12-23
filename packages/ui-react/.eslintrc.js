@@ -18,6 +18,10 @@ module.exports = {
                 allowConciseArrowFunctionExpressionsStartingWithVoid: true,
                 allowDirectConstAssertionInArrowFunctions: true
             }
+        ],
+        "unused-imports/no-unused-vars": [
+            "error",
+            { "vars": "all", "varsIgnorePattern": "^_", "args": "after-used", "argsIgnorePattern": "^_" }
         ]
     },
     settings: {

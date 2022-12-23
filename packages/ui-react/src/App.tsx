@@ -1,15 +1,16 @@
-import { FunctionComponent, useEffect } from 'react';
-import { TonConnectUi } from '@tonconnect/ui';
+import { FunctionComponent } from 'react';
+import TonConnectUIProvider from './components/TonConnectUIProvider';
+import Test from './Test';
+import { THEME } from '@tonconnect/ui';
 
 const App: FunctionComponent = () => {
-    useEffect(() => {
-        const tc = new TonConnectUi({ buttonRootId: 'tc-root' });
-    }, []);
-
     return (
-        <div className="App">
-            <div id="tc-root"></div>
-        </div>
+        <TonConnectUIProvider
+            manifestUrl="https://ton-connect.github.io/demo-dapp/tonconnect-manifest.json"
+            theme={THEME.DARK}
+        >
+            <Test />
+        </TonConnectUIProvider>
     );
 };
 
