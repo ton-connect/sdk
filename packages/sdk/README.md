@@ -87,6 +87,7 @@ const walletsList = await connector.getWallets();
     tondns?: string;
     aboutUrl: string;
     universalLink?: string;
+    deepLink?: string;
     bridgeUrl?: string;
     jsBridgeKey?: string;
     injected?: boolean; // true if this wallet is injected to the webpage

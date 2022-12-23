@@ -61,19 +61,23 @@ export class WalletsListManager {
                 tondns: walletConfigDTO.tondns
             } as WalletInfo;
 
-            if ('bridge_url' in walletConfigDTO) {
-                (walletConfig as WalletInfoRemote).bridgeUrl = walletConfigDTO.bridge_url;
-                (walletConfig as WalletInfoRemote).universalLink = walletConfigDTO.universal_url;
-            }
+            walletConfigDTO.bridge.forEach(bridge => {
+                if (bridge.type === 'sse') {
+                    (walletConfig as WalletInfoRemote).bridgeUrl = bridge.url;
+                    (walletConfig as WalletInfoRemote).universalLink =
+                        walletConfigDTO.universal_url;
+                    (walletConfig as WalletInfoRemote).deepLink = walletConfigDTO.deepLink;
+                }
 
-            if ('js_bridge_key' in walletConfigDTO) {
-                const jsBridgeKey = walletConfigDTO.js_bridge_key;
-                (walletConfig as WalletInfoInjected).jsBridgeKey = jsBridgeKey;
-                (walletConfig as WalletInfoInjected).injected =
-                    InjectedProvider.isWalletInjected(jsBridgeKey);
-                (walletConfig as WalletInfoInjected).embedded =
-                    InjectedProvider.isInsideWalletBrowser(jsBridgeKey);
-            }
+                if (bridge.type === 'js') {
+                    const jsBridgeKey = bridge.key;
+                    (walletConfig as WalletInfoInjected).jsBridgeKey = jsBridgeKey;
+                    (walletConfig as WalletInfoInjected).injected =
+                        InjectedProvider.isWalletInjected(jsBridgeKey);
+                    (walletConfig as WalletInfoInjected).embedded =
+                        InjectedProvider.isInsideWalletBrowser(jsBridgeKey);
+                }
+            });
 
             return walletConfig;
         });
@@ -92,10 +96,40 @@ export class WalletsListManager {
             return false;
         }
 
-        const containsUniversalUrl = 'universal_url' in value;
-        const containsHttpBridge = 'bridge_url' in value;
-        const containsJsBridge = 'js_bridge_key' in value;
+        if (
+            !('bridge' in value) ||
+            !Array.isArray((value as { bridge: unknown }).bridge) ||
+            !(value as { bridge: unknown[] }).bridge.length
+        ) {
+            return false;
+        }
 
-        return (containsHttpBridge && containsUniversalUrl) || containsJsBridge;
+        const bridge = (value as { bridge: unknown[] }).bridge;
+
+        if (bridge.some(item => !item || typeof item !== 'object' || !('type' in item))) {
+            return false;
+        }
+
+        const sseBridge = bridge.find(item => (item as { type: string }).type === 'sse');
+
+        if (sseBridge) {
+            if (
+                !('url' in sseBridge) ||
+                !(sseBridge as { url: string }).url ||
+                !(value as { universal_url: string }).universal_url
+            ) {
+                return false;
+            }
+        }
+
+        const jsBridge = bridge.find(item => (item as { type: string }).type === 'js');
+
+        if (jsBridge) {
+            if (!('key' in jsBridge) || !(jsBridge as { key: string }).key) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

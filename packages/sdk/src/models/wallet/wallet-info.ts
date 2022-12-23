@@ -27,6 +27,11 @@ export interface WalletInfoRemote extends WalletInfoBase {
     universalLink: string;
 
     /**
+     * Native wallet app deepLink. The link should support [Ton Connect parameters]{@link https://github.com/ton-connect/docs/blob/main/bridge.md#universal-link}.
+     */
+    deepLink: string;
+
+    /**
      * Url of the wallet's implementation of the [HTTP bridge]{@link https://github.com/ton-connect/docs/blob/main/bridge.md#http-bridge}.
      */
     bridgeUrl: string;
@@ -54,26 +59,26 @@ export type WalletInfo =
     | WalletInfoInjected
     | (WalletInfoRemote & WalletInfoInjected);
 
-export interface WalletInfoDTOBase {
+export interface WalletInfoDTO {
     name: string;
     image: string;
     tondns?: string;
     about_url: string;
-}
-
-export interface WalletInfoRemoteDTO extends WalletInfoDTOBase {
     universal_url: string;
-    bridge_url: string;
+
+    deepLink: string;
+    bridge: (WalletInfoBridgeRemoteDTO | WalletInfoBridgeInjectedDTO)[];
 }
 
-export interface WalletInfoInjectedDTO extends WalletInfoDTOBase {
-    js_bridge_key: string;
+export interface WalletInfoBridgeRemoteDTO {
+    type: 'sse';
+    url: string;
 }
 
-export type WalletInfoDTO =
-    | WalletInfoRemoteDTO
-    | WalletInfoInjectedDTO
-    | (WalletInfoRemoteDTO & WalletInfoInjectedDTO);
+export interface WalletInfoBridgeInjectedDTO {
+    type: 'js';
+    key: string;
+}
 
 export function isWalletInfoInjected(value: WalletInfo): value is WalletInfoInjected {
     return 'jsBridgeKey' in value;
