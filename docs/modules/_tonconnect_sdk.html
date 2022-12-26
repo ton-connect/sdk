@@ -16,7 +16,7 @@
 <li><a href="_tonconnect_sdk.html">@tonconnect/sdk</a></li></ul>
 <h1>Module @tonconnect/sdk</h1></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/2b2e580/packages/sdk/src/index.ts#L1">packages/sdk/src/index.ts:1</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/b78a6a3/packages/sdk/src/index.ts#L1">packages/sdk/src/index.ts:1</a></li></ul></aside>
 <section class="tsd-panel-group">
 <section class="tsd-panel tsd-typography">
 <a href="#ton-connect-sdk" id="ton-connect-sdk" style="color: inherit; text-decoration: none;">
@@ -83,6 +83,9 @@ Make sure that manifest is available to GET by its URL.</p>
 </a>
 <p>TonConnect is build to support different wallets. You can fetch all supported wallets list and show a custom wallet selection dialog for user</p>
 <pre><code class="language-ts"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">walletsList</span><span class="hl-1"> = </span><span class="hl-0">await</span><span class="hl-1"> </span><span class="hl-2">connector</span><span class="hl-1">.</span><span class="hl-5">getWallets</span><span class="hl-1">();</span><br/><br/><span class="hl-7">/* walletsList is </span><br/><span class="hl-7">{</span><br/><span class="hl-7">    name: string;</span><br/><span class="hl-7">    imageUrl: string;</span><br/><span class="hl-7">    tondns?: string;</span><br/><span class="hl-7">    aboutUrl: string;</span><br/><span class="hl-7">    universalLink?: string;</span><br/><span class="hl-7">    deepLink?: string;</span><br/><span class="hl-7">    bridgeUrl?: string;</span><br/><span class="hl-7">    jsBridgeKey?: string;</span><br/><span class="hl-7">    injected?: boolean; // true if this wallet is injected to the webpage</span><br/><span class="hl-7">    embedded?: boolean; // true if the dapp is opened inside this wallet&#39;s browser</span><br/><span class="hl-7">}[] </span><br/><span class="hl-7"> */</span>
+</code></pre>
+<p>You also can get wallets list using <code>getWallets</code> static method:</p>
+<pre><code class="language-ts"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">walletsList</span><span class="hl-1"> = </span><span class="hl-0">await</span><span class="hl-1"> </span><span class="hl-2">TonConnect</span><span class="hl-1">.</span><span class="hl-5">getWallets</span><span class="hl-1">();</span>
 </code></pre>
 
 <a href="#initialize-a-wallet-connection-when-user-clicks-to-39connect39-button-in-your-app" id="initialize-a-wallet-connection-when-user-clicks-to-39connect39-button-in-your-app" style="color: inherit; text-decoration: none;">
