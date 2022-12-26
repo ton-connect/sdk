@@ -21,7 +21,8 @@ export default defineConfig({
     target: 'es6',
     outDir: 'lib',
     emptyOutDir: true,
-    minify: true,
+    minify: false,
+    sourcemap: true,
     lib: {
       entry: path.resolve('src/index.ts'),
       name: '@tonconnect/ui',

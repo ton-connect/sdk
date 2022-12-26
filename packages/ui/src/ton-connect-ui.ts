@@ -13,7 +13,7 @@ import { TonConnectUIError } from 'src/errors/ton-connect-ui.error';
 import { TonConnectUiCreateOptions } from 'src/models/ton-connect-ui-create-options';
 import { WalletInfoStorage } from 'src/storage';
 import { isDevice } from 'src/app/styles/media';
-import { getSystemTheme, openLinkBlank, subscribeToThemeChange } from 'src/app/utils/web-api';
+import { getSystemTheme, openLink, subscribeToThemeChange } from 'src/app/utils/web-api';
 import { TonConnectUiOptions } from 'src/models/ton-connect-ui-options';
 import { setTheme } from 'src/app/state/theme-state';
 import { mergeOptions } from 'src/app/utils/options';
@@ -135,9 +135,20 @@ export class TonConnectUi {
      * @return function which has to be called to unsubscribe
      */
     public onStatusChange(
-        ...parameters: Parameters<ITonConnect['onStatusChange']>
+        callback: (wallet: (Wallet & WalletInfo) | null) => void,
+        errorsHandler?: (err: TonConnectError) => void
     ): ReturnType<ITonConnect['onStatusChange']> {
-        return this.connector.onStatusChange(...parameters);
+        return this.connector.onStatusChange(wallet => {
+            if (wallet) {
+                const lastSelectedWalletInfo =
+                    widgetController.getSelectedWalletInfo() ||
+                    this.walletInfoStorage.getWalletInfo();
+
+                callback({ ...wallet, ...lastSelectedWalletInfo! });
+            } else {
+                callback(wallet);
+            }
+        }, errorsHandler);
     }
 
     /**
@@ -174,9 +185,8 @@ export class TonConnectUi {
     public async sendTransaction(
         tx: SendTransactionRequest,
         options?: {
-            showModalBefore: boolean;
-            showSuccessModalAfter: boolean;
-            showErrorModalAfter: boolean;
+            modals: ('before' | 'success' | 'error')[];
+            notifications: ('before' | 'success' | 'error')[];
         }
     ): Promise<SendTransactionResponse> {
         if (!this.connected || !this.walletInfo) {
@@ -184,23 +194,35 @@ export class TonConnectUi {
         }
 
         if (!isDevice('desktop') && 'universalLink' in this.walletInfo) {
-            openLinkBlank(this.walletInfo.universalLink);
+            openLink(this.walletInfo.universalLink);
         }
 
-        if (options?.showModalBefore || !options) {
-            widgetController.openActionsModal('confirm-transaction');
-        }
+        const notification = options?.notifications || ['before', 'success', 'error'];
+        const modals = options?.modals || ['before'];
+
+        widgetController.setAction({
+            name: 'confirm-transaction',
+            showNotification: notification.includes('before'),
+            openModal: modals.includes('before')
+        });
+
         try {
             const result = await this.connector.sendTransaction(tx);
-            if (options?.showSuccessModalAfter) {
-                widgetController.openActionsModal('transaction-sent');
-            }
+
+            widgetController.setAction({
+                name: 'transaction-sent',
+                showNotification: notification.includes('success'),
+                openModal: modals.includes('success')
+            });
 
             return result;
         } catch (e) {
-            if (options?.showErrorModalAfter) {
-                widgetController.openActionsModal('transaction-canceled');
-            }
+            widgetController.setAction({
+                name: 'transaction-canceled',
+                showNotification: notification.includes('error'),
+                openModal: modals.includes('error')
+            });
+
             if (e instanceof TonConnectError) {
                 throw e;
             } else {

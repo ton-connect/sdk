@@ -20,7 +20,6 @@ export const AccountButtonStyled = styled(Button)`
 `;
 
 export const DropdownContainerStyled = styled.div`
-    width: 256px;
     display: flex;
     flex-direction: column;
     align-items: flex-end;

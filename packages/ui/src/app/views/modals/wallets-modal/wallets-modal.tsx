@@ -28,7 +28,7 @@ import {
     LoaderContainerStyled,
     H1Styled
 } from './style';
-import { openLinkBlank } from 'src/app/utils/web-api';
+import {openLink, openLinkBlank} from 'src/app/utils/web-api';
 import { isDevice } from 'src/app/styles/media';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { useI18n } from '@solid-primitives/i18n';
@@ -69,7 +69,7 @@ export const WalletsModal: Component = () => {
             bridgeUrl: walletInfo.bridgeUrl
         });
 
-        openLinkBlank(universalLink);
+        openLink(universalLink);
     };
 
     const onSelectIfInjected = (walletInfo: WalletInfoInjected): void => {

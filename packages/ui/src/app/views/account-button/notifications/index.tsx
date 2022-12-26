@@ -1,6 +1,6 @@
 import { Component, createEffect, createSignal, For, Match, on, Switch } from 'solid-js';
 import { TransitionGroup } from 'solid-transition-group';
-import { ActionModalName, actionModalOpen } from 'src/app/state/modals-state';
+import { ActionName, action } from 'src/app/state/modals-state';
 import { ConfirmOperationNotification } from './confirm-operation-notification';
 import { ErrorTransactionNotification } from './error-transaction-notification';
 import { SuccessTransactionNotification } from './success-transaction-notification';
@@ -14,16 +14,18 @@ export const Notifications: Component<NotificationsProps> = props => {
     const liveTimeoutMs = 4500;
 
     const [openedNotifications, setOpenedNotifications] = createSignal<
-        { id: number; action: ActionModalName }[]
+        { id: number; action: ActionName }[]
     >([]);
 
     createEffect(
-        on(actionModalOpen, action => {
-            if (action) {
+        on(action, action => {
+            if (action && action.showNotification) {
                 lastId++;
                 const id = lastId;
 
-                setOpenedNotifications(notifications => notifications.concat({ id, action }));
+                setOpenedNotifications(notifications =>
+                    notifications.concat({ id, action: action.name })
+                );
                 setTimeout(
                     () =>
                         setOpenedNotifications(notifications =>

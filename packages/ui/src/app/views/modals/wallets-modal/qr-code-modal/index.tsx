@@ -13,7 +13,7 @@ import {
     TextStyled
 } from './style';
 import { ConnectorContext } from 'src/app/state/connector.context';
-import { openLinkBlank } from 'src/app/utils/web-api';
+import { openLink, openLinkBlank } from 'src/app/utils/web-api';
 
 export interface QrCodeModalProps {
     wallet: WalletInfoRemote | (WalletInfoRemote & WalletInfoInjected);
@@ -46,10 +46,7 @@ export const QrCodeModal: Component<QrCodeModalProps> = props => {
                 <QRCode sourceUrl={universalLink} imageUrl={props.wallet.imageUrl} />
             </QRBackgroundStyled>
             <ButtonsContainerStyled>
-                <ActionButtonStyled
-                    appearance="secondary"
-                    onClick={() => openLinkBlank(universalLink)}
-                >
+                <ActionButtonStyled appearance="secondary" onClick={() => openLink(universalLink)}>
                     <Translation
                         translationKey="walletModal.qrCodeModal.openWallet"
                         translationValues={{ name: props.wallet.name }}
