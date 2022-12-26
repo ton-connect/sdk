@@ -30,10 +30,7 @@
   ],
   "author": "tonconnect",
   "license": "Apache-2.0",
-  "files": [
-    "lib",
-    "dist"
-  ],
+  "files": ["lib"],
   "main": "./lib/index.umd.cjs",
   "module": "./lib/index.js",
   "types": "./lib/index.d.ts",
@@ -48,7 +45,7 @@
   "dependencies": {
     "solid-js": "^1.5.1",
     "solid-styled-components": "^0.28.5",
-    "solid-transition-group": "^0.0.11",
+    "solid-transition-group": "^0.0.12",
     "classnames": "^2.3.2",
     "qrcode-generator": "^1.4.4",
     "deepmerge": "^4.2.2",
