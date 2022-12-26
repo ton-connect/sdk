@@ -65,7 +65,11 @@ export class SessionCrypto {
         );
 
         if (!decrypted) {
-            throw new Error('Decryption error');
+            throw new Error(
+                `Decryption error: \n message: ${message.toString()} \n sender pubkey: ${senderPublicKey.toString()} \n keypair pubkey: ${
+                    this.keyPair.publicKey.toString()
+                } \n keypair secretkey: ${this.keyPair.secretKey.toString()}`
+            );
         }
 
         return new TextDecoder().decode(decrypted);
