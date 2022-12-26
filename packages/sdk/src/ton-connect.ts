@@ -36,6 +36,13 @@ import { getWebPageManifest } from 'src/utils/web-api';
 import { WalletsListManager } from 'src/wallets-list-manager';
 
 export class TonConnect implements ITonConnect {
+    private static readonly walletsList = new WalletsListManager();
+
+    /**
+     * Returns available wallets list.
+     */
+    public static getWallets = this.walletsList.getWallets();
+
     private readonly walletsList = new WalletsListManager();
 
     private readonly dappSettings: Required<TonConnectOptions>;

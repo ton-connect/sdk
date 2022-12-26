@@ -94,6 +94,11 @@ const walletsList = await connector.getWallets();
  */
 ```
 
+You also can get wallets list using `getWallets` static method:
+```ts
+const walletsList = await TonConnect.getWallets();
+```
+
 ## Initialize a wallet connection when user clicks to 'connect' button in your app
 ### Initialize a remote wallet connection via universal link 
 

@@ -120,6 +120,8 @@ export class BridgeProvider implements HTTPProvider {
     public closeConnection(): void {
         this.bridge?.close();
         this.listeners = [];
+        this.session = null;
+        this.bridge = null;
     }
 
     public disconnect(): Promise<void> {
