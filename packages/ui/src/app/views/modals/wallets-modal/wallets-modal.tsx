@@ -28,7 +28,7 @@ import {
     LoaderContainerStyled,
     H1Styled
 } from './style';
-import {openLink, openLinkBlank} from 'src/app/utils/web-api';
+import { openLink } from 'src/app/utils/web-api';
 import { isDevice } from 'src/app/styles/media';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { useI18n } from '@solid-primitives/i18n';
@@ -85,20 +85,6 @@ export const WalletsModal: Component = () => {
     });
 
     onCleanup(unsubscribe);
-
-    createEffect(() => {
-        if (walletsList()) {
-            const embeddedWallet: WalletInfoInjected = walletsList()!.find(
-                wallet => 'embedded' in wallet && wallet.embedded
-            ) as WalletInfoInjected;
-
-            if (embeddedWallet) {
-                setLastSelectedWalletInfo(embeddedWallet);
-                connector.connect({ jsBridgeKey: embeddedWallet.jsBridgeKey });
-                onClose();
-            }
-        }
-    });
 
     return (
         <ModalWrapper>

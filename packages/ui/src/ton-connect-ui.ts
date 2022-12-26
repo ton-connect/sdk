@@ -6,7 +6,8 @@ import {
     TonConnect,
     TonConnectError,
     Wallet,
-    WalletInfo
+    WalletInfo,
+    WalletInfoInjected
 } from '@tonconnect/sdk';
 import { widgetController } from 'src/app/widget-controller';
 import { TonConnectUIError } from 'src/errors/ton-connect-ui.error';
@@ -19,6 +20,7 @@ import { setTheme } from 'src/app/state/theme-state';
 import { mergeOptions } from 'src/app/utils/options';
 import { setAppState } from 'src/app/state/app.state';
 import { unwrap } from 'solid-js/store';
+import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 
 export class TonConnectUi {
     private readonly walletInfoStorage = new WalletInfoStorage();
@@ -154,14 +156,28 @@ export class TonConnectUi {
     /**
      * Opens the modal window and handles a wallet connection.
      */
-    public connectWallet(): Promise<Wallet> {
-        widgetController.openWalletsModal();
+    public async connectWallet(): Promise<Wallet & WalletInfo> {
+        const walletsList = await this.getWallets();
+        const embeddedWallet: WalletInfoInjected = walletsList.find(
+            wallet => 'embedded' in wallet && wallet.embedded
+        ) as WalletInfoInjected;
+
+        if (embeddedWallet) {
+            setLastSelectedWalletInfo(embeddedWallet);
+            this.connector.connect({ jsBridgeKey: embeddedWallet.jsBridgeKey });
+        } else {
+            widgetController.openWalletsModal();
+        }
 
         return new Promise((resolve, reject) => {
             const unsubscribe = this.connector.onStatusChange(wallet => {
                 unsubscribe!();
                 if (wallet) {
-                    resolve(wallet);
+                    const lastSelectedWalletInfo =
+                        widgetController.getSelectedWalletInfo() ||
+                        this.walletInfoStorage.getWalletInfo();
+
+                    resolve({ ...wallet, ...lastSelectedWalletInfo! });
                 } else {
                     reject(new TonConnectUIError('Wallet was not connected'));
                 }

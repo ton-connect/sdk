@@ -24,7 +24,9 @@ export const Notifications: Component<NotificationsProps> = props => {
                 const id = lastId;
 
                 setOpenedNotifications(notifications =>
-                    notifications.concat({ id, action: action.name })
+                    notifications
+                        .filter(notification => notification.action !== 'confirm-transaction')
+                        .concat({ id, action: action.name })
                 );
                 setTimeout(
                     () =>
