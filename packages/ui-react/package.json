@@ -1,17 +1,49 @@
 {
   "name": "@tonconnect/ui-react",
-  "version": "0.0.0",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ton-connect/sdk.git"
+  },
+  "homepage": "https://github.com/ton-connect/sdk/tree/main/packages/ui-react",
+  "bugs": {
+    "url": "https://github.com/ton-connect/sdk/issues"
+  },
+  "keywords": [
+    "TON",
+    "Wallet",
+    "ton-connect",
+    "tonconnect",
+    "Connect",
+    "Tonkeeper",
+    "sdk",
+    "UI",
+    "React"
+  ],
+  "author": "tonconnect",
+  "license": "Apache-2.0",
+  "files": ["lib"],
+  "main": "./lib/index.umd.cjs",
+  "module": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "require": "./lib/index.umd.cjs",
+      "import": "./lib/index.js",
+      "default": "./lib/index.umd.cjs"
+    }
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "@tonconnect/ui": "../ui",
-    "@tonconnect/sdk": "^0.0.44"
-
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "@tonconnect/ui": "^0.0.4",
+    "@tonconnect/sdk": "^2.0.1"
   },
   "devDependencies": {
     "@types/react": "^18.0.26",
@@ -21,7 +53,12 @@
     "vite": "^4.0.0",
     "eslint-plugin-react": "^7.31.11",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "csstype": "^3.1.1"
+    "csstype": "^3.1.1",
+    "vite-plugin-dts": "^1.7.1"
+  },
+  "peerDependencies": {
+    "react": ">=17.0.0",
+    "react-dom": ">=17.0.0"
   },
   "nx": {
     "tags": ["scope:ui-react"]

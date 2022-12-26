@@ -1,7 +1,5 @@
 # TON Connect
 
-⚠️ TonConnect is currently in beta testing. Use it at your own risk.
-
 This is the implementation of the TonConnect protocol. You can find more details about TonConnect protocol in the [docs](https://github.com/ton-connect/docs).
 
 [Latest API documentation](https://ton-connect.github.io/sdk/)

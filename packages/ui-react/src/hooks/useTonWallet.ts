@@ -7,11 +7,7 @@ export function useTonWallet(): (Wallet & WalletInfo) | null {
     const [wallet, setWallet] = useState<(Wallet & WalletInfo) | null>(null);
 
     tonConnectUI.onStatusChange(value => {
-        if (!value) {
-            setWallet(value);
-        } else {
-            setWallet({ ...value, ...tonConnectUI.walletInfo! });
-        }
+        setWallet(value);
     });
 
     return wallet;

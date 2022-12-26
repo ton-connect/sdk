@@ -1,5 +1,5 @@
 import { useTonWallet } from './useTonWallet';
-import { toUserFriendlyAddress } from '@tonconnect/ui';
+import { toUserFriendlyAddress } from '@tonconnect/sdk';
 
 export function useTonAddress(userFriendly = true): string {
     const wallet = useTonWallet();
