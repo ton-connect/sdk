@@ -41,7 +41,9 @@ export class TonConnect implements ITonConnect {
     /**
      * Returns available wallets list.
      */
-    public static getWallets = this.walletsList.getWallets();
+    public static getWallets(): Promise<WalletInfo[]> {
+        return this.walletsList.getWallets();
+    }
 
     private readonly walletsList = new WalletsListManager();
 

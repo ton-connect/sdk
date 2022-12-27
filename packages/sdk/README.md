@@ -64,16 +64,18 @@ If your manifest placed not in the root of your app, you can specify its path:
 
 ## Subscribe to the connection status changes
 ```js
-connector.onStatusChange(
+const unsubscribe = connector.onStatusChange(
     walletInfo => {
         // update state/reactive variables to show updates in the ui
     } 
 );
+
+// call `unsubscribe()` later to save resources when you don't need to listen for updates anymore.
 ```
 
 ## Fetch wallets list
 
-TonConnect is build to support different wallets. You can fetch all supported wallets list and show a custom wallet selection dialog for user
+TonConnect is build to support different wallets. You can fetch all supported wallets list and show a custom wallet selection dialog for user.
 
 ```ts
 const walletsList = await connector.getWallets();
@@ -111,7 +113,7 @@ const walletConnectionSource = {
 const universalLink = connector.connect(walletConnectionSource);
 ```
 
-Then you have to show this link to user as QR code, or use it as a deeplink. You will receive an update in `connector.onStatusChange` when user approves connection in the wallet
+Then you have to show this link to user as QR code, or use it as a deeplink. You will receive an update in `connector.onStatusChange` when user approves connection in the wallet.
 
 ### Initialize injected wallet connection
 ```ts
@@ -122,7 +124,7 @@ const walletConnectionSource = {
 connector.connect(walletConnectionSource);
 ```
 
-You will receive an update in `connector.onStatusChange` when user approves connection in the wallet
+You will receive an update in `connector.onStatusChange` when user approves connection in the wallet.
 
 ## Send transaction
 ```ts

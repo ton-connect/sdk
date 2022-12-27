@@ -1,6 +1,6 @@
 {
   "name": "@tonconnect/sdk",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "scripts": {
     "build": "npx rimraf lib && ttsc --outDir ./lib/cjs && ttsc --module esnext --outDir ./lib/esm && npx rimraf dist &&  webpack --mode development",
     "build:production": "npx rimraf lib && ttsc --project tsconfig.cjs.json --sourceMap false && ttsc --project tsconfig.esm.json --sourceMap false && npx rimraf dist &&  webpack --mode production"
