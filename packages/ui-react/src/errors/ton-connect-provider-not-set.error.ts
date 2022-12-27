@@ -1,6 +1,10 @@
-import { TonConnectUiReactError } from './ton-connect-ui-react.error';
+import { TonConnectUIReactError } from './ton-connect-ui-react.error';
 
-export class TonConnectProviderNotSetError extends TonConnectUiReactError {
+/**
+ * Thrown when either <TonConnectProvider> not added to the top of the tags tree,
+ * either there is an attempt using TonConnect UI hook or <TonConnectButton> inside <TonConnectProvider>
+ */
+export class TonConnectProviderNotSetError extends TonConnectUIReactError {
     constructor(...args: ConstructorParameters<typeof Error>) {
         super(...args);
 
