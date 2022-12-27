@@ -1,10 +1,10 @@
 import { createContext, FunctionComponent, memo } from 'react';
-import { Locales, Theme, TonConnectUi } from '@tonconnect/ui';
+import { Locales, Theme, TonConnectUI } from '@tonconnect/ui';
 import { ITonConnect } from '@tonconnect/sdk';
 import type * as CSS from 'csstype';
 type Color = CSS.Property.Color;
 
-export const TonConnectUIContext = createContext<TonConnectUi | null>(null);
+export const TonConnectUIContext = createContext<TonConnectUI | null>(null);
 
 export type TonConnectUIProviderProps = {
     children: JSX.Element;
@@ -31,7 +31,7 @@ const TonConnectUIProvider: FunctionComponent<TonConnectUIProviderProps> = ({
     children,
     ...options
 }) => {
-    const tonConnectUI = new TonConnectUi(options);
+    const tonConnectUI = new TonConnectUI(options);
 
     return (
         <TonConnectUIContext.Provider value={tonConnectUI}>{children}</TonConnectUIContext.Provider>

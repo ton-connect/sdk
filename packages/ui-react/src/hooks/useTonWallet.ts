@@ -1,14 +1,20 @@
 import { useTonConnectUI } from './useTonConnectUI';
 import { Wallet, WalletInfo } from '@tonconnect/sdk';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export function useTonWallet(): (Wallet & WalletInfo) | null {
     const [tonConnectUI] = useTonConnectUI();
-    const [wallet, setWallet] = useState<(Wallet & WalletInfo) | null>(null);
+    const [wallet, setWallet] = useState<(Wallet & WalletInfo) | null>(
+        () => tonConnectUI.wallet && { ...tonConnectUI.wallet, ...tonConnectUI.walletInfo! }
+    );
 
-    tonConnectUI.onStatusChange(value => {
-        setWallet(value);
-    });
+    useEffect(
+        () =>
+            tonConnectUI.onStatusChange(value => {
+                setWallet(value);
+            }),
+        [tonConnectUI]
+    );
 
     return wallet;
 }
