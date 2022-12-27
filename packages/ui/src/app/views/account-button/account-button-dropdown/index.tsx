@@ -32,7 +32,6 @@ export const AccountButtonDropdown: Component<AccountButtonDropdownProps> = prop
     const [isCopiedShown, setIsCopiedShown] = createSignal(false);
 
     const onCopy = async (): Promise<void> => {
-        console.log(tonConnectUi.account!.address);
         const userFriendlyAddress = toUserFriendlyAddress(tonConnectUi.account!.address);
         await copyToClipboard(userFriendlyAddress);
         setIsCopiedShown(true);
