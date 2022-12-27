@@ -2,6 +2,7 @@
   "entryPointStrategy": "packages",
   "entryPoints": [
     "packages/sdk",
+    "packages/ui",
     "packages/protocol"
   ],
   "excludeInternal": true,

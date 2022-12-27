@@ -16,7 +16,7 @@
 <li><a href="_tonconnect_sdk.html">@tonconnect/sdk</a></li></ul>
 <h1>Module @tonconnect/sdk</h1></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/b78a6a3/packages/sdk/src/index.ts#L1">packages/sdk/src/index.ts:1</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/923352b/packages/sdk/src/index.ts#L1">packages/sdk/src/index.ts:1</a></li></ul></aside>
 <section class="tsd-panel-group">
 <section class="tsd-panel tsd-typography">
 <a href="#ton-connect-sdk" id="ton-connect-sdk" style="color: inherit; text-decoration: none;">
@@ -75,13 +75,13 @@ Make sure that manifest is available to GET by its URL.</p>
 <a href="#subscribe-to-the-connection-status-changes" id="subscribe-to-the-connection-status-changes" style="color: inherit; text-decoration: none;">
   <h2>Subscribe to the connection status changes</h2>
 </a>
-<pre><code class="language-js"><span class="hl-2">connector</span><span class="hl-1">.</span><span class="hl-5">onStatusChange</span><span class="hl-1">(</span><br/><span class="hl-1">    </span><span class="hl-2">walletInfo</span><span class="hl-1"> </span><span class="hl-4">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">        </span><span class="hl-7">// update state/reactive variables to show updates in the ui</span><br/><span class="hl-1">    } </span><br/><span class="hl-1">);</span>
+<pre><code class="language-js"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">unsubscribe</span><span class="hl-1"> = </span><span class="hl-2">connector</span><span class="hl-1">.</span><span class="hl-5">onStatusChange</span><span class="hl-1">(</span><br/><span class="hl-1">    </span><span class="hl-2">walletInfo</span><span class="hl-1"> </span><span class="hl-4">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">        </span><span class="hl-7">// update state/reactive variables to show updates in the ui</span><br/><span class="hl-1">    } </span><br/><span class="hl-1">);</span><br/><br/><span class="hl-7">// call `unsubscribe()` later to save resources when you don&#39;t need to listen for updates anymore.</span>
 </code></pre>
 
 <a href="#fetch-wallets-list" id="fetch-wallets-list" style="color: inherit; text-decoration: none;">
   <h2>Fetch wallets list</h2>
 </a>
-<p>TonConnect is build to support different wallets. You can fetch all supported wallets list and show a custom wallet selection dialog for user</p>
+<p>TonConnect is build to support different wallets. You can fetch all supported wallets list and show a custom wallet selection dialog for user.</p>
 <pre><code class="language-ts"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">walletsList</span><span class="hl-1"> = </span><span class="hl-0">await</span><span class="hl-1"> </span><span class="hl-2">connector</span><span class="hl-1">.</span><span class="hl-5">getWallets</span><span class="hl-1">();</span><br/><br/><span class="hl-7">/* walletsList is </span><br/><span class="hl-7">{</span><br/><span class="hl-7">    name: string;</span><br/><span class="hl-7">    imageUrl: string;</span><br/><span class="hl-7">    tondns?: string;</span><br/><span class="hl-7">    aboutUrl: string;</span><br/><span class="hl-7">    universalLink?: string;</span><br/><span class="hl-7">    deepLink?: string;</span><br/><span class="hl-7">    bridgeUrl?: string;</span><br/><span class="hl-7">    jsBridgeKey?: string;</span><br/><span class="hl-7">    injected?: boolean; // true if this wallet is injected to the webpage</span><br/><span class="hl-7">    embedded?: boolean; // true if the dapp is opened inside this wallet&#39;s browser</span><br/><span class="hl-7">}[] </span><br/><span class="hl-7"> */</span>
 </code></pre>
 <p>You also can get wallets list using <code>getWallets</code> static method:</p>
@@ -97,14 +97,14 @@ Make sure that manifest is available to GET by its URL.</p>
 </a>
 <pre><code class="language-ts"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">walletConnectionSource</span><span class="hl-1"> = {</span><br/><span class="hl-1">    </span><span class="hl-2">universalLink:</span><span class="hl-1"> </span><span class="hl-3">&#39;https://app.mycooltonwallet.com&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-2">bridgeUrl:</span><span class="hl-1"> </span><span class="hl-3">&#39;https://bridge.mycooltonwallet.com&#39;</span><br/><span class="hl-1">}</span><br/><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">universalLink</span><span class="hl-1"> = </span><span class="hl-2">connector</span><span class="hl-1">.</span><span class="hl-5">connect</span><span class="hl-1">(</span><span class="hl-2">walletConnectionSource</span><span class="hl-1">);</span>
 </code></pre>
-<p>Then you have to show this link to user as QR code, or use it as a deeplink. You will receive an update in <code>connector.onStatusChange</code> when user approves connection in the wallet</p>
+<p>Then you have to show this link to user as QR code, or use it as a deeplink. You will receive an update in <code>connector.onStatusChange</code> when user approves connection in the wallet.</p>
 
 <a href="#initialize-injected-wallet-connection" id="initialize-injected-wallet-connection" style="color: inherit; text-decoration: none;">
   <h3>Initialize injected wallet connection</h3>
 </a>
 <pre><code class="language-ts"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">walletConnectionSource</span><span class="hl-1"> = {</span><br/><span class="hl-1">    </span><span class="hl-2">jsBridgeKey:</span><span class="hl-1"> </span><span class="hl-3">&#39;tonkeeper&#39;</span><br/><span class="hl-1">}</span><br/><br/><span class="hl-2">connector</span><span class="hl-1">.</span><span class="hl-5">connect</span><span class="hl-1">(</span><span class="hl-2">walletConnectionSource</span><span class="hl-1">);</span>
 </code></pre>
-<p>You will receive an update in <code>connector.onStatusChange</code> when user approves connection in the wallet</p>
+<p>You will receive an update in <code>connector.onStatusChange</code> when user approves connection in the wallet.</p>
 
 <a href="#send-transaction" id="send-transaction" style="color: inherit; text-decoration: none;">
   <h2>Send transaction</h2>
@@ -238,7 +238,8 @@ Make sure that manifest is available to GET by its URL.</p>
 <li class="current"><a href="../modules.html">tonconnect</a>
 <ul>
 <li class="tsd-kind-module"><a href="_tonconnect_protocol.html">@tonconnect/protocol</a></li>
-<li class="current selected tsd-kind-module"><a href="_tonconnect_sdk.html">@tonconnect/sdk</a></li></ul></li></ul></div></details></nav>
+<li class="current selected tsd-kind-module"><a href="_tonconnect_sdk.html">@tonconnect/sdk</a></li>
+<li class="tsd-kind-module"><a href="_tonconnect_ui.html">@tonconnect/ui</a></li></ul></li></ul></div></details></nav>
 <nav class="tsd-navigation secondary menu-sticky">
 <ul>
 <li class="tsd-kind-reference tsd-parent-kind-module"><a href="_tonconnect_sdk.html#default" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-8388608-path"></use><use href="#icon-8388608-text"></use></svg>default</a></li>
