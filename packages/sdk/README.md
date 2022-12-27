@@ -126,6 +126,31 @@ connector.connect(walletConnectionSource);
 
 You will receive an update in `connector.onStatusChange` when user approves connection in the wallet.
 
+### Detect embedded wallet
+It is recommended not to show a QR code modal if the app is opened inside a wallet's browser. 
+You should detect working environment of the app and show appropriate UI.
+Check `embedded` property in elements of the wallets list to detect if the app is opened inside a wallet.
+
+```ts
+import { isWalletInfoInjected, WalletInfoInjected } from '@tonconnect/sdk';
+
+// "connect button" click handler.
+// Execute this before show wallet selection modal.
+
+const walletsList = await connector.getWallets(); // or use `walletsList` fetched before  
+
+const embeddedWallet = walletsList.find(
+    wallet => isWalletInfoInjected(wallet) && wallet.embedded
+) as WalletInfoInjected;
+
+if (embeddedWallet) {
+    connector.connect({ jsBridgeKey: embeddedWallet.jsBridgeKey });
+    return;
+}
+
+// else show modal and ask user to select a wallet
+```
+
 ## Send transaction
 ```ts
 if (!connector.connected) {
