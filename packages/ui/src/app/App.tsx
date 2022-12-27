@@ -9,13 +9,13 @@ import { GlobalStyles } from 'src/app/styles/global-styles';
 import { AccountButton } from 'src/app/views/account-button';
 import { ActionsModal, WalletsModal } from 'src/app/views/modals';
 import './styles/style.d.ts';
-import { TonConnectUi } from 'src/ton-connect-ui';
+import { TonConnectUI } from 'src/ton-connect-ui';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { createI18nContext, I18nContext } from '@solid-primitives/i18n';
 import { appState } from 'src/app/state/app.state';
 
 export type AppProps = {
-    tonConnectUI: TonConnectUi;
+    tonConnectUI: TonConnectUI;
 };
 
 const App: Component<AppProps> = props => {

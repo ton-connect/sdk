@@ -22,7 +22,11 @@ import { setAppState } from 'src/app/state/app.state';
 import { unwrap } from 'solid-js/store';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 
-export class TonConnectUi {
+export class TonConnectUI {
+    public static getWallets(): Promise<WalletInfo[]> {
+        return TonConnect.getWallets();
+    }
+
     private readonly walletInfoStorage = new WalletInfoStorage();
 
     private readonly connector: ITonConnect;
@@ -32,33 +36,37 @@ export class TonConnectUi {
     private systemThemeChangeUnsubscribe: (() => void) | null = null;
 
     /**
-     * Current connection status
+     * Current connection status.
      */
     public get connected(): boolean {
         return this.connector.connected;
     }
 
     /**
-     * Current connected account or null
+     * Current connected account or null.
      */
     public get account(): Account | null {
         return this.connector.account;
     }
 
     /**
-     * Curren connected wallet app or null
+     * Curren connected wallet app or null.
      */
     public get wallet(): Wallet | null {
         return this.connector.wallet;
     }
 
     /**
-     * Curren connected wallet's info or null
+     * Curren connected wallet's info or null.
      */
     public get walletInfo(): WalletInfo | null {
         return this._walletInfo;
     }
 
+    /**
+     * Set and apply new UI options. Object with partial options should be passed. Passed options will be merged with current options.
+     * @param options
+     */
     public set uiOptions(options: TonConnectUiOptions) {
         this.checkButtonRootExist(options.buttonRootId);
 
@@ -133,8 +141,8 @@ export class TonConnectUi {
     }
 
     /**
-     * Subscribe to connection status change
-     * @return function which has to be called to unsubscribe
+     * Subscribe to connection status change.
+     * @return function which has to be called to unsubscribe.
      */
     public onStatusChange(
         callback: (wallet: (Wallet & WalletInfo) | null) => void,
@@ -194,15 +202,15 @@ export class TonConnectUi {
     }
 
     /**
-     * Opens the modal window and handles the tx sending
-     * @param tx
-     * @param options
+     * Opens the modal window and handles the transaction sending.
+     * @param tx transaction to send.
+     * @param options modal and notifications behaviour settings. Default is show only 'before' modal and all notifications.
      */
     public async sendTransaction(
         tx: SendTransactionRequest,
         options?: {
-            modals: ('before' | 'success' | 'error')[];
-            notifications: ('before' | 'success' | 'error')[];
+            modals?: ('before' | 'success' | 'error')[];
+            notifications?: ('before' | 'success' | 'error')[];
         }
     ): Promise<SendTransactionResponse> {
         if (!this.connected || !this.walletInfo) {

@@ -7,7 +7,7 @@ import {
     setAction,
     setWalletsModalOpen
 } from 'src/app/state/modals-state';
-import { TonConnectUi } from 'src/ton-connect-ui';
+import { TonConnectUI } from 'src/ton-connect-ui';
 import App from './App';
 
 export const widgetController = {
@@ -16,7 +16,7 @@ export const widgetController = {
     setAction: (action: Action): void => void setTimeout(() => setAction(action)),
     clearAction: (): void => void setTimeout(() => setAction(null)),
     getSelectedWalletInfo: (): WalletInfo | null => lastSelectedWalletInfo(),
-    renderApp: (root: string, tonConnectUI: TonConnectUi): (() => void) =>
+    renderApp: (root: string, tonConnectUI: TonConnectUI): (() => void) =>
         render(
             () => <App tonConnectUI={tonConnectUI} />,
             document.getElementById(root) as HTMLElement

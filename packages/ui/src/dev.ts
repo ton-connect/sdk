@@ -1,13 +1,19 @@
 /* @refresh reload */
-import { TonConnectUi } from 'src/ton-connect-ui';
+import { TonConnectUI } from 'src/ton-connect-ui';
 import { THEME } from 'src/models/THEME';
+import { SendTransactionRequest } from '@tonconnect/sdk';
 
 async function dev(): Promise<void> {
-    const tc = new TonConnectUi({
+    const tc = new TonConnectUI({
         buttonRootId: 'button-root',
         restoreConnection: true,
         manifestUrl: 'https://ton-connect.github.io/demo-dapp/tonconnect-manifest.json',
         theme: THEME.LIGHT
+    });
+
+    const tonConnectUI = new TonConnectUI({
+        manifestUrl: 'https://<YOUR_APP_URL>/tonconnect-manifest.json',
+        buttonRootId: '<YOUR_CONNECT_BUTTON_ANCHOR_ID>'
     });
 
     /* setTimeout(() => {
@@ -17,12 +23,13 @@ async function dev(): Promise<void> {
         widgetController.openActionsModal('transaction-sent');
     }, 1000);
 */
-    const defaultTx = {
+    const defaultTx: SendTransactionRequest = {
         validUntil: Date.now() + 1000000,
         messages: [
             {
                 address: '0:412410771DA82CBA306A55FA9E0D43C9D245E38133CB58F1457DFB8D5CD8892F',
-                amount: '20000000'
+                amount: '20000000',
+                stateInit: 'base64'
             },
             {
                 address: '0:E69F10CC84877ABF539F83F879291E5CA169451BA7BCE91A37A5CED3AB8080D3',
@@ -30,6 +37,11 @@ async function dev(): Promise<void> {
             }
         ]
     };
+
+    const result = await tonConnectUI.sendTransaction(defaultTx, {
+        modals: ['before', 'success', 'error'],
+        notifications: ['before', 'success', 'error']
+    });
 
     tc.onStatusChange(wallet => {
         if (wallet) {

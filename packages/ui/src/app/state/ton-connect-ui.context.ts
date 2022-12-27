@@ -1,4 +1,4 @@
 import { createContext } from 'solid-js';
-import { TonConnectUi } from 'src/ton-connect-ui';
+import { TonConnectUI } from 'src/ton-connect-ui';
 
-export const TonConnectUiContext = createContext<TonConnectUi>();
+export const TonConnectUiContext = createContext<TonConnectUI>();
