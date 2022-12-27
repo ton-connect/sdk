@@ -253,6 +253,8 @@ export class TonConnectUI {
                 console.error(e);
                 throw new TonConnectUIError('Unhandled error:' + e);
             }
+        } finally {
+            widgetController.clearAction();
         }
     }
 
