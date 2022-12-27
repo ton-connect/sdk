@@ -32,8 +32,10 @@ const tonConnectUI = new TonConnectUI({
 ```
 
 See all available options:
-[TonConnectUiOptionsWithManifest](https://ton-connect.github.io/sdk/docs/interfaces/_tonconnect_ui.TonConnectUiOptionsWithManifest.html)
-[TonConnectUiOptionsWithConnector](https://ton-connect.github.io/sdk/docs/interfaces/_tonconnect_ui.TonConnectUiOptionsWithConnector.html)
+
+[TonConnectUiOptionsWithManifest](https://ton-connect.github.io/sdk/interfaces/_tonconnect_ui.TonConnectUiOptionsWithManifest.html)
+
+[TonConnectUiOptionsWithConnector](https://ton-connect.github.io/sdk/interfaces/_tonconnect_ui.TonConnectUiOptionsWithConnector.html)
 
 ## Change options if needed 
 ```ts
@@ -51,7 +53,7 @@ DON'T do this:
 tonConnectUI.uiOptions.language = 'ru'; // WRONG, WILL NOT WORK 
 ```
 
-[See all available options](https://ton-connect.github.io/sdk/docs/interfaces/_tonconnect_ui.TonConnectUiOptions.html)
+[See all available options](https://ton-connect.github.io/sdk/interfaces/_tonconnect_ui.TonConnectUiOptions.html)
 
 ## Fetch wallets list
 ```ts
