@@ -25,7 +25,9 @@ export class WalletsListManager {
 
     public async getEmbeddedWallet(): Promise<WalletInfoInjected | null> {
         const walletsList = await this.getWallets();
-        const injectedWallets = walletsList.filter(isWalletInfoInjected);
+        const injectedWallets = walletsList
+            .filter(isWalletInfoInjected)
+            .filter(item =>  InjectedProvider.isInsideWalletBrowser(item.jsBridgeKey));
 
         if (injectedWallets.length !== 1) {
             return null;
