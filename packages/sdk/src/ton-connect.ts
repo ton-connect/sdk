@@ -39,6 +39,20 @@ export class TonConnect implements ITonConnect {
     private static readonly walletsList = new WalletsListManager();
 
     /**
+     * Check if specified wallet is injected and available to use with the app.
+     * @param walletJSKey target wallet's js bridge key.
+     */
+    public static isWalletInjected = (walletJSKey: string): boolean =>
+        InjectedProvider.isWalletInjected(walletJSKey);
+
+    /**
+     * Check if the app is opened inside specified wallet's browser.
+     * @param walletJSKey target wallet's js bridge key.
+     */
+    public static isInsideWalletBrowser = (walletJSKey: string): boolean =>
+        InjectedProvider.isInsideWalletBrowser(walletJSKey);
+
+    /**
      * Returns available wallets list.
      */
     public static getWallets(): Promise<WalletInfo[]> {
@@ -47,7 +61,7 @@ export class TonConnect implements ITonConnect {
 
     private readonly walletsList = new WalletsListManager();
 
-    private readonly dappSettings: Required<TonConnectOptions>;
+    private readonly dappSettings: Omit<Required<TonConnectOptions>, 'walletsListSource'>;
 
     private readonly bridgeConnectionStorage: BridgeConnectionStorage;
 
@@ -90,6 +104,8 @@ export class TonConnect implements ITonConnect {
             manifestUrl: options?.manifestUrl || getWebPageManifest(),
             storage: options?.storage || new DefaultStorage()
         };
+
+        this.walletsList = new WalletsListManager(options?.walletsListSource);
 
         if (!this.dappSettings.manifestUrl) {
             throw new DappMetadataError(
@@ -227,7 +243,7 @@ export class TonConnect implements ITonConnect {
         let provider: Provider;
 
         if (isWalletConnectionSourceJS(wallet)) {
-            provider = new InjectedProvider(wallet.jsBridgeKey);
+            provider = new InjectedProvider(this.dappSettings.storage, wallet.jsBridgeKey);
         } else {
             provider = new BridgeProvider(this.dappSettings.storage, wallet);
         }

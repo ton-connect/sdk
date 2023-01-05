@@ -27,7 +27,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
     public static async fromStorage(storage: IStorage): Promise<InjectedProvider> {
         const bridgeConnectionStorage = new BridgeConnectionStorage(storage);
         const connection = await bridgeConnectionStorage.getInjectedConnection();
-        return new InjectedProvider(connection.jsBridgeKey);
+        return new InjectedProvider(storage, connection.jsBridgeKey);
     }
 
     public static isWalletInjected(injectedWalletKey: string): boolean {
@@ -60,40 +60,24 @@ export class InjectedProvider<T extends string = string> implements InternalProv
 
     private injectedWallet: InjectedWalletApi;
 
+    private readonly connectionStorage: BridgeConnectionStorage;
+
     private listenSubscriptions = false;
 
     private listeners: Array<(e: WalletEvent) => void> = [];
 
-    constructor(injectedWalletKey: T) {
+    constructor(storage: IStorage, private readonly injectedWalletKey: T) {
         const window: Window | undefined | WindowWithTon<T> = InjectedProvider.window;
         if (!InjectedProvider.isWindowContainsWallet(window, injectedWalletKey)) {
             throw new WalletNotInjectedError();
         }
 
+        this.connectionStorage = new BridgeConnectionStorage(storage);
         this.injectedWallet = window[injectedWalletKey]!.tonconnect!;
     }
 
-    public connect(message: ConnectRequest, auto = false): void {
-        this.injectedWallet
-            .connect(PROTOCOL_VERSION, message, auto)
-            .then(connectEvent => {
-                if (connectEvent.event === 'connect') {
-                    this.makeSubscriptions();
-                    this.listenSubscriptions = true;
-                }
-                this.listeners.forEach(listener => listener(connectEvent));
-            })
-            .catch(e => {
-                const connectEventError: ConnectEvent = {
-                    event: 'connect_error',
-                    payload: {
-                        code: 0,
-                        message: e?.toString()
-                    }
-                };
-
-                this.listeners.forEach(listener => listener(connectEventError));
-            });
+    public connect(message: ConnectRequest): void {
+        this._connect(PROTOCOL_VERSION, message);
     }
 
     public async restoreConnection(): Promise<void> {
@@ -101,10 +85,12 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             const connectEvent = await this.injectedWallet.restoreConnection();
             if (connectEvent.event === 'connect') {
                 this.makeSubscriptions();
-                this.listenSubscriptions = true;
                 this.listeners.forEach(listener => listener(connectEvent));
+            } else {
+                await this.connectionStorage.removeConnection();
             }
         } catch (e) {
+            await this.connectionStorage.removeConnection();
             console.error(e);
         }
     }
@@ -119,7 +105,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
     public disconnect(): Promise<void> {
         this.closeAllListeners();
         this.injectedWallet.disconnect();
-        return Promise.resolve();
+        return this.connectionStorage.removeConnection();
     }
 
     private closeAllListeners(): void {
@@ -140,7 +126,31 @@ export class InjectedProvider<T extends string = string> implements InternalProv
         return this.injectedWallet.send<T>({ ...request, id: '0' });
     }
 
+    private async _connect(protocolVersion: number, message: ConnectRequest): Promise<void> {
+        try {
+            const connectEvent = await this.injectedWallet.connect(protocolVersion, message);
+
+            if (connectEvent.event === 'connect') {
+                await this.updateSession();
+                this.makeSubscriptions();
+            }
+            this.listeners.forEach(listener => listener(connectEvent));
+        } catch (e) {
+            console.debug(e);
+            const connectEventError: ConnectEvent = {
+                event: 'connect_error',
+                payload: {
+                    code: 0,
+                    message: e?.toString()
+                }
+            };
+
+            this.listeners.forEach(listener => listener(connectEventError));
+        }
+    }
+
     private makeSubscriptions(): void {
+        this.listenSubscriptions = true;
         this.unsubscribeCallback = this.injectedWallet.listen(e => {
             if (this.listenSubscriptions) {
                 this.listeners.forEach(listener => listener(e));
@@ -149,6 +159,13 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             if (e.event === 'disconnect') {
                 this.disconnect();
             }
+        });
+    }
+
+    private updateSession(): Promise<void> {
+        return this.connectionStorage.storeConnection({
+            type: 'injected',
+            jsBridgeKey: this.injectedWalletKey
         });
     }
 }

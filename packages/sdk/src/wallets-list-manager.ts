@@ -11,8 +11,14 @@ import { InjectedProvider } from 'src/provider/injected/injected-provider';
 export class WalletsListManager {
     private walletsListCache: Promise<WalletInfo[]> | null = null;
 
-    private readonly walletsListSource =
+    private readonly walletsListSource: string =
         'https://raw.githubusercontent.com/ton-connect/wallets-list/main/wallets.json';
+
+    constructor(walletsListSource?: string) {
+        if (walletsListSource) {
+            this.walletsListSource = walletsListSource;
+        }
+    }
 
     public async getWallets(): Promise<WalletInfo[]> {
         if (!this.walletsListCache) {
@@ -25,13 +31,15 @@ export class WalletsListManager {
 
     public async getEmbeddedWallet(): Promise<WalletInfoInjected | null> {
         const walletsList = await this.getWallets();
-        const injectedWallets = walletsList.filter(isWalletInfoInjected);
+        const embeddedWallets = walletsList.filter(
+            item => isWalletInfoInjected(item) && item.embedded
+        ) as WalletInfoInjected[];
 
-        if (injectedWallets.length !== 1) {
+        if (embeddedWallets.length !== 1) {
             return null;
         }
 
-        return injectedWallets[0]!.embedded ? injectedWallets[0]! : null;
+        return embeddedWallets[0]!;
     }
 
     private async fetchWalletsList(): Promise<WalletInfo[]> {

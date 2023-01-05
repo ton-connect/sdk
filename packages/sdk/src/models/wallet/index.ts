@@ -7,6 +7,7 @@ export type {
 } from './wallet-connection-source';
 export {
     WalletInfo,
+    WalletInfoBase,
     WalletInfoInjected,
     WalletInfoRemote,
     isWalletInfoInjected

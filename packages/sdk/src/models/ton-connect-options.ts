@@ -14,4 +14,9 @@ export interface TonConnectOptions {
      * Storage to save protocol data. For browser default is `localStorage`. If you use SDK with nodeJS, you have to specify this field.
      */
     storage?: IStorage;
+
+    /**
+     * @deprecated Don't use it
+     */
+    walletsListSource?: string;
 }
