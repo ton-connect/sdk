@@ -56,6 +56,11 @@ export interface TonConnectUIProviderPropsBase {
      * @default `div#tc-widget-root`.
      */
     widgetRootId: string;
+
+    /**
+     * @deprecated Don't use it
+     */
+    walletsListSource: string;
 }
 
 let tonConnectUI: TonConnectUI | null = null;
