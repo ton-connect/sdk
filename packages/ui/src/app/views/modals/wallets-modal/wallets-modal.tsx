@@ -7,6 +7,7 @@ import {
 import {
     Component,
     createEffect,
+    createMemo,
     createResource,
     createSignal,
     onCleanup,
@@ -33,6 +34,7 @@ import { isDevice } from 'src/app/styles/media';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { useI18n } from '@solid-primitives/i18n';
 import { appState } from 'src/app/state/app.state';
+import { applyWalletsListConfiguration } from 'src/app/utils/wallets';
 
 export const WalletsModal: Component = () => {
     const { locale } = useI18n()[1];
@@ -40,9 +42,20 @@ export const WalletsModal: Component = () => {
 
     const connector = useContext(ConnectorContext)!;
     const tonConnectUI = useContext(TonConnectUiContext);
-    const [walletsList] = createResource(() => tonConnectUI!.getWallets());
+    const [fetchedWalletsList] = createResource(() => tonConnectUI!.getWallets());
 
     const [selectedWalletInfo, setSelectedWalletInfo] = createSignal<WalletInfo | null>(null);
+
+    const walletsList = createMemo(() => {
+        if (fetchedWalletsList.state !== 'ready') {
+            return null;
+        }
+
+        return applyWalletsListConfiguration(
+            fetchedWalletsList(),
+            appState.widgetConfiguration.wallets
+        );
+    });
 
     const onClose = (): void => {
         setWalletsModalOpen(false);
@@ -60,7 +73,12 @@ export const WalletsModal: Component = () => {
             return onSelectIfInjected(walletInfo);
         }
 
-        setSelectedWalletInfo(walletInfo);
+        if ('bridgeUrl' in walletInfo) {
+            setSelectedWalletInfo(walletInfo);
+            return;
+        }
+
+        openLink(walletInfo.aboutUrl, '_blank');
     };
 
     const onSelectIfMobile = (walletInfo: WalletInfoRemote): void => {
@@ -89,7 +107,7 @@ export const WalletsModal: Component = () => {
     return (
         <ModalWrapper>
             <StyledModal opened={walletsModalOpen()} onClose={onClose}>
-                <Show when={walletsList.state !== 'ready'}>
+                <Show when={!walletsList()}>
                     <H1Styled translationKey="walletModal.loading">
                         Wallets list is loading
                     </H1Styled>
@@ -97,7 +115,7 @@ export const WalletsModal: Component = () => {
                         <LoaderIconStyled fill="#7A899970" />
                     </LoaderContainerStyled>
                 </Show>
-                <Show when={walletsList.state === 'ready'}>
+                <Show when={walletsList()}>
                     <Show when={!selectedWalletInfo()} keyed={false}>
                         <SelectWalletModal walletsList={walletsList()!} onSelect={onSelect} />
                     </Show>

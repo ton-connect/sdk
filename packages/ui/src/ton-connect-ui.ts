@@ -92,9 +92,13 @@ export class TonConnectUI {
         setAppState(state => {
             const merged = mergeOptions(
                 {
-                    language: options.language,
-                    buttonConfiguration: options.buttonConfiguration,
-                    widgetConfiguration: options.widgetConfiguration
+                    ...(options.language && { language: options.language }),
+                    ...(options.buttonConfiguration && {
+                        buttonConfiguration: options.buttonConfiguration
+                    }),
+                    ...(options.widgetConfiguration && {
+                        widgetConfiguration: options.widgetConfiguration
+                    })
                 },
                 unwrap(state)
             );
@@ -111,7 +115,10 @@ export class TonConnectUI {
         if (options && 'connector' in options && options.connector) {
             this.connector = options.connector;
         } else if (options && 'manifestUrl' in options && options.manifestUrl) {
-            this.connector = new TonConnect({ manifestUrl: options.manifestUrl });
+            this.connector = new TonConnect({
+                manifestUrl: options.manifestUrl,
+                walletsListSource: options.walletsListSource
+            });
         } else {
             throw new TonConnectUIError(
                 'You have to specify a `manifestUrl` or a `connector` in the options.'
@@ -124,7 +131,11 @@ export class TonConnectUI {
         this.subscribeToWalletChange();
 
         if (options?.restoreConnection !== false) {
-            this.connector.restoreConnection();
+            this.connector.restoreConnection().then(() => {
+                if (!this.connector.connected) {
+                    this.walletInfoStorage.removeWalletInfo();
+                }
+            });
         }
 
         this.uiOptions = options || {};

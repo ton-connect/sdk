@@ -3,12 +3,29 @@ import { TonConnectUI } from 'src/ton-connect-ui';
 import { THEME } from 'src/models/THEME';
 
 async function dev(): Promise<void> {
-    /*const tc =*/ new TonConnectUI({
+    const tc = new TonConnectUI({
         buttonRootId: 'button-root',
         restoreConnection: true,
         manifestUrl: 'https://ton-connect.github.io/demo-dapp/tonconnect-manifest.json',
-        theme: THEME.LIGHT
+        theme: THEME.LIGHT,
+        walletsListSource:
+            'https://raw.githubusercontent.com/ton-connect/wallets-list/feature/openmask/wallets.json',
+        /*widgetConfiguration: {
+            wallets: {
+                excludeWallets: ['OpenMask']
+            }
+        }*/
     });
+
+    /*setTimeout(() => {
+        tc.uiOptions = {
+            widgetConfiguration: {
+                wallets: {
+                    excludeWallets: ['Tonkeeper']
+                }
+            }
+        };
+    }, 3000);
 
     // else show modal and ask user to select a wallet
 
@@ -88,4 +105,4 @@ async function dev(): Promise<void> {
     }*/
 }
 
-dev();
+setTimeout(dev, 500);

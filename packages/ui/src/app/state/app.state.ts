@@ -14,5 +14,7 @@ export type AppState = {
 
 export const [appState, setAppState] = createStore<AppState>({
     buttonRootId: null,
-    language: 'en'
+    language: 'en',
+    buttonConfiguration: {},
+    widgetConfiguration: {}
 } as AppState);

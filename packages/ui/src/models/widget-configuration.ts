@@ -4,6 +4,6 @@ import { Themed } from 'src/models/themed';
 export type ModalSize = 'm' | 'l';
 
 export interface WidgetConfiguration extends Partial<Themed> {
-    size: ModalSize;
+    size?: ModalSize;
     wallets?: WalletsListConfiguration;
 }

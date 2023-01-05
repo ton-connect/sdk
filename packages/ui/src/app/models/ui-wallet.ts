@@ -1,7 +1,4 @@
-import { WalletConnectionSource } from '@tonconnect/sdk';
+import { WalletInfoBase, WalletInfoInjected, WalletInfoRemote } from '@tonconnect/sdk';
 
-export interface UiWallet {
-    name: string;
-    iconUrl: string;
-    connectionSource: WalletConnectionSource;
-}
+export type UIWallet = WalletInfoBase &
+    (Omit<WalletInfoInjected, 'injected' | 'embedded'> | WalletInfoRemote);

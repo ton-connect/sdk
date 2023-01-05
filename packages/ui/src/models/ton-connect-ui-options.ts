@@ -38,5 +38,10 @@ export interface TonConnectUiOptions {
     /**
      * Configuration for the wallet connect modal and action modals.
      */
-    widgetConfiguration?: Partial<WidgetConfiguration>;
+    widgetConfiguration?: WidgetConfiguration;
+
+    /**
+     * @deprecated Don't use it
+     */
+    walletsListSource?: string;
 }
