@@ -20,7 +20,7 @@ export const TextStyled = styled(Text)`
     text-align: center;
     max-width: 250px;
 
-    color: ${props => props.theme!.colors.font.secondary};
+    color: ${props => props.theme!.colors.text.secondary};
 `;
 
 export const ButtonStyled = styled(Button)`

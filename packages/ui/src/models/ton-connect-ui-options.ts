@@ -1,22 +1,12 @@
-import { ButtonConfiguration } from 'src/models/button-configuration';
-import { WidgetConfiguration } from 'src/models/widget-configuration';
-import { Property } from 'csstype';
-type Color = Property.Color;
-import { Theme } from 'src/models/THEME';
 import { Locales } from 'src/models/locales';
+import { UIPreferences } from 'src/models/ui-preferences';
+import { WalletsListConfiguration } from 'src/models/wallets-list-configuration';
 
 export interface TonConnectUiOptions {
     /**
-     * Color theme for the UI elements.
-     * @default SYSTEM theme.
+     * UI elements configuration.
      */
-    theme?: Theme;
-
-    /**
-     * Accent color for the UI elements.
-     * @default #31A6F5 (blue).
-     */
-    accentColor?: Color;
+    uiPreferences?: UIPreferences;
 
     /**
      * HTML element id to attach the wallet connect button. If not passed button won't appear.
@@ -31,14 +21,9 @@ export interface TonConnectUiOptions {
     language?: Locales;
 
     /**
-     * Configuration for the wallet connect button.
+     * Configuration for the wallets list in the connect wallet modal.
      */
-    buttonConfiguration?: Partial<ButtonConfiguration>;
-
-    /**
-     * Configuration for the wallet connect modal and action modals.
-     */
-    widgetConfiguration?: WidgetConfiguration;
+    walletsList?: WalletsListConfiguration;
 
     /**
      * @deprecated Don't use it

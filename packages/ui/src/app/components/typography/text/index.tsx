@@ -19,7 +19,7 @@ export const Text: Component<TextProps> = inputs => {
     const theme = useTheme();
     const [t] = useI18n();
 
-    const color = (): Property.Color => inputs.color || theme.colors.font.primary;
+    const color = (): Property.Color => inputs.color || theme.colors.text.primary;
 
     const props = mergeProps(
         {

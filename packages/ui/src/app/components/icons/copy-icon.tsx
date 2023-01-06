@@ -8,7 +8,7 @@ interface CopyIconProps {
 
 export const CopyIcon: Component<CopyIconProps> = props => {
     const theme = useTheme();
-    const fill = (): string => props.fill || theme.colors.font.primary;
+    const fill = (): string => props.fill || theme.colors.icon.primary;
 
     return (
         <svg

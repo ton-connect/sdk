@@ -16,7 +16,7 @@ const rotationDegrees = {
 
 export const ArrowIcon: Component<ArrowIconProps> = props => {
     const theme = useTheme();
-    const fill = (): Property.Color => props.fill || theme.colors.font.third;
+    const fill = (): Property.Color => props.fill || theme.colors.icon.secondary;
     const direction = (): 'left' | 'right' | 'top' | 'bottom' => props.direction || 'left';
 
     const Svg = styled('svg')<{ svgDirection: 'left' | 'right' | 'top' | 'bottom' }>`

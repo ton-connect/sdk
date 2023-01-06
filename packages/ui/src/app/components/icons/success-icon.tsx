@@ -1,13 +1,15 @@
 import type { Property } from 'csstype';
 import { Component } from 'solid-js';
 import { Styleable } from 'src/app/models/styleable';
+import { useTheme } from 'solid-styled-components';
 
 export interface SuccessIconProps extends Styleable {
     fill?: Property.Color;
 }
 
 export const SuccessIcon: Component<SuccessIconProps> = props => {
-    const fill = (): string => props.fill || '#29CC6A';
+    const theme = useTheme();
+    const fill = (): string => props.fill || theme.colors.icon.success;
 
     return (
         <svg

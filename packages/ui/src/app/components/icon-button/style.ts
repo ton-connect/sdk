@@ -8,7 +8,7 @@ export const IconButtonStyled = styled.button`
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background-color: ${props => props.theme!.colors.backgroundSecondary};
+    background-color: ${props => props.theme!.colors.background.secondary};
     border: none;
     cursor: pointer;
 

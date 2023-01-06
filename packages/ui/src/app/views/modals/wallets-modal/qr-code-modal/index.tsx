@@ -46,7 +46,7 @@ export const QrCodeModal: Component<QrCodeModalProps> = props => {
                 <QRCode sourceUrl={universalLink} imageUrl={props.wallet.imageUrl} />
             </QRBackgroundStyled>
             <ButtonsContainerStyled>
-                <ActionButtonStyled appearance="secondary" onClick={() => openLink(universalLink)}>
+                <ActionButtonStyled onClick={() => openLink(universalLink)}>
                     <Translation
                         translationKey="walletModal.qrCodeModal.openWallet"
                         translationValues={{ name: props.wallet.name }}
@@ -56,7 +56,6 @@ export const QrCodeModal: Component<QrCodeModalProps> = props => {
                 </ActionButtonStyled>
                 <Show when={isWalletInfoInjected(props.wallet) && props.wallet.injected}>
                     <ActionButtonStyled
-                        appearance="secondary"
                         onClick={() =>
                             connector.connect({
                                 jsBridgeKey: (props.wallet as WalletInfoInjected).jsBridgeKey
@@ -76,7 +75,7 @@ export const QrCodeModal: Component<QrCodeModalProps> = props => {
                 >
                     Don't have {props.wallet.name}?
                 </TextStyled>
-                <Button appearance="secondary" onClick={() => openLinkBlank(props.wallet.aboutUrl)}>
+                <Button onClick={() => openLinkBlank(props.wallet.aboutUrl)}>
                     <Translation translationKey="walletModal.qrCodeModal.get">GET</Translation>
                 </Button>
             </GetWalletStyled>

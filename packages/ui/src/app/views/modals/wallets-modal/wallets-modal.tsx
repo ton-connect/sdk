@@ -22,13 +22,7 @@ import {
 } from 'src/app/state/modals-state';
 import { QrCodeModal } from 'src/app/views/modals/wallets-modal/qr-code-modal';
 import { SelectWalletModal } from 'src/app/views/modals/wallets-modal/select-wallet-modal';
-import {
-    ModalWrapper,
-    StyledModal,
-    LoaderIconStyled,
-    LoaderContainerStyled,
-    H1Styled
-} from './style';
+import { StyledModal, LoaderIconStyled, LoaderContainerStyled, H1Styled } from './style';
 import { openLink } from 'src/app/utils/web-api';
 import { isDevice } from 'src/app/styles/media';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
@@ -53,7 +47,7 @@ export const WalletsModal: Component = () => {
 
         return applyWalletsListConfiguration(
             fetchedWalletsList(),
-            appState.widgetConfiguration.wallets
+            appState.walletsListConfiguration
         );
     });
 
@@ -105,28 +99,24 @@ export const WalletsModal: Component = () => {
     onCleanup(unsubscribe);
 
     return (
-        <ModalWrapper>
-            <StyledModal opened={walletsModalOpen()} onClose={onClose}>
-                <Show when={!walletsList()}>
-                    <H1Styled translationKey="walletModal.loading">
-                        Wallets list is loading
-                    </H1Styled>
-                    <LoaderContainerStyled>
-                        <LoaderIconStyled fill="#7A899970" />
-                    </LoaderContainerStyled>
+        <StyledModal opened={walletsModalOpen()} onClose={onClose}>
+            <Show when={!walletsList()}>
+                <H1Styled translationKey="walletModal.loading">Wallets list is loading</H1Styled>
+                <LoaderContainerStyled>
+                    <LoaderIconStyled />
+                </LoaderContainerStyled>
+            </Show>
+            <Show when={walletsList()}>
+                <Show when={!selectedWalletInfo()} keyed={false}>
+                    <SelectWalletModal walletsList={walletsList()!} onSelect={onSelect} />
                 </Show>
-                <Show when={walletsList()}>
-                    <Show when={!selectedWalletInfo()} keyed={false}>
-                        <SelectWalletModal walletsList={walletsList()!} onSelect={onSelect} />
-                    </Show>
-                    <Show when={selectedWalletInfo()} keyed={false}>
-                        <QrCodeModal
-                            wallet={selectedWalletInfo() as WalletInfoRemote}
-                            onBackClick={() => setSelectedWalletInfo(null)}
-                        />
-                    </Show>
+                <Show when={selectedWalletInfo()} keyed={false}>
+                    <QrCodeModal
+                        wallet={selectedWalletInfo() as WalletInfoRemote}
+                        onBackClick={() => setSelectedWalletInfo(null)}
+                    />
                 </Show>
-            </StyledModal>
-        </ModalWrapper>
+            </Show>
+        </StyledModal>
     );
 };

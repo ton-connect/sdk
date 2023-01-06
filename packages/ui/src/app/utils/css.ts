@@ -1,3 +1,6 @@
+import { Property } from 'csstype';
+type Color = Property.Color;
+
 export function hexToRgb(hex: string): string {
     if (hex[0] === '#') {
         hex = hex.slice(1);
@@ -9,4 +12,12 @@ export function hexToRgb(hex: string): string {
     const b = bigint & 255;
 
     return [r, g, b].join(',');
+}
+
+export function rgba(color: Color, opacity: number): string {
+    if (color[0] === '#') {
+        color = hexToRgb(color);
+    }
+
+    return `rgba(${color}, ${opacity})`;
 }

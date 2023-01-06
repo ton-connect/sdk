@@ -13,7 +13,7 @@ export const StyledIconButton = styled(IconButton)`
 
 export const QRBackgroundStyled = styled.div`
     margin-bottom: 16px;
-    background-color: ${props => props.theme!.colors.backgroundSecondary};
+    background-color: ${props => props.theme!.colors.background.secondary};
     border-radius: 16px;
     display: flex;
     align-items: center;
@@ -42,6 +42,6 @@ export const GetWalletStyled = styled.div`
 `;
 
 export const TextStyled = styled(Text)`
-    color: ${props => props.theme!.colors.font.secondary};
+    color: ${props => props.theme!.colors.text.secondary};
     font-size: 16px;
 `;

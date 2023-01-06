@@ -9,7 +9,7 @@ export const H2Styled = styled.h2`
     text-align: center;
     letter-spacing: -0.32px;
 
-    color: ${props => props.theme!.colors.font.secondary};
+    color: ${props => props.theme!.colors.text.secondary};
 
     margin-top: 0;
     margin-bottom: 32px;

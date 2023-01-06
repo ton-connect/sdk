@@ -8,7 +8,7 @@ interface TonIconProps {
 
 export const TonIcon: Component<TonIconProps> = props => {
     const theme = useTheme();
-    const fill = (): string => props.fill || theme.colors.font.primary;
+    const fill = (): string => props.fill || theme.colors.icon.primary;
 
     return (
         <svg

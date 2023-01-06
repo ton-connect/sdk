@@ -17,7 +17,7 @@ export const QrCodeStyled = styled.div`
     }
 
     path {
-        fill: ${props => props.theme!.colors.font.primary};
+        fill: ${props => props.theme!.colors.text.primary};
     }
 `;
 
@@ -25,7 +25,7 @@ export const ImageBackground = styled.div`
     position: absolute;
     width: 52px;
     height: 52px;
-    background: ${props => props.theme!.colors.backgroundSecondary};
+    background: ${props => props.theme!.colors.background.secondary};
     padding: 7px;
     top: 112px;
     left: 112px;

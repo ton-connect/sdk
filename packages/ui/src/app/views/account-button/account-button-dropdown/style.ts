@@ -5,13 +5,13 @@ export const AccountButtonDropdownStyled = styled.div`
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.16);
     border-radius: 16px;
 
-    background-color: ${props => props.theme!.colors.backgroundPrimary}
+    background-color: ${props => props.theme!.colors.background.primary}
            
-    color: ${props => props.theme!.colors.font.primary}
+    color: ${props => props.theme!.colors.text.primary}
 `;
 
 export const UlStyled = styled.ul`
-    background-color: ${props => props.theme!.colors.backgroundPrimary};
+    background-color: ${props => props.theme!.colors.background.primary};
     padding: 8px;
 `;
 
@@ -22,7 +22,7 @@ export const MenuButtonStyled = styled.button`
     padding: 12px;
     width: 100%;
 
-    background-color: ${props => props.theme!.colors.backgroundPrimary};
+    background-color: ${props => props.theme!.colors.background.primary};
     border: none;
     border-radius: 8px;
     cursor: pointer;
@@ -30,7 +30,7 @@ export const MenuButtonStyled = styled.button`
     transition: background-color, transform 0.1s ease-in-out;
 
     &:hover {
-        background-color: ${props => props.theme!.colors.backgroundSecondary};
+        background-color: ${props => props.theme!.colors.background.secondary};
     }
 
     &:active {

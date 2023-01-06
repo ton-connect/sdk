@@ -8,8 +8,8 @@ export const H3Styled = styled.h3`
 
     letter-spacing: -0.24px;
 
-    color: ${props => props.theme!.colors.font.primary};
+    color: ${props => props.theme!.colors.text.primary};
 
     margin-top: 0;
-    margin-bottom: 0px;
+    margin-bottom: 0;
 `;

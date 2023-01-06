@@ -66,7 +66,7 @@ export const Modal: Component<ModalProps> = props => {
                             ModalWrapperClass,
                             props.class,
                             css`
-                                background-color: ${theme.colors.backgroundPrimary};
+                                background-color: ${theme.colors.background.primary};
                             `
                         )}
                         use:clickOutside={() => props.onClose()}

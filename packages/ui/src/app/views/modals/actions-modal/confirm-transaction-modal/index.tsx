@@ -11,7 +11,7 @@ export const ConfirmTransactionModal: Component<ConfirmTransactionModalProps> = 
         <ActionModal
             headerTranslationKey="actionModal.confirmTransaction.header"
             textTranslationKey="actionModal.confirmTransaction.text"
-            icon={<LoaderIconStyled fill="#7A899970" />}
+            icon={<LoaderIconStyled />}
             onClose={() => props.onClose()}
             showButton={false}
         />

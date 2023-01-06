@@ -1,6 +1,4 @@
-export type { ButtonConfiguration, ButtonSize, ButtonAppearance } from './button-configuration';
 export type { Locales } from './locales';
-export type { Themed } from './themed';
 export { THEME } from './THEME';
 export type { Theme } from './THEME';
 export type {
@@ -15,4 +13,6 @@ export type {
     WalletsListConfigurationExplicit,
     WalletsListConfigurationImplicit
 } from './wallets-list-configuration';
-export type { WidgetConfiguration } from './widget-configuration';
+export type { UIPreferences } from './ui-preferences';
+export type { ColorsSet } from './colors-set';
+export type { BorderRadius } from './border-radius';

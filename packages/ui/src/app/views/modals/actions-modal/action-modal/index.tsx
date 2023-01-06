@@ -17,7 +17,7 @@ export const ActionModal: Component<ActionModalProps> = props => {
             <H1Styled translationKey={props.headerTranslationKey} />
             <TextStyled translationKey={props.textTranslationKey} />
             <Show when={props.showButton !== false}>
-                <ButtonStyled appearance="secondary" onClick={() => props.onClose()}>
+                <ButtonStyled onClick={() => props.onClose()}>
                     <Translation translationKey="common.close">Close</Translation>
                 </ButtonStyled>
             </Show>

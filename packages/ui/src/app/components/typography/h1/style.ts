@@ -9,7 +9,7 @@ export const H1Styled = styled.h1`
     text-align: center;
     letter-spacing: 0.072px;
 
-    color: ${props => props.theme!.colors.font.primary};
+    color: ${props => props.theme!.colors.text.primary};
 
     margin-top: 0;
     margin-bottom: 6px;

@@ -16,7 +16,7 @@ import { WalletInfoStorage } from 'src/storage';
 import { isDevice } from 'src/app/styles/media';
 import { getSystemTheme, openLink, subscribeToThemeChange } from 'src/app/utils/web-api';
 import { TonConnectUiOptions } from 'src/models/ton-connect-ui-options';
-import { setTheme } from 'src/app/state/theme-state';
+import { setBorderRadius, setTheme } from 'src/app/state/theme-state';
 import { mergeOptions } from 'src/app/utils/options';
 import { setAppState } from 'src/app/state/app.state';
 import { unwrap } from 'solid-js/store';
@@ -70,35 +70,33 @@ export class TonConnectUI {
     public set uiOptions(options: TonConnectUiOptions) {
         this.checkButtonRootExist(options.buttonRootId);
 
-        if (options.theme === 'SYSTEM') {
-            setTheme(getSystemTheme());
-
-            if (!this.systemThemeChangeUnsubscribe) {
-                this.systemThemeChangeUnsubscribe = subscribeToThemeChange(theme =>
-                    setTheme(theme)
-                );
-            }
+        if (options.uiPreferences?.theme && options.uiPreferences?.theme !== 'SYSTEM') {
+            this.systemThemeChangeUnsubscribe?.();
+            setTheme(
+                options.uiPreferences.theme,
+                options.uiPreferences.colorsSet?.[options.uiPreferences.theme]
+            );
         } else {
-            if (options.theme) {
+            setTheme(getSystemTheme());
+            const colorsSet = options.uiPreferences?.colorsSet;
+
+            if (!this.systemThemeChangeUnsubscribe || colorsSet) {
                 this.systemThemeChangeUnsubscribe?.();
-                setTheme(options.theme);
+                this.systemThemeChangeUnsubscribe = subscribeToThemeChange(theme =>
+                    setTheme(theme, colorsSet?.[theme])
+                );
             }
         }
 
-        /* setThemeState(state =>
-            mergeOptions({ theme, accentColor: options.accentColor }, unwrap(state))
-        );*/
+        if (options.uiPreferences?.borderRadius) {
+            setBorderRadius(options.uiPreferences.borderRadius);
+        }
 
         setAppState(state => {
             const merged = mergeOptions(
                 {
                     ...(options.language && { language: options.language }),
-                    ...(options.buttonConfiguration && {
-                        buttonConfiguration: options.buttonConfiguration
-                    }),
-                    ...(options.widgetConfiguration && {
-                        widgetConfiguration: options.widgetConfiguration
-                    })
+                    ...(options.walletsList && { walletsList: options.walletsList })
                 },
                 unwrap(state)
             );

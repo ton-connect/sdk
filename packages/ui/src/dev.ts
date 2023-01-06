@@ -1,15 +1,17 @@
 /* @refresh reload */
 import { TonConnectUI } from 'src/ton-connect-ui';
-import { THEME } from 'src/models/THEME';
+import { THEME } from 'src/models';
 
 async function dev(): Promise<void> {
     const tc = new TonConnectUI({
         buttonRootId: 'button-root',
         restoreConnection: true,
         manifestUrl: 'https://ton-connect.github.io/demo-dapp/tonconnect-manifest.json',
-        theme: THEME.LIGHT,
+        uiPreferences: {
+            theme: THEME.DARK
+        },
         walletsListSource:
-            'https://raw.githubusercontent.com/ton-connect/wallets-list/feature/openmask/wallets.json',
+            'https://raw.githubusercontent.com/ton-connect/wallets-list/feature/openmask/wallets.json'
         /*widgetConfiguration: {
             wallets: {
                 excludeWallets: ['OpenMask']

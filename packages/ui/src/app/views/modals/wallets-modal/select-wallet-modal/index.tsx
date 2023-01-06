@@ -33,7 +33,7 @@ export const SelectWalletModal: Component<SelectWalletModalProps> = props => {
                     )}
                 </For>
             </UlStyled>
-            <ButtonStyled appearance="secondary" onClick={() => openLinkBlank(learnMoreUrl)}>
+            <ButtonStyled onClick={() => openLinkBlank(learnMoreUrl)}>
                 <Translation translationKey="walletModal.selectWalletModal.learnMore">
                     Learn more
                 </Translation>

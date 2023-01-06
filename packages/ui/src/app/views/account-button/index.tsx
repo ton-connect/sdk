@@ -5,6 +5,7 @@ import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { toUserFriendlyAddress } from '@tonconnect/sdk';
 import {
     AccountButtonStyled,
+    DropdownButtonStyled,
     DropdownContainerStyled,
     DropdownStyled,
     NotificationsStyled
@@ -13,10 +14,12 @@ import { Portal } from 'solid-js/web';
 import { useFloating } from 'solid-floating-ui';
 import { autoUpdate } from '@floating-ui/dom';
 import { Transition } from 'solid-transition-group';
+import { useTheme } from 'solid-styled-components';
 
 interface AccountButtonProps {}
 
 export const AccountButton: Component<AccountButtonProps> = () => {
+    const theme = useTheme();
     const connector = useContext(ConnectorContext)!;
     const tonConnectUI = useContext(TonConnectUiContext)!;
     const [isOpened, setIsOpened] = createSignal(false);
@@ -75,13 +78,14 @@ export const AccountButton: Component<AccountButtonProps> = () => {
     return (
         <>
             <Show when={!address()}>
-                <AccountButtonStyled appearance="flat" onClick={() => tonConnectUI.connectWallet()}>
-                    <TonIcon />
+                <AccountButtonStyled onClick={() => tonConnectUI.connectWallet()}>
+                    <TonIcon fill={theme.colors.connectButton.foreground} />
                     <Text
                         translationKey="button.connectWallet"
                         fontSize="15px"
                         letterSpacing="-0.24px"
                         fontWeight="590"
+                        color={theme.colors.connectButton.foreground}
                     >
                         Connect wallet
                     </Text>
@@ -89,16 +93,12 @@ export const AccountButton: Component<AccountButtonProps> = () => {
             </Show>
             <Show when={address()}>
                 <DropdownContainerStyled>
-                    <AccountButtonStyled
-                        appearance="flat"
-                        onClick={() => setIsOpened(v => !v)}
-                        ref={setAnchor}
-                    >
+                    <DropdownButtonStyled onClick={() => setIsOpened(v => !v)} ref={setAnchor}>
                         <Text fontSize="15px" letterSpacing="-0.24px" fontWeight="590">
                             {normalizedAddress()}
                         </Text>
                         <ArrowIcon direction="bottom" />
-                    </AccountButtonStyled>
+                    </DropdownButtonStyled>
                     <Portal>
                         <div
                             ref={setFloating}

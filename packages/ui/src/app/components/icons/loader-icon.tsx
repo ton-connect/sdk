@@ -10,7 +10,7 @@ export interface LoaderIconProps extends Styleable {
 
 export const LoaderIcon: Component<LoaderIconProps> = props => {
     const theme = useTheme();
-    const fill = (): string => props.fill || theme.colors.font.third;
+    const fill = (): string => props.fill || theme.colors.icon.tertiary;
 
     const rotateAnimation = keyframes`
         0% {
