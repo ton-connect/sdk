@@ -16,3 +16,4 @@ export type {
 export type { UIPreferences } from './ui-preferences';
 export type { ColorsSet } from './colors-set';
 export type { BorderRadius } from './border-radius';
+export type { UIWallet } from './ui-wallet';

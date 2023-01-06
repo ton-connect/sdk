@@ -1,5 +1,12 @@
 import { styled } from 'solid-styled-components';
 import { rgba } from 'src/app/utils/css';
+import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
+
+const borders: BorderRadiusConfig = {
+    m: '16px',
+    s: '8px',
+    none: '0'
+};
 
 export const ButtonStyled = styled.button`
     background-color: ${props => rgba(props.theme!.colors.accent, 0.12)};
@@ -7,7 +14,7 @@ export const ButtonStyled = styled.button`
 
     padding: 9px 16px;
     border: none;
-    border-radius: 16px;
+    border-radius: ${props => borders[props.theme!.borderRadius]};
     cursor: pointer;
 
     font-size: 14px;

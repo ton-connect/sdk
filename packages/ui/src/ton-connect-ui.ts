@@ -218,8 +218,8 @@ export class TonConnectUI {
     public async sendTransaction(
         tx: SendTransactionRequest,
         options?: {
-            modals?: ('before' | 'success' | 'error')[];
-            notifications?: ('before' | 'success' | 'error')[];
+            modals?: ('before' | 'success' | 'error')[] | 'all';
+            notifications?: ('before' | 'success' | 'error')[] | 'all';
         }
     ): Promise<SendTransactionResponse> {
         if (!this.connected || !this.walletInfo) {
@@ -230,12 +230,23 @@ export class TonConnectUI {
             openLink(this.walletInfo.universalLink);
         }
 
-        const notification = options?.notifications || ['before', 'success', 'error'];
-        const modals = options?.modals || ['before'];
+        let notifications = ['before', 'success', 'error'];
+        if (options?.notifications && options.notifications !== 'all') {
+            notifications = options.notifications;
+        }
+
+        let modals = ['before'];
+        if (options?.modals) {
+            if (options.modals === 'all') {
+                modals = ['before', 'success', 'error'];
+            } else {
+                modals = options.modals;
+            }
+        }
 
         widgetController.setAction({
             name: 'confirm-transaction',
-            showNotification: notification.includes('before'),
+            showNotification: notifications.includes('before'),
             openModal: modals.includes('before')
         });
 
@@ -244,7 +255,7 @@ export class TonConnectUI {
 
             widgetController.setAction({
                 name: 'transaction-sent',
-                showNotification: notification.includes('success'),
+                showNotification: notifications.includes('success'),
                 openModal: modals.includes('success')
             });
 
@@ -252,7 +263,7 @@ export class TonConnectUI {
         } catch (e) {
             widgetController.setAction({
                 name: 'transaction-canceled',
-                showNotification: notification.includes('error'),
+                showNotification: notifications.includes('error'),
                 openModal: modals.includes('error')
             });
 
@@ -262,8 +273,6 @@ export class TonConnectUI {
                 console.error(e);
                 throw new TonConnectUIError('Unhandled error:' + e);
             }
-        } finally {
-            widgetController.clearAction();
         }
     }
 

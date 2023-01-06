@@ -1,4 +1,4 @@
-import { UIWallet } from 'src/app/models/ui-wallet';
+import { UIWallet } from './ui-wallet';
 
 export type WalletsListConfiguration =
     | WalletsListConfigurationExplicit
