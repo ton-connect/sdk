@@ -1,10 +1,10 @@
 {
   "name": "@tonconnect/ui",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "scripts": {
     "start": "vite --host",
     "dev": "vite",
-    "build": "vite build && rollup -c rollup.config.mjs",
+    "build": "vite build && rollup -c rollup.config.mjs && vite build -c vite.cdn-config.ts",
     "serve": "vite preview"
   },
   "nx": {
@@ -30,7 +30,7 @@
   ],
   "author": "tonconnect",
   "license": "Apache-2.0",
-  "files": ["lib"],
+  "files": ["lib", "dist"],
   "main": "./lib/index.umd.cjs",
   "module": "./lib/index.js",
   "types": "./lib/index.d.ts",

@@ -1,22 +1,15 @@
 import * as path from 'path';
 import { defineConfig } from 'vite';
 import solidPlugin from 'vite-plugin-solid';
-import devtools from 'solid-devtools/vite'
 
 export default defineConfig({
   plugins: [
-    devtools({
-      autoname: true,
-    }),
       solidPlugin({ extensions: ['ts'] })
   ],
   resolve: {
     alias: {
       src: path.resolve('src/'),
     },
-  },
-  server: {
-    port: 3000,
   },
   optimizeDeps: {
     exclude: ['csstype']
@@ -26,16 +19,15 @@ export default defineConfig({
   },
   build: {
     target: 'es6',
-    outDir: 'lib',
+    outDir: 'dist',
     emptyOutDir: true,
-    minify: false,
+    minify: 'terser',
     sourcemap: true,
     lib: {
+      formats: ['umd'],
       entry: path.resolve('src/index.ts'),
       name: 'TON_CONNECT_UI',
-      fileName: format => {
-        return format === 'es' ? 'index.js' : 'index.umd.js'
-      },
+      fileName: () => 'tonconnect-ui.min.js'
     },
   },
 });
