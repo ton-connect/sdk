@@ -6,8 +6,9 @@ import { ErrorTransactionNotification } from './error-transaction-notification';
 import { SuccessTransactionNotification } from './success-transaction-notification';
 import { NotificationClass } from './style';
 import { Styleable } from 'src/app/models/styleable';
+import {Identifiable} from "src/app/models/identifiable";
 
-export interface NotificationsProps extends Styleable {}
+export interface NotificationsProps extends Styleable, Identifiable {}
 
 export const Notifications: Component<NotificationsProps> = props => {
     let lastId = -1;
@@ -40,7 +41,7 @@ export const Notifications: Component<NotificationsProps> = props => {
     );
 
     return (
-        <div class={props.class}>
+        <div class={props.class} id={props.id}>
             <TransitionGroup
                 onBeforeEnter={el => {
                     el.animate(

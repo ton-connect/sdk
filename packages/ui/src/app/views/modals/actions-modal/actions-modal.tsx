@@ -10,16 +10,26 @@ export const ActionsModal: Component = () => {
         <Modal
             opened={action() !== null && action()?.openModal === true}
             onClose={() => setAction(null)}
+            id="tc-actions-modal-container"
         >
             <Switch>
                 <Match when={action()!.name === 'transaction-sent'}>
-                    <TransactionSentModal onClose={() => setAction(null)} />
+                    <TransactionSentModal
+                        onClose={() => setAction(null)}
+                        id="tc-transaction-sent-modal"
+                    />
                 </Match>
                 <Match when={action()!.name === 'transaction-canceled'}>
-                    <TransactionCanceledModal onClose={() => setAction(null)} />
+                    <TransactionCanceledModal
+                        onClose={() => setAction(null)}
+                        id="tc-transaction-canceled-modal"
+                    />
                 </Match>
                 <Match when={action()!.name === 'confirm-transaction'}>
-                    <ConfirmTransactionModal onClose={() => setAction(null)} />
+                    <ConfirmTransactionModal
+                        onClose={() => setAction(null)}
+                        id="tc-confirm-modal"
+                    />
                 </Match>
             </Switch>
         </Modal>

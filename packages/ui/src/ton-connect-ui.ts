@@ -16,11 +16,12 @@ import { WalletInfoStorage } from 'src/storage';
 import { isDevice } from 'src/app/styles/media';
 import { getSystemTheme, openLink, subscribeToThemeChange } from 'src/app/utils/web-api';
 import { TonConnectUiOptions } from 'src/models/ton-connect-ui-options';
-import { setBorderRadius, setTheme } from 'src/app/state/theme-state';
+import { setBorderRadius, setColors, setTheme } from 'src/app/state/theme-state';
 import { mergeOptions } from 'src/app/utils/options';
 import { setAppState } from 'src/app/state/app.state';
 import { unwrap } from 'solid-js/store';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
+import { ActionConfiguration, StrictActionConfiguration } from 'src/models/action-configuration';
 
 export class TonConnectUI {
     public static getWallets(): Promise<WalletInfo[]> {
@@ -34,6 +35,11 @@ export class TonConnectUI {
     private _walletInfo: WalletInfo | null = null;
 
     private systemThemeChangeUnsubscribe: (() => void) | null = null;
+
+    private actionsConfiguration?: {
+        modals?: ('before' | 'success' | 'error')[] | 'all';
+        notifications?: ('before' | 'success' | 'error')[] | 'all';
+    };
 
     /**
      * Current connection status.
@@ -70,21 +76,22 @@ export class TonConnectUI {
     public set uiOptions(options: TonConnectUiOptions) {
         this.checkButtonRootExist(options.buttonRootId);
 
-        if (options.uiPreferences?.theme && options.uiPreferences?.theme !== 'SYSTEM') {
-            this.systemThemeChangeUnsubscribe?.();
-            setTheme(
-                options.uiPreferences.theme,
-                options.uiPreferences.colorsSet?.[options.uiPreferences.theme]
-            );
-        } else {
-            setTheme(getSystemTheme());
-            const colorsSet = options.uiPreferences?.colorsSet;
+        this.actionsConfiguration = options.actionsConfiguration;
 
-            if (!this.systemThemeChangeUnsubscribe || colorsSet) {
+        if (options.uiPreferences?.theme) {
+            if (options.uiPreferences?.theme !== 'SYSTEM') {
                 this.systemThemeChangeUnsubscribe?.();
-                this.systemThemeChangeUnsubscribe = subscribeToThemeChange(theme =>
-                    setTheme(theme, colorsSet?.[theme])
-                );
+                setTheme(options.uiPreferences.theme, options.uiPreferences.colorsSet);
+            } else {
+                setTheme(getSystemTheme(), options.uiPreferences.colorsSet);
+
+                if (!this.systemThemeChangeUnsubscribe) {
+                    this.systemThemeChangeUnsubscribe = subscribeToThemeChange(setTheme);
+                }
+            }
+        } else {
+            if (options.uiPreferences?.colorsSet) {
+                setColors(options.uiPreferences.colorsSet);
             }
         }
 
@@ -136,7 +143,7 @@ export class TonConnectUI {
             });
         }
 
-        this.uiOptions = options || {};
+        this.uiOptions = mergeOptions(options, { uiPreferences: { theme: 'SYSTEM' } });
         setAppState({ connector: this.connector });
 
         widgetController.renderApp(rootId, this);
@@ -217,10 +224,7 @@ export class TonConnectUI {
      */
     public async sendTransaction(
         tx: SendTransactionRequest,
-        options?: {
-            modals?: ('before' | 'success' | 'error')[] | 'all';
-            notifications?: ('before' | 'success' | 'error')[] | 'all';
-        }
+        options?: ActionConfiguration
     ): Promise<SendTransactionResponse> {
         if (!this.connected || !this.walletInfo) {
             throw new TonConnectUIError('Connect wallet to send a transaction.');
@@ -230,19 +234,7 @@ export class TonConnectUI {
             openLink(this.walletInfo.universalLink);
         }
 
-        let notifications = ['before', 'success', 'error'];
-        if (options?.notifications && options.notifications !== 'all') {
-            notifications = options.notifications;
-        }
-
-        let modals = ['before'];
-        if (options?.modals) {
-            if (options.modals === 'all') {
-                modals = ['before', 'success', 'error'];
-            } else {
-                modals = options.modals;
-            }
-        }
+        const { notifications, modals } = this.getModalsAndNotificationsConfiguration(options);
 
         widgetController.setAction({
             name: 'confirm-transaction',
@@ -316,5 +308,52 @@ export class TonConnectUI {
         if (!document.getElementById(buttonRootId)) {
             throw new TonConnectUIError(`${buttonRootId} element not found in the document.`);
         }
+    }
+
+    private getModalsAndNotificationsConfiguration(
+        options?: ActionConfiguration
+    ): StrictActionConfiguration {
+        const allActions: StrictActionConfiguration['notifications'] = [
+            'before',
+            'success',
+            'error'
+        ];
+
+        let notifications: StrictActionConfiguration['notifications'] = allActions;
+        if (
+            this.actionsConfiguration?.notifications &&
+            this.actionsConfiguration?.notifications !== 'all'
+        ) {
+            notifications = this.actionsConfiguration.notifications;
+        }
+
+        if (options?.notifications) {
+            if (options.notifications === 'all') {
+                notifications = allActions;
+            } else {
+                notifications = options.notifications;
+            }
+        }
+
+        let modals: StrictActionConfiguration['modals'] = ['before'];
+        if (this.actionsConfiguration?.modals) {
+            if (this.actionsConfiguration.modals === 'all') {
+                modals = allActions;
+            } else {
+                modals = this.actionsConfiguration.modals;
+            }
+        }
+        if (options?.modals) {
+            if (options.modals === 'all') {
+                modals = allActions;
+            } else {
+                modals = options.modals;
+            }
+        }
+
+        return {
+            notifications,
+            modals
+        };
     }
 }

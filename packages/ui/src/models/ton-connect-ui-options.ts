@@ -1,6 +1,7 @@
 import { Locales } from 'src/models/locales';
 import { UIPreferences } from 'src/models/ui-preferences';
 import { WalletsListConfiguration } from 'src/models/wallets-list-configuration';
+import { ActionConfiguration } from 'src/models/action-configuration';
 
 export interface TonConnectUiOptions {
     /**
@@ -24,6 +25,11 @@ export interface TonConnectUiOptions {
      * Configuration for the wallets list in the connect wallet modal.
      */
     walletsList?: WalletsListConfiguration;
+
+    /**
+     * Configuration for action-period (e.g. sendTransaction) UI elements: modals and notifications.
+     */
+    actionsConfiguration?: ActionConfiguration;
 
     /**
      * @deprecated Don't use it

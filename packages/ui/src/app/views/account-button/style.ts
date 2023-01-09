@@ -14,7 +14,7 @@ export const AccountButtonStyled = styled(Button)`
     align-items: center;
     gap: 9px;
 
-    transition: filter 0.1s ease-in-out;
+    transition: all 0.1s ease-in-out;
 
     &:hover:not(:active) {
         transform: scale(1);

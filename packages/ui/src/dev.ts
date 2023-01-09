@@ -1,16 +1,14 @@
 /* @refresh reload */
 import { TonConnectUI } from 'src/ton-connect-ui';
-import { THEME } from 'src/models';
-import { SendTransactionRequest } from '@tonconnect/sdk';
 
 async function dev(): Promise<void> {
-    const tc = new TonConnectUI({
+    const tonConnectUI = new TonConnectUI({
         buttonRootId: 'button-root',
         restoreConnection: true,
         manifestUrl: 'https://ton-connect.github.io/demo-dapp/tonconnect-manifest.json',
-        uiPreferences: {
-            theme: THEME.DARK,
-            borderRadius: 'none'
+        actionsConfiguration: {
+            modals: ['error'],
+            notifications: ['before']
         },
         walletsListSource:
             'https://raw.githubusercontent.com/ton-connect/wallets-list/feature/openmask/wallets.json'
@@ -23,13 +21,19 @@ async function dev(): Promise<void> {
 
     /*setTimeout(() => {
         tc.uiOptions = {
-            widgetConfiguration: {
-                wallets: {
-                    excludeWallets: ['Tonkeeper']
-                }
+            uiPreferences: {
+                borderRadius: 'none'
             }
         };
-    }, 3000);
+    }, 1500);
+
+    setTimeout(() => {
+        tc.uiOptions = {
+            uiPreferences: {
+                theme: THEME.LIGHT
+            }
+        };
+    }, 3000);*/
 
     // else show modal and ask user to select a wallet
 
@@ -40,7 +44,7 @@ async function dev(): Promise<void> {
         widgetController.openActionsModal('transaction-sent');
     }, 1000);
 */
-    const defaultTx: SendTransactionRequest = {
+    /*const defaultTx: SendTransactionRequest = {
         validUntil: Date.now() + 1000000,
         messages: [
             {
@@ -50,14 +54,14 @@ async function dev(): Promise<void> {
         ]
     };
 
-    tc.onStatusChange(wallet => {
+    tonConnectUI.onStatusChange(wallet => {
         if (wallet) {
             setTimeout(() => {
-                tc.sendTransaction(defaultTx, { modals: 'all', notifications: 'all' });
+                tonConnectUI.sendTransaction(defaultTx, { modals: 'all', notifications: 'all' });
             }, 1000);
         }
     });
-
+*/
     //  tc.connectWallet();
     /*
     setTimeout(() => {

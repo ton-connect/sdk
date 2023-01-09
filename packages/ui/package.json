@@ -63,7 +63,8 @@
     "csstype": "^3.1.1",
     "@types/node": "^18.11.17",
     "rollup-plugin-dts": "^5.0.0",
-    "rollup": "^3.8.0"
+    "rollup": "^3.8.0",
+    "solid-devtools": "^0.24.7"
   },
   "typedoc": {
     "entryPoint": "./src/index.ts"

@@ -1,6 +1,6 @@
 import { THEME, Theme } from 'src/models/THEME';
 import { BorderRadius } from 'src/models/border-radius';
-import { ColorsSet } from 'src/models/colors-set';
+import { PartialColorsSet } from 'src/models/colors-set';
 
 export interface UIPreferences {
     /**
@@ -15,5 +15,8 @@ export interface UIPreferences {
      */
     borderRadius?: BorderRadius;
 
-    colorsSet?: Record<THEME, ColorsSet>;
+    /**
+     * Configure colors scheme for different themes.
+     */
+    colorsSet?: Partial<Record<THEME, PartialColorsSet>>;
 }

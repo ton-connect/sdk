@@ -1,5 +1,5 @@
 import { WalletInfo, TonConnect } from '@tonconnect/sdk';
-import { UIWallet } from 'src/app/models/ui-wallet';
+import { UIWallet } from 'src/models/ui-wallet';
 import { WalletsListConfiguration } from 'src/models';
 import { WalletNotFoundError } from 'src/errors/configuration/wallet-not-found.error';
 

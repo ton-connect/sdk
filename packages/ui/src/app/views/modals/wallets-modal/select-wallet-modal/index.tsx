@@ -5,8 +5,9 @@ import { Translation } from 'src/app/components/typography/Translation';
 import { WalletItem } from './wallet-item';
 import { ButtonStyled, H2Styled, SelectWalletModalStyled, UlStyled } from './style';
 import { openLinkBlank } from 'src/app/utils/web-api';
+import { Identifiable } from 'src/app/models/identifiable';
 
-interface SelectWalletModalProps {
+interface SelectWalletModalProps extends Identifiable {
     walletsList: WalletInfo[];
     onSelect: (wallet: WalletInfo) => void;
 }
@@ -15,7 +16,7 @@ export const SelectWalletModal: Component<SelectWalletModalProps> = props => {
     const learnMoreUrl = 'https://ton.org/wallets';
 
     return (
-        <SelectWalletModalStyled>
+        <SelectWalletModalStyled id={props.id}>
             <H1 translationKey="walletModal.selectWalletModal.connectWallet">Connect a wallet</H1>
             <H2Styled translationKey="walletModal.selectWalletModal.selectWallet">
                 Select your wallet from the options to get started.

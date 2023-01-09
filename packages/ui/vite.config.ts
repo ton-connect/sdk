@@ -1,9 +1,13 @@
 import * as path from 'path';
 import { defineConfig } from 'vite';
 import solidPlugin from 'vite-plugin-solid';
+import devtools from 'solid-devtools/vite'
 
 export default defineConfig({
   plugins: [
+    devtools({
+      autoname: true,
+    }),
       solidPlugin({ extensions: ['ts'] })
   ],
   resolve: {

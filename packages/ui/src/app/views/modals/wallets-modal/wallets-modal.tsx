@@ -99,7 +99,7 @@ export const WalletsModal: Component = () => {
     onCleanup(unsubscribe);
 
     return (
-        <StyledModal opened={walletsModalOpen()} onClose={onClose}>
+        <StyledModal opened={walletsModalOpen()} onClose={onClose} id="tc-wallets-modal-container">
             <Show when={!walletsList()}>
                 <H1Styled translationKey="walletModal.loading">Wallets list is loading</H1Styled>
                 <LoaderContainerStyled>
@@ -108,12 +108,17 @@ export const WalletsModal: Component = () => {
             </Show>
             <Show when={walletsList()}>
                 <Show when={!selectedWalletInfo()} keyed={false}>
-                    <SelectWalletModal walletsList={walletsList()!} onSelect={onSelect} />
+                    <SelectWalletModal
+                        walletsList={walletsList()!}
+                        onSelect={onSelect}
+                        id="tc-wallets-modal"
+                    />
                 </Show>
                 <Show when={selectedWalletInfo()} keyed={false}>
                     <QrCodeModal
                         wallet={selectedWalletInfo() as WalletInfoRemote}
                         onBackClick={() => setSelectedWalletInfo(null)}
+                        id="tc-qr-modal"
                     />
                 </Show>
             </Show>

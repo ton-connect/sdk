@@ -14,6 +14,11 @@ export type {
     WalletsListConfigurationImplicit
 } from './wallets-list-configuration';
 export type { UIPreferences } from './ui-preferences';
-export type { ColorsSet } from './colors-set';
+export type { ColorsSet, PartialColorsSet } from './colors-set';
 export type { BorderRadius } from './border-radius';
 export type { UIWallet } from './ui-wallet';
+export type { ActionConfiguration } from './action-configuration';
+
+import { Property } from 'csstype';
+type Color = Property.Color;
+export type { Color };

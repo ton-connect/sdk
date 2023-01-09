@@ -8,6 +8,7 @@ import { isDevice, media } from 'src/app/styles/media';
 import { CloseButtonStyled, ModalBackgroundStyled, ModalWrapperClass } from './style';
 import { css, useTheme } from 'solid-styled-components';
 import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
+import { Identifiable } from 'src/app/models/identifiable';
 const clickOutside = clickOutsideDirective;
 const keyPressed = keyPressedDirective;
 
@@ -17,7 +18,7 @@ const borders: BorderRadiusConfig = {
     none: '0'
 };
 
-export interface ModalProps extends Styleable {
+export interface ModalProps extends Styleable, Identifiable {
     children: JSXElement;
     opened: boolean;
     onClose: () => void;
@@ -69,6 +70,7 @@ export const Modal: Component<ModalProps> = props => {
             <Show when={props.opened}>
                 <ModalBackgroundStyled>
                     <div
+                        id={props.id}
                         class={cn(
                             ModalWrapperClass,
                             props.class,

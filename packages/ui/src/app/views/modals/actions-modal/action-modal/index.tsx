@@ -1,8 +1,9 @@
 import { Component, JSXElement, Show } from 'solid-js';
 import { Translation } from 'src/app/components/typography/Translation';
 import { ActionModalStyled, ButtonStyled, H1Styled, TextStyled } from './style';
+import { Identifiable } from 'src/app/models/identifiable';
 
-interface ActionModalProps {
+interface ActionModalProps extends Identifiable {
     headerTranslationKey: string;
     icon: JSXElement;
     textTranslationKey?: string;
@@ -12,7 +13,7 @@ interface ActionModalProps {
 
 export const ActionModal: Component<ActionModalProps> = props => {
     return (
-        <ActionModalStyled>
+        <ActionModalStyled id={props.id}>
             {props.icon}
             <H1Styled translationKey={props.headerTranslationKey} />
             <TextStyled translationKey={props.textTranslationKey} />

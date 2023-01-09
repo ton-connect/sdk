@@ -78,7 +78,10 @@ export const AccountButton: Component<AccountButtonProps> = () => {
     return (
         <>
             <Show when={!address()}>
-                <AccountButtonStyled onClick={() => tonConnectUI.connectWallet()}>
+                <AccountButtonStyled
+                    onClick={() => tonConnectUI.connectWallet()}
+                    id="tc-connect-button"
+                >
                     <TonIcon fill={theme.colors.connectButton.foreground} />
                     <Text
                         translationKey="button.connectWallet"
@@ -93,7 +96,11 @@ export const AccountButton: Component<AccountButtonProps> = () => {
             </Show>
             <Show when={address()}>
                 <DropdownContainerStyled>
-                    <DropdownButtonStyled onClick={() => setIsOpened(v => !v)} ref={setAnchor}>
+                    <DropdownButtonStyled
+                        onClick={() => setIsOpened(v => !v)}
+                        ref={setAnchor}
+                        id="tc-dropdown-button"
+                    >
                         <Text fontSize="15px" letterSpacing="-0.24px" fontWeight="590">
                             {normalizedAddress()}
                         </Text>
@@ -108,6 +115,7 @@ export const AccountButton: Component<AccountButtonProps> = () => {
                                 left: `${position.x ?? 0}px`,
                                 'z-index': 999
                             }}
+                            id="tc-dropdown-container"
                         >
                             <Transition
                                 onBeforeEnter={el => {
@@ -139,10 +147,11 @@ export const AccountButton: Component<AccountButtonProps> = () => {
                                         hidden={!isOpened()}
                                         onClose={() => setIsOpened(false)}
                                         ref={dropDownRef}
+                                        id="tc-dropdown"
                                     />
                                 </Show>
                             </Transition>
-                            <NotificationsStyled />
+                            <NotificationsStyled id="tc-notifications" />
                         </div>
                     </Portal>
                 </DropdownContainerStyled>

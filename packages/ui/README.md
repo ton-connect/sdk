@@ -41,7 +41,9 @@ See all available options:
 ```ts
 tonConnectUI.uiOptions = {
     language: 'ru',
-    theme: THEME.DARK
+    uiPreferences: {
+        theme: THEME.DARK
+    }
 };
 ```
 
@@ -50,7 +52,7 @@ Passed options will be merged with current UI options. Note, that you have to pa
 
 DON'T do this:
 ```ts
-tonConnectUI.uiOptions.language = 'ru'; // WRONG, WILL NOT WORK 
+/* WRONG, WILL NOT WORK */ tonConnectUI.uiOptions.language = 'ru'; 
 ```
 
 [See all available options](https://ton-connect.github.io/sdk/interfaces/_tonconnect_ui.TonConnectUiOptions.html)
@@ -168,3 +170,189 @@ const defaultBehaviour = {
     notifications: ['before', 'success', 'error']
 }
 ```
+
+## UI customisation
+TonConnect UI provides an interface that should be familiar and recognizable to the user when using various apps. 
+However, the app developer can make changes to this interface to keep it consistent with the app interface.
+
+### Customise UI using tonconnectUI.uiOptions
+All such updates are reactive -- change `tonconnectUI.uiOptions` and changes will be applied immediately.  
+
+[See all available options](https://ton-connect.github.io/sdk/interfaces/_tonconnect_ui.UIPreferences.html)
+
+#### Change border radius
+There are three border-radius modes: `'m'`, `'s'` and `'none'`. Default is `'m'`. You can change it via tonconnectUI.uiOptions, or set on tonConnectUI creating:
+
+```ts
+/* Pass to the constructor */
+const tonConnectUI = new TonConnectUI({
+    manifestUrl: 'https://<YOUR_APP_URL>/tonconnect-manifest.json',
+    uiPreferences: {
+        borderRadius: 's'
+    }
+});
+
+
+/* Or update dynamically */
+tonConnectUI.uiOptions = {
+        uiPreferences: {
+            borderRadius: 's'
+        }
+    };
+```
+
+Note, that `uiOptions` is a setter which will merge new options with previous ones. So you doesn't need to merge it explicitly. Just pass changed options.
+```ts
+/* DON'T DO THIS. SEE DESCRIPTION ABOVE */
+tonConnectUI.uiOptions = {
+        ...previousUIOptions,
+        uiPreferences: {
+            borderRadius: 's'
+        }
+    };
+
+/* Just pass changed property */
+tonConnectUI.uiOptions = {
+    uiPreferences: {
+        borderRadius: 's'
+    }
+};
+```
+
+#### Change theme
+You can set fixed theme: `'THEME.LIGHT'` or `'THEME.DARK'`, or use system theme. Default theme is system.
+
+```ts
+import { THEME } from '@tonconnect/ui';
+
+tonConnectUI.uiOptions = {
+        uiPreferences: {
+            theme: THEME.DARK
+        }
+    };
+```
+
+You also can set `'SYSTEM'` theme:
+```ts
+tonConnectUI.uiOptions = {
+        uiPreferences: {
+            theme: 'SYSTEM'
+        }
+    };
+```
+
+You can set theme in the constructor if needed:
+```ts
+import { THEME } from '@tonconnect/ui';
+
+const tonConnectUI = new TonConnectUI({
+    manifestUrl: 'https://<YOUR_APP_URL>/tonconnect-manifest.json',
+    uiPreferences: {
+        theme: THEME.DARK
+    }
+});
+```
+
+#### Change colors scheme
+You can redefine all colors scheme for each theme or change some colors. Just pass colors that you want to change.
+
+```ts
+tonConnectUI.uiOptions = {
+        uiPreferences: {
+            colorsSet: {
+                [THEME.DARK]: {
+                    connectButton: {
+                        background: '#29CC6A'
+                    }
+                }
+            }
+        }
+    };
+```
+
+You can change colors for both themes at the same time:
+
+```ts
+tonConnectUI.uiOptions = {
+        uiPreferences: {
+            colorsSet: {
+                [THEME.DARK]: {
+                    connectButton: {
+                        background: '#29CC6A'
+                    }
+                },
+                [THEME.LIGHT]: {
+                    text: {
+                        primary: '#FF0000'
+                    }
+                }
+            }
+        }
+    };
+
+```
+
+You can set colors scheme in the constructor if needed:
+```ts
+import { THEME } from '@tonconnect/ui';
+
+const tonConnectUI = new TonConnectUI({
+    manifestUrl: 'https://<YOUR_APP_URL>/tonconnect-manifest.json',
+    uiPreferences: {
+        colorsSet: {
+            [THEME.DARK]: {
+                connectButton: {
+                    background: '#29CC6A'
+                }
+            }
+        }
+    }
+});
+```
+
+[See all available options](https://ton-connect.github.io/sdk/interfaces/_tonconnect_ui.PartialColorsSet.html)
+
+#### Combine options
+It is possible to change all required options at the same time:
+
+```ts
+tonConnectUI.uiOptions = {
+        uiPreferences: {
+            theme: THEME.DARK,
+            borderRadius: 's',
+            colorsSet: {
+                [THEME.DARK]: {
+                    connectButton: {
+                        background: '#29CC6A'
+                    }
+                },
+                [THEME.LIGHT]: {
+                    text: {
+                        primary: '#FF0000'
+                    }
+                }
+            }
+        }
+    };
+```
+
+
+### Direct css customisation
+It is not recommended to customise TonConnect UI elements via css as it may confuse the user when looking for known and familiar UI elements such as connect button/modals.
+However, it is possible if needed. You can add css styles to the specified selectors of the UI element. See list of selectors in the table below:
+
+| Element                              | Selector                         | Element description                                                                               |
+|--------------------------------------|----------------------------------|---------------------------------------------------------------------------------------------------|
+| Connect wallet modal container       | `#tc-wallets-modal-container`    | Container of the modal window that opens when you click on the "connect wallet" button.           |
+| Select wallet modal content          | `#tc-wallets-modal`              | Content of the modal window with wallet selection.                                                |
+| QR-code modal content                | `#tc-qr-modal`                   | Content of the modal window with QR-code.                                                         |
+| Action modal container               | `#tc-actions-modal-container`    | Container of the modal window that opens when you call `sendTransaction` or other action.         |
+| Confirm action modal content         | `#tc-confirm-modal`              | Content of the modal window asking for confirmation of the action in the wallet.                  |
+| "Transaction sent" modal content     | `#tc-transaction-sent-modal`     | Content of the modal window informing that the transaction was successfully sent.                 |
+| "Transaction canceled" modal content | `#tc-transaction-canceled-modal` | Content of the modal window informing that the transaction was not sent.                          |
+| "Connect Wallet" button              | `#tc-connect-button`             | "Connect Wallet" button element.                                                                  |
+| Wallet menu dropdown button          | `#tc-dropdown-button`            | Wallet menu button -- host of the dropdown wallet menu (copy address/disconnect).                 |
+| Wallet menu dropdown container       | `#tc-dropdown-container`         | Container of the dropdown that opens when you click on the "wallet menu" button with ton address. |
+| Wallet menu dropdown content         | `#tc-dropdown`                   | Content of the dropdown that opens when you click on the "wallet menu" button with ton address.   |
+| Notifications container              | `#tc-notifications`              | Container of the actions notifications.                                                           |
+
