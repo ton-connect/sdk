@@ -356,3 +356,59 @@ However, it is possible if needed. You can add css styles to the specified selec
 | Wallet menu dropdown content         | `#tc-dropdown`                   | Content of the dropdown that opens when you click on the "wallet menu" button with ton address.   |
 | Notifications container              | `#tc-notifications`              | Container of the actions notifications.                                                           |
 
+
+## Customize the list of displayed wallets
+You can customize the list of displayed wallets: change order, exclude wallets or add custom wallets.
+
+
+### Redefine wallets list
+Pass an array of the wallet's names and custom wallets. Array items order will be applied to the wallets in modal window.  
+
+You can define custom wallet with `jsBridgeKey` (wallet = browser extension or there is a wallet dapp browser) or with `bridgeUrl` and `universalLink` pair (for http-connection compatible wallets), or pass all of these properties. 
+```ts
+import { UIWallet } from '@tonconnect/ui';
+
+const customWallet: UIWallet = {
+    name: '<CUSTOM_WALLET_NAME>',
+    imageUrl: '<CUSTOM_WALLET_IMAGE_URL>',
+    aboutUrl: '<CUSTOM_WALLET_ABOUT_URL>',
+    jsBridgeKey: '<CUSTOM_WALLET_JS_BRIDGE_KEY>',
+    bridgeUrl: '<CUSTOM_WALLET_HTTP_BRIDGE_URL>',
+    universalLink: '<CUSTOM_WALLET_UNIVERSAL_LINK>'
+};
+
+tonConnectUI.uiOptions = {
+        walletsList: {
+            wallets: ['tonkeeper', 'openmask', customWallet]
+        }
+    };
+```
+
+### Modify default wallets list
+Exclude some wallets with `excludeWallets` property.
+Include custom wallets with `includeWallets` property.
+Setup place where custom wallets will appear in the all wallets list with `includeWalletsOrder`. Default value id `'end''`. 
+
+
+```ts
+import { UIWallet } from '@tonconnect/ui';
+
+const customWallet: UIWallet = {
+    name: '<CUSTOM_WALLET_NAME>',
+    imageUrl: '<CUSTOM_WALLET_IMAGE_URL>',
+    aboutUrl: '<CUSTOM_WALLET_ABOUT_URL>',
+    jsBridgeKey: '<CUSTOM_WALLET_JS_BRIDGE_KEY>',
+    bridgeUrl: '<CUSTOM_WALLET_HTTP_BRIDGE_URL>',
+    universalLink: '<CUSTOM_WALLET_UNIVERSAL_LINK>'
+};
+
+ tonConnectUI.uiOptions = {
+        walletsList: {
+            excludeWallets: ['openmask'],
+            includeWallets: [customWallet],
+            includeWalletsOrder: 'start'
+        }
+    };
+```
+
+[See all available options](https://ton-connect.github.io/sdk/types/_tonconnect_ui.WalletsListConfiguration.html)

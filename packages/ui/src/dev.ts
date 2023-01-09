@@ -2,7 +2,7 @@
 import { TonConnectUI } from 'src/ton-connect-ui';
 
 async function dev(): Promise<void> {
-    const tonConnectUI = new TonConnectUI({
+    /* const tonConnectUI =*/ new TonConnectUI({
         buttonRootId: 'button-root',
         restoreConnection: true,
         manifestUrl: 'https://ton-connect.github.io/demo-dapp/tonconnect-manifest.json',
