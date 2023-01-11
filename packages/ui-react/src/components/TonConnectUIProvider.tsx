@@ -1,8 +1,13 @@
 import { createContext, FunctionComponent, memo } from 'react';
-import { Locales, Theme, TonConnectUI } from '@tonconnect/ui';
+import {
+    ActionConfiguration,
+    Locales,
+    Theme,
+    TonConnectUI,
+    UIPreferences,
+    WalletsListConfiguration
+} from '@tonconnect/ui';
 import { ITonConnect } from '@tonconnect/sdk';
-import type * as CSS from 'csstype';
-type Color = CSS.Property.Color;
 
 export const TonConnectUIContext = createContext<TonConnectUI | null>(null);
 
@@ -40,12 +45,6 @@ export interface TonConnectUIProviderPropsBase {
     theme: Theme;
 
     /**
-     * Accent color for the UI elements.
-     * @default #31A6F5 (blue).
-     */
-    accentColor: Color;
-
-    /**
      * Language for the phrases it the UI elements.
      * @default system
      */
@@ -58,9 +57,24 @@ export interface TonConnectUIProviderPropsBase {
     widgetRootId: string;
 
     /**
+     * UI elements configuration.
+     */
+    uiPreferences?: UIPreferences;
+
+    /**
+     * Configuration for the wallets list in the connect wallet modal.
+     */
+    walletsList?: WalletsListConfiguration;
+
+    /**
+     * Configuration for action-period (e.g. sendTransaction) UI elements: modals and notifications.
+     */
+    actionsConfiguration?: ActionConfiguration;
+
+    /**
      * @deprecated Don't use it
      */
-    walletsListSource: string;
+    walletsListSource?: string;
 }
 
 let tonConnectUI: TonConnectUI | null = null;
