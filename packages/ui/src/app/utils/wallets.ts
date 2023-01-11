@@ -1,7 +1,6 @@
 import { WalletInfo, TonConnect } from '@tonconnect/sdk';
 import { UIWallet } from 'src/models/ui-wallet';
 import { WalletsListConfiguration } from 'src/models';
-import { WalletNotFoundError } from 'src/errors/configuration/wallet-not-found.error';
 
 export function uiWalletToWalletInfo(uiWallet: UIWallet): WalletInfo {
     if ('jsBridgeKey' in uiWallet) {
@@ -24,20 +23,26 @@ export function applyWalletsListConfiguration(
     }
 
     if ('wallets' in configuration) {
-        return configuration.wallets.map(wallet => {
-            if (typeof wallet === 'string') {
-                const walletInfo = walletsList.find(item => item.name === wallet);
+        return configuration.wallets
+            .map(wallet => {
+                if (typeof wallet === 'string') {
+                    const walletInfo = walletsList.find(item => item.name === wallet);
 
-                if (!walletInfo) {
-                    throw new WalletNotFoundError(
-                        `Wallet with name === '${wallet}' wasn't found in the wallets list. Check ${wallet} correctness.`
-                    );
+                    if (!walletInfo) {
+                        console.error(
+                            `Wallet with name === '${wallet}' wasn't found in the wallets list. Check '${wallet}' correctness. Available wallets names: ${walletsList
+                                .map(i => "'" + i.name + "'")
+                                .join(', ')}`
+                        );
+
+                        return null;
+                    }
+                    return walletInfo;
                 }
-                return walletInfo;
-            }
 
-            return uiWalletToWalletInfo(wallet);
-        });
+                return uiWalletToWalletInfo(wallet);
+            })
+            .filter(i => !!i) as WalletInfo[];
     }
 
     const filteredWalletsList = configuration.excludeWallets?.length

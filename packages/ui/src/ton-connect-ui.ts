@@ -103,7 +103,7 @@ export class TonConnectUI {
             const merged = mergeOptions(
                 {
                     ...(options.language && { language: options.language }),
-                    ...(options.walletsList && { walletsList: options.walletsList })
+                    ...(!!options.walletsList && { walletsList: options.walletsList })
                 },
                 unwrap(state)
             );

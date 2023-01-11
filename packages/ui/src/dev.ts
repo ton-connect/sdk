@@ -2,7 +2,7 @@
 import { TonConnectUI } from 'src/ton-connect-ui';
 
 async function dev(): Promise<void> {
-    /* const tonConnectUI =*/ new TonConnectUI({
+    const tonConnectUI = new TonConnectUI({
         buttonRootId: 'button-root',
         manifestUrl: 'https://ton-connect.github.io/demo-dapp/tonconnect-manifest.json',
         actionsConfiguration: {
@@ -17,6 +17,12 @@ async function dev(): Promise<void> {
             }
         }*/
     });
+
+    tonConnectUI.uiOptions = {
+        walletsList: {
+            wallets: ['OpenMask', 'Tonkeeper']
+        }
+    };
 
     /*setTimeout(() => {
         tc.uiOptions = {

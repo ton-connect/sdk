@@ -45,10 +45,7 @@ export const WalletsModal: Component = () => {
             return null;
         }
 
-        return applyWalletsListConfiguration(
-            fetchedWalletsList(),
-            appState.walletsListConfiguration
-        );
+        return applyWalletsListConfiguration(fetchedWalletsList(), appState.walletsList);
     });
 
     const onClose = (): void => {

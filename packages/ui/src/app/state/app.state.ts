@@ -7,11 +7,11 @@ export type AppState = {
     connector: ITonConnect;
     buttonRootId: string | null;
     language: Locales;
-    walletsListConfiguration: WalletsListConfiguration | {};
+    walletsList: WalletsListConfiguration | {};
 };
 
 export const [appState, setAppState] = createStore<AppState>({
     buttonRootId: null,
     language: 'en',
-    walletsListConfiguration: {}
+    walletsList: {}
 } as AppState);
