@@ -3,6 +3,7 @@
   "entryPoints": [
     "packages/sdk",
     "packages/ui",
+    "packages/ui-react",
     "packages/protocol"
   ],
   "excludeInternal": true,

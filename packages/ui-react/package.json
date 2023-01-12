@@ -62,5 +62,8 @@
   },
   "nx": {
     "tags": ["scope:ui-react"]
+  },
+  "typedoc": {
+    "entryPoint": "./src/library.ts"
   }
 }

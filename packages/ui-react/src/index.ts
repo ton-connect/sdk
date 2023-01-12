@@ -1,4 +1,2 @@
-export * from './components';
-export * from './errors';
-export * from './hooks';
+export * from './library';
 export * from '@tonconnect/ui';
