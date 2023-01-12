@@ -22,11 +22,17 @@ jobs:
         with:
           node-version: '${{ steps.nvm.outputs.NVMRC }}'
 
+      - name: Install NX
+        run: npm install -g nx
+
+      - name: Set up NX
+        run: npx nx init
+
       - name: Set up dependencies
         run: npm install
 
       - name: Build docs
-        run: npm generateDocs
+        run: npm run generateDocs
 
       - name: Commit and push changes
         run: |
