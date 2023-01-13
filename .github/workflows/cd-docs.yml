@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Read .nvmrc
         run: echo ::set-output name=NVMRC::$(cat .nvmrc)
@@ -22,20 +22,19 @@ jobs:
         with:
           node-version: '${{ steps.nvm.outputs.NVMRC }}'
 
-      - name: Install NX
-        run: npm install -g nx
-
-      - name: Set up NX
-        run: npx nx init
-
       - name: Set up dependencies
-        run: npm install
+        run: npm ci
+
+      - name: Build
+        uses: ./.github/actions/build
 
       - name: Build docs
         run: npm run generateDocs
 
       - name: Commit and push changes
         run: |
+            git config --global user.email "BOT_TonConnect_Builder@tonconnect.ton"
+            git config --global user.name "BOT_TonConnect_Builder"
             git add -A
             git commit -m "build(docs): docs rebuild by github action"
             git push

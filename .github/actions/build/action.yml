@@ -1,0 +1,21 @@
+name: Build
+description: 'Build packages'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Build protocol
+      shell: bash
+      run: npx nx run protocol:build:production
+
+    - name: Build sdk
+      shell: bash
+      run: npx nx run sdk:build:production
+
+    - name: Build ui
+      shell: bash
+      run: npx nx run ui:build
+
+    - name: Build ui-react
+      shell: bash
+      run: npx nx run ui-react:build
