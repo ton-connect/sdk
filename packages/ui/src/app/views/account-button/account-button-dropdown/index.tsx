@@ -6,10 +6,10 @@ import { Styleable } from 'src/app/models/styleable';
 import { Translateable } from 'src/app/models/translateable';
 import { ConnectorContext } from 'src/app/state/connector.context';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
-import { toUserFriendlyAddress } from '@tonconnect/sdk';
+import { CHAIN, toUserFriendlyAddress } from '@tonconnect/sdk';
 import { copyToClipboard } from 'src/app/utils/copy-to-clipboard';
 import { AccountButtonDropdownStyled, MenuButtonStyled, UlStyled } from './style';
-import {Identifiable} from "src/app/models/identifiable";
+import { Identifiable } from 'src/app/models/identifiable';
 
 const MenuItemText: Component<{ children: string } & Translateable> = props => (
     <Text
@@ -33,7 +33,10 @@ export const AccountButtonDropdown: Component<AccountButtonDropdownProps> = prop
     const [isCopiedShown, setIsCopiedShown] = createSignal(false);
 
     const onCopy = async (): Promise<void> => {
-        const userFriendlyAddress = toUserFriendlyAddress(tonConnectUi.account!.address);
+        const userFriendlyAddress = toUserFriendlyAddress(
+            tonConnectUi.account!.address,
+            tonConnectUi.account!.chain === CHAIN.TESTNET
+        );
         await copyToClipboard(userFriendlyAddress);
         setIsCopiedShown(true);
 

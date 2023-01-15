@@ -2,7 +2,7 @@ import { Component, createSignal, onCleanup, onMount, Show, useContext } from 's
 import { ArrowIcon, Text, TonIcon } from 'src/app/components';
 import { ConnectorContext } from 'src/app/state/connector.context';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
-import { toUserFriendlyAddress } from '@tonconnect/sdk';
+import { Account, toUserFriendlyAddress } from '@tonconnect/sdk';
 import {
     AccountButtonStyled,
     DropdownButtonStyled,
@@ -15,6 +15,7 @@ import { useFloating } from 'solid-floating-ui';
 import { autoUpdate } from '@floating-ui/dom';
 import { Transition } from 'solid-transition-group';
 import { useTheme } from 'solid-styled-components';
+import { CHAIN } from '@tonconnect/protocol';
 
 interface AccountButtonProps {}
 
@@ -23,7 +24,7 @@ export const AccountButton: Component<AccountButtonProps> = () => {
     const connector = useContext(ConnectorContext)!;
     const tonConnectUI = useContext(TonConnectUiContext)!;
     const [isOpened, setIsOpened] = createSignal(false);
-    const [address, setAddress] = createSignal('');
+    const [account, setAccount] = createSignal<Account | null>(null);
 
     let dropDownRef: HTMLDivElement | undefined;
 
@@ -36,8 +37,12 @@ export const AccountButton: Component<AccountButtonProps> = () => {
     });
 
     const normalizedAddress = (): string => {
-        if (address()) {
-            const userFriendlyAddress = toUserFriendlyAddress(address());
+        const acc = account();
+        if (acc) {
+            const userFriendlyAddress = toUserFriendlyAddress(
+                acc.address,
+                acc.chain === CHAIN.TESTNET
+            );
             return userFriendlyAddress.slice(0, 4) + '...' + userFriendlyAddress.slice(-4);
         }
 
@@ -47,15 +52,15 @@ export const AccountButton: Component<AccountButtonProps> = () => {
     const unsubscribe = connector.onStatusChange(wallet => {
         if (!wallet) {
             setIsOpened(false);
-            setAddress('');
+            setAccount(null);
             return;
         }
 
-        setAddress(wallet.account.address);
+        setAccount(wallet.account);
     });
 
     const onClick = (e: Event): void | boolean => {
-        if (!address() || !isOpened()) {
+        if (!account() || !isOpened()) {
             return;
         }
         const clickToButton = anchor()!.contains(e.target as Node);
@@ -77,7 +82,7 @@ export const AccountButton: Component<AccountButtonProps> = () => {
 
     return (
         <>
-            <Show when={!address()}>
+            <Show when={!account()}>
                 <AccountButtonStyled
                     onClick={() => tonConnectUI.connectWallet()}
                     id="tc-connect-button"
@@ -94,7 +99,7 @@ export const AccountButton: Component<AccountButtonProps> = () => {
                     </Text>
                 </AccountButtonStyled>
             </Show>
-            <Show when={address()}>
+            <Show when={account()}>
                 <DropdownContainerStyled>
                     <DropdownButtonStyled
                         onClick={() => setIsOpened(v => !v)}

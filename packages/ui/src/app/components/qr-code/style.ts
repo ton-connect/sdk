@@ -10,6 +10,11 @@ export const QrCodeStyled = styled.div`
         display: flex;
         align-items: center;
         justify-content: center;
+
+        > svg {
+            height: 276px;
+            width: 276px;
+        }
     }
 
     rect {
