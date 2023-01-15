@@ -10,7 +10,7 @@ runs:
 
     - name: Build sdk
       shell: bash
-      run: npx nx run sdk:build:production
+      run: npx nx run sdk:build
 
     - name: Build ui
       shell: bash
