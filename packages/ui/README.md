@@ -434,3 +434,43 @@ const customWallet: UIWallet = {
 ```
 
 [See all available options](https://ton-connect.github.io/sdk/types/_tonconnect_ui.WalletsListConfiguration.html)
+
+
+## Add connect request parameters (ton_proof)
+Pass `getConnectParameters` async function to the `TonConnectUI` constructor. This callback will be called after `connectWallet` method call or `Connect Button` click before wallets list render.
+
+In other words, if `getConnectParameters` is passed, there will be a following steps:
+1. User clicks to the 'Connect Wallet' button, or `connectWallet` method is called
+2. Wallets modal opens
+3. Loader renders in the center of the modal
+4. TonConnectUI calls `getConnectParameters` and waits while it resolves
+5. Wallets list renders in the center of the modal
+
+Note that there is no any caching for `getConnectParameters` -- every time wallets modal opens there will be the 5 steps above.
+
+If you have to make a http-request to your backend it this case, it is better to do it after app initialization (if possible) and return (probably completed) promise from the `getConnectParameters` to reduce loading time for the user.
+
+```ts
+const tonProofPayloadPromise = getTonProofFromYourBackend(); // will be executed during app initialization
+                                                             // don't forget to manage to refetch payload from your backend if needed
+
+const tonConnectUI = new TonConnectUI({
+    manifestUrl: 'https://<YOUR_APP_URL>/tonconnect-manifest.json',
+    buttonRootId: '<YOUR_CONNECT_BUTTON_ANCHOR_ID>',
+    getConnectParameters: async () => {
+        const tonProof = await tonProofPayloadPromise; // will be executed every time when wallets modal is opened. It is recommended to make an http-request in advance
+        return {                                         
+            tonProof
+        };
+    }
+});
+```
+
+You can find `ton_proof` result in the `wallet` object when wallet will be connected:
+```ts
+tonConnectUI.onStatusChange(wallet => {
+        if (wallet && wallet.connectItems?.tonProof && 'proof' in wallet.connectItems.tonProof) {
+            checkProofInYourBackend(wallet.connectItems.tonProof.proof);
+        }
+    });
+```
