@@ -1,6 +1,58 @@
 /* @refresh reload */
 import { TonConnectUI } from 'src/ton-connect-ui';
+import { TonProofItemReplySuccess } from '@tonconnect/protocol';
+import { Account } from '@tonconnect/sdk';
 
+let accessToken: string | null = null;
+
+async function getAccountInfo(account: Account): Promise<unknown> {
+    const response = await (
+        await fetch(`https://demo.tonconnect.dev/dapp/getAccountInfo?network=${account.chain}`, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+            }
+        })
+    ).json();
+
+    return response as {};
+}
+async function generatePayload(): Promise<string> {
+    const response = await (
+        await fetch(`https://demo.tonconnect.dev/ton-proof/generatePayload`, {
+            method: 'POST'
+        })
+    ).json();
+
+    return response.payload as string;
+}
+async function checkProof(
+    proof: TonProofItemReplySuccess['proof'],
+    account: Account
+): Promise<void> {
+    try {
+        const reqBody = {
+            address: account.address,
+            network: account.chain,
+            proof
+        };
+
+        const response = await (
+            await fetch(`https://demo.tonconnect.dev/ton-proof/checkProof`, {
+                method: 'POST',
+                body: JSON.stringify(reqBody)
+            })
+        ).json();
+
+        if (response?.token) {
+            accessToken = response.token;
+        }
+    } catch (e) {
+        console.log('checkProof error:', e);
+    }
+}
+
+const getConnectParametersPromise = generatePayload();
 async function dev(): Promise<void> {
     const tonConnectUI = new TonConnectUI({
         buttonRootId: 'button-root',
@@ -9,8 +61,15 @@ async function dev(): Promise<void> {
             modals: ['error'],
             notifications: ['before']
         },
+        restoreConnection: false,
         walletsListSource:
-            'https://raw.githubusercontent.com/ton-connect/wallets-list/feature/openmask/wallets.json'
+            'https://raw.githubusercontent.com/ton-connect/wallets-list/feature/openmask/wallets.json',
+        getConnectParameters: async () => {
+            const tonProof = await getConnectParametersPromise;
+            return {
+                tonProof
+            };
+        }
         /*widgetConfiguration: {
             wallets: {
                 excludeWallets: ['OpenMask']
@@ -18,12 +77,13 @@ async function dev(): Promise<void> {
         }*/
     });
 
-    tonConnectUI.uiOptions = {
-        walletsList: {
-            wallets: ['OpenMask', 'Tonkeeper']
+    tonConnectUI.onStatusChange(wallet => {
+        if (wallet && wallet.connectItems?.tonProof && 'proof' in wallet.connectItems.tonProof) {
+            checkProof(wallet.connectItems.tonProof.proof, wallet.account).then(() => {
+                getAccountInfo(wallet.account).then(console.log);
+            });
         }
-    };
-
+    });
     /*setTimeout(() => {
         tc.uiOptions = {
             uiPreferences: {

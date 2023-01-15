@@ -30,9 +30,4 @@ export interface TonConnectUiOptions {
      * Configuration for action-period (e.g. sendTransaction) UI elements: modals and notifications.
      */
     actionsConfiguration?: ActionConfiguration;
-
-    /**
-     * @deprecated Don't use it
-     */
-    walletsListSource?: string;
 }

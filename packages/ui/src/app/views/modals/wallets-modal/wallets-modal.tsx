@@ -1,4 +1,5 @@
 import {
+    ConnectAdditionalRequest,
     isWalletInfoInjected,
     WalletInfo,
     WalletInfoInjected,
@@ -10,6 +11,7 @@ import {
     createMemo,
     createResource,
     createSignal,
+    on,
     onCleanup,
     Show,
     useContext
@@ -37,6 +39,23 @@ export const WalletsModal: Component = () => {
     const connector = useContext(ConnectorContext)!;
     const tonConnectUI = useContext(TonConnectUiContext);
     const [fetchedWalletsList] = createResource(() => tonConnectUI!.getWallets());
+    const [fetchedAdditionalRequest, { refetch }] = createResource<
+        ConnectAdditionalRequest | undefined
+    >((_, { refetching }) => {
+        if (refetching) {
+            return appState.getConnectParameters?.();
+        }
+
+        return undefined;
+    });
+
+    createEffect(
+        on(walletsModalOpen, () => {
+            if (walletsModalOpen() && fetchedAdditionalRequest.state !== 'refreshing') {
+                refetch();
+            }
+        })
+    );
 
     const [selectedWalletInfo, setSelectedWalletInfo] = createSignal<WalletInfo | null>(null);
 
@@ -46,6 +65,17 @@ export const WalletsModal: Component = () => {
         }
 
         return applyWalletsListConfiguration(fetchedWalletsList(), appState.walletsList);
+    });
+
+    const additionalRequestLoading = (): boolean =>
+        fetchedAdditionalRequest.state !== 'ready' && fetchedAdditionalRequest.state !== 'errored';
+
+    const additionalRequest = createMemo(() => {
+        if (fetchedAdditionalRequest.state !== 'ready') {
+            return undefined;
+        }
+
+        return fetchedAdditionalRequest();
     });
 
     const onClose = (): void => {
@@ -73,18 +103,24 @@ export const WalletsModal: Component = () => {
     };
 
     const onSelectIfMobile = (walletInfo: WalletInfoRemote): void => {
-        const universalLink = connector.connect({
-            universalLink: walletInfo.universalLink,
-            bridgeUrl: walletInfo.bridgeUrl
-        });
+        const universalLink = connector.connect(
+            {
+                universalLink: walletInfo.universalLink,
+                bridgeUrl: walletInfo.bridgeUrl
+            },
+            additionalRequest()
+        );
 
         openLink(universalLink);
     };
 
     const onSelectIfInjected = (walletInfo: WalletInfoInjected): void => {
-        connector.connect({
-            jsBridgeKey: walletInfo.jsBridgeKey
-        });
+        connector.connect(
+            {
+                jsBridgeKey: walletInfo.jsBridgeKey
+            },
+            additionalRequest()
+        );
     };
 
     const unsubscribe = connector.onStatusChange(wallet => {
@@ -97,13 +133,13 @@ export const WalletsModal: Component = () => {
 
     return (
         <StyledModal opened={walletsModalOpen()} onClose={onClose} id="tc-wallets-modal-container">
-            <Show when={!walletsList()}>
+            <Show when={!walletsList() || additionalRequestLoading()}>
                 <H1Styled translationKey="walletModal.loading">Wallets list is loading</H1Styled>
                 <LoaderContainerStyled>
                     <LoaderIconStyled />
                 </LoaderContainerStyled>
             </Show>
-            <Show when={walletsList()}>
+            <Show when={walletsList() && !additionalRequestLoading()}>
                 <Show when={!selectedWalletInfo()} keyed={false}>
                     <SelectWalletModal
                         walletsList={walletsList()!}
@@ -113,6 +149,7 @@ export const WalletsModal: Component = () => {
                 </Show>
                 <Show when={selectedWalletInfo()} keyed={false}>
                     <QrCodeModal
+                        additionalRequest={additionalRequest()}
                         wallet={selectedWalletInfo() as WalletInfoRemote}
                         onBackClick={() => setSelectedWalletInfo(null)}
                         id="tc-qr-modal"

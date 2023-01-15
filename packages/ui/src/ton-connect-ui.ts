@@ -144,7 +144,10 @@ export class TonConnectUI {
         }
 
         this.uiOptions = mergeOptions(options, { uiPreferences: { theme: 'SYSTEM' } });
-        setAppState({ connector: this.connector });
+        setAppState({
+            connector: this.connector,
+            getConnectParameters: options?.getConnectParameters
+        });
 
         widgetController.renderApp(rootId, this);
     }
