@@ -188,6 +188,21 @@ try {
 }
 ```
 
+# Utils
+
+## Convert address to user-friendly format
+Use `toUserFriendlyAddress` function to convert raw-address to the user-friendly format. You can pass `true` as a second
+parameter to make it 'testnet only' (disabled by default).
+
+
+```ts
+import { toUserFriendlyAddress } from '@tonconnect/sdk';
+
+const rawAddress = connector.wallet.account.address; // like '0:abcdef123456789...'
+const bouncableUserFriendlyAddress = toUserFriendlyAddress(rawAddress);
+const testnetOnlyBouncableUserFriendlyAddress = toUserFriendlyAddress(rawAddress, true);
+```
+
 # Backend authorization
 To authorize user in your backend with TonConnect you can use following schema:
 1. Fetch auth payload from your backend. It might be any random value. Backend must save information that this payload was sent to the client to check payload correctness later.
