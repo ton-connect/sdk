@@ -16,7 +16,9 @@ export interface TonConnectOptions {
     storage?: IStorage;
 
     /**
-     * @deprecated Don't use it
+     * Redefine wallets list source URL. Must be a link to a json file with [following structure]{@link https://github.com/ton-connect/wallets-list}
+     * @default https://raw.githubusercontent.com/ton-connect/wallets-list/main/wallets.json
+     * @
      */
     walletsListSource?: string;
 }
