@@ -1,0 +1,12 @@
+{
+  "root": "packages/ui-react/",
+  "targets": {
+    "version": {
+      "executor": "@jscutlery/semver:version",
+      "options": {
+        "changelogHeader": "# Changelog @tonconnect/ui-react \n",
+        "push": false
+      }
+    }
+  }
+}
