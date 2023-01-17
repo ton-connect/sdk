@@ -1,60 +1,8 @@
 /* @refresh reload */
 import { TonConnectUI } from 'src/ton-connect-ui';
-import { TonProofItemReplySuccess } from '@tonconnect/protocol';
-import { Account } from '@tonconnect/sdk';
 
-let accessToken: string | null = null;
-
-async function getAccountInfo(account: Account): Promise<unknown> {
-    const response = await (
-        await fetch(`https://demo.tonconnect.dev/dapp/getAccountInfo?network=${account.chain}`, {
-            headers: {
-                Authorization: `Bearer ${accessToken}`,
-                'Content-Type': 'application/json'
-            }
-        })
-    ).json();
-
-    return response as {};
-}
-async function generatePayload(): Promise<string> {
-    const response = await (
-        await fetch(`https://demo.tonconnect.dev/ton-proof/generatePayload`, {
-            method: 'POST'
-        })
-    ).json();
-
-    return response.payload as string;
-}
-async function checkProof(
-    proof: TonProofItemReplySuccess['proof'],
-    account: Account
-): Promise<void> {
-    try {
-        const reqBody = {
-            address: account.address,
-            network: account.chain,
-            proof
-        };
-
-        const response = await (
-            await fetch(`https://demo.tonconnect.dev/ton-proof/checkProof`, {
-                method: 'POST',
-                body: JSON.stringify(reqBody)
-            })
-        ).json();
-
-        if (response?.token) {
-            accessToken = response.token;
-        }
-    } catch (e) {
-        console.log('checkProof error:', e);
-    }
-}
-
-const getConnectParametersPromise = generatePayload();
 async function dev(): Promise<void> {
-    const tonConnectUI = new TonConnectUI({
+    /*const tonConnectUI =*/ new TonConnectUI({
         buttonRootId: 'button-root',
         manifestUrl: 'https://ton-connect.github.io/demo-dapp/tonconnect-manifest.json',
         actionsConfiguration: {
@@ -71,9 +19,6 @@ async function dev(): Promise<void> {
         }*/
     });
 
-    tonConnectUI.onStatusChange(wallet => {
-        console.log(wallet);
-    });
     /*setTimeout(() => {
         tc.uiOptions = {
             uiPreferences: {
@@ -97,9 +42,9 @@ async function dev(): Promise<void> {
     }, 500);
     setTimeout(() => {
         widgetController.openActionsModal('transaction-sent');
-    }, 1000);
-*/
-    /*const defaultTx: SendTransactionRequest = {
+    }, 1000); */
+
+    /* const defaultTx: SendTransactionRequest = {
         validUntil: Date.now() + 1000000,
         messages: [
             {
@@ -115,8 +60,8 @@ async function dev(): Promise<void> {
                 tonConnectUI.sendTransaction(defaultTx, { modals: 'all', notifications: 'all' });
             }, 1000);
         }
-    });
-*/
+    });*/
+
     //  tc.connectWallet();
     /*
     setTimeout(() => {
