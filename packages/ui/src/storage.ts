@@ -1,5 +1,5 @@
-import { WalletInfo } from '@tonconnect/sdk';
 import { TonConnectUIError } from 'src/errors/ton-connect-ui.error';
+import { WalletInfoWithOpenMethod } from 'src/models/connected-wallet';
 
 export class WalletInfoStorage {
     private readonly localStorage: Storage;
@@ -16,11 +16,11 @@ export class WalletInfoStorage {
         this.localStorage = localStorage;
     }
 
-    public setWalletInfo(walletInfo: WalletInfo): void {
+    public setWalletInfo(walletInfo: WalletInfoWithOpenMethod): void {
         this.localStorage.setItem(this.storageKey, JSON.stringify(walletInfo));
     }
 
-    public getWalletInfo(): WalletInfo | null {
+    public getWalletInfo(): WalletInfoWithOpenMethod | null {
         const walletInfoString = this.localStorage.getItem(this.storageKey);
 
         if (!walletInfoString) {

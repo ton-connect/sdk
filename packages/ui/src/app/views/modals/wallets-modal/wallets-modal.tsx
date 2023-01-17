@@ -84,17 +84,18 @@ export const WalletsModal: Component = () => {
     };
 
     const onSelect = (walletInfo: WalletInfo): void => {
-        setLastSelectedWalletInfo(walletInfo);
-
         if (isDevice('mobile') && 'universalLink' in walletInfo) {
+            setLastSelectedWalletInfo({ ...walletInfo, openMethod: 'universal-link' });
             return onSelectIfMobile(walletInfo);
         }
 
         if (isWalletInfoInjected(walletInfo) && walletInfo.injected) {
+            setLastSelectedWalletInfo(walletInfo);
             return onSelectIfInjected(walletInfo);
         }
 
         if ('bridgeUrl' in walletInfo) {
+            setLastSelectedWalletInfo({ ...walletInfo, openMethod: 'qrcode' });
             setSelectedWalletInfo(walletInfo);
             return;
         }
