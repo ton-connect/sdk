@@ -149,7 +149,7 @@ export const Settings = () => {
 ## Add connect request parameters (ton_proof)
 Pass `getConnectParameters` async function to the `TonConnectUIProvider`. This callback will be called after `connectWallet` method call or `Connect Button` click before wallets list render.
 
-In other words, if `getConnectParameters` is passed, there will be a following steps:
+In other words, if `getConnectParameters` is passed, there will be following steps:
 1. User clicks to the 'Connect Wallet' button, or `connectWallet` method is called
 2. Wallets modal opens
 3. Loader renders in the center of the modal
