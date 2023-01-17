@@ -61,15 +61,9 @@ async function dev(): Promise<void> {
             modals: ['error'],
             notifications: ['before']
         },
-        restoreConnection: false,
+        restoreConnection: true,
         walletsListSource:
-            'https://raw.githubusercontent.com/ton-connect/wallets-list/feature/openmask/wallets.json',
-        getConnectParameters: async () => {
-            const tonProof = await getConnectParametersPromise;
-            return {
-                tonProof
-            };
-        }
+            'https://raw.githubusercontent.com/ton-connect/wallets-list/feature/openmask/wallets.json'
         /*widgetConfiguration: {
             wallets: {
                 excludeWallets: ['OpenMask']
@@ -78,11 +72,7 @@ async function dev(): Promise<void> {
     });
 
     tonConnectUI.onStatusChange(wallet => {
-        if (wallet && wallet.connectItems?.tonProof && 'proof' in wallet.connectItems.tonProof) {
-            checkProof(wallet.connectItems.tonProof.proof, wallet.account).then(() => {
-                getAccountInfo(wallet.account).then(console.log);
-            });
-        }
+        console.log(wallet);
     });
     /*setTimeout(() => {
         tc.uiOptions = {
