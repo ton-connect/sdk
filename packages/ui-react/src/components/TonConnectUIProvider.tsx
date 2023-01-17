@@ -7,7 +7,7 @@ import {
     UIPreferences,
     WalletsListConfiguration
 } from '@tonconnect/ui';
-import { ITonConnect } from '@tonconnect/sdk';
+import type { ConnectAdditionalRequest, ITonConnect } from '@tonconnect/sdk';
 
 export const TonConnectUIContext = createContext<TonConnectUI | null>(null);
 
@@ -72,9 +72,18 @@ export interface TonConnectUIProviderPropsBase {
     actionsConfiguration?: ActionConfiguration;
 
     /**
-     * @deprecated Don't use it
+     * Redefine wallets list source URL. Must be a link to a json file with [following structure]{@link https://github.com/ton-connect/wallets-list}
+     * @default https://raw.githubusercontent.com/ton-connect/wallets-list/main/wallets.json
+     * @
      */
     walletsListSource?: string;
+
+    /**
+     * Use it to customize ConnectRequest and add `tonProof` payload.
+     * The function will be called after wallets modal opens, and wallets selection will be blocked until it's resolved.
+     * If you have to make a http-request to your backend, it is better to do it after app initialization (if possible) and return (probably completed) promise to reduce loading time for the user.
+     */
+    getConnectParameters?: () => Promise<ConnectAdditionalRequest>;
 }
 
 let tonConnectUI: TonConnectUI | null = null;

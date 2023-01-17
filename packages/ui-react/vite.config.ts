@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [
       react(),
       dts({
-        insertTypesEntry: true,
+        insertTypesEntry: true
       })
   ],
   optimizeDeps: {
