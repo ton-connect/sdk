@@ -23,7 +23,6 @@ export type ColorsSet = {
     };
     text: {
         primary: Color;
-        subhead: Color;
         secondary: Color;
     };
 };
@@ -50,7 +49,6 @@ export type PartialColorsSet = {
     };
     text?: {
         primary?: Color;
-        subhead?: Color;
         secondary?: Color;
     };
 };

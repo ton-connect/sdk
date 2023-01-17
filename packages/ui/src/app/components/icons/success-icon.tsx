@@ -23,7 +23,7 @@ export const SuccessIcon: Component<SuccessIconProps> = props => {
             <circle cx="12" cy="12" r="11" fill={fill()} />
             <path
                 d="M7.5 13L10 15.5L16.5 9"
-                stroke="white"
+                stroke={theme.colors.constant.white}
                 stroke-width="1.8"
                 stroke-linecap="round"
                 stroke-linejoin="round"
