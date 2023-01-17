@@ -1,0 +1,12 @@
+{
+  "root": "packages/protocol/",
+  "targets": {
+    "version": {
+      "executor": "@jscutlery/semver:version",
+      "options": {
+        "changelogHeader": "# Changelog @tonconnect/protocol \n",
+        "push": false
+      }
+    }
+  }
+}
