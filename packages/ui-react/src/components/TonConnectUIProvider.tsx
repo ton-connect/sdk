@@ -2,7 +2,6 @@ import { createContext, FunctionComponent, memo } from 'react';
 import {
     ActionConfiguration,
     Locales,
-    Theme,
     TonConnectUI,
     UIPreferences,
     WalletsListConfiguration
@@ -37,12 +36,6 @@ export interface TonConnectUIProviderPropsBase {
      * @default true.
      */
     restoreConnection: boolean;
-
-    /**
-     * Color theme for the UI elements.
-     * @default SYSTEM theme.
-     */
-    theme: Theme;
 
     /**
      * Language for the phrases it the UI elements.
