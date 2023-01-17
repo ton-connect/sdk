@@ -1,8 +1,9 @@
 /* @refresh reload */
 import { TonConnectUI } from 'src/ton-connect-ui';
+import { SendTransactionRequest } from '@tonconnect/sdk';
 
 async function dev(): Promise<void> {
-    /*const tonConnectUI =*/ new TonConnectUI({
+    const tonConnectUI = new TonConnectUI({
         buttonRootId: 'button-root',
         manifestUrl: 'https://ton-connect.github.io/demo-dapp/tonconnect-manifest.json',
         actionsConfiguration: {
@@ -44,23 +45,22 @@ async function dev(): Promise<void> {
         widgetController.openActionsModal('transaction-sent');
     }, 1000); */
 
-    /* const defaultTx: SendTransactionRequest = {
-        validUntil: Date.now() + 1000000,
-        messages: [
-            {
-                address: '0:412410771DA82CBA306A55FA9E0D43C9D245E38133CB58F1457DFB8D5CD8892F',
-                amount: '200000'
-            }
-        ]
-    };
+    document.getElementById('send-tx')!.onclick = () => {
+        const defaultTx: SendTransactionRequest = {
+            validUntil: Date.now() + 1000000,
+            messages: [
+                {
+                    address: '0:412410771DA82CBA306A55FA9E0D43C9D245E38133CB58F1457DFB8D5CD8892F',
+                    amount: '200000'
+                }
+            ]
+        };
 
-    tonConnectUI.onStatusChange(wallet => {
-        if (wallet) {
-            setTimeout(() => {
-                tonConnectUI.sendTransaction(defaultTx, { modals: 'all', notifications: 'all' });
-            }, 1000);
-        }
-    });*/
+        tonConnectUI.sendTransaction(defaultTx, {
+            modals: 'all',
+            notifications: 'all'
+        });
+    };
 
     //  tc.connectWallet();
     /*

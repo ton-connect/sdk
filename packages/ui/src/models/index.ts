@@ -18,6 +18,12 @@ export type { ColorsSet, PartialColorsSet } from './colors-set';
 export type { BorderRadius } from './border-radius';
 export type { UIWallet } from './ui-wallet';
 export type { ActionConfiguration } from './action-configuration';
+export type {
+    ConnectedWallet,
+    WalletInfoWithOpenMethod,
+    WalletOpenMethod,
+    WalletInfoRemoteWithOpenMethod
+} from './connected-wallet';
 
 import { Property } from 'csstype';
 type Color = Property.Color;

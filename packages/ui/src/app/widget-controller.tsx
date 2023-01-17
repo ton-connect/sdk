@@ -1,4 +1,3 @@
-import { WalletInfo } from '@tonconnect/sdk';
 import { render } from 'solid-js/web';
 
 import {
@@ -9,13 +8,14 @@ import {
 } from 'src/app/state/modals-state';
 import { TonConnectUI } from 'src/ton-connect-ui';
 import App from './App';
+import { WalletInfoWithOpenMethod } from 'src/models/connected-wallet';
 
 export const widgetController = {
     openWalletsModal: (): void => void setTimeout(() => setWalletsModalOpen(true)),
     closeWalletsModal: (): void => void setTimeout(() => setWalletsModalOpen(false)),
     setAction: (action: Action): void => void setTimeout(() => setAction(action)),
     clearAction: (): void => void setTimeout(() => setAction(null)),
-    getSelectedWalletInfo: (): WalletInfo | null => lastSelectedWalletInfo(),
+    getSelectedWalletInfo: (): WalletInfoWithOpenMethod | null => lastSelectedWalletInfo(),
     renderApp: (root: string, tonConnectUI: TonConnectUI): (() => void) =>
         render(
             () => <App tonConnectUI={tonConnectUI} />,

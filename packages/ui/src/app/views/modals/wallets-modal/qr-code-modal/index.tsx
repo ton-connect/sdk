@@ -20,6 +20,7 @@ import {
 import { ConnectorContext } from 'src/app/state/connector.context';
 import { openLink, openLinkBlank } from 'src/app/utils/web-api';
 import { Identifiable } from 'src/app/models/identifiable';
+import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 
 export interface QrCodeModalProps extends Identifiable {
     additionalRequest?: ConnectAdditionalRequest;
@@ -56,7 +57,15 @@ export const QrCodeModal: Component<QrCodeModalProps> = props => {
                 <QRCode sourceUrl={universalLink} imageUrl={props.wallet.imageUrl} />
             </QRBackgroundStyled>
             <ButtonsContainerStyled>
-                <ActionButtonStyled onClick={() => openLink(universalLink)}>
+                <ActionButtonStyled
+                    onClick={() => {
+                        setLastSelectedWalletInfo({
+                            ...props.wallet,
+                            openMethod: 'universal-link'
+                        });
+                        openLink(universalLink);
+                    }}
+                >
                     <Translation
                         translationKey="walletModal.qrCodeModal.openWallet"
                         translationValues={{ name: props.wallet.name }}
@@ -66,14 +75,15 @@ export const QrCodeModal: Component<QrCodeModalProps> = props => {
                 </ActionButtonStyled>
                 <Show when={isWalletInfoInjected(props.wallet) && props.wallet.injected}>
                     <ActionButtonStyled
-                        onClick={() =>
+                        onClick={() => {
+                            setLastSelectedWalletInfo(props.wallet as WalletInfoInjected);
                             connector.connect(
                                 {
                                     jsBridgeKey: (props.wallet as WalletInfoInjected).jsBridgeKey
                                 },
                                 props.additionalRequest
-                            )
-                        }
+                            );
+                        }}
                     >
                         <Translation translationKey="walletModal.qrCodeModal.openExtension">
                             Open Extension

@@ -13,7 +13,6 @@ import { widgetController } from 'src/app/widget-controller';
 import { TonConnectUIError } from 'src/errors/ton-connect-ui.error';
 import { TonConnectUiCreateOptions } from 'src/models/ton-connect-ui-create-options';
 import { WalletInfoStorage } from 'src/storage';
-import { isDevice } from 'src/app/styles/media';
 import { getSystemTheme, openLink, subscribeToThemeChange } from 'src/app/utils/web-api';
 import { TonConnectUiOptions } from 'src/models/ton-connect-ui-options';
 import { setBorderRadius, setColors, setTheme } from 'src/app/state/theme-state';
@@ -22,6 +21,7 @@ import { setAppState } from 'src/app/state/app.state';
 import { unwrap } from 'solid-js/store';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { ActionConfiguration, StrictActionConfiguration } from 'src/models/action-configuration';
+import { ConnectedWallet, WalletInfoWithOpenMethod } from 'src/models/connected-wallet';
 
 export class TonConnectUI {
     public static getWallets(): Promise<WalletInfo[]> {
@@ -32,7 +32,7 @@ export class TonConnectUI {
 
     private readonly connector: ITonConnect;
 
-    private _walletInfo: WalletInfo | null = null;
+    private _walletInfo: WalletInfoWithOpenMethod | null = null;
 
     private systemThemeChangeUnsubscribe: (() => void) | null = null;
 
@@ -65,7 +65,7 @@ export class TonConnectUI {
     /**
      * Curren connected wallet's info or null.
      */
-    public get walletInfo(): WalletInfo | null {
+    public get walletInfo(): WalletInfoWithOpenMethod | null {
         return this._walletInfo;
     }
 
@@ -164,7 +164,7 @@ export class TonConnectUI {
      * @return function which has to be called to unsubscribe.
      */
     public onStatusChange(
-        callback: (wallet: (Wallet & WalletInfo) | null) => void,
+        callback: (wallet: ConnectedWallet | null) => void,
         errorsHandler?: (err: TonConnectError) => void
     ): ReturnType<ITonConnect['onStatusChange']> {
         return this.connector.onStatusChange(wallet => {
@@ -183,7 +183,7 @@ export class TonConnectUI {
     /**
      * Opens the modal window and handles a wallet connection.
      */
-    public async connectWallet(): Promise<Wallet & WalletInfo> {
+    public async connectWallet(): Promise<ConnectedWallet> {
         const walletsList = await this.getWallets();
         const embeddedWallet: WalletInfoInjected = walletsList.find(
             wallet => 'embedded' in wallet && wallet.embedded
@@ -233,7 +233,7 @@ export class TonConnectUI {
             throw new TonConnectUIError('Connect wallet to send a transaction.');
         }
 
-        if (!isDevice('desktop') && 'universalLink' in this.walletInfo) {
+        if ('universalLink' in this.walletInfo && this.walletInfo.openMethod === 'universal-link') {
             openLink(this.walletInfo.universalLink);
         }
 
