@@ -193,6 +193,30 @@ const defaultBehaviour = {
 }
 ```
 
+## Detect end of the connection restoring process
+Before restoring previous connected wallet TonConnect has to set up SSE connection with bridge, so you have to wait a little while connection restoring.
+If you need to update your UI depending on if connection is restoring, you can use `tonConnectUI.connectionRestored` promise.
+
+Promise that resolves after end of th connection restoring process (promise will fire after `onStatusChange`, so you can get actual information about wallet and session after when promise resolved).
+Resolved value `true`/`false` indicates if the session was restored successfully.
+
+
+```ts
+tonConnectUI.connectionRestored.then(restored => {
+    if (restored) {
+        console.log(
+            'Connection restored. Wallet:',
+            JSON.stringify({
+                ...tonConnectUI.wallet,
+                ...tonConnectUI.walletInfo
+            })
+        );
+    } else {
+        console.log('Connection was not restored.');
+    }
+});
+```
+
 ## UI customisation
 TonConnect UI provides an interface that should be familiar and recognizable to the user when using various apps. 
 However, the app developer can make changes to this interface to keep it consistent with the app interface.
@@ -363,20 +387,21 @@ tonConnectUI.uiOptions = {
 It is not recommended to customise TonConnect UI elements via css as it may confuse the user when looking for known and familiar UI elements such as connect button/modals.
 However, it is possible if needed. You can add css styles to the specified selectors of the UI element. See list of selectors in the table below:
 
-| Element                              | Selector                         | Element description                                                                               |
-|--------------------------------------|----------------------------------|---------------------------------------------------------------------------------------------------|
-| Connect wallet modal container       | `#tc-wallets-modal-container`    | Container of the modal window that opens when you click on the "connect wallet" button.           |
-| Select wallet modal content          | `#tc-wallets-modal`              | Content of the modal window with wallet selection.                                                |
-| QR-code modal content                | `#tc-qr-modal`                   | Content of the modal window with QR-code.                                                         |
-| Action modal container               | `#tc-actions-modal-container`    | Container of the modal window that opens when you call `sendTransaction` or other action.         |
-| Confirm action modal content         | `#tc-confirm-modal`              | Content of the modal window asking for confirmation of the action in the wallet.                  |
-| "Transaction sent" modal content     | `#tc-transaction-sent-modal`     | Content of the modal window informing that the transaction was successfully sent.                 |
-| "Transaction canceled" modal content | `#tc-transaction-canceled-modal` | Content of the modal window informing that the transaction was not sent.                          |
-| "Connect Wallet" button              | `#tc-connect-button`             | "Connect Wallet" button element.                                                                  |
-| Wallet menu dropdown button          | `#tc-dropdown-button`            | Wallet menu button -- host of the dropdown wallet menu (copy address/disconnect).                 |
-| Wallet menu dropdown container       | `#tc-dropdown-container`         | Container of the dropdown that opens when you click on the "wallet menu" button with ton address. |
-| Wallet menu dropdown content         | `#tc-dropdown`                   | Content of the dropdown that opens when you click on the "wallet menu" button with ton address.   |
-| Notifications container              | `#tc-notifications`              | Container of the actions notifications.                                                           |
+| Element                              | Selector                         | Element description                                                                                                   |
+|--------------------------------------|----------------------------------|-----------------------------------------------------------------------------------------------------------------------|
+| Connect wallet modal container       | `#tc-wallets-modal-container`    | Container of the modal window that opens when you click on the "connect wallet" button.                               |
+| Select wallet modal content          | `#tc-wallets-modal`              | Content of the modal window with wallet selection.                                                                    |
+| QR-code modal content                | `#tc-qr-modal`                   | Content of the modal window with QR-code.                                                                             |
+| Action modal container               | `#tc-actions-modal-container`    | Container of the modal window that opens when you call `sendTransaction` or other action.                             |
+| Confirm action modal content         | `#tc-confirm-modal`              | Content of the modal window asking for confirmation of the action in the wallet.                                      |
+| "Transaction sent" modal content     | `#tc-transaction-sent-modal`     | Content of the modal window informing that the transaction was successfully sent.                                     |
+| "Transaction canceled" modal content | `#tc-transaction-canceled-modal` | Content of the modal window informing that the transaction was not sent.                                              |
+| "Connect Wallet" button              | `#tc-connect-button`             | "Connect Wallet" button element.                                                                                      |
+| Wallet menu loading button           | `#tc-connect-button-loading`     | Button element which appears instead of "Connect Wallet" and dropdown menu buttons while restoring connection process |
+| Wallet menu dropdown button          | `#tc-dropdown-button`            | Wallet menu button -- host of the dropdown wallet menu (copy address/disconnect).                                     |
+| Wallet menu dropdown container       | `#tc-dropdown-container`         | Container of the dropdown that opens when you click on the "wallet menu" button with ton address.                     |
+| Wallet menu dropdown content         | `#tc-dropdown`                   | Content of the dropdown that opens when you click on the "wallet menu" button with ton address.                       |
+| Notifications container              | `#tc-notifications`              | Container of the actions notifications.                                                                               |
 
 
 ## Customize the list of displayed wallets

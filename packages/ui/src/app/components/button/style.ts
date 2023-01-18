@@ -15,7 +15,7 @@ export const ButtonStyled = styled.button`
     padding: 9px 16px;
     border: none;
     border-radius: ${props => borders[props.theme!.borderRadius]};
-    cursor: pointer;
+    cursor: ${props => (props.disabled ? 'not-allowed' : 'pointer')};
 
     font-size: 14px;
     font-weight: 590;
@@ -25,10 +25,10 @@ export const ButtonStyled = styled.button`
     transition: transform 0.1s ease-in-out;
 
     &:hover {
-        transform: scale(1.04);
+        transform: ${props => (props.disabled ? 'unset' : 'scale(1.04)')};
     }
 
     &:active {
-        transform: scale(0.96);
+        transform: ${props => (props.disabled ? 'unset' : 'scale(0.96)')};
     }
 `;
