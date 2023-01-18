@@ -42,6 +42,12 @@ export class TonConnectUI {
     };
 
     /**
+     * Promise that resolves after end of th connection restoring process (promise will fire after `onStatusChange`, so you can get actual information about wallet and session after when promise resolved).
+     * Resolved value `true`/`false` indicates if the session was restored successfully.
+     */
+    public readonly connectionRestored = Promise.resolve(false);
+
+    /**
      * Current connection status.
      */
     public get connected(): boolean {
@@ -136,10 +142,14 @@ export class TonConnectUI {
         this.subscribeToWalletChange();
 
         if (options?.restoreConnection !== false) {
-            this.connector.restoreConnection().then(() => {
+            this.connectionRestored = new Promise(async resolve => {
+                await this.connector.restoreConnection();
+
                 if (!this.connector.connected) {
                     this.walletInfoStorage.removeWalletInfo();
                 }
+
+                resolve(this.connector.connected);
             });
         }
 

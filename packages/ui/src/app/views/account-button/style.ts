@@ -1,5 +1,5 @@
 import { styled } from 'solid-styled-components';
-import { Button } from 'src/app/components';
+import { Button, LoaderIcon } from 'src/app/components';
 import { rgba } from 'src/app/utils/css';
 import { AccountButtonDropdown } from 'src/app/views/account-button/account-button-dropdown';
 import { Notifications } from 'src/app/views/account-button/notifications';
@@ -26,7 +26,26 @@ export const AccountButtonStyled = styled(Button)`
 `;
 
 export const DropdownButtonStyled = styled(AccountButtonStyled)`
+    width: 140px;
+    gap: 11px;
+    justify-content: center;
     background-color: ${props => props.theme!.colors.background.primary};
+`;
+
+export const LoaderButtonStyled = styled(Button)`
+    width: 140px;
+
+    background-color: ${props => props.theme!.colors.background.primary};
+    color: ${props => props.theme!.colors.connectButton.foreground};
+    box-shadow: ${props => `0 4px 24px ${rgba(props.theme!.colors.constant.black, 0.16)}`};
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+`;
+export const LoaderIconStyled = styled(LoaderIcon)`
+    height: 18px;
+    width: 18px;
 `;
 
 export const DropdownContainerStyled = styled.div`
