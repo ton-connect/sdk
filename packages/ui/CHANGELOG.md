@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui 
 
+## [0.0.14](https://github.com/ton-connect/sdk/compare/ui-0.0.13...ui-0.0.14) (2023-01-18)
+
+
+### Bug Fixes
+
+* **ui:** ton proof was being applied in embedded wallet browser ([06b44cf](https://github.com/ton-connect/sdk/commit/06b44cfc021649f85261c2e8a10c73b8f337f994))
+
+
+
 ## [0.0.13](https://github.com/ton-connect/sdk/compare/ui-0.0.12...ui-0.0.13) (2023-01-18)
 
 
