@@ -1,6 +1,6 @@
 {
   "name": "@tonconnect/ui-react",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ton-connect/sdk.git"
@@ -22,7 +22,9 @@
   ],
   "author": "tonconnect",
   "license": "Apache-2.0",
-  "files": ["lib"],
+  "files": [
+    "lib"
+  ],
   "main": "./lib/index.umd.cjs",
   "module": "./lib/index.js",
   "types": "./lib/index.d.ts",
@@ -61,7 +63,9 @@
     "react-dom": ">=17.0.0"
   },
   "nx": {
-    "tags": ["scope:ui-react"]
+    "tags": [
+      "scope:ui-react"
+    ]
   },
   "typedoc": {
     "entryPoint": "./src/library.ts"
