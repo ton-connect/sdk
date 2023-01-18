@@ -153,9 +153,9 @@ You can use it to detect when connection restoring process if finished.
 import { useIsConnectionRestored } from '@tonconnect/ui-react';
 
 export const EntrypointPage = () => {
-    const connectionRestoring = useIsConnectionRestored();
+    const connectionRestored = useIsConnectionRestored();
 
-    if (connectionRestoring) {
+    if (!connectionRestored) {
         return <Loader>Please wait...</Loader>;
     }
 
