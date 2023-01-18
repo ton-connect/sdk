@@ -17,7 +17,7 @@ import { getSystemTheme, openLink, subscribeToThemeChange } from 'src/app/utils/
 import { TonConnectUiOptions } from 'src/models/ton-connect-ui-options';
 import { setBorderRadius, setColors, setTheme } from 'src/app/state/theme-state';
 import { mergeOptions } from 'src/app/utils/options';
-import { setAppState } from 'src/app/state/app.state';
+import { appState, setAppState } from 'src/app/state/app.state';
 import { unwrap } from 'solid-js/store';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { ActionConfiguration, StrictActionConfiguration } from 'src/models/action-configuration';
@@ -200,8 +200,10 @@ export class TonConnectUI {
         ) as WalletInfoInjected;
 
         if (embeddedWallet) {
+            const additionalRequest = await appState.getConnectParameters?.();
+
             setLastSelectedWalletInfo(embeddedWallet);
-            this.connector.connect({ jsBridgeKey: embeddedWallet.jsBridgeKey });
+            this.connector.connect({ jsBridgeKey: embeddedWallet.jsBridgeKey }, additionalRequest);
         } else {
             widgetController.openWalletsModal();
         }
