@@ -145,6 +145,23 @@ export const Settings = () => {
 };
 ```
 
+### useIsConnectionRestored
+Indicates current status of the connection restoring process.
+You can use it to detect when connection restoring process if finished.
+
+```tsx
+import { useIsConnectionRestored } from '@tonconnect/ui-react';
+
+export const EntrypointPage = () => {
+    const connectionRestoring = useIsConnectionRestored();
+
+    if (connectionRestoring) {
+        return <Loader>Please wait...</Loader>;
+    }
+
+    return <MainPage />;
+};
+```
 
 ## Add connect request parameters (ton_proof)
 Pass `getConnectParameters` async function to the `TonConnectUIProvider`. This callback will be called after `connectWallet` method call or `Connect Button` click before wallets list render.
