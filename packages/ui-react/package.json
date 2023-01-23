@@ -44,7 +44,7 @@
   "dependencies": {
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "@tonconnect/ui": "^0.0.14",
+    "@tonconnect/ui": "^0.0.15",
     "@tonconnect/sdk": "^2.0.7"
   },
   "devDependencies": {

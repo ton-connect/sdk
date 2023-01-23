@@ -7,6 +7,7 @@ import {
     WalletsListConfiguration
 } from '@tonconnect/ui';
 import type { ConnectAdditionalRequest, ITonConnect } from '@tonconnect/sdk';
+import { isClientSide } from '../utils/web';
 
 export const TonConnectUIContext = createContext<TonConnectUI | null>(null);
 
@@ -92,7 +93,7 @@ const TonConnectUIProvider: FunctionComponent<TonConnectUIProviderProps> = ({
     children,
     ...options
 }) => {
-    if (!tonConnectUI) {
+    if (isClientSide() && !tonConnectUI) {
         tonConnectUI = new TonConnectUI(options);
     }
 
