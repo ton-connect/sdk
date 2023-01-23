@@ -7,7 +7,7 @@ export class WalletInfoStorage {
     private readonly storageKey = 'ton-connect-ui_wallet-info';
 
     constructor() {
-        if (!localStorage) {
+        if (typeof localStorage === 'undefined') {
             throw new TonConnectUIError(
                 'window.localStorage is undefined. localStorage is required for TonConnectUI'
             );

@@ -1,10 +1,10 @@
 {
   "name": "@tonconnect/ui",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "scripts": {
     "start": "vite --host",
     "dev": "vite",
-    "build": "vite build && rollup -c rollup.config.mjs && vite build -c vite.cdn-config.ts",
+    "build": "vite build && rollup -c rollup.config.mjs && vite build -c vite.cdn-config.ts && node ./scripts/patch-build_ssr-fix.js",
     "serve": "vite preview"
   },
   "nx": {

@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui 
 
+## [0.0.15](https://github.com/ton-connect/sdk/compare/ui-0.0.14...ui-0.0.15) (2023-01-23)
+
+
+### Bug Fixes
+
+* **ui:** ssr compatibility added ([58e78c2](https://github.com/ton-connect/sdk/commit/58e78c2c5720afce8ca1d83f30c6983ee62e8627))
+
+
+
 ## [0.0.14](https://github.com/ton-connect/sdk/compare/ui-0.0.13...ui-0.0.14) (2023-01-18)
 
 

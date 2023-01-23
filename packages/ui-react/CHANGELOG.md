@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui-react 
 
+## [0.0.12](https://github.com/ton-connect/sdk/compare/ui-react-0.0.11...ui-react-0.0.12) (2023-01-23)
+
+
+### Bug Fixes
+
+* **ui-react:** ssr compatibility added ([f33a072](https://github.com/ton-connect/sdk/commit/f33a07245bd27a7310ffcace10cb2c1e86071dc9))
+
+
+
 ## [0.0.11](https://github.com/ton-connect/sdk/compare/ui-react-0.0.10...ui-react-0.0.11) (2023-01-18)
 
 
