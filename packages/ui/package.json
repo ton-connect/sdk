@@ -4,7 +4,7 @@
   "scripts": {
     "start": "vite --host",
     "dev": "vite",
-    "build": "vite build && rollup -c rollup.config.mjs && vite build -c vite.cdn-config.ts",
+    "build": "vite build && rollup -c rollup.config.mjs && vite build -c vite.cdn-config.ts && node ./scripts/patch-build_ssr-fix.js",
     "serve": "vite preview"
   },
   "nx": {
