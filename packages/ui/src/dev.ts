@@ -10,9 +10,7 @@ async function dev(): Promise<void> {
             modals: ['error'],
             notifications: ['before']
         },
-        restoreConnection: true,
-        walletsListSource:
-            'https://raw.githubusercontent.com/ton-connect/wallets-list/feature/openmask/wallets.json'
+        restoreConnection: true
         /*widgetConfiguration: {
             wallets: {
                 excludeWallets: ['OpenMask']
