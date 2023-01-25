@@ -31,6 +31,7 @@ import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { useI18n } from '@solid-primitives/i18n';
 import { appState } from 'src/app/state/app.state';
 import { applyWalletsListConfiguration } from 'src/app/utils/wallets';
+import {UniversalConnectionModal} from "src/app/views/modals/wallets-modal/universal-connection-modal";
 
 export const WalletsModal: Component = () => {
     const { locale } = useI18n()[1];
@@ -142,11 +143,12 @@ export const WalletsModal: Component = () => {
             </Show>
             <Show when={walletsList() && !additionalRequestLoading()}>
                 <Show when={!selectedWalletInfo()} keyed={false}>
-                    <SelectWalletModal
+                    {/*<SelectWalletModal
                         walletsList={walletsList()!}
                         onSelect={onSelect}
                         id="tc-wallets-modal"
-                    />
+                    />*/}
+                    <UniversalConnectionModal />
                 </Show>
                 <Show when={selectedWalletInfo()} keyed={false}>
                     <QrCodeModal

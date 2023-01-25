@@ -18,11 +18,12 @@ export const defaultLightColorsSet: ColorsSet = {
     },
     background: {
         primary: '#FFFFFF',
-        secondary: '#F1F3F5'
+        secondary: '#F1F3F5',
+        segment: '#FFFFFF'
     },
     text: {
         primary: '#0F0F0F',
-        secondary: '#7A8999'
+        secondary: '#6A7785'
     }
 };
 
@@ -44,7 +45,8 @@ export const defaultDarkColorsSet: ColorsSet = {
     },
     background: {
         primary: '#121214',
-        secondary: '#18181A'
+        secondary: '#18181A',
+        segment: '#262629'
     },
     text: {
         primary: '#E5E5EA',

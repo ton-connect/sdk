@@ -10,5 +10,5 @@ interface TranslationProps extends PropertyRequired<Translateable, 'translationK
 export const Translation: Component<TranslationProps> = props => {
     const [t] = useI18n();
 
-    return t(props.translationKey, props.translationValues, props.children?.toString());
+    return <>{t(props.translationKey, props.translationValues, props.children?.toString())}</>;
 };

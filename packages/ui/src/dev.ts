@@ -1,6 +1,7 @@
 /* @refresh reload */
 import { TonConnectUI } from 'src/ton-connect-ui';
 import { SendTransactionRequest } from '@tonconnect/sdk';
+import { THEME } from 'src/models';
 
 async function dev(): Promise<void> {
     const tonConnectUI = new TonConnectUI({
@@ -10,9 +11,10 @@ async function dev(): Promise<void> {
             modals: ['error'],
             notifications: ['before']
         },
-        restoreConnection: true,
-        walletsListSource:
-            'https://raw.githubusercontent.com/ton-connect/wallets-list/feature/openmask/wallets.json'
+        uiPreferences: {
+            theme: THEME.LIGHT
+        },
+        restoreConnection: true
         /*widgetConfiguration: {
             wallets: {
                 excludeWallets: ['OpenMask']
