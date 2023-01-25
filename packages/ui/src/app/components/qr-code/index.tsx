@@ -6,8 +6,9 @@ import { copyToClipboard } from 'src/app/utils/copy-to-clipboard';
 import { Translation } from 'src/app/components/typography/Translation';
 
 export interface QRCodeProps {
-    imageUrl?: string;
     sourceUrl: string;
+    imageUrl?: string;
+    disableCopy?: boolean;
 }
 
 type CopyButtonText = {
@@ -89,7 +90,7 @@ export const QRCode: Component<QRCodeProps> = props => {
                     ).finished.then(done);
                 }}
             >
-                <Show when={copyButtonOpened()}>
+                <Show when={copyButtonOpened() && !props.disableCopy}>
                     {/* TODO i18n*/}
                     <CopyButtonStyled onClick={onCopyClick}>
                         <Translation translationKey={copyButtonText().translationKey}>

@@ -2,8 +2,6 @@ import { styled } from 'solid-styled-components';
 import { Button, H2 } from 'src/app/components';
 import { media } from 'src/app/styles/media';
 
-export const SelectWalletModalStyled = styled.div``;
-
 export const UlStyled = styled.ul`
     display: flex;
     margin: 0 auto 24px;

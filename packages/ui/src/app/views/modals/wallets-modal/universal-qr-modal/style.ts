@@ -1,0 +1,96 @@
+import { styled } from 'solid-styled-components';
+import { Button, H2, QRCode } from 'src/app/components';
+import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
+
+const borders: BorderRadiusConfig = {
+    m: '16px',
+    s: '8px',
+    none: '0'
+};
+
+const hoverBorders: BorderRadiusConfig = {
+    m: '8px',
+    s: '4px',
+    none: '0'
+};
+
+export const UniversalQrModalStyled = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+`;
+
+export const H2Styled = styled(H2)`
+    max-width: 320px;
+    margin-bottom: 24px;
+`;
+
+export const QRCodeStyled = styled(QRCode)`
+    margin-bottom: 16px;
+`;
+
+export const ButtonsContainerStyled = styled.div`
+    display: flex;
+    gap: 16px;
+    width: 100%;
+`;
+
+export const ActionButtonStyled = styled(Button)<{ disableEventsAnimation?: boolean }>`
+    position: relative;
+    font-size: 16px;
+    line-height: 20px;
+    letter-spacing: -0.32px;
+    width: 100%;
+    padding: 18px 16px;
+    border-radius: ${props => borders[props.theme!.borderRadius]};
+
+    &:hover {
+        ${props => (props.disableEventsAnimation ? 'transform: unset;' : '')}
+    }
+
+    &:active {
+        ${props => (props.disableEventsAnimation ? 'transform: unset;' : '')}
+    }
+`;
+
+export const PopupWrapper = styled.ul`
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    margin: 0;
+    padding: 8px;
+    width: 188px;
+    transform: translateY(-16px);
+
+    background-color: ${props => props.theme!.colors.background.primary};
+    border-radius: ${props => borders[props.theme!.borderRadius]};
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.16);
+`;
+
+export const ExtensionLi = styled.li`
+    padding: 8px;
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    cursor: pointer;
+    border-radius: ${props => hoverBorders[props.theme!.borderRadius]};
+
+    > img {
+        width: 24px;
+        height: 24px;
+
+        border-radius: 6px;
+    }
+
+    transition: background-color, transform 0.1s ease-in-out;
+
+    &:hover {
+        background-color: ${props => props.theme!.colors.background.secondary};
+    }
+
+    &:active {
+        transform: scale(0.96);
+    }
+`;

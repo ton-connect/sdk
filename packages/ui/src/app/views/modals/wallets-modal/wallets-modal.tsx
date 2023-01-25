@@ -11,9 +11,11 @@ import {
     createMemo,
     createResource,
     createSignal,
+    Match,
     on,
     onCleanup,
     Show,
+    Switch,
     useContext
 } from 'solid-js';
 import { ConnectorContext } from 'src/app/state/connector.context';
@@ -23,15 +25,24 @@ import {
     walletsModalOpen
 } from 'src/app/state/modals-state';
 import { QrCodeModal } from 'src/app/views/modals/wallets-modal/qr-code-modal';
-import { SelectWalletModal } from 'src/app/views/modals/wallets-modal/select-wallet-modal';
-import { StyledModal, LoaderIconStyled, LoaderContainerStyled, H1Styled } from './style';
+import {
+    StyledModal,
+    LoaderIconStyled,
+    LoaderContainerStyled,
+    H1Styled,
+    TabBarStyled,
+    TabTextStyled
+} from './style';
 import { openLink } from 'src/app/utils/web-api';
 import { isDevice } from 'src/app/styles/media';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { useI18n } from '@solid-primitives/i18n';
 import { appState } from 'src/app/state/app.state';
 import { applyWalletsListConfiguration } from 'src/app/utils/wallets';
-import {UniversalConnectionModal} from "src/app/views/modals/wallets-modal/universal-connection-modal";
+import isMobile from 'src/app/hooks/isMobile';
+import { SelectWalletModalMobile } from 'src/app/views/modals/wallets-modal/select-wallet-modal-mobile';
+import {UniversalQrModal} from "src/app/views/modals/wallets-modal/universal-qr-modal";
+import {DesktopSelectWalletModal} from "src/app/views/modals/wallets-modal/desktop-select-wallet-modal";
 
 export const WalletsModal: Component = () => {
     const { locale } = useI18n()[1];
@@ -59,6 +70,7 @@ export const WalletsModal: Component = () => {
     );
 
     const [selectedWalletInfo, setSelectedWalletInfo] = createSignal<WalletInfo | null>(null);
+    const [selectedTabIndex, setSelectedTabIndex] = createSignal(0);
 
     const walletsList = createMemo(() => {
         if (fetchedWalletsList.state !== 'ready') {
@@ -135,28 +147,51 @@ export const WalletsModal: Component = () => {
 
     return (
         <StyledModal opened={walletsModalOpen()} onClose={onClose} id="tc-wallets-modal-container">
-            <Show when={!walletsList() || additionalRequestLoading()}>
+            <Show when={additionalRequestLoading() || !walletsList()}>
                 <H1Styled translationKey="walletModal.loading">Wallets list is loading</H1Styled>
                 <LoaderContainerStyled>
                     <LoaderIconStyled />
                 </LoaderContainerStyled>
             </Show>
-            <Show when={walletsList() && !additionalRequestLoading()}>
-                <Show when={!selectedWalletInfo()} keyed={false}>
-                    {/*<SelectWalletModal
-                        walletsList={walletsList()!}
-                        onSelect={onSelect}
+
+            <Show when={!additionalRequestLoading() && walletsList()}>
+                <Show when={isMobile()}>
+                    <SelectWalletModalMobile
                         id="tc-wallets-modal"
-                    />*/}
-                    <UniversalConnectionModal />
-                </Show>
-                <Show when={selectedWalletInfo()} keyed={false}>
-                    <QrCodeModal
-                        additionalRequest={additionalRequest()}
-                        wallet={selectedWalletInfo() as WalletInfoRemote}
-                        onBackClick={() => setSelectedWalletInfo(null)}
-                        id="tc-qr-modal"
+                        walletsList={walletsList()!}
+                        additionalRequest={additionalRequest()!}
                     />
+                </Show>
+
+                <Show when={!isMobile()}>
+                    <Show when={!selectedWalletInfo()} keyed={false}>
+                        <TabBarStyled
+                            tab1={<TabTextStyled>QR Code</TabTextStyled>}
+                            tab2={<TabTextStyled>Wallets</TabTextStyled>}
+                            selectedTabIndex={selectedTabIndex()}
+                            onSelectedTabIndexChange={setSelectedTabIndex}
+                        />
+
+                        <Switch>
+                            <Match when={selectedTabIndex() === 0}>
+                                <UniversalQrModal
+                                    walletsList={walletsList()!}
+                                    additionalRequest={additionalRequest()!}
+                                />
+                            </Match>
+                            <Match when={selectedTabIndex() === 1}>
+                                <DesktopSelectWalletModal />
+                            </Match>
+                        </Switch>
+                    </Show>
+                    <Show when={selectedWalletInfo()} keyed={false}>
+                        <QrCodeModal
+                            additionalRequest={additionalRequest()}
+                            wallet={selectedWalletInfo() as WalletInfoRemote}
+                            onBackClick={() => setSelectedWalletInfo(null)}
+                            id="tc-qr-modal"
+                        />
+                    </Show>
                 </Show>
             </Show>
         </StyledModal>
