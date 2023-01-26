@@ -4,18 +4,18 @@ import { H1 } from 'src/app/components';
 import { Translation } from 'src/app/components/typography/Translation';
 import { WalletItem } from './wallet-item';
 import { ButtonStyled, H2Styled, UlStyled } from './style';
-import { openLink, openLinkBlank } from 'src/app/utils/web-api';
+import { addReturnStrategy, openLink, openLinkBlank } from 'src/app/utils/web-api';
 import { Identifiable } from 'src/app/models/identifiable';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { appState } from 'src/app/state/app.state';
 
-interface SelectWalletModalMobileProps extends Identifiable {
+interface MobileSelectWalletModalProps extends Identifiable {
     walletsList: WalletInfo[];
 
     additionalRequest: ConnectAdditionalRequest;
 }
 
-export const SelectWalletModalMobile: Component<SelectWalletModalMobileProps> = props => {
+export const MobileSelectWalletModal: Component<MobileSelectWalletModalProps> = props => {
     const learnMoreUrl = 'https://ton.org/wallets';
     const connector = appState.connector;
 
@@ -31,10 +31,10 @@ export const SelectWalletModalMobile: Component<SelectWalletModalMobileProps> = 
                 props.additionalRequest
             );
 
-            openLink(universalLink);
+            openLink(addReturnStrategy(universalLink, appState.returnStrategy));
         }
 
-        openLink(walletInfo.aboutUrl, '_blank');
+        openLinkBlank(walletInfo.aboutUrl);
     };
 
     return (

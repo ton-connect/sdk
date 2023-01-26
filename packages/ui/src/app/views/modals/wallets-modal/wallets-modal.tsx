@@ -33,16 +33,16 @@ import {
     TabBarStyled,
     TabTextStyled
 } from './style';
-import { openLink } from 'src/app/utils/web-api';
+import { addReturnStrategy, openLink, openLinkBlank } from 'src/app/utils/web-api';
 import { isDevice } from 'src/app/styles/media';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { useI18n } from '@solid-primitives/i18n';
 import { appState } from 'src/app/state/app.state';
 import { applyWalletsListConfiguration } from 'src/app/utils/wallets';
 import isMobile from 'src/app/hooks/isMobile';
-import { SelectWalletModalMobile } from 'src/app/views/modals/wallets-modal/select-wallet-modal-mobile';
-import {UniversalQrModal} from "src/app/views/modals/wallets-modal/universal-qr-modal";
-import {DesktopSelectWalletModal} from "src/app/views/modals/wallets-modal/desktop-select-wallet-modal";
+import { MobileSelectWalletModal } from 'src/app/views/modals/wallets-modal/mobile-select-wallet-modal';
+import { UniversalQrModal } from 'src/app/views/modals/wallets-modal/universal-qr-modal';
+import { DesktopSelectWalletModal } from 'src/app/views/modals/wallets-modal/desktop-select-wallet-modal';
 
 export const WalletsModal: Component = () => {
     const { locale } = useI18n()[1];
@@ -156,7 +156,7 @@ export const WalletsModal: Component = () => {
 
             <Show when={!additionalRequestLoading() && walletsList()}>
                 <Show when={isMobile()}>
-                    <SelectWalletModalMobile
+                    <MobileSelectWalletModal
                         id="tc-wallets-modal"
                         walletsList={walletsList()!}
                         additionalRequest={additionalRequest()!}

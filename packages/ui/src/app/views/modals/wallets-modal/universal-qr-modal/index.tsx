@@ -17,7 +17,7 @@ import {
 } from '@tonconnect/sdk';
 import { appState } from 'src/app/state/app.state';
 import { Translation } from 'src/app/components/typography/Translation';
-import { openLinkBlank } from 'src/app/utils/web-api';
+import { addReturnStrategy, openLinkBlank } from 'src/app/utils/web-api';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { Transition } from 'solid-transition-group';
 import { Text } from 'src/app/components';
@@ -81,7 +81,11 @@ export const UniversalQrModal: Component<UniversalQrModalProps> = props => {
             <H2Styled>Scan QR code with a TON Connect compatible wallet.</H2Styled>
             <QRCodeStyled sourceUrl={request} disableCopy={popupOpened()} />
             <ButtonsContainerStyled>
-                <ActionButtonStyled onClick={() => openLinkBlank(request)}>
+                <ActionButtonStyled
+                    onClick={() =>
+                        openLinkBlank(addReturnStrategy(request, appState.returnStrategy))
+                    }
+                >
                     <Show when={availableInjectableWallets.length}>
                         <Translation translationKey="">Open wallet</Translation>
                     </Show>
