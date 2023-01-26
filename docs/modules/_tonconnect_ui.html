@@ -16,7 +16,7 @@
 <li><a href="_tonconnect_ui.html">@tonconnect/ui</a></li></ul>
 <h1>Module @tonconnect/ui</h1></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/ebd35e3/packages/ui/src/index.ts#L1">packages/ui/src/index.ts:1</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/df5a00b/packages/ui/src/index.ts#L1">packages/ui/src/index.ts:1</a></li></ul></aside>
 <section class="tsd-panel-group">
 <section class="tsd-panel tsd-typography">
 <a href="#ton-connect-ui" id="ton-connect-ui" style="color: inherit; text-decoration: none;">
@@ -127,6 +127,23 @@ To react and handle wallet changes use <code>onStatusChange</code> mathod.</p>
 </code></pre>
 <p>Default configuration is: </p>
 <pre><code class="language-ts"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">defaultBehaviour</span><span class="hl-1"> = {</span><br/><span class="hl-1">    </span><span class="hl-2">modals:</span><span class="hl-1"> [</span><span class="hl-3">&#39;before&#39;</span><span class="hl-1">],</span><br/><span class="hl-1">    </span><span class="hl-2">notifications:</span><span class="hl-1"> [</span><span class="hl-3">&#39;before&#39;</span><span class="hl-1">, </span><span class="hl-3">&#39;success&#39;</span><span class="hl-1">, </span><span class="hl-3">&#39;error&#39;</span><span class="hl-1">]</span><br/><span class="hl-1">}</span>
+</code></pre>
+<p>You can also modify this behaviour for all actions calls using <code>uiOptions</code> setter:</p>
+<pre><code class="language-ts"><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-2">uiOptions</span><span class="hl-1"> = {</span><br/><span class="hl-1">        </span><span class="hl-2">actionsConfiguration:</span><span class="hl-1"> {</span><br/><span class="hl-1">            </span><span class="hl-2">modals:</span><span class="hl-1"> [</span><span class="hl-3">&#39;before&#39;</span><span class="hl-1">, </span><span class="hl-3">&#39;success&#39;</span><span class="hl-1">, </span><span class="hl-3">&#39;error&#39;</span><span class="hl-1">],</span><br/><span class="hl-1">            </span><span class="hl-2">notifications:</span><span class="hl-1"> [</span><span class="hl-3">&#39;before&#39;</span><span class="hl-1">, </span><span class="hl-3">&#39;success&#39;</span><span class="hl-1">, </span><span class="hl-3">&#39;error&#39;</span><span class="hl-1">]</span><br/><span class="hl-1">        }</span><br/><span class="hl-1">    };</span>
+</code></pre>
+
+<a href="#add-the-return-strategy" id="add-the-return-strategy" style="color: inherit; text-decoration: none;">
+  <h2>Add the return strategy</h2>
+</a>
+<p>Return strategy (optional) specifies return strategy for the deeplink when user signs/declines the request.</p>
+<p>&#39;back&#39; (default) means return to the app which initialized deeplink jump (e.g. browser, native app, ...),
+&#39;none&#39; means no jumps after user action;
+a URL: wallet will open this URL after completing the user&#39;s action. Note, that you shouldn&#39;t pass your app&#39;s URL if it is a webpage. This option should be used for native apps to work around possible OS-specific issues with &#39;back&#39; option.</p>
+<p>You can set it globally with <code>uiOptions</code> setter, and it will be applied for connect request and all subsequent actions (send transaction/...).</p>
+<pre><code class="language-ts"><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-2">uiOptions</span><span class="hl-1"> = {</span><br/><span class="hl-1">        </span><span class="hl-2">actionsConfiguration:</span><span class="hl-1"> {</span><br/><span class="hl-1">            </span><span class="hl-2">returnStrategy:</span><span class="hl-1"> </span><span class="hl-3">&#39;none&#39;</span><br/><span class="hl-1">        }</span><br/><span class="hl-1">    };</span>
+</code></pre>
+<p>Or you can set it directly when you send a transaction (will be applied only for this transaction request)</p>
+<pre><code class="language-ts"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">result</span><span class="hl-1"> = </span><span class="hl-0">await</span><span class="hl-1"> </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-5">sendTransaction</span><span class="hl-1">(</span><span class="hl-2">defaultTx</span><span class="hl-1">, {</span><br/><span class="hl-1">    </span><span class="hl-2">returnStrategy:</span><span class="hl-1"> </span><span class="hl-3">&#39;&lt;protocol&gt;://&lt;your_return_url&gt;&#39;</span><span class="hl-1"> </span><span class="hl-7">// Note, that you shouldn&#39;t pass your app&#39;s URL if it is a webpage.</span><br/><span class="hl-1">     </span><span class="hl-7">// This option should be used for native apps to work around possible OS-specific issues with &#39;back&#39; option.</span><br/><span class="hl-1">});</span>
 </code></pre>
 
 <a href="#detect-end-of-the-connection-restoring-process" id="detect-end-of-the-connection-restoring-process" style="color: inherit; text-decoration: none;">
@@ -353,6 +370,7 @@ Setup place where custom wallets will appear in the all wallets list with <code>
 <a href="../types/_tonconnect_ui.ConnectedWallet.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Connected<wbr/>Wallet</span></a>
 <a href="../types/_tonconnect_ui.Locales.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Locales</span></a>
 <a href="../types/_tonconnect_ui.PartialColorsSet.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Partial<wbr/>Colors<wbr/>Set</span></a>
+<a href="../types/_tonconnect_ui.ReturnStrategy.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Return<wbr/>Strategy</span></a>
 <a href="../types/_tonconnect_ui.Theme-1.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Theme</span></a>
 <a href="../types/_tonconnect_ui.TonConnectUiCreateOptions.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Ton<wbr/>Connect<wbr/>Ui<wbr/>Create<wbr/>Options</span></a>
 <a href="../types/_tonconnect_ui.UIWallet.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>UIWallet</span></a>
@@ -408,6 +426,7 @@ Setup place where custom wallets will appear in the all wallets list with <code>
 <li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.ConnectedWallet.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Connected<wbr/>Wallet</a></li>
 <li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.Locales.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Locales</a></li>
 <li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.PartialColorsSet.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Partial<wbr/>Colors<wbr/>Set</a></li>
+<li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.ReturnStrategy.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Return<wbr/>Strategy</a></li>
 <li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.Theme-1.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Theme</a></li>
 <li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.TonConnectUiCreateOptions.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Ton<wbr/>Connect<wbr/>Ui<wbr/>Create<wbr/>Options</a></li>
 <li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.UIWallet.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>UIWallet</a></li>

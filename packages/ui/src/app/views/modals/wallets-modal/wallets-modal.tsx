@@ -113,7 +113,7 @@ export const WalletsModal: Component = () => {
             return;
         }
 
-        openLink(walletInfo.aboutUrl, '_blank');
+        openLinkBlank(walletInfo.aboutUrl);
     };
 
     const onSelectIfMobile = (walletInfo: WalletInfoRemote): void => {
@@ -125,7 +125,7 @@ export const WalletsModal: Component = () => {
             additionalRequest()
         );
 
-        openLink(universalLink);
+        openLink(addReturnStrategy(universalLink, appState.returnStrategy));
     };
 
     const onSelectIfInjected = (walletInfo: WalletInfoInjected): void => {

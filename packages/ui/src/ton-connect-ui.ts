@@ -13,7 +13,12 @@ import { widgetController } from 'src/app/widget-controller';
 import { TonConnectUIError } from 'src/errors/ton-connect-ui.error';
 import { TonConnectUiCreateOptions } from 'src/models/ton-connect-ui-create-options';
 import { WalletInfoStorage } from 'src/storage';
-import { getSystemTheme, openLink, subscribeToThemeChange } from 'src/app/utils/web-api';
+import {
+    addReturnStrategy,
+    getSystemTheme,
+    openLink,
+    subscribeToThemeChange
+} from 'src/app/utils/web-api';
 import { TonConnectUiOptions } from 'src/models/ton-connect-ui-options';
 import { setBorderRadius, setColors, setTheme } from 'src/app/state/theme-state';
 import { mergeOptions } from 'src/app/utils/options';
@@ -36,10 +41,7 @@ export class TonConnectUI {
 
     private systemThemeChangeUnsubscribe: (() => void) | null = null;
 
-    private actionsConfiguration?: {
-        modals?: ('before' | 'success' | 'error')[] | 'all';
-        notifications?: ('before' | 'success' | 'error')[] | 'all';
-    };
+    private actionsConfiguration?: ActionConfiguration;
 
     /**
      * Promise that resolves after end of th connection restoring process (promise will fire after `onStatusChange`, so you can get actual information about wallet and session after when promise resolved).
@@ -109,6 +111,9 @@ export class TonConnectUI {
             const merged = mergeOptions(
                 {
                     ...(options.language && { language: options.language }),
+                    ...(!!options.actionsConfiguration?.returnStrategy && {
+                        returnStrategy: options.actionsConfiguration.returnStrategy
+                    }),
                     ...(!!options.walletsList && { walletsList: options.walletsList })
                 },
                 unwrap(state)
@@ -245,11 +250,12 @@ export class TonConnectUI {
             throw new TonConnectUIError('Connect wallet to send a transaction.');
         }
 
-        if ('universalLink' in this.walletInfo && this.walletInfo.openMethod === 'universal-link') {
-            openLink(this.walletInfo.universalLink);
-        }
+        const { notifications, modals, returnStrategy } =
+            this.getModalsAndNotificationsConfiguration(options);
 
-        const { notifications, modals } = this.getModalsAndNotificationsConfiguration(options);
+        if ('universalLink' in this.walletInfo && this.walletInfo.openMethod === 'universal-link') {
+            openLink(addReturnStrategy(this.walletInfo.universalLink, returnStrategy));
+        }
 
         widgetController.setAction({
             name: 'confirm-transaction',
@@ -368,7 +374,8 @@ export class TonConnectUI {
 
         return {
             notifications,
-            modals
+            modals,
+            returnStrategy: options?.returnStrategy || 'back'
         };
     }
 }

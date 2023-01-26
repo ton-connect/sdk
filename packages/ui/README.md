@@ -193,6 +193,42 @@ const defaultBehaviour = {
 }
 ```
 
+You can also modify this behaviour for all actions calls using `uiOptions` setter:
+```ts
+tonConnectUI.uiOptions = {
+        actionsConfiguration: {
+            modals: ['before', 'success', 'error'],
+            notifications: ['before', 'success', 'error']
+        }
+    };
+```
+
+## Add the return strategy
+
+Return strategy (optional) specifies return strategy for the deeplink when user signs/declines the request.
+
+'back' (default) means return to the app which initialized deeplink jump (e.g. browser, native app, ...),
+'none' means no jumps after user action;
+a URL: wallet will open this URL after completing the user's action. Note, that you shouldn't pass your app's URL if it is a webpage. This option should be used for native apps to work around possible OS-specific issues with 'back' option.
+
+You can set it globally with `uiOptions` setter, and it will be applied for connect request and all subsequent actions (send transaction/...).
+
+```ts
+tonConnectUI.uiOptions = {
+        actionsConfiguration: {
+            returnStrategy: 'none'
+        }
+    };
+```
+
+Or you can set it directly when you send a transaction (will be applied only for this transaction request)
+```ts
+const result = await tonConnectUI.sendTransaction(defaultTx, {
+    returnStrategy: '<protocol>://<your_return_url>' // Note, that you shouldn't pass your app's URL if it is a webpage.
+     // This option should be used for native apps to work around possible OS-specific issues with 'back' option.
+});
+```
+
 ## Detect end of the connection restoring process
 Before restoring previous connected wallet TonConnect has to set up SSE connection with bridge, so you have to wait a little while connection restoring.
 If you need to update your UI depending on if connection is restoring, you can use `tonConnectUI.connectionRestored` promise.
