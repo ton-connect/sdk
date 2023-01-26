@@ -25,7 +25,7 @@ import {
 import { QrCodeModal } from 'src/app/views/modals/wallets-modal/qr-code-modal';
 import { SelectWalletModal } from 'src/app/views/modals/wallets-modal/select-wallet-modal';
 import { StyledModal, LoaderIconStyled, LoaderContainerStyled, H1Styled } from './style';
-import { openLink } from 'src/app/utils/web-api';
+import { addReturnStrategy, openLink, openLinkBlank } from 'src/app/utils/web-api';
 import { isDevice } from 'src/app/styles/media';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { useI18n } from '@solid-primitives/i18n';
@@ -100,7 +100,7 @@ export const WalletsModal: Component = () => {
             return;
         }
 
-        openLink(walletInfo.aboutUrl, '_blank');
+        openLinkBlank(walletInfo.aboutUrl);
     };
 
     const onSelectIfMobile = (walletInfo: WalletInfoRemote): void => {
@@ -112,7 +112,7 @@ export const WalletsModal: Component = () => {
             additionalRequest()
         );
 
-        openLink(universalLink);
+        openLink(addReturnStrategy(universalLink, appState.returnStrategy));
     };
 
     const onSelectIfInjected = (walletInfo: WalletInfoInjected): void => {

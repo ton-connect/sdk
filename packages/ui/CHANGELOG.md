@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui 
 
+## [0.0.16](https://github.com/ton-connect/sdk/compare/ui-0.0.15...ui-0.0.16) (2023-01-26)
+
+
+### Bug Fixes
+
+* **ui:** return strategy added ([d195743](https://github.com/ton-connect/sdk/commit/d195743e56649203082ed4cb3bb750298bc48954))
+
+
+
 ## [0.0.15](https://github.com/ton-connect/sdk/compare/ui-0.0.14...ui-0.0.15) (2023-01-23)
 
 
