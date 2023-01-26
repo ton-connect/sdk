@@ -32,6 +32,8 @@ export class BridgeProvider implements HTTPProvider {
 
     public readonly type = 'http';
 
+    private readonly standardUniversalLink = 'https://connect.ton.org';
+
     private readonly connectionStorage: BridgeConnectionStorage;
 
     private readonly pendingRequests = new Map<
@@ -45,38 +47,68 @@ export class BridgeProvider implements HTTPProvider {
 
     private bridge: BridgeGateway | null = null;
 
+    private pendingBridges: BridgeGateway[] = [];
+
     private listeners: Array<(e: WalletEvent) => void> = [];
 
     constructor(
         private readonly storage: IStorage,
-        private readonly walletConnectionSource: WalletConnectionSourceHTTP
+        private readonly walletConnectionSource: WalletConnectionSourceHTTP | string[]
     ) {
         this.connectionStorage = new BridgeConnectionStorage(storage);
     }
 
     public connect(message: ConnectRequest): string {
-        this.bridge?.close();
+        this.closeBridges();
         const sessionCrypto = new SessionCrypto();
+
+        let walletConnectionSource: WalletConnectionSourceHTTP = {
+            universalLink: this.standardUniversalLink,
+            bridgeUrl: ''
+        };
+
+        if (Array.isArray(this.walletConnectionSource)) {
+            this.pendingBridges = this.walletConnectionSource.map(
+                source =>
+                    new BridgeGateway(
+                        this.storage,
+                        source,
+                        sessionCrypto.sessionId,
+                        this.gatewayListener.bind(this),
+                        this.gatewayErrorsListener.bind(this)
+                    )
+            );
+
+            this.pendingBridges.forEach(bridge => bridge.registerSession());
+        } else {
+            walletConnectionSource = this.walletConnectionSource;
+
+            this.bridge = new BridgeGateway(
+                this.storage,
+                this.walletConnectionSource.bridgeUrl,
+                sessionCrypto.sessionId,
+                this.gatewayListener.bind(this),
+                this.gatewayErrorsListener.bind(this)
+            );
+            this.bridge.registerSession();
+        }
 
         this.session = {
             sessionCrypto,
-            walletConnectionSource: this.walletConnectionSource
+            walletConnectionSource
         };
 
-        this.bridge = new BridgeGateway(
-            this.storage,
-            this.walletConnectionSource.bridgeUrl,
-            sessionCrypto.sessionId,
-            this.gatewayListener.bind(this),
-            this.gatewayErrorsListener.bind(this)
-        );
-        this.bridge.registerSession();
-
-        return this.generateUniversalLink(message);
+        return this.generateUniversalLink(walletConnectionSource.universalLink, message);
     }
 
     public async restoreConnection(): Promise<void> {
-        this.bridge?.close();
+        if (Array.isArray(this.walletConnectionSource)) {
+            throw new TonConnectError(
+                'Internal error. Connection source is array while WalletConnectionSourceHTTP was expected.'
+            );
+        }
+
+        this.closeBridges();
         const storedConnection = await this.connectionStorage.getHttpConnection();
         if (!storedConnection) {
             return;
@@ -118,14 +150,14 @@ export class BridgeProvider implements HTTPProvider {
     }
 
     public closeConnection(): void {
-        this.bridge?.close();
+        this.closeBridges();
         this.listeners = [];
         this.session = null;
         this.bridge = null;
     }
 
     public disconnect(): Promise<void> {
-        this.bridge?.close();
+        this.closeBridges();
         this.listeners = [];
         return this.removeBridgeAndSession();
     }
@@ -133,6 +165,22 @@ export class BridgeProvider implements HTTPProvider {
     public listen(callback: (e: WalletEvent) => void): () => void {
         this.listeners.push(callback);
         return () => (this.listeners = this.listeners.filter(listener => listener !== callback));
+    }
+
+    private async pendingGatewaysListener(
+        gateway: BridgeGateway,
+        bridgeIncomingMessage: BridgeIncomingMessage
+    ): Promise<void> {
+        if (!this.pendingBridges.includes(gateway)) {
+            gateway.close();
+            return;
+        }
+
+        this.closeBridges();
+
+        this.session!.walletConnectionSource.bridgeUrl = gateway.bridgeUrl;
+        this.bridge = gateway;
+        return this.gatewayListener(bridgeIncomingMessage);
     }
 
     private async gatewayListener(bridgeIncomingMessage: BridgeIncomingMessage): Promise<void> {
@@ -204,11 +252,17 @@ export class BridgeProvider implements HTTPProvider {
         await this.connectionStorage.removeConnection();
     }
 
-    private generateUniversalLink(message: ConnectRequest): string {
-        const url = new URL(this.walletConnectionSource.universalLink);
+    private generateUniversalLink(universalLink: string, message: ConnectRequest): string {
+        const url = new URL(universalLink);
         url.searchParams.append('v', PROTOCOL_VERSION.toString());
         url.searchParams.append('id', this.session!.sessionCrypto.sessionId);
         url.searchParams.append('r', JSON.stringify(message));
         return url.toString();
+    }
+
+    private closeBridges(except?: BridgeGateway): void {
+        this.bridge?.close();
+        this.pendingBridges.filter(item => item !== except).forEach(bridge => bridge.close());
+        this.pendingBridges = [];
     }
 }

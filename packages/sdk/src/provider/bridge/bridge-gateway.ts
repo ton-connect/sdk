@@ -31,7 +31,7 @@ export class BridgeGateway {
 
     constructor(
         storage: IStorage,
-        private readonly bridgeUrl: string,
+        public readonly bridgeUrl: string,
         public readonly sessionId: string,
         private readonly listener: (msg: BridgeIncomingMessage) => void,
         private readonly errorsListener: (err: Event) => void

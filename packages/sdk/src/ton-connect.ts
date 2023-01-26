@@ -157,11 +157,11 @@ export class TonConnect implements ITonConnect {
      * @returns universal link if external wallet was passed or void for the injected wallet.
      */
     public connect<T extends WalletConnectionSource>(
-        wallet: T,
+        wallet: T | string[],
         request?: ConnectAdditionalRequest
     ): T extends WalletConnectionSourceJS ? void : string;
     public connect(
-        wallet: WalletConnectionSource,
+        wallet: WalletConnectionSource | string[],
         request?: ConnectAdditionalRequest
     ): void | string {
         if (this.connected) {
@@ -239,10 +239,10 @@ export class TonConnect implements ITonConnect {
         this.onWalletDisconnected();
     }
 
-    private createProvider(wallet: WalletConnectionSource): Provider {
+    private createProvider(wallet: WalletConnectionSource | string[]): Provider {
         let provider: Provider;
 
-        if (isWalletConnectionSourceJS(wallet)) {
+        if (!Array.isArray(wallet) && isWalletConnectionSourceJS(wallet)) {
             provider = new InjectedProvider(this.dappSettings.storage, wallet.jsBridgeKey);
         } else {
             provider = new BridgeProvider(this.dappSettings.storage, wallet);
