@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui-react 
 
+## [0.0.13](https://github.com/ton-connect/sdk/compare/ui-react-0.0.12...ui-react-0.0.13) (2023-01-26)
+
+
+### Bug Fixes
+
+* **ui-react:** return strategy added ([ff2db16](https://github.com/ton-connect/sdk/commit/ff2db163d2bde9b2c07de464e851f164aaf43684))
+
+
+
 ## [0.0.12](https://github.com/ton-connect/sdk/compare/ui-react-0.0.11...ui-react-0.0.12) (2023-01-23)
 
 
