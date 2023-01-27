@@ -32,7 +32,7 @@ export class BridgeProvider implements HTTPProvider {
 
     public readonly type = 'http';
 
-    private readonly standardUniversalLink = 'https://connect.ton.org';
+    private readonly standardUniversalLink = 'tc://';
 
     private readonly connectionStorage: BridgeConnectionStorage;
 
