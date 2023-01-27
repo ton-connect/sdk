@@ -6,14 +6,13 @@ import {
 } from '@tonconnect/sdk';
 import { Component, Show, useContext } from 'solid-js';
 import { Button, H1, H2 } from 'src/app/components';
-import { QRCode } from 'src/app/components/qr-code';
 import { Translation } from 'src/app/components/typography/Translation';
 import {
     ActionButtonStyled,
     ButtonsContainerStyled,
     GetWalletStyled,
-    QRBackgroundStyled,
     QrCodeModalStyled,
+    QRStyled,
     StyledIconButton,
     TextStyled
 } from './style';
@@ -54,9 +53,11 @@ export const QrCodeModal: Component<QrCodeModalProps> = props => {
             >
                 Scan QR code with your phone’s or {props.wallet.name}’s camera.
             </H2>
-            <QRBackgroundStyled>
-                <QRCode sourceUrl={universalLink} imageUrl={props.wallet.imageUrl} />
-            </QRBackgroundStyled>
+            <QRStyled
+                disableCopy={true}
+                sourceUrl={universalLink}
+                imageUrl={props.wallet.imageUrl}
+            />
             <ButtonsContainerStyled>
                 <ActionButtonStyled
                     onClick={() => {

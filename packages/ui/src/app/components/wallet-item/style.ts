@@ -1,5 +1,5 @@
 import { styled } from 'solid-styled-components';
-import { Text } from 'src/app/components';
+import { Text } from '../typography/text';
 import { media } from 'src/app/styles/media';
 export const WalletItemStyled = styled.button`
     cursor: pointer;

@@ -8,29 +8,35 @@ const borders: BorderRadiusConfig = {
     none: '0'
 };
 
-export const QrCodeStyled = styled.div`
-    margin-bottom: 16px;
+const qrSize = '244';
+const imgSize = '52';
+const imgPosition = ((Number(qrSize) - Number(imgSize)) / 2).toString();
+
+export const QRCodeBackgroundWrapper = styled.div`
+    width: 100%;
+    position: relative;
+`;
+
+export const QrCodeBackground = styled.div`
     background-color: ${props => props.theme!.colors.background.secondary};
     border-radius: ${props => borders[props.theme!.borderRadius]};
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 10px 0;
-    position: relative;
+    padding: 24px 0;
     width: 100%;
+`;
+
+export const QrCodeWrapper = styled.div`
+    position: relative;
 
     > div:first-child {
-        height: 276px;
-        width: 276px;
+        height: ${qrSize}px;
+        width: ${qrSize}px;
 
         display: flex;
         align-items: center;
         justify-content: center;
-
-        > svg {
-            height: 276px;
-            width: 276px;
-        }
     }
 
     rect {
@@ -44,12 +50,11 @@ export const QrCodeStyled = styled.div`
 
 export const ImageBackground = styled.div`
     position: absolute;
-    width: 52px;
-    height: 52px;
+    width: ${imgSize}px;
+    height: ${imgSize}px;
     background: ${props => props.theme!.colors.background.secondary};
-    padding: 7px;
-    top: 112px;
-    left: 112px;
+    top: ${imgPosition}px;
+    left: ${imgPosition}px;
 
     display: flex;
     align-items: center;
@@ -62,12 +67,23 @@ export const ImageBackground = styled.div`
     }
 `;
 
+export const CopyButtonContainerStyled = styled.div``;
+
 export const CopyButtonStyled = styled(Button)`
     position: absolute;
-    bottom: 16px;
+    bottom: 14px;
+    left: 50%;
+
+    transform: translate(-50%, 0);
 
     background-color: ${props => props.theme!.colors.background.segment};
     color: ${props => props.theme!.colors.text.primary};
 
-    transform: translateY(0);
+    &:hover {
+        transform: translate(-50%, 0) scale(1.04);
+    }
+
+    &:active {
+        transform: translate(-50%, 0) scale(0.96);
+    }
 `;

@@ -6,6 +6,8 @@ import { Identifiable } from 'src/app/models/identifiable';
 export interface ButtonProps extends Styleable, Identifiable {
     children: JSXElement;
     onClick?: (e: MouseEvent & { currentTarget: HTMLButtonElement; target: Element }) => void;
+    onMouseEnter?: (e: MouseEvent & { currentTarget: HTMLButtonElement; target: Element }) => void;
+    onMouseLeave?: (e: MouseEvent & { currentTarget: HTMLButtonElement; target: Element }) => void;
     disabled?: boolean;
     ref?: HTMLButtonElement | ((el: HTMLButtonElement) => void) | undefined;
 }
@@ -16,6 +18,8 @@ export const Button: Component<ButtonProps> = props => {
             class={props.class}
             id={props.id}
             onClick={e => props.onClick?.(e)}
+            onMouseEnter={e => props.onMouseEnter?.(e)}
+            onMouseLeave={e => props.onMouseLeave?.(e)}
             ref={props.ref}
             disabled={props.disabled}
         >

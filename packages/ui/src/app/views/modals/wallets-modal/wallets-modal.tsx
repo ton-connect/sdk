@@ -2,7 +2,6 @@ import {
     ConnectAdditionalRequest,
     isWalletInfoInjected,
     WalletInfo,
-    WalletInfoInjected,
     WalletInfoRemote
 } from '@tonconnect/sdk';
 import {
@@ -33,8 +32,7 @@ import {
     TabBarStyled,
     TabTextStyled
 } from './style';
-import { addReturnStrategy, openLink, openLinkBlank } from 'src/app/utils/web-api';
-import { isDevice } from 'src/app/styles/media';
+import { openLinkBlank } from 'src/app/utils/web-api';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { useI18n } from '@solid-primitives/i18n';
 import { appState } from 'src/app/state/app.state';
@@ -96,15 +94,16 @@ export const WalletsModal: Component = () => {
         setSelectedWalletInfo(null);
     };
 
-    const onSelect = (walletInfo: WalletInfo): void => {
-        if (isDevice('mobile') && 'universalLink' in walletInfo) {
-            setLastSelectedWalletInfo({ ...walletInfo, openMethod: 'universal-link' });
-            return onSelectIfMobile(walletInfo);
-        }
-
+    const onSelectInDesktopList = (walletInfo: WalletInfo): void => {
         if (isWalletInfoInjected(walletInfo) && walletInfo.injected) {
             setLastSelectedWalletInfo(walletInfo);
-            return onSelectIfInjected(walletInfo);
+            connector.connect(
+                {
+                    jsBridgeKey: walletInfo.jsBridgeKey
+                },
+                additionalRequest()
+            );
+            return;
         }
 
         if ('bridgeUrl' in walletInfo) {
@@ -114,27 +113,6 @@ export const WalletsModal: Component = () => {
         }
 
         openLinkBlank(walletInfo.aboutUrl);
-    };
-
-    const onSelectIfMobile = (walletInfo: WalletInfoRemote): void => {
-        const universalLink = connector.connect(
-            {
-                universalLink: walletInfo.universalLink,
-                bridgeUrl: walletInfo.bridgeUrl
-            },
-            additionalRequest()
-        );
-
-        openLink(addReturnStrategy(universalLink, appState.returnStrategy));
-    };
-
-    const onSelectIfInjected = (walletInfo: WalletInfoInjected): void => {
-        connector.connect(
-            {
-                jsBridgeKey: walletInfo.jsBridgeKey
-            },
-            additionalRequest()
-        );
     };
 
     const unsubscribe = connector.onStatusChange(wallet => {
@@ -180,7 +158,10 @@ export const WalletsModal: Component = () => {
                                 />
                             </Match>
                             <Match when={selectedTabIndex() === 1}>
-                                <DesktopSelectWalletModal />
+                                <DesktopSelectWalletModal
+                                    walletsList={walletsList()!}
+                                    onSelect={onSelectInDesktopList}
+                                />
                             </Match>
                         </Switch>
                     </Show>

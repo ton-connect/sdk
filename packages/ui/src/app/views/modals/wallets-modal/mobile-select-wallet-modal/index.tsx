@@ -1,13 +1,20 @@
-import { ConnectAdditionalRequest, WalletInfo } from '@tonconnect/sdk';
+import { ConnectAdditionalRequest, WalletInfo, WalletInfoRemote } from '@tonconnect/sdk';
 import { Component, For } from 'solid-js';
-import { H1 } from 'src/app/components';
+import { H1, LongArrowIcon, WalletItem, Text } from 'src/app/components';
 import { Translation } from 'src/app/components/typography/Translation';
-import { WalletItem } from './wallet-item';
-import { ButtonStyled, H2Styled, UlStyled } from './style';
+import {
+    ButtonStyled,
+    DefaultWallet,
+    Divider,
+    H2Styled,
+    LongArrowIconContainer,
+    UlStyled
+} from './style';
 import { addReturnStrategy, openLink, openLinkBlank } from 'src/app/utils/web-api';
 import { Identifiable } from 'src/app/models/identifiable';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { appState } from 'src/app/state/app.state';
+import { LINKS } from 'src/app/env/LINKS';
 
 interface MobileSelectWalletModalProps extends Identifiable {
     walletsList: WalletInfo[];
@@ -16,7 +23,6 @@ interface MobileSelectWalletModalProps extends Identifiable {
 }
 
 export const MobileSelectWalletModal: Component<MobileSelectWalletModalProps> = props => {
-    const learnMoreUrl = 'https://ton.org/wallets';
     const connector = appState.connector;
 
     const onSelect = (walletInfo: WalletInfo): void => {
@@ -37,6 +43,16 @@ export const MobileSelectWalletModal: Component<MobileSelectWalletModalProps> = 
         openLinkBlank(walletInfo.aboutUrl);
     };
 
+    const onSelectUniversal = (): void => {
+        const universalLink = connector.connect(
+            props.walletsList
+                .filter(wallet => 'bridgeUrl' in wallet)
+                .map(wallet => (wallet as WalletInfoRemote).bridgeUrl)
+        ) as string;
+
+        openLink(addReturnStrategy(universalLink, appState.returnStrategy));
+    };
+
     return (
         <div id={props.id}>
             <H1 translationKey="walletModal.selectWalletModal.connectWallet">Connect a wallet</H1>
@@ -44,6 +60,13 @@ export const MobileSelectWalletModal: Component<MobileSelectWalletModalProps> = 
                 Select your wallet from the options to get started.
             </H2Styled>
             <UlStyled>
+                <DefaultWallet onClick={onSelectUniversal}>
+                    <LongArrowIconContainer>
+                        <LongArrowIcon />
+                    </LongArrowIconContainer>
+                    <Text fontWeight={590}>Installed wallet</Text>
+                </DefaultWallet>
+                <Divider>&nbsp;</Divider>
                 <For each={props.walletsList.filter(wallet => 'bridgeUrl' in wallet)}>
                     {wallet => (
                         <li>
@@ -56,7 +79,7 @@ export const MobileSelectWalletModal: Component<MobileSelectWalletModalProps> = 
                     )}
                 </For>
             </UlStyled>
-            <ButtonStyled onClick={() => openLinkBlank(learnMoreUrl)}>
+            <ButtonStyled onClick={() => openLinkBlank(LINKS.LEARN_MORE)}>
                 <Translation translationKey="walletModal.selectWalletModal.learnMore">
                     Learn more
                 </Translation>

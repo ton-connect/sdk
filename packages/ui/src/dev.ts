@@ -12,7 +12,7 @@ async function dev(): Promise<void> {
             notifications: ['before']
         },
         uiPreferences: {
-            theme: THEME.LIGHT
+            theme: THEME.DARK
         },
         restoreConnection: true
         /*widgetConfiguration: {
@@ -54,12 +54,14 @@ async function dev(): Promise<void> {
     }, 1000); */
 
     document.getElementById('send-tx')!.onclick = () => {
-        const defaultTx: SendTransactionRequest = {
+        window.location.assign('ton-connect://ffdfd');
+       /* const defaultTx: SendTransactionRequest = {
             validUntil: Date.now() + 1000000,
             messages: [
                 {
-                    address: '0:412410771DA82CBA306A55FA9E0D43C9D245E38133CB58F1457DFB8D5CD8892F',
-                    amount: '200000'
+                    address: '-1:4d5c0210b35daddaa219fac459dba0fdefb1fae4e97a0d0797739fe050d694ca',
+                    amount: '10000000000',
+                    payload: 'swapTo%230x8f4Bf8cA0Fc7Ed5FFe58504176736eF92A12CF94'
                 }
             ]
         };
@@ -67,7 +69,7 @@ async function dev(): Promise<void> {
         tonConnectUI.sendTransaction(defaultTx, {
             modals: 'all',
             notifications: 'all'
-        });
+        });*/
     };
 
     //  tc.connectWallet();

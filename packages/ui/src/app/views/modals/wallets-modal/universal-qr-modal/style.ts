@@ -1,5 +1,5 @@
 import { styled } from 'solid-styled-components';
-import { Button, H2, QRCode } from 'src/app/components';
+import { Button, H2, QRCode, Text } from 'src/app/components';
 import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
 
 const borders: BorderRadiusConfig = {
@@ -93,4 +93,17 @@ export const ExtensionLi = styled.li`
     &:active {
         transform: scale(0.96);
     }
+`;
+
+export const GetWalletStyled = styled.div`
+    margin-top: 16px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+`;
+
+export const TextStyled = styled(Text)`
+    color: ${props => props.theme!.colors.text.secondary};
+    font-size: 16px;
 `;

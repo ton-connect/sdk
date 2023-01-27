@@ -1,5 +1,5 @@
 import { styled } from 'solid-styled-components';
-import { Button, IconButton, Text } from 'src/app/components';
+import {Button, IconButton, QRCode, Text} from 'src/app/components';
 import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
 
 const borders: BorderRadiusConfig = {
@@ -8,9 +8,7 @@ const borders: BorderRadiusConfig = {
     none: '0'
 };
 
-export const QrCodeModalStyled = styled.div`
-    padding: 0 24px;
-`;
+export const QrCodeModalStyled = styled.div``;
 
 export const StyledIconButton = styled(IconButton)`
     position: absolute;
@@ -18,14 +16,8 @@ export const StyledIconButton = styled(IconButton)`
     left: 16px;
 `;
 
-export const QRBackgroundStyled = styled.div`
+export const QRStyled = styled(QRCode)`
     margin-bottom: 16px;
-    background-color: ${props => props.theme!.colors.background.secondary};
-    border-radius: ${props => borders[props.theme!.borderRadius]};
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px 0;
 `;
 
 export const ButtonsContainerStyled = styled.div`

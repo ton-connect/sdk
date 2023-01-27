@@ -1,13 +1,12 @@
 import { styled } from 'solid-styled-components';
 import { Button, H2 } from 'src/app/components';
-import { media } from 'src/app/styles/media';
 
 export const UlStyled = styled.ul`
     display: flex;
     margin: 0 auto 24px;
     width: fit-content;
     max-width: 100%;
-    min-height: 140px;
+    min-height: 126px;
     overflow: auto;
     padding: 0 24px;
 
@@ -17,18 +16,53 @@ export const UlStyled = styled.ul`
 
     -ms-overflow-style: none;
     scrollbar-width: none;
+`;
 
-    ${media('mobile')} {
-        min-height: 126px;
+export const DefaultWallet = styled.li`
+    width: 84px;
+    padding: 10px 10px 20px 10px;
+
+    text-align: center;
+    cursor: pointer;
+
+    transition: transform 0.1s ease-in-out;
+
+    &:hover {
+        transform: scale(1.04);
+    }
+
+    &:active {
+        transform: scale(0.96);
     }
 `;
 
+export const Divider = styled.div`
+    width: 1px;
+    margin: 0 10px;
+    height: 24px;
+    position: relative;
+    top: 30px;
+
+    background-color: ${props => props.theme!.colors.icon.tertiary};
+`;
+
+export const LongArrowIconContainer = styled.div`
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background-color: ${props => props.theme!.colors.background.secondary};
+
+    margin-bottom: 8px;
+`;
+
 export const H2Styled = styled(H2)`
-    ${media('mobile')} {
-        margin-bottom: 24px;
-        padding: 0 24px;
-        min-height: 44px;
-    }
+    margin-bottom: 24px;
+    padding: 0 24px;
+    min-height: 44px;
 `;
 
 export const ButtonStyled = styled(Button)`
