@@ -1,6 +1,18 @@
 import { styled } from 'solid-styled-components';
+import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
 
-// TODO border radius
+const wrapperBorderRadius: BorderRadiusConfig = {
+    m: '22px',
+    s: '12px',
+    none: '0'
+};
+
+const sliderBorderRadius: BorderRadiusConfig = {
+    m: '18px',
+    s: '8px',
+    none: '0'
+};
+
 export const TabBarStyled = styled.div`
     display: grid;
     grid-template: 1fr / 1fr 1fr;
@@ -10,12 +22,11 @@ export const TabBarStyled = styled.div`
 
     position: relative;
     padding: 4px;
-    border-radius: 22px;
+    border-radius: ${props => wrapperBorderRadius[props.theme!.borderRadius]};
 
     background-color: ${props => props.theme!.colors.background.secondary};
 `;
 
-// TODO border radius
 export const SliderStyled = styled.div<{ right: boolean }>`
     position: absolute;
     top: 4px;
@@ -24,7 +35,7 @@ export const SliderStyled = styled.div<{ right: boolean }>`
     height: calc(100% - 8px);
     width: calc(50% - 4px);
 
-    border-radius: 18px;
+    border-radius: ${props => sliderBorderRadius[props.theme!.borderRadius]};
     background-color: ${props => props.theme!.colors.background.segment};
 
     transform: ${props => (props.right ? 'translateX(100%)' : 'translateX(0)')};

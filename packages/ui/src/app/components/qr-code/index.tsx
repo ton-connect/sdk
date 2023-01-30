@@ -24,12 +24,12 @@ type CopyButtonText = {
 };
 
 const copyText: CopyButtonText = {
-    translationKey: '',
+    translationKey: 'common.copyLink',
     text: 'Copy Link'
 };
 
 const copiedText: CopyButtonText = {
-    translationKey: '',
+    translationKey: 'common.copied',
     text: 'Copied!'
 };
 
@@ -111,7 +111,6 @@ export const QRCode: Component<QRCodeProps> = props => {
                 }}
             >
                 <Show when={copyButtonOpened() && !props.disableCopy}>
-                    {/* TODO i18n*/}
                     <CopyButtonStyled
                         onClick={onCopyClick}
                         onMouseEnter={() => (copyButtonHovered = true)}

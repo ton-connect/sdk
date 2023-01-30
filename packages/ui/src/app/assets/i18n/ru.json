@@ -3,7 +3,9 @@
     "close": "Закрыть",
     "get": "Скачать",
     "learnMore": "Подробнее",
-    "openExtension": "Открыть расширение"
+    "openExtension": "Открыть расширение",
+    "copyLink": "Копировать ссылку",
+    "copied": "Скопировано!"
   },
   "button": {
     "connectWallet": "Подключить кошелёк",

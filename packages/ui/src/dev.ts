@@ -11,7 +11,8 @@ async function dev(): Promise<void> {
             notifications: ['before']
         },
         uiPreferences: {
-            theme: THEME.DARK
+            theme: THEME.DARK,
+            borderRadius: 'm'
         },
         language: 'en',
         restoreConnection: true

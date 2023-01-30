@@ -3,7 +3,9 @@
     "close": "Close",
     "get": "GET",
     "learnMore": "Learn more",
-    "openExtension": "Open Extension"
+    "openExtension": "Open Extension",
+    "copyLink": "Copy Link",
+    "copied": "Copied!"
   },
   "button": {
     "connectWallet": "Connect Wallet",
