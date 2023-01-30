@@ -9,7 +9,6 @@ export const DesktopSelectWalletModalStyled = styled.div`
 
 export const H2Styled = styled(H2)`
     margin-bottom: 26px;
-    margin-top: 22px;
 `;
 
 export const WalletsUl = styled.ul`

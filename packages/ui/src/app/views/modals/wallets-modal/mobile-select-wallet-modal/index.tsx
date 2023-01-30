@@ -55,8 +55,10 @@ export const MobileSelectWalletModal: Component<MobileSelectWalletModalProps> = 
 
     return (
         <div id={props.id}>
-            <H1 translationKey="walletModal.selectWalletModal.connectWallet">Connect a wallet</H1>
-            <H2Styled translationKey="walletModal.selectWalletModal.selectWallet">
+            <H1 translationKey="walletModal.mobileSelectWalletModal.connectWallet">
+                Connect a wallet
+            </H1>
+            <H2Styled translationKey="walletModal.mobileSelectWalletModal.selectWallet">
                 Select your wallet from the options to get started.
             </H2Styled>
             <UlStyled>
@@ -64,7 +66,12 @@ export const MobileSelectWalletModal: Component<MobileSelectWalletModalProps> = 
                     <LongArrowIconContainer>
                         <LongArrowIcon />
                     </LongArrowIconContainer>
-                    <Text fontWeight={590}>Installed wallet</Text>
+                    <Text
+                        fontWeight={590}
+                        translationKey="walletModal.mobileSelectWalletModal.installedWallet"
+                    >
+                        Installed wallet
+                    </Text>
                 </DefaultWallet>
                 <Divider>&nbsp;</Divider>
                 <For each={props.walletsList.filter(wallet => 'bridgeUrl' in wallet)}>
@@ -80,9 +87,7 @@ export const MobileSelectWalletModal: Component<MobileSelectWalletModalProps> = 
                 </For>
             </UlStyled>
             <ButtonStyled onClick={() => openLinkBlank(LINKS.LEARN_MORE)}>
-                <Translation translationKey="walletModal.selectWalletModal.learnMore">
-                    Learn more
-                </Translation>
+                <Translation translationKey="common.learnMore">Learn more</Translation>
             </ButtonStyled>
         </div>
     );

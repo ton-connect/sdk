@@ -1,6 +1,5 @@
 /* @refresh reload */
 import { TonConnectUI } from 'src/ton-connect-ui';
-import { SendTransactionRequest } from '@tonconnect/sdk';
 import { THEME } from 'src/models';
 
 async function dev(): Promise<void> {
@@ -14,6 +13,7 @@ async function dev(): Promise<void> {
         uiPreferences: {
             theme: THEME.DARK
         },
+        language: 'en',
         restoreConnection: true
         /*widgetConfiguration: {
             wallets: {
@@ -55,7 +55,7 @@ async function dev(): Promise<void> {
 
     document.getElementById('send-tx')!.onclick = () => {
         window.location.assign('ton-connect://ffdfd');
-       /* const defaultTx: SendTransactionRequest = {
+        /* const defaultTx: SendTransactionRequest = {
             validUntil: Date.now() + 1000000,
             messages: [
                 {

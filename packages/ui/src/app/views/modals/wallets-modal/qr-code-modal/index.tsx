@@ -87,7 +87,7 @@ export const QrCodeModal: Component<QrCodeModalProps> = props => {
                             );
                         }}
                     >
-                        <Translation translationKey="walletModal.qrCodeModal.openExtension">
+                        <Translation translationKey="common.openExtension">
                             Open Extension
                         </Translation>
                     </ActionButtonStyled>
@@ -101,7 +101,7 @@ export const QrCodeModal: Component<QrCodeModalProps> = props => {
                     Don't have {props.wallet.name}?
                 </TextStyled>
                 <Button onClick={() => openLinkBlank(props.wallet.aboutUrl)}>
-                    <Translation translationKey="walletModal.qrCodeModal.get">GET</Translation>
+                    <Translation translationKey="common.get">GET</Translation>
                 </Button>
             </GetWalletStyled>
         </QrCodeModalStyled>

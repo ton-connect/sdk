@@ -1,5 +1,5 @@
 import { styled } from 'solid-styled-components';
-import {Button, IconButton, QRCode, Text} from 'src/app/components';
+import { Button, IconButton, QRCode, Text } from 'src/app/components';
 import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
 
 const borders: BorderRadiusConfig = {
@@ -28,6 +28,8 @@ export const ButtonsContainerStyled = styled.div`
 `;
 
 export const ActionButtonStyled = styled(Button)`
+    padding: 0 16px;
+    height: 56px;
     font-size: 16px;
     line-height: 20px;
     letter-spacing: -0.32px;

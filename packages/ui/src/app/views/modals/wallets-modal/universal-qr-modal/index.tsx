@@ -39,15 +39,10 @@ export const UniversalQrModal: Component<UniversalQrModalProps> = props => {
         .filter(wallet => 'bridgeUrl' in wallet)
         .map(wallet => (wallet as WalletInfoRemote).bridgeUrl);
 
-    let availableInjectableWallets = props.walletsList.filter(
+    const availableInjectableWallets = props.walletsList.filter(
         wallet => isWalletInfoInjected(wallet) && wallet.injected
     ) as WalletInfoInjected[];
 
-    // to test popup
-    /* availableInjectableWallets = availableInjectableWallets
-        .concat(availableInjectableWallets)
-        .concat(availableInjectableWallets);
-*/
     const request = appState.connector.connect(walletsBridges) as string;
 
     const onOpenExtensionClick = (e: Event): void => {
@@ -81,17 +76,23 @@ export const UniversalQrModal: Component<UniversalQrModalProps> = props => {
 
     return (
         <UniversalQrModalStyled onClick={() => setPopupOpened(false)}>
-            <H2Styled>Scan QR code with a TON Connect compatible wallet.</H2Styled>
+            <H2Styled translationKey="walletModal.universalQRModal.scanQR">
+                Scan QR code with a TON Connect compatible wallet.
+            </H2Styled>
             <QRCodeStyled sourceUrl={request} disableCopy={popupOpened()} />
             <ButtonsContainerStyled>
                 <ActionButtonStyled
                     onClick={() => openLink(addReturnStrategy(request, appState.returnStrategy))}
                 >
                     <Show when={availableInjectableWallets.length}>
-                        <Translation translationKey="">Open wallet</Translation>
+                        <Translation translationKey="walletModal.universalQRModal.openWallet">
+                            Open Wallet
+                        </Translation>
                     </Show>
                     <Show when={!availableInjectableWallets.length}>
-                        <Translation translationKey="">Open installed wallet</Translation>
+                        <Translation translationKey="walletModal.universalQRModal.openInstalledWallet">
+                            Open Installed Wallet
+                        </Translation>
                     </Show>
                 </ActionButtonStyled>
                 <Show when={availableInjectableWallets.length}>
@@ -136,15 +137,19 @@ export const UniversalQrModal: Component<UniversalQrModalProps> = props => {
                                 </PopupWrapper>
                             </Show>
                         </Transition>
-                        <Translation translationKey="">Open Extension</Translation>
+                        <Translation translationKey="common.openExtension">
+                            Open Extension
+                        </Translation>
                     </ActionButtonStyled>
                 </Show>
             </ButtonsContainerStyled>
             <Show when={!availableInjectableWallets.length}>
                 <GetWalletStyled>
-                    <TextStyled>Don't have compatible wallet?</TextStyled>
+                    <TextStyled translationKey="walletModal.universalQRModal.dontHave">
+                        Don't have compatible wallet?
+                    </TextStyled>
                     <Button onClick={() => openLinkBlank(LINKS.LEARN_MORE)}>
-                        <Translation translationKey="walletModal.qrCodeModal.get">GET</Translation>
+                        <Translation translationKey="common.get">GET</Translation>
                     </Button>
                 </GetWalletStyled>
             </Show>

@@ -41,7 +41,8 @@ export const ActionButtonStyled = styled(Button)<{ disableEventsAnimation?: bool
     line-height: 20px;
     letter-spacing: -0.32px;
     width: 100%;
-    padding: 18px 16px;
+    padding: 0 16px;
+    height: 56px;
     border-radius: ${props => borders[props.theme!.borderRadius]};
 
     &:hover {

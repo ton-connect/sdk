@@ -20,7 +20,9 @@ export interface DesktopSelectWalletModalProps {
 export const DesktopSelectWalletModal: Component<DesktopSelectWalletModalProps> = props => {
     return (
         <DesktopSelectWalletModalStyled>
-            <H2Styled>Choose your preferred wallet from the options to get started.</H2Styled>
+            <H2Styled translationKey="walletModal.desktopSelectWalletModal.selectWallet">
+                Choose your preferred wallet from the options to get started.
+            </H2Styled>
             <WalletsUl>
                 <For each={props.walletsList}>
                     {wallet => (
@@ -35,9 +37,7 @@ export const DesktopSelectWalletModal: Component<DesktopSelectWalletModalProps> 
                 </For>
             </WalletsUl>
             <ButtonStyled onClick={() => openLinkBlank(LINKS.LEARN_MORE)}>
-                <Translation translationKey="walletModal.selectWalletModal.learnMore">
-                    Learn more
-                </Translation>
+                <Translation translationKey="common.learnMore">Learn more</Translation>
             </ButtonStyled>
         </DesktopSelectWalletModalStyled>
     );

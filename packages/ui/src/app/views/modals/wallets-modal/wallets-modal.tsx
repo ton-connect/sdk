@@ -144,8 +144,16 @@ export const WalletsModal: Component = () => {
                 <Show when={!isMobile()}>
                     <Show when={!selectedWalletInfo()} keyed={false}>
                         <TabBarStyled
-                            tab1={<TabTextStyled>QR Code</TabTextStyled>}
-                            tab2={<TabTextStyled>Wallets</TabTextStyled>}
+                            tab1={
+                                <TabTextStyled translationKey="walletModal.qrCode">
+                                    QR Code
+                                </TabTextStyled>
+                            }
+                            tab2={
+                                <TabTextStyled translationKey="walletModal.wallets">
+                                    Wallets
+                                </TabTextStyled>
+                            }
                             selectedTabIndex={selectedTabIndex()}
                             onSelectedTabIndexChange={setSelectedTabIndex}
                         />

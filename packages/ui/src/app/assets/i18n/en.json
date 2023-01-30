@@ -1,6 +1,9 @@
 {
   "common": {
-    "close": "Close"
+    "close": "Close",
+    "get": "GET",
+    "learnMore": "Learn more",
+    "openExtension": "Open Extension"
   },
   "button": {
     "connectWallet": "Connect Wallet",
@@ -20,23 +23,33 @@
     },
     "transactionCanceled": {
       "header": "Action cancelled",
-      "text": "The action was canceled because there were no expected changes in the blockchain."
+      "text": "The action was canceled. There will be no changes to the blockchain."
     }
   },
   "walletModal": {
     "loading":  "Wallets list is loading",
-    "selectWalletModal": {
+    "qrCode": "QR Code",
+    "wallets": "Wallets",
+    "universalQRModal": {
+      "scanQR": "Scan QR code with a TON Connect compatible wallet.",
+      "openWallet": "Open Wallet",
+      "openInstalledWallet": "Open Installed Wallet",
+      "dontHave": "Don't have compatible wallet?"
+    },
+    "desktopSelectWalletModal": {
+      "selectWallet": "Choose your preferred wallet from the options to get started."
+    },
+    "mobileSelectWalletModal": {
       "connectWallet": "Connect a Wallet",
-      "selectWallet": "Choose your preferred wallet from the options to get started.",
-      "learnMore": "Learn more"
+      "selectWallet": "Select your wallet from the options to get started.",
+      "installedWallet": "Installed Wallet"
     },
     "qrCodeModal": {
       "connectWith": "Connect with {{ name }}",
       "scan": "Scan QR code with your phone’s or {{ name }}’s camera.",
       "openWallet": "Open {{ name }}",
       "openExtension": "Open Extension",
-      "dontHave": "Don't have {{ name }}?",
-      "get": "GET"
+      "dontHave": "Don't have {{ name }}?"
     }
   },
   "actionModal": {
