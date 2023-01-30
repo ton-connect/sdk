@@ -9,7 +9,7 @@ export interface ErrorIconProps extends Styleable {
 
 export const ErrorIcon: Component<ErrorIconProps> = props => {
     const theme = useTheme();
-    const fill = (): string => props.fill || theme.colors.icon.secondary;
+    const fill = (): string => props.fill || theme.colors.icon.error;
 
     return (
         <svg
