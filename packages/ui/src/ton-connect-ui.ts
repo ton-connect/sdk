@@ -233,6 +233,7 @@ export class TonConnectUI {
      * Disconnect wallet and clean localstorage.
      */
     public disconnect(): Promise<void> {
+        widgetController.clearAction();
         this.walletInfoStorage.removeWalletInfo();
         return this.connector.disconnect();
     }

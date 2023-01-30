@@ -16,6 +16,7 @@ export type ColorsSet = {
         secondary: Color;
         tertiary: Color;
         success: Color;
+        error: Color;
     };
     background: {
         primary: Color;
@@ -42,6 +43,7 @@ export type PartialColorsSet = {
         secondary?: Color;
         tertiary?: Color;
         success?: Color;
+        error?: Color;
     };
     background?: {
         primary?: Color;

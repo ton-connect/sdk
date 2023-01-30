@@ -1,5 +1,15 @@
 # Changelog @tonconnect/ui 
 
+## [0.0.17](https://github.com/ton-connect/sdk/compare/ui-0.0.16...ui-0.0.17) (2023-01-30)
+
+
+### Bug Fixes
+
+* **ui:** "action canceled" icon redesigned so that it does not confuse users ([17cf7d8](https://github.com/ton-connect/sdk/commit/17cf7d8e585f53df4458778aeffa524615b11988))
+* **ui:** last event notification is duplicated on wallet reconnect bug fixed ([ee82650](https://github.com/ton-connect/sdk/commit/ee82650e455c83d3986f1c0671959e2fade6583f))
+
+
+
 ## [0.0.16](https://github.com/ton-connect/sdk/compare/ui-0.0.15...ui-0.0.16) (2023-01-26)
 
 
