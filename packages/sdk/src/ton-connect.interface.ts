@@ -54,6 +54,17 @@ export interface ITonConnect {
     restoreConnection(): Promise<void>;
 
     /**
+     * Pause bridge HTTP connection. Might be helpful, if you want to pause connections while browser tab is unfocused,
+     * or if you use SDK with NodeJS and want to save server resources.
+     */
+    pauseConnection(): void;
+
+    /**
+     * Unpause bridge HTTP connection if it is paused.
+     */
+    unPauseConnection(): Promise<void>;
+
+    /**
      * Disconnect form thw connected wallet and drop current session.
      */
     disconnect(): Promise<void>;

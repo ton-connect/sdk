@@ -16,7 +16,12 @@ export interface InternalProvider extends BaseProvider {
 
 export interface HTTPProvider extends BaseProvider {
     type: 'http';
+
     connect(message: ConnectRequest): string;
+
+    pause(): void;
+
+    unPause(): Promise<void>;
 }
 
 interface BaseProvider {

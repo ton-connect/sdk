@@ -169,6 +169,19 @@ export class BridgeProvider implements HTTPProvider {
         return () => (this.listeners = this.listeners.filter(listener => listener !== callback));
     }
 
+    public pause(): void {
+        this.bridge?.pause();
+        this.pendingBridges.forEach(bridge => bridge.pause());
+    }
+
+    public async unPause(): Promise<void> {
+        const promises = this.pendingBridges.map(bridge => bridge.unPause());
+        if (this.bridge) {
+            promises.push(this.bridge.unPause());
+        }
+        await Promise.all(promises);
+    }
+
     private async pendingGatewaysListener(
         gateway: BridgeGateway,
         bridgeIncomingMessage: BridgeIncomingMessage

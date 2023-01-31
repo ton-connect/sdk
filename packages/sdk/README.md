@@ -101,6 +101,46 @@ You also can get wallets list using `getWallets` static method:
 const walletsList = await TonConnect.getWallets();
 ```
 
+### WalletInfo utils and type guards
+Following type guards might be helpful for WalletInfos manipulations:
+
+```ts
+import {
+    isWalletInfoEmbedded,
+    isWalletInfoInjectable,
+    isWalletInfoInjected,
+    isWalletInfoRemote,
+    WalletInfo
+} from '@tonconnect/sdk';
+
+/* Use for filtration */
+const remoteConnectionWalletInfos = walletInfoList.filter(isWalletInfoRemote);
+
+// all wallets that supports injecteble connection (EVEN THOSE THAT ARE NOT INJECTED TO THE CURRENT PAGE) 
+const injectableConnectionWalletInfos = walletInfoList.filter(isWalletInfoInjectable);
+
+// wallets that are injected to the current webpage 
+const currentlyInjectedWalletInfos = walletInfoList.filter(isWalletInfoInjected);
+const embeddedWalletInfo = walletInfoList.find(isWalletInfoEmbedded);
+
+    
+/* or use as type guard */
+if (isWalletInfoRemote(walletInfo)) {
+    connector.connect({
+        universalLink: walletInfo.universalLink,
+        bridgeUrl: walletInfo.bridgeUrl
+    });
+    return;
+}
+
+if (isWalletInfoInjected(walletInfo)) {
+    connector.connect({
+        jsBridgeKey: walletInfo.jsBridgeKey
+    });
+    return;
+}
+```
+
 ## Initialize a wallet connection when user clicks to 'connect' button in your app
 ### Initialize a remote wallet connection via universal link 
 
@@ -132,16 +172,14 @@ You should detect working environment of the app and show appropriate UI.
 Check `embedded` property in elements of the wallets list to detect if the app is opened inside a wallet.
 
 ```ts
-import { isWalletInfoInjected, WalletInfoInjected } from '@tonconnect/sdk';
+import { isWalletInfoEmbedded, WalletInfoInjected } from '@tonconnect/sdk';
 
 // "connect button" click handler.
 // Execute this before show wallet selection modal.
 
 const walletsList = await connector.getWallets(); // or use `walletsList` fetched before  
 
-const embeddedWallet = walletsList.find(
-    wallet => isWalletInfoInjected(wallet) && wallet.embedded
-) as WalletInfoInjected;
+const embeddedWallet = walletsList.find(isWalletInfoEmbedded) as WalletInfoInjected;
 
 if (embeddedWallet) {
     connector.connect({ jsBridgeKey: embeddedWallet.jsBridgeKey });
@@ -271,3 +309,18 @@ export interface IStorage {
 [See details about IStorage in the API documentation](https://ton-connect.github.io/sdk/interfaces/_tonconnect_sdk.IStorage.html).
 
 Other steps are the same as for browser apps.
+
+## Pause and unpause connection
+You can pause and unpause HTTP connection using `tonConnect.pauseConnection()` and `tonConnect.unPauseConnection()` to save your server resources.   
+
+```ts
+myTelegramBot.userIsOffline(user => {
+    const connector = myFunctionGetConnectorByUser(user);
+    connector.pauseConnection();  
+})
+
+myTelegramBot.userIsOnline(user => {
+    const connector = myFunctionGetConnectorByUser(user);
+    connector.unPauseConnection();
+})
+```

@@ -77,6 +77,14 @@ export class BridgeGateway {
         });
     }
 
+    public pause(): void {
+        this.eventSource?.close();
+    }
+
+    public unPause(): Promise<void> {
+        return this.registerSession();
+    }
+
     public close(): void {
         this.isClosed = true;
         this.eventSource?.close();

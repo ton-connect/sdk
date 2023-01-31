@@ -32,7 +32,7 @@ import { Provider } from 'src/provider/provider';
 import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { DefaultStorage } from 'src/storage/default-storage';
 import { ITonConnect } from 'src/ton-connect.interface';
-import { getWebPageManifest } from 'src/utils/web-api';
+import { getDocument, getWebPageManifest } from 'src/utils/web-api';
 import { WalletsListManager } from 'src/wallets-list-manager';
 
 export class TonConnect implements ITonConnect {
@@ -114,6 +114,7 @@ export class TonConnect implements ITonConnect {
         }
 
         this.bridgeConnectionStorage = new BridgeConnectionStorage(this.dappSettings.storage);
+        this.addWindowFocusAndBlurSubscriptions();
     }
 
     /**
@@ -237,6 +238,48 @@ export class TonConnect implements ITonConnect {
         }
         await this.provider!.disconnect();
         this.onWalletDisconnected();
+    }
+
+    /**
+     * Pause bridge HTTP connection. Might be helpful, if you want to pause connections while browser tab is unfocused,
+     * or if you use SDK with NodeJS and want to save server resources.
+     */
+    public pauseConnection(): void {
+        if (this.provider?.type !== 'http') {
+            return;
+        }
+
+        this.provider.pause();
+    }
+
+    /**
+     * Unpause bridge HTTP connection if it is paused.
+     */
+    public unPauseConnection(): Promise<void> {
+        if (this.provider?.type !== 'http') {
+            return Promise.resolve();
+        }
+
+        return this.provider.unPause();
+    }
+
+    private addWindowFocusAndBlurSubscriptions(): void {
+        const document = getDocument();
+        if (!document) {
+            return;
+        }
+
+        try {
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    this.pauseConnection();
+                } else {
+                    this.unPauseConnection();
+                }
+            });
+        } catch (e) {
+            console.error('Cannot subscribe to the document.visibilitychange: ', e);
+        }
     }
 
     private createProvider(wallet: WalletConnectionSource | string[]): Provider {
