@@ -144,7 +144,9 @@ export class BridgeProvider implements HTTPProvider {
                 hexToByteArray(this.session.walletPublicKey)
             );
 
-            this.bridge.send(encodedRequest, this.session.walletPublicKey).catch(reject);
+            this.bridge
+                .send(encodedRequest, this.session.walletPublicKey, request.method)
+                .catch(reject);
             this.pendingRequests.set(id.toString(), resolve);
         });
     }

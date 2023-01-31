@@ -1,4 +1,4 @@
-import { Base64, isNode } from '@tonconnect/protocol';
+import { Base64, isNode, RpcMethod } from '@tonconnect/protocol';
 import { TonConnectError } from 'src/errors';
 import { BridgeIncomingMessage } from 'src/provider/bridge/models/bridge-incomming-message';
 import { HttpBridgeGatewayStorage } from 'src/storage/http-bridge-gateway-storage';
@@ -60,11 +60,17 @@ export class BridgeGateway {
         });
     }
 
-    public async send(message: Uint8Array, receiver: string, ttl?: number): Promise<void> {
+    public async send(
+        message: Uint8Array,
+        receiver: string,
+        topic: RpcMethod,
+        ttl?: number
+    ): Promise<void> {
         const url = new URL(addPathToUrl(this.bridgeUrl, this.postPath));
         url.searchParams.append('client_id', this.sessionId);
         url.searchParams.append('to', receiver);
         url.searchParams.append('ttl', (ttl || this.defaultTtl).toString());
+        url.searchParams.append('topic', topic);
         await fetch(url, {
             method: 'post',
             body: Base64.encode(message)
