@@ -10,5 +10,8 @@ export {
     WalletInfoBase,
     WalletInfoInjected,
     WalletInfoRemote,
-    isWalletInfoInjected
+    isWalletInfoInjected,
+    isWalletInfoEmbedded,
+    isWalletInfoInjectable,
+    isWalletInfoRemote
 } from './wallet-info';

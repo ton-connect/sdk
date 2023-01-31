@@ -80,6 +80,34 @@ export interface WalletInfoBridgeInjectedDTO {
     key: string;
 }
 
+/**
+ * Checks if `WalletInfo` is `WalletInfoInjected` and `WalletInfo` is injected to page (`walletInfo.injected === true`).
+ * @param value WalletInfo to check.
+ */
 export function isWalletInfoInjected(value: WalletInfo): value is WalletInfoInjected {
+    return isWalletInfoInjectable(value) && value.injected;
+}
+
+/**
+ * Checks if `WalletInfo` is `WalletInfoInjected` and dApp  is opened inside this wallet's browser.
+ * @param value WalletInfo to check.
+ */
+export function isWalletInfoEmbedded(value: WalletInfo): value is WalletInfoInjected {
+    return isWalletInfoInjectable(value) && value.injected && value.embedded;
+}
+
+/**
+ * Checks if `WalletInfo` is `WalletInfoInjected`, but doesn't check if it is injected to the page or not.
+ * @param value WalletInfo to check.
+ */
+export function isWalletInfoInjectable(value: WalletInfo): value is WalletInfoInjected {
     return 'jsBridgeKey' in value;
+}
+
+/**
+ * Checks if `WalletInfo` is `WalletInfoRemote`.
+ * @param value WalletInfo to check.
+ */
+export function isWalletInfoRemote(value: WalletInfo): value is WalletInfoRemote {
+    return 'bridgeUrl' in value;
 }
