@@ -123,7 +123,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
     public async sendRequest<T extends RpcMethod>(
         request: WithoutId<AppRequest<T>>
     ): Promise<WithoutId<WalletResponse<T>>> {
-        return this.injectedWallet.send<T>({ ...request, id: '0' });
+        return this.injectedWallet.send<T>({ ...request, id: '0' } as AppRequest<T>);
     }
 
     private async _connect(protocolVersion: number, message: ConnectRequest): Promise<void> {

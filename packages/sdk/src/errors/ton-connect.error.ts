@@ -4,16 +4,17 @@
 export class TonConnectError extends Error {
     private static prefix = '[TON_CONNECT_SDK_ERROR]';
 
-    protected info?: string;
+    protected get info(): string {
+        return '';
+    }
 
     constructor(message?: string, options?: ErrorOptions) {
         super(message, options);
 
         this.message = `${TonConnectError.prefix} ${this.constructor.name}${
-            this.info ? ':' + this.info : ''
-        }\n
-            ${message}
-        `;
+            this.info ? ': ' + this.info : ''
+        }${message ? '\n' + message : ''}`;
+
         Object.setPrototypeOf(this, TonConnectError.prototype);
     }
 }
