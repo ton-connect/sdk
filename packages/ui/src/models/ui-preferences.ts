@@ -10,7 +10,7 @@ export interface UIPreferences {
     theme?: Theme;
 
     /**
-     * Birder radius for UI elements.
+     * Border radius for UI elements.
      * @default 'm'
      */
     borderRadius?: BorderRadius;

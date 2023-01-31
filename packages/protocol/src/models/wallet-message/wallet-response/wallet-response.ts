@@ -3,11 +3,17 @@ import {
     SendTransactionRpcResponseError,
     SendTransactionRpcResponseSuccess
 } from './send-transaction-rpc-response';
+import { SignDataRpcResponseError, SignDataRpcResponseSuccess } from './sign-data-rpc-response';
 
 export type RpcResponses = {
     sendTransaction: {
         error: SendTransactionRpcResponseError;
         success: SendTransactionRpcResponseSuccess;
+    };
+
+    signData: {
+        error: SignDataRpcResponseError;
+        success: SignDataRpcResponseSuccess;
     };
 };
 

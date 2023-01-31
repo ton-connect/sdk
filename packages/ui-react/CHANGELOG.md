@@ -1,5 +1,9 @@
 # Changelog @tonconnect/ui-react 
 
+## [0.0.14](https://github.com/ton-connect/sdk/compare/ui-react-0.0.13...ui-react-0.0.14) (2023-01-30)
+
+
+
 ## [0.0.13](https://github.com/ton-connect/sdk/compare/ui-react-0.0.12...ui-react-0.0.13) (2023-01-26)
 
 

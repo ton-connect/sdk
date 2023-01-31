@@ -10,6 +10,7 @@ import { CHAIN, toUserFriendlyAddress } from '@tonconnect/sdk';
 import { copyToClipboard } from 'src/app/utils/copy-to-clipboard';
 import { AccountButtonDropdownStyled, MenuButtonStyled, UlStyled } from './style';
 import { Identifiable } from 'src/app/models/identifiable';
+import { setAction } from 'src/app/state/modals-state';
 
 const MenuItemText: Component<{ children: string } & Translateable> = props => (
     <Text
@@ -44,6 +45,7 @@ export const AccountButtonDropdown: Component<AccountButtonDropdownProps> = prop
     };
 
     const onDisconnect = (): void => {
+        setAction(null);
         connector.disconnect();
         props.onClose();
     };
