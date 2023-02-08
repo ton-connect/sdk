@@ -1,10 +1,11 @@
 import { FetchWalletsError } from 'src/errors/wallets-manager/fetch-wallets.error';
 import {
     WalletInfoRemote,
-    WalletInfoInjected,
+    WalletInfoInjectable,
     WalletInfo,
     WalletInfoDTO,
-    isWalletInfoInjected
+    isWalletInfoCurrentlyEmbedded,
+    WalletInfoCurrentlyEmbedded
 } from 'src/models/wallet/wallet-info';
 import { InjectedProvider } from 'src/provider/injected/injected-provider';
 
@@ -29,11 +30,9 @@ export class WalletsListManager {
         return this.walletsListCache;
     }
 
-    public async getEmbeddedWallet(): Promise<WalletInfoInjected | null> {
+    public async getEmbeddedWallet(): Promise<WalletInfoCurrentlyEmbedded | null> {
         const walletsList = await this.getWallets();
-        const embeddedWallets = walletsList.filter(
-            item => isWalletInfoInjected(item) && item.embedded
-        ) as WalletInfoInjected[];
+        const embeddedWallets = walletsList.filter(isWalletInfoCurrentlyEmbedded);
 
         if (embeddedWallets.length !== 1) {
             return null;
@@ -79,10 +78,10 @@ export class WalletsListManager {
 
                 if (bridge.type === 'js') {
                     const jsBridgeKey = bridge.key;
-                    (walletConfig as WalletInfoInjected).jsBridgeKey = jsBridgeKey;
-                    (walletConfig as WalletInfoInjected).injected =
+                    (walletConfig as WalletInfoInjectable).jsBridgeKey = jsBridgeKey;
+                    (walletConfig as WalletInfoInjectable).injected =
                         InjectedProvider.isWalletInjected(jsBridgeKey);
-                    (walletConfig as WalletInfoInjected).embedded =
+                    (walletConfig as WalletInfoInjectable).embedded =
                         InjectedProvider.isInsideWalletBrowser(jsBridgeKey);
                 }
             });

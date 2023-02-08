@@ -1,5 +1,5 @@
 import { TonConnectError } from 'src/errors';
-import { Account, WalletConnectionSource, Wallet } from 'src/models';
+import { Account, WalletConnectionSource, Wallet, WalletConnectionSourceHTTP } from 'src/models';
 import { SendTransactionRequest, SendTransactionResponse } from 'src/models/methods';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
 import { WalletInfo } from 'src/models/wallet/wallet-info';
@@ -43,8 +43,8 @@ export interface ITonConnect {
      * @param request (optional) additional request to pass to the wallet while connect (currently only ton_proof is available).
      * @returns universal link if external wallet was passed or void for the injected wallet.
      */
-    connect<T extends WalletConnectionSource>(
-        wallet: T | string[],
+    connect<T extends WalletConnectionSource | WalletConnectionSourceHTTP[]>(
+        wallet: T,
         request?: ConnectAdditionalRequest
     ): T extends WalletConnectionSourceJS ? void : string;
 

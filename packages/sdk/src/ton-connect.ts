@@ -16,7 +16,13 @@ import { TonConnectError } from 'src/errors/ton-connect.error';
 import { WalletAlreadyConnectedError } from 'src/errors/wallet/wallet-already-connected.error';
 import { WalletNotConnectedError } from 'src/errors/wallet/wallet-not-connected.error';
 import { WalletNotSupportFeatureError } from 'src/errors/wallet/wallet-not-support-feature.error';
-import { Account, Wallet, WalletConnectionSource, WalletInfo } from 'src/models';
+import {
+    Account,
+    Wallet,
+    WalletConnectionSource,
+    WalletConnectionSourceHTTP,
+    WalletInfo
+} from 'src/models';
 import { SendTransactionRequest, SendTransactionResponse } from 'src/models/methods';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
 import { TonConnectOptions } from 'src/models/ton-connect-options';
@@ -157,12 +163,12 @@ export class TonConnect implements ITonConnect {
      * @param request (optional) additional request to pass to the wallet while connect (currently only ton_proof is available).
      * @returns universal link if external wallet was passed or void for the injected wallet.
      */
-    public connect<T extends WalletConnectionSource>(
-        wallet: T | string[],
+    public connect<T extends WalletConnectionSource | WalletConnectionSourceHTTP[]>(
+        wallet: T,
         request?: ConnectAdditionalRequest
     ): T extends WalletConnectionSourceJS ? void : string;
     public connect(
-        wallet: WalletConnectionSource | string[],
+        wallet: WalletConnectionSource | WalletConnectionSourceHTTP[],
         request?: ConnectAdditionalRequest
     ): void | string {
         if (this.connected) {
@@ -282,7 +288,9 @@ export class TonConnect implements ITonConnect {
         }
     }
 
-    private createProvider(wallet: WalletConnectionSource | string[]): Provider {
+    private createProvider(
+        wallet: WalletConnectionSource | WalletConnectionSourceHTTP[]
+    ): Provider {
         let provider: Provider;
 
         if (!Array.isArray(wallet) && isWalletConnectionSourceJS(wallet)) {

@@ -31,12 +31,12 @@ export class BridgeGateway {
 
     constructor(
         storage: IStorage,
-        public readonly bridgeUrl: string,
+        private readonly bridgeUrl: string,
         public readonly sessionId: string,
-        private readonly listener: (msg: BridgeIncomingMessage) => void,
-        private readonly errorsListener: (err: Event) => void
+        private listener: (msg: BridgeIncomingMessage) => void,
+        private errorsListener: (err: Event) => void
     ) {
-        this.bridgeGatewayStorage = new HttpBridgeGatewayStorage(storage);
+        this.bridgeGatewayStorage = new HttpBridgeGatewayStorage(storage, bridgeUrl);
     }
 
     public async registerSession(): Promise<void> {
@@ -88,6 +88,14 @@ export class BridgeGateway {
     public close(): void {
         this.isClosed = true;
         this.eventSource?.close();
+    }
+
+    public setListener(listener: (msg: BridgeIncomingMessage) => void): void {
+        this.listener = listener;
+    }
+
+    public setErrorsListener(errorsListener: (err: Event) => void): void {
+        this.errorsListener = errorsListener;
     }
 
     private errorsHandler(e: Event): void {

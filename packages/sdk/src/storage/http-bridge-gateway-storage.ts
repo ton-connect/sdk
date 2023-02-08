@@ -1,9 +1,11 @@
 import { IStorage } from 'src/storage/models/storage.interface';
 
 export class HttpBridgeGatewayStorage {
-    private readonly storeKey = 'ton-connect-storage_http-bridge-gateway';
+    private readonly storeKey: string;
 
-    constructor(private readonly storage: IStorage) {}
+    constructor(private readonly storage: IStorage, bridgeUrl: string) {
+        this.storeKey = 'ton-connect-storage_http-bridge-gateway::' + bridgeUrl;
+    }
 
     public async storeLastEventId(lastEventId: string): Promise<void> {
         return this.storage.setItem(this.storeKey, lastEventId);
