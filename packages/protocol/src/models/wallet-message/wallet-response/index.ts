@@ -16,3 +16,9 @@ export {
     SignDataRpcResponseError,
     SIGN_DATA_ERROR_CODES
 } from './sign-data-rpc-response';
+export {
+    DisconnectRpcResponse,
+    DisconnectRpcResponseSuccess,
+    DisconnectRpcResponseError,
+    DISCONNECT_ERROR_CODES
+} from './disconnect-rpc-response';
