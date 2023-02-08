@@ -1,1 +1,1 @@
-export type RpcMethod = 'sendTransaction' | 'signData';
+export type RpcMethod = 'disconnect' | 'sendTransaction' | 'signData';
