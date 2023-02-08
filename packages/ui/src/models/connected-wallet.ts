@@ -1,11 +1,11 @@
-import { Wallet, WalletInfoInjected, WalletInfoRemote } from '@tonconnect/sdk';
+import { Wallet, WalletInfoInjectable, WalletInfoRemote } from '@tonconnect/sdk';
 
 export type WalletOpenMethod = 'qrcode' | 'universal-link';
 
 export type WalletInfoWithOpenMethod =
-    | WalletInfoInjected
+    | WalletInfoInjectable
     | WalletInfoRemoteWithOpenMethod
-    | (WalletInfoInjected & WalletInfoRemoteWithOpenMethod);
+    | (WalletInfoInjectable & WalletInfoRemoteWithOpenMethod);
 
 export type WalletInfoRemoteWithOpenMethod = WalletInfoRemote & {
     openMethod: WalletOpenMethod;

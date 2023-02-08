@@ -1,5 +1,5 @@
 import cn from 'classnames';
-import { Component, JSXElement, Show } from 'solid-js';
+import { Component, createEffect, JSXElement, Show } from 'solid-js';
 import { Transition } from 'solid-transition-group';
 import clickOutsideDirective from 'src/app/directives/click-outside';
 import keyPressedDirective from 'src/app/directives/key-pressed';
@@ -9,6 +9,7 @@ import { CloseButtonStyled, ModalBackgroundStyled, ModalWrapperClass } from './s
 import { css, useTheme } from 'solid-styled-components';
 import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
 import { Identifiable } from 'src/app/models/identifiable';
+import { disableScrollClass } from 'src/app/styles/global-styles';
 const clickOutside = clickOutsideDirective;
 const keyPressed = keyPressedDirective;
 
@@ -26,6 +27,15 @@ export interface ModalProps extends Styleable, Identifiable {
 
 export const Modal: Component<ModalProps> = props => {
     const theme = useTheme();
+
+    createEffect(() => {
+        if (props.opened) {
+            document.body.classList.add(disableScrollClass);
+        } else {
+            document.body.classList.remove(disableScrollClass);
+        }
+    });
+
     return (
         <Transition
             onBeforeEnter={el => {

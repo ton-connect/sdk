@@ -1,6 +1,7 @@
 /* @refresh reload */
 import { TonConnectUI } from 'src/ton-connect-ui';
 import { THEME } from 'src/models';
+import { SendTransactionRequest } from '@tonconnect/sdk';
 
 async function dev(): Promise<void> {
     const tonConnectUI = new TonConnectUI({
@@ -15,12 +16,22 @@ async function dev(): Promise<void> {
             borderRadius: 'm'
         },
         language: 'en',
-        restoreConnection: true
-        /*widgetConfiguration: {
-            wallets: {
-                excludeWallets: ['OpenMask']
-            }
-        }*/
+        restoreConnection: true,
+        walletsList: {
+            includeWallets: [...new Array(11)].map((_, index) => ({
+                name: 'tonkeeper',
+                bridgeUrl: `https://bridge${
+                    index < 9 ? `0${index + 1}` : index + 1
+                }.subgroup.org/bridge`,
+                universalLink: 'https://app.tonkeeper.com/ton-connect',
+                aboutUrl: '',
+                imageUrl: 'https://tonkeeper.com/assets/tonconnect-icon.png'
+            }))
+        }
+    });
+
+    tonConnectUI.onStatusChange(wallet => {
+        document.getElementById('content')!.textContent = wallet ? JSON.stringify(wallet) : wallet;
     });
 
     /*    tonConnectUI.uiOptions = {
@@ -55,14 +66,12 @@ async function dev(): Promise<void> {
     }, 1000); */
 
     document.getElementById('send-tx')!.onclick = () => {
-        window.location.assign('ton-connect://ffdfd');
-        /* const defaultTx: SendTransactionRequest = {
+        const defaultTx: SendTransactionRequest = {
             validUntil: Date.now() + 1000000,
             messages: [
                 {
                     address: '-1:4d5c0210b35daddaa219fac459dba0fdefb1fae4e97a0d0797739fe050d694ca',
-                    amount: '10000000000',
-                    payload: 'swapTo%230x8f4Bf8cA0Fc7Ed5FFe58504176736eF92A12CF94'
+                    amount: '1000000'
                 }
             ]
         };
@@ -70,7 +79,7 @@ async function dev(): Promise<void> {
         tonConnectUI.sendTransaction(defaultTx, {
             modals: 'all',
             notifications: 'all'
-        });*/
+        });
     };
 
     //  tc.connectWallet();

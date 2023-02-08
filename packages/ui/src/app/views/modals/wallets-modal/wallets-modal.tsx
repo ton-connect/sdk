@@ -1,6 +1,7 @@
 import {
     ConnectAdditionalRequest,
-    isWalletInfoInjected,
+    isWalletInfoCurrentlyInjected,
+    isWalletInfoRemote,
     WalletInfo,
     WalletInfoRemote
 } from '@tonconnect/sdk';
@@ -95,7 +96,7 @@ export const WalletsModal: Component = () => {
     };
 
     const onSelectInDesktopList = (walletInfo: WalletInfo): void => {
-        if (isWalletInfoInjected(walletInfo) && walletInfo.injected) {
+        if (isWalletInfoCurrentlyInjected(walletInfo)) {
             setLastSelectedWalletInfo(walletInfo);
             connector.connect(
                 {
@@ -106,7 +107,7 @@ export const WalletsModal: Component = () => {
             return;
         }
 
-        if ('bridgeUrl' in walletInfo) {
+        if (isWalletInfoRemote(walletInfo)) {
             setLastSelectedWalletInfo({ ...walletInfo, openMethod: 'qrcode' });
             setSelectedWalletInfo(walletInfo);
             return;

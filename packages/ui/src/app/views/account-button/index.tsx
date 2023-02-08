@@ -12,12 +12,13 @@ import {
     LoaderIconStyled,
     NotificationsStyled
 } from './style';
-import { Portal } from 'solid-js/web';
+import { Dynamic, Portal } from 'solid-js/web';
 import { useFloating } from 'solid-floating-ui';
 import { autoUpdate } from '@floating-ui/dom';
 import { Transition } from 'solid-transition-group';
 import { useTheme } from 'solid-styled-components';
 import { CHAIN } from '@tonconnect/protocol';
+import { globalStylesTag } from 'src/app/styles/global-styles';
 
 interface AccountButtonProps {}
 
@@ -86,7 +87,7 @@ export const AccountButton: Component<AccountButtonProps> = () => {
     });
 
     return (
-        <>
+        <Dynamic component={globalStylesTag}>
             <Show when={restoringProcess()}>
                 <LoaderButtonStyled disabled={true} id="tc-connect-button-loading">
                     <LoaderIconStyled />
@@ -128,7 +129,7 @@ export const AccountButton: Component<AccountButtonProps> = () => {
                             <ArrowIcon direction="bottom" />
                         </DropdownButtonStyled>
                         <Portal>
-                            <div
+                            <tc-root
                                 ref={setFloating}
                                 style={{
                                     position: position.strategy,
@@ -173,11 +174,11 @@ export const AccountButton: Component<AccountButtonProps> = () => {
                                     </Show>
                                 </Transition>
                                 <NotificationsStyled id="tc-notifications" />
-                            </div>
+                            </tc-root>
                         </Portal>
                     </DropdownContainerStyled>
                 </Show>
             </Show>
-        </>
+        </Dynamic>
     );
 };

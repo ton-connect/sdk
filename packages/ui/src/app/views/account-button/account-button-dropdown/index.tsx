@@ -4,13 +4,11 @@ import { CopyIcon } from 'src/app/components/icons/copy-icon';
 import { DisconnectIcon } from 'src/app/components/icons/disconnect-icon';
 import { Styleable } from 'src/app/models/styleable';
 import { Translateable } from 'src/app/models/translateable';
-import { ConnectorContext } from 'src/app/state/connector.context';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { CHAIN, toUserFriendlyAddress } from '@tonconnect/sdk';
 import { copyToClipboard } from 'src/app/utils/copy-to-clipboard';
 import { AccountButtonDropdownStyled, MenuButtonStyled, UlStyled } from './style';
 import { Identifiable } from 'src/app/models/identifiable';
-import { setAction } from 'src/app/state/modals-state';
 
 const MenuItemText: Component<{ children: string } & Translateable> = props => (
     <Text
@@ -30,7 +28,6 @@ export interface AccountButtonDropdownProps extends Styleable, Identifiable {
 
 export const AccountButtonDropdown: Component<AccountButtonDropdownProps> = props => {
     const tonConnectUi = useContext(TonConnectUiContext)!;
-    const connector = useContext(ConnectorContext)!;
     const [isCopiedShown, setIsCopiedShown] = createSignal(false);
 
     const onCopy = async (): Promise<void> => {
@@ -45,8 +42,7 @@ export const AccountButtonDropdown: Component<AccountButtonDropdownProps> = prop
     };
 
     const onDisconnect = (): void => {
-        setAction(null);
-        connector.disconnect();
+        tonConnectUi.disconnect();
         props.onClose();
     };
 

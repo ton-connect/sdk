@@ -1,11 +1,12 @@
+import './global.d.ts';
 import { Show } from 'solid-js';
 import type { Component } from 'solid-js';
-import { Portal } from 'solid-js/web';
+import { Dynamic, Portal } from 'solid-js/web';
 import { ThemeProvider } from 'solid-styled-components';
 import { i18nDictionary } from 'src/app/i18n';
 import { ConnectorContext } from 'src/app/state/connector.context';
 import { themeState } from 'src/app/state/theme-state';
-import { GlobalStyles } from 'src/app/styles/global-styles';
+import { GlobalStyles, globalStylesTag } from 'src/app/styles/global-styles';
 import { AccountButton } from 'src/app/views/account-button';
 import { ActionsModal, WalletsModal } from 'src/app/views/modals';
 import './styles/style.d.ts';
@@ -32,8 +33,10 @@ const App: Component<AppProps> = props => {
                                 <AccountButton />
                             </Portal>
                         </Show>
-                        <WalletsModal />
-                        <ActionsModal />
+                        <Dynamic component={globalStylesTag}>
+                            <WalletsModal />
+                            <ActionsModal />
+                        </Dynamic>
                     </ThemeProvider>
                 </ConnectorContext.Provider>
             </TonConnectUiContext.Provider>

@@ -2,6 +2,7 @@ import { Component, createEffect, createSignal, Show } from 'solid-js';
 import {
     CopyButtonStyled,
     ImageBackground,
+    imgSize,
     QrCodeBackground,
     QRCodeBackgroundWrapper,
     QrCodeWrapper
@@ -34,7 +35,9 @@ const copiedText: CopyButtonText = {
 };
 
 export const QRCode: Component<QRCodeProps> = props => {
-    let qrCodeCanvas: HTMLDivElement | undefined;
+    let qrCodeCanvasRef: HTMLDivElement | undefined;
+    let qrCodeWrapperRef: HTMLDivElement | undefined;
+    let imageRef: HTMLDivElement | undefined;
 
     const [copyButtonOpened, setCopyButtonOpened] = createSignal(false);
     const [copyButtonText, setCopyButtonText] = createSignal<CopyButtonText>(copyText);
@@ -45,7 +48,18 @@ export const QRCode: Component<QRCodeProps> = props => {
         const qr = qrcode(0, errorCorrectionLevel);
         qr.addData(props.sourceUrl);
         qr.make();
-        qrCodeCanvas!.innerHTML = qr.createSvgTag(4, 0);
+        qrCodeCanvasRef!.innerHTML = qr.createSvgTag(4, 0);
+        const qrSize = qrCodeCanvasRef!.firstElementChild!.clientWidth;
+
+        if (imageRef) {
+            const imgOffset = ((qrSize - Number(imgSize)) / 2).toString() + 'px';
+            imageRef.style.top = imgOffset;
+            imageRef.style.left = imgOffset;
+        }
+
+        const normalQRSize = 244;
+        const scale = Math.round((normalQRSize / qrSize) * 100) / 100;
+        qrCodeWrapperRef!.style.transform = `scale(${scale})`;
     });
 
     let timeoutId: null | ReturnType<typeof setTimeout> = null;
@@ -75,10 +89,10 @@ export const QRCode: Component<QRCodeProps> = props => {
                     });
                 }}
             >
-                <QrCodeWrapper>
-                    <div ref={qrCodeCanvas} />
+                <QrCodeWrapper ref={qrCodeWrapperRef}>
+                    <div ref={qrCodeCanvasRef} />
                     <Show when={props.imageUrl}>
-                        <ImageBackground>
+                        <ImageBackground ref={imageRef}>
                             <img src={props.imageUrl} alt="" />
                         </ImageBackground>
                     </Show>

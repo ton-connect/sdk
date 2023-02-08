@@ -8,9 +8,7 @@ const borders: BorderRadiusConfig = {
     none: '0'
 };
 
-const qrSize = '244';
-const imgSize = '52';
-const imgPosition = ((Number(qrSize) - Number(imgSize)) / 2).toString();
+export const imgSize = '52';
 
 export const QRCodeBackgroundWrapper = styled.div`
     width: 100%;
@@ -31,8 +29,7 @@ export const QrCodeWrapper = styled.div`
     position: relative;
 
     > div:first-child {
-        height: ${qrSize}px;
-        width: ${qrSize}px;
+       
 
         display: flex;
         align-items: center;
@@ -53,8 +50,6 @@ export const ImageBackground = styled.div`
     width: ${imgSize}px;
     height: ${imgSize}px;
     background: ${props => props.theme!.colors.background.secondary};
-    top: ${imgPosition}px;
-    left: ${imgPosition}px;
 
     display: flex;
     align-items: center;

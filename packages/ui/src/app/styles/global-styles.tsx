@@ -1,39 +1,47 @@
 import { JSXElement } from 'solid-js';
 import { createGlobalStyles } from 'solid-styled-components';
 
+export const globalStylesTag = 'tc-root';
+export const disableScrollClass = 'tc-disable-scroll';
+export const usingMouseClass = 'tc-using-mouse';
+
 export const GlobalStyles = (): JSXElement => {
-    document.body.addEventListener('mousedown', () => document.body.classList.add('using-mouse'));
+    document.body.addEventListener('mousedown', () => document.body.classList.add(usingMouseClass));
 
     document.body.addEventListener('keydown', event => {
         if (event.key === 'Tab') {
-            document.body.classList.remove('using-mouse');
+            document.body.classList.remove(usingMouseClass);
         }
     });
 
     const Styles = createGlobalStyles`
-    * {
+    ${globalStylesTag} * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
+        
         font-family: SF Pro, Roboto, sans-serif;
-    }
-    html, body {
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
     }
-    
-    *:focus {
+ 
+    ${globalStylesTag} *:focus {
         outline: #08f auto 2px;
     }
-
-    body.using-mouse :focus {
+    
+    ${globalStylesTag} li {
+        list-style: none;
+    }
+    
+    ${globalStylesTag} button {
         outline: none;
     }
     
-    li {
-        list-style: none;
+    body.${disableScrollClass} {
+        overflow: hidden;
     }
-    button {
+    
+    body.${usingMouseClass} ${globalStylesTag} *:focus {
         outline: none;
     }
 `;

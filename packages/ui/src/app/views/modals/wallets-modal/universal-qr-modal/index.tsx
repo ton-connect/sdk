@@ -12,18 +12,19 @@ import {
 } from './style';
 import {
     ConnectAdditionalRequest,
-    isWalletInfoInjected,
+    isWalletInfoCurrentlyInjected,
+    isWalletInfoRemote,
     WalletInfo,
-    WalletInfoInjected,
-    WalletInfoRemote
+    WalletInfoCurrentlyInjected
 } from '@tonconnect/sdk';
 import { appState } from 'src/app/state/app.state';
 import { Translation } from 'src/app/components/typography/Translation';
-import { addReturnStrategy, openLink, openLinkBlank } from 'src/app/utils/web-api';
+import { addReturnStrategy, openLink } from 'src/app/utils/web-api';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { Transition } from 'solid-transition-group';
 import { Button, Text } from 'src/app/components';
 import { LINKS } from 'src/app/env/LINKS';
+import { Link } from 'src/app/components/link';
 
 interface UniversalQrModalProps {
     additionalRequest: ConnectAdditionalRequest;
@@ -36,14 +37,26 @@ export const UniversalQrModal: Component<UniversalQrModalProps> = props => {
     const connector = appState.connector;
 
     const walletsBridges = props.walletsList
-        .filter(wallet => 'bridgeUrl' in wallet)
-        .map(wallet => (wallet as WalletInfoRemote).bridgeUrl);
+        .filter(isWalletInfoRemote)
+        .map(item => ({ bridgeUrl: item.bridgeUrl, universalLink: item.universalLink }));
+    const availableInjectableWallets = props.walletsList.filter(isWalletInfoCurrentlyInjected);
 
-    const availableInjectableWallets = props.walletsList.filter(
-        wallet => isWalletInfoInjected(wallet) && wallet.injected
-    ) as WalletInfoInjected[];
+    setLastSelectedWalletInfo({ openMethod: 'qrcode' });
+    const request = appState.connector.connect(walletsBridges);
 
-    const request = appState.connector.connect(walletsBridges) as string;
+    const onOpenWalletClick = (): void => {
+        function blurHandler(): void {
+            setLastSelectedWalletInfo({ openMethod: 'universal-link' });
+            window.removeEventListener('blur', blurHandler);
+        }
+
+        window.addEventListener('blur', blurHandler);
+
+        openLink(addReturnStrategy(request, appState.returnStrategy));
+        setTimeout(() => {
+            window.removeEventListener('blur', blurHandler);
+        }, 200);
+    };
 
     const onOpenExtensionClick = (e: Event): void => {
         e.stopPropagation();
@@ -63,7 +76,7 @@ export const UniversalQrModal: Component<UniversalQrModalProps> = props => {
         setPopupOpened(opened => !opened);
     };
 
-    const onExtensionClick = (walletInfo: WalletInfoInjected): void => {
+    const onExtensionClick = (walletInfo: WalletInfoCurrentlyInjected): void => {
         setLastSelectedWalletInfo(walletInfo);
 
         connector.connect(
@@ -81,9 +94,7 @@ export const UniversalQrModal: Component<UniversalQrModalProps> = props => {
             </H2Styled>
             <QRCodeStyled sourceUrl={request} disableCopy={popupOpened()} />
             <ButtonsContainerStyled>
-                <ActionButtonStyled
-                    onClick={() => openLink(addReturnStrategy(request, appState.returnStrategy))}
-                >
+                <ActionButtonStyled onClick={onOpenWalletClick}>
                     <Show when={availableInjectableWallets.length}>
                         <Translation translationKey="walletModal.universalQRModal.openWallet">
                             Open Wallet
@@ -148,9 +159,11 @@ export const UniversalQrModal: Component<UniversalQrModalProps> = props => {
                     <TextStyled translationKey="walletModal.universalQRModal.dontHave">
                         Don't have compatible wallet?
                     </TextStyled>
-                    <Button onClick={() => openLinkBlank(LINKS.LEARN_MORE)}>
-                        <Translation translationKey="common.get">GET</Translation>
-                    </Button>
+                    <Link href={LINKS.LEARN_MORE} blank>
+                        <Button>
+                            <Translation translationKey="common.get">GET</Translation>
+                        </Button>
+                    </Link>
                 </GetWalletStyled>
             </Show>
         </UniversalQrModalStyled>

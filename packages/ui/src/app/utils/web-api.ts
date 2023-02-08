@@ -1,8 +1,8 @@
 import { THEME } from 'src/models/THEME';
 import { ReturnStrategy } from 'src/models/return-strategy';
 
-export function openLink(href: string, target = '_self'): void {
-    window.open(href, target, 'noreferrer noopener');
+export function openLink(href: string, target = '_self'): ReturnType<typeof window.open> {
+    return window.open(href, target, 'noreferrer noopener');
 }
 
 export function openLinkBlank(href: string): void {

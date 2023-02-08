@@ -1,4 +1,4 @@
-import { ConnectAdditionalRequest, WalletInfo, WalletInfoRemote } from '@tonconnect/sdk';
+import { ConnectAdditionalRequest, isWalletInfoRemote, WalletInfo } from '@tonconnect/sdk';
 import { Component, For } from 'solid-js';
 import { H1, LongArrowIcon, WalletItem, Text } from 'src/app/components';
 import { Translation } from 'src/app/components/typography/Translation';
@@ -15,6 +15,7 @@ import { Identifiable } from 'src/app/models/identifiable';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { appState } from 'src/app/state/app.state';
 import { LINKS } from 'src/app/env/LINKS';
+import { Link } from 'src/app/components/link';
 
 interface MobileSelectWalletModalProps extends Identifiable {
     walletsList: WalletInfo[];
@@ -38,6 +39,7 @@ export const MobileSelectWalletModal: Component<MobileSelectWalletModalProps> = 
             );
 
             openLink(addReturnStrategy(universalLink, appState.returnStrategy));
+            return;
         }
 
         openLinkBlank(walletInfo.aboutUrl);
@@ -46,11 +48,20 @@ export const MobileSelectWalletModal: Component<MobileSelectWalletModalProps> = 
     const onSelectUniversal = (): void => {
         const universalLink = connector.connect(
             props.walletsList
-                .filter(wallet => 'bridgeUrl' in wallet)
-                .map(wallet => (wallet as WalletInfoRemote).bridgeUrl)
-        ) as string;
+                .filter(isWalletInfoRemote)
+                .map(item => ({ bridgeUrl: item.bridgeUrl, universalLink: item.universalLink }))
+        );
+        function blurHandler(): void {
+            setLastSelectedWalletInfo({ openMethod: 'universal-link' });
+            window.removeEventListener('blur', blurHandler);
+        }
+
+        window.addEventListener('blur', blurHandler);
 
         openLink(addReturnStrategy(universalLink, appState.returnStrategy));
+        setTimeout(() => {
+            window.removeEventListener('blur', blurHandler);
+        }, 200);
     };
 
     return (
@@ -86,9 +97,11 @@ export const MobileSelectWalletModal: Component<MobileSelectWalletModalProps> = 
                     )}
                 </For>
             </UlStyled>
-            <ButtonStyled onClick={() => openLinkBlank(LINKS.LEARN_MORE)}>
-                <Translation translationKey="common.learnMore">Learn more</Translation>
-            </ButtonStyled>
+            <Link href={LINKS.LEARN_MORE} blank>
+                <ButtonStyled>
+                    <Translation translationKey="common.learnMore">Learn more</Translation>
+                </ButtonStyled>
+            </Link>
         </div>
     );
 };

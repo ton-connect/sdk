@@ -7,9 +7,9 @@ import {
     H2Styled
 } from './style';
 import { WalletInfo } from '@tonconnect/sdk';
-import { openLinkBlank } from 'src/app/utils/web-api';
 import { Translation } from 'src/app/components/typography/Translation';
 import { LINKS } from 'src/app/env/LINKS';
+import {Link} from "src/app/components/link";
 
 export interface DesktopSelectWalletModalProps {
     walletsList: WalletInfo[];
@@ -36,9 +36,11 @@ export const DesktopSelectWalletModal: Component<DesktopSelectWalletModalProps> 
                     )}
                 </For>
             </WalletsUl>
-            <ButtonStyled onClick={() => openLinkBlank(LINKS.LEARN_MORE)}>
-                <Translation translationKey="common.learnMore">Learn more</Translation>
-            </ButtonStyled>
+            <Link href={LINKS.LEARN_MORE} blank>
+                <ButtonStyled>
+                    <Translation translationKey="common.learnMore">Learn more</Translation>
+                </ButtonStyled>
+            </Link>
         </DesktopSelectWalletModalStyled>
     );
 };
