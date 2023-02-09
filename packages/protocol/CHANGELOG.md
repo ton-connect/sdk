@@ -1,5 +1,14 @@
 # Changelog @tonconnect/protocol 
 
+## [2.2.1](https://github.com/ton-connect/sdk/compare/protocol-2.2.0...protocol-2.2.1) (2023-02-09)
+
+
+### Bug Fixes
+
+* **protocol:** CONNECT_ITEM_ERROR_CODES reexport added ([9969635](https://github.com/ton-connect/sdk/commit/99696354aceb12537aaf7c1fefe9f3badf44c0fc))
+
+
+
 # [2.2.0](https://github.com/ton-connect/sdk/compare/protocol-2.1.0...protocol-2.2.0) (2023-02-08)
 
 
