@@ -7,7 +7,8 @@ export {
     TonProofItemReply,
     TonProofItemReplySuccess,
     TonProofItemReplyError,
-    TonAddressItemReply
+    TonAddressItemReply,
+    CONNECT_ITEM_ERROR_CODES
 } from './connect-event';
 export { DisconnectEvent } from './disconnect-event';
 export { WalletEvent } from './wallet-event';
