@@ -5,6 +5,7 @@ export type ConnectEvent = ConnectEventSuccess | ConnectEventError;
 
 export interface ConnectEventSuccess {
     event: 'connect';
+    id: number;
     payload: {
         items: ConnectItemReply[];
         device: DeviceInfo;
@@ -13,6 +14,7 @@ export interface ConnectEventSuccess {
 
 export interface ConnectEventError {
     event: 'connect_error';
+    id: number;
     payload: {
         code: CONNECT_EVENT_ERROR_CODES;
         message: string;
