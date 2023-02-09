@@ -40,6 +40,7 @@ import { DefaultStorage } from 'src/storage/default-storage';
 import { ITonConnect } from 'src/ton-connect.interface';
 import { getDocument, getWebPageManifest } from 'src/utils/web-api';
 import { WalletsListManager } from 'src/wallets-list-manager';
+import { WithoutIdDistributive } from 'src/utils/types';
 
 export class TonConnect implements ITonConnect {
     private static readonly walletsList = new WalletsListManager();
@@ -303,7 +304,7 @@ export class TonConnect implements ITonConnect {
         return provider;
     }
 
-    private walletEventsListener(e: WalletEvent): void {
+    private walletEventsListener(e: WithoutIdDistributive<WalletEvent>): void {
         switch (e.event) {
             case 'connect':
                 this.onWalletConnected(e.payload);

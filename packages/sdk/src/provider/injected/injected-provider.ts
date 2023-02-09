@@ -5,15 +5,16 @@ import {
     WalletResponse,
     ConnectRequest,
     WalletEvent,
-    ConnectEvent
+    ConnectEventError
 } from '@tonconnect/protocol';
 import { InjectedWalletApi } from 'src/provider/injected/models/injected-wallet-api';
 import { InternalProvider } from 'src/provider/provider';
 import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { IStorage } from 'src/storage/models/storage.interface';
-import { WithoutId } from 'src/utils/types';
+import { WithoutId, WithoutIdDistributive } from 'src/utils/types';
 import { getWindow } from 'src/utils/web-api';
 import { PROTOCOL_VERSION } from 'src/resources/protocol';
+import { TonConnectError } from 'src/errors';
 
 type WindowWithTon<T extends string> = {
     [key in T]: {
@@ -64,7 +65,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
 
     private listenSubscriptions = false;
 
-    private listeners: Array<(e: WalletEvent) => void> = [];
+    private listeners: Array<(e: WithoutIdDistributive<WalletEvent>) => void> = [];
 
     constructor(storage: IStorage, private readonly injectedWalletKey: T) {
         const window: Window | undefined | WindowWithTon<T> = InjectedProvider.window;
@@ -102,9 +103,24 @@ export class InjectedProvider<T extends string = string> implements InternalProv
         this.closeAllListeners();
     }
 
-    public disconnect(): Promise<void> {
+    public async disconnect(): Promise<void> {
+        this.sendRequest({
+            method: 'disconnect',
+            params: []
+        })
+            .then(result => {
+                if (!result || 'error' in result || !('result' in result)) {
+                    throw new TonConnectError("Rpc method 'disconnect' is not supported");
+                }
+            })
+            .catch(e => {
+                console.debug(e);
+                try {
+                    this.injectedWallet.disconnect();
+                } catch {}
+            });
+
         this.closeAllListeners();
-        this.injectedWallet.disconnect();
         return this.connectionStorage.removeConnection();
     }
 
@@ -114,7 +130,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
         this.unsubscribeCallback?.();
     }
 
-    public listen(eventsCallback: (e: WalletEvent) => void): () => void {
+    public listen(eventsCallback: (e: WithoutIdDistributive<WalletEvent>) => void): () => void {
         this.listeners.push(eventsCallback);
         return () =>
             (this.listeners = this.listeners.filter(listener => listener !== eventsCallback));
@@ -137,7 +153,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             this.listeners.forEach(listener => listener(connectEvent));
         } catch (e) {
             console.debug(e);
-            const connectEventError: ConnectEvent = {
+            const connectEventError: WithoutId<ConnectEventError> = {
                 event: 'connect_error',
                 payload: {
                     code: 0,
