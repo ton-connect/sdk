@@ -1,5 +1,14 @@
 # Changelog @tonconnect/protocol 
 
+## [2.2.2](https://github.com/ton-connect/sdk/compare/protocol-2.2.1...protocol-2.2.2) (2023-02-09)
+
+
+### Bug Fixes
+
+* **protocol:** added id for events ([e9e2123](https://github.com/ton-connect/sdk/commit/e9e2123da11ac074a9fe557f2cae18b3ac191e0e))
+
+
+
 ## [2.2.1](https://github.com/ton-connect/sdk/compare/protocol-2.2.0...protocol-2.2.1) (2023-02-09)
 
 
