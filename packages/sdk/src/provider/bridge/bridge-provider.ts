@@ -20,7 +20,7 @@ import { BridgePartialSession, BridgeSession } from 'src/provider/bridge/models/
 import { HTTPProvider } from 'src/provider/provider';
 import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { IStorage } from 'src/storage/models/storage.interface';
-import { WithoutId } from 'src/utils/types';
+import { WithoutId, WithoutIdDistributive } from 'src/utils/types';
 import { PROTOCOL_VERSION } from 'src/resources/protocol';
 
 export class BridgeProvider implements HTTPProvider {
@@ -45,7 +45,7 @@ export class BridgeProvider implements HTTPProvider {
 
     private bridge: BridgeGateway | null = null;
 
-    private listeners: Array<(e: WalletEvent) => void> = [];
+    private listeners: Array<(e: WithoutIdDistributive<WalletEvent>) => void> = [];
 
     constructor(
         private readonly storage: IStorage,
@@ -124,14 +124,14 @@ export class BridgeProvider implements HTTPProvider {
         this.bridge = null;
     }
 
-    public disconnect(): Promise<void> {
-        this.sendRequest({ method: 'disconnect', params: [] });
+    public async disconnect(): Promise<void> {
+        this.sendRequest({ method: 'disconnect', params: [] }).catch(e => console.debug(e));
         this.bridge?.close();
         this.listeners = [];
         return this.removeBridgeAndSession();
     }
 
-    public listen(callback: (e: WalletEvent) => void): () => void {
+    public listen(callback: (e: WithoutIdDistributive<WalletEvent>) => void): () => void {
         this.listeners.push(callback);
         return () => (this.listeners = this.listeners.filter(listener => listener !== callback));
     }

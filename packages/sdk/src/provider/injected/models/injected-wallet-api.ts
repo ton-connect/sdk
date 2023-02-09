@@ -16,5 +16,9 @@ export interface InjectedWalletApi {
     restoreConnection(): Promise<ConnectEvent>;
     send<T extends RpcMethod>(message: AppRequest<T>): Promise<WalletResponse<T>>;
     listen(callback: (event: WalletEvent) => void): () => void;
+
+    /**
+     * @deprecated
+     */
     disconnect(): void;
 }
