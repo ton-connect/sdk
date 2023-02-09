@@ -7,9 +7,12 @@ import {
     WalletEvent,
     WalletResponse
 } from '@tonconnect/protocol';
+import { WalletInfoDTO } from 'src/models/wallet/wallet-info';
+import { hasProperties, hasProperty } from 'src/utils/types';
 
 export interface InjectedWalletApi {
     deviceInfo: DeviceInfo;
+    walletInfo: Pick<WalletInfoDTO, 'name' | 'tondns' | 'image' | 'about_url'>;
     protocolVersion: number;
     isWalletBrowser: boolean;
     connect(protocolVersion: number, message: ConnectRequest): Promise<ConnectEvent>;
@@ -21,4 +24,12 @@ export interface InjectedWalletApi {
      * @deprecated
      */
     disconnect(): void;
+}
+
+export function isJSBridgeWithMetadata(value: unknown): value is { tonconnect: InjectedWalletApi } {
+    if (!hasProperty(value, 'tonconnect') || !hasProperty(value.tonconnect, 'walletInfo')) {
+        return false;
+    }
+
+    return hasProperties(value.tonconnect.walletInfo, ['name', 'image', 'about_url']);
 }

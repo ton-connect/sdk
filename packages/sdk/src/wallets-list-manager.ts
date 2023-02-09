@@ -53,7 +53,12 @@ export class WalletsListManager {
                 throw new FetchWalletsError('Wrong wallets list format');
             }
 
-            return this.walletConfigDTOListToWalletConfigList(walletsList);
+            const currentlyInjectedWallets = InjectedProvider.getCurrentlyInjectedWallets();
+
+            return this.mergeWalletsLists(
+                this.walletConfigDTOListToWalletConfigList(walletsList),
+                currentlyInjectedWallets
+            );
         } catch (e) {
             throw new FetchWalletsError(e);
         }
@@ -87,6 +92,20 @@ export class WalletsListManager {
             });
 
             return walletConfig;
+        });
+    }
+
+    private mergeWalletsLists(list1: WalletInfo[], list2: WalletInfo[]): WalletInfo[] {
+        const names = new Set(list1.concat(list2).map(item => item.name));
+
+        return [...names.values()].map(name => {
+            const list1Item = list1.find(item => item.name === name);
+            const list2Item = list2.find(item => item.name === name);
+
+            return {
+                ...(list1Item && { ...list1Item }),
+                ...(list2Item && { ...list2Item })
+            } as WalletInfo;
         });
     }
 

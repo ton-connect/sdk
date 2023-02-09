@@ -7,7 +7,10 @@ import {
     WalletEvent,
     ConnectEventError
 } from '@tonconnect/protocol';
-import { InjectedWalletApi } from 'src/provider/injected/models/injected-wallet-api';
+import {
+    InjectedWalletApi,
+    isJSBridgeWithMetadata
+} from 'src/provider/injected/models/injected-wallet-api';
 import { InternalProvider } from 'src/provider/provider';
 import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { IStorage } from 'src/storage/models/storage.interface';
@@ -15,6 +18,7 @@ import { WithoutId, WithoutIdDistributive } from 'src/utils/types';
 import { getWindow } from 'src/utils/web-api';
 import { PROTOCOL_VERSION } from 'src/resources/protocol';
 import { TonConnectError } from 'src/errors';
+import { WalletInfoCurrentlyInjected } from 'src/models';
 
 type WindowWithTon<T extends string> = {
     [key in T]: {
@@ -41,6 +45,26 @@ export class InjectedProvider<T extends string = string> implements InternalProv
         }
 
         return false;
+    }
+
+    public static getCurrentlyInjectedWallets(): WalletInfoCurrentlyInjected[] {
+        if (!this.window) {
+            return [];
+        }
+
+        const wallets = Object.entries(this.window).filter(([_, value]) =>
+            isJSBridgeWithMetadata(value)
+        ) as unknown as [string, { tonconnect: InjectedWalletApi }][];
+
+        return wallets.map(([jsBridgeKey, wallet]) => ({
+            name: wallet.tonconnect.walletInfo.name,
+            aboutUrl: wallet.tonconnect.walletInfo.about_url,
+            imageUrl: wallet.tonconnect.walletInfo.image,
+            tondns: wallet.tonconnect.walletInfo.tondns,
+            jsBridgeKey,
+            injected: true,
+            embedded: wallet.tonconnect.isWalletBrowser
+        }));
     }
 
     private static isWindowContainsWallet<T extends string>(
