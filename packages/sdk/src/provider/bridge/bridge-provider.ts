@@ -125,6 +125,7 @@ export class BridgeProvider implements HTTPProvider {
     }
 
     public disconnect(): Promise<void> {
+        this.sendRequest({ method: 'disconnect', params: [] });
         this.bridge?.close();
         this.listeners = [];
         return this.removeBridgeAndSession();
