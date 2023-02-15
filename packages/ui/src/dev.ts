@@ -17,7 +17,7 @@ async function dev(): Promise<void> {
         },
         language: 'en',
         restoreConnection: true,
-        walletsList: {
+        walletsListConfiguration: {
             includeWallets: [...new Array(11)].map((_, index) => ({
                 name: 'tonkeeper',
                 bridgeUrl: `https://bridge${
@@ -26,11 +26,16 @@ async function dev(): Promise<void> {
                 universalLink: 'https://app.tonkeeper.com/ton-connect',
                 aboutUrl: '',
                 imageUrl: 'https://tonkeeper.com/assets/tonconnect-icon.png'
-            }))
+            })),
+            walletsOrder: ['OpenMask', 'MyTonWallet']
+        },
+        getConnectParameters() {
+            return Promise.resolve({ tonProof: 'demo-proof' });
         }
     });
 
     tonConnectUI.onStatusChange(wallet => {
+        console.log(wallet);
         document.getElementById('content')!.textContent = wallet ? JSON.stringify(wallet) : wallet;
     });
 

@@ -8,7 +8,7 @@ export type AppState = {
     connector: ITonConnect;
     buttonRootId: string | null;
     language: Locales;
-    walletsList: WalletsListConfiguration | {};
+    walletsListConfiguration: WalletsListConfiguration | {};
     getConnectParameters?: () => Promise<ConnectAdditionalRequest>;
     returnStrategy: ReturnStrategy;
 };
@@ -17,5 +17,5 @@ export const [appState, setAppState] = createStore<AppState>({
     buttonRootId: null,
     language: 'en',
     returnStrategy: 'back',
-    walletsList: {}
+    walletsListConfiguration: {}
 } as AppState);

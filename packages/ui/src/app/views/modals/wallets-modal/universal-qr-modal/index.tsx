@@ -42,7 +42,8 @@ export const UniversalQrModal: Component<UniversalQrModalProps> = props => {
     const availableInjectableWallets = props.walletsList.filter(isWalletInfoCurrentlyInjected);
 
     setLastSelectedWalletInfo({ openMethod: 'qrcode' });
-    const request = appState.connector.connect(walletsBridges);
+    const request = (): string =>
+        appState.connector.connect(walletsBridges, props.additionalRequest);
 
     const onOpenWalletClick = (): void => {
         function blurHandler(): void {
@@ -52,7 +53,7 @@ export const UniversalQrModal: Component<UniversalQrModalProps> = props => {
 
         window.addEventListener('blur', blurHandler);
 
-        openLink(addReturnStrategy(request, appState.returnStrategy));
+        openLink(addReturnStrategy(request(), appState.returnStrategy));
         setTimeout(() => {
             window.removeEventListener('blur', blurHandler);
         }, 200);
@@ -92,7 +93,7 @@ export const UniversalQrModal: Component<UniversalQrModalProps> = props => {
             <H2Styled translationKey="walletModal.universalQRModal.scanQR">
                 Scan QR code with a TON Connect compatible wallet.
             </H2Styled>
-            <QRCodeStyled sourceUrl={request} disableCopy={popupOpened()} />
+            <QRCodeStyled sourceUrl={request()} disableCopy={popupOpened()} />
             <ButtonsContainerStyled>
                 <ActionButtonStyled onClick={onOpenWalletClick}>
                     <Show when={availableInjectableWallets.length}>

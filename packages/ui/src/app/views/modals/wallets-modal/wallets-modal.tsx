@@ -76,7 +76,10 @@ export const WalletsModal: Component = () => {
             return null;
         }
 
-        return applyWalletsListConfiguration(fetchedWalletsList(), appState.walletsList);
+        return applyWalletsListConfiguration(
+            fetchedWalletsList(),
+            appState.walletsListConfiguration
+        );
     });
 
     const additionalRequestLoading = (): boolean =>

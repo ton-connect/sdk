@@ -118,7 +118,9 @@ export class TonConnectUI {
                     ...(!!options.actionsConfiguration?.returnStrategy && {
                         returnStrategy: options.actionsConfiguration.returnStrategy
                     }),
-                    ...(!!options.walletsList && { walletsList: options.walletsList })
+                    ...(!!options.walletsListConfiguration && {
+                        walletsListConfiguration: options.walletsListConfiguration
+                    })
                 },
                 unwrap(state)
             );
@@ -320,7 +322,7 @@ export class TonConnectUI {
         if (!('name' in lastSelectedWalletInfo)) {
             const walletsList = applyWalletsListConfiguration(
                 await this.walletsList,
-                appState.walletsList
+                appState.walletsListConfiguration
             );
             const walletInfo = walletsList.find(
                 item => item.name.toLowerCase() === wallet.device.appName.toLowerCase()

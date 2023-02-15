@@ -8,11 +8,7 @@ export type {
     TonConnectUiCreateOptionsBase
 } from './ton-connect-ui-create-options';
 export type { TonConnectUiOptions } from './ton-connect-ui-options';
-export type {
-    WalletsListConfiguration,
-    WalletsListConfigurationExplicit,
-    WalletsListConfigurationImplicit
-} from './wallets-list-configuration';
+export type { WalletsListConfiguration } from './wallets-list-configuration';
 export type { UIPreferences } from './ui-preferences';
 export type { ColorsSet, PartialColorsSet } from './colors-set';
 export type { BorderRadius } from './border-radius';
