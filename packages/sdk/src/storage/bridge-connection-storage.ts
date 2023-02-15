@@ -105,4 +105,15 @@ export class BridgeConnectionStorage {
         const connection: BridgeConnection = JSON.parse(stored);
         return connection.type;
     }
+
+    public async storeLastWalletEventId(id: number): Promise<void> {
+        const connection = await this.getHttpConnection();
+        connection.lastWalletEventId = id;
+        return this.storeConnection(connection);
+    }
+
+    public async getLastWalletEventId(): Promise<number | undefined> {
+        const connection = await this.getHttpConnection();
+        return connection.lastWalletEventId;
+    }
 }

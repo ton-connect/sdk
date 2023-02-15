@@ -11,6 +11,7 @@ export interface BridgeConnectionInjected {
 
 export interface BridgeConnectionHttp {
     type: 'http';
+    lastWalletEventId?: number;
     connectEvent: {
         event: 'connect';
         payload: {

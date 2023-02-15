@@ -223,12 +223,25 @@ export class BridgeProvider implements HTTPProvider {
             const id = walletMessage.id.toString();
             const resolve = this.pendingRequests.get(id);
             if (!resolve) {
-                throw new TonConnectError(`Response id ${id} doesn't match any request's id`);
+                console.error(`Response id ${id} doesn't match any request's id`);
+                return;
             }
 
             resolve(walletMessage);
             this.pendingRequests.delete(id);
             return;
+        }
+
+        if (walletMessage.id !== undefined) {
+            const lastId = await this.connectionStorage.getLastWalletEventId();
+
+            if (lastId !== undefined && walletMessage.id <= lastId) {
+                console.error(
+                    `Received event id (=${walletMessage.id}) must be greater than stored last wallet event id (=${lastId}) `
+                );
+            }
+
+            await this.connectionStorage.storeLastWalletEventId(walletMessage.id);
         }
 
         if (walletMessage.event === 'connect') {
