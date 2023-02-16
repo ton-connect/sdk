@@ -29,7 +29,8 @@ export class BridgeConnectionStorage {
         const rawConnection: BridgeConnectionHttpRaw = {
             type: 'http',
             connectEvent: connection.connectEvent,
-            session: rawSession
+            session: rawSession,
+            lastWalletEventId: connection.lastWalletEventId
         };
         return this.storage.setItem(this.storeKey, JSON.stringify(rawConnection));
     }
@@ -54,6 +55,7 @@ export class BridgeConnectionStorage {
         return {
             type: 'http',
             connectEvent: connection.connectEvent,
+            lastWalletEventId: connection.lastWalletEventId,
             session: {
                 sessionCrypto,
                 walletConnectionSource: connection.session.walletConnectionSource,
@@ -107,13 +109,19 @@ export class BridgeConnectionStorage {
     }
 
     public async storeLastWalletEventId(id: number): Promise<void> {
-        const connection = await this.getHttpConnection();
-        connection.lastWalletEventId = id;
-        return this.storeConnection(connection);
+        const connection = await this.getConnection();
+        if (connection && connection.type === 'http') {
+            connection.lastWalletEventId = id;
+            return this.storeConnection(connection);
+        }
     }
 
     public async getLastWalletEventId(): Promise<number | undefined> {
-        const connection = await this.getHttpConnection();
-        return connection.lastWalletEventId;
+        const connection = await this.getConnection();
+        if (connection && 'lastWalletEventId' in connection) {
+            return connection.lastWalletEventId;
+        }
+
+        return undefined;
     }
 }

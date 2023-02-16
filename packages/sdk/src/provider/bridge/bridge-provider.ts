@@ -239,9 +239,12 @@ export class BridgeProvider implements HTTPProvider {
                 console.error(
                     `Received event id (=${walletMessage.id}) must be greater than stored last wallet event id (=${lastId}) `
                 );
+                return;
             }
 
-            await this.connectionStorage.storeLastWalletEventId(walletMessage.id);
+            if (walletMessage.event !== 'connect') {
+                await this.connectionStorage.storeLastWalletEventId(walletMessage.id);
+            }
         }
 
         if (walletMessage.event === 'connect') {
@@ -283,6 +286,7 @@ export class BridgeProvider implements HTTPProvider {
         await this.connectionStorage.storeConnection({
             type: 'http',
             session: this.session,
+            lastWalletEventId: connectEvent.id,
             connectEvent: connectEventToSave
         });
     }
