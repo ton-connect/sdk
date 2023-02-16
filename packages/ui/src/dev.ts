@@ -12,10 +12,10 @@ async function dev(): Promise<void> {
             notifications: ['before']
         },
         uiPreferences: {
-            theme: THEME.DARK,
+            theme: THEME.LIGHT,
             borderRadius: 'm'
         },
-        language: 'en',
+        language: 'ru',
         restoreConnection: true,
         walletsListConfiguration: {
             includeWallets: [...new Array(11)].map((_, index) => ({

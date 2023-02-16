@@ -8,11 +8,12 @@ const borders: BorderRadiusConfig = {
     none: '0'
 };
 
-export const ButtonStyled = styled.button`
-    background-color: ${props => rgba(props.theme!.colors.accent, 0.12)};
+export const ButtonStyled = styled.button<{ appearance: 'primary' | 'flat' }>`
+    background-color: ${props =>
+        props.appearance === 'flat' ? 'transparent' : rgba(props.theme!.colors.accent, 0.12)};
     color: ${props => props.theme!.colors.accent};
 
-    padding: 9px 16px;
+    padding: ${props => (props.appearance === 'flat' ? '0' : '9px 16px')};
     border: none;
     border-radius: ${props => borders[props.theme!.borderRadius]};
     cursor: ${props => (props.disabled ? 'not-allowed' : 'pointer')};

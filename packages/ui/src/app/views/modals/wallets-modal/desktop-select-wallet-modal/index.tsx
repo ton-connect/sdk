@@ -9,7 +9,7 @@ import {
 import { WalletInfo } from '@tonconnect/sdk';
 import { Translation } from 'src/app/components/typography/Translation';
 import { LINKS } from 'src/app/env/LINKS';
-import {Link} from "src/app/components/link";
+import { Link } from 'src/app/components/link';
 
 export interface DesktopSelectWalletModalProps {
     walletsList: WalletInfo[];
@@ -37,8 +37,10 @@ export const DesktopSelectWalletModal: Component<DesktopSelectWalletModalProps> 
                 </For>
             </WalletsUl>
             <Link href={LINKS.LEARN_MORE} blank>
-                <ButtonStyled>
-                    <Translation translationKey="common.learnMore">Learn more</Translation>
+                <ButtonStyled appearance="flat">
+                    <Translation translationKey="common.exploreWallets">
+                        Explore TON wallets
+                    </Translation>
                 </ButtonStyled>
             </Link>
         </DesktopSelectWalletModalStyled>

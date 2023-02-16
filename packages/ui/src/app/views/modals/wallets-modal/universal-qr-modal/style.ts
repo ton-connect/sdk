@@ -97,10 +97,11 @@ export const ExtensionLi = styled.li`
 `;
 
 export const GetWalletStyled = styled.div`
-    margin-top: 16px;
+    margin-top: 23px;
+    margin-bottom: 1px;
     width: 100%;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
 `;
 

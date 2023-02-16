@@ -44,5 +44,6 @@ export const WalletItemStyled = styled(WalletItem)`
 
 export const ButtonStyled = styled(Button)`
     display: block;
-    margin: 0 auto;
+    margin: 0 auto 1px;
+    font-size: 15px;
 `;

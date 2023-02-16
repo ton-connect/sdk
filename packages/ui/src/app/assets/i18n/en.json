@@ -2,7 +2,7 @@
   "common": {
     "close": "Close",
     "get": "GET",
-    "learnMore": "Learn more",
+    "exploreWallets": "Explore TON wallets",
     "openExtension": "Open Extension",
     "copyLink": "Copy Link",
     "copied": "Copied!"
@@ -35,8 +35,7 @@
     "universalQRModal": {
       "scanQR": "Scan QR code with a TON Connect compatible wallet.",
       "openWallet": "Open Wallet",
-      "openInstalledWallet": "Open Installed Wallet",
-      "dontHave": "Don't have compatible wallet?"
+      "openInstalledWallet": "Open Installed Wallet"
     },
     "desktopSelectWalletModal": {
       "selectWallet": "Choose your preferred wallet from the options to get started."

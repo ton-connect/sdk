@@ -16,6 +16,7 @@ import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { appState } from 'src/app/state/app.state';
 import { LINKS } from 'src/app/env/LINKS';
 import { Link } from 'src/app/components/link';
+import {useTheme} from "solid-styled-components";
 
 interface MobileSelectWalletModalProps extends Identifiable {
     walletsList: WalletInfo[];
@@ -25,6 +26,7 @@ interface MobileSelectWalletModalProps extends Identifiable {
 
 export const MobileSelectWalletModal: Component<MobileSelectWalletModalProps> = props => {
     const connector = appState.connector;
+    const theme = useTheme();
 
     const onSelect = (walletInfo: WalletInfo): void => {
         if ('universalLink' in walletInfo) {
@@ -49,7 +51,8 @@ export const MobileSelectWalletModal: Component<MobileSelectWalletModalProps> = 
         const universalLink = connector.connect(
             props.walletsList
                 .filter(isWalletInfoRemote)
-                .map(item => ({ bridgeUrl: item.bridgeUrl, universalLink: item.universalLink }))
+                .map(item => ({ bridgeUrl: item.bridgeUrl, universalLink: item.universalLink })),
+            props.additionalRequest
         );
         function blurHandler(): void {
             setLastSelectedWalletInfo({ openMethod: 'universal-link' });
@@ -75,7 +78,7 @@ export const MobileSelectWalletModal: Component<MobileSelectWalletModalProps> = 
             <UlStyled>
                 <DefaultWallet onClick={onSelectUniversal}>
                     <LongArrowIconContainer>
-                        <LongArrowIcon />
+                        <LongArrowIcon fill={theme!.colors.accent} />
                     </LongArrowIconContainer>
                     <Text
                         fontWeight={590}
@@ -99,7 +102,7 @@ export const MobileSelectWalletModal: Component<MobileSelectWalletModalProps> = 
             </UlStyled>
             <Link href={LINKS.LEARN_MORE} blank>
                 <ButtonStyled>
-                    <Translation translationKey="common.learnMore">Learn more</Translation>
+                    <Translation translationKey="common.exploreWallets">Explore TON wallets</Translation>
                 </ButtonStyled>
             </Link>
         </div>

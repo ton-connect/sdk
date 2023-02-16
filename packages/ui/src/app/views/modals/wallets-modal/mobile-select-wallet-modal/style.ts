@@ -1,5 +1,6 @@
 import { styled } from 'solid-styled-components';
 import { Button, H2 } from 'src/app/components';
+import { rgba } from 'src/app/utils/css';
 
 export const UlStyled = styled.ul`
     display: flex;
@@ -54,7 +55,8 @@ export const LongArrowIconContainer = styled.div`
     align-items: center;
     justify-content: center;
 
-    background-color: ${props => props.theme!.colors.background.secondary};
+    background-color: ${props => rgba(props.theme!.colors.accent, 0.12)};
+    color: ${props => props.theme!.colors.accent};
 
     margin-bottom: 8px;
 `;

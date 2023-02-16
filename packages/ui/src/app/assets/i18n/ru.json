@@ -2,7 +2,7 @@
   "common": {
     "close": "Закрыть",
     "get": "Скачать",
-    "learnMore": "Подробнее",
+    "exploreWallets": "Подробнее о кошельках TON",
     "openExtension": "Открыть расширение",
     "copyLink": "Копировать ссылку",
     "copied": "Скопировано!"
@@ -35,8 +35,7 @@
     "universalQRModal": {
       "scanQR": "Отсканируйте QR код TON Connect-совместимым кошельком. ",
       "openWallet": "Открыть кошелек",
-      "openInstalledWallet": "Открыть установленный кошелек",
-      "dontHave": "Нет нужного кошелька?"
+      "openInstalledWallet": "Открыть установленный кошелек"
     },
     "desktopSelectWalletModal": {
       "selectWallet": "Выберите свой кошелёк из предложенных ниже."

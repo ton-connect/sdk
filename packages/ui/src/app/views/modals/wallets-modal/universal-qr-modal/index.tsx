@@ -7,8 +7,7 @@ import {
     ActionButtonStyled,
     PopupWrapper,
     ExtensionLi,
-    GetWalletStyled,
-    TextStyled
+    GetWalletStyled
 } from './style';
 import {
     ConnectAdditionalRequest,
@@ -25,6 +24,7 @@ import { Transition } from 'solid-transition-group';
 import { Button, Text } from 'src/app/components';
 import { LINKS } from 'src/app/env/LINKS';
 import { Link } from 'src/app/components/link';
+import { css } from 'solid-styled-components';
 
 interface UniversalQrModalProps {
     additionalRequest: ConnectAdditionalRequest;
@@ -157,12 +157,16 @@ export const UniversalQrModal: Component<UniversalQrModalProps> = props => {
             </ButtonsContainerStyled>
             <Show when={!availableInjectableWallets.length}>
                 <GetWalletStyled>
-                    <TextStyled translationKey="walletModal.universalQRModal.dontHave">
-                        Don't have compatible wallet?
-                    </TextStyled>
                     <Link href={LINKS.LEARN_MORE} blank>
-                        <Button>
-                            <Translation translationKey="common.get">GET</Translation>
+                        <Button
+                            appearance="flat"
+                            class={css`
+                                font-size: 15px;
+                            `}
+                        >
+                            <Translation translationKey="common.exploreWallets">
+                                Explore TON wallets
+                            </Translation>
                         </Button>
                     </Link>
                 </GetWalletStyled>
