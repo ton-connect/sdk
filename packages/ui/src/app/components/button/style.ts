@@ -21,7 +21,6 @@ export const ButtonStyled = styled.button<{ appearance: 'primary' | 'flat' }>`
     font-size: 14px;
     font-weight: 590;
     line-height: 18px;
-    letter-spacing: -0.154px;
 
     transition: transform 0.1s ease-in-out;
 

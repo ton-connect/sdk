@@ -26,14 +26,14 @@ export const AccountButtonStyled = styled(Button)`
 `;
 
 export const DropdownButtonStyled = styled(AccountButtonStyled)`
-    width: 140px;
+    width: 150px;
     gap: 11px;
     justify-content: center;
     background-color: ${props => props.theme!.colors.background.primary};
 `;
 
 export const LoaderButtonStyled = styled(Button)`
-    width: 140px;
+    width: 150px;
 
     background-color: ${props => props.theme!.colors.background.primary};
     color: ${props => props.theme!.colors.connectButton.foreground};

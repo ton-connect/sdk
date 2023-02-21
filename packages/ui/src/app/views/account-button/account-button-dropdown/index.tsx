@@ -14,7 +14,6 @@ const MenuItemText: Component<{ children: string } & Translateable> = props => (
     <Text
         translationKey={props.translationKey}
         fontSize="15px"
-        letterSpacing="-0.24px"
         fontWeight="590"
     >
         {props.children}

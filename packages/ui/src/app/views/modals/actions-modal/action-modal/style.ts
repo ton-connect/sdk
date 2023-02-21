@@ -16,7 +16,6 @@ export const TextStyled = styled(Text)`
     font-weight: 510;
     font-size: 16px;
     line-height: 22px;
-    letter-spacing: -0.32px;
     text-align: center;
     max-width: 250px;
 

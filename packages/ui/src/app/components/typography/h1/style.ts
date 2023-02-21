@@ -7,7 +7,6 @@ export const H1Styled = styled.h1`
     line-height: 30px;
 
     text-align: center;
-    letter-spacing: 0.072px;
 
     color: ${props => props.theme!.colors.text.primary};
 

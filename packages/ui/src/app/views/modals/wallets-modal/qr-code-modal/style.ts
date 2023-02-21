@@ -32,7 +32,6 @@ export const ActionButtonStyled = styled(Button)`
     height: 56px;
     font-size: 16px;
     line-height: 20px;
-    letter-spacing: -0.32px;
     width: 100%;
     border-radius: ${props => borders[props.theme!.borderRadius]};
 `;

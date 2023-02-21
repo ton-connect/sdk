@@ -1,5 +1,5 @@
 import { styled } from 'solid-styled-components';
-import { H1, LoaderIcon, Modal, TabBar, Text } from 'src/app/components';
+import { H1, Modal, TabBar, Text } from 'src/app/components';
 import { media } from 'src/app/styles/media';
 
 export const StyledModal = styled(Modal)`
@@ -20,11 +20,6 @@ export const H1Styled = styled(H1)`
     ${media('mobile')} {
         padding: 0 10px;
     }
-`;
-
-export const LoaderIconStyled = styled(LoaderIcon)`
-    width: 70px;
-    height: 70px;
 `;
 
 export const LoaderContainerStyled = styled.div`

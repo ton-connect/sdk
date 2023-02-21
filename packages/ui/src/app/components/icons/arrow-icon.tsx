@@ -26,15 +26,15 @@ export const ArrowIcon: Component<ArrowIconProps> = props => {
 
     return (
         <Svg
-            width="6"
-            height="12"
-            viewBox="0 0 6 12"
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             svgDirection={direction()}
         >
             <path
-                d="M5.1 1.40012L1.5 6.0001L5.1 10.6001"
+                d="M9.1 3.40012L5.5 8.0001L9.1 12.6001"
                 stroke={fill()}
                 stroke-width="1.8"
                 stroke-linecap="round"

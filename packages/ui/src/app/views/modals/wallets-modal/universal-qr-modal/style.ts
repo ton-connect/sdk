@@ -39,7 +39,6 @@ export const ActionButtonStyled = styled(Button)<{ disableEventsAnimation?: bool
     position: relative;
     font-size: 16px;
     line-height: 20px;
-    letter-spacing: -0.32px;
     width: 100%;
     padding: 0 16px;
     height: 56px;

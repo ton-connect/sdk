@@ -20,7 +20,7 @@ export const GlobalStyles = (): JSXElement => {
         padding: 0;
         box-sizing: border-box;
         
-        font-family: SF Pro, Roboto, sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica Neue', Arial, Tahoma, Verdana, sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
     }

@@ -47,7 +47,7 @@ export const AccountButton: Component<AccountButtonProps> = () => {
                 acc.address,
                 acc.chain === CHAIN.TESTNET
             );
-            return userFriendlyAddress.slice(0, 4) + '...' + userFriendlyAddress.slice(-4);
+            return userFriendlyAddress.slice(0, 4) + '…' + userFriendlyAddress.slice(-4);
         }
 
         return '';
@@ -103,7 +103,7 @@ export const AccountButton: Component<AccountButtonProps> = () => {
                         <Text
                             translationKey="button.connectWallet"
                             fontSize="15px"
-                            letterSpacing="-0.24px"
+                            lineHeight="18px"
                             fontWeight="590"
                             color={theme.colors.connectButton.foreground}
                         >
@@ -120,7 +120,6 @@ export const AccountButton: Component<AccountButtonProps> = () => {
                         >
                             <Text
                                 fontSize="15px"
-                                letterSpacing="-0.24px"
                                 fontWeight="590"
                                 lineHeight="18px"
                             >

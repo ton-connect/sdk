@@ -25,14 +25,7 @@ import {
     walletsModalOpen
 } from 'src/app/state/modals-state';
 import { QrCodeModal } from 'src/app/views/modals/wallets-modal/qr-code-modal';
-import {
-    StyledModal,
-    LoaderIconStyled,
-    LoaderContainerStyled,
-    H1Styled,
-    TabBarStyled,
-    TabTextStyled
-} from './style';
+import { StyledModal, LoaderContainerStyled, H1Styled, TabBarStyled, TabTextStyled } from './style';
 import { openLinkBlank } from 'src/app/utils/web-api';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { useI18n } from '@solid-primitives/i18n';
@@ -42,6 +35,7 @@ import isMobile from 'src/app/hooks/isMobile';
 import { MobileSelectWalletModal } from 'src/app/views/modals/wallets-modal/mobile-select-wallet-modal';
 import { UniversalQrModal } from 'src/app/views/modals/wallets-modal/universal-qr-modal';
 import { DesktopSelectWalletModal } from 'src/app/views/modals/wallets-modal/desktop-select-wallet-modal';
+import { LoaderIcon } from 'src/app/components';
 
 export const WalletsModal: Component = () => {
     const { locale } = useI18n()[1];
@@ -132,7 +126,7 @@ export const WalletsModal: Component = () => {
             <Show when={additionalRequestLoading() || !walletsList()}>
                 <H1Styled translationKey="walletModal.loading">Wallets list is loading</H1Styled>
                 <LoaderContainerStyled>
-                    <LoaderIconStyled />
+                    <LoaderIcon size="m" />
                 </LoaderContainerStyled>
             </Show>
 
