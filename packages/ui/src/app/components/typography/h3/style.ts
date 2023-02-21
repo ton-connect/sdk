@@ -10,4 +10,6 @@ export const H3Styled = styled.h3`
 
     margin-top: 0;
     margin-bottom: 0;
+
+    cursor: default;
 `;

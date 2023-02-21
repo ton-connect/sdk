@@ -5,13 +5,15 @@ import {
     imgSize,
     QrCodeBackground,
     QRCodeBackgroundWrapper,
-    QrCodeWrapper
+    QrCodeWrapper,
+    qrNormalSize
 } from './style';
 import qrcode from 'qrcode-generator';
 import { Transition } from 'solid-transition-group';
 import { copyToClipboard } from 'src/app/utils/copy-to-clipboard';
 import { Translation } from 'src/app/components/typography/Translation';
 import { Styleable } from 'src/app/models/styleable';
+import { toPx } from 'src/app/utils/css';
 
 export interface QRCodeProps extends Styleable {
     sourceUrl: string;
@@ -52,13 +54,12 @@ export const QRCode: Component<QRCodeProps> = props => {
         const qrSize = qrCodeCanvasRef!.firstElementChild!.clientWidth;
 
         if (imageRef) {
-            const imgOffset = ((qrSize - Number(imgSize)) / 2).toString() + 'px';
+            const imgOffset = toPx((qrSize - imgSize) / 2);
             imageRef.style.top = imgOffset;
             imageRef.style.left = imgOffset;
         }
 
-        const normalQRSize = 244;
-        const scale = Math.round((normalQRSize / qrSize) * 100) / 100;
+        const scale = Math.round((qrNormalSize / qrSize) * 100) / 100;
         qrCodeWrapperRef!.style.transform = `scale(${scale})`;
     });
 

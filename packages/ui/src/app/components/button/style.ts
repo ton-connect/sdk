@@ -3,7 +3,7 @@ import { rgba } from 'src/app/utils/css';
 import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
 
 const borders: BorderRadiusConfig = {
-    m: '16px',
+    m: '100vh',
     s: '8px',
     none: '0'
 };

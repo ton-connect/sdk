@@ -1,6 +1,7 @@
 import { styled } from 'solid-styled-components';
 import { Button } from 'src/app/components';
 import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
+import { toPx } from 'src/app/utils/css';
 
 const borders: BorderRadiusConfig = {
     m: '16px',
@@ -8,7 +9,10 @@ const borders: BorderRadiusConfig = {
     none: '0'
 };
 
-export const imgSize = '52';
+export const qrNormalSize = 256;
+export const imgSize = 60;
+
+const qrPaddingTop = 24;
 
 export const QRCodeBackgroundWrapper = styled.div`
     width: 100%;
@@ -21,7 +25,8 @@ export const QrCodeBackground = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px 0;
+    padding: ${toPx(qrPaddingTop)} 0;
+    height: ${toPx(qrNormalSize + qrPaddingTop * 2)};
     width: 100%;
 `;
 
@@ -29,8 +34,6 @@ export const QrCodeWrapper = styled.div`
     position: relative;
 
     > div:first-child {
-       
-
         display: flex;
         align-items: center;
         justify-content: center;
@@ -47,8 +50,8 @@ export const QrCodeWrapper = styled.div`
 
 export const ImageBackground = styled.div`
     position: absolute;
-    width: ${imgSize}px;
-    height: ${imgSize}px;
+    width: ${toPx(imgSize)};
+    height: ${toPx(imgSize)};
     background: ${props => props.theme!.colors.background.secondary};
 
     display: flex;
@@ -56,8 +59,8 @@ export const ImageBackground = styled.div`
     justify-content: center;
 
     > img {
-        width: 46px;
-        height: 46px;
+        width: 48px;
+        height: 48px;
         border-radius: 12px;
     }
 `;

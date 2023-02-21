@@ -12,4 +12,6 @@ export const H1Styled = styled.h1`
 
     margin-top: 0;
     margin-bottom: 6px;
+
+    cursor: default;
 `;

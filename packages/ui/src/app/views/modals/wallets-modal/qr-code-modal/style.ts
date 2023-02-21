@@ -43,6 +43,7 @@ export const GetWalletStyled = styled.div`
 `;
 
 export const TextStyled = styled(Text)`
+    padding-left: 8px;
     color: ${props => props.theme!.colors.text.secondary};
     font-size: 16px;
 `;
