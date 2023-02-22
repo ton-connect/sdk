@@ -13,6 +13,7 @@ export const AccountButtonStyled = styled(Button)`
     display: flex;
     align-items: center;
     gap: 9px;
+    height: 40px;
 
     transition: all 0.1s ease-in-out;
 

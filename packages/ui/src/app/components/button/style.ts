@@ -8,7 +8,12 @@ const borders: BorderRadiusConfig = {
     none: '0'
 };
 
-export const ButtonStyled = styled.button<{ appearance: 'primary' | 'flat' }>`
+const scaleValues = {
+    s: 0.02,
+    m: 0.04
+};
+
+export const ButtonStyled = styled.button<{ appearance: 'primary' | 'flat'; scale: 's' | 'm' }>`
     background-color: ${props =>
         props.appearance === 'flat' ? 'transparent' : rgba(props.theme!.colors.accent, 0.12)};
     color: ${props => props.theme!.colors.accent};
@@ -25,10 +30,10 @@ export const ButtonStyled = styled.button<{ appearance: 'primary' | 'flat' }>`
     transition: transform 0.125s ease-in-out;
 
     &:hover {
-        transform: ${props => (props.disabled ? 'unset' : 'scale(1.04)')};
+        transform: ${props => (props.disabled ? 'unset' : `scale(${1 + scaleValues[props.scale]})`)};
     }
 
     &:active {
-        transform: ${props => (props.disabled ? 'unset' : 'scale(0.96)')};
+        transform: ${props => (props.disabled ? 'unset' : `scale(${1 - scaleValues[props.scale]})`)};
     }
 `;

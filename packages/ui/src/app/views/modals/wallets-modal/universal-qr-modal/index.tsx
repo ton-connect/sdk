@@ -95,7 +95,7 @@ export const UniversalQrModal: Component<UniversalQrModalProps> = props => {
             </H2Styled>
             <QRCodeStyled sourceUrl={request()} disableCopy={popupOpened()} />
             <ButtonsContainerStyled>
-                <ActionButtonStyled onClick={onOpenWalletClick}>
+                <ActionButtonStyled onClick={onOpenWalletClick} scale="s">
                     <Show when={availableInjectableWallets.length}>
                         <Translation translationKey="walletModal.universalQRModal.openWallet">
                             Open Wallet
@@ -111,6 +111,7 @@ export const UniversalQrModal: Component<UniversalQrModalProps> = props => {
                     <ActionButtonStyled
                         onClick={onOpenExtensionClick}
                         disableEventsAnimation={popupOpened()}
+                        scale="s"
                     >
                         <Transition
                             onBeforeEnter={el => {

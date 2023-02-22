@@ -22,7 +22,7 @@ import { addReturnStrategy, openLink } from 'src/app/utils/web-api';
 import { Identifiable } from 'src/app/models/identifiable';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { appState } from 'src/app/state/app.state';
-import {Link} from "src/app/components/link";
+import { Link } from 'src/app/components/link';
 
 export interface QrCodeModalProps extends Identifiable {
     additionalRequest?: ConnectAdditionalRequest;
@@ -62,6 +62,7 @@ export const QrCodeModal: Component<QrCodeModalProps> = props => {
             />
             <ButtonsContainerStyled>
                 <ActionButtonStyled
+                    scale="s"
                     onClick={() => {
                         setLastSelectedWalletInfo({
                             ...props.wallet,
@@ -79,6 +80,7 @@ export const QrCodeModal: Component<QrCodeModalProps> = props => {
                 </ActionButtonStyled>
                 <Show when={isWalletInfoCurrentlyInjected(props.wallet)}>
                     <ActionButtonStyled
+                        scale="s"
                         onClick={() => {
                             setLastSelectedWalletInfo(props.wallet as WalletInfoCurrentlyInjected);
                             connector.connect(
