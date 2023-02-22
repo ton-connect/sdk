@@ -10,28 +10,28 @@ const borders: BorderRadiusConfig = {
 };
 
 export const qrNormalSize = 256;
-export const imgSize = 60;
+export const imgSize = 61;
 
 const qrPaddingTop = 24;
 
-export const QRCodeBackgroundWrapper = styled.div`
-    width: 100%;
-    position: relative;
-`;
-
 export const QrCodeBackground = styled.div`
-    background-color: ${props => props.theme!.colors.background.secondary};
-    border-radius: ${props => borders[props.theme!.borderRadius]};
     display: flex;
     align-items: center;
-    justify-content: center;
+    position: relative;
+    background-color: ${props => props.theme!.colors.background.secondary};
+    border-radius: ${props => borders[props.theme!.borderRadius]};
     padding: ${toPx(qrPaddingTop)} 0;
     height: ${toPx(qrNormalSize + qrPaddingTop * 2)};
     width: 100%;
+
+    overflow: hidden;
 `;
 
 export const QrCodeWrapper = styled.div`
     position: relative;
+
+    width: fit-content;
+    margin: 0 auto;
 
     > div:first-child {
         display: flex;
@@ -68,6 +68,7 @@ export const ImageBackground = styled.div`
 export const CopyButtonContainerStyled = styled.div``;
 
 export const CopyButtonStyled = styled(Button)`
+    filter: drop-shadow(0px 2px 8px rgba(0, 0, 0, 0.08));
     position: absolute;
     bottom: 14px;
     left: 50%;

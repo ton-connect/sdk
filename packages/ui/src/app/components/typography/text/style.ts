@@ -13,6 +13,4 @@ export const TextStyled = styled.div<{
     line-height: ${props => props.lineHeight};
 
     color: ${props => props.color};
-
-    cursor: default;
 `;

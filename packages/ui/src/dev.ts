@@ -2,7 +2,6 @@
 import { TonConnectUI } from 'src/ton-connect-ui';
 import { THEME } from 'src/models';
 import { SendTransactionRequest } from '@tonconnect/sdk';
-import { widgetController } from 'src/app/widget-controller';
 
 async function dev(): Promise<void> {
     const tonConnectUI = new TonConnectUI({

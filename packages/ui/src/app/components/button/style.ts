@@ -22,7 +22,7 @@ export const ButtonStyled = styled.button<{ appearance: 'primary' | 'flat' }>`
     font-weight: 590;
     line-height: 18px;
 
-    transition: transform 0.1s ease-in-out;
+    transition: transform 0.125s ease-in-out;
 
     &:hover {
         transform: ${props => (props.disabled ? 'unset' : 'scale(1.04)')};

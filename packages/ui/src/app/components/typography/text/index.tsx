@@ -1,6 +1,6 @@
 import { useI18n } from '@solid-primitives/i18n';
 import { Property } from 'csstype';
-import { Component, JSXElement, mergeProps } from 'solid-js';
+import { Component, JSXElement, mergeProps, onMount } from 'solid-js';
 import { useTheme } from 'solid-styled-components';
 import { Styleable } from 'src/app/models/styleable';
 import { Translateable } from 'src/app/models/translateable';
@@ -18,6 +18,7 @@ export interface TextProps extends Styleable, Translateable {
 export const Text: Component<TextProps> = inputs => {
     const theme = useTheme();
     const [t] = useI18n();
+    let textRef: HTMLDivElement | undefined;
 
     const color = (): Property.Color => inputs.color || theme.colors.text.primary;
 
@@ -29,6 +30,17 @@ export const Text: Component<TextProps> = inputs => {
         },
         inputs
     );
+
+    onMount(() => {
+        if (!textRef) {
+            return;
+        }
+
+        if (getComputedStyle(textRef).cursor !== 'pointer') {
+            textRef.style.cursor = 'default';
+        }
+    });
+
     return (
         <TextStyled
             fontSize={props.fontSize}
@@ -36,6 +48,7 @@ export const Text: Component<TextProps> = inputs => {
             lineHeight={props.lineHeight}
             color={color()}
             class={props.class}
+            ref={textRef}
         >
             {props.translationKey
                 ? t(props.translationKey, props.translationValues, props.children?.toString())

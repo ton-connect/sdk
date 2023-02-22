@@ -4,7 +4,6 @@ import {
     ImageBackground,
     imgSize,
     QrCodeBackground,
-    QRCodeBackgroundWrapper,
     QrCodeWrapper,
     qrNormalSize
 } from './style';
@@ -42,8 +41,13 @@ export const QRCode: Component<QRCodeProps> = props => {
     let imageRef: HTMLDivElement | undefined;
 
     const [copyButtonOpened, setCopyButtonOpened] = createSignal(false);
+    const [copyButtonHovered, setCopyButtonHovered] = createSignal(false);
+    const [qrHovered, setQrHovered] = createSignal(false);
     const [copyButtonText, setCopyButtonText] = createSignal<CopyButtonText>(copyText);
-    let copyButtonHovered = false;
+
+    createEffect(() => setCopyButtonOpened(copyButtonHovered() || qrHovered()));
+
+    createEffect(() => !copyButtonOpened() && setCopyButtonText(copyText));
 
     createEffect(() => {
         const errorCorrectionLevel = 'L';
@@ -72,33 +76,23 @@ export const QRCode: Component<QRCodeProps> = props => {
             clearTimeout(timeoutId);
         }
 
-        timeoutId = setTimeout(() => setCopyButtonText(copyText), 5000);
+        timeoutId = setTimeout(() => setCopyButtonText(copyText), 3000);
     };
 
     return (
-        <QRCodeBackgroundWrapper class={props.class}>
-            <QrCodeBackground
-                onMouseEnter={() => {
-                    setCopyButtonOpened(true);
-                }}
-                onMouseLeave={() => {
-                    setTimeout(() => {
-                        if (!copyButtonHovered) {
-                            setCopyButtonOpened(false);
-                            setCopyButtonText(copyText);
-                        }
-                    });
-                }}
+        <QrCodeBackground class={props.class}>
+            <QrCodeWrapper
+                ref={qrCodeWrapperRef}
+                onMouseEnter={() => setQrHovered(true)}
+                onMouseLeave={() => setTimeout(() => setQrHovered(false))}
             >
-                <QrCodeWrapper ref={qrCodeWrapperRef}>
-                    <div ref={qrCodeCanvasRef} />
-                    <Show when={props.imageUrl}>
-                        <ImageBackground ref={imageRef}>
-                            <img src={props.imageUrl} alt="" />
-                        </ImageBackground>
-                    </Show>
-                </QrCodeWrapper>
-            </QrCodeBackground>
+                <div ref={qrCodeCanvasRef} />
+                <Show when={props.imageUrl}>
+                    <ImageBackground ref={imageRef}>
+                        <img src={props.imageUrl} alt="" />
+                    </ImageBackground>
+                </Show>
+            </QrCodeWrapper>
             <Transition
                 onBeforeEnter={el => {
                     el.animate(
@@ -107,7 +101,7 @@ export const QRCode: Component<QRCodeProps> = props => {
                             { opacity: 1, transform: 'translate(-50%, 0)' }
                         ],
                         {
-                            duration: 150
+                            duration: 200
                         }
                     );
                 }}
@@ -118,7 +112,7 @@ export const QRCode: Component<QRCodeProps> = props => {
                             { opacity: 0, transform: 'translate(-50%, 44px)' }
                         ],
                         {
-                            duration: 150
+                            duration: 200
                         }
                     ).finished.then(() => {
                         done();
@@ -128,8 +122,8 @@ export const QRCode: Component<QRCodeProps> = props => {
                 <Show when={copyButtonOpened() && !props.disableCopy}>
                     <CopyButtonStyled
                         onClick={onCopyClick}
-                        onMouseEnter={() => (copyButtonHovered = true)}
-                        onMouseLeave={() => (copyButtonHovered = false)}
+                        onMouseEnter={() => copyButtonOpened() && setCopyButtonHovered(true)}
+                        onMouseLeave={() => setTimeout(() => setCopyButtonHovered(false))}
                     >
                         <Translation translationKey={copyButtonText().translationKey}>
                             {copyButtonText().text}
@@ -137,6 +131,6 @@ export const QRCode: Component<QRCodeProps> = props => {
                     </CopyButtonStyled>
                 </Show>
             </Transition>
-        </QRCodeBackgroundWrapper>
+        </QrCodeBackground>
     );
 };
