@@ -5,9 +5,10 @@ import {
     QRCodeStyled,
     ButtonsContainerStyled,
     ActionButtonStyled,
-    PopupWrapper,
-    ExtensionLi,
-    GetWalletStyled
+    PopupWrapperStyled,
+    GetWalletStyled,
+    ExtensionLiStyled,
+    ImageStyled
 } from './style';
 import {
     ConnectAdditionalRequest,
@@ -138,16 +139,18 @@ export const UniversalQrModal: Component<UniversalQrModalProps> = props => {
                             }}
                         >
                             <Show when={popupOpened()}>
-                                <PopupWrapper>
+                                <PopupWrapperStyled>
                                     <For each={availableInjectableWallets}>
                                         {wallet => (
-                                            <ExtensionLi onClick={() => onExtensionClick(wallet)}>
-                                                <img src={wallet.imageUrl} alt="" />
+                                            <ExtensionLiStyled
+                                                onClick={() => onExtensionClick(wallet)}
+                                            >
+                                                <ImageStyled src={wallet.imageUrl} alt="" />
                                                 <Text fontWeight={590}>{wallet.name}</Text>
-                                            </ExtensionLi>
+                                            </ExtensionLiStyled>
                                         )}
                                     </For>
-                                </PopupWrapper>
+                                </PopupWrapperStyled>
                             </Show>
                         </Transition>
                         <Translation translationKey="common.openExtension">

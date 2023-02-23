@@ -1,5 +1,5 @@
 import { Component, createEffect, createSignal, Show } from 'solid-js';
-import { ImageStyled } from 'src/app/components/image/style';
+import { ImagePlaceholder } from './style';
 import { Styleable } from 'src/app/models/styleable';
 
 export interface ImageProps extends Styleable {
@@ -33,7 +33,7 @@ export const Image: Component<ImageProps> = props => {
         <>
             <Show when={image()}>{image()}</Show>
             <Show when={!image()}>
-                <ImageStyled class={props.class} ref={imgRef} />
+                <ImagePlaceholder class={props.class} ref={imgRef} />
             </Show>
         </>
     );

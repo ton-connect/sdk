@@ -1,5 +1,5 @@
 import { styled } from 'solid-styled-components';
 
-export const ImageStyled = styled.div`
-    background-color: rebeccapurple;
+export const ImagePlaceholder = styled.div`
+    background-color: ${props => props.theme!.colors.background.secondary};
 `;

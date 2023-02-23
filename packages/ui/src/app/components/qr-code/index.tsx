@@ -2,7 +2,9 @@ import { Component, createEffect, createSignal, Show } from 'solid-js';
 import {
     CopyButtonStyled,
     ImageBackground,
-    imgSize,
+    ImageStyled,
+    imgSizeDefault,
+    picSizeDefault,
     QrCodeBackground,
     QrCodeWrapper,
     qrNormalSize
@@ -45,25 +47,34 @@ export const QRCode: Component<QRCodeProps> = props => {
     const [qrHovered, setQrHovered] = createSignal(false);
     const [copyButtonText, setCopyButtonText] = createSignal<CopyButtonText>(copyText);
 
+    const [picSize, setPicSize] = createSignal(picSizeDefault);
+
     createEffect(() => setCopyButtonOpened(copyButtonHovered() || qrHovered()));
 
     createEffect(() => !copyButtonOpened() && setCopyButtonText(copyText));
 
     createEffect(() => {
         const errorCorrectionLevel = 'L';
+        const cellSize = 4;
         const qr = qrcode(0, errorCorrectionLevel);
         qr.addData(props.sourceUrl);
         qr.make();
-        qrCodeCanvasRef!.innerHTML = qr.createSvgTag(4, 0);
+        qrCodeCanvasRef!.innerHTML = qr.createSvgTag(cellSize, 0);
         const qrSize = qrCodeCanvasRef!.firstElementChild!.clientWidth;
 
+        const scale = Math.round((qrNormalSize / qrSize) * 100000) / 100000;
+
         if (imageRef) {
-            const imgOffset = toPx((qrSize - imgSize) / 2);
+            const imgSize = Math.ceil(imgSizeDefault / (scale * cellSize)) * cellSize;
+            const imgOffset = toPx(Math.ceil((qrSize - imgSize) / (2 * cellSize)) * cellSize);
             imageRef.style.top = imgOffset;
             imageRef.style.left = imgOffset;
+            imageRef.style.height = toPx(imgSize);
+            imageRef.style.width = toPx(imgSize);
+
+            setPicSize(Math.round(picSizeDefault / scale));
         }
 
-        const scale = Math.round((qrNormalSize / qrSize) * 100) / 100;
         qrCodeWrapperRef!.style.transform = `scale(${scale})`;
     });
 
@@ -89,7 +100,7 @@ export const QRCode: Component<QRCodeProps> = props => {
                 <div ref={qrCodeCanvasRef} />
                 <Show when={props.imageUrl}>
                     <ImageBackground ref={imageRef}>
-                        <img src={props.imageUrl} alt="" />
+                        <ImageStyled src={props.imageUrl!} alt="" size={picSize()} />
                     </ImageBackground>
                 </Show>
             </QrCodeWrapper>

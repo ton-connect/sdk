@@ -1,5 +1,5 @@
 import { styled } from 'solid-styled-components';
-import { Button, H2, QRCode, Text } from 'src/app/components';
+import { Button, H2, QRCode, Text, Image } from 'src/app/components';
 import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
 
 const borders: BorderRadiusConfig = {
@@ -53,7 +53,7 @@ export const ActionButtonStyled = styled(Button)<{ disableEventsAnimation?: bool
     }
 `;
 
-export const PopupWrapper = styled.ul`
+export const PopupWrapperStyled = styled.ul`
     position: absolute;
     bottom: 100%;
     left: 0;
@@ -67,7 +67,7 @@ export const PopupWrapper = styled.ul`
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.16);
 `;
 
-export const ExtensionLi = styled.li`
+export const ExtensionLiStyled = styled.li`
     padding: 8px;
 
     display: flex;
@@ -76,13 +76,6 @@ export const ExtensionLi = styled.li`
 
     cursor: pointer;
     border-radius: ${props => hoverBorders[props.theme!.borderRadius]};
-
-    > img {
-        width: 24px;
-        height: 24px;
-
-        border-radius: 6px;
-    }
 
     transition: background-color, transform 0.1s ease-in-out;
 
@@ -93,6 +86,13 @@ export const ExtensionLi = styled.li`
     &:active {
         transform: scale(0.96);
     }
+`;
+
+export const ImageStyled = styled(Image)`
+    width: 24px;
+    height: 24px;
+
+    border-radius: 6px;
 `;
 
 export const GetWalletStyled = styled.div`

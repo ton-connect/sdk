@@ -12,10 +12,10 @@ async function dev(): Promise<void> {
             notifications: ['before']
         },
         uiPreferences: {
-            theme: THEME.LIGHT,
+            theme: THEME.DARK,
             borderRadius: 'm'
         },
-        language: 'en',
+        language: 'ru',
         restoreConnection: true,
         walletsListConfiguration: {
             includeWallets: [...new Array(11)].map((_, index) => ({
@@ -35,7 +35,6 @@ async function dev(): Promise<void> {
     });
 
     tonConnectUI.onStatusChange(wallet => {
-        console.log(wallet);
         document.getElementById('content')!.textContent = wallet ? JSON.stringify(wallet) : wallet;
     });
 

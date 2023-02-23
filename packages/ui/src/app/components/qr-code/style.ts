@@ -1,5 +1,5 @@
 import { styled } from 'solid-styled-components';
-import { Button } from 'src/app/components';
+import { Button, Image } from 'src/app/components';
 import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
 import { toPx } from 'src/app/utils/css';
 
@@ -10,7 +10,9 @@ const borders: BorderRadiusConfig = {
 };
 
 export const qrNormalSize = 256;
-export const imgSize = 61;
+export const imgSizeDefault = 60;
+
+export const picSizeDefault = 48;
 
 const qrPaddingTop = 24;
 
@@ -50,22 +52,20 @@ export const QrCodeWrapper = styled.div`
 
 export const ImageBackground = styled.div`
     position: absolute;
-    width: ${toPx(imgSize)};
-    height: ${toPx(imgSize)};
+    width: ${toPx(imgSizeDefault)};
+    height: ${toPx(imgSizeDefault)};
     background: ${props => props.theme!.colors.background.secondary};
 
     display: flex;
     align-items: center;
     justify-content: center;
-
-    > img {
-        width: 48px;
-        height: 48px;
-        border-radius: 12px;
-    }
 `;
 
-export const CopyButtonContainerStyled = styled.div``;
+export const ImageStyled = styled(Image)<{ size: number }>`
+    width: ${props => toPx(props.size)};
+    height: ${props => toPx(props.size)};
+    border-radius: 12px;
+`;
 
 export const CopyButtonStyled = styled(Button)`
     filter: drop-shadow(0px 2px 8px rgba(0, 0, 0, 0.08));

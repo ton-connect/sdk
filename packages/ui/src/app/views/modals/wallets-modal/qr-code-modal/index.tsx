@@ -18,7 +18,7 @@ import {
     TextStyled
 } from './style';
 import { ConnectorContext } from 'src/app/state/connector.context';
-import { addReturnStrategy, openLink } from 'src/app/utils/web-api';
+import {addReturnStrategy, openLink, openLinkBlank} from 'src/app/utils/web-api';
 import { Identifiable } from 'src/app/models/identifiable';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { appState } from 'src/app/state/app.state';
@@ -68,7 +68,7 @@ export const QrCodeModal: Component<QrCodeModalProps> = props => {
                             ...props.wallet,
                             openMethod: 'universal-link'
                         });
-                        openLink(addReturnStrategy(universalLink, appState.returnStrategy));
+                        openLinkBlank(addReturnStrategy(universalLink, appState.returnStrategy));
                     }}
                 >
                     <Translation
