@@ -58,7 +58,7 @@ export interface TonConnectUIProviderPropsBase {
     /**
      * Configuration for the wallets list in the connect wallet modal.
      */
-    walletsList?: WalletsListConfiguration;
+    walletsListConfiguration?: WalletsListConfiguration;
 
     /**
      * Configuration for action-period (e.g. sendTransaction) UI elements: modals and notifications and wallet behaviour (return strategy).
