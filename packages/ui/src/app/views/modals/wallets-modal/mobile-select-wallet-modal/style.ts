@@ -6,8 +6,8 @@ export const UlStyled = styled.ul`
     display: flex;
     margin: 0 auto 24px;
     width: fit-content;
+    min-height: 124px;
     max-width: 100%;
-    min-height: 126px;
     overflow: auto;
     padding: 0 24px;
 
@@ -20,8 +20,13 @@ export const UlStyled = styled.ul`
 `;
 
 export const DefaultWallet = styled.li`
-    width: 84px;
-    padding: 10px 10px 20px 10px;
+    width: 82px;
+    min-width: 82px;
+    height: 124px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 4px;
 
     text-align: center;
     cursor: pointer;

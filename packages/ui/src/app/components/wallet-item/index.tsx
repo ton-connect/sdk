@@ -1,5 +1,5 @@
 import { Component } from 'solid-js';
-import { StyledText, WalletItemStyled } from './style';
+import { ImageStyled, StyledText, WalletItemStyled } from './style';
 import { Styleable } from 'src/app/models/styleable';
 
 export interface WalletItemProps extends Styleable {
@@ -11,7 +11,7 @@ export interface WalletItemProps extends Styleable {
 export const WalletItem: Component<WalletItemProps> = props => {
     return (
         <WalletItemStyled class={props.class} onClick={() => props.onClick()}>
-            <img src={props.iconUrl} alt="" />
+            <ImageStyled src={props.iconUrl} alt="" />
             <StyledText>{props.name}</StyledText>
         </WalletItemStyled>
     );

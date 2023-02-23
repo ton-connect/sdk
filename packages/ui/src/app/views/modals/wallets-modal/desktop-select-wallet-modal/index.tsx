@@ -1,11 +1,5 @@
 import { Component, For } from 'solid-js';
-import {
-    DesktopSelectWalletModalStyled,
-    WalletsUl,
-    ButtonStyled,
-    WalletItemStyled,
-    H2Styled
-} from './style';
+import { DesktopSelectWalletModalStyled, WalletsUl, ButtonStyled, H2Styled } from './style';
 import { WalletInfo } from '@tonconnect/sdk';
 import { Translation } from 'src/app/components/typography/Translation';
 import { LINKS } from 'src/app/env/LINKS';
@@ -17,6 +11,8 @@ export interface DesktopSelectWalletModalProps {
     onSelect: (walletInfo: WalletInfo) => void;
 }
 
+import { WalletItem } from 'src/app/components';
+
 export const DesktopSelectWalletModal: Component<DesktopSelectWalletModalProps> = props => {
     return (
         <DesktopSelectWalletModalStyled>
@@ -27,7 +23,7 @@ export const DesktopSelectWalletModal: Component<DesktopSelectWalletModalProps> 
                 <For each={props.walletsList}>
                     {wallet => (
                         <li>
-                            <WalletItemStyled
+                            <WalletItem
                                 iconUrl={wallet.imageUrl}
                                 name={wallet.name}
                                 onClick={() => props.onSelect(wallet)}

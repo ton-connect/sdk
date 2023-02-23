@@ -1,5 +1,5 @@
 import { styled } from 'solid-styled-components';
-import { Button, H2, WalletItem } from 'src/app/components';
+import { Button, H2 } from 'src/app/components';
 
 export const DesktopSelectWalletModalStyled = styled.div`
     display: flex;
@@ -13,9 +13,9 @@ export const H2Styled = styled(H2)`
 
 export const WalletsUl = styled.ul`
     display: grid;
-    grid-template-columns: repeat(auto-fit, 96px);
+    grid-template-columns: repeat(auto-fit, 92px);
     justify-content: center;
-    row-gap: 28px;
+    row-gap: 8px;
     overflow-y: auto;
     max-height: 410px;
     width: calc(100% + 12px);
@@ -35,11 +35,6 @@ export const WalletsUl = styled.ul`
         background: #cacaca;
         border-radius: 12px;
     }
-`;
-
-export const WalletItemStyled = styled(WalletItem)`
-    padding-bottom: 0;
-    padding-top: 0;
 `;
 
 export const ButtonStyled = styled(Button)`
