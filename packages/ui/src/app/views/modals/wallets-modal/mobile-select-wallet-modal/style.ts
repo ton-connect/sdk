@@ -8,7 +8,8 @@ export const UlStyled = styled.ul`
     width: fit-content;
     min-height: 124px;
     max-width: 100%;
-    overflow: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
     padding: 0 24px;
 
     &&::-webkit-scrollbar {

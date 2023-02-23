@@ -3,7 +3,7 @@ import { H3 } from 'src/app/components';
 import { Styleable } from 'src/app/models/styleable';
 import { Translateable } from 'src/app/models/translateable';
 import { PropertyRequired } from 'src/app/utils/types';
-import { NotificationStyled, TextStyled } from './style';
+import { NotificationContentStyled, NotificationStyled, TextStyled } from './style';
 
 export interface NotificationProps extends Styleable {
     header: PropertyRequired<Translateable, 'translationKey'>;
@@ -15,7 +15,7 @@ export interface NotificationProps extends Styleable {
 export const Notification: Component<NotificationProps> = props => {
     return (
         <NotificationStyled class={props.class}>
-            <div>
+            <NotificationContentStyled>
                 <H3
                     translationKey={props.header.translationKey}
                     translationValues={props.header.translationValues}
@@ -28,7 +28,7 @@ export const Notification: Component<NotificationProps> = props => {
                         translationValues={props.text!.translationValues}
                     />
                 </Show>
-            </div>
+            </NotificationContentStyled>
             {props.icon}
         </NotificationStyled>
     );

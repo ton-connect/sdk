@@ -9,10 +9,11 @@ export const AccountButtonStyled = styled(Button)`
     background-color: ${props => props.theme!.colors.connectButton.background};
     color: ${props => props.theme!.colors.connectButton.foreground};
     box-shadow: ${props => `0 4px 24px ${rgba(props.theme!.colors.constant.black, 0.16)}`};
+    padding: 8px 16px 8px 12px;
 
     display: flex;
     align-items: center;
-    gap: 9px;
+    gap: 4px;
     height: 40px;
 
     transition: all 0.1s ease-in-out;
@@ -27,8 +28,8 @@ export const AccountButtonStyled = styled(Button)`
 `;
 
 export const DropdownButtonStyled = styled(AccountButtonStyled)`
+    padding: 12px 16px;
     min-width: 148px;
-    gap: 6px;
     justify-content: center;
     background-color: ${props => props.theme!.colors.background.primary};
 `;

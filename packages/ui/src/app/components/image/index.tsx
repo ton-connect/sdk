@@ -16,6 +16,7 @@ export const Image: Component<ImageProps> = props => {
         const img = new window.Image();
         img.src = props.src;
         img.alt = props.alt || '';
+        img.setAttribute('draggable', 'false');
         if (props.class) {
             img.classList.add(props.class);
         }

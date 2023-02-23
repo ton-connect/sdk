@@ -9,13 +9,13 @@ export const ActionModalStyled = styled.div`
 `;
 
 export const H1Styled = styled(H1)`
-    margin-top: 19px;
+    margin-top: 16px;
 `;
 
 export const TextStyled = styled(Text)`
     font-weight: 510;
     font-size: 16px;
-    line-height: 22px;
+    line-height: 20px;
     text-align: center;
     max-width: 250px;
 

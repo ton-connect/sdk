@@ -2,6 +2,7 @@
 import { TonConnectUI } from 'src/ton-connect-ui';
 import { THEME } from 'src/models';
 import { SendTransactionRequest } from '@tonconnect/sdk';
+import { widgetController } from 'src/app/widget-controller';
 
 async function dev(): Promise<void> {
     const tonConnectUI = new TonConnectUI({
@@ -12,10 +13,10 @@ async function dev(): Promise<void> {
             notifications: ['before']
         },
         uiPreferences: {
-            theme: THEME.DARK,
+            theme: THEME.LIGHT,
             borderRadius: 'm'
         },
-        language: 'ru',
+        language: 'en',
         restoreConnection: true,
         walletsListConfiguration: {
             includeWallets: [...new Array(11)].map((_, index) => ({
@@ -36,6 +37,12 @@ async function dev(): Promise<void> {
 
     tonConnectUI.onStatusChange(wallet => {
         document.getElementById('content')!.textContent = wallet ? JSON.stringify(wallet) : wallet;
+    });
+
+    widgetController.setAction({
+        name: 'transaction-sent',
+        showNotification: true,
+        openModal: true
     });
 
     /*    tonConnectUI.uiOptions = {
