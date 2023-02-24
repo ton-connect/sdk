@@ -1,5 +1,7 @@
 import { THEME } from 'src/models/THEME';
 import { ReturnStrategy } from 'src/models/return-strategy';
+import { disableScrollClass } from 'src/app/styles/global-styles';
+import { toPx } from 'src/app/utils/css';
 
 export function openLink(href: string, target = '_self'): ReturnType<typeof window.open> {
     return window.open(href, target, 'noreferrer noopener');
@@ -33,4 +35,19 @@ export function addQueryParameter(url: string, key: string, value: string): stri
 
 export function addReturnStrategy(url: string, returnStrategy: ReturnStrategy): string {
     return addQueryParameter(url, 'ret', returnStrategy);
+}
+
+export function disableScroll(): void {
+    if (document.documentElement.scrollHeight === document.documentElement.clientHeight) {
+        return;
+    }
+
+    document.body.style.top = toPx(-document.documentElement.scrollTop);
+    document.body.classList.add(disableScrollClass);
+}
+
+export function enableScroll(): void {
+    document.body.classList.remove(disableScrollClass);
+    document.documentElement.scrollTo({ top: -parseFloat(getComputedStyle(document.body).top) });
+    document.body.style.top = 'auto';
 }

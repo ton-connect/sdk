@@ -1,6 +1,6 @@
 import { useI18n } from '@solid-primitives/i18n';
 import { Property } from 'csstype';
-import { Component, JSXElement, mergeProps, onMount } from 'solid-js';
+import { Component, createEffect, JSXElement, mergeProps } from 'solid-js';
 import { useTheme } from 'solid-styled-components';
 import { Styleable } from 'src/app/models/styleable';
 import { Translateable } from 'src/app/models/translateable';
@@ -13,6 +13,8 @@ export interface TextProps extends Styleable, Translateable {
     lineHeight?: Property.LineHeight;
     letterSpacing?: Property.LetterSpacing;
     color?: Property.Color;
+
+    cursor?: 'default' | 'unset';
 }
 
 export const Text: Component<TextProps> = inputs => {
@@ -31,8 +33,12 @@ export const Text: Component<TextProps> = inputs => {
         inputs
     );
 
-    onMount(() => {
+    createEffect(() => {
         if (!textRef) {
+            return;
+        }
+
+        if (props.cursor === 'unset') {
             return;
         }
 

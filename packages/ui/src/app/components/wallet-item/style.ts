@@ -1,7 +1,7 @@
 import { styled } from 'solid-styled-components';
 import { Text } from '../typography/text';
 import { Image } from '../image';
-import { media } from 'src/app/styles/media';
+import { media, mediaTouch } from 'src/app/styles/media';
 export const WalletItemStyled = styled.button`
     cursor: pointer;
     border: none;
@@ -13,7 +13,7 @@ export const WalletItemStyled = styled.button`
     flex-direction: column;
     align-items: center;
 
-    transition: transform 0.1s ease-in-out;
+    transition: transform 0.125s ease-in-out;
 
     &:hover {
         transform: scale(1.04);
@@ -27,6 +27,13 @@ export const WalletItemStyled = styled.button`
         padding: 8px 4px;
         height: 124px;
         width: 82px;
+    }
+
+    ${mediaTouch} {
+        &:hover,
+        &:active {
+            transform: scale(0.96);
+        }
     }
 `;
 

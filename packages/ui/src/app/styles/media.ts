@@ -42,3 +42,5 @@ export function mediaMax(px: number): string {
 export function mediaMinMax(pxMin: number, pxMax: number): string {
     return `@media (min-width: ${pxMin}px) (max-width: ${pxMax}px)`;
 }
+
+export const mediaTouch = '@media (hover: none) or (pointer: coarse)';

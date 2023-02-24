@@ -9,7 +9,7 @@ import { CloseButtonStyled, ModalBackgroundStyled, ModalWrapperClass } from './s
 import { css, useTheme } from 'solid-styled-components';
 import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
 import { Identifiable } from 'src/app/models/identifiable';
-import { disableScrollClass } from 'src/app/styles/global-styles';
+import { disableScroll, enableScroll } from 'src/app/utils/web-api';
 const clickOutside = clickOutsideDirective;
 const keyPressed = keyPressedDirective;
 
@@ -30,9 +30,9 @@ export const Modal: Component<ModalProps> = props => {
 
     createEffect(() => {
         if (props.opened) {
-            document.body.classList.add(disableScrollClass);
+            disableScroll();
         } else {
-            document.body.classList.remove(disableScrollClass);
+            enableScroll();
         }
     });
 

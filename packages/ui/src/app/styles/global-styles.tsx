@@ -22,7 +22,8 @@ export const GlobalStyles = (): JSXElement => {
         
         font-family: -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica Neue', Arial, Tahoma, Verdana, sans-serif;
         -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
+        -moz-osx-font-smoothing: grayscale;        
+        -webkit-tap-highlight-color: transparent;
     }
  
     ${globalStylesTag} *:focus {
@@ -38,7 +39,10 @@ export const GlobalStyles = (): JSXElement => {
     }
     
     body.${disableScrollClass} {
-        overflow: hidden;
+        position: fixed; 
+        overflow-y: scroll;
+        right: 0;
+        left: 0;
     }
     
     body.${usingMouseClass} ${globalStylesTag} *:focus {

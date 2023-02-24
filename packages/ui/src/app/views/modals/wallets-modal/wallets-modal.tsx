@@ -143,12 +143,12 @@ export const WalletsModal: Component = () => {
                     <Show when={!selectedWalletInfo()} keyed={false}>
                         <TabBarStyled
                             tab1={
-                                <TabTextStyled translationKey="walletModal.qrCode">
+                                <TabTextStyled translationKey="walletModal.qrCode" cursor="unset">
                                     QR Code
                                 </TabTextStyled>
                             }
                             tab2={
-                                <TabTextStyled translationKey="walletModal.wallets">
+                                <TabTextStyled translationKey="walletModal.wallets" cursor="unset">
                                     Wallets
                                 </TabTextStyled>
                             }
