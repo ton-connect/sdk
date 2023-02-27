@@ -5,7 +5,7 @@ export const ActionModalStyled = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-bottom: 20px;
+    padding-bottom: 8px;
 `;
 
 export const H1Styled = styled(H1)`

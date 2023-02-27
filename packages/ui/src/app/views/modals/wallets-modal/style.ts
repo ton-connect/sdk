@@ -10,7 +10,7 @@ export const StyledModal = styled(Modal)`
         padding-left: 0;
         padding-right: 0;
 
-        min-height: 390px;
+        min-height: 364px;
     }
 `;
 
