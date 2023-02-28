@@ -14,6 +14,7 @@ import { TonConnectUI } from 'src/ton-connect-ui';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { createI18nContext, I18nContext } from '@solid-primitives/i18n';
 import { appState } from 'src/app/state/app.state';
+import { defineStylesRoot, fixMobileSafariActiveTransition } from 'src/app/utils/web-api';
 
 export type AppProps = {
     tonConnectUI: TonConnectUI;
@@ -21,6 +22,9 @@ export type AppProps = {
 
 const App: Component<AppProps> = props => {
     const translations = createI18nContext(i18nDictionary, appState.language);
+
+    defineStylesRoot();
+    fixMobileSafariActiveTransition();
 
     return (
         <I18nContext.Provider value={translations}>

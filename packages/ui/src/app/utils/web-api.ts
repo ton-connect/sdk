@@ -1,6 +1,6 @@
 import { THEME } from 'src/models/THEME';
 import { ReturnStrategy } from 'src/models/return-strategy';
-import { disableScrollClass } from 'src/app/styles/global-styles';
+import { disableScrollClass, globalStylesTag } from 'src/app/styles/global-styles';
 import { toPx } from 'src/app/utils/css';
 
 export function openLink(href: string, target = '_self'): ReturnType<typeof window.open> {
@@ -50,4 +50,16 @@ export function enableScroll(): void {
     document.body.classList.remove(disableScrollClass);
     document.documentElement.scrollTo({ top: -parseFloat(getComputedStyle(document.body).top) });
     document.body.style.top = 'auto';
+}
+
+export function fixMobileSafariActiveTransition(): void {
+    if (!document.body.hasAttribute('ontouchstart')) {
+        document.body.setAttribute('ontouchstart', '');
+    }
+}
+
+export function defineStylesRoot(): void {
+    customElements.define(globalStylesTag, class TcRootElement extends HTMLDivElement {}, {
+        extends: 'div'
+    });
 }

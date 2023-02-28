@@ -1,7 +1,7 @@
 import { styled } from 'solid-styled-components';
 import { rgba } from 'src/app/utils/css';
 import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
-import { mediaTouch } from 'src/app/styles/media';
+import { mediaNotTouch, mediaTouch } from 'src/app/styles/media';
 
 const borders: BorderRadiusConfig = {
     m: '100vh',
@@ -30,9 +30,11 @@ export const ButtonStyled = styled.button<{ appearance: 'primary' | 'flat'; scal
 
     transition: transform 0.125s ease-in-out;
 
-    &:hover {
-        transform: ${props =>
-            props.disabled ? 'unset' : `scale(${1 + scaleValues[props.scale]})`};
+    ${mediaNotTouch} {
+        &:hover {
+            transform: ${props =>
+                props.disabled ? 'unset' : `scale(${1 + scaleValues[props.scale]})`};
+        }
     }
 
     &:active {
@@ -41,7 +43,6 @@ export const ButtonStyled = styled.button<{ appearance: 'primary' | 'flat'; scal
     }
 
     ${mediaTouch} {
-        &:hover,
         &:active {
             transform: ${props =>
                 props.disabled ? 'unset' : `scale(${1 - scaleValues[props.scale] * 2})`};

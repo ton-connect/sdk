@@ -1,6 +1,7 @@
 import { styled } from 'solid-styled-components';
 import { Button, H2 } from 'src/app/components';
 import { rgba } from 'src/app/utils/css';
+import { mediaNotTouch, mediaTouch } from 'src/app/styles/media';
 
 export const UlStyled = styled.ul`
     display: flex;
@@ -34,12 +35,20 @@ export const DefaultWallet = styled.li`
 
     transition: transform 0.1s ease-in-out;
 
-    &:hover {
-        transform: scale(1.04);
+    ${mediaNotTouch} {
+        &:hover {
+            transform: scale(1.04);
+        }
     }
 
     &:active {
         transform: scale(0.96);
+    }
+
+    ${mediaTouch} {
+        &:active {
+            transform: scale(0.92);
+        }
     }
 `;
 

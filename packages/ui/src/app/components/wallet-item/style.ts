@@ -1,7 +1,7 @@
 import { styled } from 'solid-styled-components';
 import { Text } from '../typography/text';
 import { Image } from '../image';
-import { media, mediaTouch } from 'src/app/styles/media';
+import { media, mediaNotTouch, mediaTouch } from 'src/app/styles/media';
 export const WalletItemStyled = styled.button`
     cursor: pointer;
     border: none;
@@ -15,8 +15,10 @@ export const WalletItemStyled = styled.button`
 
     transition: transform 0.125s ease-in-out;
 
-    &:hover {
-        transform: scale(1.04);
+    ${mediaNotTouch} {
+        &:hover {
+            transform: scale(1.04);
+        }
     }
 
     &:active {
@@ -30,9 +32,8 @@ export const WalletItemStyled = styled.button`
     }
 
     ${mediaTouch} {
-        &:hover,
         &:active {
-            transform: scale(0.96);
+            transform: scale(0.92);
         }
     }
 `;

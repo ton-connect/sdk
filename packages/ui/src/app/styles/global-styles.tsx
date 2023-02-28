@@ -25,6 +25,11 @@ export const GlobalStyles = (): JSXElement => {
         -moz-osx-font-smoothing: grayscale;        
         -webkit-tap-highlight-color: transparent;
     }
+    
+    ${globalStylesTag} img {
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }   
  
     ${globalStylesTag} *:focus {
         outline: #08f auto 2px;

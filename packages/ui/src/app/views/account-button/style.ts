@@ -25,6 +25,7 @@ export const DropdownButtonStyled = styled(AccountButtonStyled)`
 
 export const LoaderButtonStyled = styled(Button)`
     min-width: 148px;
+    height: 40px;
 
     background-color: ${props => props.theme!.colors.background.primary};
     color: ${props => props.theme!.colors.connectButton.foreground};

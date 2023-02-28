@@ -28,7 +28,6 @@ import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { ActionConfiguration, StrictActionConfiguration } from 'src/models/action-configuration';
 import { ConnectedWallet, WalletInfoWithOpenMethod } from 'src/models/connected-wallet';
 import { applyWalletsListConfiguration } from 'src/app/utils/wallets';
-import { globalStylesTag } from 'src/app/styles/global-styles';
 
 export class TonConnectUI {
     public static getWallets(): Promise<WalletInfo[]> {
@@ -134,10 +133,6 @@ export class TonConnectUI {
     }
 
     constructor(options?: TonConnectUiCreateOptions) {
-        customElements.define(globalStylesTag, class TcRootElement extends HTMLDivElement {}, {
-            extends: 'div'
-        });
-
         if (options && 'connector' in options && options.connector) {
             this.connector = options.connector;
         } else if (options && 'manifestUrl' in options && options.manifestUrl) {
