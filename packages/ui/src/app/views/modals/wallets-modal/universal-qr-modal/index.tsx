@@ -1,4 +1,4 @@
-import { Component, createSignal, For, Show } from 'solid-js';
+import { Component, createMemo, createSignal, For, Show } from 'solid-js';
 import {
     UniversalQrModalStyled,
     H2Styled,
@@ -43,8 +43,9 @@ export const UniversalQrModal: Component<UniversalQrModalProps> = props => {
     const availableInjectableWallets = props.walletsList.filter(isWalletInfoCurrentlyInjected);
 
     setLastSelectedWalletInfo({ openMethod: 'qrcode' });
-    const request = (): string =>
-        appState.connector.connect(walletsBridges, props.additionalRequest);
+    const request = createMemo(() =>
+        appState.connector.connect(walletsBridges, props.additionalRequest)
+    );
 
     const onOpenWalletClick = (): void => {
         function blurHandler(): void {

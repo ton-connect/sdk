@@ -5,7 +5,7 @@ import {
     WalletInfoInjectable,
     WalletInfoRemote
 } from '@tonconnect/sdk';
-import { Component, Show, useContext } from 'solid-js';
+import { Component, createMemo, Show, useContext } from 'solid-js';
 import { Button, H1, H2 } from 'src/app/components';
 import { Translation } from 'src/app/components/typography/Translation';
 import {
@@ -18,7 +18,7 @@ import {
     TextStyled
 } from './style';
 import { ConnectorContext } from 'src/app/state/connector.context';
-import {addReturnStrategy, openLink, openLinkBlank} from 'src/app/utils/web-api';
+import { addReturnStrategy, openLinkBlank } from 'src/app/utils/web-api';
 import { Identifiable } from 'src/app/models/identifiable';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { appState } from 'src/app/state/app.state';
@@ -32,12 +32,14 @@ export interface QrCodeModalProps extends Identifiable {
 
 export const QrCodeModal: Component<QrCodeModalProps> = props => {
     const connector = useContext(ConnectorContext)!;
-    const universalLink = connector.connect(
-        {
-            universalLink: props.wallet.universalLink,
-            bridgeUrl: props.wallet.bridgeUrl
-        },
-        props.additionalRequest
+    const universalLink = createMemo(() =>
+        connector.connect(
+            {
+                universalLink: props.wallet.universalLink,
+                bridgeUrl: props.wallet.bridgeUrl
+            },
+            props.additionalRequest
+        )
     );
 
     return (
@@ -57,7 +59,7 @@ export const QrCodeModal: Component<QrCodeModalProps> = props => {
             </H2>
             <QRStyled
                 disableCopy={false}
-                sourceUrl={universalLink}
+                sourceUrl={universalLink()}
                 imageUrl={props.wallet.imageUrl}
             />
             <ButtonsContainerStyled>
@@ -68,7 +70,7 @@ export const QrCodeModal: Component<QrCodeModalProps> = props => {
                             ...props.wallet,
                             openMethod: 'universal-link'
                         });
-                        openLinkBlank(addReturnStrategy(universalLink, appState.returnStrategy));
+                        openLinkBlank(addReturnStrategy(universalLink(), appState.returnStrategy));
                     }}
                 >
                     <Translation
