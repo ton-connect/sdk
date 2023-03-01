@@ -13,7 +13,7 @@ export class WalletsListManager {
     private walletsListCache: Promise<WalletInfo[]> | null = null;
 
     private readonly walletsListSource: string =
-        'https://raw.githubusercontent.com/ton-connect/wallets-list/main/wallets.json';
+        'https://raw.githubusercontent.com/ton-blockchain/wallets-list/main/wallets.json';
 
     constructor(walletsListSource?: string) {
         if (walletsListSource) {
