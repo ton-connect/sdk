@@ -45,4 +45,4 @@ export function mediaMinMax(pxMin: number, pxMax: number): string {
 
 export const mediaTouch = '@media (hover: none)';
 
-export const mediaNotTouch = '@media not (hover: none)';
+export const mediaNotTouch = '@media not all and (hover: none)';
