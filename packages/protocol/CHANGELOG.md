@@ -1,5 +1,14 @@
 # Changelog @tonconnect/protocol 
 
+## [2.2.4](https://github.com/ton-connect/sdk/compare/protocol-2.2.3...protocol-2.2.4) (2023-03-01)
+
+
+### Bug Fixes
+
+* **protocol:** `publicKey` added to the `TonAddressItemReply` ([a0fd029](https://github.com/ton-connect/sdk/commit/a0fd029b8d7aff7aa540d551eef208b92b2666e1))
+
+
+
 ## [2.2.3](https://github.com/ton-connect/sdk/compare/protocol-2.2.2...protocol-2.2.3) (2023-02-23)
 
 
