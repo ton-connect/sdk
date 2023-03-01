@@ -225,8 +225,16 @@ export class TonConnect implements ITonConnect {
         this.checkFeatureSupport('SendTransaction');
 
         const { validUntil, ...tx } = transaction;
+        const from = transaction.from || this.account!.address;
+        const network = transaction.network || this.account!.chain;
+
         const response = await this.provider!.sendRequest(
-            sendTransactionParser.convertToRpcRequest({ ...tx, valid_until: validUntil })
+            sendTransactionParser.convertToRpcRequest({
+                ...tx,
+                valid_until: validUntil,
+                from,
+                network
+            })
         );
 
         if (sendTransactionParser.isError(response)) {
