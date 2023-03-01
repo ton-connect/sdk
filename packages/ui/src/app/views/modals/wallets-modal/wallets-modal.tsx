@@ -80,7 +80,7 @@ export const WalletsModal: Component = () => {
         fetchedAdditionalRequest.state !== 'ready' && fetchedAdditionalRequest.state !== 'errored';
 
     const additionalRequest = createMemo(() => {
-        if (fetchedAdditionalRequest.state !== 'ready') {
+        if (additionalRequestLoading()) {
             return undefined;
         }
 

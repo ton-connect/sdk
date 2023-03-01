@@ -43,9 +43,7 @@ export const UniversalQrModal: Component<UniversalQrModalProps> = props => {
     const availableInjectableWallets = props.walletsList.filter(isWalletInfoCurrentlyInjected);
 
     setLastSelectedWalletInfo({ openMethod: 'qrcode' });
-    const request = createMemo(() =>
-        appState.connector.connect(walletsBridges, props.additionalRequest)
-    );
+    const request = createMemo(() => connector.connect(walletsBridges, props.additionalRequest));
 
     const onOpenWalletClick = (): void => {
         function blurHandler(): void {
