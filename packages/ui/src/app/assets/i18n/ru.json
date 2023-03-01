@@ -21,11 +21,11 @@
     },
     "transactionSent": {
       "header": "Транзакция отправлена",
-      "text": "Ваша транзакция отправлена в сеть и будет обработана через несколько секунд."
+      "text": "Ваша транзакция будет обработана через несколько секунд."
     },
     "transactionCanceled": {
       "header": "Транзакция отменена",
-      "text": "Изменений в блокчейне не будет."
+      "text": "Состояние вашего счёта не изменится."
     }
   },
   "walletModal": {
@@ -33,9 +33,9 @@
     "qrCode": "QR-код",
     "wallets": "Кошельки",
     "universalQRModal": {
-      "scanQR": "Отсканируйте QR-код ниже с помощью камеры вашего TON кошелька.",
+      "scanQR": "Отсканируйте код ниже с помощью камеры в вашем TON-кошельке.",
       "openWallet": "Открыть кошелёк",
-      "openInstalledWallet": "Открыть установленный кошелёк",
+      "openInstalledWallet": "Открыть кошелёк",
       "dontHave": "Подробнее о TON кошельках"
     },
     "desktopSelectWalletModal": {
@@ -47,8 +47,8 @@
       "installedWallet": "Открыть кошелёк"
     },
     "qrCodeModal": {
-      "connectWith": "Подключиться с помощью {{ name }}",
-      "scan": "Отсканируйте QR-код ниже камерой телефона или приложения {{ name }}.",
+      "connectWith": "Подключиться через {{ name }}",
+      "scan": "Отсканируйте код ниже.",
       "openWallet": "Открыть {{ name }}",
       "openExtension": "Расширение",
       "dontHave": "У вас нет {{ name }}?"
@@ -57,7 +57,7 @@
   "actionModal": {
     "confirmTransaction": {
       "header": "Подтвердите действие в своём кошельке",
-      "text": "Это займет всего минуту."
+      "text": "Это займет пару секунд."
     },
     "transactionSent": "$notifications.transactionSent",
     "transactionCanceled": "$notifications.transactionCanceled"
