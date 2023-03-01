@@ -44,6 +44,11 @@ export class BridgeGateway {
         url.searchParams.append('client_id', this.sessionId);
 
         const lastEventId = await this.bridgeGatewayStorage.getLastEventId();
+
+        if (this.isClosed) {
+            return;
+        }
+
         if (lastEventId) {
             url.searchParams.append('last_event_id', lastEventId);
         }

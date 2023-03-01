@@ -164,12 +164,14 @@ export class TonConnect implements ITonConnect {
      * @param request (optional) additional request to pass to the wallet while connect (currently only ton_proof is available).
      * @returns universal link if external wallet was passed or void for the injected wallet.
      */
-    public connect<T extends WalletConnectionSource | WalletConnectionSourceHTTP[]>(
+    public connect<
+        T extends WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[]
+    >(
         wallet: T,
         request?: ConnectAdditionalRequest
     ): T extends WalletConnectionSourceJS ? void : string;
     public connect(
-        wallet: WalletConnectionSource | WalletConnectionSourceHTTP[],
+        wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
         request?: ConnectAdditionalRequest
     ): void | string {
         if (this.connected) {
@@ -290,7 +292,7 @@ export class TonConnect implements ITonConnect {
     }
 
     private createProvider(
-        wallet: WalletConnectionSource | WalletConnectionSourceHTTP[]
+        wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[]
     ): Provider {
         let provider: Provider;
 

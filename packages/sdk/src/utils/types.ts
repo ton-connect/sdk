@@ -5,6 +5,8 @@ export type WithoutIdDistributive<T extends { id: unknown }> = DistributiveOmit<
 
 export type DistributiveOmit<T, K extends keyof T> = T extends unknown ? Omit<T, K> : never;
 
+export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
+
 export function hasProperty<T extends string>(
     value: unknown,
     propertyKey: T

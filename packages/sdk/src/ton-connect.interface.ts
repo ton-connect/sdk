@@ -43,7 +43,7 @@ export interface ITonConnect {
      * @param request (optional) additional request to pass to the wallet while connect (currently only ton_proof is available).
      * @returns universal link if external wallet was passed or void for the injected wallet.
      */
-    connect<T extends WalletConnectionSource | WalletConnectionSourceHTTP[]>(
+    connect<T extends WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[]>(
         wallet: T,
         request?: ConnectAdditionalRequest
     ): T extends WalletConnectionSourceJS ? void : string;
