@@ -1,5 +1,32 @@
 # Changelog @tonconnect/protocol 
 
+## [2.2.3](https://github.com/ton-connect/sdk/compare/protocol-2.2.2...protocol-2.2.3) (2023-02-23)
+
+
+### Bug Fixes
+
+* **protocol:** webcrypto.getRandomValues replaced with nacl.randomBytes ([779352a](https://github.com/ton-connect/sdk/commit/779352ae3eb6628eea37ce3f7f4379abd08cff67))
+
+
+
+## [2.2.2](https://github.com/ton-connect/sdk/compare/protocol-2.2.1...protocol-2.2.2) (2023-02-09)
+
+
+### Bug Fixes
+
+* **protocol:** added id for events ([e9e2123](https://github.com/ton-connect/sdk/commit/e9e2123da11ac074a9fe557f2cae18b3ac191e0e))
+
+
+
+## [2.2.1](https://github.com/ton-connect/sdk/compare/protocol-2.2.0...protocol-2.2.1) (2023-02-09)
+
+
+### Bug Fixes
+
+* **protocol:** CONNECT_ITEM_ERROR_CODES reexport added ([9969635](https://github.com/ton-connect/sdk/commit/99696354aceb12537aaf7c1fefe9f3badf44c0fc))
+
+
+
 # [2.2.0](https://github.com/ton-connect/sdk/compare/protocol-2.1.0...protocol-2.2.0) (2023-02-08)
 
 

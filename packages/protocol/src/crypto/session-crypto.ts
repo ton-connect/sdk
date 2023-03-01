@@ -1,18 +1,6 @@
 import { KeyPair } from './key-pair';
-import {
-    concatUint8Arrays,
-    hexToByteArray,
-    splitToUint8Arrays,
-    toHexString,
-    isNode
-} from '../utils';
+import { concatUint8Arrays, hexToByteArray, splitToUint8Arrays, toHexString } from '../utils';
 import nacl, { BoxKeyPair } from 'tweetnacl';
-
-if (isNode()) {
-    try {
-        eval("global.crypto = require('crypto').webcrypto");
-    } catch (err) {}
-}
 
 export class SessionCrypto {
     private readonly nonceLength = 24;
@@ -38,8 +26,7 @@ export class SessionCrypto {
     }
 
     private createNonce(): Uint8Array {
-        const buffer = new Uint8Array(this.nonceLength);
-        return crypto.getRandomValues(buffer);
+        return nacl.randomBytes(this.nonceLength);
     }
 
     public encrypt(message: string, receiverPublicKey: Uint8Array): Uint8Array {
