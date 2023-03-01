@@ -63,3 +63,10 @@ export function defineStylesRoot(): void {
         extends: 'div'
     });
 }
+
+export function preloadImages(images: string[]): void {
+    images.forEach(img => {
+        const node = new window.Image();
+        node.src = img;
+    });
+}

@@ -17,6 +17,7 @@ import {
     addReturnStrategy,
     getSystemTheme,
     openLink,
+    preloadImages,
     subscribeToThemeChange
 } from 'src/app/utils/web-api';
 import { TonConnectUiOptions } from 'src/models/ton-connect-ui-options';
@@ -28,6 +29,7 @@ import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { ActionConfiguration, StrictActionConfiguration } from 'src/models/action-configuration';
 import { ConnectedWallet, WalletInfoWithOpenMethod } from 'src/models/connected-wallet';
 import { applyWalletsListConfiguration } from 'src/app/utils/wallets';
+import { uniq } from 'src/app/utils/array';
 
 export class TonConnectUI {
     public static getWallets(): Promise<WalletInfo[]> {
@@ -136,10 +138,7 @@ export class TonConnectUI {
         if (options && 'connector' in options && options.connector) {
             this.connector = options.connector;
         } else if (options && 'manifestUrl' in options && options.manifestUrl) {
-            this.connector = new TonConnect({
-                manifestUrl: options.manifestUrl,
-                walletsListSource: options.walletsListSource
-            });
+            this.connector = new TonConnect({ manifestUrl: options.manifestUrl });
         } else {
             throw new TonConnectUIError(
                 'You have to specify a `manifestUrl` or a `connector` in the options.'
@@ -147,6 +146,8 @@ export class TonConnectUI {
         }
 
         this.walletsList = this.getWallets();
+
+        this.walletsList.then(list => preloadImages(uniq(list.map(item => item.imageUrl))));
 
         const rootId = this.normalizeWidgetRoot(options?.widgetRootId);
 

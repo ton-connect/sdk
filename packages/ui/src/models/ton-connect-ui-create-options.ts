@@ -39,11 +39,4 @@ export interface TonConnectUiCreateOptionsBase extends TonConnectUiOptions {
      * If you have to make a http-request to your backend, it is better to do it after app initialization (if possible) and return (probably completed) promise to reduce loading time for the user.
      */
     getConnectParameters?: () => Promise<ConnectAdditionalRequest>;
-
-    /**
-     * Redefine wallets list source URL. Must be a link to a json file with [following structure]{@link https://github.com/ton-connect/wallets-list}
-     * @default https://raw.githubusercontent.com/ton-connect/wallets-list/main/wallets.json
-     * @
-     */
-    walletsListSource?: string;
 }
