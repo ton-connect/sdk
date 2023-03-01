@@ -338,7 +338,8 @@ export class TonConnect implements ITonConnect {
             account: {
                 address: tonAccountItem.address,
                 chain: tonAccountItem.network,
-                walletStateInit: tonAccountItem.walletStateInit
+                walletStateInit: tonAccountItem.walletStateInit,
+                publicKey: tonAccountItem.publicKey
             }
         };
 

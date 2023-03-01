@@ -16,4 +16,9 @@ export interface Account {
      * Can be used to get user's public key from the stateInit if the wallet contract doesn't support corresponding get method.
      */
     walletStateInit: string;
+
+    /**
+     * Hex string without 0x prefix.
+     */
+    publicKey?: string;
 }

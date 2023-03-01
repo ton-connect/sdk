@@ -27,7 +27,7 @@
     "tweetnacl": "^1.0.3",
     "eventsource": "^2.0.2",
     "node-fetch": "^2.6.7",
-    "@tonconnect/protocol": "^2.2.2"
+    "@tonconnect/protocol": "^2.2.4"
   },
   "files": [
     "lib",
