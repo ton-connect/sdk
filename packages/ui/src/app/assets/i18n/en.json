@@ -21,21 +21,21 @@
     },
     "transactionSent": {
       "header": "Transaction sent",
-      "text": "Your transaction has been sent to the network and will be processed in a few seconds."
+      "text": "Your transaction will be processed in a few seconds."
     },
     "transactionCanceled": {
       "header": "Transaction canceled",
-      "text": "There will be no changes on the blockchain."
+      "text": "There will be no changes to your account."
     }
   },
   "walletModal": {
-    "loading":  "Wallets list is loading",
+    "loading":  "Loading wallets",
     "qrCode": "QR Code",
     "wallets": "Wallets",
     "universalQRModal": {
-      "scanQR": "Scan the QR code below with your TON crypto wallet's camera.",
+      "scanQR": "Scan the code below with a camera in your TON wallet.",
       "openWallet": "Open Wallet",
-      "openInstalledWallet": "Open Installed Wallet",
+      "openInstalledWallet": "Open Wallet",
       "dontHave": "Explore TON wallets"
     },
     "desktopSelectWalletModal": {
@@ -48,7 +48,7 @@
     },
     "qrCodeModal": {
       "connectWith": "Connect with {{ name }}",
-      "scan": "Scan the QR code below with your phone’s or {{ name }}’s camera.",
+      "scan": "Scan the code below.",
       "openWallet": "Open {{ name }}",
       "openExtension": "Open Extension",
       "dontHave": "Don't have {{ name }}?"
