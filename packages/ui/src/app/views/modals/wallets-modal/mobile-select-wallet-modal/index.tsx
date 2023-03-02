@@ -40,7 +40,7 @@ export const MobileSelectWalletModal: Component<MobileSelectWalletModalProps> = 
                 props.additionalRequest
             );
 
-            openLinkBlank(addReturnStrategy(universalLink, appState.returnStrategy));
+            openLink(addReturnStrategy(universalLink, appState.returnStrategy));
             return;
         }
 
@@ -54,17 +54,10 @@ export const MobileSelectWalletModal: Component<MobileSelectWalletModalProps> = 
                 .map(item => ({ bridgeUrl: item.bridgeUrl, universalLink: item.universalLink })),
             props.additionalRequest
         );
-        function blurHandler(): void {
-            setLastSelectedWalletInfo({ openMethod: 'universal-link' });
-            window.removeEventListener('blur', blurHandler);
-        }
 
-        window.addEventListener('blur', blurHandler);
+        setLastSelectedWalletInfo({ openMethod: 'universal-link' });
 
         openLink(addReturnStrategy(universalLink, appState.returnStrategy));
-        setTimeout(() => {
-            window.removeEventListener('blur', blurHandler);
-        }, 200);
     };
 
     return (
