@@ -8,8 +8,9 @@ import { isDevice, media } from 'src/app/styles/media';
 import { CloseButtonStyled, ModalBackgroundStyled, ModalWrapperClass } from './style';
 import { css, useTheme } from 'solid-styled-components';
 import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
-import { Identifiable } from 'src/app/models/identifiable';
 import { disableScroll, enableScroll } from 'src/app/utils/web-api';
+import { WithDataAttributes } from 'src/app/models/with-data-attributes';
+import { useDataAttributes } from 'src/app/hooks/use-data-attributes';
 const clickOutside = clickOutsideDirective;
 const keyPressed = keyPressedDirective;
 
@@ -19,7 +20,7 @@ const borders: BorderRadiusConfig = {
     none: '0'
 };
 
-export interface ModalProps extends Styleable, Identifiable {
+export interface ModalProps extends Styleable, WithDataAttributes {
     children: JSXElement;
     opened: boolean;
     onClose: () => void;
@@ -27,6 +28,7 @@ export interface ModalProps extends Styleable, Identifiable {
 
 export const Modal: Component<ModalProps> = props => {
     const theme = useTheme();
+    const dataAttrs = useDataAttributes(props);
 
     createEffect(() => {
         if (props.opened) {
@@ -78,9 +80,8 @@ export const Modal: Component<ModalProps> = props => {
             }}
         >
             <Show when={props.opened}>
-                <ModalBackgroundStyled>
+                <ModalBackgroundStyled data-tc-modal="true" {...dataAttrs()}>
                     <div
-                        id={props.id}
                         class={cn(
                             ModalWrapperClass,
                             props.class,

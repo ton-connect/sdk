@@ -55,6 +55,7 @@ export const Text: Component<TextProps> = inputs => {
             color={color()}
             class={props.class}
             ref={textRef}
+            data-tc-text="true"
         >
             {props.translationKey
                 ? t(props.translationKey, props.translationValues, props.children?.toString())

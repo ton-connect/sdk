@@ -89,7 +89,7 @@ export const AccountButton: Component<AccountButtonProps> = () => {
     return (
         <Dynamic component={globalStylesTag}>
             <Show when={restoringProcess()}>
-                <LoaderButtonStyled disabled={true} id="tc-connect-button-loading">
+                <LoaderButtonStyled disabled={true} data-tc-connect-button-loading="true">
                     <LoaderIconStyled />
                 </LoaderButtonStyled>
             </Show>
@@ -97,7 +97,7 @@ export const AccountButton: Component<AccountButtonProps> = () => {
                 <Show when={!account()}>
                     <AccountButtonStyled
                         onClick={() => tonConnectUI.connectWallet()}
-                        id="tc-connect-button"
+                        data-tc-connect-button="true"
                     >
                         <TonIcon fill={theme.colors.connectButton.foreground} />
                         <Text
@@ -116,13 +116,9 @@ export const AccountButton: Component<AccountButtonProps> = () => {
                         <DropdownButtonStyled
                             onClick={() => setIsOpened(v => !v)}
                             ref={setAnchor}
-                            id="tc-dropdown-button"
+                            data-tc-dropdown-button="true"
                         >
-                            <Text
-                                fontSize="15px"
-                                fontWeight="590"
-                                lineHeight="18px"
-                            >
+                            <Text fontSize="15px" fontWeight="590" lineHeight="18px">
                                 {normalizedAddress()}
                             </Text>
                             <ArrowIcon direction="bottom" />
@@ -136,7 +132,7 @@ export const AccountButton: Component<AccountButtonProps> = () => {
                                     left: `${position.x ?? 0}px`,
                                     'z-index': 999
                                 }}
-                                id="tc-dropdown-container"
+                                data-tc-dropdown-container="true"
                             >
                                 <Transition
                                     onBeforeEnter={el => {
@@ -168,11 +164,10 @@ export const AccountButton: Component<AccountButtonProps> = () => {
                                             hidden={!isOpened()}
                                             onClose={() => setIsOpened(false)}
                                             ref={dropDownRef}
-                                            id="tc-dropdown"
                                         />
                                     </Show>
                                 </Transition>
-                                <NotificationsStyled id="tc-notifications" />
+                                <NotificationsStyled />
                             </tc-root>
                         </Portal>
                     </DropdownContainerStyled>

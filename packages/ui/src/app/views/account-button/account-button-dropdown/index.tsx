@@ -8,19 +8,14 @@ import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { CHAIN, toUserFriendlyAddress } from '@tonconnect/sdk';
 import { copyToClipboard } from 'src/app/utils/copy-to-clipboard';
 import { AccountButtonDropdownStyled, MenuButtonStyled, UlStyled } from './style';
-import { Identifiable } from 'src/app/models/identifiable';
 
 const MenuItemText: Component<{ children: string } & Translateable> = props => (
-    <Text
-        translationKey={props.translationKey}
-        fontSize="15px"
-        fontWeight="590"
-    >
+    <Text translationKey={props.translationKey} fontSize="15px" fontWeight="590">
         {props.children}
     </Text>
 );
 
-export interface AccountButtonDropdownProps extends Styleable, Identifiable {
+export interface AccountButtonDropdownProps extends Styleable {
     onClose: () => void;
     ref: HTMLDivElement | undefined;
 }
@@ -46,7 +41,7 @@ export const AccountButtonDropdown: Component<AccountButtonDropdownProps> = prop
     };
 
     return (
-        <AccountButtonDropdownStyled ref={props.ref} class={props.class} id={props.id}>
+        <AccountButtonDropdownStyled ref={props.ref} class={props.class} data-tc-dropdown="true">
             <UlStyled>
                 <li>
                     <MenuButtonStyled onClick={() => onCopy()}>

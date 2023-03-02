@@ -10,7 +10,7 @@ export interface WalletItemProps extends Styleable {
 
 export const WalletItem: Component<WalletItemProps> = props => {
     return (
-        <WalletItemStyled class={props.class} onClick={() => props.onClick()}>
+        <WalletItemStyled class={props.class} onClick={() => props.onClick()} data-tc-wallet-item="true">
             <ImageStyled src={props.iconUrl} alt="" />
             <StyledText>{props.name}</StyledText>
         </WalletItemStyled>

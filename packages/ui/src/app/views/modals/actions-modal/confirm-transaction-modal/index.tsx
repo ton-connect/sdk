@@ -1,9 +1,8 @@
 import { Component } from 'solid-js';
 import { ActionModal } from 'src/app/views/modals/actions-modal/action-modal';
-import { Identifiable } from 'src/app/models/identifiable';
 import { LoaderIcon } from 'src/app/components';
 
-interface ConfirmTransactionModalProps extends Identifiable {
+interface ConfirmTransactionModalProps {
     onClose: () => void;
 }
 
@@ -15,7 +14,7 @@ export const ConfirmTransactionModal: Component<ConfirmTransactionModalProps> = 
             icon={<LoaderIcon size="m" />}
             onClose={() => props.onClose()}
             showButton={false}
-            id={props.id}
+            data-tc-confirm-modal="true"
         />
     );
 };

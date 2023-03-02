@@ -20,12 +20,11 @@ import {
 } from './style';
 import { ConnectorContext } from 'src/app/state/connector.context';
 import { addReturnStrategy, openLinkBlank } from 'src/app/utils/web-api';
-import { Identifiable } from 'src/app/models/identifiable';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { appState } from 'src/app/state/app.state';
 import { Link } from 'src/app/components/link';
 
-export interface QrCodeModalProps extends Identifiable {
+export interface QrCodeModalProps {
     additionalRequest?: ConnectAdditionalRequest;
     wallet: WalletInfoRemote | (WalletInfoRemote & WalletInfoInjectable);
     onBackClick: () => void;
@@ -44,7 +43,7 @@ export const QrCodeModal: Component<QrCodeModalProps> = props => {
     );
 
     return (
-        <QrCodeModalStyled id={props.id}>
+        <QrCodeModalStyled data-tc-wallet-qr-modal-desktop="true">
             <StyledIconButton icon="arrow" onClick={() => props.onBackClick()} />
             <H1Styled
                 translationKey="walletModal.qrCodeModal.connectWith"

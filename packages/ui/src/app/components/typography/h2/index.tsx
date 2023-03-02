@@ -11,7 +11,7 @@ export interface H2Props extends Styleable, Translateable {
 export const H2: Component<H2Props> = props => {
     const [t] = useI18n();
     return (
-        <H2Styled class={props.class}>
+        <H2Styled class={props.class} data-tc-h2="true">
             {props.translationKey
                 ? t(props.translationKey, props.translationValues, props.children?.toString())
                 : props.children}

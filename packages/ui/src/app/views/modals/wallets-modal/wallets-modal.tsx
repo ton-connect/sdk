@@ -122,7 +122,11 @@ export const WalletsModal: Component = () => {
     onCleanup(unsubscribe);
 
     return (
-        <StyledModal opened={walletsModalOpen()} onClose={onClose} id="tc-wallets-modal-container">
+        <StyledModal
+            opened={walletsModalOpen()}
+            onClose={onClose}
+            data-tc-wallets-modal-container="true"
+        >
             <Show when={additionalRequestLoading() || !walletsList()}>
                 <H1Styled translationKey="walletModal.loading">Wallets list is loading</H1Styled>
                 <LoaderContainerStyled>
@@ -133,7 +137,6 @@ export const WalletsModal: Component = () => {
             <Show when={!additionalRequestLoading() && walletsList()}>
                 <Show when={isMobile()}>
                     <MobileSelectWalletModal
-                        id="tc-wallets-modal"
                         walletsList={walletsList()!}
                         additionalRequest={additionalRequest()!}
                     />
@@ -141,42 +144,49 @@ export const WalletsModal: Component = () => {
 
                 <Show when={!isMobile()}>
                     <Show when={!selectedWalletInfo()} keyed={false}>
-                        <TabBarStyled
-                            tab1={
-                                <TabTextStyled translationKey="walletModal.qrCode" cursor="unset">
-                                    QR Code
-                                </TabTextStyled>
-                            }
-                            tab2={
-                                <TabTextStyled translationKey="walletModal.wallets" cursor="unset">
-                                    Wallets
-                                </TabTextStyled>
-                            }
-                            selectedTabIndex={selectedTabIndex()}
-                            onSelectedTabIndexChange={setSelectedTabIndex}
-                        />
+                        <div data-tc-wallets-modal-desktop="true">
+                            <TabBarStyled
+                                tab1={
+                                    <TabTextStyled
+                                        translationKey="walletModal.qrCode"
+                                        cursor="unset"
+                                    >
+                                        QR Code
+                                    </TabTextStyled>
+                                }
+                                tab2={
+                                    <TabTextStyled
+                                        translationKey="walletModal.wallets"
+                                        cursor="unset"
+                                    >
+                                        Wallets
+                                    </TabTextStyled>
+                                }
+                                selectedTabIndex={selectedTabIndex()}
+                                onSelectedTabIndexChange={setSelectedTabIndex}
+                            />
 
-                        <Switch>
-                            <Match when={selectedTabIndex() === 0}>
-                                <UniversalQrModal
-                                    walletsList={walletsList()!}
-                                    additionalRequest={additionalRequest()!}
-                                />
-                            </Match>
-                            <Match when={selectedTabIndex() === 1}>
-                                <DesktopSelectWalletModal
-                                    walletsList={walletsList()!}
-                                    onSelect={onSelectInDesktopList}
-                                />
-                            </Match>
-                        </Switch>
+                            <Switch>
+                                <Match when={selectedTabIndex() === 0}>
+                                    <UniversalQrModal
+                                        walletsList={walletsList()!}
+                                        additionalRequest={additionalRequest()!}
+                                    />
+                                </Match>
+                                <Match when={selectedTabIndex() === 1}>
+                                    <DesktopSelectWalletModal
+                                        walletsList={walletsList()!}
+                                        onSelect={onSelectInDesktopList}
+                                    />
+                                </Match>
+                            </Switch>
+                        </div>
                     </Show>
                     <Show when={selectedWalletInfo()} keyed={false}>
                         <QrCodeModal
                             additionalRequest={additionalRequest()}
                             wallet={selectedWalletInfo() as WalletInfoRemote}
                             onBackClick={() => setSelectedWalletInfo(null)}
-                            id="tc-qr-modal"
                         />
                     </Show>
                 </Show>

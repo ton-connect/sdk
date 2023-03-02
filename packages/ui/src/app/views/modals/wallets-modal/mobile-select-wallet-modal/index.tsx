@@ -11,14 +11,13 @@ import {
     UlStyled
 } from './style';
 import { addReturnStrategy, openLink, openLinkBlank } from 'src/app/utils/web-api';
-import { Identifiable } from 'src/app/models/identifiable';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { appState } from 'src/app/state/app.state';
 import { LINKS } from 'src/app/env/LINKS';
 import { Link } from 'src/app/components/link';
 import { useTheme } from 'solid-styled-components';
 
-interface MobileSelectWalletModalProps extends Identifiable {
+interface MobileSelectWalletModalProps {
     walletsList: WalletInfo[];
 
     additionalRequest: ConnectAdditionalRequest;
@@ -61,7 +60,7 @@ export const MobileSelectWalletModal: Component<MobileSelectWalletModalProps> = 
     };
 
     return (
-        <div id={props.id}>
+        <div data-tc-wallets-modal-mobile="true">
             <H1 translationKey="walletModal.mobileSelectWalletModal.connectWallet">
                 Connect a wallet
             </H1>

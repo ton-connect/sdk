@@ -11,6 +11,7 @@ export const ConfirmOperationNotification: Component<ConfirmOperationNotificatio
             header={{ translationKey: 'notifications.confirm.header' }}
             class={props.class}
             icon={<LoaderIconStyled />}
+            data-tc-notification-confirm="true"
         >
             Confirm operation in your wallet
         </Notification>

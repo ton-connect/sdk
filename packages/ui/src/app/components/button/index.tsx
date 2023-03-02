@@ -1,9 +1,10 @@
 import { Component, JSXElement } from 'solid-js';
 import { ButtonStyled } from 'src/app/components/button/style';
 import { Styleable } from 'src/app/models/styleable';
-import { Identifiable } from 'src/app/models/identifiable';
+import { WithDataAttributes } from 'src/app/models/with-data-attributes';
+import { useDataAttributes } from 'src/app/hooks/use-data-attributes';
 
-export interface ButtonProps extends Styleable, Identifiable {
+export interface ButtonProps extends Styleable, WithDataAttributes {
     appearance?: 'primary' | 'flat';
     scale?: 's' | 'm';
     children: JSXElement;
@@ -15,17 +16,20 @@ export interface ButtonProps extends Styleable, Identifiable {
 }
 
 export const Button: Component<ButtonProps> = props => {
+    const dataAttrs = useDataAttributes(props);
+
     return (
         <ButtonStyled
             appearance={props.appearance || 'primary'}
             class={props.class}
-            id={props.id}
             onClick={e => props.onClick?.(e)}
             onMouseEnter={e => props.onMouseEnter?.(e)}
             onMouseLeave={e => props.onMouseLeave?.(e)}
             ref={props.ref}
             disabled={props.disabled}
             scale={props.scale || 'm'}
+            data-tc-button="true"
+            {...dataAttrs()}
         >
             {props.children}
         </ButtonStyled>

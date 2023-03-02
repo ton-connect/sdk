@@ -15,7 +15,7 @@ export const TabBar: Component<TabBarProps> = props => {
     const groupName = 'tabBar' + Math.floor(Math.random() * 10000);
 
     return (
-        <TabBarStyled class={props.class}>
+        <TabBarStyled class={props.class} data-tc-tab-bar="true">
             <SliderStyled right={props.selectedTabIndex === 1} />
             <LabelStyled isActive={props.selectedTabIndex === 0}>
                 <InputStyled

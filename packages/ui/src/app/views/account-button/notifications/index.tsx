@@ -6,9 +6,8 @@ import { ErrorTransactionNotification } from './error-transaction-notification';
 import { SuccessTransactionNotification } from './success-transaction-notification';
 import { NotificationClass } from './style';
 import { Styleable } from 'src/app/models/styleable';
-import { Identifiable } from 'src/app/models/identifiable';
 
-export interface NotificationsProps extends Styleable, Identifiable {}
+export interface NotificationsProps extends Styleable {}
 
 export const Notifications: Component<NotificationsProps> = props => {
     const timeouts: ReturnType<typeof setTimeout>[] = [];
@@ -49,7 +48,7 @@ export const Notifications: Component<NotificationsProps> = props => {
     });
 
     return (
-        <div class={props.class} id={props.id}>
+        <div class={props.class} data-tc-list-notifications="true">
             <TransitionGroup
                 onBeforeEnter={el => {
                     el.animate(

@@ -11,7 +11,7 @@ export const H3: Component<H3Props> = props => {
     const [t] = useI18n();
 
     return (
-        <H3Styled>
+        <H3Styled data-tc-h3="true">
             {props.translationKey
                 ? t(props.translationKey, props.translationValues, props.children?.toString())
                 : props.children}

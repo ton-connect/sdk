@@ -2,7 +2,6 @@ import { Component } from 'solid-js';
 import { Notification } from 'src/app/components/notification';
 import { Styleable } from 'src/app/models/styleable';
 import { SuccessIconStyled } from 'src/app/views/account-button/notifications/success-transaction-notification/style';
-import cn from 'classnames';
 
 interface SuccessTransactionNotificationProps extends Styleable {}
 
@@ -14,7 +13,8 @@ export const SuccessTransactionNotification: Component<
             header={{ translationKey: 'notifications.transactionSent.header' }}
             text={{ translationKey: 'notifications.transactionSent.text' }}
             icon={<SuccessIconStyled />}
-            class={cn(props.class, 'tc-notification')}
+            class={props.class}
+            data-tc-notification-tx-sent="true"
         >
             Transaction sent
         </Notification>

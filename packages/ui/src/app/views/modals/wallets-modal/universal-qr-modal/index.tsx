@@ -89,7 +89,10 @@ export const UniversalQrModal: Component<UniversalQrModalProps> = props => {
     };
 
     return (
-        <UniversalQrModalStyled onClick={() => setPopupOpened(false)}>
+        <UniversalQrModalStyled
+            onClick={() => setPopupOpened(false)}
+            data-tc-universal-qr-desktop="true"
+        >
             <H2Styled translationKey="walletModal.universalQRModal.scanQR">
                 Scan QR code with a TON Connect compatible wallet.
             </H2Styled>
