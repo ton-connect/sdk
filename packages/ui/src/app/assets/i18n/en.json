@@ -2,7 +2,7 @@
   "common": {
     "close": "Close",
     "get": "GET",
-    "exploreWallets": "Explore TON wallets",
+    "learnMore": "Learn more",
     "openExtension": "Open Extension",
     "copyLink": "Copy Link",
     "copied": "Copied!"
@@ -17,37 +17,38 @@
   },
   "notifications": {
     "confirm": {
-      "header": "Confirm action in your wallet"
+      "header": "Open to confirm the transaction."
     },
     "transactionSent": {
       "header": "Transaction sent",
-      "text": "Your transaction has been sent to the network and will be processed in a few seconds."
+      "text": "Your transaction will be processed in a few seconds."
     },
     "transactionCanceled": {
-      "header": "Action cancelled",
-      "text": "The action was canceled. There will be no changes to the blockchain."
+      "header": "Transaction canceled",
+      "text": "There will be no changes to your account."
     }
   },
   "walletModal": {
-    "loading":  "Wallets list is loading",
+    "loading":  "Loading wallets",
     "qrCode": "QR Code",
     "wallets": "Wallets",
     "universalQRModal": {
-      "scanQR": "Scan QR code with a TON Connect compatible wallet.",
+      "scanQR": "Scan the code below with a camera in your TON wallet.",
       "openWallet": "Open Wallet",
-      "openInstalledWallet": "Open Installed Wallet"
+      "openInstalledWallet": "Open Wallet",
+      "dontHave": "Explore TON wallets"
     },
     "desktopSelectWalletModal": {
-      "selectWallet": "Choose your preferred wallet from the options to get started."
+      "selectWallet": "Select a wallet to connect."
     },
     "mobileSelectWalletModal": {
       "connectWallet": "Connect a Wallet",
-      "selectWallet": "Select your wallet from the options to get started.",
+      "selectWallet": "$walletModal.desktopSelectWalletModal.selectWallet",
       "installedWallet": "Installed Wallet"
     },
     "qrCodeModal": {
-      "connectWith": "Connect with {{ name }}",
-      "scan": "Scan QR code with your phone’s or {{ name }}’s camera.",
+      "connectWith": "Connect with {{ name }}",
+      "scan": "Scan the code below.",
       "openWallet": "Open {{ name }}",
       "openExtension": "Open Extension",
       "dontHave": "Don't have {{ name }}?"
@@ -55,8 +56,8 @@
   },
   "actionModal": {
     "confirmTransaction": {
-      "header": "Confirm action in your wallet",
-      "text": "Checking after confirmation usually takes some time."
+      "header": "Confirm the transaction in your wallet",
+      "text": "It will only take a moment."
     },
     "transactionSent": "$notifications.transactionSent",
     "transactionCanceled": "$notifications.transactionCanceled"
