@@ -16,7 +16,7 @@ import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { appState } from 'src/app/state/app.state';
 import { LINKS } from 'src/app/env/LINKS';
 import { Link } from 'src/app/components/link';
-import {useTheme} from "solid-styled-components";
+import { useTheme } from 'solid-styled-components';
 
 interface MobileSelectWalletModalProps extends Identifiable {
     walletsList: WalletInfo[];
@@ -40,7 +40,7 @@ export const MobileSelectWalletModal: Component<MobileSelectWalletModalProps> = 
                 props.additionalRequest
             );
 
-            openLink(addReturnStrategy(universalLink, appState.returnStrategy));
+            openLinkBlank(addReturnStrategy(universalLink, appState.returnStrategy));
             return;
         }
 
@@ -102,7 +102,9 @@ export const MobileSelectWalletModal: Component<MobileSelectWalletModalProps> = 
             </UlStyled>
             <Link href={LINKS.LEARN_MORE} blank>
                 <ButtonStyled>
-                    <Translation translationKey="common.exploreWallets">Explore TON wallets</Translation>
+                    <Translation translationKey="common.exploreWallets">
+                        Explore TON wallets
+                    </Translation>
                 </ButtonStyled>
             </Link>
         </div>
