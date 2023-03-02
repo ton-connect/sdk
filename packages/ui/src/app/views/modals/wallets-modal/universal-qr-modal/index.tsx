@@ -167,9 +167,7 @@ export const UniversalQrModal: Component<UniversalQrModalProps> = props => {
                                 font-size: 15px;
                             `}
                         >
-                            <Translation translationKey="common.exploreWallets">
-                                Explore TON wallets
-                            </Translation>
+                            <Translation translationKey="common.learnMore">Learn more</Translation>
                         </Button>
                     </Link>
                 </GetWalletStyled>

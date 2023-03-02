@@ -15,7 +15,7 @@ async function dev(): Promise<void> {
             theme: THEME.LIGHT,
             borderRadius: 'm'
         },
-        language: 'ru',
+        language: 'en',
         restoreConnection: true,
         walletsListConfiguration: {
             includeWallets: [...new Array(11)].map((_, index) => ({

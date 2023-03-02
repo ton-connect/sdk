@@ -34,9 +34,7 @@ export const DesktopSelectWalletModal: Component<DesktopSelectWalletModalProps> 
             </WalletsUl>
             <Link href={LINKS.LEARN_MORE} blank>
                 <ButtonStyled appearance="flat">
-                    <Translation translationKey="common.exploreWallets">
-                        Explore TON wallets
-                    </Translation>
+                    <Translation translationKey="common.learnMore">Learn more</Translation>
                 </ButtonStyled>
             </Link>
         </DesktopSelectWalletModalStyled>

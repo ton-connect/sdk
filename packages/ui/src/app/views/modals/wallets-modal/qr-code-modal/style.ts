@@ -1,5 +1,5 @@
 import { styled } from 'solid-styled-components';
-import { Button, IconButton, QRCode, Text } from 'src/app/components';
+import {Button, H1, IconButton, QRCode, Text} from 'src/app/components';
 import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
 
 const borders: BorderRadiusConfig = {
@@ -9,6 +9,11 @@ const borders: BorderRadiusConfig = {
 };
 
 export const QrCodeModalStyled = styled.div``;
+
+export const H1Styled = styled(H1)`
+    max-width: 320px;
+    margin: 0 auto 6px;
+`;
 
 export const StyledIconButton = styled(IconButton)`
     position: absolute;

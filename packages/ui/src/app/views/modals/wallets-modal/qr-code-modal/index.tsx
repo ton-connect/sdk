@@ -6,12 +6,13 @@ import {
     WalletInfoRemote
 } from '@tonconnect/sdk';
 import { Component, createMemo, Show, useContext } from 'solid-js';
-import { Button, H1, H2 } from 'src/app/components';
+import { Button, H2 } from 'src/app/components';
 import { Translation } from 'src/app/components/typography/Translation';
 import {
     ActionButtonStyled,
     ButtonsContainerStyled,
     GetWalletStyled,
+    H1Styled,
     QrCodeModalStyled,
     QRStyled,
     StyledIconButton,
@@ -45,12 +46,12 @@ export const QrCodeModal: Component<QrCodeModalProps> = props => {
     return (
         <QrCodeModalStyled id={props.id}>
             <StyledIconButton icon="arrow" onClick={() => props.onBackClick()} />
-            <H1
+            <H1Styled
                 translationKey="walletModal.qrCodeModal.connectWith"
                 translationValues={{ name: props.wallet.name }}
             >
                 Connect with {props.wallet.name}
-            </H1>
+            </H1Styled>
             <H2
                 translationKey="walletModal.qrCodeModal.scan"
                 translationValues={{ name: props.wallet.name }}

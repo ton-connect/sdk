@@ -102,9 +102,7 @@ export const MobileSelectWalletModal: Component<MobileSelectWalletModalProps> = 
             </UlStyled>
             <Link href={LINKS.LEARN_MORE} blank>
                 <ButtonStyled>
-                    <Translation translationKey="common.exploreWallets">
-                        Explore TON wallets
-                    </Translation>
+                    <Translation translationKey="common.learnMore">Learn more</Translation>
                 </ButtonStyled>
             </Link>
         </div>
