@@ -2,6 +2,7 @@ import { THEME } from 'src/models/THEME';
 import { ReturnStrategy } from 'src/models/return-strategy';
 import { disableScrollClass, globalStylesTag } from 'src/app/styles/global-styles';
 import { toPx } from 'src/app/utils/css';
+import { TonConnectUIError } from 'src/errors';
 
 export function openLink(href: string, target = '_self'): ReturnType<typeof window.open> {
     return window.open(href, target, 'noreferrer noopener');
@@ -69,4 +70,12 @@ export function preloadImages(images: string[]): void {
         const node = new window.Image();
         node.src = img;
     });
+}
+
+export function checkLocalStorageExists(): never | void {
+    if (typeof localStorage === 'undefined') {
+        throw new TonConnectUIError(
+            'window.localStorage is undefined. localStorage is required for TonConnectUI'
+        );
+    }
 }

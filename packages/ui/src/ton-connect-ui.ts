@@ -12,7 +12,7 @@ import {
 import { widgetController } from 'src/app/widget-controller';
 import { TonConnectUIError } from 'src/errors/ton-connect-ui.error';
 import { TonConnectUiCreateOptions } from 'src/models/ton-connect-ui-create-options';
-import { WalletInfoStorage } from 'src/storage';
+import { WalletInfoStorage, PreferredWalletStorage } from 'src/storage';
 import {
     addReturnStrategy,
     getSystemTheme,
@@ -37,6 +37,8 @@ export class TonConnectUI {
     }
 
     private readonly walletInfoStorage = new WalletInfoStorage();
+
+    private readonly preferredWalletStorage = new PreferredWalletStorage();
 
     private readonly connector: ITonConnect;
 
@@ -166,9 +168,11 @@ export class TonConnectUI {
         }
 
         this.uiOptions = mergeOptions(options, { uiPreferences: { theme: 'SYSTEM' } });
+        const preferredWalletName = this.preferredWalletStorage.getPreferredWalletName();
         setAppState({
             connector: this.connector,
-            getConnectParameters: options?.getConnectParameters
+            getConnectParameters: options?.getConnectParameters,
+            preferredWalletName
         });
 
         widgetController.renderApp(rootId, this);
@@ -298,13 +302,19 @@ export class TonConnectUI {
     }
 
     private subscribeToWalletChange(): void {
-        this.connector.onStatusChange(wallet => {
+        this.connector.onStatusChange(async wallet => {
             if (wallet) {
-                this.updateWalletInfo(wallet);
+                await this.updateWalletInfo(wallet);
+                this.setPreferredWalletName(this.walletInfo?.name || wallet.device.appName);
             } else {
                 this.walletInfoStorage.removeWalletInfo();
             }
         });
+    }
+
+    private setPreferredWalletName(value: string): void {
+        this.preferredWalletStorage.setPreferredWalletName(value);
+        setAppState({ preferredWalletName: value });
     }
 
     private async getSelectedWalletInfo(wallet: Wallet): Promise<WalletInfoWithOpenMethod | null> {

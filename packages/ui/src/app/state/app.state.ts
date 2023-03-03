@@ -11,6 +11,7 @@ export type AppState = {
     walletsListConfiguration: WalletsListConfiguration | {};
     getConnectParameters?: () => Promise<ConnectAdditionalRequest>;
     returnStrategy: ReturnStrategy;
+    preferredWalletName: string | undefined;
 };
 
 export const [appState, setAppState] = createStore<AppState>({

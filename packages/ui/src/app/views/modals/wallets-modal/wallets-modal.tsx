@@ -70,10 +70,22 @@ export const WalletsModal: Component = () => {
             return null;
         }
 
-        return applyWalletsListConfiguration(
+        let walletsList = applyWalletsListConfiguration(
             fetchedWalletsList(),
             appState.walletsListConfiguration
         );
+        const preferredWalletName = appState.preferredWalletName;
+        const preferredWallet = walletsList.find(item => item.name === preferredWalletName);
+        const someWalletsWithSameName =
+            walletsList.filter(item => item.name === preferredWalletName).length >= 2;
+
+        if (preferredWalletName && preferredWallet && !someWalletsWithSameName) {
+            walletsList = [preferredWallet].concat(
+                walletsList.filter(item => item.name !== preferredWalletName)
+            );
+        }
+
+        return walletsList;
     });
 
     const additionalRequestLoading = (): boolean =>
@@ -143,7 +155,7 @@ export const WalletsModal: Component = () => {
                 </Show>
 
                 <Show when={!isMobile()}>
-                    <Show when={!selectedWalletInfo()} keyed={false}>
+                    <Show when={!selectedWalletInfo()}>
                         <div data-tc-wallets-modal-desktop="true">
                             <TabBarStyled
                                 tab1={
@@ -182,7 +194,7 @@ export const WalletsModal: Component = () => {
                             </Switch>
                         </div>
                     </Show>
-                    <Show when={selectedWalletInfo()} keyed={false}>
+                    <Show when={selectedWalletInfo()}>
                         <QrCodeModal
                             additionalRequest={additionalRequest()}
                             wallet={selectedWalletInfo() as WalletInfoRemote}

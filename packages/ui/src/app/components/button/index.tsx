@@ -29,7 +29,7 @@ export const Button: Component<ButtonProps> = props => {
             disabled={props.disabled}
             scale={props.scale || 'm'}
             data-tc-button="true"
-            {...dataAttrs()}
+            {...dataAttrs}
         >
             {props.children}
         </ButtonStyled>

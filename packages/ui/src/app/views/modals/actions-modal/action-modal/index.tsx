@@ -16,7 +16,7 @@ export const ActionModal: Component<ActionModalProps> = props => {
     const dataAttrs = useDataAttributes(props);
 
     return (
-        <ActionModalStyled {...dataAttrs()}>
+        <ActionModalStyled {...dataAttrs}>
             {props.icon}
             <H1Styled translationKey={props.headerTranslationKey} />
             <TextStyled translationKey={props.textTranslationKey} />

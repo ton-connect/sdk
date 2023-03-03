@@ -18,15 +18,15 @@ async function dev(): Promise<void> {
         language: 'en',
         restoreConnection: true,
         walletsListConfiguration: {
-            includeWallets: [...new Array(11)].map((_, index) => ({
-                name: 'tonkeeper',
+            /* includeWallets: [...new Array(11)].map((_, index) => ({
+                name: `tonkeeper${index}`,
                 bridgeUrl: `https://bridge${
                     index < 9 ? `0${index + 1}` : index + 1
                 }.subgroup.org/bridge`,
                 universalLink: 'https://app.tonkeeper.com/ton-connect',
                 aboutUrl: '',
                 imageUrl: 'https://tonkeeper.com/assets/tonconnect-icon.png'
-            })),
+            })),*/
             walletsOrder: ['OpenMask', 'MyTonWallet']
         },
         getConnectParameters() {

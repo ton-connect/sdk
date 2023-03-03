@@ -80,7 +80,7 @@ export const Modal: Component<ModalProps> = props => {
             }}
         >
             <Show when={props.opened}>
-                <ModalBackgroundStyled data-tc-modal="true" {...dataAttrs()}>
+                <ModalBackgroundStyled data-tc-modal="true" {...dataAttrs}>
                     <div
                         class={cn(
                             ModalWrapperClass,
