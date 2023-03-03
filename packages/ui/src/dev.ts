@@ -27,11 +27,17 @@ async function dev(): Promise<void> {
                 aboutUrl: '',
                 imageUrl: 'https://tonkeeper.com/assets/tonconnect-icon.png'
             })),*/
-        },
-        getConnectParameters() {
-            return Promise.resolve({ tonProof: 'demo-proof' });
         }
     });
+
+    tonConnectUI.setConnectRequestParameters({ state: 'loading' });
+
+    setTimeout(() => {
+        tonConnectUI.setConnectRequestParameters({
+            state: 'ready',
+            value: { tonProof: 'tonProofPayload' }
+        });
+    }, 3000);
 
     tonConnectUI.onStatusChange(wallet => {
         document.getElementById('content')!.textContent = wallet ? JSON.stringify(wallet) : wallet;

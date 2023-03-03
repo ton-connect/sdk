@@ -1,4 +1,13 @@
-import { Component, createSignal, onCleanup, onMount, Show, useContext } from 'solid-js';
+import {
+    Component,
+    createEffect,
+    createResource,
+    createSignal,
+    onCleanup,
+    onMount,
+    Show,
+    useContext
+} from 'solid-js';
 import { ArrowIcon, Text, TonIcon } from 'src/app/components';
 import { ConnectorContext } from 'src/app/state/connector.context';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';

@@ -24,3 +24,4 @@ export type { ReturnStrategy } from './return-strategy';
 import { Property } from 'csstype';
 type Color = Property.Color;
 export type { Color };
+export type { Loadable, LoadableReady, LoadableLoading } from './loadable';

@@ -1,4 +1,4 @@
-import type { Account } from '@tonconnect/sdk';
+import type { Account, ConnectAdditionalRequest } from '@tonconnect/sdk';
 import {
     isWalletInfoCurrentlyEmbedded,
     ITonConnect,
@@ -30,6 +30,7 @@ import { ActionConfiguration, StrictActionConfiguration } from 'src/models/actio
 import { ConnectedWallet, WalletInfoWithOpenMethod } from 'src/models/connected-wallet';
 import { applyWalletsListConfiguration } from 'src/app/utils/wallets';
 import { uniq } from 'src/app/utils/array';
+import { Loadable } from 'src/models/loadable';
 
 export class TonConnectUI {
     public static getWallets(): Promise<WalletInfo[]> {
@@ -49,6 +50,10 @@ export class TonConnectUI {
     private actionsConfiguration?: ActionConfiguration;
 
     private readonly walletsList: Promise<WalletInfo[]>;
+
+    private connectRequestParametersCallback?: (
+        parameters: ConnectAdditionalRequest | undefined
+    ) => void;
 
     /**
      * Promise that resolves after end of th connection restoring process (promise will fire after `onStatusChange`, so you can get actual information about wallet and session after when promise resolved).
@@ -171,11 +176,25 @@ export class TonConnectUI {
         const preferredWalletName = this.preferredWalletStorage.getPreferredWalletName();
         setAppState({
             connector: this.connector,
-            getConnectParameters: options?.getConnectParameters,
             preferredWalletName
         });
 
         widgetController.renderApp(rootId, this);
+    }
+
+    /**
+     * Use it to customize ConnectRequest and add `tonProof` payload.
+     * You can call it multiply times to set updated tonProof payload if previous one is outdated.
+     * If `connectRequestParameters.state === 'loading'` loader will appear instead of the qr code in the wallets modal.
+     * If `connectRequestParameters.state` was changed to 'ready' or it's value has been changed, QR will be re-rendered.
+     */
+    public setConnectRequestParameters(
+        connectRequestParameters: Loadable<ConnectAdditionalRequest> | undefined | null
+    ): void {
+        setAppState({ connectRequestParameters });
+        if (connectRequestParameters?.state === 'ready' || !connectRequestParameters) {
+            this.connectRequestParametersCallback?.(connectRequestParameters?.value);
+        }
     }
 
     /**
@@ -215,10 +234,17 @@ export class TonConnectUI {
         const embeddedWallet = walletsList.find(isWalletInfoCurrentlyEmbedded);
 
         if (embeddedWallet) {
-            const additionalRequest = await appState.getConnectParameters?.();
+            const connect = (parameters?: ConnectAdditionalRequest): void => {
+                setLastSelectedWalletInfo(embeddedWallet);
+                this.connector.connect({ jsBridgeKey: embeddedWallet.jsBridgeKey }, parameters);
+            };
 
-            setLastSelectedWalletInfo(embeddedWallet);
-            this.connector.connect({ jsBridgeKey: embeddedWallet.jsBridgeKey }, additionalRequest);
+            const additionalRequest = appState.connectRequestParameters;
+            if (additionalRequest?.state === 'loading') {
+                this.connectRequestParametersCallback = connect;
+            } else {
+                connect(additionalRequest?.value);
+            }
         } else {
             widgetController.openWalletsModal();
         }

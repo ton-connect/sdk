@@ -12,7 +12,6 @@ import {
     createResource,
     createSignal,
     Match,
-    on,
     onCleanup,
     Show,
     Switch,
@@ -36,6 +35,7 @@ import { MobileSelectWalletModal } from 'src/app/views/modals/wallets-modal/mobi
 import { UniversalQrModal } from 'src/app/views/modals/wallets-modal/universal-qr-modal';
 import { DesktopSelectWalletModal } from 'src/app/views/modals/wallets-modal/desktop-select-wallet-modal';
 import { LoaderIcon } from 'src/app/components';
+import { LoadableReady } from 'src/models/loadable';
 
 export const WalletsModal: Component = () => {
     const { locale } = useI18n()[1];
@@ -44,23 +44,6 @@ export const WalletsModal: Component = () => {
     const connector = useContext(ConnectorContext)!;
     const tonConnectUI = useContext(TonConnectUiContext);
     const [fetchedWalletsList] = createResource(() => tonConnectUI!.getWallets());
-    const [fetchedAdditionalRequest, { refetch }] = createResource<
-        ConnectAdditionalRequest | undefined
-    >((_, { refetching }) => {
-        if (refetching) {
-            return appState.getConnectParameters?.();
-        }
-
-        return undefined;
-    });
-
-    createEffect(
-        on(walletsModalOpen, () => {
-            if (walletsModalOpen() && fetchedAdditionalRequest.state !== 'refreshing') {
-                refetch();
-            }
-        })
-    );
 
     const [selectedWalletInfo, setSelectedWalletInfo] = createSignal<WalletInfo | null>(null);
     const [selectedTabIndex, setSelectedTabIndex] = createSignal(0);
@@ -89,14 +72,15 @@ export const WalletsModal: Component = () => {
     });
 
     const additionalRequestLoading = (): boolean =>
-        fetchedAdditionalRequest.state !== 'ready' && fetchedAdditionalRequest.state !== 'errored';
+        appState.connectRequestParameters?.state === 'loading';
 
     const additionalRequest = createMemo(() => {
         if (additionalRequestLoading()) {
             return undefined;
         }
 
-        return fetchedAdditionalRequest();
+        return (appState.connectRequestParameters as LoadableReady<ConnectAdditionalRequest>)
+            ?.value;
     });
 
     const onClose = (): void => {
