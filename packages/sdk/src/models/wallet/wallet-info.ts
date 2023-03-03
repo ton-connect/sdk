@@ -79,6 +79,15 @@ export interface WalletInfoCurrentlyEmbedded extends WalletInfoCurrentlyInjected
     embedded: true;
 }
 
+/**
+ * @deprecated Use `WalletInfoInjectable` or `WalletInfoCurrentlyInjected` instead.
+ */
+export interface WalletInfoInjected extends WalletInfoBase {
+    jsBridgeKey: string;
+    injected: boolean;
+    embedded: boolean;
+}
+
 export type WalletInfo =
     | WalletInfoRemote
     | WalletInfoInjectable
@@ -139,4 +148,12 @@ export function isWalletInfoInjectable(value: WalletInfo): value is WalletInfoIn
  */
 export function isWalletInfoRemote(value: WalletInfo): value is WalletInfoRemote {
     return 'bridgeUrl' in value;
+}
+
+/**
+ * @deprecated use `isWalletInfoInjectable` or `isWalletInfoCurrentlyInjected` instead.
+ * @param value WalletInfo to check.
+ */
+export function isWalletInfoInjected(value: WalletInfo): value is WalletInfoInjected {
+    return 'jsBridgeKey' in value;
 }

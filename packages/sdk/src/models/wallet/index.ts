@@ -12,8 +12,10 @@ export {
     WalletInfoCurrentlyInjected,
     WalletInfoCurrentlyEmbedded,
     WalletInfoRemote,
+    WalletInfoInjected,
     isWalletInfoCurrentlyInjected,
     isWalletInfoCurrentlyEmbedded,
     isWalletInfoInjectable,
-    isWalletInfoRemote
+    isWalletInfoRemote,
+    isWalletInfoInjected
 } from './wallet-info';
