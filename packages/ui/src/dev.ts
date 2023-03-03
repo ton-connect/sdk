@@ -27,7 +27,6 @@ async function dev(): Promise<void> {
                 aboutUrl: '',
                 imageUrl: 'https://tonkeeper.com/assets/tonconnect-icon.png'
             })),*/
-            walletsOrder: ['OpenMask', 'MyTonWallet']
         },
         getConnectParameters() {
             return Promise.resolve({ tonProof: 'demo-proof' });

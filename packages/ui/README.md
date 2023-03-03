@@ -490,21 +490,6 @@ tonConnectUI.uiOptions = {
 }
 ```
 
-### Reorder wallets list
-You can change the order of the wallets (pre-defined and custom) in the wallets list with `walletsOrder` property.
-
-Not mentioned wallets will be placed in the end of the list.
-```ts
-tonConnectUI.uiOptions = {
-    walletsListConfiguration: {
-        walletsOrder: [customWallet.name, 'OpenMask', 'MyTonWallet']
-    }
-}
-```
-
-[See all available options](https://ton-connect.github.io/sdk/types/_tonconnect_ui.WalletsListConfiguration.html)
-
-
 ## Add connect request parameters (ton_proof)
 Pass `getConnectParameters` async function to the `TonConnectUI` constructor. This callback will be called after `connectWallet` method call or `Connect Button` click before wallets list render.
 
