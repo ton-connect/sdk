@@ -30,7 +30,8 @@ export class BridgeConnectionStorage {
             type: 'http',
             connectEvent: connection.connectEvent,
             session: rawSession,
-            lastWalletEventId: connection.lastWalletEventId
+            lastWalletEventId: connection.lastWalletEventId,
+            nextRpcRequestId: connection.nextRpcRequestId
         };
         return this.storage.setItem(this.storeKey, JSON.stringify(rawConnection));
     }
@@ -56,6 +57,7 @@ export class BridgeConnectionStorage {
             type: 'http',
             connectEvent: connection.connectEvent,
             lastWalletEventId: connection.lastWalletEventId,
+            nextRpcRequestId: connection.nextRpcRequestId,
             session: {
                 sessionCrypto,
                 bridgeUrl: connection.session.bridgeUrl,
@@ -123,5 +125,23 @@ export class BridgeConnectionStorage {
         }
 
         return undefined;
+    }
+
+    public async increaseNextRpcRequestId(): Promise<void> {
+        const connection = await this.getConnection();
+        if (connection) {
+            const lastId = connection.nextRpcRequestId || 0;
+            connection.nextRpcRequestId = lastId + 1;
+            return this.storeConnection(connection);
+        }
+    }
+
+    public async getNextRpcRequestId(): Promise<number> {
+        const connection = await this.getConnection();
+        if (connection) {
+            return connection.nextRpcRequestId || 0;
+        }
+
+        return 0;
     }
 }

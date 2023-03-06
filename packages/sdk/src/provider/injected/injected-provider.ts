@@ -19,6 +19,7 @@ import { getWindow } from 'src/utils/web-api';
 import { PROTOCOL_VERSION } from 'src/resources/protocol';
 import { TonConnectError } from 'src/errors';
 import { WalletInfoCurrentlyInjected } from 'src/models';
+import { logDebug } from 'src/utils/log';
 
 type WindowWithTon<T extends string> = {
     [key in T]: {
@@ -163,7 +164,14 @@ export class InjectedProvider<T extends string = string> implements InternalProv
     public async sendRequest<T extends RpcMethod>(
         request: WithoutId<AppRequest<T>>
     ): Promise<WithoutId<WalletResponse<T>>> {
-        return this.injectedWallet.send<T>({ ...request, id: '0' } as AppRequest<T>);
+        const id = (await this.connectionStorage.getNextRpcRequestId()).toString();
+        await this.connectionStorage.increaseNextRpcRequestId();
+
+        logDebug('Send injected-bridge request:', { ...request, id });
+        const result = this.injectedWallet.send<T>({ ...request, id } as AppRequest<T>);
+        result.then(response => logDebug('Wallet message received:', response));
+
+        return result;
     }
 
     private async _connect(protocolVersion: number, message: ConnectRequest): Promise<void> {
@@ -176,7 +184,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             }
             this.listeners.forEach(listener => listener(connectEvent));
         } catch (e) {
-            console.debug(e);
+            logDebug(e);
             const connectEventError: WithoutId<ConnectEventError> = {
                 event: 'connect_error',
                 payload: {
@@ -192,6 +200,8 @@ export class InjectedProvider<T extends string = string> implements InternalProv
     private makeSubscriptions(): void {
         this.listenSubscriptions = true;
         this.unsubscribeCallback = this.injectedWallet.listen(e => {
+            logDebug('Wallet message received:', e);
+
             if (this.listenSubscriptions) {
                 this.listeners.forEach(listener => listener(e));
             }
@@ -205,7 +215,8 @@ export class InjectedProvider<T extends string = string> implements InternalProv
     private updateSession(): Promise<void> {
         return this.connectionStorage.storeConnection({
             type: 'injected',
-            jsBridgeKey: this.injectedWalletKey
+            jsBridgeKey: this.injectedWalletKey,
+            nextRpcRequestId: 0
         });
     }
 }

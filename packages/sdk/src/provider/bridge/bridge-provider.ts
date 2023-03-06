@@ -22,6 +22,7 @@ import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { IStorage } from 'src/storage/models/storage.interface';
 import { Optional, WithoutId, WithoutIdDistributive } from 'src/utils/types';
 import { PROTOCOL_VERSION } from 'src/resources/protocol';
+import { logDebug, logError } from 'src/utils/log';
 
 export class BridgeProvider implements HTTPProvider {
     public static async fromStorage(storage: IStorage): Promise<BridgeProvider> {
@@ -40,8 +41,6 @@ export class BridgeProvider implements HTTPProvider {
         string,
         (response: WithoutId<WalletResponse<RpcMethod>>) => void
     >();
-
-    private nextRequestId = Math.floor(Date.now() / 2 - Math.random() * 1000);
 
     private session: BridgeSession | BridgePartialSession | null = null;
 
@@ -142,12 +141,15 @@ export class BridgeProvider implements HTTPProvider {
     public sendRequest<T extends RpcMethod>(
         request: WithoutId<AppRequest<T>>
     ): Promise<WithoutId<WalletResponse<T>>> {
-        return new Promise((resolve, reject) => {
-            const id = this.nextRequestId;
-            this.nextRequestId++;
+        return new Promise(async (resolve, reject) => {
             if (!this.gateway || !this.session || !('walletPublicKey' in this.session)) {
                 throw new TonConnectError('Trying to send bridge request without session');
             }
+
+            const id = (await this.connectionStorage.getNextRpcRequestId()).toString();
+            await this.connectionStorage.increaseNextRpcRequestId();
+
+            logDebug('Send http-bridge request:', { ...request, id });
 
             const encodedRequest = this.session!.sessionCrypto.encrypt(
                 JSON.stringify({ ...request, id }),
@@ -218,11 +220,13 @@ export class BridgeProvider implements HTTPProvider {
             )
         );
 
+        logDebug('Wallet message received:', walletMessage);
+
         if (!('event' in walletMessage)) {
             const id = walletMessage.id.toString();
             const resolve = this.pendingRequests.get(id);
             if (!resolve) {
-                console.error(`Response id ${id} doesn't match any request's id`);
+                logDebug(`Response id ${id} doesn't match any request's id`);
                 return;
             }
 
@@ -235,7 +239,7 @@ export class BridgeProvider implements HTTPProvider {
             const lastId = await this.connectionStorage.getLastWalletEventId();
 
             if (lastId !== undefined && walletMessage.id <= lastId) {
-                console.error(
+                logError(
                     `Received event id (=${walletMessage.id}) must be greater than stored last wallet event id (=${lastId}) `
                 );
                 return;
@@ -289,7 +293,8 @@ export class BridgeProvider implements HTTPProvider {
             type: 'http',
             session: this.session,
             lastWalletEventId: connectEvent.id,
-            connectEvent: connectEventToSave
+            connectEvent: connectEventToSave,
+            nextRpcRequestId: 0
         });
     }
 
