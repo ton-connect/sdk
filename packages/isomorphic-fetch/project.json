@@ -1,0 +1,12 @@
+{
+  "root": "packages/isomorphic-fetch/",
+  "targets": {
+    "version": {
+      "executor": "@jscutlery/semver:version",
+      "options": {
+        "changelogHeader": "# Changelog @tonconnect/isomorphic-fetch \n",
+        "push": false
+      }
+    }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "name": "@tonconnect/isomorphic-fetch",
+  "version": "0.0.2",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ton-connect/sdk.git"
+  },
+  "homepage": "https://github.com/ton-connect/sdk/tree/main/packages/isomorphic-fetch",
+  "bugs": {
+    "url": "https://github.com/ton-connect/sdk/issues"
+  },
+  "keywords": [
+    "ton-connect",
+    "Connect",
+    "EventSource",
+    "Isomorphic"
+  ],
+  "author": "tonconnect",
+  "license": "Apache-2.0",
+  "scripts": { },
+  "files": ["browser.js", "index.js", "index.mjs", "index.d.ts"],
+  "main": "./index.js",
+  "module": "./index.mjs",
+  "browser": "./browser.js",
+  "types": "./index.d.ts",
+  "typings": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/types/index.d.ts",
+      "browser": "./browser.js",
+      "require": "./index.js",
+      "import": "./index.mjs",
+      "default": "./index.js"
+    }
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.9"
+  },
+  "devDependencies": { },
+  "nx": {
+    "tags": [
+      "scope:isomorphic-fetch"
+    ]
+  }
+}
