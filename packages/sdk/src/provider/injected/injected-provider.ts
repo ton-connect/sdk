@@ -17,7 +17,6 @@ import { IStorage } from 'src/storage/models/storage.interface';
 import { WithoutId, WithoutIdDistributive } from 'src/utils/types';
 import { getWindow } from 'src/utils/web-api';
 import { PROTOCOL_VERSION } from 'src/resources/protocol';
-import { TonConnectError } from 'src/errors';
 import { WalletInfoCurrentlyInjected } from 'src/models';
 import { logDebug } from 'src/utils/log';
 
@@ -129,24 +128,27 @@ export class InjectedProvider<T extends string = string> implements InternalProv
     }
 
     public async disconnect(): Promise<void> {
-        this.sendRequest({
-            method: 'disconnect',
-            params: []
-        })
-            .then(result => {
-                if (!result || 'error' in result || !('result' in result)) {
-                    throw new TonConnectError("Rpc method 'disconnect' is not supported");
-                }
-            })
-            .catch(e => {
-                console.debug(e);
-                try {
-                    this.injectedWallet.disconnect();
-                } catch {}
-            });
+        return new Promise(resolve => {
+            const onRequestSent = (): void => {
+                this.closeAllListeners();
+                this.connectionStorage.removeConnection().then(resolve);
+            };
 
-        this.closeAllListeners();
-        return this.connectionStorage.removeConnection();
+            try {
+                this.injectedWallet.disconnect();
+                onRequestSent();
+            } catch (e) {
+                logDebug(e);
+
+                this.sendRequest(
+                    {
+                        method: 'disconnect',
+                        params: []
+                    },
+                    onRequestSent
+                );
+            }
+        });
     }
 
     private closeAllListeners(): void {
@@ -162,7 +164,8 @@ export class InjectedProvider<T extends string = string> implements InternalProv
     }
 
     public async sendRequest<T extends RpcMethod>(
-        request: WithoutId<AppRequest<T>>
+        request: WithoutId<AppRequest<T>>,
+        onRequestSent?: () => void
     ): Promise<WithoutId<WalletResponse<T>>> {
         const id = (await this.connectionStorage.getNextRpcRequestId()).toString();
         await this.connectionStorage.increaseNextRpcRequestId();
@@ -170,6 +173,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
         logDebug('Send injected-bridge request:', { ...request, id });
         const result = this.injectedWallet.send<T>({ ...request, id } as AppRequest<T>);
         result.then(response => logDebug('Wallet message received:', response));
+        onRequestSent?.();
 
         return result;
     }

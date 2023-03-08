@@ -139,7 +139,8 @@ export class BridgeProvider implements HTTPProvider {
     }
 
     public sendRequest<T extends RpcMethod>(
-        request: WithoutId<AppRequest<T>>
+        request: WithoutId<AppRequest<T>>,
+        onRequestSent?: () => void
     ): Promise<WithoutId<WalletResponse<T>>> {
         return new Promise(async (resolve, reject) => {
             if (!this.gateway || !this.session || !('walletPublicKey' in this.session)) {
@@ -160,6 +161,7 @@ export class BridgeProvider implements HTTPProvider {
                 .send(encodedRequest, this.session.walletPublicKey, request.method)
                 .catch(reject);
             this.pendingRequests.set(id.toString(), resolve);
+            onRequestSent?.();
         });
     }
 
@@ -170,9 +172,24 @@ export class BridgeProvider implements HTTPProvider {
         this.gateway = null;
     }
 
-    public disconnect(): Promise<void> {
-        this.sendRequest({ method: 'disconnect', params: [] }).catch(e => console.debug(e));
-        return this.removeBridgeAndSession();
+    public async disconnect(): Promise<void> {
+        return new Promise(async resolve => {
+            let called = false;
+            const onRequestSent = (): void => {
+                called = true;
+                this.removeBridgeAndSession().then(resolve);
+            };
+
+            try {
+                await this.sendRequest({ method: 'disconnect', params: [] }, onRequestSent);
+            } catch (e) {
+                console.debug(e);
+
+                if (!called) {
+                    this.removeBridgeAndSession().then(resolve);
+                }
+            }
+        });
     }
 
     public listen(callback: (e: WithoutIdDistributive<WalletEvent>) => void): () => void {
