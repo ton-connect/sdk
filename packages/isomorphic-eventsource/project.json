@@ -1,0 +1,12 @@
+{
+  "root": "packages/isomorphic-eventsource/",
+  "targets": {
+    "version": {
+      "executor": "@jscutlery/semver:version",
+      "options": {
+        "changelogHeader": "# Changelog @tonconnect/isomorphic-eventsource \n",
+        "push": false
+      }
+    }
+  }
+}
