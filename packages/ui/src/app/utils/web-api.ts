@@ -79,3 +79,11 @@ export function checkLocalStorageExists(): never | void {
         );
     }
 }
+
+export function getWindow(): Window | undefined {
+    if (typeof window !== 'undefined') {
+        return window;
+    }
+
+    return undefined;
+}

@@ -1,3 +1,5 @@
+import { getWindow } from 'src/app/utils/web-api';
+
 export type Device = 'mobile' | 'tablet' | 'desktop';
 
 const maxWidth = {
@@ -6,6 +8,11 @@ const maxWidth = {
 };
 
 export function isDevice(device: keyof typeof maxWidth | 'desktop'): boolean {
+    const window = getWindow();
+    if (!window) {
+        return device === 'desktop';
+    }
+
     const width = window.innerWidth;
 
     switch (device) {
