@@ -4,6 +4,7 @@ export {
     ConnectEventError,
     CONNECT_EVENT_ERROR_CODES,
     ConnectItemReply,
+    ConnectItemReplyError,
     TonProofItemReply,
     TonProofItemReplySuccess,
     TonProofItemReplyError,

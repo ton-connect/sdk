@@ -64,3 +64,5 @@ export const Base64 = {
     encode,
     decode
 };
+
+export type { encode, decode };
