@@ -10,6 +10,8 @@ export {
     Feature,
     TonProofItemReply,
     TonProofItemReplySuccess,
-    TonProofItemReplyError
+    TonProofItemReplyError,
+    ConnectItemReplyError,
+    CONNECT_ITEM_ERROR_CODES
 } from '@tonconnect/protocol';
 export { toUserFriendlyAddress } from './utils/address';

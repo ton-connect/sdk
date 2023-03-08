@@ -1,8 +1,7 @@
 {
     "extends": "../../tsconfig.base.json",
     "compilerOptions": {
-        "declarationDir": "./lib/types",
-        "outDir": "./lib",
+        "declaration": false,
         "baseUrl": "./",
         "paths": {
             "src/*": ["./src/*"]
@@ -13,9 +12,6 @@
             { "transform": "typescript-transform-paths", "afterDeclarations": true }
         ]
     },
-    "include": [
-      "./src"
-    ],
-    "exclude": [
-      "./__tests__","node_modules", "./lib", "./types"]
+    "include": ["./src"],
+    "exclude": ["node_modules", "./lib", "./dist", "./types-dist"]
 }

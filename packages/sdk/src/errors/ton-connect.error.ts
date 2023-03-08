@@ -8,7 +8,12 @@ export class TonConnectError extends Error {
         return '';
     }
 
-    constructor(message?: string, options?: ErrorOptions) {
+    constructor(
+        message?: string,
+        options?: {
+            cause?: unknown;
+        }
+    ) {
         super(message, options);
 
         this.message = `${TonConnectError.prefix} ${this.constructor.name}${
