@@ -21,7 +21,7 @@ const TonConnectButton: FunctionComponent<TonConnectButtonProps> = ({ className,
 
     useEffect(() => {
         setOptions({ buttonRootId });
-    }, []);
+    }, [setOptions]);
 
     return <div id={buttonRootId} className={className} style={style}></div>;
 };

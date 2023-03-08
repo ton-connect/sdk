@@ -1,5 +1,5 @@
 module.exports = {
-    extends: ["../../.eslintrc.js", 'plugin:react/recommended'],
+    extends: ["../../.eslintrc.js", 'plugin:react/recommended', 'plugin:react-hooks/recommended'],
     parserOptions: {
         "sourceType": "module",
         "ecmaVersion": "latest",
