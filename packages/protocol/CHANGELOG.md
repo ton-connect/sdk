@@ -1,5 +1,15 @@
 # Changelog @tonconnect/protocol 
 
+## [2.2.5](https://github.com/ton-connect/sdk/compare/protocol-2.2.4...protocol-2.2.5) (2023-03-09)
+
+
+### Bug Fixes
+
+* **protocol:** `Features` format changed ([3bc5f68](https://github.com/ton-connect/sdk/commit/3bc5f689779807b8a78784484f48e849e83544f9))
+* **protocol:** building process refactored ([2516523](https://github.com/ton-connect/sdk/commit/251652336964c6ab2b2dedb3ab0530f15de2c29b))
+
+
+
 ## [2.2.4](https://github.com/ton-connect/sdk/compare/protocol-2.2.3...protocol-2.2.4) (2023-03-01)
 
 
