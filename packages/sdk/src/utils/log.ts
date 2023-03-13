@@ -14,3 +14,12 @@ export function logError(...args: Parameters<Console['error']>): void {
     }
 }
 
+export function logWarning(...args: Parameters<Console['warn']>): void {
+    if (typeof 'console' !== undefined) {
+        try {
+            console.warn('[TON_CONNECT_SDK]', ...args);
+        } catch {}
+    }
+}
+
+

@@ -107,7 +107,10 @@ export class InjectedProvider<T extends string = string> implements InternalProv
 
     public async restoreConnection(): Promise<void> {
         try {
+            logDebug(`Injected Provider restoring connection...`);
             const connectEvent = await this.injectedWallet.restoreConnection();
+            logDebug('Injected Provider restoring connection response', connectEvent);
+
             if (connectEvent.event === 'connect') {
                 this.makeSubscriptions();
                 this.listeners.forEach(listener => listener(connectEvent));
@@ -180,7 +183,13 @@ export class InjectedProvider<T extends string = string> implements InternalProv
 
     private async _connect(protocolVersion: number, message: ConnectRequest): Promise<void> {
         try {
+            logDebug(
+                `Injected Provider connect request: protocolVersion: ${protocolVersion}, message:`,
+                message
+            );
             const connectEvent = await this.injectedWallet.connect(protocolVersion, message);
+
+            logDebug('Injected Provider connect response:', connectEvent);
 
             if (connectEvent.event === 'connect') {
                 await this.updateSession();

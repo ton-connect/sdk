@@ -6,8 +6,7 @@ import {
     TonAddressItemReply,
     WalletEvent,
     TonProofItemReply,
-    ConnectItem,
-    Feature
+    ConnectItem
 } from '@tonconnect/protocol';
 import { DappMetadataError } from 'src/errors/dapp/dapp-metadata.error';
 import { ManifestContentErrorError } from 'src/errors/protocol/events/connect/manifest-content-error.error';
@@ -15,7 +14,6 @@ import { ManifestNotFoundError } from 'src/errors/protocol/events/connect/manife
 import { TonConnectError } from 'src/errors/ton-connect.error';
 import { WalletAlreadyConnectedError } from 'src/errors/wallet/wallet-already-connected.error';
 import { WalletNotConnectedError } from 'src/errors/wallet/wallet-not-connected.error';
-import { WalletNotSupportFeatureError } from 'src/errors/wallet/wallet-not-support-feature.error';
 import {
     Account,
     Wallet,
@@ -41,6 +39,7 @@ import { ITonConnect } from 'src/ton-connect.interface';
 import { getDocument, getWebPageManifest } from 'src/utils/web-api';
 import { WalletsListManager } from 'src/wallets-list-manager';
 import { WithoutIdDistributive } from 'src/utils/types';
+import { checkSendTransactionSupport } from 'src/utils/feature-support';
 
 export class TonConnect implements ITonConnect {
     private static readonly walletsList = new WalletsListManager();
@@ -222,7 +221,9 @@ export class TonConnect implements ITonConnect {
         transaction: SendTransactionRequest
     ): Promise<SendTransactionResponse> {
         this.checkConnection();
-        this.checkFeatureSupport('SendTransaction');
+        checkSendTransactionSupport(this.wallet!.device.features, {
+            requiredMessagesNumber: transaction.messages.length
+        });
 
         const { validUntil, ...tx } = transaction;
         const from = transaction.from || this.account!.address;
@@ -379,12 +380,6 @@ export class TonConnect implements ITonConnect {
     private checkConnection(): void | never {
         if (!this.connected) {
             throw new WalletNotConnectedError();
-        }
-    }
-
-    private checkFeatureSupport(feature: Feature): void | never {
-        if (!this.wallet?.device.features.includes(feature)) {
-            throw new WalletNotSupportFeatureError();
         }
     }
 
