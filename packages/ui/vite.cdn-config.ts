@@ -22,6 +22,11 @@ export default defineConfig({
     outDir: 'dist',
     emptyOutDir: true,
     minify: 'terser',
+    terserOptions: {
+      format: {
+        comments: false
+      }
+    },
     sourcemap: true,
     lib: {
       formats: ['umd'],
