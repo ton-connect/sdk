@@ -106,9 +106,9 @@ Following type guards might be helpful for WalletInfos manipulations:
 
 ```ts
 import {
-    isWalletInfoEmbedded,
+    isWalletInfoCurrentlyEmbedded,
     isWalletInfoInjectable,
-    isWalletInfoInjected,
+    isWalletInfoCurrentlyInjected,
     isWalletInfoRemote,
     WalletInfo
 } from '@tonconnect/sdk';
@@ -120,8 +120,8 @@ const remoteConnectionWalletInfos = walletInfoList.filter(isWalletInfoRemote);
 const injectableConnectionWalletInfos = walletInfoList.filter(isWalletInfoInjectable);
 
 // wallets that are injected to the current webpage 
-const currentlyInjectedWalletInfos = walletInfoList.filter(isWalletInfoInjected);
-const embeddedWalletInfo = walletInfoList.find(isWalletInfoEmbedded);
+const currentlyInjectedWalletInfos = walletInfoList.filter(isWalletInfoCurrentlyInjected);
+const embeddedWalletInfo = walletInfoList.find(isWalletInfoCurrentlyEmbedded);
 
     
 /* or use as type guard */
@@ -133,7 +133,7 @@ if (isWalletInfoRemote(walletInfo)) {
     return;
 }
 
-if (isWalletInfoInjected(walletInfo)) {
+if (isWalletInfoCurrentlyInjected(walletInfo)) {
     connector.connect({
         jsBridgeKey: walletInfo.jsBridgeKey
     });
@@ -145,9 +145,10 @@ if (isWalletInfoInjected(walletInfo)) {
 ### Initialize a remote wallet connection via universal link 
 
 ```ts
+// Should correspond to the wallet that user selects
 const walletConnectionSource = {
-    universalLink: 'https://app.mycooltonwallet.com',
-    bridgeUrl: 'https://bridge.mycooltonwallet.com'
+    universalLink: 'https://app.tonkeeper.com/ton-connect',
+    bridgeUrl: 'https://bridge.tonapi.io/bridge'
 }
 
 const universalLink = connector.connect(walletConnectionSource);
@@ -157,6 +158,7 @@ Then you have to show this link to user as QR code, or use it as a deeplink. You
 
 ### Initialize injected wallet connection
 ```ts
+// Should correspond to the wallet that user selects
 const walletConnectionSource = {
     jsBridgeKey: 'tonkeeper'
 }
@@ -166,20 +168,37 @@ connector.connect(walletConnectionSource);
 
 You will receive an update in `connector.onStatusChange` when user approves connection in the wallet.
 
+### Create unified link
+You can create the unified link that could be accepted by any wallet. To do that you should pass an array of http-wallet-connection-sources:
+
+If several wallets have same bridge url, you can pass this url only once.
+```ts
+const sources = [
+    {
+        bridgeUrl: 'https://bridge.tonapi.io/bridge' // Tonkeeper
+    },
+    {
+        bridgeUrl: 'https://<OTHER_WALLET_BRIDGE>' // Tonkeeper
+    }
+];
+
+connector.connect(sources);
+```
+
 ### Detect embedded wallet
 It is recommended not to show a QR code modal if the app is opened inside a wallet's browser. 
 You should detect working environment of the app and show appropriate UI.
 Check `embedded` property in elements of the wallets list to detect if the app is opened inside a wallet.
 
 ```ts
-import { isWalletInfoEmbedded, WalletInfoInjected } from '@tonconnect/sdk';
+import { isWalletInfoCurrentlyEmbedded, WalletInfoCurrentlyEmbedded } from '@tonconnect/sdk';
 
 // "connect button" click handler.
 // Execute this before show wallet selection modal.
 
 const walletsList = await connector.getWallets(); // or use `walletsList` fetched before  
 
-const embeddedWallet = walletsList.find(isWalletInfoEmbedded) as WalletInfoInjected;
+const embeddedWallet = walletsList.find(isWalletInfoCurrentlyEmbedded) as WalletInfoCurrentlyEmbedded;
 
 if (embeddedWallet) {
     connector.connect({ jsBridgeKey: embeddedWallet.jsBridgeKey });
@@ -201,12 +220,12 @@ const transaction = {
         {
             address: "0:412410771DA82CBA306A55FA9E0D43C9D245E38133CB58F1457DFB8D5CD8892F",
             amount: "20000000",
-            stateInit: "base64bocblahblahblah==" // just for instance. Replace with your transaction initState or remove
+         /* stateInit: "base64_YOUR_STATE_INIT" */ // just for instance. Replace with your transaction stateInit or remove
         },
         {
             address: "0:E69F10CC84877ABF539F83F879291E5CA169451BA7BCE91A37A5CED3AB8080D3",
-            amount: "60000000",
-            payload: "base64bocblahblahblah==" // just for instance. Replace with your transaction payload or remove
+            amount: "60000000", 
+         /* payload: "base64_YOUR_PAYLOAD" */ // just for instance. Replace with your transaction payload or remove
         }
     ]
 }
