@@ -30,14 +30,14 @@ async function dev(): Promise<void> {
         }
     });
 
-    tonConnectUI.setConnectRequestParameters({ state: 'loading' });
+    /* tonConnectUI.setConnectRequestParameters({ state: 'loading' });
 
     setTimeout(() => {
         tonConnectUI.setConnectRequestParameters({
             state: 'ready',
             value: { tonProof: 'tonProofPayload' }
         });
-    }, 3000);
+    }, 3000);*/
 
     tonConnectUI.onStatusChange(wallet => {
         document.getElementById('content')!.textContent = wallet ? JSON.stringify(wallet) : wallet;
@@ -76,8 +76,12 @@ async function dev(): Promise<void> {
 
     document.getElementById('send-tx')!.onclick = () => {
         const defaultTx: SendTransactionRequest = {
-            validUntil: Date.now() + 1000000,
+            validUntil: Math.round(Date.now() / 1000) + 1000,
             messages: [
+                {
+                    address: '-1:4d5c0210b35daddaa219fac459dba0fdefb1fae4e97a0d0797739fe050d694ca',
+                    amount: '1000000'
+                },
                 {
                     address: '-1:4d5c0210b35daddaa219fac459dba0fdefb1fae4e97a0d0797739fe050d694ca',
                     amount: '1000000'

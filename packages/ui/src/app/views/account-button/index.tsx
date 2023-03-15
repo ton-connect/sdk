@@ -1,13 +1,4 @@
-import {
-    Component,
-    createEffect,
-    createResource,
-    createSignal,
-    onCleanup,
-    onMount,
-    Show,
-    useContext
-} from 'solid-js';
+import { Component, createSignal, onCleanup, onMount, Show, useContext } from 'solid-js';
 import { ArrowIcon, Text, TonIcon } from 'src/app/components';
 import { ConnectorContext } from 'src/app/state/connector.context';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
@@ -36,7 +27,7 @@ export const AccountButton: Component<AccountButtonProps> = () => {
     const connector = useContext(ConnectorContext)!;
     const tonConnectUI = useContext(TonConnectUiContext)!;
     const [isOpened, setIsOpened] = createSignal(false);
-    const [account, setAccount] = createSignal<Account | null>(null);
+    const [account, setAccount] = createSignal<Account | null>(connector.account);
     const [restoringProcess, setRestoringProcess] = createSignal<boolean>(true);
 
     let dropDownRef: HTMLDivElement | undefined;

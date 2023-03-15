@@ -2,7 +2,7 @@ import { getWindow } from 'src/app/utils/web-api';
 
 export type Device = 'mobile' | 'tablet' | 'desktop';
 
-const maxWidth = {
+export const maxWidth = {
     mobile: 440,
     tablet: 1020
 };

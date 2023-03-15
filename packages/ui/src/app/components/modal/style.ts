@@ -1,6 +1,6 @@
 import { css, styled } from 'solid-styled-components';
 import { IconButton } from 'src/app/components/icon-button';
-import { media } from 'src/app/styles/media';
+import { maxWidth, media } from 'src/app/styles/media';
 
 export const ModalBackgroundStyled = styled.div`
     display: flex;
@@ -16,6 +16,12 @@ export const ModalBackgroundStyled = styled.div`
 
     ${media('mobile')} {
         align-items: flex-end;
+    }
+
+    @media (min-width: ${maxWidth.mobile.toString()}px) and (max-height: 600px) {
+        padding: 48px 0;
+        align-items: flex-start;
+        overflow: scroll;
     }
 `;
 

@@ -5,7 +5,8 @@
     "learnMore": "Подробнее",
     "openExtension": "Расширение",
     "copyLink": "Копировать ссылку",
-    "copied": "Скопировано!"
+    "copied": "Скопировано!",
+    "yourWallet": "вашем кошельке"
   },
   "button": {
     "connectWallet": "Подключить кошелёк",
@@ -17,7 +18,7 @@
   },
   "notifications": {
     "confirm": {
-      "header": "Откройте, чтобы подтвердить транзакцию."
+      "header": "Откройте {{ name }}, чтобы подтвердить транзакцию."
     },
     "transactionSent": {
       "header": "Транзакция отправлена",
@@ -56,7 +57,7 @@
   },
   "actionModal": {
     "confirmTransaction": {
-      "header": "Подтвердите действие в своём кошельке",
+      "header": "Подтвердите действие в {{ name }}",
       "text": "Это займет пару секунд."
     },
     "transactionSent": "$notifications.transactionSent",

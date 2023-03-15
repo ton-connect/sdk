@@ -5,7 +5,8 @@
     "learnMore": "Learn more",
     "openExtension": "Open Extension",
     "copyLink": "Copy Link",
-    "copied": "Copied!"
+    "copied": "Copied!",
+    "yourWallet": "your wallet"
   },
   "button": {
     "connectWallet": "Connect Wallet",
@@ -17,7 +18,7 @@
   },
   "notifications": {
     "confirm": {
-      "header": "Open to confirm the transaction."
+      "header": "Open {{ name }} to confirm the transaction."
     },
     "transactionSent": {
       "header": "Transaction sent",
@@ -56,7 +57,7 @@
   },
   "actionModal": {
     "confirmTransaction": {
-      "header": "Confirm the transaction in your wallet",
+      "header": "Confirm the transaction in {{ name }}t",
       "text": "It will only take a moment."
     },
     "transactionSent": "$notifications.transactionSent",

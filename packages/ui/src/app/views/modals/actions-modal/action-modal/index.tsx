@@ -6,8 +6,10 @@ import { useDataAttributes } from 'src/app/hooks/use-data-attributes';
 
 interface ActionModalProps extends WithDataAttributes {
     headerTranslationKey: string;
+    headerTranslationValues?: Record<string, string>;
     icon: JSXElement;
     textTranslationKey?: string;
+    textTranslationValues?: Record<string, string>;
     onClose: () => void;
     showButton?: boolean;
 }
@@ -18,8 +20,14 @@ export const ActionModal: Component<ActionModalProps> = props => {
     return (
         <ActionModalStyled {...dataAttrs}>
             {props.icon}
-            <H1Styled translationKey={props.headerTranslationKey} />
-            <TextStyled translationKey={props.textTranslationKey} />
+            <H1Styled
+                translationKey={props.headerTranslationKey}
+                translationValues={props.headerTranslationValues}
+            />
+            <TextStyled
+                translationKey={props.textTranslationKey}
+                translationValues={props.textTranslationValues}
+            />
             <Show when={props.showButton !== false}>
                 <ButtonStyled onClick={() => props.onClose()}>
                     <Translation translationKey="common.close">Close</Translation>
