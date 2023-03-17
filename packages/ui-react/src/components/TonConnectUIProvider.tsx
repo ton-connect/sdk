@@ -1,4 +1,4 @@
-import { createContext, FunctionComponent, memo } from 'react';
+import { createContext, FunctionComponent, memo, ReactNode } from 'react';
 import {
     ActionConfiguration,
     Locales,
@@ -12,7 +12,7 @@ import { isClientSide } from '../utils/web';
 export const TonConnectUIContext = createContext<TonConnectUI | null>(null);
 
 export type TonConnectUIProviderProps = {
-    children: JSX.Element;
+    children: ReactNode;
 } & Partial<TonConnectUIProviderPropsBase> &
     Partial<TonConnectUIProviderPropsWithManifest | TonConnectUIProviderPropsWithConnector>;
 
