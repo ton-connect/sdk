@@ -192,19 +192,25 @@ export class TonConnect implements ITonConnect {
             this.walletsList.getEmbeddedWallet()
         ]);
 
-        switch (bridgeConnectionType) {
-            case 'http':
-                this.provider = await BridgeProvider.fromStorage(this.dappSettings.storage);
-                break;
-            case 'injected':
-                this.provider = await InjectedProvider.fromStorage(this.dappSettings.storage);
-                break;
-            default:
-                if (embeddedWallet) {
-                    this.provider = await this.createProvider(embeddedWallet);
-                } else {
-                    return;
-                }
+        try {
+            switch (bridgeConnectionType) {
+                case 'http':
+                    this.provider = await BridgeProvider.fromStorage(this.dappSettings.storage);
+                    break;
+                case 'injected':
+                    this.provider = await InjectedProvider.fromStorage(this.dappSettings.storage);
+                    break;
+                default:
+                    if (embeddedWallet) {
+                        this.provider = await this.createProvider(embeddedWallet);
+                    } else {
+                        return;
+                    }
+            }
+        } catch {
+            await this.bridgeConnectionStorage.removeConnection();
+            this.provider = null;
+            return;
         }
 
         this.provider.listen(this.walletEventsListener.bind(this));
