@@ -27,9 +27,13 @@ export interface InjectedWalletApi {
 }
 
 export function isJSBridgeWithMetadata(value: unknown): value is { tonconnect: InjectedWalletApi } {
-    if (!hasProperty(value, 'tonconnect') || !hasProperty(value.tonconnect, 'walletInfo')) {
+    try {
+        if (!hasProperty(value, 'tonconnect') || !hasProperty(value.tonconnect, 'walletInfo')) {
+            return false;
+        }
+
+        return hasProperties(value.tonconnect.walletInfo, ['name', 'image', 'about_url']);
+    } catch {
         return false;
     }
-
-    return hasProperties(value.tonconnect.walletInfo, ['name', 'image', 'about_url']);
 }
