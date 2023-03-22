@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "strict": false,
+    "isolatedModules": false,
+    "target": "ESNext",
+    "module": "ESNext",
+    "types": ["vitest/globals"],
+    "rootDir": "./",
+    "paths": {
+      "tests/*": ["./tests/*"],
+      "src/*": ["./src/*"]
+    }
+  },
+  "include": ["./tests"],
+  "exclude": ["src"]
+}
