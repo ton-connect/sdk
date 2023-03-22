@@ -1,5 +1,16 @@
 # Changelog @tonconnect/sdk 
 
+## [2.1.1](https://github.com/ton-connect/sdk/compare/sdk-2.1.0...sdk-2.1.1) (2023-03-22)
+
+
+### Bug Fixes
+
+* **sdk:** extension was disabled after wallet connection check added ([b13d1e1](https://github.com/ton-connect/sdk/commit/b13d1e15428b1f05ab71d3f2412e94e3f4f12415))
+* **sdk:** fetch wallets list error when window contains iframe fixed ([b1f338a](https://github.com/ton-connect/sdk/commit/b1f338a34159b7c3251271a38a3579cc6b7a2a84))
+* **sdk:** option to disable auto pause/unpause SSE connection on 'document.visibilitychange' event added ([5b1aeff](https://github.com/ton-connect/sdk/commit/5b1aeff0827722d84c7a675046b9484a222a7e7e))
+
+
+
 # [2.1.0](https://github.com/ton-connect/sdk/compare/sdk-2.0.7...sdk-2.1.0) (2023-03-17)
 
 
