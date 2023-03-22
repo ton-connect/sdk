@@ -1,6 +1,6 @@
 {
   "name": "@tonconnect/ui-react",
-  "version": "0.0.14",
+  "version": "1.0.0-beta.0",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build"
