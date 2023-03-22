@@ -1,5 +1,15 @@
 # Changelog @tonconnect/sdk 
 
+## [2.1.2](https://github.com/ton-connect/sdk/compare/sdk-2.1.1...sdk-2.1.2) (2023-03-22)
+
+
+### Bug Fixes
+
+* **sdk:** wallets list fallback added ([518c87b](https://github.com/ton-connect/sdk/commit/518c87b9c5a5f9c41626ba352414e0392d28d681))
+* **sdk:** wallets list tests added ([f8784fc](https://github.com/ton-connect/sdk/commit/f8784fc8971053490098d6946b6fead964f1ad85))
+
+
+
 ## [2.1.1](https://github.com/ton-connect/sdk/compare/sdk-2.1.0...sdk-2.1.1) (2023-03-22)
 
 
