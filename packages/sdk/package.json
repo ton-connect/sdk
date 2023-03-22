@@ -1,6 +1,6 @@
 {
   "name": "@tonconnect/sdk",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "scripts": {
     "build": "npx rimraf types-dist && npx rimraf lib && npx rollup -c rollup.config.mjs && ttsc --project tsconfig.declarations.json && api-extractor run && npx rimraf types-dist && npx rimraf dist && npx webpack --config webpack.config.js",
     "test": "vitest run"
@@ -60,7 +60,6 @@
     "vite-tsconfig-paths": "^4.0.5",
     "vitest": "^0.29.2",
     "vitest-fetch-mock": "^0.2.2"
-
   },
   "typedoc": {
     "entryPoint": "./src/index.ts"

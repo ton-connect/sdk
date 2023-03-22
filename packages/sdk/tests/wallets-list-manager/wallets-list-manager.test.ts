@@ -1,14 +1,21 @@
-import { afterEach, describe, expect, Mock, vitest } from 'vitest';
+import { describe, expect, Mock } from 'vitest';
 import { fetchMocker } from 'tests/setup';
 import { WalletsListManager } from 'src/wallets-list-manager';
 import { defaultWalletsList, walletsListWithWrongWallet, wrongWalletsList } from './mock-data';
+import { FALLBACK_WALLETS_LIST } from 'src/resources/fallback-wallets-list';
 import { FetchWalletsError } from 'src/errors';
+import { logError } from '../../src/utils/log';
 
-const originalConsoleDebug = console.debug;
+vi.mock('../../src/utils/log', () => {
+    return {
+        logError: vi.fn()
+    };
+});
+
 describe('Wallets list manager tests', () => {
     let walletsListManager: WalletsListManager;
 
-    let consoleDebugMock: Mock;
+    let consoleErrorMock: Mock;
 
     const mockFetch = (walletsListSource: object) =>
         fetchMocker.mockIf(walletsListManager['walletsListSource'], () => ({
@@ -16,13 +23,14 @@ describe('Wallets list manager tests', () => {
         }));
 
     beforeEach(() => {
-        consoleDebugMock = vitest.fn();
-        console.debug = consoleDebugMock;
+        consoleErrorMock = vi.fn();
+
         walletsListManager = new WalletsListManager();
     });
 
     afterEach(() => {
-        console.debug = originalConsoleDebug;
+        vi.clearAllMocks();
+        vi.resetAllMocks();
     });
 
     it('Should parse correct config', async () => {
@@ -30,6 +38,7 @@ describe('Wallets list manager tests', () => {
 
         const walletsList = await walletsListManager.getWallets();
 
+        expect(logError).toBeCalledTimes(0);
         expect(walletsList).toEqual(defaultWalletsList.parsed);
     });
 
@@ -39,30 +48,41 @@ describe('Wallets list manager tests', () => {
         const walletsList = await walletsListManager.getWallets();
 
         expect(walletsList).toEqual(walletsListWithWrongWallet.parsed);
-        expect(consoleDebugMock.mock.calls.length).toEqual(1);
-        expect(consoleDebugMock.mock.calls[0].join(' ')).toEqual(
-            '[TON_CONNECT_SDK] Wallet(s) Tonhub config format is wrong. They were removed from the wallets list.'
+        expect(logError).toBeCalledTimes(1);
+        expect(logError).toBeCalledWith(
+            'Wallet(s) Tonhub config format is wrong. They were removed from the wallets list.'
         );
     });
 
-    it('Should throw when wallets list format is incorrect', async () => {
+    it('Should use fallback wallets list if fetched wallets list format is incorrect', async () => {
         mockFetch(wrongWalletsList.source);
 
-        await expect(walletsListManager.getWallets()).rejects.toEqual(
+        const walletsList = await walletsListManager.getWallets();
+
+        expect(logError).toBeCalledTimes(1);
+        expect(logError).toBeCalledWith(
             new FetchWalletsError('Wrong wallets list format, wallets list must be an array.')
+        );
+        expect(walletsList).toEqual(
+            walletsListManager['walletConfigDTOListToWalletConfigList'](FALLBACK_WALLETS_LIST)
         );
     });
 
-    it("Should throw when can't load the wallets list", async () => {
+    it("Should use fallback wallets list when can't load the wallets list", async () => {
         fetchMocker.mockIf(walletsListManager['walletsListSource'], () => ({
             code: 400,
             body: ''
         }));
 
-        await expect(walletsListManager.getWallets()).rejects.toEqual(
-            new FetchWalletsError(
-                'FetchError: invalid json response body at  reason: Unexpected end of JSON input'
-            )
+        const walletsList = await walletsListManager.getWallets();
+
+        expect(logError).toBeCalledTimes(1);
+
+        expect((logError as Mock).mock.calls[0].toString()).toEqual(
+            'FetchError: invalid json response body at  reason: Unexpected end of JSON input'
+        );
+        expect(walletsList).toEqual(
+            walletsListManager['walletConfigDTOListToWalletConfigList'](FALLBACK_WALLETS_LIST)
         );
     });
 
@@ -86,5 +106,6 @@ describe('Wallets list manager tests', () => {
         const walletsList = await walletsListManager.getWallets();
 
         expect(walletsList.length).toEqual(walletsListSource.length);
+        expect(consoleErrorMock.mock.calls.length).toEqual(0);
     });
 });
