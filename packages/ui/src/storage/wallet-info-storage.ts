@@ -1,5 +1,5 @@
-import { TonConnectUIError } from 'src/errors/ton-connect-ui.error';
 import { WalletInfoWithOpenMethod } from 'src/models/connected-wallet';
+import { checkLocalStorageExists } from 'src/app/utils/web-api';
 
 export class WalletInfoStorage {
     private readonly localStorage: Storage;
@@ -7,11 +7,7 @@ export class WalletInfoStorage {
     private readonly storageKey = 'ton-connect-ui_wallet-info';
 
     constructor() {
-        if (typeof localStorage === 'undefined') {
-            throw new TonConnectUIError(
-                'window.localStorage is undefined. localStorage is required for TonConnectUI'
-            );
-        }
+        checkLocalStorageExists();
 
         this.localStorage = localStorage;
     }

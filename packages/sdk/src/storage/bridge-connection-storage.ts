@@ -23,13 +23,15 @@ export class BridgeConnectionStorage {
         const rawSession: BridgeSessionRaw = {
             sessionKeyPair: connection.session.sessionCrypto.stringifyKeypair(),
             walletPublicKey: connection.session.walletPublicKey,
-            walletConnectionSource: connection.session.walletConnectionSource
+            bridgeUrl: connection.session.bridgeUrl
         };
 
         const rawConnection: BridgeConnectionHttpRaw = {
             type: 'http',
             connectEvent: connection.connectEvent,
-            session: rawSession
+            session: rawSession,
+            lastWalletEventId: connection.lastWalletEventId,
+            nextRpcRequestId: connection.nextRpcRequestId
         };
         return this.storage.setItem(this.storeKey, JSON.stringify(rawConnection));
     }
@@ -54,9 +56,11 @@ export class BridgeConnectionStorage {
         return {
             type: 'http',
             connectEvent: connection.connectEvent,
+            lastWalletEventId: connection.lastWalletEventId,
+            nextRpcRequestId: connection.nextRpcRequestId,
             session: {
                 sessionCrypto,
-                walletConnectionSource: connection.session.walletConnectionSource,
+                bridgeUrl: connection.session.bridgeUrl,
                 walletPublicKey: connection.session.walletPublicKey
             }
         };
@@ -104,5 +108,40 @@ export class BridgeConnectionStorage {
         }
         const connection: BridgeConnection = JSON.parse(stored);
         return connection.type;
+    }
+
+    public async storeLastWalletEventId(id: number): Promise<void> {
+        const connection = await this.getConnection();
+        if (connection && connection.type === 'http') {
+            connection.lastWalletEventId = id;
+            return this.storeConnection(connection);
+        }
+    }
+
+    public async getLastWalletEventId(): Promise<number | undefined> {
+        const connection = await this.getConnection();
+        if (connection && 'lastWalletEventId' in connection) {
+            return connection.lastWalletEventId;
+        }
+
+        return undefined;
+    }
+
+    public async increaseNextRpcRequestId(): Promise<void> {
+        const connection = await this.getConnection();
+        if (connection) {
+            const lastId = connection.nextRpcRequestId || 0;
+            connection.nextRpcRequestId = lastId + 1;
+            return this.storeConnection(connection);
+        }
+    }
+
+    public async getNextRpcRequestId(): Promise<number> {
+        const connection = await this.getConnection();
+        if (connection) {
+            return connection.nextRpcRequestId || 0;
+        }
+
+        return 0;
     }
 }

@@ -1,7 +1,5 @@
 # TON Connect UI
 
-⚠️ **API is work in progress right now. Don't use this package in production.**
-
 TonConnect UI is a UI kit for TonConnect SDK. Use it to connect your app to TON wallets via TonConnect protocol.
 
 If you use React for your dapp, take a look at [TonConnect UI React kit](https://github.com/ton-connect/sdk/tree/main/packages/ui-react).
@@ -423,29 +421,54 @@ tonConnectUI.uiOptions = {
 It is not recommended to customise TonConnect UI elements via css as it may confuse the user when looking for known and familiar UI elements such as connect button/modals.
 However, it is possible if needed. You can add css styles to the specified selectors of the UI element. See list of selectors in the table below:
 
-| Element                              | Selector                         | Element description                                                                                                   |
-|--------------------------------------|----------------------------------|-----------------------------------------------------------------------------------------------------------------------|
-| Connect wallet modal container       | `#tc-wallets-modal-container`    | Container of the modal window that opens when you click on the "connect wallet" button.                               |
-| Select wallet modal content          | `#tc-wallets-modal`              | Content of the modal window with wallet selection.                                                                    |
-| QR-code modal content                | `#tc-qr-modal`                   | Content of the modal window with QR-code.                                                                             |
-| Action modal container               | `#tc-actions-modal-container`    | Container of the modal window that opens when you call `sendTransaction` or other action.                             |
-| Confirm action modal content         | `#tc-confirm-modal`              | Content of the modal window asking for confirmation of the action in the wallet.                                      |
-| "Transaction sent" modal content     | `#tc-transaction-sent-modal`     | Content of the modal window informing that the transaction was successfully sent.                                     |
-| "Transaction canceled" modal content | `#tc-transaction-canceled-modal` | Content of the modal window informing that the transaction was not sent.                                              |
-| "Connect Wallet" button              | `#tc-connect-button`             | "Connect Wallet" button element.                                                                                      |
-| Wallet menu loading button           | `#tc-connect-button-loading`     | Button element which appears instead of "Connect Wallet" and dropdown menu buttons while restoring connection process |
-| Wallet menu dropdown button          | `#tc-dropdown-button`            | Wallet menu button -- host of the dropdown wallet menu (copy address/disconnect).                                     |
-| Wallet menu dropdown container       | `#tc-dropdown-container`         | Container of the dropdown that opens when you click on the "wallet menu" button with ton address.                     |
-| Wallet menu dropdown content         | `#tc-dropdown`                   | Content of the dropdown that opens when you click on the "wallet menu" button with ton address.                       |
-| Notifications container              | `#tc-notifications`              | Container of the actions notifications.                                                                               |
+UI components:
+
+| Element                               | Selector                                      | Element description                                                                                                   |
+|---------------------------------------|-----------------------------------------------|-----------------------------------------------------------------------------------------------------------------------|
+| Connect wallet modal container        | `[data-tc-wallets-modal-container="true"]`    | Container of the modal window that opens when you click on the "connect wallet" button.                               |
+| Select wallet mobile modal content    | `[data-tc-wallets-modal-mobile="true"]`       | Content of the mobile modal window with wallet selection.                                                             |
+| Select wallet desktop modal content   | `[data-tc-wallets-modal-desktop="true"]`      | Content of the desktop window with wallet selection.                                                                  |
+| Desktop Universal QR content          | `[data-tc-universal-qr-desktop="true"]`       | Universal QR page content under the tab bar in the desktop wallets selection modal window.                            |
+| Desktop wallets list content          | `[data-tc-select-wallet-desktop="true"]`      | Wallets list page content under the tab bar in the desktop wallets selection modal window.                            |
+| Concrete wallet QR-code modal content | `[data-tc-wallet-qr-modal-desktop="true"]`    | Content of the modal window with the concrete wallet QR-code.                                                         |
+| Action modal container                | `[data-tc-actions-modal-container="true"]`    | Container of the modal window that opens when you call `sendTransaction` or other action.                             |
+| Confirm action modal content          | `[data-tc-confirm-modal="true"]`              | Content of the modal window asking for confirmation of the action in the wallet.                                      |
+| "Transaction sent" modal content      | `[data-tc-transaction-sent-modal="true"]`     | Content of the modal window informing that the transaction was successfully sent.                                     |
+| "Transaction canceled" modal content  | `[data-tc-transaction-canceled-modal="true"]` | Content of the modal window informing that the transaction was not sent.                                              |
+| "Connect Wallet" button               | `[data-tc-connect-button="true"]`             | "Connect Wallet" button element.                                                                                      |
+| Wallet menu loading button            | `[data-tc-connect-button-loading="true"]`     | Button element which appears instead of "Connect Wallet" and dropdown menu buttons while restoring connection process |
+| Wallet menu dropdown button           | `[data-tc-dropdown-button="true"]`            | Wallet menu button -- host of the dropdown wallet menu (copy address/disconnect).                                     |
+| Wallet menu dropdown container        | `[data-tc-dropdown-container="true"]`         | Container of the dropdown that opens when you click on the "wallet menu" button with ton address.                     |
+| Wallet menu dropdown content          | `[data-tc-dropdown="true"]`                   | Content of the dropdown that opens when you click on the "wallet menu" button with ton address.                       |
+| Notifications container               | `[data-tc-list-notifications="true"]`         | Container of the actions notifications.                                                                               |
+| Notification confirm                  | `[data-tc-notification-confirm="true"]`       | Confirmation notification element.                                                                                    |
+| Notification tx sent                  | `[data-tc-notification-tx-sent="true"]`       | Transaction sent notification element.                                                                                |
+| Notification cancelled tx             | `[data-tc-notification-tx-cancelled="true"]`  | Cancelled transaction notification element.                                                                           |
+
+---
+
+Basic UI elements:
+
+| Element                        | Selector                        |
+|--------------------------------|---------------------------------|
+| Button                         | `[data-tc-button="true"]`       |
+| Icon-button                    | `[data-tc-icon-button="true"]`  |
+| Modal window                   | `[data-tc-modal="true"]`        |
+| Notification                   | `[data-tc-notification="true"]` |
+| Tab bar                        | `[data-tc-tab-bar="true"]`      |
+| H1                             | `[data-tc-h1="true"]`           |
+| H2                             | `[data-tc-h2="true"]`           |
+| H3                             | `[data-tc-h3="true"]`           |
+| Text                           | `[data-tc-text="true"]`         |
+| Wallet-item                    | `[data-tc-wallet-item="true"]`  |
 
 
 ## Customize the list of displayed wallets
 You can customize the list of displayed wallets: change order, exclude wallets or add custom wallets.
 
 
-### Redefine wallets list
-Pass an array of the wallet's names and custom wallets. Array items order will be applied to the wallets in modal window.  
+### Extend wallets list
+Pass custom wallets array to extend the wallets list. Passed wallets will be added to the end of the original wallets list.  
 
 You can define custom wallet with `jsBridgeKey` (wallet = browser extension or there is a wallet dapp browser) or with `bridgeUrl` and `universalLink` pair (for http-connection compatible wallets), or pass all of these properties. 
 ```ts
@@ -461,71 +484,67 @@ const customWallet: UIWallet = {
 };
 
 tonConnectUI.uiOptions = {
-        walletsList: {
-            wallets: ['tonkeeper', 'openmask', customWallet]
-        }
-    };
+    walletsListConfiguration: {
+        includeWallets: [customWallet]
+    }
+}
 ```
-
-### Modify default wallets list
-Exclude some wallets with `excludeWallets` property.
-Include custom wallets with `includeWallets` property.
-Setup place where custom wallets will appear in the all wallets list with `includeWalletsOrder`. Default value id `'end''`. 
-
-
-```ts
-import { UIWallet } from '@tonconnect/ui';
-
-const customWallet: UIWallet = {
-    name: '<CUSTOM_WALLET_NAME>',
-    imageUrl: '<CUSTOM_WALLET_IMAGE_URL>',
-    aboutUrl: '<CUSTOM_WALLET_ABOUT_URL>',
-    jsBridgeKey: '<CUSTOM_WALLET_JS_BRIDGE_KEY>',
-    bridgeUrl: '<CUSTOM_WALLET_HTTP_BRIDGE_URL>',
-    universalLink: '<CUSTOM_WALLET_UNIVERSAL_LINK>'
-};
-
- tonConnectUI.uiOptions = {
-        walletsList: {
-            excludeWallets: ['openmask'],
-            includeWallets: [customWallet],
-            includeWalletsOrder: 'start'
-        }
-    };
-```
-
-[See all available options](https://ton-connect.github.io/sdk/types/_tonconnect_ui.WalletsListConfiguration.html)
-
 
 ## Add connect request parameters (ton_proof)
-Pass `getConnectParameters` async function to the `TonConnectUI` constructor. This callback will be called after `connectWallet` method call or `Connect Button` click before wallets list render.
+Use `tonConnectUI.setConnectRequestParameters` function to pass your connect request parameters.
 
-In other words, if `getConnectParameters` is passed, there will be a following steps:
-1. User clicks to the 'Connect Wallet' button, or `connectWallet` method is called
-2. Wallets modal opens
-3. Loader renders in the center of the modal
-4. TonConnectUI calls `getConnectParameters` and waits while it resolves
-5. Wallets list renders in the center of the modal
+This function takes one parameter:
 
-Note that there is no any caching for `getConnectParameters` -- every time wallets modal opens there will be the 5 steps above.
-
-If you have to make a http-request to your backend it this case, it is better to do it after app initialization (if possible) and return (probably completed) promise from the `getConnectParameters` to reduce loading time for the user.
-
+Set state to 'loading' while you are waiting for the response from your backend. If user opens connect wallet modal at this moment, he will see a loader.
 ```ts
-const tonProofPayloadPromise = getTonProofFromYourBackend(); // will be executed during app initialization
-                                                             // don't forget to manage to refetch payload from your backend if needed
+tonConnectUI.setConnectRequestParameters({
+    state: 'loading'
+});
+```
 
-const tonConnectUI = new TonConnectUI({
-    manifestUrl: 'https://<YOUR_APP_URL>/tonconnect-manifest.json',
-    buttonRootId: '<YOUR_CONNECT_BUTTON_ANCHOR_ID>',
-    getConnectParameters: async () => {
-        const tonProof = await tonProofPayloadPromise; // will be executed every time when wallets modal is opened. It is recommended to make an http-request in advance
-        return {                                         
-            tonProof
-        };
+or
+
+Set state to 'ready' and define `tonProof` value. Passed parameter will be applied to the connect request (QR and universal link).
+```ts
+tonConnectUI.setConnectRequestParameters({
+    state: 'ready',
+    value: {
+        tonProof: '<your-proof-payload>'
     }
 });
 ```
+
+or 
+
+Remove loader if it was enabled via `state: 'loading'` (e.g. you received an error instead of a response from your backend). Connect request will be created without any additional parameters.
+```ts
+tonConnectUI.setConnectRequestParameters(null);
+```
+
+
+You can call `tonConnectUI.setConnectRequestParameters` multiple times if your tonProof payload has bounded lifetime (e.g. you can refresh connect request parameters every 10 minutes). 
+
+
+```ts
+// enable ui loader
+tonConnectUI.setConnectRequestParameters({ state: 'loading' });
+
+// fetch you tonProofPayload from the backend
+const tonProofPayload: string | null = await fetchTonProofPayloadFromBackend();
+
+if (!tonProofPayload) {
+    // remove loader, connect request will be without any additional parameters
+    tonConnectUI.setConnectRequestParameters(null);
+} else {
+    // add tonProof to the connect request
+    tonConnectUI.setConnectRequestParameters({
+        state: "ready",
+        value: { tonProof: tonProofPayload }
+    });
+}
+
+```
+
 
 You can find `ton_proof` result in the `wallet` object when wallet will be connected:
 ```ts

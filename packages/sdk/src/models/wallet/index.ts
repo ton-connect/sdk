@@ -8,7 +8,14 @@ export type {
 export {
     WalletInfo,
     WalletInfoBase,
-    WalletInfoInjected,
+    WalletInfoInjectable,
+    WalletInfoCurrentlyInjected,
+    WalletInfoCurrentlyEmbedded,
     WalletInfoRemote,
+    WalletInfoInjected,
+    isWalletInfoCurrentlyInjected,
+    isWalletInfoCurrentlyEmbedded,
+    isWalletInfoInjectable,
+    isWalletInfoRemote,
     isWalletInfoInjected
 } from './wallet-info';

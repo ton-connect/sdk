@@ -1,8 +1,8 @@
 {
   "name": "@tonconnect/sdk",
-  "version": "2.0.7",
+  "version": "2.1.1",
   "scripts": {
-    "build": "npx rimraf lib && ttsc --project tsconfig.cjs.json && ttsc --project tsconfig.esm.json && npx rimraf dist &&  webpack --mode production"
+    "build": "npx rimraf types-dist && npx rimraf lib && npx rollup -c rollup.config.mjs && ttsc --project tsconfig.declarations.json && api-extractor run && npx rimraf types-dist && npx rimraf dist && npx webpack --config webpack.config.js"
   },
   "repository": {
     "type": "git",
@@ -23,29 +23,29 @@
   "author": "tonconnect",
   "license": "Apache-2.0",
   "dependencies": {
-    "deepmerge": "^4.2.2",
-    "tweetnacl": "^1.0.3",
-    "eventsource": "^2.0.2",
-    "node-fetch": "^2.6.7",
-    "@tonconnect/protocol": "^2.0.1"
+    "@tonconnect/isomorphic-eventsource": "^0.0.1",
+    "@tonconnect/isomorphic-fetch": "^0.0.2",
+    "@tonconnect/protocol": "^2.2.5"
   },
   "files": [
     "lib",
     "dist"
   ],
-  "main": "./lib/cjs/index.js",
-  "module": "./lib/esm/index.js",
+  "main": "./lib/cjs/index.cjs",
+  "module": "./lib/esm/index.mjs",
   "types": "./lib/types/index.d.ts",
   "exports": {
     ".": {
       "types": "./lib/types/index.d.ts",
-      "require": "./lib/cjs/index.js",
-      "import": "./lib/esm/index.js",
-      "default": "./lib/cjs/index.js"
+      "require": "./lib/cjs/index.cjs",
+      "import": "./lib/esm/index.mjs",
+      "default": "./lib/cjs/index.cjs"
     }
   },
   "nx": {
-    "tags": ["scope:sdk"]
+    "tags": [
+      "scope:sdk"
+    ]
   },
   "devDependencies": {
     "ts-loader": "^9.4.1",
@@ -53,8 +53,8 @@
     "typescript-transform-paths": "^3.3.1",
     "webpack": "^5.75.0",
     "webpack-cli": "^5.0.0",
-    "webpack-bundle-analyzer": "^4.7.0",
-    "tsconfig-paths-webpack-plugin": "^3.5.2"
+    "rollup": "^3.18.0",
+    "@rollup/plugin-typescript": "^11.0.0"
   },
   "typedoc": {
     "entryPoint": "./src/index.ts"

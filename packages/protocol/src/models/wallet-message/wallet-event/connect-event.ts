@@ -38,6 +38,7 @@ export interface TonAddressItemReply {
     address: string;
     network: CHAIN;
     walletStateInit: string;
+    publicKey: string;
 }
 
 export type TonProofItemReply = TonProofItemReplySuccess | TonProofItemReplyError;

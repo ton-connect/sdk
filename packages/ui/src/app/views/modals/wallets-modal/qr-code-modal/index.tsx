@@ -1,70 +1,76 @@
 import {
     ConnectAdditionalRequest,
-    isWalletInfoInjected,
-    WalletInfoInjected,
+    isWalletInfoCurrentlyInjected,
+    WalletInfoCurrentlyInjected,
+    WalletInfoInjectable,
     WalletInfoRemote
 } from '@tonconnect/sdk';
-import { Component, Show, useContext } from 'solid-js';
-import { Button, H1, H2 } from 'src/app/components';
-import { QRCode } from 'src/app/components/qr-code';
+import { Component, createMemo, Show, useContext } from 'solid-js';
+import { Button, H2 } from 'src/app/components';
 import { Translation } from 'src/app/components/typography/Translation';
 import {
     ActionButtonStyled,
     ButtonsContainerStyled,
     GetWalletStyled,
-    QRBackgroundStyled,
+    H1Styled,
     QrCodeModalStyled,
+    QRStyled,
     StyledIconButton,
     TextStyled
 } from './style';
 import { ConnectorContext } from 'src/app/state/connector.context';
-import { addReturnStrategy, openLink, openLinkBlank } from 'src/app/utils/web-api';
-import { Identifiable } from 'src/app/models/identifiable';
+import { addReturnStrategy, openLinkBlank } from 'src/app/utils/web-api';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { appState } from 'src/app/state/app.state';
+import { Link } from 'src/app/components/link';
 
-export interface QrCodeModalProps extends Identifiable {
+export interface QrCodeModalProps {
     additionalRequest?: ConnectAdditionalRequest;
-    wallet: WalletInfoRemote | (WalletInfoRemote & WalletInfoInjected);
+    wallet: WalletInfoRemote | (WalletInfoRemote & WalletInfoInjectable);
     onBackClick: () => void;
 }
 
 export const QrCodeModal: Component<QrCodeModalProps> = props => {
     const connector = useContext(ConnectorContext)!;
-    const universalLink = connector.connect(
-        {
-            universalLink: props.wallet.universalLink,
-            bridgeUrl: props.wallet.bridgeUrl
-        },
-        props.additionalRequest
+    const universalLink = createMemo(() =>
+        connector.connect(
+            {
+                universalLink: props.wallet.universalLink,
+                bridgeUrl: props.wallet.bridgeUrl
+            },
+            props.additionalRequest
+        )
     );
 
     return (
-        <QrCodeModalStyled id={props.id}>
+        <QrCodeModalStyled data-tc-wallet-qr-modal-desktop="true">
             <StyledIconButton icon="arrow" onClick={() => props.onBackClick()} />
-            <H1
+            <H1Styled
                 translationKey="walletModal.qrCodeModal.connectWith"
                 translationValues={{ name: props.wallet.name }}
             >
                 Connect with {props.wallet.name}
-            </H1>
+            </H1Styled>
             <H2
                 translationKey="walletModal.qrCodeModal.scan"
                 translationValues={{ name: props.wallet.name }}
             >
                 Scan QR code with your phone’s or {props.wallet.name}’s camera.
             </H2>
-            <QRBackgroundStyled>
-                <QRCode sourceUrl={universalLink} imageUrl={props.wallet.imageUrl} />
-            </QRBackgroundStyled>
+            <QRStyled
+                disableCopy={false}
+                sourceUrl={universalLink()}
+                imageUrl={props.wallet.imageUrl}
+            />
             <ButtonsContainerStyled>
                 <ActionButtonStyled
+                    scale="s"
                     onClick={() => {
                         setLastSelectedWalletInfo({
                             ...props.wallet,
                             openMethod: 'universal-link'
                         });
-                        openLink(addReturnStrategy(universalLink, appState.returnStrategy));
+                        openLinkBlank(addReturnStrategy(universalLink(), appState.returnStrategy));
                     }}
                 >
                     <Translation
@@ -74,19 +80,21 @@ export const QrCodeModal: Component<QrCodeModalProps> = props => {
                         Open {props.wallet.name}
                     </Translation>
                 </ActionButtonStyled>
-                <Show when={isWalletInfoInjected(props.wallet) && props.wallet.injected}>
+                <Show when={isWalletInfoCurrentlyInjected(props.wallet)}>
                     <ActionButtonStyled
+                        scale="s"
                         onClick={() => {
-                            setLastSelectedWalletInfo(props.wallet as WalletInfoInjected);
+                            setLastSelectedWalletInfo(props.wallet as WalletInfoCurrentlyInjected);
                             connector.connect(
                                 {
-                                    jsBridgeKey: (props.wallet as WalletInfoInjected).jsBridgeKey
+                                    jsBridgeKey: (props.wallet as WalletInfoCurrentlyInjected)
+                                        .jsBridgeKey
                                 },
                                 props.additionalRequest
                             );
                         }}
                     >
-                        <Translation translationKey="walletModal.qrCodeModal.openExtension">
+                        <Translation translationKey="common.openExtension">
                             Open Extension
                         </Translation>
                     </ActionButtonStyled>
@@ -99,9 +107,11 @@ export const QrCodeModal: Component<QrCodeModalProps> = props => {
                 >
                     Don't have {props.wallet.name}?
                 </TextStyled>
-                <Button onClick={() => openLinkBlank(props.wallet.aboutUrl)}>
-                    <Translation translationKey="walletModal.qrCodeModal.get">GET</Translation>
-                </Button>
+                <Link href={props.wallet.aboutUrl} blank>
+                    <Button>
+                        <Translation translationKey="common.get">GET</Translation>
+                    </Button>
+                </Link>
             </GetWalletStyled>
         </QrCodeModalStyled>
     );

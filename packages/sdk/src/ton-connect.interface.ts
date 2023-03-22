@@ -1,5 +1,5 @@
 import { TonConnectError } from 'src/errors';
-import { Account, WalletConnectionSource, Wallet } from 'src/models';
+import { Account, WalletConnectionSource, Wallet, WalletConnectionSourceHTTP } from 'src/models';
 import { SendTransactionRequest, SendTransactionResponse } from 'src/models/methods';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
 import { WalletInfo } from 'src/models/wallet/wallet-info';
@@ -39,11 +39,11 @@ export interface ITonConnect {
 
     /**
      * Generates universal link for an external wallet and subscribes to the wallet's bridge, or sends connect request to the injected wallet.
-     * @param wallet wallet's bridge url and universal link for an external wallet or jsBridge key for the injected wallet.
+     * @param wallet wallet's bridge url and universal link for an external wallet or jsBridge key for the injected wallet, or list of bridges urls for creating an universal connection request for the corresponding wallets.
      * @param request (optional) additional request to pass to the wallet while connect (currently only ton_proof is available).
      * @returns universal link if external wallet was passed or void for the injected wallet.
      */
-    connect<T extends WalletConnectionSource>(
+    connect<T extends WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[]>(
         wallet: T,
         request?: ConnectAdditionalRequest
     ): T extends WalletConnectionSourceJS ? void : string;
@@ -52,6 +52,17 @@ export interface ITonConnect {
      * Try to restore existing session and reconnect to the corresponding wallet. Call it immediately when your app is loaded.
      */
     restoreConnection(): Promise<void>;
+
+    /**
+     * Pause bridge HTTP connection. Might be helpful, if you want to pause connections while browser tab is unfocused,
+     * or if you use SDK with NodeJS and want to save server resources.
+     */
+    pauseConnection(): void;
+
+    /**
+     * Unpause bridge HTTP connection if it is paused.
+     */
+    unPauseConnection(): Promise<void>;
 
     /**
      * Disconnect form thw connected wallet and drop current session.

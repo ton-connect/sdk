@@ -5,7 +5,7 @@ import {
     WalletEvent,
     WalletResponse
 } from '@tonconnect/protocol';
-import { WithoutId } from 'src/utils/types';
+import {WithoutId, WithoutIdDistributive} from 'src/utils/types';
 
 export type Provider = InternalProvider | HTTPProvider;
 
@@ -16,7 +16,12 @@ export interface InternalProvider extends BaseProvider {
 
 export interface HTTPProvider extends BaseProvider {
     type: 'http';
+
     connect(message: ConnectRequest): string;
+
+    pause(): void;
+
+    unPause(): Promise<void>;
 }
 
 interface BaseProvider {
@@ -26,5 +31,5 @@ interface BaseProvider {
     sendRequest<T extends RpcMethod>(
         request: WithoutId<AppRequest<T>>
     ): Promise<WithoutId<WalletResponse<T>>>;
-    listen(eventsCallback: (e: WalletEvent) => void): void;
+    listen(eventsCallback: (e: WithoutIdDistributive<WalletEvent>) => void): void;
 }

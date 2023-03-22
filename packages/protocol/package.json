@@ -1,6 +1,6 @@
 {
   "name": "@tonconnect/protocol",
-  "version": "2.2.3",
+  "version": "2.2.5",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ton-connect/sdk.git"
@@ -19,31 +19,34 @@
   "author": "tonconnect",
   "license": "Apache-2.0",
   "scripts": {
-    "build": "npx rimraf lib && tsc --project tsconfig.cjs.json && tsc --project tsconfig.esm.json",
-    "build:production": "npx rimraf lib && tsc --sourceMap false --project tsconfig.cjs.json && tsc --sourceMap false --project tsconfig.esm.json",
+    "build": "npx rimraf types-dist && npx rimraf lib && npx rollup -c rollup.config.mjs && tsc && api-extractor run && npx rimraf types-dist",
     "test": "jest"
   },
   "files": [
     "lib"
   ],
-  "main": "./lib/cjs/index.js",
-  "module": "./lib/esm/index.js",
+  "main": "./lib/cjs/index.cjs",
+  "module": "./lib/esm/index.mjs",
   "types": "./lib/types/index.d.ts",
+  "typings": "./lib/types/index.d.ts",
   "exports": {
     ".": {
       "types": "./lib/types/index.d.ts",
-      "require": "./lib/cjs/index.js",
-      "import": "./lib/esm/index.js",
-      "default": "./lib/cjs/index.js"
+      "require": "./lib/cjs/index.cjs",
+      "import": "./lib/esm/index.mjs",
+      "default": "./lib/cjs/index.cjs"
     }
   },
   "dependencies": {
-    "tweetnacl-util": "^0.15.1"
+    "tweetnacl-util": "^0.15.1",
+    "tweetnacl": "^1.0.3"
   },
   "devDependencies": {
     "jest": "^29.2.2",
     "ts-jest": "^29.0.3",
-    "@types/jest": "^29.2.0"
+    "@types/jest": "^29.2.0",
+    "rollup": "^3.18.0",
+    "@rollup/plugin-typescript": "^11.0.0"
   },
   "nx": {
     "tags": [

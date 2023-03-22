@@ -101,13 +101,54 @@ You also can get wallets list using `getWallets` static method:
 const walletsList = await TonConnect.getWallets();
 ```
 
+### WalletInfo utils and type guards
+Following type guards might be helpful for WalletInfos manipulations:
+
+```ts
+import {
+    isWalletInfoCurrentlyEmbedded,
+    isWalletInfoInjectable,
+    isWalletInfoCurrentlyInjected,
+    isWalletInfoRemote,
+    WalletInfo
+} from '@tonconnect/sdk';
+
+/* Use for filtration */
+const remoteConnectionWalletInfos = walletInfoList.filter(isWalletInfoRemote);
+
+// all wallets that supports injecteble connection (EVEN THOSE THAT ARE NOT INJECTED TO THE CURRENT PAGE) 
+const injectableConnectionWalletInfos = walletInfoList.filter(isWalletInfoInjectable);
+
+// wallets that are injected to the current webpage 
+const currentlyInjectedWalletInfos = walletInfoList.filter(isWalletInfoCurrentlyInjected);
+const embeddedWalletInfo = walletInfoList.find(isWalletInfoCurrentlyEmbedded);
+
+    
+/* or use as type guard */
+if (isWalletInfoRemote(walletInfo)) {
+    connector.connect({
+        universalLink: walletInfo.universalLink,
+        bridgeUrl: walletInfo.bridgeUrl
+    });
+    return;
+}
+
+if (isWalletInfoCurrentlyInjected(walletInfo)) {
+    connector.connect({
+        jsBridgeKey: walletInfo.jsBridgeKey
+    });
+    return;
+}
+```
+
 ## Initialize a wallet connection when user clicks to 'connect' button in your app
 ### Initialize a remote wallet connection via universal link 
 
 ```ts
+// Should correspond to the wallet that user selects
 const walletConnectionSource = {
-    universalLink: 'https://app.mycooltonwallet.com',
-    bridgeUrl: 'https://bridge.mycooltonwallet.com'
+    universalLink: 'https://app.tonkeeper.com/ton-connect',
+    bridgeUrl: 'https://bridge.tonapi.io/bridge'
 }
 
 const universalLink = connector.connect(walletConnectionSource);
@@ -117,6 +158,7 @@ Then you have to show this link to user as QR code, or use it as a deeplink. You
 
 ### Initialize injected wallet connection
 ```ts
+// Should correspond to the wallet that user selects
 const walletConnectionSource = {
     jsBridgeKey: 'tonkeeper'
 }
@@ -126,22 +168,37 @@ connector.connect(walletConnectionSource);
 
 You will receive an update in `connector.onStatusChange` when user approves connection in the wallet.
 
+### Create unified link
+You can create the unified link that could be accepted by any wallet. To do that you should pass an array of http-wallet-connection-sources:
+
+If several wallets have same bridge url, you can pass this url only once.
+```ts
+const sources = [
+    {
+        bridgeUrl: 'https://bridge.tonapi.io/bridge' // Tonkeeper
+    },
+    {
+        bridgeUrl: 'https://<OTHER_WALLET_BRIDGE>' // Tonkeeper
+    }
+];
+
+connector.connect(sources);
+```
+
 ### Detect embedded wallet
 It is recommended not to show a QR code modal if the app is opened inside a wallet's browser. 
 You should detect working environment of the app and show appropriate UI.
 Check `embedded` property in elements of the wallets list to detect if the app is opened inside a wallet.
 
 ```ts
-import { isWalletInfoInjected, WalletInfoInjected } from '@tonconnect/sdk';
+import { isWalletInfoCurrentlyEmbedded, WalletInfoCurrentlyEmbedded } from '@tonconnect/sdk';
 
 // "connect button" click handler.
 // Execute this before show wallet selection modal.
 
 const walletsList = await connector.getWallets(); // or use `walletsList` fetched before  
 
-const embeddedWallet = walletsList.find(
-    wallet => isWalletInfoInjected(wallet) && wallet.embedded
-) as WalletInfoInjected;
+const embeddedWallet = walletsList.find(isWalletInfoCurrentlyEmbedded) as WalletInfoCurrentlyEmbedded;
 
 if (embeddedWallet) {
     connector.connect({ jsBridgeKey: embeddedWallet.jsBridgeKey });
@@ -163,12 +220,12 @@ const transaction = {
         {
             address: "0:412410771DA82CBA306A55FA9E0D43C9D245E38133CB58F1457DFB8D5CD8892F",
             amount: "20000000",
-            stateInit: "base64bocblahblahblah==" // just for instance. Replace with your transaction initState or remove
+         /* stateInit: "base64_YOUR_STATE_INIT" */ // just for instance. Replace with your transaction stateInit or remove
         },
         {
             address: "0:E69F10CC84877ABF539F83F879291E5CA169451BA7BCE91A37A5CED3AB8080D3",
-            amount: "60000000",
-            payload: "base64bocblahblahblah==" // just for instance. Replace with your transaction payload or remove
+            amount: "60000000", 
+         /* payload: "base64_YOUR_PAYLOAD" */ // just for instance. Replace with your transaction payload or remove
         }
     ]
 }
@@ -271,3 +328,18 @@ export interface IStorage {
 [See details about IStorage in the API documentation](https://ton-connect.github.io/sdk/interfaces/_tonconnect_sdk.IStorage.html).
 
 Other steps are the same as for browser apps.
+
+## Pause and unpause connection
+You can pause and unpause HTTP connection using `tonConnect.pauseConnection()` and `tonConnect.unPauseConnection()` to save your server resources.   
+
+```ts
+myTelegramBot.userIsOffline(user => {
+    const connector = myFunctionGetConnectorByUser(user);
+    connector.pauseConnection();  
+})
+
+myTelegramBot.userIsOnline(user => {
+    const connector = myFunctionGetConnectorByUser(user);
+    connector.unPauseConnection();
+})
+```

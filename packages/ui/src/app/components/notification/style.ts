@@ -18,6 +18,10 @@ export const NotificationStyled = styled.div`
     border-radius: ${props => borders[props.theme!.borderRadius]};
 `;
 
+export const NotificationContentStyled = styled.div`
+    width: 192px;
+`;
+
 export const TextStyled = styled(Text)`
     margin-top: 4px;
     color: ${props => props.theme!.colors.text.secondary};

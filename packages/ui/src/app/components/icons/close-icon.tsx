@@ -12,14 +12,14 @@ export const CloseIcon: Component<CloseIconProps> = props => {
 
     return (
         <svg
-            width="10"
-            height="10"
-            viewBox="0 0 10 10"
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
         >
             <path
-                d="M0.900031 0.900397L5.00002 5.00039M5.00002 5.00039L9.10003 9.1004M5.00002 5.00039L9.10003 0.900391M5.00002 5.00039L0.900024 9.1004"
+                d="M3.90003 3.89991L8.00002 7.9999M8.00002 7.9999L12.1 12.0999M8.00002 7.9999L12.1 3.8999M8.00002 7.9999L3.90002 12.0999"
                 stroke={fill()}
                 stroke-width="1.8"
                 stroke-linecap="round"

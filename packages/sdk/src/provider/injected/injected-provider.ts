@@ -5,15 +5,20 @@ import {
     WalletResponse,
     ConnectRequest,
     WalletEvent,
-    ConnectEvent
+    ConnectEventError
 } from '@tonconnect/protocol';
-import { InjectedWalletApi } from 'src/provider/injected/models/injected-wallet-api';
+import {
+    InjectedWalletApi,
+    isJSBridgeWithMetadata
+} from 'src/provider/injected/models/injected-wallet-api';
 import { InternalProvider } from 'src/provider/provider';
 import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { IStorage } from 'src/storage/models/storage.interface';
-import { WithoutId } from 'src/utils/types';
+import { WithoutId, WithoutIdDistributive } from 'src/utils/types';
 import { getWindow } from 'src/utils/web-api';
 import { PROTOCOL_VERSION } from 'src/resources/protocol';
+import { WalletInfoCurrentlyInjected } from 'src/models';
+import { logDebug } from 'src/utils/log';
 
 type WindowWithTon<T extends string> = {
     [key in T]: {
@@ -42,6 +47,26 @@ export class InjectedProvider<T extends string = string> implements InternalProv
         return false;
     }
 
+    public static getCurrentlyInjectedWallets(): WalletInfoCurrentlyInjected[] {
+        if (!this.window) {
+            return [];
+        }
+
+        const wallets = Object.entries(this.window).filter(([_, value]) =>
+            isJSBridgeWithMetadata(value)
+        ) as unknown as [string, { tonconnect: InjectedWalletApi }][];
+
+        return wallets.map(([jsBridgeKey, wallet]) => ({
+            name: wallet.tonconnect.walletInfo.name,
+            aboutUrl: wallet.tonconnect.walletInfo.about_url,
+            imageUrl: wallet.tonconnect.walletInfo.image,
+            tondns: wallet.tonconnect.walletInfo.tondns,
+            jsBridgeKey,
+            injected: true,
+            embedded: wallet.tonconnect.isWalletBrowser
+        }));
+    }
+
     private static isWindowContainsWallet<T extends string>(
         window: Window | undefined,
         injectedWalletKey: string
@@ -64,7 +89,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
 
     private listenSubscriptions = false;
 
-    private listeners: Array<(e: WalletEvent) => void> = [];
+    private listeners: Array<(e: WithoutIdDistributive<WalletEvent>) => void> = [];
 
     constructor(storage: IStorage, private readonly injectedWalletKey: T) {
         const window: Window | undefined | WindowWithTon<T> = InjectedProvider.window;
@@ -82,7 +107,10 @@ export class InjectedProvider<T extends string = string> implements InternalProv
 
     public async restoreConnection(): Promise<void> {
         try {
+            logDebug(`Injected Provider restoring connection...`);
             const connectEvent = await this.injectedWallet.restoreConnection();
+            logDebug('Injected Provider restoring connection response', connectEvent);
+
             if (connectEvent.event === 'connect') {
                 this.makeSubscriptions();
                 this.listeners.forEach(listener => listener(connectEvent));
@@ -102,10 +130,28 @@ export class InjectedProvider<T extends string = string> implements InternalProv
         this.closeAllListeners();
     }
 
-    public disconnect(): Promise<void> {
-        this.closeAllListeners();
-        this.injectedWallet.disconnect();
-        return this.connectionStorage.removeConnection();
+    public async disconnect(): Promise<void> {
+        return new Promise(resolve => {
+            const onRequestSent = (): void => {
+                this.closeAllListeners();
+                this.connectionStorage.removeConnection().then(resolve);
+            };
+
+            try {
+                this.injectedWallet.disconnect();
+                onRequestSent();
+            } catch (e) {
+                logDebug(e);
+
+                this.sendRequest(
+                    {
+                        method: 'disconnect',
+                        params: []
+                    },
+                    onRequestSent
+                );
+            }
+        });
     }
 
     private closeAllListeners(): void {
@@ -114,21 +160,36 @@ export class InjectedProvider<T extends string = string> implements InternalProv
         this.unsubscribeCallback?.();
     }
 
-    public listen(eventsCallback: (e: WalletEvent) => void): () => void {
+    public listen(eventsCallback: (e: WithoutIdDistributive<WalletEvent>) => void): () => void {
         this.listeners.push(eventsCallback);
         return () =>
             (this.listeners = this.listeners.filter(listener => listener !== eventsCallback));
     }
 
     public async sendRequest<T extends RpcMethod>(
-        request: WithoutId<AppRequest<T>>
+        request: WithoutId<AppRequest<T>>,
+        onRequestSent?: () => void
     ): Promise<WithoutId<WalletResponse<T>>> {
-        return this.injectedWallet.send<T>({ ...request, id: '0' });
+        const id = (await this.connectionStorage.getNextRpcRequestId()).toString();
+        await this.connectionStorage.increaseNextRpcRequestId();
+
+        logDebug('Send injected-bridge request:', { ...request, id });
+        const result = this.injectedWallet.send<T>({ ...request, id } as AppRequest<T>);
+        result.then(response => logDebug('Wallet message received:', response));
+        onRequestSent?.();
+
+        return result;
     }
 
     private async _connect(protocolVersion: number, message: ConnectRequest): Promise<void> {
         try {
+            logDebug(
+                `Injected Provider connect request: protocolVersion: ${protocolVersion}, message:`,
+                message
+            );
             const connectEvent = await this.injectedWallet.connect(protocolVersion, message);
+
+            logDebug('Injected Provider connect response:', connectEvent);
 
             if (connectEvent.event === 'connect') {
                 await this.updateSession();
@@ -136,8 +197,8 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             }
             this.listeners.forEach(listener => listener(connectEvent));
         } catch (e) {
-            console.debug(e);
-            const connectEventError: ConnectEvent = {
+            logDebug(e);
+            const connectEventError: WithoutId<ConnectEventError> = {
                 event: 'connect_error',
                 payload: {
                     code: 0,
@@ -152,6 +213,8 @@ export class InjectedProvider<T extends string = string> implements InternalProv
     private makeSubscriptions(): void {
         this.listenSubscriptions = true;
         this.unsubscribeCallback = this.injectedWallet.listen(e => {
+            logDebug('Wallet message received:', e);
+
             if (this.listenSubscriptions) {
                 this.listeners.forEach(listener => listener(e));
             }
@@ -165,7 +228,8 @@ export class InjectedProvider<T extends string = string> implements InternalProv
     private updateSession(): Promise<void> {
         return this.connectionStorage.storeConnection({
             type: 'injected',
-            jsBridgeKey: this.injectedWalletKey
+            jsBridgeKey: this.injectedWalletKey,
+            nextRpcRequestId: 0
         });
     }
 }

@@ -1,5 +1,6 @@
 /* @refresh reload */
 import { TonConnectUI } from 'src/ton-connect-ui';
+import { THEME } from 'src/models';
 import { SendTransactionRequest } from '@tonconnect/sdk';
 
 async function dev(): Promise<void> {
@@ -10,12 +11,36 @@ async function dev(): Promise<void> {
             modals: ['error'],
             notifications: ['before']
         },
-        restoreConnection: true
-        /*widgetConfiguration: {
-            wallets: {
-                excludeWallets: ['OpenMask']
-            }
-        }*/
+        uiPreferences: {
+            theme: THEME.LIGHT,
+            borderRadius: 'm'
+        },
+        language: 'en',
+        restoreConnection: true,
+        walletsListConfiguration: {
+            /* includeWallets: [...new Array(11)].map((_, index) => ({
+                name: `tonkeeper${index}`,
+                bridgeUrl: `https://bridge${
+                    index < 9 ? `0${index + 1}` : index + 1
+                }.subgroup.org/bridge`,
+                universalLink: 'https://app.tonkeeper.com/ton-connect',
+                aboutUrl: '',
+                imageUrl: 'https://tonkeeper.com/assets/tonconnect-icon.png'
+            })),*/
+        }
+    });
+
+    /* tonConnectUI.setConnectRequestParameters({ state: 'loading' });
+
+    setTimeout(() => {
+        tonConnectUI.setConnectRequestParameters({
+            state: 'ready',
+            value: { tonProof: 'tonProofPayload' }
+        });
+    }, 3000);*/
+
+    tonConnectUI.onStatusChange(wallet => {
+        document.getElementById('content')!.textContent = wallet ? JSON.stringify(wallet) : wallet;
     });
 
     /*    tonConnectUI.uiOptions = {
@@ -51,11 +76,15 @@ async function dev(): Promise<void> {
 
     document.getElementById('send-tx')!.onclick = () => {
         const defaultTx: SendTransactionRequest = {
-            validUntil: Date.now() + 1000000,
+            validUntil: Math.round(Date.now() / 1000) + 1000,
             messages: [
                 {
-                    address: '0:412410771DA82CBA306A55FA9E0D43C9D245E38133CB58F1457DFB8D5CD8892F',
-                    amount: '200000'
+                    address: '-1:4d5c0210b35daddaa219fac459dba0fdefb1fae4e97a0d0797739fe050d694ca',
+                    amount: '1000000'
+                },
+                {
+                    address: '-1:4d5c0210b35daddaa219fac459dba0fdefb1fae4e97a0d0797739fe050d694ca',
+                    amount: '1000000'
                 }
             ]
         };

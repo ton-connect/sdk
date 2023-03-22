@@ -1,22 +1,23 @@
-import type { Account } from '@tonconnect/sdk';
+import type { Account, ConnectAdditionalRequest } from '@tonconnect/sdk';
 import {
+    isWalletInfoCurrentlyEmbedded,
     ITonConnect,
     SendTransactionRequest,
     SendTransactionResponse,
     TonConnect,
     TonConnectError,
     Wallet,
-    WalletInfo,
-    WalletInfoInjected
+    WalletInfo
 } from '@tonconnect/sdk';
 import { widgetController } from 'src/app/widget-controller';
 import { TonConnectUIError } from 'src/errors/ton-connect-ui.error';
 import { TonConnectUiCreateOptions } from 'src/models/ton-connect-ui-create-options';
-import { WalletInfoStorage } from 'src/storage';
+import { WalletInfoStorage, PreferredWalletStorage } from 'src/storage';
 import {
     addReturnStrategy,
     getSystemTheme,
     openLink,
+    preloadImages,
     subscribeToThemeChange
 } from 'src/app/utils/web-api';
 import { TonConnectUiOptions } from 'src/models/ton-connect-ui-options';
@@ -27,6 +28,9 @@ import { unwrap } from 'solid-js/store';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { ActionConfiguration, StrictActionConfiguration } from 'src/models/action-configuration';
 import { ConnectedWallet, WalletInfoWithOpenMethod } from 'src/models/connected-wallet';
+import { applyWalletsListConfiguration } from 'src/app/utils/wallets';
+import { uniq } from 'src/app/utils/array';
+import { Loadable } from 'src/models/loadable';
 
 export class TonConnectUI {
     public static getWallets(): Promise<WalletInfo[]> {
@@ -35,13 +39,21 @@ export class TonConnectUI {
 
     private readonly walletInfoStorage = new WalletInfoStorage();
 
-    private readonly connector: ITonConnect;
+    private readonly preferredWalletStorage = new PreferredWalletStorage();
 
-    private _walletInfo: WalletInfoWithOpenMethod | null = null;
+    public readonly connector: ITonConnect;
+
+    private walletInfo: WalletInfoWithOpenMethod | null = null;
 
     private systemThemeChangeUnsubscribe: (() => void) | null = null;
 
     private actionsConfiguration?: ActionConfiguration;
+
+    private readonly walletsList: Promise<WalletInfo[]>;
+
+    private connectRequestParametersCallback?: (
+        parameters: ConnectAdditionalRequest | undefined
+    ) => void;
 
     /**
      * Promise that resolves after end of th connection restoring process (promise will fire after `onStatusChange`, so you can get actual information about wallet and session after when promise resolved).
@@ -64,17 +76,17 @@ export class TonConnectUI {
     }
 
     /**
-     * Curren connected wallet app or null.
+     * Curren connected wallet app and its info or null.
      */
-    public get wallet(): Wallet | null {
-        return this.connector.wallet;
-    }
+    public get wallet(): (Wallet & WalletInfoWithOpenMethod) | null {
+        if (!this.connector.wallet || !this.walletInfo) {
+            return null;
+        }
 
-    /**
-     * Curren connected wallet's info or null.
-     */
-    public get walletInfo(): WalletInfoWithOpenMethod | null {
-        return this._walletInfo;
+        return {
+            ...this.connector.wallet,
+            ...this.walletInfo
+        };
     }
 
     /**
@@ -114,7 +126,9 @@ export class TonConnectUI {
                     ...(!!options.actionsConfiguration?.returnStrategy && {
                         returnStrategy: options.actionsConfiguration.returnStrategy
                     }),
-                    ...(!!options.walletsList && { walletsList: options.walletsList })
+                    ...(!!options.walletsListConfiguration && {
+                        walletsListConfiguration: options.walletsListConfiguration
+                    })
                 },
                 unwrap(state)
             );
@@ -131,17 +145,17 @@ export class TonConnectUI {
         if (options && 'connector' in options && options.connector) {
             this.connector = options.connector;
         } else if (options && 'manifestUrl' in options && options.manifestUrl) {
-            this.connector = new TonConnect({
-                manifestUrl: options.manifestUrl,
-                walletsListSource: options.walletsListSource
-            });
+            this.connector = new TonConnect({ manifestUrl: options.manifestUrl });
         } else {
             throw new TonConnectUIError(
                 'You have to specify a `manifestUrl` or a `connector` in the options.'
             );
         }
 
-        this.getWallets();
+        this.walletsList = this.getWallets();
+
+        this.walletsList.then(list => preloadImages(uniq(list.map(item => item.imageUrl))));
+
         const rootId = this.normalizeWidgetRoot(options?.widgetRootId);
 
         this.subscribeToWalletChange();
@@ -159,12 +173,28 @@ export class TonConnectUI {
         }
 
         this.uiOptions = mergeOptions(options, { uiPreferences: { theme: 'SYSTEM' } });
+        const preferredWalletName = this.preferredWalletStorage.getPreferredWalletName();
         setAppState({
             connector: this.connector,
-            getConnectParameters: options?.getConnectParameters
+            preferredWalletName
         });
 
         widgetController.renderApp(rootId, this);
+    }
+
+    /**
+     * Use it to customize ConnectRequest and add `tonProof` payload.
+     * You can call it multiply times to set updated tonProof payload if previous one is outdated.
+     * If `connectRequestParameters.state === 'loading'` loader will appear instead of the qr code in the wallets modal.
+     * If `connectRequestParameters.state` was changed to 'ready' or it's value has been changed, QR will be re-rendered.
+     */
+    public setConnectRequestParameters(
+        connectRequestParameters: Loadable<ConnectAdditionalRequest> | undefined | null
+    ): void {
+        setAppState({ connectRequestParameters });
+        if (connectRequestParameters?.state === 'ready' || !connectRequestParameters) {
+            this.connectRequestParametersCallback?.(connectRequestParameters?.value);
+        }
     }
 
     /**
@@ -182,13 +212,14 @@ export class TonConnectUI {
         callback: (wallet: ConnectedWallet | null) => void,
         errorsHandler?: (err: TonConnectError) => void
     ): ReturnType<ITonConnect['onStatusChange']> {
-        return this.connector.onStatusChange(wallet => {
+        return this.connector.onStatusChange(async wallet => {
             if (wallet) {
-                const lastSelectedWalletInfo =
-                    widgetController.getSelectedWalletInfo() ||
-                    this.walletInfoStorage.getWalletInfo();
+                const lastSelectedWalletInfo = await this.getSelectedWalletInfo(wallet);
 
-                callback({ ...wallet, ...lastSelectedWalletInfo! });
+                callback({
+                    ...wallet,
+                    ...(lastSelectedWalletInfo || this.walletInfoStorage.getWalletInfo())!
+                });
             } else {
                 callback(wallet);
             }
@@ -200,28 +231,34 @@ export class TonConnectUI {
      */
     public async connectWallet(): Promise<ConnectedWallet> {
         const walletsList = await this.getWallets();
-        const embeddedWallet: WalletInfoInjected = walletsList.find(
-            wallet => 'embedded' in wallet && wallet.embedded
-        ) as WalletInfoInjected;
+        const embeddedWallet = walletsList.find(isWalletInfoCurrentlyEmbedded);
 
         if (embeddedWallet) {
-            const additionalRequest = await appState.getConnectParameters?.();
+            const connect = (parameters?: ConnectAdditionalRequest): void => {
+                setLastSelectedWalletInfo(embeddedWallet);
+                this.connector.connect({ jsBridgeKey: embeddedWallet.jsBridgeKey }, parameters);
+            };
 
-            setLastSelectedWalletInfo(embeddedWallet);
-            this.connector.connect({ jsBridgeKey: embeddedWallet.jsBridgeKey }, additionalRequest);
+            const additionalRequest = appState.connectRequestParameters;
+            if (additionalRequest?.state === 'loading') {
+                this.connectRequestParametersCallback = connect;
+            } else {
+                connect(additionalRequest?.value);
+            }
         } else {
             widgetController.openWalletsModal();
         }
 
         return new Promise((resolve, reject) => {
-            const unsubscribe = this.connector.onStatusChange(wallet => {
+            const unsubscribe = this.connector.onStatusChange(async wallet => {
                 unsubscribe!();
                 if (wallet) {
-                    const lastSelectedWalletInfo =
-                        widgetController.getSelectedWalletInfo() ||
-                        this.walletInfoStorage.getWalletInfo();
+                    const lastSelectedWalletInfo = await this.getSelectedWalletInfo(wallet);
 
-                    resolve({ ...wallet, ...lastSelectedWalletInfo! });
+                    resolve({
+                        ...wallet,
+                        ...(lastSelectedWalletInfo || this.walletInfoStorage.getWalletInfo())!
+                    });
                 } else {
                     reject(new TonConnectUIError('Wallet was not connected'));
                 }
@@ -291,23 +328,63 @@ export class TonConnectUI {
     }
 
     private subscribeToWalletChange(): void {
-        this.connector.onStatusChange(wallet => {
+        this.connector.onStatusChange(async wallet => {
             if (wallet) {
-                this.updateWalletInfo();
+                await this.updateWalletInfo(wallet);
+                this.setPreferredWalletName(this.walletInfo?.name || wallet.device.appName);
             } else {
                 this.walletInfoStorage.removeWalletInfo();
             }
         });
     }
 
-    private updateWalletInfo(): void {
-        const lastSelectedWalletInfo = widgetController.getSelectedWalletInfo();
+    private setPreferredWalletName(value: string): void {
+        this.preferredWalletStorage.setPreferredWalletName(value);
+        setAppState({ preferredWalletName: value });
+    }
 
-        if (lastSelectedWalletInfo) {
-            this._walletInfo = lastSelectedWalletInfo;
-            this.walletInfoStorage.setWalletInfo(lastSelectedWalletInfo);
+    private async getSelectedWalletInfo(wallet: Wallet): Promise<WalletInfoWithOpenMethod | null> {
+        let lastSelectedWalletInfo = widgetController.getSelectedWalletInfo();
+
+        if (!lastSelectedWalletInfo) {
+            return null;
+        }
+
+        let fullLastSelectedWalletInfo: WalletInfoWithOpenMethod;
+        if (!('name' in lastSelectedWalletInfo)) {
+            const walletsList = applyWalletsListConfiguration(
+                await this.walletsList,
+                appState.walletsListConfiguration
+            );
+            const walletInfo = walletsList.find(
+                item => item.name.toLowerCase() === wallet.device.appName.toLowerCase()
+            );
+
+            if (!walletInfo) {
+                throw new TonConnectUIError(
+                    `Cannot find WalletInfo for the '${wallet.device.appName}' wallet`
+                );
+            }
+
+            fullLastSelectedWalletInfo = {
+                ...walletInfo,
+                ...lastSelectedWalletInfo
+            };
         } else {
-            this._walletInfo = this.walletInfoStorage.getWalletInfo();
+            fullLastSelectedWalletInfo = lastSelectedWalletInfo;
+        }
+
+        return fullLastSelectedWalletInfo;
+    }
+
+    private async updateWalletInfo(wallet: Wallet): Promise<void> {
+        const selectedWalletInfo = await this.getSelectedWalletInfo(wallet);
+
+        if (selectedWalletInfo) {
+            this.walletInfo = selectedWalletInfo;
+            this.walletInfoStorage.setWalletInfo(selectedWalletInfo);
+        } else {
+            this.walletInfo = this.walletInfoStorage.getWalletInfo();
         }
     }
 

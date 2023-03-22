@@ -22,3 +22,7 @@ export {
     DisconnectRpcResponseError,
     DISCONNECT_ERROR_CODES
 } from './disconnect-rpc-response';
+export {
+    WalletResponseTemplateError,
+    WalletResponseTemplateSuccess
+} from './wallet-response-template';

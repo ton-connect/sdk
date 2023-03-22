@@ -1,6 +1,10 @@
 {
   "name": "@tonconnect/ui-react",
-  "version": "0.0.14",
+  "version": "1.0.0-beta.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ton-connect/sdk.git"
@@ -36,16 +40,11 @@
       "default": "./lib/index.umd.cjs"
     }
   },
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
-  },
   "dependencies": {
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "@tonconnect/ui": "^0.0.17",
-    "@tonconnect/sdk": "^2.0.7"
+    "@tonconnect/ui": "^1.0.0-beta.0",
+    "@tonconnect/sdk": "^2.1.1"
   },
   "devDependencies": {
     "@types/react": "^18.0.26",

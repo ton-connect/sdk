@@ -1,21 +1,13 @@
 const path = require('path');
 const webpack = require('webpack');
 
-module.exports = function(env, argv) {
-    return {
+module.exports = {
         entry: './src/index.ts',
         module: {
             rules: [
                 {
                     test: /\.ts?$/,
-                    use: [
-                        {
-                            loader: require.resolve('ts-loader'),
-                            options: {
-                                compiler: 'ttypescript',
-                            },
-                        },
-                    ],
+                    use: 'ts-loader',
                     exclude: ['/node_modules', '/lib'],
                 },
                 {
@@ -49,6 +41,5 @@ module.exports = function(env, argv) {
             clean: true
         },
         devtool: 'source-map',
-        mode: argv.mode
-    }
+        mode: 'production'
 };

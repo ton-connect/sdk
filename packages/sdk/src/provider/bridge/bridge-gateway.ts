@@ -1,18 +1,11 @@
-import { Base64, isNode } from '@tonconnect/protocol';
+import { Base64, RpcMethod } from '@tonconnect/protocol';
 import { TonConnectError } from 'src/errors';
 import { BridgeIncomingMessage } from 'src/provider/bridge/models/bridge-incomming-message';
 import { HttpBridgeGatewayStorage } from 'src/storage/http-bridge-gateway-storage';
 import { IStorage } from 'src/storage/models/storage.interface';
 import { addPathToUrl } from 'src/utils/url';
-
-if (isNode()) {
-    try {
-        eval("global.EventSource = require('eventsource')");
-        eval("global.fetch = require('node-fetch')");
-    } catch (err) {
-        console.error(err);
-    }
-}
+import '@tonconnect/isomorphic-eventsource';
+import '@tonconnect/isomorphic-fetch';
 
 export class BridgeGateway {
     private readonly ssePath = 'events';
@@ -33,10 +26,10 @@ export class BridgeGateway {
         storage: IStorage,
         private readonly bridgeUrl: string,
         public readonly sessionId: string,
-        private readonly listener: (msg: BridgeIncomingMessage) => void,
-        private readonly errorsListener: (err: Event) => void
+        private listener: (msg: BridgeIncomingMessage) => void,
+        private errorsListener: (err: Event) => void
     ) {
-        this.bridgeGatewayStorage = new HttpBridgeGatewayStorage(storage);
+        this.bridgeGatewayStorage = new HttpBridgeGatewayStorage(storage, bridgeUrl);
     }
 
     public async registerSession(): Promise<void> {
@@ -44,6 +37,11 @@ export class BridgeGateway {
         url.searchParams.append('client_id', this.sessionId);
 
         const lastEventId = await this.bridgeGatewayStorage.getLastEventId();
+
+        if (this.isClosed) {
+            return;
+        }
+
         if (lastEventId) {
             url.searchParams.append('last_event_id', lastEventId);
         }
@@ -60,20 +58,42 @@ export class BridgeGateway {
         });
     }
 
-    public async send(message: Uint8Array, receiver: string, ttl?: number): Promise<void> {
+    public async send(
+        message: Uint8Array,
+        receiver: string,
+        topic: RpcMethod,
+        ttl?: number
+    ): Promise<void> {
         const url = new URL(addPathToUrl(this.bridgeUrl, this.postPath));
         url.searchParams.append('client_id', this.sessionId);
         url.searchParams.append('to', receiver);
         url.searchParams.append('ttl', (ttl || this.defaultTtl).toString());
+        url.searchParams.append('topic', topic);
         await fetch(url, {
             method: 'post',
             body: Base64.encode(message)
         });
     }
 
+    public pause(): void {
+        this.eventSource?.close();
+    }
+
+    public unPause(): Promise<void> {
+        return this.registerSession();
+    }
+
     public close(): void {
         this.isClosed = true;
         this.eventSource?.close();
+    }
+
+    public setListener(listener: (msg: BridgeIncomingMessage) => void): void {
+        this.listener = listener;
+    }
+
+    public setErrorsListener(errorsListener: (err: Event) => void): void {
+        this.errorsListener = errorsListener;
     }
 
     private errorsHandler(e: Event): void {

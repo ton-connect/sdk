@@ -6,10 +6,10 @@ export const H3Styled = styled.h3`
     font-size: 15px;
     line-height: 20px;
 
-    letter-spacing: -0.24px;
-
     color: ${props => props.theme!.colors.text.primary};
 
     margin-top: 0;
     margin-bottom: 0;
+
+    cursor: default;
 `;

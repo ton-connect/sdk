@@ -1,9 +1,8 @@
 import { Component } from 'solid-js';
 import { ActionModal } from 'src/app/views/modals/actions-modal/action-modal';
-import { SuccessIconStyled } from './style';
-import { Identifiable } from 'src/app/models/identifiable';
+import { SuccessIcon } from 'src/app/components';
 
-interface TransactionSentModalProps extends Identifiable {
+interface TransactionSentModalProps {
     onClose: () => void;
 }
 
@@ -12,9 +11,9 @@ export const TransactionSentModal: Component<TransactionSentModalProps> = props 
         <ActionModal
             headerTranslationKey="actionModal.transactionSent.header"
             textTranslationKey="actionModal.transactionSent.text"
-            icon={<SuccessIconStyled />}
+            icon={<SuccessIcon size="m" />}
             onClose={() => props.onClose()}
-            id={props.id}
+            data-tc-transaction-sent-modal="true"
         />
     );
 };

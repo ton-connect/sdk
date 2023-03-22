@@ -21,3 +21,7 @@ export function rgba(color: Color, opacity: number): string {
 
     return `rgba(${color}, ${opacity})`;
 }
+
+export function toPx(value: number | string): string {
+    return value.toString() + 'px';
+}

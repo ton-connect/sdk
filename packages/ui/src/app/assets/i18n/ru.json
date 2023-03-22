@@ -1,6 +1,12 @@
 {
   "common": {
-    "close": "Закрыть"
+    "close": "Закрыть",
+    "get": "Скачать",
+    "learnMore": "Подробнее",
+    "openExtension": "Расширение",
+    "copyLink": "Копировать ссылку",
+    "copied": "Скопировано!",
+    "yourWallet": "вашем кошельке"
   },
   "button": {
     "connectWallet": "Подключить кошелёк",
@@ -12,37 +18,47 @@
   },
   "notifications": {
     "confirm": {
-      "header": "Подтвердите действие в своём кошельке"
+      "header": "Откройте {{ name }}, чтобы подтвердить транзакцию."
     },
     "transactionSent": {
       "header": "Транзакция отправлена",
-      "text": "Ваша транзакция отправлена в сеть и будет обработана через несколько секунд."
+      "text": "Ваша транзакция будет обработана через несколько секунд."
     },
     "transactionCanceled": {
-      "header": "Действие отменено",
-      "text": "Действие прервано потому что в блокчейне нет ожидаемых изменений."
+      "header": "Транзакция отменена",
+      "text": "Состояние вашего счёта не изменится."
     }
   },
   "walletModal": {
     "loading":  "Список кошельков загружается",
-    "selectWalletModal": {
+    "qrCode": "QR-код",
+    "wallets": "Кошельки",
+    "universalQRModal": {
+      "scanQR": "Отсканируйте код ниже с помощью камеры в вашем TON-кошельке.",
+      "openWallet": "Открыть кошелёк",
+      "openInstalledWallet": "Открыть кошелёк",
+      "dontHave": "Подробнее о TON кошельках"
+    },
+    "desktopSelectWalletModal": {
+      "selectWallet": "Выберите кошелёк для подключения."
+    },
+    "mobileSelectWalletModal": {
       "connectWallet": "Подключите кошелёк",
-      "selectWallet": "Выберите свой кошелёк из предложенных ниже.",
-      "learnMore": "Подробнее"
+      "selectWallet": "$walletModal.desktopSelectWalletModal.selectWallet",
+      "installedWallet": "Открыть кошелёк"
     },
     "qrCodeModal": {
-      "connectWith": "Подключиться с помощью {{ name }}",
-      "scan": "Отсканируйте QR-код камерой телефона или приложения {{ name }}.",
+      "connectWith": "Подключиться через {{ name }}",
+      "scan": "Отсканируйте код ниже.",
       "openWallet": "Открыть {{ name }}",
-      "openExtension": "Открыть расширение",
-      "dontHave": "У вас нет {{ name }}?",
-      "get": "Скачать"
+      "openExtension": "Расширение",
+      "dontHave": "У вас нет {{ name }}?"
     }
   },
   "actionModal": {
     "confirmTransaction": {
-      "header": "Подтвердите действие в своём кошельке",
-      "text": "Отправка транзакции после подтверждения обычно занимает некоторое время."
+      "header": "Подтвердите действие в {{ name }}",
+      "text": "Это займет пару секунд."
     },
     "transactionSent": "$notifications.transactionSent",
     "transactionCanceled": "$notifications.transactionCanceled"

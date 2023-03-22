@@ -4,8 +4,10 @@ import { ArrowIcon } from 'src/app/components/icons/arrow-icon';
 import { CloseIcon } from 'src/app/components/icons/close-icon';
 import { Styleable } from 'src/app/models/styleable';
 import { IconButtonStyled } from './style';
+import { WithDataAttributes } from 'src/app/models/with-data-attributes';
+import { useDataAttributes } from 'src/app/hooks/use-data-attributes';
 
-export interface IconButtonProps extends Styleable {
+export interface IconButtonProps extends Styleable, WithDataAttributes {
     fill?: Property.Color;
     children?: JSXElement;
     icon?: 'close' | 'arrow';
@@ -13,9 +15,15 @@ export interface IconButtonProps extends Styleable {
 }
 
 export const IconButton: Component<IconButtonProps> = props => {
+    const dataAttrs = useDataAttributes(props);
     const icon = (): 'close' | 'arrow' => props.icon || 'close';
     return (
-        <IconButtonStyled class={props.class} onClick={() => props.onClick()}>
+        <IconButtonStyled
+            class={props.class}
+            onClick={() => props.onClick()}
+            data-tc-icon-button="true"
+            {...dataAttrs}
+        >
             <Show when={!!props.children}>{props.children}</Show>
             <Show when={!props.children}>
                 <Switch>

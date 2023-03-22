@@ -1,4 +1,4 @@
-import { createContext, FunctionComponent, memo } from 'react';
+import { createContext, FunctionComponent, memo, ReactNode } from 'react';
 import {
     ActionConfiguration,
     Locales,
@@ -6,13 +6,13 @@ import {
     UIPreferences,
     WalletsListConfiguration
 } from '@tonconnect/ui';
-import type { ConnectAdditionalRequest, ITonConnect } from '@tonconnect/sdk';
+import type { ITonConnect } from '@tonconnect/sdk';
 import { isClientSide } from '../utils/web';
 
 export const TonConnectUIContext = createContext<TonConnectUI | null>(null);
 
 export type TonConnectUIProviderProps = {
-    children: JSX.Element;
+    children: ReactNode;
 } & Partial<TonConnectUIProviderPropsBase> &
     Partial<TonConnectUIProviderPropsWithManifest | TonConnectUIProviderPropsWithConnector>;
 
@@ -58,26 +58,12 @@ export interface TonConnectUIProviderPropsBase {
     /**
      * Configuration for the wallets list in the connect wallet modal.
      */
-    walletsList?: WalletsListConfiguration;
+    walletsListConfiguration?: WalletsListConfiguration;
 
     /**
      * Configuration for action-period (e.g. sendTransaction) UI elements: modals and notifications and wallet behaviour (return strategy).
      */
     actionsConfiguration?: ActionConfiguration;
-
-    /**
-     * Redefine wallets list source URL. Must be a link to a json file with [following structure]{@link https://github.com/ton-connect/wallets-list}
-     * @default https://raw.githubusercontent.com/ton-connect/wallets-list/main/wallets.json
-     * @
-     */
-    walletsListSource?: string;
-
-    /**
-     * Use it to customize ConnectRequest and add `tonProof` payload.
-     * The function will be called after wallets modal opens, and wallets selection will be blocked until it's resolved.
-     * If you have to make a http-request to your backend, it is better to do it after app initialization (if possible) and return (probably completed) promise to reduce loading time for the user.
-     */
-    getConnectParameters?: () => Promise<ConnectAdditionalRequest>;
 }
 
 let tonConnectUI: TonConnectUI | null = null;

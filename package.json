@@ -25,7 +25,8 @@
     "typescript": "~4.8.2",
     "rimraf": "^3.0.2",
     "typedoc": "^0.23.21",
-    "@jscutlery/semver": "^2.29.3"
+    "@jscutlery/semver": "^2.29.3",
+    "@microsoft/api-extractor": "^7.34.4"
   },
   "workspaces": [
     "packages/**"

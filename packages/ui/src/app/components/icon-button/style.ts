@@ -1,4 +1,5 @@
 import { styled } from 'solid-styled-components';
+import { mediaNotTouch, mediaTouch } from 'src/app/styles/media';
 
 export const IconButtonStyled = styled.button`
     padding: 0;
@@ -12,13 +13,21 @@ export const IconButtonStyled = styled.button`
     border: none;
     cursor: pointer;
 
-    transition: transform 0.1s ease-in-out;
+    transition: transform 0.125s ease-in-out;
 
-    &:hover {
-        transform: scale(1.04);
+    ${mediaNotTouch} {
+        &:hover {
+            transform: scale(1.04);
+        }
     }
 
     &:active {
         transform: scale(0.96);
+    }
+
+    ${mediaTouch} {
+        &:active {
+            transform: scale(0.92);
+        }
     }
 `;

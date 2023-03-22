@@ -7,10 +7,13 @@ export type BridgeConnection = BridgeConnectionHttp | BridgeConnectionInjected;
 export interface BridgeConnectionInjected {
     type: 'injected';
     jsBridgeKey: string;
+    nextRpcRequestId: number;
 }
 
 export interface BridgeConnectionHttp {
     type: 'http';
+    lastWalletEventId?: number;
+    nextRpcRequestId: number;
     connectEvent: {
         event: 'connect';
         payload: {

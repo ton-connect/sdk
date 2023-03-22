@@ -8,11 +8,7 @@ export type {
     TonConnectUiCreateOptionsBase
 } from './ton-connect-ui-create-options';
 export type { TonConnectUiOptions } from './ton-connect-ui-options';
-export type {
-    WalletsListConfiguration,
-    WalletsListConfigurationExplicit,
-    WalletsListConfigurationImplicit
-} from './wallets-list-configuration';
+export type { WalletsListConfiguration } from './wallets-list-configuration';
 export type { UIPreferences } from './ui-preferences';
 export type { ColorsSet, PartialColorsSet } from './colors-set';
 export type { BorderRadius } from './border-radius';
@@ -28,3 +24,4 @@ export type { ReturnStrategy } from './return-strategy';
 import { Property } from 'csstype';
 type Color = Property.Color;
 export type { Color };
+export type { Loadable, LoadableReady, LoadableLoading } from './loadable';

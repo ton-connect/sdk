@@ -1,5 +1,5 @@
 import { styled } from 'solid-styled-components';
-import { Button, IconButton, Text } from 'src/app/components';
+import {Button, H1, IconButton, QRCode, Text} from 'src/app/components';
 import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
 
 const borders: BorderRadiusConfig = {
@@ -8,8 +8,11 @@ const borders: BorderRadiusConfig = {
     none: '0'
 };
 
-export const QrCodeModalStyled = styled.div`
-    padding: 0 24px;
+export const QrCodeModalStyled = styled.div``;
+
+export const H1Styled = styled(H1)`
+    max-width: 320px;
+    margin: 0 auto 6px;
 `;
 
 export const StyledIconButton = styled(IconButton)`
@@ -18,14 +21,8 @@ export const StyledIconButton = styled(IconButton)`
     left: 16px;
 `;
 
-export const QRBackgroundStyled = styled.div`
+export const QRStyled = styled(QRCode)`
     margin-bottom: 16px;
-    background-color: ${props => props.theme!.colors.background.secondary};
-    border-radius: ${props => borders[props.theme!.borderRadius]};
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px 0;
 `;
 
 export const ButtonsContainerStyled = styled.div`
@@ -36,9 +33,10 @@ export const ButtonsContainerStyled = styled.div`
 `;
 
 export const ActionButtonStyled = styled(Button)`
+    padding: 0 16px;
+    height: 56px;
     font-size: 16px;
     line-height: 20px;
-    letter-spacing: -0.32px;
     width: 100%;
     border-radius: ${props => borders[props.theme!.borderRadius]};
 `;
@@ -50,6 +48,7 @@ export const GetWalletStyled = styled.div`
 `;
 
 export const TextStyled = styled(Text)`
+    padding-left: 8px;
     color: ${props => props.theme!.colors.text.secondary};
     font-size: 16px;
 `;

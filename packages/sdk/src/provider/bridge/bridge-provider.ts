@@ -20,17 +20,20 @@ import { BridgePartialSession, BridgeSession } from 'src/provider/bridge/models/
 import { HTTPProvider } from 'src/provider/provider';
 import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { IStorage } from 'src/storage/models/storage.interface';
-import { WithoutId } from 'src/utils/types';
+import { Optional, WithoutId, WithoutIdDistributive } from 'src/utils/types';
 import { PROTOCOL_VERSION } from 'src/resources/protocol';
+import { logDebug, logError } from 'src/utils/log';
 
 export class BridgeProvider implements HTTPProvider {
     public static async fromStorage(storage: IStorage): Promise<BridgeProvider> {
         const bridgeConnectionStorage = new BridgeConnectionStorage(storage);
         const connection = await bridgeConnectionStorage.getHttpConnection();
-        return new BridgeProvider(storage, connection.session.walletConnectionSource);
+        return new BridgeProvider(storage, { bridgeUrl: connection.session.bridgeUrl });
     }
 
     public readonly type = 'http';
+
+    private readonly standardUniversalLink = 'tc://';
 
     private readonly connectionStorage: BridgeConnectionStorage;
 
@@ -39,44 +42,82 @@ export class BridgeProvider implements HTTPProvider {
         (response: WithoutId<WalletResponse<RpcMethod>>) => void
     >();
 
-    private nextRequestId = 0;
-
     private session: BridgeSession | BridgePartialSession | null = null;
 
-    private bridge: BridgeGateway | null = null;
+    private gateway: BridgeGateway | null = null;
 
-    private listeners: Array<(e: WalletEvent) => void> = [];
+    private pendingGateways: BridgeGateway[] = [];
+
+    private listeners: Array<(e: WithoutIdDistributive<WalletEvent>) => void> = [];
 
     constructor(
         private readonly storage: IStorage,
-        private readonly walletConnectionSource: WalletConnectionSourceHTTP
+        private readonly walletConnectionSource:
+            | Optional<WalletConnectionSourceHTTP, 'universalLink'>
+            | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[]
     ) {
         this.connectionStorage = new BridgeConnectionStorage(storage);
     }
 
     public connect(message: ConnectRequest): string {
-        this.bridge?.close();
+        this.closeGateways();
         const sessionCrypto = new SessionCrypto();
+
+        let bridgeUrl = '';
+        let universalLink = this.standardUniversalLink;
+
+        if (Array.isArray(this.walletConnectionSource)) {
+            this.pendingGateways = this.walletConnectionSource.map(source => {
+                const gateway = new BridgeGateway(
+                    this.storage,
+                    source.bridgeUrl,
+                    sessionCrypto.sessionId,
+                    () => {},
+                    e => {
+                        console.error(e);
+                    }
+                );
+
+                gateway.setListener(message =>
+                    this.pendingGatewaysListener(gateway, source.bridgeUrl, message)
+                );
+
+                return gateway;
+            });
+
+            this.pendingGateways.forEach(bridge => bridge.registerSession());
+        } else {
+            bridgeUrl = this.walletConnectionSource.bridgeUrl;
+            if (this.walletConnectionSource.universalLink) {
+                universalLink = this.walletConnectionSource.universalLink;
+            }
+
+            this.gateway = new BridgeGateway(
+                this.storage,
+                this.walletConnectionSource.bridgeUrl,
+                sessionCrypto.sessionId,
+                this.gatewayListener.bind(this),
+                this.gatewayErrorsListener.bind(this)
+            );
+            this.gateway.registerSession();
+        }
 
         this.session = {
             sessionCrypto,
-            walletConnectionSource: this.walletConnectionSource
+            bridgeUrl
         };
 
-        this.bridge = new BridgeGateway(
-            this.storage,
-            this.walletConnectionSource.bridgeUrl,
-            sessionCrypto.sessionId,
-            this.gatewayListener.bind(this),
-            this.gatewayErrorsListener.bind(this)
-        );
-        this.bridge.registerSession();
-
-        return this.generateUniversalLink(message);
+        return this.generateUniversalLink(universalLink, message);
     }
 
     public async restoreConnection(): Promise<void> {
-        this.bridge?.close();
+        if (Array.isArray(this.walletConnectionSource)) {
+            throw new TonConnectError(
+                'Internal error. Connection source is array while WalletConnectionSourceHTTP was expected.'
+            );
+        }
+
+        this.closeGateways();
         const storedConnection = await this.connectionStorage.getHttpConnection();
         if (!storedConnection) {
             return;
@@ -84,7 +125,7 @@ export class BridgeProvider implements HTTPProvider {
 
         this.session = storedConnection.session;
 
-        this.bridge = new BridgeGateway(
+        this.gateway = new BridgeGateway(
             this.storage,
             this.walletConnectionSource.bridgeUrl,
             storedConnection.session.sessionCrypto.sessionId,
@@ -92,47 +133,100 @@ export class BridgeProvider implements HTTPProvider {
             this.gatewayErrorsListener.bind(this)
         );
 
-        await this.bridge.registerSession();
+        await this.gateway.registerSession();
 
         this.listeners.forEach(listener => listener(storedConnection.connectEvent));
     }
 
     public sendRequest<T extends RpcMethod>(
-        request: WithoutId<AppRequest<T>>
+        request: WithoutId<AppRequest<T>>,
+        onRequestSent?: () => void
     ): Promise<WithoutId<WalletResponse<T>>> {
-        return new Promise((resolve, reject) => {
-            const id = this.nextRequestId;
-            this.nextRequestId++;
-            if (!this.bridge || !this.session || !('walletPublicKey' in this.session)) {
+        return new Promise(async (resolve, reject) => {
+            if (!this.gateway || !this.session || !('walletPublicKey' in this.session)) {
                 throw new TonConnectError('Trying to send bridge request without session');
             }
+
+            const id = (await this.connectionStorage.getNextRpcRequestId()).toString();
+            await this.connectionStorage.increaseNextRpcRequestId();
+
+            logDebug('Send http-bridge request:', { ...request, id });
 
             const encodedRequest = this.session!.sessionCrypto.encrypt(
                 JSON.stringify({ ...request, id }),
                 hexToByteArray(this.session.walletPublicKey)
             );
 
-            this.bridge.send(encodedRequest, this.session.walletPublicKey).catch(reject);
+            this.gateway
+                .send(encodedRequest, this.session.walletPublicKey, request.method)
+                .catch(reject);
             this.pendingRequests.set(id.toString(), resolve);
+            onRequestSent?.();
         });
     }
 
     public closeConnection(): void {
-        this.bridge?.close();
+        this.closeGateways();
         this.listeners = [];
         this.session = null;
-        this.bridge = null;
+        this.gateway = null;
     }
 
-    public disconnect(): Promise<void> {
-        this.bridge?.close();
-        this.listeners = [];
-        return this.removeBridgeAndSession();
+    public async disconnect(): Promise<void> {
+        return new Promise(async resolve => {
+            let called = false;
+            const onRequestSent = (): void => {
+                called = true;
+                this.removeBridgeAndSession().then(resolve);
+            };
+
+            try {
+                await this.sendRequest({ method: 'disconnect', params: [] }, onRequestSent);
+            } catch (e) {
+                console.debug(e);
+
+                if (!called) {
+                    this.removeBridgeAndSession().then(resolve);
+                }
+            }
+        });
     }
 
-    public listen(callback: (e: WalletEvent) => void): () => void {
+    public listen(callback: (e: WithoutIdDistributive<WalletEvent>) => void): () => void {
         this.listeners.push(callback);
         return () => (this.listeners = this.listeners.filter(listener => listener !== callback));
+    }
+
+    public pause(): void {
+        this.gateway?.pause();
+        this.pendingGateways.forEach(bridge => bridge.pause());
+    }
+
+    public async unPause(): Promise<void> {
+        const promises = this.pendingGateways.map(bridge => bridge.unPause());
+        if (this.gateway) {
+            promises.push(this.gateway.unPause());
+        }
+        await Promise.all(promises);
+    }
+
+    private async pendingGatewaysListener(
+        gateway: BridgeGateway,
+        bridgeUrl: string,
+        bridgeIncomingMessage: BridgeIncomingMessage
+    ): Promise<void> {
+        if (!this.pendingGateways.includes(gateway)) {
+            gateway.close();
+            return;
+        }
+
+        this.closeGateways({ except: gateway });
+
+        this.session!.bridgeUrl = bridgeUrl;
+        this.gateway = gateway;
+        this.gateway.setErrorsListener(this.gatewayErrorsListener.bind(this));
+        this.gateway.setListener(this.gatewayListener.bind(this));
+        return this.gatewayListener(bridgeIncomingMessage);
     }
 
     private async gatewayListener(bridgeIncomingMessage: BridgeIncomingMessage): Promise<void> {
@@ -143,17 +237,38 @@ export class BridgeProvider implements HTTPProvider {
             )
         );
 
+        logDebug('Wallet message received:', walletMessage);
+
         if (!('event' in walletMessage)) {
             const id = walletMessage.id.toString();
             const resolve = this.pendingRequests.get(id);
             if (!resolve) {
-                throw new TonConnectError(`Response id ${id} doesn't match any request's id`);
+                logDebug(`Response id ${id} doesn't match any request's id`);
+                return;
             }
 
             resolve(walletMessage);
             this.pendingRequests.delete(id);
             return;
         }
+
+        if (walletMessage.id !== undefined) {
+            const lastId = await this.connectionStorage.getLastWalletEventId();
+
+            if (lastId !== undefined && walletMessage.id <= lastId) {
+                logError(
+                    `Received event id (=${walletMessage.id}) must be greater than stored last wallet event id (=${lastId}) `
+                );
+                return;
+            }
+
+            if (walletMessage.event !== 'connect') {
+                await this.connectionStorage.storeLastWalletEventId(walletMessage.id);
+            }
+        }
+
+        // `this.listeners` might be modified in the event handler
+        const listeners = this.listeners;
 
         if (walletMessage.event === 'connect') {
             await this.updateSession(walletMessage, bridgeIncomingMessage.from);
@@ -163,7 +278,7 @@ export class BridgeProvider implements HTTPProvider {
             await this.removeBridgeAndSession();
         }
 
-        this.listeners.forEach(listener => listener(walletMessage));
+        listeners.forEach(listener => listener(walletMessage));
     }
 
     private async gatewayErrorsListener(e: Event): Promise<void> {
@@ -194,21 +309,30 @@ export class BridgeProvider implements HTTPProvider {
         await this.connectionStorage.storeConnection({
             type: 'http',
             session: this.session,
-            connectEvent: connectEventToSave
+            lastWalletEventId: connectEvent.id,
+            connectEvent: connectEventToSave,
+            nextRpcRequestId: 0
         });
     }
 
     private async removeBridgeAndSession(): Promise<void> {
-        this.session = null;
-        this.bridge = null;
+        this.closeConnection();
         await this.connectionStorage.removeConnection();
     }
 
-    private generateUniversalLink(message: ConnectRequest): string {
-        const url = new URL(this.walletConnectionSource.universalLink);
+    private generateUniversalLink(universalLink: string, message: ConnectRequest): string {
+        const url = new URL(universalLink);
         url.searchParams.append('v', PROTOCOL_VERSION.toString());
         url.searchParams.append('id', this.session!.sessionCrypto.sessionId);
         url.searchParams.append('r', JSON.stringify(message));
         return url.toString();
+    }
+
+    private closeGateways(options?: { except: BridgeGateway }): void {
+        this.gateway?.close();
+        this.pendingGateways
+            .filter(item => item !== options?.except)
+            .forEach(bridge => bridge.close());
+        this.pendingGateways = [];
     }
 }

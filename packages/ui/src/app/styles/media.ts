@@ -1,11 +1,18 @@
+import { getWindow } from 'src/app/utils/web-api';
+
 export type Device = 'mobile' | 'tablet' | 'desktop';
 
-const maxWidth = {
+export const maxWidth = {
     mobile: 440,
     tablet: 1020
 };
 
 export function isDevice(device: keyof typeof maxWidth | 'desktop'): boolean {
+    const window = getWindow();
+    if (!window) {
+        return device === 'desktop';
+    }
+
     const width = window.innerWidth;
 
     switch (device) {
@@ -40,5 +47,9 @@ export function mediaMax(px: number): string {
 }
 
 export function mediaMinMax(pxMin: number, pxMax: number): string {
-    return `@media (min-width: ${pxMin}px) (max-width: ${pxMax}px)`;
+    return `@media (min-width: ${pxMin}px) and (max-width: ${pxMax}px)`;
 }
+
+export const mediaTouch = '@media (hover: none)';
+
+export const mediaNotTouch = '@media not all and (hover: none)';

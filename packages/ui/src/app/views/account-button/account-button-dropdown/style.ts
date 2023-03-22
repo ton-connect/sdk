@@ -32,7 +32,8 @@ export const MenuButtonStyled = styled.button`
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 12px;
+    height: 40px;
+    padding-left: 8px;
     width: 100%;
 
     background-color: ${props => props.theme!.colors.background.primary};

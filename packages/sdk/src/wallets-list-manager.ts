@@ -1,10 +1,11 @@
 import { FetchWalletsError } from 'src/errors/wallets-manager/fetch-wallets.error';
 import {
     WalletInfoRemote,
-    WalletInfoInjected,
+    WalletInfoInjectable,
     WalletInfo,
     WalletInfoDTO,
-    isWalletInfoInjected
+    isWalletInfoCurrentlyEmbedded,
+    WalletInfoCurrentlyEmbedded
 } from 'src/models/wallet/wallet-info';
 import { InjectedProvider } from 'src/provider/injected/injected-provider';
 
@@ -12,7 +13,7 @@ export class WalletsListManager {
     private walletsListCache: Promise<WalletInfo[]> | null = null;
 
     private readonly walletsListSource: string =
-        'https://raw.githubusercontent.com/ton-connect/wallets-list/main/wallets.json';
+        'https://raw.githubusercontent.com/ton-blockchain/wallets-list/main/wallets.json';
 
     constructor(walletsListSource?: string) {
         if (walletsListSource) {
@@ -29,11 +30,9 @@ export class WalletsListManager {
         return this.walletsListCache;
     }
 
-    public async getEmbeddedWallet(): Promise<WalletInfoInjected | null> {
+    public async getEmbeddedWallet(): Promise<WalletInfoCurrentlyEmbedded | null> {
         const walletsList = await this.getWallets();
-        const embeddedWallets = walletsList.filter(
-            item => isWalletInfoInjected(item) && item.embedded
-        ) as WalletInfoInjected[];
+        const embeddedWallets = walletsList.filter(isWalletInfoCurrentlyEmbedded);
 
         if (embeddedWallets.length !== 1) {
             return null;
@@ -54,7 +53,12 @@ export class WalletsListManager {
                 throw new FetchWalletsError('Wrong wallets list format');
             }
 
-            return this.walletConfigDTOListToWalletConfigList(walletsList);
+            const currentlyInjectedWallets = InjectedProvider.getCurrentlyInjectedWallets();
+
+            return this.mergeWalletsLists(
+                this.walletConfigDTOListToWalletConfigList(walletsList),
+                currentlyInjectedWallets
+            );
         } catch (e) {
             throw new FetchWalletsError(e);
         }
@@ -79,15 +83,29 @@ export class WalletsListManager {
 
                 if (bridge.type === 'js') {
                     const jsBridgeKey = bridge.key;
-                    (walletConfig as WalletInfoInjected).jsBridgeKey = jsBridgeKey;
-                    (walletConfig as WalletInfoInjected).injected =
+                    (walletConfig as WalletInfoInjectable).jsBridgeKey = jsBridgeKey;
+                    (walletConfig as WalletInfoInjectable).injected =
                         InjectedProvider.isWalletInjected(jsBridgeKey);
-                    (walletConfig as WalletInfoInjected).embedded =
+                    (walletConfig as WalletInfoInjectable).embedded =
                         InjectedProvider.isInsideWalletBrowser(jsBridgeKey);
                 }
             });
 
             return walletConfig;
+        });
+    }
+
+    private mergeWalletsLists(list1: WalletInfo[], list2: WalletInfo[]): WalletInfo[] {
+        const names = new Set(list1.concat(list2).map(item => item.name));
+
+        return [...names.values()].map(name => {
+            const list1Item = list1.find(item => item.name === name);
+            const list2Item = list2.find(item => item.name === name);
+
+            return {
+                ...(list1Item && { ...list1Item }),
+                ...(list2Item && { ...list2Item })
+            } as WalletInfo;
         });
     }
 

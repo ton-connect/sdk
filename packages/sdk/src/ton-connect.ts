@@ -6,8 +6,7 @@ import {
     TonAddressItemReply,
     WalletEvent,
     TonProofItemReply,
-    ConnectItem,
-    Feature
+    ConnectItem
 } from '@tonconnect/protocol';
 import { DappMetadataError } from 'src/errors/dapp/dapp-metadata.error';
 import { ManifestContentErrorError } from 'src/errors/protocol/events/connect/manifest-content-error.error';
@@ -15,8 +14,13 @@ import { ManifestNotFoundError } from 'src/errors/protocol/events/connect/manife
 import { TonConnectError } from 'src/errors/ton-connect.error';
 import { WalletAlreadyConnectedError } from 'src/errors/wallet/wallet-already-connected.error';
 import { WalletNotConnectedError } from 'src/errors/wallet/wallet-not-connected.error';
-import { WalletNotSupportFeatureError } from 'src/errors/wallet/wallet-not-support-feature.error';
-import { Account, Wallet, WalletConnectionSource, WalletInfo } from 'src/models';
+import {
+    Account,
+    Wallet,
+    WalletConnectionSource,
+    WalletConnectionSourceHTTP,
+    WalletInfo
+} from 'src/models';
 import { SendTransactionRequest, SendTransactionResponse } from 'src/models/methods';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
 import { TonConnectOptions } from 'src/models/ton-connect-options';
@@ -32,8 +36,10 @@ import { Provider } from 'src/provider/provider';
 import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { DefaultStorage } from 'src/storage/default-storage';
 import { ITonConnect } from 'src/ton-connect.interface';
-import { getWebPageManifest } from 'src/utils/web-api';
+import { getDocument, getWebPageManifest } from 'src/utils/web-api';
 import { WalletsListManager } from 'src/wallets-list-manager';
+import { WithoutIdDistributive } from 'src/utils/types';
+import { checkSendTransactionSupport } from 'src/utils/feature-support';
 
 export class TonConnect implements ITonConnect {
     private static readonly walletsList = new WalletsListManager();
@@ -61,7 +67,7 @@ export class TonConnect implements ITonConnect {
 
     private readonly walletsList = new WalletsListManager();
 
-    private readonly dappSettings: Omit<Required<TonConnectOptions>, 'walletsListSource'>;
+    private readonly dappSettings: Pick<Required<TonConnectOptions>, 'manifestUrl' | 'storage'>;
 
     private readonly bridgeConnectionStorage: BridgeConnectionStorage;
 
@@ -114,6 +120,10 @@ export class TonConnect implements ITonConnect {
         }
 
         this.bridgeConnectionStorage = new BridgeConnectionStorage(this.dappSettings.storage);
+
+        if (!options?.disableAutoPauseConnection) {
+            this.addWindowFocusAndBlurSubscriptions();
+        }
     }
 
     /**
@@ -156,12 +166,14 @@ export class TonConnect implements ITonConnect {
      * @param request (optional) additional request to pass to the wallet while connect (currently only ton_proof is available).
      * @returns universal link if external wallet was passed or void for the injected wallet.
      */
-    public connect<T extends WalletConnectionSource>(
+    public connect<
+        T extends WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[]
+    >(
         wallet: T,
         request?: ConnectAdditionalRequest
     ): T extends WalletConnectionSourceJS ? void : string;
     public connect(
-        wallet: WalletConnectionSource,
+        wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
         request?: ConnectAdditionalRequest
     ): void | string {
         if (this.connected) {
@@ -183,19 +195,25 @@ export class TonConnect implements ITonConnect {
             this.walletsList.getEmbeddedWallet()
         ]);
 
-        switch (bridgeConnectionType) {
-            case 'http':
-                this.provider = await BridgeProvider.fromStorage(this.dappSettings.storage);
-                break;
-            case 'injected':
-                this.provider = await InjectedProvider.fromStorage(this.dappSettings.storage);
-                break;
-            default:
-                if (embeddedWallet) {
-                    this.provider = await this.createProvider(embeddedWallet);
-                } else {
-                    return;
-                }
+        try {
+            switch (bridgeConnectionType) {
+                case 'http':
+                    this.provider = await BridgeProvider.fromStorage(this.dappSettings.storage);
+                    break;
+                case 'injected':
+                    this.provider = await InjectedProvider.fromStorage(this.dappSettings.storage);
+                    break;
+                default:
+                    if (embeddedWallet) {
+                        this.provider = await this.createProvider(embeddedWallet);
+                    } else {
+                        return;
+                    }
+            }
+        } catch {
+            await this.bridgeConnectionStorage.removeConnection();
+            this.provider = null;
+            return;
         }
 
         this.provider.listen(this.walletEventsListener.bind(this));
@@ -212,11 +230,21 @@ export class TonConnect implements ITonConnect {
         transaction: SendTransactionRequest
     ): Promise<SendTransactionResponse> {
         this.checkConnection();
-        this.checkFeatureSupport('SendTransaction');
+        checkSendTransactionSupport(this.wallet!.device.features, {
+            requiredMessagesNumber: transaction.messages.length
+        });
 
         const { validUntil, ...tx } = transaction;
+        const from = transaction.from || this.account!.address;
+        const network = transaction.network || this.account!.chain;
+
         const response = await this.provider!.sendRequest(
-            sendTransactionParser.convertToRpcRequest({ ...tx, valid_until: validUntil })
+            sendTransactionParser.convertToRpcRequest({
+                ...tx,
+                valid_until: validUntil,
+                from,
+                network
+            })
         );
 
         if (sendTransactionParser.isError(response)) {
@@ -239,10 +267,54 @@ export class TonConnect implements ITonConnect {
         this.onWalletDisconnected();
     }
 
-    private createProvider(wallet: WalletConnectionSource): Provider {
+    /**
+     * Pause bridge HTTP connection. Might be helpful, if you want to pause connections while browser tab is unfocused,
+     * or if you use SDK with NodeJS and want to save server resources.
+     */
+    public pauseConnection(): void {
+        if (this.provider?.type !== 'http') {
+            return;
+        }
+
+        this.provider.pause();
+    }
+
+    /**
+     * Unpause bridge HTTP connection if it is paused.
+     */
+    public unPauseConnection(): Promise<void> {
+        if (this.provider?.type !== 'http') {
+            return Promise.resolve();
+        }
+
+        return this.provider.unPause();
+    }
+
+    private addWindowFocusAndBlurSubscriptions(): void {
+        const document = getDocument();
+        if (!document) {
+            return;
+        }
+
+        try {
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    this.pauseConnection();
+                } else {
+                    this.unPauseConnection();
+                }
+            });
+        } catch (e) {
+            console.error('Cannot subscribe to the document.visibilitychange: ', e);
+        }
+    }
+
+    private createProvider(
+        wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[]
+    ): Provider {
         let provider: Provider;
 
-        if (isWalletConnectionSourceJS(wallet)) {
+        if (!Array.isArray(wallet) && isWalletConnectionSourceJS(wallet)) {
             provider = new InjectedProvider(this.dappSettings.storage, wallet.jsBridgeKey);
         } else {
             provider = new BridgeProvider(this.dappSettings.storage, wallet);
@@ -252,7 +324,7 @@ export class TonConnect implements ITonConnect {
         return provider;
     }
 
-    private walletEventsListener(e: WalletEvent): void {
+    private walletEventsListener(e: WithoutIdDistributive<WalletEvent>): void {
         switch (e.event) {
             case 'connect':
                 this.onWalletConnected(e.payload);
@@ -284,7 +356,8 @@ export class TonConnect implements ITonConnect {
             account: {
                 address: tonAccountItem.address,
                 chain: tonAccountItem.network,
-                walletStateInit: tonAccountItem.walletStateInit
+                walletStateInit: tonAccountItem.walletStateInit,
+                publicKey: tonAccountItem.publicKey
             }
         };
 
@@ -316,12 +389,6 @@ export class TonConnect implements ITonConnect {
     private checkConnection(): void | never {
         if (!this.connected) {
             throw new WalletNotConnectedError();
-        }
-    }
-
-    private checkFeatureSupport(feature: Feature): void | never {
-        if (!this.wallet?.device.features.includes(feature)) {
-            throw new WalletNotSupportFeatureError();
         }
     }
 
