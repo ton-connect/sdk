@@ -16,13 +16,12 @@
 <li><a href="_tonconnect_ui.html">@tonconnect/ui</a></li></ul>
 <h1>Module @tonconnect/ui</h1></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/b8d7ca5/packages/ui/src/index.ts#L1">packages/ui/src/index.ts:1</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/03c9ece/packages/ui/src/index.ts#L1">packages/ui/src/index.ts:1</a></li></ul></aside>
 <section class="tsd-panel-group">
 <section class="tsd-panel tsd-typography">
 <a href="#ton-connect-ui" id="ton-connect-ui" style="color: inherit; text-decoration: none;">
   <h1>TON Connect UI</h1>
 </a>
-<p>⚠️ <strong>API is work in progress right now. Don&#39;t use this package in production.</strong></p>
 <p>TonConnect UI is a UI kit for TonConnect SDK. Use it to connect your app to TON wallets via TonConnect protocol.</p>
 <p>If you use React for your dapp, take a look at <a href="https://github.com/ton-connect/sdk/tree/main/packages/ui-react">TonConnect UI React kit</a>.</p>
 <p>If you want to use TonConnect on the server side, you should use the <a href="https://github.com/ton-connect/sdk/tree/main/packages/sdk">TonConnect SDK</a>.</p>
@@ -217,6 +216,7 @@ However, the app developer can make changes to this interface to keep it consist
 </a>
 <p>It is not recommended to customise TonConnect UI elements via css as it may confuse the user when looking for known and familiar UI elements such as connect button/modals.
 However, it is possible if needed. You can add css styles to the specified selectors of the UI element. See list of selectors in the table below:</p>
+<p>UI components:</p>
 <table>
 <thead>
 <tr>
@@ -227,68 +227,148 @@ However, it is possible if needed. You can add css styles to the specified selec
 </thead>
 <tbody><tr>
 <td>Connect wallet modal container</td>
-<td><code>#tc-wallets-modal-container</code></td>
+<td><code>[data-tc-wallets-modal-container=&quot;true&quot;]</code></td>
 <td>Container of the modal window that opens when you click on the &quot;connect wallet&quot; button.</td>
 </tr>
 <tr>
-<td>Select wallet modal content</td>
-<td><code>#tc-wallets-modal</code></td>
-<td>Content of the modal window with wallet selection.</td>
+<td>Select wallet mobile modal content</td>
+<td><code>[data-tc-wallets-modal-mobile=&quot;true&quot;]</code></td>
+<td>Content of the mobile modal window with wallet selection.</td>
 </tr>
 <tr>
-<td>QR-code modal content</td>
-<td><code>#tc-qr-modal</code></td>
-<td>Content of the modal window with QR-code.</td>
+<td>Select wallet desktop modal content</td>
+<td><code>[data-tc-wallets-modal-desktop=&quot;true&quot;]</code></td>
+<td>Content of the desktop window with wallet selection.</td>
+</tr>
+<tr>
+<td>Desktop Universal QR content</td>
+<td><code>[data-tc-universal-qr-desktop=&quot;true&quot;]</code></td>
+<td>Universal QR page content under the tab bar in the desktop wallets selection modal window.</td>
+</tr>
+<tr>
+<td>Desktop wallets list content</td>
+<td><code>[data-tc-select-wallet-desktop=&quot;true&quot;]</code></td>
+<td>Wallets list page content under the tab bar in the desktop wallets selection modal window.</td>
+</tr>
+<tr>
+<td>Concrete wallet QR-code modal content</td>
+<td><code>[data-tc-wallet-qr-modal-desktop=&quot;true&quot;]</code></td>
+<td>Content of the modal window with the concrete wallet QR-code.</td>
 </tr>
 <tr>
 <td>Action modal container</td>
-<td><code>#tc-actions-modal-container</code></td>
+<td><code>[data-tc-actions-modal-container=&quot;true&quot;]</code></td>
 <td>Container of the modal window that opens when you call <code>sendTransaction</code> or other action.</td>
 </tr>
 <tr>
 <td>Confirm action modal content</td>
-<td><code>#tc-confirm-modal</code></td>
+<td><code>[data-tc-confirm-modal=&quot;true&quot;]</code></td>
 <td>Content of the modal window asking for confirmation of the action in the wallet.</td>
 </tr>
 <tr>
 <td>&quot;Transaction sent&quot; modal content</td>
-<td><code>#tc-transaction-sent-modal</code></td>
+<td><code>[data-tc-transaction-sent-modal=&quot;true&quot;]</code></td>
 <td>Content of the modal window informing that the transaction was successfully sent.</td>
 </tr>
 <tr>
 <td>&quot;Transaction canceled&quot; modal content</td>
-<td><code>#tc-transaction-canceled-modal</code></td>
+<td><code>[data-tc-transaction-canceled-modal=&quot;true&quot;]</code></td>
 <td>Content of the modal window informing that the transaction was not sent.</td>
 </tr>
 <tr>
 <td>&quot;Connect Wallet&quot; button</td>
-<td><code>#tc-connect-button</code></td>
+<td><code>[data-tc-connect-button=&quot;true&quot;]</code></td>
 <td>&quot;Connect Wallet&quot; button element.</td>
 </tr>
 <tr>
 <td>Wallet menu loading button</td>
-<td><code>#tc-connect-button-loading</code></td>
+<td><code>[data-tc-connect-button-loading=&quot;true&quot;]</code></td>
 <td>Button element which appears instead of &quot;Connect Wallet&quot; and dropdown menu buttons while restoring connection process</td>
 </tr>
 <tr>
 <td>Wallet menu dropdown button</td>
-<td><code>#tc-dropdown-button</code></td>
+<td><code>[data-tc-dropdown-button=&quot;true&quot;]</code></td>
 <td>Wallet menu button -- host of the dropdown wallet menu (copy address/disconnect).</td>
 </tr>
 <tr>
 <td>Wallet menu dropdown container</td>
-<td><code>#tc-dropdown-container</code></td>
+<td><code>[data-tc-dropdown-container=&quot;true&quot;]</code></td>
 <td>Container of the dropdown that opens when you click on the &quot;wallet menu&quot; button with ton address.</td>
 </tr>
 <tr>
 <td>Wallet menu dropdown content</td>
-<td><code>#tc-dropdown</code></td>
+<td><code>[data-tc-dropdown=&quot;true&quot;]</code></td>
 <td>Content of the dropdown that opens when you click on the &quot;wallet menu&quot; button with ton address.</td>
 </tr>
 <tr>
 <td>Notifications container</td>
-<td><code>#tc-notifications</code></td>
+<td><code>[data-tc-list-notifications=&quot;true&quot;]</code></td>
 <td>Container of the actions notifications.</td>
+</tr>
+<tr>
+<td>Notification confirm</td>
+<td><code>[data-tc-notification-confirm=&quot;true&quot;]</code></td>
+<td>Confirmation notification element.</td>
+</tr>
+<tr>
+<td>Notification tx sent</td>
+<td><code>[data-tc-notification-tx-sent=&quot;true&quot;]</code></td>
+<td>Transaction sent notification element.</td>
+</tr>
+<tr>
+<td>Notification cancelled tx</td>
+<td><code>[data-tc-notification-tx-cancelled=&quot;true&quot;]</code></td>
+<td>Cancelled transaction notification element.</td>
+</tr>
+</tbody></table>
+<hr>
+<p>Basic UI elements:</p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Selector</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Button</td>
+<td><code>[data-tc-button=&quot;true&quot;]</code></td>
+</tr>
+<tr>
+<td>Icon-button</td>
+<td><code>[data-tc-icon-button=&quot;true&quot;]</code></td>
+</tr>
+<tr>
+<td>Modal window</td>
+<td><code>[data-tc-modal=&quot;true&quot;]</code></td>
+</tr>
+<tr>
+<td>Notification</td>
+<td><code>[data-tc-notification=&quot;true&quot;]</code></td>
+</tr>
+<tr>
+<td>Tab bar</td>
+<td><code>[data-tc-tab-bar=&quot;true&quot;]</code></td>
+</tr>
+<tr>
+<td>H1</td>
+<td><code>[data-tc-h1=&quot;true&quot;]</code></td>
+</tr>
+<tr>
+<td>H2</td>
+<td><code>[data-tc-h2=&quot;true&quot;]</code></td>
+</tr>
+<tr>
+<td>H3</td>
+<td><code>[data-tc-h3=&quot;true&quot;]</code></td>
+</tr>
+<tr>
+<td>Text</td>
+<td><code>[data-tc-text=&quot;true&quot;]</code></td>
+</tr>
+<tr>
+<td>Wallet-item</td>
+<td><code>[data-tc-wallet-item=&quot;true&quot;]</code></td>
 </tr>
 </tbody></table>
 
@@ -297,39 +377,32 @@ However, it is possible if needed. You can add css styles to the specified selec
 </a>
 <p>You can customize the list of displayed wallets: change order, exclude wallets or add custom wallets.</p>
 
-<a href="#redefine-wallets-list" id="redefine-wallets-list" style="color: inherit; text-decoration: none;">
-  <h3>Redefine wallets list</h3>
+<a href="#extend-wallets-list" id="extend-wallets-list" style="color: inherit; text-decoration: none;">
+  <h3>Extend wallets list</h3>
 </a>
-<p>Pass an array of the wallet&#39;s names and custom wallets. Array items order will be applied to the wallets in modal window.  </p>
+<p>Pass custom wallets array to extend the wallets list. Passed wallets will be added to the end of the original wallets list.  </p>
 <p>You can define custom wallet with <code>jsBridgeKey</code> (wallet = browser extension or there is a wallet dapp browser) or with <code>bridgeUrl</code> and <code>universalLink</code> pair (for http-connection compatible wallets), or pass all of these properties. </p>
-<pre><code class="language-ts"><span class="hl-0">import</span><span class="hl-1"> { </span><span class="hl-2">UIWallet</span><span class="hl-1"> } </span><span class="hl-0">from</span><span class="hl-1"> </span><span class="hl-3">&#39;@tonconnect/ui&#39;</span><span class="hl-1">;</span><br/><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">customWallet</span><span class="hl-1">: </span><span class="hl-6">UIWallet</span><span class="hl-1"> = {</span><br/><span class="hl-1">    </span><span class="hl-2">name:</span><span class="hl-1"> </span><span class="hl-3">&#39;&lt;CUSTOM_WALLET_NAME&gt;&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-2">imageUrl:</span><span class="hl-1"> </span><span class="hl-3">&#39;&lt;CUSTOM_WALLET_IMAGE_URL&gt;&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-2">aboutUrl:</span><span class="hl-1"> </span><span class="hl-3">&#39;&lt;CUSTOM_WALLET_ABOUT_URL&gt;&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-2">jsBridgeKey:</span><span class="hl-1"> </span><span class="hl-3">&#39;&lt;CUSTOM_WALLET_JS_BRIDGE_KEY&gt;&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-2">bridgeUrl:</span><span class="hl-1"> </span><span class="hl-3">&#39;&lt;CUSTOM_WALLET_HTTP_BRIDGE_URL&gt;&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-2">universalLink:</span><span class="hl-1"> </span><span class="hl-3">&#39;&lt;CUSTOM_WALLET_UNIVERSAL_LINK&gt;&#39;</span><br/><span class="hl-1">};</span><br/><br/><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-2">uiOptions</span><span class="hl-1"> = {</span><br/><span class="hl-1">        </span><span class="hl-2">walletsList:</span><span class="hl-1"> {</span><br/><span class="hl-1">            </span><span class="hl-2">wallets:</span><span class="hl-1"> [</span><span class="hl-3">&#39;tonkeeper&#39;</span><span class="hl-1">, </span><span class="hl-3">&#39;openmask&#39;</span><span class="hl-1">, </span><span class="hl-2">customWallet</span><span class="hl-1">]</span><br/><span class="hl-1">        }</span><br/><span class="hl-1">    };</span>
+<pre><code class="language-ts"><span class="hl-0">import</span><span class="hl-1"> { </span><span class="hl-2">UIWallet</span><span class="hl-1"> } </span><span class="hl-0">from</span><span class="hl-1"> </span><span class="hl-3">&#39;@tonconnect/ui&#39;</span><span class="hl-1">;</span><br/><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">customWallet</span><span class="hl-1">: </span><span class="hl-6">UIWallet</span><span class="hl-1"> = {</span><br/><span class="hl-1">    </span><span class="hl-2">name:</span><span class="hl-1"> </span><span class="hl-3">&#39;&lt;CUSTOM_WALLET_NAME&gt;&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-2">imageUrl:</span><span class="hl-1"> </span><span class="hl-3">&#39;&lt;CUSTOM_WALLET_IMAGE_URL&gt;&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-2">aboutUrl:</span><span class="hl-1"> </span><span class="hl-3">&#39;&lt;CUSTOM_WALLET_ABOUT_URL&gt;&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-2">jsBridgeKey:</span><span class="hl-1"> </span><span class="hl-3">&#39;&lt;CUSTOM_WALLET_JS_BRIDGE_KEY&gt;&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-2">bridgeUrl:</span><span class="hl-1"> </span><span class="hl-3">&#39;&lt;CUSTOM_WALLET_HTTP_BRIDGE_URL&gt;&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-2">universalLink:</span><span class="hl-1"> </span><span class="hl-3">&#39;&lt;CUSTOM_WALLET_UNIVERSAL_LINK&gt;&#39;</span><br/><span class="hl-1">};</span><br/><br/><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-2">uiOptions</span><span class="hl-1"> = {</span><br/><span class="hl-1">    </span><span class="hl-2">walletsListConfiguration:</span><span class="hl-1"> {</span><br/><span class="hl-1">        </span><span class="hl-2">includeWallets:</span><span class="hl-1"> [</span><span class="hl-2">customWallet</span><span class="hl-1">]</span><br/><span class="hl-1">    }</span><br/><span class="hl-1">}</span>
 </code></pre>
-
-<a href="#modify-default-wallets-list" id="modify-default-wallets-list" style="color: inherit; text-decoration: none;">
-  <h3>Modify default wallets list</h3>
-</a>
-<p>Exclude some wallets with <code>excludeWallets</code> property.
-Include custom wallets with <code>includeWallets</code> property.
-Setup place where custom wallets will appear in the all wallets list with <code>includeWalletsOrder</code>. Default value id <code>&#39;end&#39;&#39;</code>. </p>
-<pre><code class="language-ts"><span class="hl-0">import</span><span class="hl-1"> { </span><span class="hl-2">UIWallet</span><span class="hl-1"> } </span><span class="hl-0">from</span><span class="hl-1"> </span><span class="hl-3">&#39;@tonconnect/ui&#39;</span><span class="hl-1">;</span><br/><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">customWallet</span><span class="hl-1">: </span><span class="hl-6">UIWallet</span><span class="hl-1"> = {</span><br/><span class="hl-1">    </span><span class="hl-2">name:</span><span class="hl-1"> </span><span class="hl-3">&#39;&lt;CUSTOM_WALLET_NAME&gt;&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-2">imageUrl:</span><span class="hl-1"> </span><span class="hl-3">&#39;&lt;CUSTOM_WALLET_IMAGE_URL&gt;&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-2">aboutUrl:</span><span class="hl-1"> </span><span class="hl-3">&#39;&lt;CUSTOM_WALLET_ABOUT_URL&gt;&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-2">jsBridgeKey:</span><span class="hl-1"> </span><span class="hl-3">&#39;&lt;CUSTOM_WALLET_JS_BRIDGE_KEY&gt;&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-2">bridgeUrl:</span><span class="hl-1"> </span><span class="hl-3">&#39;&lt;CUSTOM_WALLET_HTTP_BRIDGE_URL&gt;&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-2">universalLink:</span><span class="hl-1"> </span><span class="hl-3">&#39;&lt;CUSTOM_WALLET_UNIVERSAL_LINK&gt;&#39;</span><br/><span class="hl-1">};</span><br/><br/><span class="hl-1"> </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-2">uiOptions</span><span class="hl-1"> = {</span><br/><span class="hl-1">        </span><span class="hl-2">walletsList:</span><span class="hl-1"> {</span><br/><span class="hl-1">            </span><span class="hl-2">excludeWallets:</span><span class="hl-1"> [</span><span class="hl-3">&#39;openmask&#39;</span><span class="hl-1">],</span><br/><span class="hl-1">            </span><span class="hl-2">includeWallets:</span><span class="hl-1"> [</span><span class="hl-2">customWallet</span><span class="hl-1">],</span><br/><span class="hl-1">            </span><span class="hl-2">includeWalletsOrder:</span><span class="hl-1"> </span><span class="hl-3">&#39;start&#39;</span><br/><span class="hl-1">        }</span><br/><span class="hl-1">    };</span>
-</code></pre>
-<p><a href="https://ton-connect.github.io/sdk/types/_tonconnect_ui.WalletsListConfiguration.html">See all available options</a></p>
 
 <a href="#add-connect-request-parameters-ton_proof" id="add-connect-request-parameters-ton_proof" style="color: inherit; text-decoration: none;">
   <h2>Add connect request parameters (ton_proof)</h2>
 </a>
-<p>Pass <code>getConnectParameters</code> async function to the <code>TonConnectUI</code> constructor. This callback will be called after <code>connectWallet</code> method call or <code>Connect Button</code> click before wallets list render.</p>
-<p>In other words, if <code>getConnectParameters</code> is passed, there will be a following steps:</p>
-<ol>
-<li>User clicks to the &#39;Connect Wallet&#39; button, or <code>connectWallet</code> method is called</li>
-<li>Wallets modal opens</li>
-<li>Loader renders in the center of the modal</li>
-<li>TonConnectUI calls <code>getConnectParameters</code> and waits while it resolves</li>
-<li>Wallets list renders in the center of the modal</li>
-</ol>
-<p>Note that there is no any caching for <code>getConnectParameters</code> -- every time wallets modal opens there will be the 5 steps above.</p>
-<p>If you have to make a http-request to your backend it this case, it is better to do it after app initialization (if possible) and return (probably completed) promise from the <code>getConnectParameters</code> to reduce loading time for the user.</p>
-<pre><code class="language-ts"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">tonProofPayloadPromise</span><span class="hl-1"> = </span><span class="hl-5">getTonProofFromYourBackend</span><span class="hl-1">(); </span><span class="hl-7">// will be executed during app initialization</span><br/><span class="hl-1">                                                             </span><span class="hl-7">// don&#39;t forget to manage to refetch payload from your backend if needed</span><br/><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">tonConnectUI</span><span class="hl-1"> = </span><span class="hl-4">new</span><span class="hl-1"> </span><span class="hl-5">TonConnectUI</span><span class="hl-1">({</span><br/><span class="hl-1">    </span><span class="hl-2">manifestUrl:</span><span class="hl-1"> </span><span class="hl-3">&#39;https://&lt;YOUR_APP_URL&gt;/tonconnect-manifest.json&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-2">buttonRootId:</span><span class="hl-1"> </span><span class="hl-3">&#39;&lt;YOUR_CONNECT_BUTTON_ANCHOR_ID&gt;&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-5">getConnectParameters</span><span class="hl-2">:</span><span class="hl-1"> </span><span class="hl-4">async</span><span class="hl-1"> () </span><span class="hl-4">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">        </span><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">tonProof</span><span class="hl-1"> = </span><span class="hl-0">await</span><span class="hl-1"> </span><span class="hl-2">tonProofPayloadPromise</span><span class="hl-1">; </span><span class="hl-7">// will be executed every time when wallets modal is opened. It is recommended to make an http-request in advance</span><br/><span class="hl-1">        </span><span class="hl-0">return</span><span class="hl-1"> {                                         </span><br/><span class="hl-1">            </span><span class="hl-2">tonProof</span><br/><span class="hl-1">        };</span><br/><span class="hl-1">    }</span><br/><span class="hl-1">});</span>
+<p>Use <code>tonConnectUI.setConnectRequestParameters</code> function to pass your connect request parameters.</p>
+<p>This function takes one parameter:</p>
+<p>Set state to &#39;loading&#39; while you are waiting for the response from your backend. If user opens connect wallet modal at this moment, he will see a loader.</p>
+<pre><code class="language-ts"><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-5">setConnectRequestParameters</span><span class="hl-1">({</span><br/><span class="hl-1">    </span><span class="hl-2">state:</span><span class="hl-1"> </span><span class="hl-3">&#39;loading&#39;</span><br/><span class="hl-1">});</span>
+</code></pre>
+<p>or</p>
+<p>Set state to &#39;ready&#39; and define <code>tonProof</code> value. Passed parameter will be applied to the connect request (QR and universal link).</p>
+<pre><code class="language-ts"><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-5">setConnectRequestParameters</span><span class="hl-1">({</span><br/><span class="hl-1">    </span><span class="hl-2">state:</span><span class="hl-1"> </span><span class="hl-3">&#39;ready&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-2">value:</span><span class="hl-1"> {</span><br/><span class="hl-1">        </span><span class="hl-2">tonProof:</span><span class="hl-1"> </span><span class="hl-3">&#39;&lt;your-proof-payload&gt;&#39;</span><br/><span class="hl-1">    }</span><br/><span class="hl-1">});</span>
+</code></pre>
+<p>or </p>
+<p>Remove loader if it was enabled via <code>state: &#39;loading&#39;</code> (e.g. you received an error instead of a response from your backend). Connect request will be created without any additional parameters.</p>
+<pre><code class="language-ts"><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-5">setConnectRequestParameters</span><span class="hl-1">(</span><span class="hl-4">null</span><span class="hl-1">);</span>
+</code></pre>
+<p>You can call <code>tonConnectUI.setConnectRequestParameters</code> multiple times if your tonProof payload has bounded lifetime (e.g. you can refresh connect request parameters every 10 minutes). </p>
+<pre><code class="language-ts"><span class="hl-7">// enable ui loader</span><br/><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-5">setConnectRequestParameters</span><span class="hl-1">({ </span><span class="hl-2">state:</span><span class="hl-1"> </span><span class="hl-3">&#39;loading&#39;</span><span class="hl-1"> });</span><br/><br/><span class="hl-7">// fetch you tonProofPayload from the backend</span><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">tonProofPayload</span><span class="hl-1">: </span><span class="hl-6">string</span><span class="hl-1"> | </span><span class="hl-6">null</span><span class="hl-1"> = </span><span class="hl-0">await</span><span class="hl-1"> </span><span class="hl-5">fetchTonProofPayloadFromBackend</span><span class="hl-1">();</span><br/><br/><span class="hl-0">if</span><span class="hl-1"> (!</span><span class="hl-2">tonProofPayload</span><span class="hl-1">) {</span><br/><span class="hl-1">    </span><span class="hl-7">// remove loader, connect request will be without any additional parameters</span><br/><span class="hl-1">    </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-5">setConnectRequestParameters</span><span class="hl-1">(</span><span class="hl-4">null</span><span class="hl-1">);</span><br/><span class="hl-1">} </span><span class="hl-0">else</span><span class="hl-1"> {</span><br/><span class="hl-1">    </span><span class="hl-7">// add tonProof to the connect request</span><br/><span class="hl-1">    </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-5">setConnectRequestParameters</span><span class="hl-1">({</span><br/><span class="hl-1">        </span><span class="hl-2">state:</span><span class="hl-1"> </span><span class="hl-3">&quot;ready&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">        </span><span class="hl-2">value:</span><span class="hl-1"> { </span><span class="hl-2">tonProof:</span><span class="hl-1"> </span><span class="hl-2">tonProofPayload</span><span class="hl-1"> }</span><br/><span class="hl-1">    });</span><br/><span class="hl-1">}</span><br/>
 </code></pre>
 <p>You can find <code>ton_proof</code> result in the <code>wallet</code> object when wallet will be connected:</p>
 <pre><code class="language-ts"><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-5">onStatusChange</span><span class="hl-1">(</span><span class="hl-2">wallet</span><span class="hl-1"> </span><span class="hl-4">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">        </span><span class="hl-0">if</span><span class="hl-1"> (</span><span class="hl-2">wallet</span><span class="hl-1"> &amp;&amp; </span><span class="hl-2">wallet</span><span class="hl-1">.</span><span class="hl-2">connectItems</span><span class="hl-1">?.</span><span class="hl-2">tonProof</span><span class="hl-1"> &amp;&amp; </span><span class="hl-3">&#39;proof&#39;</span><span class="hl-1"> </span><span class="hl-4">in</span><span class="hl-1"> </span><span class="hl-2">wallet</span><span class="hl-1">.</span><span class="hl-2">connectItems</span><span class="hl-1">.</span><span class="hl-2">tonProof</span><span class="hl-1">) {</span><br/><span class="hl-1">            </span><span class="hl-5">checkProofInYourBackend</span><span class="hl-1">(</span><span class="hl-2">wallet</span><span class="hl-1">.</span><span class="hl-2">connectItems</span><span class="hl-1">.</span><span class="hl-2">tonProof</span><span class="hl-1">.</span><span class="hl-2">proof</span><span class="hl-1">);</span><br/><span class="hl-1">        }</span><br/><span class="hl-1">    });</span>
@@ -368,6 +441,9 @@ Setup place where custom wallets will appear in the all wallets list with <code>
 <a href="../types/_tonconnect_ui.Color.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Color</span></a>
 <a href="../types/_tonconnect_ui.ColorsSet.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Colors<wbr/>Set</span></a>
 <a href="../types/_tonconnect_ui.ConnectedWallet.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Connected<wbr/>Wallet</span></a>
+<a href="../types/_tonconnect_ui.Loadable.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Loadable</span></a>
+<a href="../types/_tonconnect_ui.LoadableLoading.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Loadable<wbr/>Loading</span></a>
+<a href="../types/_tonconnect_ui.LoadableReady.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Loadable<wbr/>Ready</span></a>
 <a href="../types/_tonconnect_ui.Locales.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Locales</span></a>
 <a href="../types/_tonconnect_ui.PartialColorsSet.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Partial<wbr/>Colors<wbr/>Set</span></a>
 <a href="../types/_tonconnect_ui.ReturnStrategy.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Return<wbr/>Strategy</span></a>
@@ -378,8 +454,6 @@ Setup place where custom wallets will appear in the all wallets list with <code>
 <a href="../types/_tonconnect_ui.WalletInfoWithOpenMethod.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Wallet<wbr/>Info<wbr/>With<wbr/>Open<wbr/>Method</span></a>
 <a href="../types/_tonconnect_ui.WalletOpenMethod.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Wallet<wbr/>Open<wbr/>Method</span></a>
 <a href="../types/_tonconnect_ui.WalletsListConfiguration.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Wallets<wbr/>List<wbr/>Configuration</span></a>
-<a href="../types/_tonconnect_ui.WalletsListConfigurationExplicit.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Wallets<wbr/>List<wbr/>Configuration<wbr/>Explicit</span></a>
-<a href="../types/_tonconnect_ui.WalletsListConfigurationImplicit.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Wallets<wbr/>List<wbr/>Configuration<wbr/>Implicit</span></a>
 </div></section></div></details></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>References</h2>
@@ -424,6 +498,9 @@ Setup place where custom wallets will appear in the all wallets list with <code>
 <li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.Color.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Color</a></li>
 <li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.ColorsSet.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Colors<wbr/>Set</a></li>
 <li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.ConnectedWallet.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Connected<wbr/>Wallet</a></li>
+<li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.Loadable.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Loadable</a></li>
+<li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.LoadableLoading.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Loadable<wbr/>Loading</a></li>
+<li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.LoadableReady.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Loadable<wbr/>Ready</a></li>
 <li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.Locales.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Locales</a></li>
 <li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.PartialColorsSet.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Partial<wbr/>Colors<wbr/>Set</a></li>
 <li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.ReturnStrategy.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Return<wbr/>Strategy</a></li>
@@ -433,9 +510,7 @@ Setup place where custom wallets will appear in the all wallets list with <code>
 <li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.WalletInfoRemoteWithOpenMethod.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Wallet<wbr/>Info<wbr/>Remote<wbr/>With<wbr/>Open<wbr/>Method</a></li>
 <li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.WalletInfoWithOpenMethod.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Wallet<wbr/>Info<wbr/>With<wbr/>Open<wbr/>Method</a></li>
 <li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.WalletOpenMethod.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Wallet<wbr/>Open<wbr/>Method</a></li>
-<li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.WalletsListConfiguration.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Wallets<wbr/>List<wbr/>Configuration</a></li>
-<li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.WalletsListConfigurationExplicit.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Wallets<wbr/>List<wbr/>Configuration<wbr/>Explicit</a></li>
-<li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.WalletsListConfigurationImplicit.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Wallets<wbr/>List<wbr/>Configuration<wbr/>Implicit</a></li></ul></nav></div></div>
+<li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.WalletsListConfiguration.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Wallets<wbr/>List<wbr/>Configuration</a></li></ul></nav></div></div>
 <div class="container tsd-generator">
 <p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></div>
 <div class="overlay"></div><script src="../assets/main.js"></script></body></html>
