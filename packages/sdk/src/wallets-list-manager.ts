@@ -8,6 +8,8 @@ import {
     WalletInfoCurrentlyEmbedded
 } from 'src/models/wallet/wallet-info';
 import { InjectedProvider } from 'src/provider/injected/injected-provider';
+import { logDebug } from 'src/utils/log';
+import { TonConnectError } from 'src/errors';
 
 export class WalletsListManager {
     private walletsListCache: Promise<WalletInfo[]> | null = null;
@@ -44,13 +46,27 @@ export class WalletsListManager {
     private async fetchWalletsList(): Promise<WalletInfo[]> {
         try {
             const walletsResponse = await fetch(this.walletsListSource);
-            const walletsList: WalletInfoDTO[] = await walletsResponse.json();
+            let walletsList: WalletInfoDTO[] = await walletsResponse.json();
 
-            if (
-                !Array.isArray(walletsList) ||
-                !walletsList.every(wallet => this.isCorrectWalletConfigDTO(wallet))
-            ) {
-                throw new FetchWalletsError('Wrong wallets list format');
+            if (!Array.isArray(walletsList)) {
+                throw new FetchWalletsError(
+                    'Wrong wallets list format, wallets list must be an array.'
+                );
+            }
+
+            const wrongFormatWallets = walletsList.filter(
+                wallet => !this.isCorrectWalletConfigDTO(wallet)
+            );
+            if (wrongFormatWallets.length) {
+                logDebug(
+                    `Wallet(s) ${wrongFormatWallets
+                        .map(wallet => wallet.name)
+                        .join(
+                            ', '
+                        )} config format is wrong. They were removed from the wallets list.`
+                );
+
+                walletsList = walletsList.filter(wallet => this.isCorrectWalletConfigDTO(wallet));
             }
 
             const currentlyInjectedWallets = InjectedProvider.getCurrentlyInjectedWallets();
@@ -60,7 +76,11 @@ export class WalletsListManager {
                 currentlyInjectedWallets
             );
         } catch (e) {
-            throw new FetchWalletsError(e);
+            if (!(e instanceof TonConnectError)) {
+                throw new FetchWalletsError(e);
+            }
+
+            throw e;
         }
     }
 
