@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui 
 
+# [1.0.0-beta.1](https://github.com/ton-connect/sdk/compare/ui-1.0.0-beta.0...ui-1.0.0-beta.1) (2023-03-22)
+
+
+### Bug Fixes
+
+* **ui:** `Notification` types fixes ([410e361](https://github.com/ton-connect/sdk/commit/410e36148e1aeaf911f23f47f7995d0f409237b1))
+
+
+
 # [1.0.0-beta.0](https://github.com/ton-connect/sdk/compare/ui-0.0.17...ui-1.0.0-beta.0) (2023-03-22)
 
 
