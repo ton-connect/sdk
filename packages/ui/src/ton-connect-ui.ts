@@ -41,7 +41,7 @@ export class TonConnectUI {
 
     private readonly preferredWalletStorage = new PreferredWalletStorage();
 
-    private readonly connector: ITonConnect;
+    public readonly connector: ITonConnect;
 
     private walletInfo: WalletInfoWithOpenMethod | null = null;
 
