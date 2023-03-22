@@ -57,7 +57,7 @@
   },
   "actionModal": {
     "confirmTransaction": {
-      "header": "Confirm the transaction in {{ name }}t",
+      "header": "Confirm the transaction in {{ name }}",
       "text": "It will only take a moment."
     },
     "transactionSent": "$notifications.transactionSent",
