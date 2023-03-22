@@ -98,9 +98,9 @@ export interface WalletInfoDTO {
     image: string;
     tondns?: string;
     about_url: string;
-    universal_url: string;
+    universal_url?: string;
 
-    deepLink: string;
+    deepLink?: string;
     bridge: (WalletInfoBridgeRemoteDTO | WalletInfoBridgeInjectedDTO)[];
 }
 

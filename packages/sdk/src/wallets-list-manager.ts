@@ -5,11 +5,12 @@ import {
     WalletInfo,
     WalletInfoDTO,
     isWalletInfoCurrentlyEmbedded,
-    WalletInfoCurrentlyEmbedded
+    WalletInfoCurrentlyEmbedded,
+    WalletInfoCurrentlyInjected
 } from 'src/models/wallet/wallet-info';
 import { InjectedProvider } from 'src/provider/injected/injected-provider';
-import { logDebug } from 'src/utils/log';
-import { TonConnectError } from 'src/errors';
+import { logError } from 'src/utils/log';
+import { FALLBACK_WALLETS_LIST } from 'src/resources/fallback-wallets-list';
 
 export class WalletsListManager {
     private walletsListCache: Promise<WalletInfo[]> | null = null;
@@ -44,9 +45,11 @@ export class WalletsListManager {
     }
 
     private async fetchWalletsList(): Promise<WalletInfo[]> {
+        let walletsList: WalletInfoDTO[] = [];
+
         try {
             const walletsResponse = await fetch(this.walletsListSource);
-            let walletsList: WalletInfoDTO[] = await walletsResponse.json();
+            walletsList = await walletsResponse.json();
 
             if (!Array.isArray(walletsList)) {
                 throw new FetchWalletsError(
@@ -58,7 +61,7 @@ export class WalletsListManager {
                 wallet => !this.isCorrectWalletConfigDTO(wallet)
             );
             if (wrongFormatWallets.length) {
-                logDebug(
+                logError(
                     `Wallet(s) ${wrongFormatWallets
                         .map(wallet => wallet.name)
                         .join(
@@ -68,20 +71,22 @@ export class WalletsListManager {
 
                 walletsList = walletsList.filter(wallet => this.isCorrectWalletConfigDTO(wallet));
             }
-
-            const currentlyInjectedWallets = InjectedProvider.getCurrentlyInjectedWallets();
-
-            return this.mergeWalletsLists(
-                this.walletConfigDTOListToWalletConfigList(walletsList),
-                currentlyInjectedWallets
-            );
         } catch (e) {
-            if (!(e instanceof TonConnectError)) {
-                throw new FetchWalletsError(e);
-            }
-
-            throw e;
+            logError(e);
+            walletsList = FALLBACK_WALLETS_LIST;
         }
+
+        let currentlyInjectedWallets: WalletInfoCurrentlyInjected[] = [];
+        try {
+            currentlyInjectedWallets = InjectedProvider.getCurrentlyInjectedWallets();
+        } catch (e) {
+            logError(e);
+        }
+
+        return this.mergeWalletsLists(
+            this.walletConfigDTOListToWalletConfigList(walletsList),
+            currentlyInjectedWallets
+        );
     }
 
     private walletConfigDTOListToWalletConfigList(walletConfigDTO: WalletInfoDTO[]): WalletInfo[] {
@@ -97,7 +102,7 @@ export class WalletsListManager {
                 if (bridge.type === 'sse') {
                     (walletConfig as WalletInfoRemote).bridgeUrl = bridge.url;
                     (walletConfig as WalletInfoRemote).universalLink =
-                        walletConfigDTO.universal_url;
+                        walletConfigDTO.universal_url!;
                     (walletConfig as WalletInfoRemote).deepLink = walletConfigDTO.deepLink;
                 }
 
