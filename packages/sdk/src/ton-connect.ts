@@ -67,7 +67,7 @@ export class TonConnect implements ITonConnect {
 
     private readonly walletsList = new WalletsListManager();
 
-    private readonly dappSettings: Omit<Required<TonConnectOptions>, 'walletsListSource'>;
+    private readonly dappSettings: Pick<Required<TonConnectOptions>, 'manifestUrl' | 'storage'>;
 
     private readonly bridgeConnectionStorage: BridgeConnectionStorage;
 
@@ -120,7 +120,10 @@ export class TonConnect implements ITonConnect {
         }
 
         this.bridgeConnectionStorage = new BridgeConnectionStorage(this.dappSettings.storage);
-        this.addWindowFocusAndBlurSubscriptions();
+
+        if (!options?.disableAutoPauseConnection) {
+            this.addWindowFocusAndBlurSubscriptions();
+        }
     }
 
     /**
