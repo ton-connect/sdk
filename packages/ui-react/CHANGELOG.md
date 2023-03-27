@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui-react 
 
+## [0.0.15](https://github.com/ton-connect/sdk/compare/ui-react-1.0.0-beta.2...ui-react-0.0.15) (2023-03-27)
+
+
+### Bug Fixes
+
+* **ui-react:** README updated ([2720ad1](https://github.com/ton-connect/sdk/commit/2720ad1a10dacbcd2445751091e9e25862777f6d))
+
+
+
 # [1.0.0-beta.2](https://github.com/ton-connect/sdk/compare/ui-react-1.0.0-beta.1...ui-react-1.0.0-beta.2) (2023-03-22)
 
 
