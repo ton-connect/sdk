@@ -1,7 +1,5 @@
 # TON Connect UI React
 
-⚠️ **API is work in progress right now. Don't use this package in production.**
-
 TonConnect UI React is a React UI kit for TonConnect SDK. Use it to connect your app to TON wallets via TonConnect protocol in React apps.
 
 If you don't use React for your app, take a look at [TonConnect UI](https://github.com/ton-connect/sdk/tree/main/packages/ui).
@@ -25,7 +23,7 @@ You can find more details and the protocol specification in the [docs](https://g
 
 ## Add TonConnectUIProvider
 Add TonConnectUIProvider to the root of the app. You can specify UI options using props.
-[See all available options](TODO)
+[See all available options](https://ton-connect.github.io/sdk/types/_tonconnect_ui_react.TonConnectUIProviderProps.html)
 
 All TonConnect UI hooks calls and `<TonConnectButton />` component must be placed inside `<TonConnectUIProvider>`.
 
@@ -164,34 +162,68 @@ export const EntrypointPage = () => {
 ```
 
 ## Add connect request parameters (ton_proof)
-Pass `getConnectParameters` async function to the `TonConnectUIProvider`. This callback will be called after `connectWallet` method call or `Connect Button` click before wallets list render.
+Use `tonConnectUI.setConnectRequestParameters` function to pass your connect request parameters.
 
-In other words, if `getConnectParameters` is passed, there will be following steps:
-1. User clicks to the 'Connect Wallet' button, or `connectWallet` method is called
-2. Wallets modal opens
-3. Loader renders in the center of the modal
-4. TonConnectUI calls `getConnectParameters` and waits while it resolves
-5. Wallets list renders in the center of the modal
+This function takes one parameter:
 
-Note that there is no any caching for `getConnectParameters` -- every time wallets modal opens there will be the 5 steps above.
+Set state to 'loading' while you are waiting for the response from your backend. If user opens connect wallet modal at this moment, he will see a loader.
+```ts
+const [tonConnectUI] = useTonConnectUI();
 
-If you have to make a http-request to your backend it this case, it is better to do it after app initialization (if possible) and return (probably completed) promise from the `getConnectParameters` to reduce loading time for the user.
-
-```tsx
-const tonProofPayloadPromise = getTonProofFromYourBackend(); // will be executed during app initialization
-                                                             // don't forget to manage to refetch payload from your backend if needed
-<TonConnectUIProvider
-    manifestUrl="https://<YOUR_APP_URL>/tonconnect-manifest.json"
-    getConnectParameters={async () => {
-        const tonProof = await tonProofPayloadPromise; // will be executed every time when wallets modal is opened. It is recommended to make an http-request in advance
-        return {
-            tonProof
-        };
-    }}
->
-    { /* Your app */ }
-</TonConnectUIProvider>
+tonConnectUI.setConnectRequestParameters({
+    state: 'loading'
+});
 ```
+
+or
+
+Set state to 'ready' and define `tonProof` value. Passed parameter will be applied to the connect request (QR and universal link).
+```ts
+const [tonConnectUI] = useTonConnectUI();
+
+tonConnectUI.setConnectRequestParameters({
+    state: 'ready',
+    value: {
+        tonProof: '<your-proof-payload>'
+    }
+});
+```
+
+or
+
+Remove loader if it was enabled via `state: 'loading'` (e.g. you received an error instead of a response from your backend). Connect request will be created without any additional parameters.
+```ts
+const [tonConnectUI] = useTonConnectUI();
+
+tonConnectUI.setConnectRequestParameters(null);
+```
+
+
+You can call `tonConnectUI.setConnectRequestParameters` multiple times if your tonProof payload has bounded lifetime (e.g. you can refresh connect request parameters every 10 minutes).
+
+
+```ts
+const [tonConnectUI] = useTonConnectUI();
+
+// enable ui loader
+tonConnectUI.setConnectRequestParameters({ state: 'loading' });
+
+// fetch you tonProofPayload from the backend
+const tonProofPayload: string | null = await fetchTonProofPayloadFromBackend();
+
+if (!tonProofPayload) {
+    // remove loader, connect request will be without any additional parameters
+    tonConnectUI.setConnectRequestParameters(null);
+} else {
+    // add tonProof to the connect request
+    tonConnectUI.setConnectRequestParameters({
+        state: "ready",
+        value: { tonProof: tonProofPayload }
+    });
+}
+
+```
+
 
 You can find `ton_proof` result in the `wallet` object when wallet will be connected:
 
