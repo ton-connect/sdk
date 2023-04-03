@@ -1,5 +1,14 @@
 # Changelog @tonconnect/sdk 
 
+## [2.1.3](https://github.com/ton-connect/sdk/compare/sdk-2.1.2...sdk-2.1.3) (2023-04-03)
+
+
+### Bug Fixes
+
+* **sdk:** wallets list cache option added. `WalletsListManager` exported ([52fe8f6](https://github.com/ton-connect/sdk/commit/52fe8f6ecd8890b05382520b91587877cae882ae))
+
+
+
 ## [2.1.2](https://github.com/ton-connect/sdk/compare/sdk-2.1.1...sdk-2.1.2) (2023-03-22)
 
 
