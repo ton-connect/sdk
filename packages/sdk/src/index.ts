@@ -3,6 +3,7 @@ export * from './models';
 export * from './errors';
 export { IStorage } from './storage/models/storage.interface';
 export { TonConnect as default } from './ton-connect';
+export { WalletsListManager } from './wallets-list-manager';
 export { ITonConnect } from './ton-connect.interface';
 export {
     CHAIN,

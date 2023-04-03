@@ -15,19 +15,42 @@ import { FALLBACK_WALLETS_LIST } from 'src/resources/fallback-wallets-list';
 export class WalletsListManager {
     private walletsListCache: Promise<WalletInfo[]> | null = null;
 
+    private walletsListCacheCreationTimestamp: number | null = null;
+
+    private readonly cacheTTLMs: number | undefined;
+
     private readonly walletsListSource: string =
         'https://raw.githubusercontent.com/ton-blockchain/wallets-list/main/wallets.json';
 
-    constructor(walletsListSource?: string) {
-        if (walletsListSource) {
-            this.walletsListSource = walletsListSource;
+    constructor(options?: { walletsListSource?: string; cacheTTLMs?: number }) {
+        if (options?.walletsListSource) {
+            this.walletsListSource = options.walletsListSource;
+        }
+
+        if (options?.cacheTTLMs) {
+            this.cacheTTLMs = options.cacheTTLMs;
         }
     }
 
     public async getWallets(): Promise<WalletInfo[]> {
+        if (
+            this.cacheTTLMs &&
+            this.walletsListCacheCreationTimestamp &&
+            Date.now() > this.walletsListCacheCreationTimestamp + this.cacheTTLMs
+        ) {
+            this.walletsListCache = null;
+        }
+
         if (!this.walletsListCache) {
             this.walletsListCache = this.fetchWalletsList();
-            this.walletsListCache.catch(() => (this.walletsListCache = null));
+            this.walletsListCache
+                .then(() => {
+                    this.walletsListCacheCreationTimestamp = Date.now();
+                })
+                .catch(() => {
+                    this.walletsListCache = null;
+                    this.walletsListCacheCreationTimestamp = null;
+                });
         }
 
         return this.walletsListCache;

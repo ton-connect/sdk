@@ -23,6 +23,12 @@ export interface TonConnectOptions {
     walletsListSource?: string;
 
     /**
+     * Wallets list cache time to live
+     * @default Infinity
+     */
+    walletsListCacheTTLMs?: number;
+
+    /**
      * Allows to disable auto pause/unpause SSE connection on 'document.visibilitychange' event. It is not recommended to change default behaviour.
      */
     disableAutoPauseConnection?: boolean;

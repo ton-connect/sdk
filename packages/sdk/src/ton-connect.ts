@@ -111,7 +111,10 @@ export class TonConnect implements ITonConnect {
             storage: options?.storage || new DefaultStorage()
         };
 
-        this.walletsList = new WalletsListManager(options?.walletsListSource);
+        this.walletsList = new WalletsListManager({
+            walletsListSource: options?.walletsListSource,
+            cacheTTLMs: options?.walletsListCacheTTLMs
+        });
 
         if (!this.dappSettings.manifestUrl) {
             throw new DappMetadataError(
