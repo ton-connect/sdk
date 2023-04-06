@@ -167,6 +167,7 @@ export const WalletsModal: Component = () => {
                                     <UniversalQrModal
                                         walletsList={walletsList()!}
                                         additionalRequest={additionalRequest()!}
+                                        openWalletFallback={() => setSelectedTabIndex(1)}
                                     />
                                 </Match>
                                 <Match when={selectedTabIndex() === 1}>
