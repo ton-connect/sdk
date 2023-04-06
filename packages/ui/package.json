@@ -47,19 +47,19 @@
     }
   },
   "dependencies": {
+    "classnames": "^2.3.2",
+    "deepmerge": "^4.2.2",
+    "@tonconnect/sdk": "^2.1.3"
+  },
+  "devDependencies": {
     "solid-js": "^1.5.1",
     "solid-styled-components": "^0.28.5",
     "solid-transition-group": "^0.0.12",
-    "classnames": "^2.3.2",
-    "qrcode-generator": "^1.4.4",
-    "deepmerge": "^4.2.2",
-    "is-plain-object": "^5.0.0",
-    "@tonconnect/sdk": "^2.1.2",
     "@solid-primitives/i18n": "^1.1.2",
     "@floating-ui/dom": "^1.0.12",
-    "solid-floating-ui": "^0.2.0"
-  },
-  "devDependencies": {
+    "solid-floating-ui": "^0.2.0",
+    "is-plain-object": "^5.0.0",
+    "qrcode-generator": "^1.4.4",
     "typescript": "^4.8.2",
     "eslint-plugin-solid": "^0.7.3",
     "vite": "^3.0.9",
@@ -71,6 +71,6 @@
     "solid-devtools": "^0.24.7"
   },
   "typedoc": {
-    "entryPoint": "./src/index.ts"
+    "entryPoint": "./src/library.ts"
   }
 }

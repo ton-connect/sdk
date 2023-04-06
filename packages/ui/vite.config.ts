@@ -37,5 +37,15 @@ export default defineConfig({
         return format === 'es' ? 'index.js' : 'index.umd.js'
       },
     },
+    rollupOptions: {
+      external: ['classnames', 'deepmerge', '@tonconnect/sdk'],
+      output: {
+        globals: {
+          '@tonconnect/sdk': 'TonConnectSDK',
+          'deepmerge': 'deepmerge',
+          'classnames': 'classNames'
+        },
+      },
+    },
   },
 });
