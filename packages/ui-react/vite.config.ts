@@ -27,11 +27,12 @@ export default defineConfig({
       },
     },
     rollupOptions: {
-      external: ['react', 'react-dom'],
+      external: ['react', 'react-dom', '@tonconnect/ui'],
       output: {
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM',
+          '@tonconnect/ui': 'TON_CONNECT_UI'
         }
       }
     }
