@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui-react 
 
+# [1.0.0-beta.4](https://github.com/ton-connect/sdk/compare/ui-react-1.0.0-beta.3...ui-react-1.0.0-beta.4) (2023-04-06)
+
+
+### Bug Fixes
+
+* **ui-react:** deps libs removed from the bundle ([b06a136](https://github.com/ton-connect/sdk/commit/b06a1360fe65abaeafbcb3a373fe3090393664d3))
+
+
+
 # [1.0.0-beta.3](https://github.com/ton-connect/sdk/compare/ui-react-1.0.0-beta.2...ui-react-1.0.0-beta.3) (2023-03-27)
 
 
