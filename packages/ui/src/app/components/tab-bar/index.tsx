@@ -21,6 +21,7 @@ export const TabBar: Component<TabBarProps> = props => {
                 <InputStyled
                     type="radio"
                     name={groupName}
+                    checked={props.selectedTabIndex === 0}
                     onInput={() => props.onSelectedTabIndexChange?.(0)}
                 />
                 {props.tab1}
@@ -28,6 +29,7 @@ export const TabBar: Component<TabBarProps> = props => {
             <LabelStyled isActive={props.selectedTabIndex === 1}>
                 <InputStyled
                     type="radio"
+                    checked={props.selectedTabIndex === 1}
                     name={groupName}
                     onInput={() => props.onSelectedTabIndexChange?.(1)}
                 />

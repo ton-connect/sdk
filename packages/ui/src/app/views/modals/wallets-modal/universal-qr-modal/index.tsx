@@ -31,6 +31,8 @@ interface UniversalQrModalProps {
     additionalRequest: ConnectAdditionalRequest;
 
     walletsList: WalletInfo[];
+
+    openWalletFallback: () => void;
 }
 
 export const UniversalQrModal: Component<UniversalQrModalProps> = props => {
@@ -46,7 +48,9 @@ export const UniversalQrModal: Component<UniversalQrModalProps> = props => {
     const request = createMemo(() => connector.connect(walletsBridges, props.additionalRequest));
 
     const onOpenWalletClick = (): void => {
+        let blurred = false;
         function blurHandler(): void {
+            blurred = true;
             setLastSelectedWalletInfo({ openMethod: 'universal-link' });
             window.removeEventListener('blur', blurHandler);
         }
@@ -55,6 +59,9 @@ export const UniversalQrModal: Component<UniversalQrModalProps> = props => {
 
         openLink(addReturnStrategy(request(), appState.returnStrategy));
         setTimeout(() => {
+            if (!blurred) {
+                props.openWalletFallback();
+            }
             window.removeEventListener('blur', blurHandler);
         }, 200);
     };

@@ -17,7 +17,7 @@ import { useFloating } from 'solid-floating-ui';
 import { autoUpdate } from '@floating-ui/dom';
 import { Transition } from 'solid-transition-group';
 import { useTheme } from 'solid-styled-components';
-import { CHAIN } from '@tonconnect/protocol';
+import { CHAIN } from '@tonconnect/sdk';
 import { globalStylesTag } from 'src/app/styles/global-styles';
 
 interface AccountButtonProps {}

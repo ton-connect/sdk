@@ -1,5 +1,5 @@
 import { useTonWallet } from './useTonWallet';
-import { CHAIN, toUserFriendlyAddress } from '@tonconnect/sdk';
+import { CHAIN, toUserFriendlyAddress } from '@tonconnect/ui';
 
 /**
  * Use it to get user's current ton wallet address. If wallet is not connected hook will return empty string.
