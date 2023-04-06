@@ -1,5 +1,15 @@
 # Changelog @tonconnect/ui 
 
+# [1.0.0-beta.3](https://github.com/ton-connect/sdk/compare/ui-1.0.0-beta.2...ui-1.0.0-beta.3) (2023-04-06)
+
+
+### Bug Fixes
+
+* **ui:** "Open Wallet" button with deeplink click fallback added -- button opens the second tab in the modal ([1e93b7c](https://github.com/ton-connect/sdk/commit/1e93b7cf3fd3158b6dd7f172820fc42331fa79ff))
+* **ui:** solid deps moved to the devDependencies. Deps libs removed from bundle ([cad2a47](https://github.com/ton-connect/sdk/commit/cad2a47ff7ca2fc669b8e366f4595fe19ffe0c23))
+
+
+
 # [1.0.0-beta.2](https://github.com/ton-connect/sdk/compare/ui-1.0.0-beta.1...ui-1.0.0-beta.2) (2023-03-22)
 
 
