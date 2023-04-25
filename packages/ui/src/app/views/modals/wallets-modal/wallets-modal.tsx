@@ -131,8 +131,9 @@ export const WalletsModal: Component = () => {
             </Show>
 
             <Show when={!additionalRequestLoading() && walletsList()}>
-                <Show when={isMobile()}>
+                <Show when={isMobile() && !selectedWalletInfo()}>
                     <MobileSelectWalletModal
+                        onSelect={onSelectInDesktopList}
                         walletsList={walletsList()!}
                         additionalRequest={additionalRequest()!}
                     />
@@ -179,13 +180,13 @@ export const WalletsModal: Component = () => {
                             </Switch>
                         </div>
                     </Show>
-                    <Show when={selectedWalletInfo()}>
-                        <QrCodeModal
-                            additionalRequest={additionalRequest()}
-                            wallet={selectedWalletInfo() as WalletInfoRemote}
-                            onBackClick={() => setSelectedWalletInfo(null)}
-                        />
-                    </Show>
+                </Show>
+                <Show when={selectedWalletInfo()}>
+                    <QrCodeModal
+                        additionalRequest={additionalRequest()}
+                        wallet={selectedWalletInfo() as WalletInfoRemote}
+                        onBackClick={() => setSelectedWalletInfo(null)}
+                    />
                 </Show>
             </Show>
         </StyledModal>
