@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui 
 
+# [1.0.0-beta.4](https://github.com/ton-connect/sdk/compare/ui-1.0.0-beta.3...ui-1.0.0-beta.4) (2023-04-25)
+
+
+### Bug Fixes
+
+* **ui:** mobile QR modal added for non-mobile user agents (TWA) ([cc2183e](https://github.com/ton-connect/sdk/commit/cc2183e66a0fb9a02f34b6f353f52c9b86aae794))
+
+
+
 # [1.0.0-beta.3](https://github.com/ton-connect/sdk/compare/ui-1.0.0-beta.2...ui-1.0.0-beta.3) (2023-04-06)
 
 
