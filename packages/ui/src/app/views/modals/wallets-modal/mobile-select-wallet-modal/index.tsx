@@ -10,7 +10,12 @@ import {
     LongArrowIconContainer,
     UlStyled
 } from './style';
-import { addReturnStrategy, openLink, openLinkBlank } from 'src/app/utils/web-api';
+import {
+    addReturnStrategy,
+    isMobileUserAgent,
+    openLink,
+    openLinkBlank
+} from 'src/app/utils/web-api';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { appState } from 'src/app/state/app.state';
 import { LINKS } from 'src/app/env/LINKS';
@@ -21,6 +26,8 @@ interface MobileSelectWalletModalProps {
     walletsList: WalletInfo[];
 
     additionalRequest: ConnectAdditionalRequest;
+
+    onSelect: (walletInfo: WalletInfo) => void;
 }
 
 export const MobileSelectWalletModal: Component<MobileSelectWalletModalProps> = props => {
@@ -28,6 +35,10 @@ export const MobileSelectWalletModal: Component<MobileSelectWalletModalProps> = 
     const theme = useTheme();
 
     const onSelect = (walletInfo: WalletInfo): void => {
+        if (!isMobileUserAgent()) {
+            return props.onSelect(walletInfo);
+        }
+
         if ('universalLink' in walletInfo) {
             setLastSelectedWalletInfo({ ...walletInfo, openMethod: 'universal-link' });
 
