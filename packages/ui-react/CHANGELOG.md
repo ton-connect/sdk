@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui-react 
 
+# [1.0.0-beta.5](https://github.com/ton-connect/sdk/compare/ui-react-1.0.0-beta.4...ui-react-1.0.0-beta.5) (2023-04-25)
+
+
+### Bug Fixes
+
+* **ui-react:** mobile QR modal added for non-mobile user agents (TWA) ([5fbf104](https://github.com/ton-connect/sdk/commit/5fbf104b0de5b4759dc070aea54299a441ca151c))
+
+
+
 # [1.0.0-beta.4](https://github.com/ton-connect/sdk/compare/ui-react-1.0.0-beta.3...ui-react-1.0.0-beta.4) (2023-04-06)
 
 
