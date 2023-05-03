@@ -24,7 +24,13 @@ const TonConnectButton: FunctionComponent<TonConnectButtonProps> = ({ className,
         return () => setOptions({ buttonRootId: null });
     }, [setOptions]);
 
-    return <div id={buttonRootId} className={className} style={style}></div>;
+    return (
+        <div
+            id={buttonRootId}
+            className={className}
+            style={{ width: 'fit-content', ...style }}
+        ></div>
+    );
 };
 
 export default memo(TonConnectButton);
