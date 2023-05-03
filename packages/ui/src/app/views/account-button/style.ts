@@ -41,6 +41,7 @@ export const LoaderIconStyled = styled(LoaderIcon)`
 `;
 
 export const DropdownContainerStyled = styled.div`
+    width: fit-content;
     display: flex;
     flex-direction: column;
     align-items: flex-end;
