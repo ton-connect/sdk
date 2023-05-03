@@ -1,5 +1,15 @@
 # Changelog @tonconnect/ui-react 
 
+# [1.0.0-beta.6](https://github.com/ton-connect/sdk/compare/ui-react-1.0.0-beta.5...ui-react-1.0.0-beta.6) (2023-05-03)
+
+
+### Bug Fixes
+
+* **ui-react:** Connect wallet button container width set to 'fit-content' ([9ef2535](https://github.com/ton-connect/sdk/commit/9ef2535c9fa2032f89a761bc2317b3444e3e9aef))
+* **ui-react:** Connect wallet button doesn't work with react-router-dom ([f5110ab](https://github.com/ton-connect/sdk/commit/f5110ab52b9092322000daf505cdd3c23a262fad))
+
+
+
 # [1.0.0-beta.5](https://github.com/ton-connect/sdk/compare/ui-react-1.0.0-beta.4...ui-react-1.0.0-beta.5) (2023-04-25)
 
 

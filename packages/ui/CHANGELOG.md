@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui 
 
+# [1.0.0-beta.5](https://github.com/ton-connect/sdk/compare/ui-1.0.0-beta.4...ui-1.0.0-beta.5) (2023-05-03)
+
+
+### Bug Fixes
+
+* **ui:** Connect wallet button container width set to 'fit-content' ([09df142](https://github.com/ton-connect/sdk/commit/09df142add0f704de6f2bd94823c4976ec8fc163))
+
+
+
 # [1.0.0-beta.4](https://github.com/ton-connect/sdk/compare/ui-1.0.0-beta.3...ui-1.0.0-beta.4) (2023-04-25)
 
 
