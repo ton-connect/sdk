@@ -245,6 +245,14 @@ try {
 }
 ```
 
+## Disconnect wallet
+Note that if you want to change connected wallet, you should disconnect current one firstly. Also make sure that you've waited for `restoreConnection()` promise resolved before call `disconnect()`;
+
+```ts
+if (connector.connected) {
+    await connector.disconnect();
+}
+```
 # Utils
 
 ## Convert address to user-friendly format
