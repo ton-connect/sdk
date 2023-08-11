@@ -18,6 +18,12 @@ export interface ActionConfiguration {
      * @default 'back'
      */
     returnStrategy?: ReturnStrategy;
+
+    /**
+     * Specifies whether the method should redirect user to the connected wallet
+     * @default 'ios'
+     */
+    skipRedirectToWallet?: 'ios' | 'always' | 'never';
 }
 
 export type StrictActionConfiguration = {

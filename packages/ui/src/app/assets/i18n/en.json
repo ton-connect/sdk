@@ -1,6 +1,7 @@
 {
   "common": {
     "close": "Close",
+    "openWallet": "Open wallet",
     "get": "GET",
     "learnMore": "Learn more",
     "openExtension": "Open Extension",

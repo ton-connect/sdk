@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui 
 
+# [1.0.0-beta.6](https://github.com/ton-connect/sdk/compare/ui-1.0.0-beta.5...ui-1.0.0-beta.6) (2023-08-11)
+
+
+### Bug Fixes
+
+* **ui:** ios universal links issue fixed ([aad243e](https://github.com/ton-connect/sdk/commit/aad243e02e475c88620db002e85d5f67a77117c3))
+
+
+
 # [1.0.0-beta.5](https://github.com/ton-connect/sdk/compare/ui-1.0.0-beta.4...ui-1.0.0-beta.5) (2023-05-03)
 
 

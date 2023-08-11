@@ -20,7 +20,7 @@ export const ConfirmTransactionModal: Component<ConfirmTransactionModalProps> = 
             textTranslationKey="actionModal.confirmTransaction.text"
             icon={<LoaderIcon size="m" />}
             onClose={() => props.onClose()}
-            showButton={false}
+            showButton="open-wallet"
             data-tc-confirm-modal="true"
         />
     );

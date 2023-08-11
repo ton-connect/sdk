@@ -16,6 +16,7 @@ import { WalletInfoStorage, PreferredWalletStorage } from 'src/storage';
 import {
     addReturnStrategy,
     getSystemTheme,
+    getUserAgent,
     openLink,
     preloadImages,
     subscribeToThemeChange
@@ -288,10 +289,18 @@ export class TonConnectUI {
             throw new TonConnectUIError('Connect wallet to send a transaction.');
         }
 
-        const { notifications, modals, returnStrategy } =
+        const { notifications, modals, returnStrategy, skipRedirectToWallet } =
             this.getModalsAndNotificationsConfiguration(options);
 
-        if ('universalLink' in this.walletInfo && this.walletInfo.openMethod === 'universal-link') {
+        const userOSIsIos = getUserAgent().os === 'ios';
+        const shouldSkipRedirectToWallet =
+            (skipRedirectToWallet === 'ios' && userOSIsIos) || skipRedirectToWallet === 'always';
+
+        if (
+            'universalLink' in this.walletInfo &&
+            this.walletInfo.openMethod === 'universal-link' &&
+            !shouldSkipRedirectToWallet
+        ) {
             openLink(addReturnStrategy(this.walletInfo.universalLink, returnStrategy));
         }
 
@@ -450,10 +459,19 @@ export class TonConnectUI {
             }
         }
 
+        const returnStrategy =
+            options?.returnStrategy || this.actionsConfiguration?.returnStrategy || 'back';
+
+        const skipRedirectToWallet =
+            options?.skipRedirectToWallet ||
+            this.actionsConfiguration?.skipRedirectToWallet ||
+            'ios';
+
         return {
             notifications,
             modals,
-            returnStrategy: options?.returnStrategy || 'back'
+            returnStrategy,
+            skipRedirectToWallet
         };
     }
 }

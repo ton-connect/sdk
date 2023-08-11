@@ -1,8 +1,10 @@
-import { Component, JSXElement, Show } from 'solid-js';
+import { Component, JSXElement, Show, useContext } from 'solid-js';
 import { Translation } from 'src/app/components/typography/Translation';
 import { ActionModalStyled, ButtonStyled, H1Styled, TextStyled } from './style';
 import { WithDataAttributes } from 'src/app/models/with-data-attributes';
 import { useDataAttributes } from 'src/app/hooks/use-data-attributes';
+import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
+import { addReturnStrategy, openLink } from 'src/app/utils/web-api';
 
 interface ActionModalProps extends WithDataAttributes {
     headerTranslationKey: string;
@@ -11,11 +13,25 @@ interface ActionModalProps extends WithDataAttributes {
     textTranslationKey?: string;
     textTranslationValues?: Record<string, string>;
     onClose: () => void;
-    showButton?: boolean;
+    showButton?: 'close' | 'open-wallet';
 }
 
 export const ActionModal: Component<ActionModalProps> = props => {
     const dataAttrs = useDataAttributes(props);
+    const tonConnectUI = useContext(TonConnectUiContext);
+
+    let universalLink: string | undefined;
+    if (
+        tonConnectUI?.wallet &&
+        'universalLink' in tonConnectUI.wallet &&
+        tonConnectUI.wallet.openMethod === 'universal-link'
+    ) {
+        universalLink = tonConnectUI.wallet.universalLink;
+    }
+
+    const onOpenWallet = (): void => {
+        openLink(addReturnStrategy(universalLink!, 'back'));
+    };
 
     return (
         <ActionModalStyled {...dataAttrs}>
@@ -28,9 +44,14 @@ export const ActionModal: Component<ActionModalProps> = props => {
                 translationKey={props.textTranslationKey}
                 translationValues={props.textTranslationValues}
             />
-            <Show when={props.showButton !== false}>
+            <Show when={props.showButton !== 'open-wallet'}>
                 <ButtonStyled onClick={() => props.onClose()}>
                     <Translation translationKey="common.close">Close</Translation>
+                </ButtonStyled>
+            </Show>
+            <Show when={props.showButton === 'open-wallet' && universalLink}>
+                <ButtonStyled onClick={onOpenWallet}>
+                    <Translation translationKey="common.openWallet">Open wallet</Translation>
                 </ButtonStyled>
             </Show>
         </ActionModalStyled>

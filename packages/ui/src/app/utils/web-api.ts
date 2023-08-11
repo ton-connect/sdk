@@ -3,6 +3,8 @@ import { ReturnStrategy } from 'src/models/return-strategy';
 import { disableScrollClass, globalStylesTag } from 'src/app/styles/global-styles';
 import { toPx } from 'src/app/utils/css';
 import { TonConnectUIError } from 'src/errors';
+import { UserAgent } from 'src/models/user-agent';
+import UAParser from 'ua-parser-js';
 
 export function openLink(href: string, target = '_self'): ReturnType<typeof window.open> {
     return window.open(href, target, 'noreferrer noopener');
@@ -102,4 +104,46 @@ export function isMobileUserAgent(): boolean {
             check = true;
     })(navigator.userAgent || navigator.vendor || (window as unknown as { opera: string }).opera);
     return check;
+}
+
+export function getUserAgent(): UserAgent {
+    const results = new UAParser().getResult();
+    const osName = results.os.name?.toLowerCase();
+    let os: UserAgent['os'];
+    switch (true) {
+        case osName === 'ios':
+            os = 'ios';
+            break;
+        case osName === 'android':
+            os = 'android';
+            break;
+        case osName === 'mac os':
+            os = 'macos';
+            break;
+        case osName === 'linux':
+            os = 'linux';
+            break;
+        case osName?.includes('windows'):
+            os = 'windows';
+            break;
+    }
+
+    const browserName = results.browser.name?.toLowerCase();
+    let browser: UserAgent['browser'] | undefined;
+    switch (true) {
+        case browserName === 'chrome':
+            browser = 'chrome';
+            break;
+        case browserName === 'firefox':
+            browser = 'firefox';
+            break;
+        case browserName?.includes('safari'):
+            browser = 'safari';
+            break;
+    }
+
+    return {
+        os,
+        browser
+    };
 }
