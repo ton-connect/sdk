@@ -201,6 +201,63 @@ tonConnectUI.uiOptions = {
     };
 ```
 
+## Universal links redirecting issues (IOS)
+Some operating systems, and especially iOS, have restrictions related to universal link usage. 
+For instance, if you try to open a universal link on an iOS device via `window.open`, you can face the following problem:
+the mobile browser won't redirect the user to the wallet app and will open the fallback tab instead. 
+That's because universal links can only be opened synchronously after a user's action in the browser (button click/...). 
+This means that you either can't perform any asynchronous requests after the user clicks an action button in your dapp, either you can't redirect the user to the connected wallet on some devices.
+
+So, by default, if the user's operating system is iOS, they won't be automatically redirected to the wallet after the dapp calls `tonConnectUI.sendTransaction`. 
+You can change this behavior using the skipRedirectToWallet option:
+
+```ts
+const result = await tonConnectUI.sendTransaction(defaultTx, {
+    modals: ['before', 'success', 'error'],
+    notifications: ['before', 'success', 'error'],
+    skipRedirectToWallet: 'ios' //'ios' (default), or 'never', or 'always'
+});
+```
+
+<details>
+<summary>You can set it globally with `uiOptions` setter, and it will be applied for all actions (send transaction/...).</summary>
+
+```ts
+tonConnectUI.uiOptions = {
+        actionsConfiguration: {
+            skipRedirectToWallet: 'ios'
+        }
+    };
+```
+
+</details>
+
+<details>
+<summary>You should use the option `'never'` if there are no any async calls in the action button's click handler before `tonConnectUI.sendTransaction` call</summary>
+
+```ts
+// use skipRedirectToWallet: 'never' for better UX
+const onClick = async ()  => {
+    const txBody = packTxBodySynchrone();
+    tonConnectUI.sendTransaction(txBody, { skipRedirectToWallet: 'never' });
+
+    const myApiResponse = await notifyBackend();
+    //...
+}
+```
+
+```ts
+// DON'T use skipRedirectToWallet: 'never', you should use skipRedirectToWallet: 'ios' 
+const onClick = async ()  => {
+    const myApiResponse = await notifyBackend();
+    
+    const txBody = packTxBodySynchrone();
+    tonConnectUI.sendTransaction(txBody, { skipRedirectToWallet: 'ios' });
+    //...
+}
+```
+</details>
+
 ## Add the return strategy
 
 Return strategy (optional) specifies return strategy for the deeplink when user signs/declines the request.

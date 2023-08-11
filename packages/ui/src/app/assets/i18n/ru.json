@@ -1,6 +1,7 @@
 {
   "common": {
     "close": "Закрыть",
+    "openWallet": "Открыть кошелек",
     "get": "Скачать",
     "learnMore": "Подробнее",
     "openExtension": "Расширение",
