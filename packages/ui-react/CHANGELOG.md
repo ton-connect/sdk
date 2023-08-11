@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui-react 
 
+# [1.0.0-beta.7](https://github.com/ton-connect/sdk/compare/ui-react-1.0.0-beta.6...ui-react-1.0.0-beta.7) (2023-08-11)
+
+
+### Bug Fixes
+
+* **ui:** ios universal links issue fixed ([513b4ae](https://github.com/ton-connect/sdk/commit/513b4aed8e779d276ac353cbc17838da773e7e86))
+
+
+
 # [1.0.0-beta.6](https://github.com/ton-connect/sdk/compare/ui-react-1.0.0-beta.5...ui-react-1.0.0-beta.6) (2023-05-03)
 
 
