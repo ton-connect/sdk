@@ -4,21 +4,22 @@ import { Transition } from 'solid-transition-group';
 import clickOutsideDirective from 'src/app/directives/click-outside';
 import keyPressedDirective from 'src/app/directives/key-pressed';
 import { Styleable } from 'src/app/models/styleable';
-import { isDevice, media } from 'src/app/styles/media';
-import { CloseButtonStyled, ModalBackgroundStyled, ModalWrapperClass } from './style';
+import { isDevice } from 'src/app/styles/media';
+import {
+    borders,
+    CloseButtonStyled,
+    ModalBackgroundStyled,
+    ModalBodyStyled,
+    ModalFooterStyled,
+    ModalWrapperClass, QuestionButtonStyled
+} from './style';
 import { css, useTheme } from 'solid-styled-components';
-import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
 import { disableScroll, enableScroll } from 'src/app/utils/web-api';
 import { WithDataAttributes } from 'src/app/models/with-data-attributes';
 import { useDataAttributes } from 'src/app/hooks/use-data-attributes';
+import {IconButton, TonConnectBrand} from 'src/app/components';
 const clickOutside = clickOutsideDirective;
 const keyPressed = keyPressedDirective;
-
-const borders: BorderRadiusConfig = {
-    m: '24px',
-    s: '16px',
-    none: '0'
-};
 
 export interface ModalProps extends Styleable, WithDataAttributes {
     children: JSXElement;
@@ -84,22 +85,22 @@ export const Modal: Component<ModalProps> = props => {
                     <div
                         class={cn(
                             ModalWrapperClass,
-                            props.class,
                             css`
-                                background-color: ${theme.colors.background.primary};
-                                border-radius: ${borders[theme.borderRadius]};
-
-                                ${media('mobile')} {
-                                    border-radius: ${borders[theme.borderRadius]}
-                                        ${borders[theme.borderRadius]} 0 0;
-                                }
+                                border-radius: ${borders[theme!.borderRadius]};
+                                background-color: ${theme.colors.background.secondary};
                             `
                         )}
                         use:clickOutside={() => props.onClose()}
                         use:keyPressed={() => props.onClose()}
                     >
-                        <CloseButtonStyled icon="close" onClick={() => props.onClose()} />
-                        {props.children}
+                        <ModalBodyStyled class={props.class}>
+                            <CloseButtonStyled icon="close" onClick={() => props.onClose()} />
+                            {props.children}
+                        </ModalBodyStyled>
+                        <ModalFooterStyled>
+                            <TonConnectBrand />
+                            <QuestionButtonStyled onClick={() => {}} icon="question" />
+                        </ModalFooterStyled>
                     </div>
                 </ModalBackgroundStyled>
             </Show>

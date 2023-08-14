@@ -22,6 +22,7 @@ export type ColorsSet = {
         primary: Color;
         secondary: Color;
         segment: Color;
+        tint: Color;
     };
     text: {
         primary: Color;
@@ -50,6 +51,7 @@ export type PartialColorsSet = {
         primary?: Color;
         secondary?: Color;
         segment?: Color;
+        tint?: Color;
     };
     text?: {
         primary?: Color;

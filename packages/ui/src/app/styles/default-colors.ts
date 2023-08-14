@@ -20,7 +20,8 @@ export const defaultLightColorsSet: ColorsSet = {
     background: {
         primary: '#FFFFFF',
         secondary: '#F1F3F5',
-        segment: '#FFFFFF'
+        segment: '#FFFFFF',
+        tint: '#F1F3F5'
     },
     text: {
         primary: '#0F0F0F',
@@ -48,7 +49,8 @@ export const defaultDarkColorsSet: ColorsSet = {
     background: {
         primary: '#121214',
         secondary: '#18181A',
-        segment: '#262629'
+        segment: '#262629',
+        tint: '#222224'
     },
     text: {
         primary: '#E5E5EA',

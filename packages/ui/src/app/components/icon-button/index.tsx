@@ -6,17 +6,18 @@ import { Styleable } from 'src/app/models/styleable';
 import { IconButtonStyled } from './style';
 import { WithDataAttributes } from 'src/app/models/with-data-attributes';
 import { useDataAttributes } from 'src/app/hooks/use-data-attributes';
+import { QuestionIcon } from 'src/app/components';
 
 export interface IconButtonProps extends Styleable, WithDataAttributes {
     fill?: Property.Color;
     children?: JSXElement;
-    icon?: 'close' | 'arrow';
+    icon?: 'close' | 'arrow' | 'question';
     onClick: () => void;
 }
 
 export const IconButton: Component<IconButtonProps> = props => {
     const dataAttrs = useDataAttributes(props);
-    const icon = (): 'close' | 'arrow' => props.icon || 'close';
+    const icon = (): 'close' | 'arrow' | 'question' => props.icon || 'close';
     return (
         <IconButtonStyled
             class={props.class}
@@ -32,6 +33,9 @@ export const IconButton: Component<IconButtonProps> = props => {
                     </Match>
                     <Match when={icon() === 'arrow'}>
                         <ArrowIcon fill={props.fill} />
+                    </Match>
+                    <Match when={icon() === 'question'}>
+                        <QuestionIcon fill={props.fill} />
                     </Match>
                 </Switch>
             </Show>

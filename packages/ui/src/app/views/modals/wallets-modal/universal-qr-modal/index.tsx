@@ -1,38 +1,31 @@
-import { Component, createMemo, createSignal, For, Show } from 'solid-js';
+import { Component, createMemo, createSignal, For } from 'solid-js';
 import {
     UniversalQrModalStyled,
     H2Styled,
     QRCodeStyled,
-    ButtonsContainerStyled,
-    ActionButtonStyled,
-    PopupWrapperStyled,
-    GetWalletStyled,
-    ExtensionLiStyled,
-    ImageStyled
+    H2AvailableWalletsStyled,
+    WalletsContainerStyled
 } from './style';
 import {
     ConnectAdditionalRequest,
     isWalletInfoCurrentlyInjected,
     isWalletInfoRemote,
-    WalletInfo,
-    WalletInfoCurrentlyInjected
+    WalletInfo
 } from '@tonconnect/sdk';
 import { appState } from 'src/app/state/app.state';
-import { Translation } from 'src/app/components/typography/Translation';
-import { addReturnStrategy, openLink } from 'src/app/utils/web-api';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
-import { Transition } from 'solid-transition-group';
-import { Button, Text } from 'src/app/components';
-import { LINKS } from 'src/app/env/LINKS';
-import { Link } from 'src/app/components/link';
-import { css } from 'solid-styled-components';
+import { FourWalletsItem, H1, WalletItem } from 'src/app/components';
+import { AT_WALLET_NAME } from 'src/app/models/at-wallet-name';
+import { PersonalizedWalletInfo } from 'src/app/models/personalized-wallet-info';
 
 interface UniversalQrModalProps {
     additionalRequest: ConnectAdditionalRequest;
 
-    walletsList: WalletInfo[];
+    walletsList: PersonalizedWalletInfo[];
 
-    openWalletFallback: () => void;
+    onSelectWallet: (walletInfo: WalletInfo) => void;
+
+    onSelectAllWallets: () => void;
 }
 
 export const UniversalQrModal: Component<UniversalQrModalProps> = props => {
@@ -42,57 +35,28 @@ export const UniversalQrModal: Component<UniversalQrModalProps> = props => {
     const walletsBridges = props.walletsList
         .filter(isWalletInfoRemote)
         .map(item => ({ bridgeUrl: item.bridgeUrl, universalLink: item.universalLink }));
-    const availableInjectableWallets = props.walletsList.filter(isWalletInfoCurrentlyInjected);
 
     setLastSelectedWalletInfo({ openMethod: 'qrcode' });
     const request = createMemo(() => connector.connect(walletsBridges, props.additionalRequest));
 
-    const onOpenWalletClick = (): void => {
-        let blurred = false;
-        function blurHandler(): void {
-            blurred = true;
-            setLastSelectedWalletInfo({ openMethod: 'universal-link' });
-            window.removeEventListener('blur', blurHandler);
-        }
-
-        window.addEventListener('blur', blurHandler);
-
-        openLink(addReturnStrategy(request(), appState.returnStrategy));
-        setTimeout(() => {
-            if (!blurred) {
-                props.openWalletFallback();
+    const walletsSecondLines = (): (string | undefined)[] => {
+        let popularUsed = false;
+        return props.walletsList.slice(0, 3).map(i => {
+            if (i.name === AT_WALLET_NAME) {
+                return undefined;
             }
-            window.removeEventListener('blur', blurHandler);
-        }, 200);
-    };
-
-    const onOpenExtensionClick = (e: Event): void => {
-        e.stopPropagation();
-        if (availableInjectableWallets.length === 1) {
-            const walletInfo = availableInjectableWallets[0]!;
-            setLastSelectedWalletInfo(walletInfo);
-
-            connector.connect(
-                {
-                    jsBridgeKey: walletInfo.jsBridgeKey
-                },
-                props.additionalRequest
-            );
-            return;
-        }
-
-        setPopupOpened(opened => !opened);
-    };
-
-    const onExtensionClick = (walletInfo: WalletInfoCurrentlyInjected): void => {
-        setLastSelectedWalletInfo(walletInfo);
-
-        connector.connect(
-            {
-                jsBridgeKey: walletInfo.jsBridgeKey
-            },
-            props.additionalRequest
-        );
+            if ('isPreferred' in i && i.isPreferred) {
+                return 'Recent';
+            }
+            if (isWalletInfoCurrentlyInjected(i)) {
+                return 'Installed';
+            }
+            if (!popularUsed) {
+                popularUsed = true;
+                return 'Popular';
+            }
+            return undefined;
+        });
     };
 
     return (
@@ -100,88 +64,45 @@ export const UniversalQrModal: Component<UniversalQrModalProps> = props => {
             onClick={() => setPopupOpened(false)}
             data-tc-universal-qr-desktop="true"
         >
-            <H2Styled translationKey="walletModal.universalQRModal.scanQR">
-                Scan QR code with a TON Connect compatible wallet.
-            </H2Styled>
-            <QRCodeStyled sourceUrl={request()} disableCopy={popupOpened()} />
-            <ButtonsContainerStyled>
-                <ActionButtonStyled onClick={onOpenWalletClick} scale="s">
-                    <Show when={availableInjectableWallets.length}>
-                        <Translation translationKey="walletModal.universalQRModal.openWallet">
-                            Open Wallet
-                        </Translation>
-                    </Show>
-                    <Show when={!availableInjectableWallets.length}>
-                        <Translation translationKey="walletModal.universalQRModal.openInstalledWallet">
-                            Open Installed Wallet
-                        </Translation>
-                    </Show>
-                </ActionButtonStyled>
-                <Show when={availableInjectableWallets.length}>
-                    <ActionButtonStyled
-                        onClick={onOpenExtensionClick}
-                        disableEventsAnimation={popupOpened()}
-                        scale="s"
-                    >
-                        <Transition
-                            onBeforeEnter={el => {
-                                el.animate(
-                                    [
-                                        { opacity: 0, transform: 'translateY(0)' },
-                                        { opacity: 1, transform: 'translateY(-16px)' }
-                                    ],
-                                    {
-                                        duration: 150
-                                    }
-                                );
-                            }}
-                            onExit={(el, done) => {
-                                el.animate(
-                                    [
-                                        { opacity: 1, transform: 'translateY(-16px)' },
-                                        { opacity: 0, transform: 'translateY(0)' }
-                                    ],
-                                    {
-                                        duration: 150
-                                    }
-                                ).finished.then(done);
-                            }}
-                        >
-                            <Show when={popupOpened()}>
-                                <PopupWrapperStyled>
-                                    <For each={availableInjectableWallets}>
-                                        {wallet => (
-                                            <ExtensionLiStyled
-                                                onClick={() => onExtensionClick(wallet)}
-                                            >
-                                                <ImageStyled src={wallet.imageUrl} alt="" />
-                                                <Text fontWeight={590}>{wallet.name}</Text>
-                                            </ExtensionLiStyled>
-                                        )}
-                                    </For>
-                                </PopupWrapperStyled>
-                            </Show>
-                        </Transition>
-                        <Translation translationKey="common.openExtension">
-                            Open Extension
-                        </Translation>
-                    </ActionButtonStyled>
-                </Show>
-            </ButtonsContainerStyled>
-            <Show when={!availableInjectableWallets.length}>
-                <GetWalletStyled>
-                    <Link href={LINKS.LEARN_MORE} blank>
-                        <Button
-                            appearance="flat"
-                            class={css`
-                                font-size: 15px;
-                            `}
-                        >
-                            <Translation translationKey="common.learnMore">Learn more</Translation>
-                        </Button>
-                    </Link>
-                </GetWalletStyled>
-            </Show>
+            <H1>Connect your wallet</H1>
+            <H2Styled>Scan with your mobile wallet</H2Styled>
+            <QRCodeStyled
+                sourceUrl={request()}
+                disableCopy={popupOpened()}
+                imageUrl="https://raw.githubusercontent.com/ton-connect/sdk/main/assets/ton-icon-48.png"
+            />
+            <H2AvailableWalletsStyled>Available wallets</H2AvailableWalletsStyled>
+            <WalletsContainerStyled>
+                <For each={props.walletsList.slice(0, 3)}>
+                    {(wallet, index) => (
+                        <li>
+                            {wallet.name === AT_WALLET_NAME ? (
+                                <WalletItem
+                                    icon={wallet.imageUrl}
+                                    name={wallet.name + ' on'}
+                                    secondLine="Telegram"
+                                    badgeUrl="https://raw.githubusercontent.com/ton-connect/sdk/main/assets/tg.png"
+                                    onClick={() => {}}
+                                />
+                            ) : (
+                                <WalletItem
+                                    icon={wallet.imageUrl}
+                                    name={wallet.name}
+                                    secondLine={walletsSecondLines()[index()]}
+                                    secondLineColorPrimary={false}
+                                    onClick={() => props.onSelectWallet(wallet)}
+                                />
+                            )}
+                        </li>
+                    )}
+                </For>
+                <FourWalletsItem
+                    labelLine1="View all"
+                    labelLine2="wallets"
+                    images={props.walletsList.slice(3, 7).map(i => i.imageUrl)}
+                    onClick={props.onSelectAllWallets}
+                />
+            </WalletsContainerStyled>
         </UniversalQrModalStyled>
     );
 };

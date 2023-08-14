@@ -7,3 +7,4 @@ export { QRCode } from './qr-code';
 export { WalletItem } from './wallet-item';
 export * from './typography';
 export * from './icons';
+export { FourWalletsItem } from './wallet-item/four-wallets';

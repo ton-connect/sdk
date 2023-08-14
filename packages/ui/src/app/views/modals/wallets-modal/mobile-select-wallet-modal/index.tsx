@@ -95,7 +95,7 @@ export const MobileSelectWalletModal: Component<MobileSelectWalletModalProps> = 
                     {wallet => (
                         <li>
                             <WalletItem
-                                iconUrl={wallet.imageUrl}
+                                icon={wallet.imageUrl}
                                 name={wallet.name}
                                 onClick={() => onSelect(wallet)}
                             />

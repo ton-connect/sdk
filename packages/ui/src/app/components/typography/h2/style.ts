@@ -4,7 +4,7 @@ export const H2Styled = styled.h2`
     font-style: normal;
     font-weight: 510;
     font-size: 16px;
-    line-height: 20px;
+    line-height: 22px;
 
     text-align: center;
 

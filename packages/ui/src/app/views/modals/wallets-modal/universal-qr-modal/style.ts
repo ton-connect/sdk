@@ -18,15 +18,25 @@ export const UniversalQrModalStyled = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
+    padding-bottom: 16px;
 `;
 
 export const H2Styled = styled(H2)`
     max-width: 320px;
-    margin-bottom: 24px;
+    margin-top: 2px;
+    margin-bottom: 20px;
+`;
+
+export const H2AvailableWalletsStyled = styled(H2)`
+    margin-bottom: 16px;
 `;
 
 export const QRCodeStyled = styled(QRCode)`
-    margin-bottom: 16px;
+    margin-bottom: 24px;
+`;
+
+export const WalletsContainerStyled = styled.ul`
+    display: flex;
 `;
 
 export const ButtonsContainerStyled = styled.div`

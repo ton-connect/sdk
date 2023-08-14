@@ -22,7 +22,7 @@ export const DesktopSelectWalletModal: Component<DesktopSelectWalletModalProps> 
                     {wallet => (
                         <li>
                             <WalletItem
-                                iconUrl={wallet.imageUrl}
+                                icon={wallet.imageUrl}
                                 name={wallet.name}
                                 onClick={() => props.onSelect(wallet)}
                             />
