@@ -6,16 +6,10 @@ import {
     H2AvailableWalletsStyled,
     WalletsContainerStyled
 } from './style';
-import {
-    ConnectAdditionalRequest,
-    isWalletInfoCurrentlyInjected,
-    isWalletInfoRemote,
-    WalletInfo
-} from '@tonconnect/sdk';
+import { ConnectAdditionalRequest, isWalletInfoRemote, WalletInfo } from '@tonconnect/sdk';
 import { appState } from 'src/app/state/app.state';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
-import { FourWalletsItem, H1, WalletItem } from 'src/app/components';
-import { AT_WALLET_NAME } from 'src/app/models/at-wallet-name';
+import { FourWalletsItem, H1, WalletLabeledItem } from 'src/app/components';
 import { PersonalizedWalletInfo } from 'src/app/models/personalized-wallet-info';
 
 interface UniversalQrModalProps {
@@ -39,26 +33,6 @@ export const UniversalQrModal: Component<UniversalQrModalProps> = props => {
     setLastSelectedWalletInfo({ openMethod: 'qrcode' });
     const request = createMemo(() => connector.connect(walletsBridges, props.additionalRequest));
 
-    const walletsSecondLines = (): (string | undefined)[] => {
-        let popularUsed = false;
-        return props.walletsList.slice(0, 3).map(i => {
-            if (i.name === AT_WALLET_NAME) {
-                return undefined;
-            }
-            if ('isPreferred' in i && i.isPreferred) {
-                return 'Recent';
-            }
-            if (isWalletInfoCurrentlyInjected(i)) {
-                return 'Installed';
-            }
-            if (!popularUsed) {
-                popularUsed = true;
-                return 'Popular';
-            }
-            return undefined;
-        });
-    };
-
     return (
         <UniversalQrModalStyled
             onClick={() => setPopupOpened(false)}
@@ -74,25 +48,12 @@ export const UniversalQrModal: Component<UniversalQrModalProps> = props => {
             <H2AvailableWalletsStyled>Available wallets</H2AvailableWalletsStyled>
             <WalletsContainerStyled>
                 <For each={props.walletsList.slice(0, 3)}>
-                    {(wallet, index) => (
+                    {wallet => (
                         <li>
-                            {wallet.name === AT_WALLET_NAME ? (
-                                <WalletItem
-                                    icon={wallet.imageUrl}
-                                    name={wallet.name + ' on'}
-                                    secondLine="Telegram"
-                                    badgeUrl="https://raw.githubusercontent.com/ton-connect/sdk/main/assets/tg.png"
-                                    onClick={() => {}}
-                                />
-                            ) : (
-                                <WalletItem
-                                    icon={wallet.imageUrl}
-                                    name={wallet.name}
-                                    secondLine={walletsSecondLines()[index()]}
-                                    secondLineColorPrimary={false}
-                                    onClick={() => props.onSelectWallet(wallet)}
-                                />
-                            )}
+                            <WalletLabeledItem
+                                wallet={wallet}
+                                onClick={() => props.onSelectWallet(wallet)}
+                            />
                         </li>
                     )}
                 </For>

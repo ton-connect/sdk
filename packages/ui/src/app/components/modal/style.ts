@@ -41,7 +41,7 @@ export const ModalWrapperClass = css`
 export const ModalBodyStyled = styled.div`
     position: relative;
     min-height: 100px;
-    width: 440px;
+    width: 416px;
     padding: 44px 56px 24px;
 
     box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.04);

@@ -1,40 +1,45 @@
-import { Component, For } from 'solid-js';
-import { DesktopSelectWalletModalStyled, WalletsUl, ButtonStyled, H2Styled } from './style';
+import { Component, createSignal, For } from 'solid-js';
+import {
+    DesktopSelectWalletModalStyled,
+    WalletsUl,
+    H1Styled,
+    StyledIconButton,
+    WalletLabeledItemStyled,
+    ScrollDivider
+} from './style';
 import { WalletInfo } from '@tonconnect/sdk';
-import { Translation } from 'src/app/components/typography/Translation';
-import { LINKS } from 'src/app/env/LINKS';
-import { Link } from 'src/app/components/link';
-import { WalletItem } from 'src/app/components';
 export interface DesktopSelectWalletModalProps {
     walletsList: WalletInfo[];
+
+    onBack: () => void;
 
     onSelect: (walletInfo: WalletInfo) => void;
 }
 
 export const DesktopSelectWalletModal: Component<DesktopSelectWalletModalProps> = props => {
+    const [scrolled, setScrolled] = createSignal(false);
+
+    const onScroll = (e: Event): void => {
+        setScrolled((e.target as HTMLUListElement).scrollTop !== 0);
+    };
+
     return (
         <DesktopSelectWalletModalStyled data-tc-select-wallet-desktop="true">
-            <H2Styled translationKey="walletModal.desktopSelectWalletModal.selectWallet">
-                Choose your preferred wallet from the options to get started.
-            </H2Styled>
-            <WalletsUl>
+            <StyledIconButton icon="arrow" onClick={() => props.onBack()} />
+            <H1Styled>Wallets</H1Styled>
+            <ScrollDivider isShown={scrolled()} />
+            <WalletsUl onScroll={onScroll}>
                 <For each={props.walletsList}>
                     {wallet => (
                         <li>
-                            <WalletItem
-                                icon={wallet.imageUrl}
-                                name={wallet.name}
+                            <WalletLabeledItemStyled
+                                wallet={wallet}
                                 onClick={() => props.onSelect(wallet)}
                             />
                         </li>
                     )}
                 </For>
             </WalletsUl>
-            <Link href={LINKS.LEARN_MORE} blank>
-                <ButtonStyled appearance="flat">
-                    <Translation translationKey="common.learnMore">Learn more</Translation>
-                </ButtonStyled>
-            </Link>
         </DesktopSelectWalletModalStyled>
     );
 };

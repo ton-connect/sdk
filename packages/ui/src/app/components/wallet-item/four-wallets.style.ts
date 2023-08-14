@@ -1,5 +1,5 @@
 import { styled } from 'solid-styled-components';
-import { Image } from 'src/app/components';
+import { WalletImage } from './wallet-image';
 
 export const FourWalletsCard = styled.div`
     width: 60px;
@@ -13,7 +13,7 @@ export const FourWalletsCard = styled.div`
     gap: 4px;
 `;
 
-export const FourWalletsImage = styled(Image)`
+export const FourWalletsImage = styled(WalletImage)`
     width: 20px;
     height: 20px;
     border-radius: 6px;

@@ -18,7 +18,7 @@ export const WalletItem: Component<WalletItemProps> = props => {
             onClick={() => props.onClick()}
             data-tc-wallet-item="true"
         >
-            {typeof props.icon === 'string' ? <ImageStyled src={props.icon} alt="" /> : props.icon}
+            {typeof props.icon === 'string' ? <ImageStyled src={props.icon} /> : props.icon}
             {props.badgeUrl && <BadgeStyled src={props.badgeUrl} />}
             <StyledText>{props.name}</StyledText>
             {props.secondLine && (

@@ -2,13 +2,13 @@ import { styled } from 'solid-styled-components';
 import { Text } from '../typography/text';
 import { Image } from '../image';
 import { media, mediaNotTouch, mediaTouch } from 'src/app/styles/media';
+import { WalletImage } from './wallet-image';
 export const WalletItemStyled = styled.button`
     position: relative;
     cursor: pointer;
     border: none;
     background-color: unset;
     padding: 8px 4px;
-    height: 120px;
     width: 92px;
     display: flex;
     flex-direction: column;
@@ -39,18 +39,11 @@ export const WalletItemStyled = styled.button`
     }
 `;
 
-export const ImageStyled = styled(Image)`
+export const ImageStyled = styled(WalletImage)`
     width: 60px;
     height: 60px;
-    border-radius: 12px;
 
     margin-bottom: 8px;
-
-    ${media('mobile')} {
-        width: 64px;
-        height: 64px;
-        border-radius: 16px;
-    }
 `;
 
 export const BadgeStyled = styled(Image)`

@@ -163,6 +163,7 @@ export const WalletsModal: Component = () => {
                                 <Match when={selectedTab() === 'all-wallets'}>
                                     <DesktopSelectWalletModal
                                         walletsList={walletsList()!}
+                                        onBack={() => setSelectedTab('universal')}
                                         onSelect={onSelectInDesktopList}
                                     />
                                 </Match>
