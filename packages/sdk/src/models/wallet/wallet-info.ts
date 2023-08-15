@@ -21,6 +21,20 @@ export interface WalletInfoBase {
      * Info or landing page of your wallet. May be useful for TON newcomers.
      */
     aboutUrl: string;
+
+    /**
+     * OS and browsers where the wallet could be installed
+     */
+    platforms: (
+        | 'ios'
+        | 'android'
+        | 'macos'
+        | 'windows'
+        | 'linux'
+        | 'chrome'
+        | 'firefox'
+        | 'safari'
+    )[];
 }
 
 /**
@@ -99,6 +113,16 @@ export interface WalletInfoDTO {
     tondns?: string;
     about_url: string;
     universal_url?: string;
+    platforms: (
+        | 'ios'
+        | 'android'
+        | 'macos'
+        | 'windows'
+        | 'linux'
+        | 'chrome'
+        | 'firefox'
+        | 'safari'
+    )[];
 
     deepLink?: string;
     bridge: (WalletInfoBridgeRemoteDTO | WalletInfoBridgeInjectedDTO)[];

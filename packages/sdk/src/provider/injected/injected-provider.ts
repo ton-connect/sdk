@@ -63,7 +63,8 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             tondns: wallet.tonconnect.walletInfo.tondns,
             jsBridgeKey,
             injected: true,
-            embedded: wallet.tonconnect.isWalletBrowser
+            embedded: wallet.tonconnect.isWalletBrowser,
+            platforms: wallet.tonconnect.walletInfo.platforms
         }));
     }
 

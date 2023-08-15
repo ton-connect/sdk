@@ -118,7 +118,8 @@ export class WalletsListManager {
                 name: walletConfigDTO.name,
                 imageUrl: walletConfigDTO.image,
                 aboutUrl: walletConfigDTO.about_url,
-                tondns: walletConfigDTO.tondns
+                tondns: walletConfigDTO.tondns,
+                platforms: walletConfigDTO.platforms
             } as WalletInfo;
 
             walletConfigDTO.bridge.forEach(bridge => {
@@ -165,11 +166,19 @@ export class WalletsListManager {
         const containsName = 'name' in value;
         const containsImage = 'image' in value;
         const containsAbout = 'about_url' in value;
+        const containsPlatforms = 'platforms' in value;
 
-        if (!containsName || !containsImage || !containsAbout) {
+        if (!containsName || !containsImage || !containsAbout || !containsPlatforms) {
             return false;
         }
 
+        if (
+            !(value as { platforms: unknown }).platforms ||
+            !Array.isArray((value as { platforms: unknown }).platforms) ||
+            !(value as { platforms: string[] }).platforms.length
+        ) {
+            return false;
+        }
         if (
             !('bridge' in value) ||
             !Array.isArray((value as { bridge: unknown }).bridge) ||
