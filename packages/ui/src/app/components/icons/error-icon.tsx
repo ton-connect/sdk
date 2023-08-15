@@ -38,6 +38,7 @@ export const ErrorIcon: Component<ErrorIconProps> = props => {
                     height="48"
                     viewBox="0 0 48 48"
                     fill="none"
+                    class={props.class}
                 >
                     <circle cx="24" cy="24.001" r="22" fill={fill()} />
                     <path

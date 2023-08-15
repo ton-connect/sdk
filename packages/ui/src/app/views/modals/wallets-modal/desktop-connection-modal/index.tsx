@@ -21,6 +21,7 @@ import {
     ButtonsContainerStyled,
     DesktopConnectionModalStyled,
     ErrorIconStyled,
+    FooterButton,
     H1Styled,
     H2Styled,
     LoaderStyled,
@@ -41,6 +42,7 @@ import { appState } from 'src/app/state/app.state';
 import { addReturnStrategy, openLinkBlank } from 'src/app/utils/web-api';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { Link } from 'src/app/components/link';
+import { supportsDesktop, supportsExtension, supportsMobile } from 'src/app/utils/wallets';
 
 export interface DesktopConnectionProps {
     additionalRequest?: ConnectAdditionalRequest;
@@ -76,7 +78,10 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
     };
 
     createEffect(() => {
-        if (untrack(mode) !== 'extension') {
+        if (
+            untrack(mode) !== 'extension' &&
+            (supportsMobile(props.wallet) || supportsDesktop(props.wallet))
+        ) {
             generateUniversalLink();
         }
     });
@@ -121,6 +126,14 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
             );
         }
     };
+
+    if (supportsMobile(props.wallet)) {
+        onClickMobile();
+    } else if (supportsExtension(props.wallet)) {
+        onClickExtension();
+    } else {
+        onClickDesktop();
+    }
 
     return (
         <DesktopConnectionModalStyled data-tc-wallet-qr-modal-desktop="true">
@@ -197,24 +210,35 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
             </BodyStyled>
 
             <ButtonsContainerStyled>
-                <Show when={mode() !== 'mobile'}>
-                    <Button appearance="secondary" icon={<MobileIcon />} onClick={onClickMobile}>
+                <Show when={mode() !== 'mobile' && supportsMobile(props.wallet)}>
+                    <FooterButton
+                        appearance="secondary"
+                        icon={<MobileIcon />}
+                        onClick={onClickMobile}
+                        mt={false}
+                    >
                         Mobile
-                    </Button>
+                    </FooterButton>
                 </Show>
-                <Show when={mode() !== 'extension'}>
-                    <Button
+                <Show when={mode() !== 'extension' && supportsExtension(props.wallet)}>
+                    <FooterButton
                         appearance="secondary"
                         icon={<BrowserIcon />}
                         onClick={onClickExtension}
+                        mt={mode() === 'mobile'}
                     >
                         Browser Extension
-                    </Button>
+                    </FooterButton>
                 </Show>
-                <Show when={mode() !== 'desktop'}>
-                    <Button appearance="secondary" icon={<DesktopIcon />} onClick={onClickDesktop}>
+                <Show when={mode() !== 'desktop' && supportsDesktop(props.wallet)}>
+                    <FooterButton
+                        appearance="secondary"
+                        icon={<DesktopIcon />}
+                        onClick={onClickDesktop}
+                        mt={mode() === 'mobile'}
+                    >
                         Desktop
-                    </Button>
+                    </FooterButton>
                 </Show>
             </ButtonsContainerStyled>
         </DesktopConnectionModalStyled>

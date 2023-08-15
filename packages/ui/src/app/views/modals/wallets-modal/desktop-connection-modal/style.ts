@@ -20,8 +20,7 @@ export const DesktopConnectionModalStyled = styled.div`
 
 export const BodyStyled = styled.div<{ qr: boolean }>`
     flex: 1;
-    margin-bottom: ${props => (props.qr ? '24px' : '0')};
-    margin-top: ${props => (props.qr ? '18px' : '0')};
+    margin-top: ${props => (props.qr ? '0' : '18px')};
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -50,6 +49,10 @@ export const ButtonsContainerStyled = styled.div`
     display: flex;
     justify-content: center;
     gap: 8px;
+`;
+
+export const FooterButton = styled(Button)<{ mt: boolean }>`
+    margin-top: ${props => (props.mt ? '24px' : '0')};
 `;
 
 export const ActionButtonStyled = styled(Button)`

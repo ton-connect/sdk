@@ -164,7 +164,7 @@ export const WalletsModal: Component = () => {
                                     <DesktopSelectWalletModal
                                         walletsList={walletsList()!}
                                         onBack={() => setSelectedTab('universal')}
-                                        onSelect={onSelectInDesktopList}
+                                        onSelect={setSelectedWalletInfo}
                                     />
                                 </Match>
                             </Switch>
