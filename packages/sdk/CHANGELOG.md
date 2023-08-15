@@ -1,5 +1,15 @@
 # Changelog @tonconnect/sdk 
 
+## [2.1.4](https://github.com/ton-connect/sdk/compare/sdk-2.1.3...sdk-2.1.4) (2023-08-15)
+
+
+### Bug Fixes
+
+* 'platform' field added to WalletInfo ([40e0332](https://github.com/ton-connect/sdk/commit/40e0332a37886baef6aaa9942a8fad7a2e29d78b))
+* **sdk:** README updated ([900c115](https://github.com/ton-connect/sdk/commit/900c115bd71aa631026f60e55632e03d7b185784))
+
+
+
 ## [2.1.3](https://github.com/ton-connect/sdk/compare/sdk-2.1.2...sdk-2.1.3) (2023-04-03)
 
 
