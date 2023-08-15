@@ -11,13 +11,14 @@ import {
     ModalBackgroundStyled,
     ModalBodyStyled,
     ModalFooterStyled,
-    ModalWrapperClass, QuestionButtonStyled
+    ModalWrapperClass,
+    QuestionButtonStyled
 } from './style';
 import { css, useTheme } from 'solid-styled-components';
 import { disableScroll, enableScroll } from 'src/app/utils/web-api';
 import { WithDataAttributes } from 'src/app/models/with-data-attributes';
 import { useDataAttributes } from 'src/app/hooks/use-data-attributes';
-import {IconButton, TonConnectBrand} from 'src/app/components';
+import { TonConnectBrand } from 'src/app/components';
 const clickOutside = clickOutsideDirective;
 const keyPressed = keyPressedDirective;
 
@@ -25,6 +26,7 @@ export interface ModalProps extends Styleable, WithDataAttributes {
     children: JSXElement;
     opened: boolean;
     onClose: () => void;
+    onClickQuestion?: () => void;
 }
 
 export const Modal: Component<ModalProps> = props => {
@@ -97,10 +99,15 @@ export const Modal: Component<ModalProps> = props => {
                             <CloseButtonStyled icon="close" onClick={() => props.onClose()} />
                             {props.children}
                         </ModalBodyStyled>
-                        <ModalFooterStyled>
-                            <TonConnectBrand />
-                            <QuestionButtonStyled onClick={() => {}} icon="question" />
-                        </ModalFooterStyled>
+                        <Show when={props.onClickQuestion}>
+                            <ModalFooterStyled>
+                                <TonConnectBrand />
+                                <QuestionButtonStyled
+                                    onClick={props.onClickQuestion!}
+                                    icon="question"
+                                />
+                            </ModalFooterStyled>
+                        </Show>
                     </div>
                 </ModalBackgroundStyled>
             </Show>

@@ -38,6 +38,7 @@ import { LoadableReady } from 'src/models/loadable';
 import { PersonalizedWalletInfo } from 'src/app/models/personalized-wallet-info';
 import { AT_WALLET_NAME } from 'src/app/models/at-wallet-name';
 import { DesktopConnectionModal } from 'src/app/views/modals/wallets-modal/desktop-connection-modal';
+import { InfoModal } from 'src/app/views/modals/wallets-modal/info-modal';
 
 export const WalletsModal: Component = () => {
     const { locale } = useI18n()[1];
@@ -49,6 +50,7 @@ export const WalletsModal: Component = () => {
 
     const [selectedWalletInfo, setSelectedWalletInfo] = createSignal<WalletInfo | null>(null);
     const [selectedTab, setSelectedTab] = createSignal<'universal' | 'all-wallets'>('universal');
+    const [infoTab, setInfoTab] = createSignal(false);
 
     const walletsList = createMemo<PersonalizedWalletInfo[] | null>(() => {
         if (fetchedWalletsList.state !== 'ready') {
@@ -95,6 +97,7 @@ export const WalletsModal: Component = () => {
     const onClose = (): void => {
         setWalletsModalOpen(false);
         setSelectedWalletInfo(null);
+        setInfoTab(false);
     };
 
     const onSelectInDesktopList = (walletInfo: WalletInfo): void => {
@@ -130,53 +133,63 @@ export const WalletsModal: Component = () => {
         <StyledModal
             opened={walletsModalOpen()}
             onClose={onClose}
+            onClickQuestion={() => setInfoTab(v => !v)}
             data-tc-wallets-modal-container="true"
         >
-            <Show when={additionalRequestLoading() || !walletsList()}>
-                <H1Styled translationKey="walletModal.loading">Wallets list is loading</H1Styled>
-                <LoaderContainerStyled>
-                    <LoaderIcon size="m" />
-                </LoaderContainerStyled>
+            <Show when={infoTab()}>
+                <InfoModal onBackClick={() => setInfoTab(false)} />
             </Show>
 
-            <Show when={!additionalRequestLoading() && walletsList()}>
-                <Show when={isMobile() && !selectedWalletInfo()}>
-                    <MobileSelectWalletModal
-                        onSelect={onSelectInDesktopList}
-                        walletsList={walletsList()!}
-                        additionalRequest={additionalRequest()!}
-                    />
+            <Show when={!infoTab()}>
+                <Show when={additionalRequestLoading() || !walletsList()}>
+                    <H1Styled translationKey="walletModal.loading">
+                        Wallets list is loading
+                    </H1Styled>
+                    <LoaderContainerStyled>
+                        <LoaderIcon size="m" />
+                    </LoaderContainerStyled>
                 </Show>
 
-                <Show when={!isMobile()}>
-                    <Show when={!selectedWalletInfo()}>
-                        <div data-tc-wallets-modal-desktop="true">
-                            <Switch>
-                                <Match when={selectedTab() === 'universal'}>
-                                    <UniversalQrModal
-                                        walletsList={walletsList()!}
-                                        additionalRequest={additionalRequest()!}
-                                        onSelectAllWallets={() => setSelectedTab('all-wallets')}
-                                        onSelectWallet={setSelectedWalletInfo}
-                                    />
-                                </Match>
-                                <Match when={selectedTab() === 'all-wallets'}>
-                                    <DesktopSelectWalletModal
-                                        walletsList={walletsList()!}
-                                        onBack={() => setSelectedTab('universal')}
-                                        onSelect={setSelectedWalletInfo}
-                                    />
-                                </Match>
-                            </Switch>
-                        </div>
+                <Show when={!additionalRequestLoading() && walletsList()}>
+                    <Show when={isMobile() && !selectedWalletInfo()}>
+                        <MobileSelectWalletModal
+                            onSelect={onSelectInDesktopList}
+                            walletsList={walletsList()!}
+                            additionalRequest={additionalRequest()!}
+                        />
                     </Show>
-                </Show>
-                <Show when={selectedWalletInfo()}>
-                    <DesktopConnectionModal
-                        additionalRequest={additionalRequest()}
-                        wallet={selectedWalletInfo() as WalletInfoRemote}
-                        onBackClick={() => setSelectedWalletInfo(null)}
-                    />
+
+                    <Show when={!isMobile()}>
+                        <Show when={!selectedWalletInfo()}>
+                            <div data-tc-wallets-modal-desktop="true">
+                                <Switch>
+                                    <Match when={selectedTab() === 'universal'}>
+                                        <UniversalQrModal
+                                            walletsList={walletsList()!}
+                                            additionalRequest={additionalRequest()!}
+                                            onSelectAllWallets={() => setSelectedTab('all-wallets')}
+                                            onSelectWallet={setSelectedWalletInfo}
+                                        />
+                                    </Match>
+                                    <Match when={selectedTab() === 'all-wallets'}>
+                                        <DesktopSelectWalletModal
+                                            walletsList={walletsList()!}
+                                            onBack={() => setSelectedTab('universal')}
+                                            onSelect={setSelectedWalletInfo}
+                                        />
+                                    </Match>
+                                </Switch>
+                            </div>
+                        </Show>
+                    </Show>
+
+                    <Show when={selectedWalletInfo()}>
+                        <DesktopConnectionModal
+                            additionalRequest={additionalRequest()}
+                            wallet={selectedWalletInfo() as WalletInfoRemote}
+                            onBackClick={() => setSelectedWalletInfo(null)}
+                        />
+                    </Show>
                 </Show>
             </Show>
         </StyledModal>

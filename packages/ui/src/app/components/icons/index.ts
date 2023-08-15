@@ -12,3 +12,7 @@ export { MobileIcon } from './mobile-icon';
 export { DesktopIcon } from './desktop-icon';
 export { RetryIcon } from './retry-icon';
 export { LinkIcon } from './link-icon';
+export { WalletIcon } from './wallet-icon';
+export { SecurityIcon } from './security-icon';
+export { PersonalityIcon } from './personality-icon';
+export { SwapIcon } from './swap-icon';

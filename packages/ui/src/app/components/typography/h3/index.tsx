@@ -3,7 +3,7 @@ import { Component, JSXElement } from 'solid-js';
 import { Translateable } from 'src/app/models/translateable';
 import { H3Styled } from './style';
 
-interface H3Props extends Translateable {
+export interface H3Props extends Translateable {
     children?: JSXElement;
 }
 
