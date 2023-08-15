@@ -23,7 +23,6 @@ import {
     setWalletsModalOpen,
     walletsModalOpen
 } from 'src/app/state/modals-state';
-import { QrCodeModal } from 'src/app/views/modals/wallets-modal/qr-code-modal';
 import { StyledModal, LoaderContainerStyled, H1Styled } from './style';
 import { openLinkBlank } from 'src/app/utils/web-api';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
@@ -38,6 +37,7 @@ import { LoaderIcon } from 'src/app/components';
 import { LoadableReady } from 'src/models/loadable';
 import { PersonalizedWalletInfo } from 'src/app/models/personalized-wallet-info';
 import { AT_WALLET_NAME } from 'src/app/models/at-wallet-name';
+import { DesktopConnectionModal } from 'src/app/views/modals/wallets-modal/desktop-connection-modal';
 
 export const WalletsModal: Component = () => {
     const { locale } = useI18n()[1];
@@ -172,7 +172,7 @@ export const WalletsModal: Component = () => {
                     </Show>
                 </Show>
                 <Show when={selectedWalletInfo()}>
-                    <QrCodeModal
+                    <DesktopConnectionModal
                         additionalRequest={additionalRequest()}
                         wallet={selectedWalletInfo() as WalletInfoRemote}
                         onBackClick={() => setSelectedWalletInfo(null)}

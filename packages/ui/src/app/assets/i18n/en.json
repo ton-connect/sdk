@@ -50,7 +50,7 @@
     },
     "qrCodeModal": {
       "connectWith": "Connect with {{ name }}",
-      "scan": "Scan the code below.",
+      "scan": "Scan QR code with your phone’s or {{ name }} camera.",
       "openWallet": "Open {{ name }}",
       "openExtension": "Open Extension",
       "dontHave": "Don't have {{ name }}?"

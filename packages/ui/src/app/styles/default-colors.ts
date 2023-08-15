@@ -6,10 +6,10 @@ export const defaultLightColorsSet: ColorsSet = {
         white: '#FFFFFF'
     },
     connectButton: {
-        background: '#31A6F5',
+        background: '#0098EA',
         foreground: '#FFFFFF'
     },
-    accent: '#31A6F5',
+    accent: '#0098EA',
     icon: {
         primary: '#0F0F0F',
         secondary: '#7A8999',
@@ -35,7 +35,7 @@ export const defaultDarkColorsSet: ColorsSet = {
         white: '#FFFFFF'
     },
     connectButton: {
-        background: '#31A6F5',
+        background: '#0098EA',
         foreground: '#FFFFFF'
     },
     accent: '#E5E5EA',

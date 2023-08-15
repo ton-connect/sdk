@@ -14,10 +14,26 @@ const scaleValues = {
     m: 0.04
 };
 
-export const ButtonStyled = styled.button<{ appearance: 'primary' | 'flat'; scale: 's' | 'm' }>`
+export const ButtonStyled = styled.button<{
+    appearance: 'primary' | 'flat' | 'secondary';
+    scale: 's' | 'm';
+    hasIcon: boolean;
+    iconFloatRight: boolean;
+}>`
+    display: ${props => (props.hasIcon ? 'flex' : 'inline-block')};
+    gap: ${props => (props.hasIcon ? '6px' : 'unset')};
+    align-items: ${props => (props.hasIcon ? 'center' : 'unset')};
+    flex-direction: ${props => (props.iconFloatRight ? 'row-reverse' : 'row')};
     background-color: ${props =>
-        props.appearance === 'flat' ? 'transparent' : rgba(props.theme!.colors.accent, 0.12)};
-    color: ${props => props.theme!.colors.accent};
+        props.appearance === 'flat'
+            ? 'transparent'
+            : props.appearance === 'secondary'
+            ? props.theme!.colors.background.tint
+            : rgba(props.theme!.colors.accent, 0.12)};
+    color: ${props =>
+        props.appearance === 'secondary'
+            ? props.theme!.colors.text.primary
+            : props.theme!.colors.accent};
 
     padding: ${props => (props.appearance === 'flat' ? '0' : '9px 16px')};
     border: none;

@@ -7,3 +7,8 @@ export { ErrorIcon } from './error-icon';
 export { LoaderIcon } from './loader-icon';
 export { TonConnectBrand } from './ton-connect-brand';
 export { QuestionIcon } from './question-icon';
+export { BrowserIcon } from './browser-icon';
+export { MobileIcon } from './mobile-icon';
+export { DesktopIcon } from './desktop-icon';
+export { RetryIcon } from './retry-icon';
+export { LinkIcon } from './link-icon';
