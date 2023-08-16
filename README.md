@@ -1,6 +1,6 @@
 # TON Connect
 
-This is the implementation of the TonConnect protocol. You can find more details about TonConnect protocol in the [docs](https://github.com/ton-connect/docs).
+This is the implementation of the TonConnect protocol. You can find more details about TonConnect protocol in the [docs](https://docs.ton.org/develop/dapps/ton-connect/overview).
 
 [Latest API documentation](https://ton-connect.github.io/sdk/)
 
