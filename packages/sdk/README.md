@@ -1,7 +1,7 @@
 # TON Connect SDK
 
 Use it to connect your app to TON wallets via TonConnect protocol. 
-You can find more details and the protocol specification in the [docs](https://github.com/ton-connect/docs).
+You can find more details and the protocol specification in the [docs](https://docs.ton.org/develop/dapps/ton-connect/overview).
 See the example of sdk usage [here](https://github.com/ton-connect/demo-dapp).
 
 [Latest API documentation](https://ton-connect.github.io/sdk/modules/_tonconnect_sdk.html)
@@ -55,7 +55,7 @@ App needs to have its manifest to pass meta information to the wallet. Manifest 
 Best practice is to place the manifest in the root of your app, e.g. `https://myapp.com/tonconnect-manifest.json`. It allows the wallet to handle your app better and improve the UX connected to your app.
 Make sure that manifest is available to GET by its URL.
 
-[See details](https://github.com/ton-connect/docs/blob/main/requests-responses.md#app-manifest)
+[See details](https://docs.ton.org/develop/dapps/ton-connect/protocol/requests-responses#app-manifest)
 
 If your manifest placed not in the root of your app, you can specify its path:
 ```ts
