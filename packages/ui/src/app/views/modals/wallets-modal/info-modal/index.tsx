@@ -9,14 +9,7 @@ import {
     TextStyled,
     ButtonsBlock
 } from './style';
-import {
-    Button,
-    LinkIcon,
-    PersonalityIcon,
-    SecurityIcon,
-    SwapIcon,
-    WalletIcon
-} from 'src/app/components/';
+import { Button, PersonalityIcon, SecurityIcon, SwapIcon, WalletIcon } from 'src/app/components/';
 import { Link } from 'src/app/components/link';
 import { LINKS } from 'src/app/env/LINKS';
 
@@ -56,15 +49,8 @@ export const InfoModal: Component<InfoModalProps> = props => {
             </InfoBlock>
 
             <ButtonsBlock>
-                <Link href={LINKS.LEARN_MORE} blank>
-                    <Button icon={<LinkIcon />} iconFloatRight>
-                        Learn More
-                    </Button>
-                </Link>
                 <Link href={LINKS.GET_A_WALLET} blank>
-                    <Button icon={<WalletIcon />} iconFloatRight>
-                        Get a Wallet
-                    </Button>
+                    <Button rightIcon={<WalletIcon />}>Get a Wallet</Button>
                 </Link>
             </ButtonsBlock>
         </InfoModalStyled>

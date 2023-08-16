@@ -14,7 +14,7 @@ const hoverBorders: BorderRadiusConfig = {
     none: '0'
 };
 
-export const UniversalQrModalStyled = styled.div`
+export const DesktopUniversalModalStyled = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;

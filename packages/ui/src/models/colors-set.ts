@@ -11,6 +11,7 @@ export type ColorsSet = {
         foreground: Color;
     };
     accent: Color;
+    telegramButton: Color;
     icon: {
         primary: Color;
         secondary: Color;
@@ -40,6 +41,7 @@ export type PartialColorsSet = {
         foreground?: Color;
     };
     accent?: Color;
+    telegramButton?: Color;
     icon?: {
         primary?: Color;
         secondary?: Color;

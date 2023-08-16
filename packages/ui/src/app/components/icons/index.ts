@@ -16,3 +16,6 @@ export { WalletIcon } from './wallet-icon';
 export { SecurityIcon } from './security-icon';
 export { PersonalityIcon } from './personality-icon';
 export { SwapIcon } from './swap-icon';
+export { AtWalletIcon } from './at-wallet-icon';
+export { DoneIcon } from './done-icon';
+export { CopyLightIcon } from './copy-light-icon';

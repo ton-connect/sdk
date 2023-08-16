@@ -1,17 +1,16 @@
 import { styled } from 'solid-styled-components';
-import { Button, H2 } from 'src/app/components';
-import { rgba } from 'src/app/utils/css';
+import { Button, H1, H2, Image } from 'src/app/components';
 import { mediaNotTouch, mediaTouch } from 'src/app/styles/media';
 
 export const UlStyled = styled.ul`
     display: flex;
-    margin: 0 auto 24px;
+    margin: 0 auto;
     width: fit-content;
     min-height: 124px;
     max-width: 100%;
     overflow-x: auto;
     overflow-y: hidden;
-    padding: 0 24px;
+    padding: 0 13px 24px;
 
     &&::-webkit-scrollbar {
         display: none;
@@ -21,7 +20,7 @@ export const UlStyled = styled.ul`
     scrollbar-width: none;
 `;
 
-export const DefaultWallet = styled.li`
+export const OtherOptionButton = styled.li`
     width: 82px;
     min-width: 82px;
     height: 124px;
@@ -62,7 +61,7 @@ export const Divider = styled.div`
     background-color: ${props => props.theme!.colors.icon.tertiary};
 `;
 
-export const LongArrowIconContainer = styled.div`
+export const IconContainer = styled.div`
     width: 64px;
     height: 64px;
     border-radius: 16px;
@@ -70,10 +69,14 @@ export const LongArrowIconContainer = styled.div`
     align-items: center;
     justify-content: center;
 
-    background-color: ${props => rgba(props.theme!.colors.accent, 0.12)};
-    color: ${props => props.theme!.colors.accent};
-
+    background-color: ${props => props.theme!.colors.background.tint};
     margin-bottom: 8px;
+`;
+
+export const H1Styled = styled(H1)`
+    margin-top: 38px;
+    margin-bottom: 4px;
+    padding: 0 24px;
 `;
 
 export const H2Styled = styled(H2)`
@@ -85,4 +88,23 @@ export const H2Styled = styled(H2)`
 export const ButtonStyled = styled(Button)`
     display: block;
     margin: 0 auto;
+`;
+
+export const TelegramButtonStyled = styled(Button)`
+    margin: 0 24px 24px;
+    width: calc(100% - 48px);
+    border-radius: 16px;
+    padding: 14px 16px 14px 14px;
+    background-color: ${props => props.theme!.colors.telegramButton};
+
+    color: ${props => props.theme!.colors.constant.white};
+    font-weight: 590;
+    font-size: 16px;
+    line-height: 20px;
+`;
+
+export const TGImageStyled = styled(Image)`
+    border-radius: 6px;
+    width: 24px;
+    height: 24px;
 `;

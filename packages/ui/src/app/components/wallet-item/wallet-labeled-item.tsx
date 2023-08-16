@@ -1,9 +1,10 @@
 import { Component } from 'solid-js';
 import { Styleable } from 'src/app/models/styleable';
 import { PersonalizedWalletInfo } from 'src/app/models/personalized-wallet-info';
-import { AT_WALLET_NAME } from 'src/app/models/at-wallet-name';
+import { AT_WALLET_NAME } from 'src/app/env/AT_WALLET_NAME';
 import { WalletItem } from 'src/app/components';
 import { isWalletInfoCurrentlyInjected } from '@tonconnect/sdk';
+import { IMG } from 'src/app/env/IMG';
 
 export interface WalletLabeledItemProps extends Styleable {
     wallet: PersonalizedWalletInfo;
@@ -34,7 +35,7 @@ export const WalletLabeledItem: Component<WalletLabeledItemProps> = props => {
                     icon={props.wallet.imageUrl}
                     name={props.wallet.name + ' on'}
                     secondLine="Telegram"
-                    badgeUrl="https://raw.githubusercontent.com/ton-connect/sdk/main/assets/tg.png"
+                    badgeUrl={IMG.TG}
                     onClick={() => {}}
                 />
             ) : (

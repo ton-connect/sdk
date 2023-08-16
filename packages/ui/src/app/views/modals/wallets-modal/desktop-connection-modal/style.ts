@@ -13,9 +13,6 @@ export const DesktopConnectionModalStyled = styled.div`
     display: flex;
     padding-bottom: 24px;
     flex-direction: column;
-    ${media('mobile')} {
-        padding: 10px 16px 0 16px;
-    }
 `;
 
 export const BodyStyled = styled.div<{ qr: boolean }>`

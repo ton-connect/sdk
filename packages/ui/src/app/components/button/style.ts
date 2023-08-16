@@ -18,12 +18,11 @@ export const ButtonStyled = styled.button<{
     appearance: 'primary' | 'flat' | 'secondary';
     scale: 's' | 'm';
     hasIcon: boolean;
-    iconFloatRight: boolean;
 }>`
     display: ${props => (props.hasIcon ? 'flex' : 'inline-block')};
     gap: ${props => (props.hasIcon ? '6px' : 'unset')};
     align-items: ${props => (props.hasIcon ? 'center' : 'unset')};
-    flex-direction: ${props => (props.iconFloatRight ? 'row-reverse' : 'row')};
+    justify-content: ${props => (props.hasIcon ? 'space-between' : 'unset')};
     background-color: ${props =>
         props.appearance === 'flat'
             ? 'transparent'

@@ -1,5 +1,6 @@
 import { styled } from 'solid-styled-components';
 import { Button, H1, IconButton, WalletLabeledItem } from 'src/app/components';
+import { media } from 'src/app/styles/media';
 
 export const DesktopSelectWalletModalStyled = styled.div`
     display: flex;
@@ -18,6 +19,10 @@ export const ScrollDivider = styled.div<{ isShown: boolean }>`
     opacity: 0.12;
     background: ${props => (props.isShown ? props.theme!.colors.icon.secondary : 'transparent')};
     transition: background 0.15s ease-in-out;
+
+    ${media('mobile')} {
+        width: 100%;
+    }
 `;
 
 export const WalletsUl = styled.ul`
@@ -27,7 +32,7 @@ export const WalletsUl = styled.ul`
     row-gap: 8px;
     overflow-y: auto;
     max-height: 510px;
-    width: calc(100% + 12px);
+    width: 100%;
     padding: 0 0 16px;
     align-self: flex-start;
 
@@ -42,6 +47,11 @@ export const WalletsUl = styled.ul`
 
     &&::-webkit-scrollbar-thumb {
         display: none;
+    }
+
+    ${media('mobile')} {
+        max-height: 410px;
+        grid-template-columns: repeat(auto-fit, 82px);
     }
 `;
 

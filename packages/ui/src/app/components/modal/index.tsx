@@ -4,7 +4,7 @@ import { Transition } from 'solid-transition-group';
 import clickOutsideDirective from 'src/app/directives/click-outside';
 import keyPressedDirective from 'src/app/directives/key-pressed';
 import { Styleable } from 'src/app/models/styleable';
-import { isDevice } from 'src/app/styles/media';
+import { isDevice, media } from 'src/app/styles/media';
 import {
     borders,
     CloseButtonStyled,
@@ -90,6 +90,10 @@ export const Modal: Component<ModalProps> = props => {
                             css`
                                 border-radius: ${borders[theme!.borderRadius]};
                                 background-color: ${theme.colors.background.secondary};
+                                ${media('mobile')} {
+                                    border-radius: ${borders[theme!.borderRadius]}
+                                        ${borders[theme!.borderRadius]} 0 0;
+                                }
                             `
                         )}
                         use:clickOutside={() => props.onClose()}

@@ -1,6 +1,6 @@
 import { css, styled } from 'solid-styled-components';
 import { IconButton } from 'src/app/components/icon-button';
-import { maxWidth, media } from 'src/app/styles/media';
+import { media } from 'src/app/styles/media';
 import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
 import { rgba } from 'src/app/utils/css';
 
@@ -12,8 +12,6 @@ export const borders: BorderRadiusConfig = {
 
 export const ModalBackgroundStyled = styled.div`
     display: flex;
-    align-items: center;
-    justify-content: center;
     position: fixed;
     z-index: 1000;
     left: 0;
@@ -21,21 +19,24 @@ export const ModalBackgroundStyled = styled.div`
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.4);
+    padding: 20px 0;
+    overflow-y: auto;
 
     ${media('mobile')} {
-        align-items: flex-end;
-    }
-
-    @media (min-width: ${maxWidth.mobile.toString()}px) and (max-height: 600px) {
-        padding: 48px 0;
-        align-items: flex-start;
-        overflow: scroll;
+        padding-bottom: 0;
     }
 `;
 
 export const ModalWrapperClass = css`
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 16px 64px rgba(0, 0, 0, 0.16);
     width: fit-content;
+    margin: auto;
+
+    ${media('mobile')} {
+        width: 100%;
+        height: fit-content;
+        margin: auto 0 0 0;
+    }
 `;
 
 export const ModalBodyStyled = styled.div`
@@ -51,11 +52,6 @@ export const ModalBodyStyled = styled.div`
 
     ${media('mobile')} {
         width: 100%;
-        border-radius: ${props => borders[props.theme!.borderRadius]}
-            ${props => borders[props.theme!.borderRadius]} 0 0;
-    }
-
-    ${media('mobile')} {
     }
 `;
 

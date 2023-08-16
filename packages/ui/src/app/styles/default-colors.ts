@@ -10,6 +10,7 @@ export const defaultLightColorsSet: ColorsSet = {
         foreground: '#FFFFFF'
     },
     accent: '#0098EA',
+    telegramButton: '#0098EA',
     icon: {
         primary: '#0F0F0F',
         secondary: '#7A8999',
@@ -39,6 +40,7 @@ export const defaultDarkColorsSet: ColorsSet = {
         foreground: '#FFFFFF'
     },
     accent: '#E5E5EA',
+    telegramButton: '#31A6F5',
     icon: {
         primary: '#E5E5EA',
         secondary: '#909099',

@@ -161,7 +161,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                         <ErrorIconStyled size="s" />
                         <BodyTextStyled>Connection declined</BodyTextStyled>
                         <Button
-                            icon={<RetryIcon />}
+                            leftIcon={<RetryIcon />}
                             onClick={mode() === 'extension' ? onClickExtension : onClickDesktop}
                         >
                             Retry
@@ -173,7 +173,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                             <BodyTextStyled>
                                 Continue in {props.wallet.name} browser extension…
                             </BodyTextStyled>
-                            <Button icon={<RetryIcon />} onClick={onClickExtension}>
+                            <Button leftIcon={<RetryIcon />} onClick={onClickExtension}>
                                 Retry
                             </Button>
                         </Show>
@@ -182,11 +182,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                                 Seems you don't have installed {props.wallet.name} browser extension
                             </BodyTextStyled>
                             <Link href={props.wallet.aboutUrl} blank>
-                                <Button
-                                    icon={<LinkIcon />}
-                                    iconFloatRight
-                                    onClick={onClickExtension}
-                                >
+                                <Button rightIcon={<LinkIcon />} onClick={onClickExtension}>
                                     Get {props.wallet.name}
                                 </Button>
                             </Link>
@@ -196,13 +192,11 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                         <LoaderIcon size="m" />
                         <BodyTextStyled>Continue in {props.wallet.name} on desktop…</BodyTextStyled>
                         <ButtonsContainerStyled>
-                            <Button icon={<RetryIcon />} onClick={onClickDesktop}>
+                            <Button leftIcon={<RetryIcon />} onClick={onClickDesktop}>
                                 Retry
                             </Button>
                             <Link href={props.wallet.aboutUrl} blank>
-                                <Button icon={<LinkIcon />} iconFloatRight>
-                                    Get {props.wallet.name}
-                                </Button>
+                                <Button rightIcon={<LinkIcon />}>Get {props.wallet.name}</Button>
                             </Link>
                         </ButtonsContainerStyled>
                     </Match>
@@ -213,7 +207,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                 <Show when={mode() !== 'mobile' && supportsMobile(props.wallet)}>
                     <FooterButton
                         appearance="secondary"
-                        icon={<MobileIcon />}
+                        leftIcon={<MobileIcon />}
                         onClick={onClickMobile}
                         mt={false}
                     >
@@ -223,7 +217,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                 <Show when={mode() !== 'extension' && supportsExtension(props.wallet)}>
                     <FooterButton
                         appearance="secondary"
-                        icon={<BrowserIcon />}
+                        leftIcon={<BrowserIcon />}
                         onClick={onClickExtension}
                         mt={mode() === 'mobile'}
                     >
@@ -233,7 +227,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                 <Show when={mode() !== 'desktop' && supportsDesktop(props.wallet)}>
                     <FooterButton
                         appearance="secondary"
-                        icon={<DesktopIcon />}
+                        leftIcon={<DesktopIcon />}
                         onClick={onClickDesktop}
                         mt={mode() === 'mobile'}
                     >

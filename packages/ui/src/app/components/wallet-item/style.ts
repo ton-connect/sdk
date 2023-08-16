@@ -28,7 +28,6 @@ export const WalletItemStyled = styled.button`
 
     ${media('mobile')} {
         padding: 8px 4px;
-        height: 124px;
         width: 82px;
     }
 
@@ -53,7 +52,7 @@ export const BadgeStyled = styled(Image)`
     width: 24px;
     height: 24px;
     border-radius: 6px;
-    box-shadow: 0px 2px 8px 0px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.08);
 `;
 
 export const StyledText = styled(Text)`
