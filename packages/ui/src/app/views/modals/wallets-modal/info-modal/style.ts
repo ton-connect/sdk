@@ -42,3 +42,6 @@ export const ButtonsBlock = styled.div`
     justify-content: center;
     gap: 8px;
 `;
+
+export const ScrollContainer = styled.div`
+`

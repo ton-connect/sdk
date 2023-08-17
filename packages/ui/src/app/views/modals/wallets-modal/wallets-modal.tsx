@@ -145,7 +145,7 @@ export const WalletsModal: Component = () => {
                         </Match>
                         <Match when={selectedTab() === 'all-wallets'}>
                             <AllWalletsListModal
-                                walletsList={walletsList()!}
+                                walletsList={walletsList()!.concat(walletsList()!).concat(walletsList()!).concat(walletsList()!)}
                                 onBack={() => setSelectedTab('universal')}
                                 onSelect={setSelectedWalletInfo}
                             />

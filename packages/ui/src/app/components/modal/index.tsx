@@ -89,7 +89,7 @@ export const Modal: Component<ModalProps> = props => {
                             ModalWrapperClass,
                             css`
                                 border-radius: ${borders[theme!.borderRadius]};
-                                background-color: ${theme.colors.background.secondary};
+                                background-color: ${theme.colors.background.tint};
                                 ${media('mobile')} {
                                     border-radius: ${borders[theme!.borderRadius]}
                                         ${borders[theme!.borderRadius]} 0 0;
