@@ -1,7 +1,6 @@
 import { styled } from 'solid-styled-components';
-import { Button, ErrorIcon, H1, H2, IconButton, LoaderIcon, Text } from 'src/app/components';
+import { Button, ErrorIcon, H1, H2, IconButton, LoaderIcon, Text, Image } from 'src/app/components';
 import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
-import { media } from 'src/app/styles/media';
 
 const borders: BorderRadiusConfig = {
     m: '16px',
@@ -85,4 +84,19 @@ export const BodyTextStyled = styled(Text)`
     color: ${props => props.theme!.colors.text.secondary};
     text-align: center;
     margin-bottom: 20px;
+`;
+
+export const TgButtonStyled = styled(Button)`
+    margin-top: 16px;
+    width: 100%;
+    padding: 12px 12px 12px 20px;
+    border-radius: 16px;
+    font-size: 16px;
+    line-height: 20px;
+`;
+
+export const TgImageStyled = styled(Image)`
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
 `;

@@ -22,7 +22,8 @@ export const defaultLightColorsSet: ColorsSet = {
         primary: '#FFFFFF',
         secondary: '#F1F3F5',
         segment: '#FFFFFF',
-        tint: '#F1F3F5'
+        tint: '#F1F3F5',
+        qr: '#F1F3F5'
     },
     text: {
         primary: '#0F0F0F',
@@ -52,7 +53,8 @@ export const defaultDarkColorsSet: ColorsSet = {
         primary: '#121214',
         secondary: '#18181A',
         segment: '#262629',
-        tint: '#222224'
+        tint: '#222224',
+        qr: '#F1F3F5'
     },
     text: {
         primary: '#E5E5EA',

@@ -17,6 +17,7 @@ import { Button, H3, RetryIcon } from 'src/app/components';
 import { appState } from 'src/app/state/app.state';
 import { addReturnStrategy, openLinkBlank } from 'src/app/utils/web-api';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
+import {formatName} from "src/app/utils/wallets";
 
 export interface MobileConnectionProps {
     additionalRequest?: ConnectAdditionalRequest;
@@ -60,7 +61,7 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
     return (
         <MobileConnectionModalStyled data-tc-wallet-qr-modal-desktop="true">
             <StyledIconButton icon="arrow" onClick={() => props.onBackClick()} />
-            <H1Styled>{props.wallet.name}</H1Styled>
+            <H1Styled>{formatName(props.wallet.name)}</H1Styled>
 
             <BodyStyled>
                 <Show when={connectionErrored()}>
@@ -72,7 +73,7 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
                 </Show>
                 <Show when={!connectionErrored()}>
                     <LoaderStyled size="m" />
-                    <BodyTextStyled>Continue in {props.wallet.name}…</BodyTextStyled>
+                    <BodyTextStyled>Continue in {formatName(props.wallet.name)}…</BodyTextStyled>
                     <Button leftIcon={<RetryIcon />} onClick={onRetry}>
                         Retry
                     </Button>
@@ -81,7 +82,7 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
 
             <FooterStyled>
                 <ImageStyled src={props.wallet.imageUrl} />
-                <H3>{props.wallet.name}</H3>
+                <H3>{formatName(props.wallet.name)}</H3>
                 <FooterButton href={props.wallet.aboutUrl} blank>
                     <Button>GET</Button>
                 </FooterButton>

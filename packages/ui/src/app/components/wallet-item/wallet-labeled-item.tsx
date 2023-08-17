@@ -33,10 +33,10 @@ export const WalletLabeledItem: Component<WalletLabeledItemProps> = props => {
             {props.wallet.name === AT_WALLET_NAME ? (
                 <WalletItem
                     icon={props.wallet.imageUrl}
-                    name={props.wallet.name + ' on'}
+                    name="Wallet on"
                     secondLine="Telegram"
                     badgeUrl={IMG.TG}
-                    onClick={() => {}}
+                    onClick={() => props.onClick()}
                 />
             ) : (
                 <WalletItem

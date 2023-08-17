@@ -25,7 +25,9 @@ import {
     H1Styled,
     H2Styled,
     LoaderStyled,
-    StyledIconButton
+    StyledIconButton,
+    TgButtonStyled,
+    TgImageStyled
 } from './style';
 import { ConnectorContext } from 'src/app/state/connector.context';
 import {
@@ -42,7 +44,14 @@ import { appState } from 'src/app/state/app.state';
 import { addReturnStrategy, openLinkBlank } from 'src/app/utils/web-api';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { Link } from 'src/app/components/link';
-import { supportsDesktop, supportsExtension, supportsMobile } from 'src/app/utils/wallets';
+import {
+    formatName,
+    supportsDesktop,
+    supportsExtension,
+    supportsMobile
+} from 'src/app/utils/wallets';
+import { AT_WALLET_NAME } from 'src/app/env/AT_WALLET_NAME';
+import { IMG } from 'src/app/env/IMG';
 
 export interface DesktopConnectionProps {
     additionalRequest?: ConnectAdditionalRequest;
@@ -59,7 +68,9 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
     const unsubscribe = connector.onStatusChange(
         () => {},
         () => {
-            setConnectionErrored(true);
+            if (props.wallet.name !== AT_WALLET_NAME) {
+                setConnectionErrored(true);
+            }
         }
     );
 
@@ -113,6 +124,14 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
         openLinkBlank(addReturnStrategy(universalLink()!, appState.returnStrategy));
     };
 
+    const onClickTelegram = (): void => {
+        setLastSelectedWalletInfo({
+            ...props.wallet,
+            openMethod: 'universal-link'
+        });
+        openLinkBlank(universalLink()!);
+    };
+
     const onClickExtension = (): void => {
         setConnectionErrored(false);
         setMode('extension');
@@ -138,13 +157,13 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
     return (
         <DesktopConnectionModalStyled data-tc-wallet-qr-modal-desktop="true">
             <StyledIconButton icon="arrow" onClick={() => props.onBackClick()} />
-            <H1Styled>{props.wallet.name}</H1Styled>
+            <H1Styled>{formatName(props.wallet.name)}</H1Styled>
             <Show when={mode() === 'mobile'}>
                 <H2Styled
                     translationKey="walletModal.qrCodeModal.scan"
-                    translationValues={{ name: props.wallet.name }}
+                    translationValues={{ name: formatName(props.wallet.name) }}
                 >
-                    Scan QR code with your phone’s or {props.wallet.name}’s camera.
+                    Scan QR code with your phone’s or {formatName(props.wallet.name)}’s camera.
                 </H2Styled>
             </Show>
 
@@ -203,38 +222,49 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                 </Switch>
             </BodyStyled>
 
-            <ButtonsContainerStyled>
-                <Show when={mode() !== 'mobile' && supportsMobile(props.wallet)}>
-                    <FooterButton
-                        appearance="secondary"
-                        leftIcon={<MobileIcon />}
-                        onClick={onClickMobile}
-                        mt={false}
-                    >
-                        Mobile
-                    </FooterButton>
-                </Show>
-                <Show when={mode() !== 'extension' && supportsExtension(props.wallet)}>
-                    <FooterButton
-                        appearance="secondary"
-                        leftIcon={<BrowserIcon />}
-                        onClick={onClickExtension}
-                        mt={mode() === 'mobile'}
-                    >
-                        Browser Extension
-                    </FooterButton>
-                </Show>
-                <Show when={mode() !== 'desktop' && supportsDesktop(props.wallet)}>
-                    <FooterButton
-                        appearance="secondary"
-                        leftIcon={<DesktopIcon />}
-                        onClick={onClickDesktop}
-                        mt={mode() === 'mobile'}
-                    >
-                        Desktop
-                    </FooterButton>
-                </Show>
-            </ButtonsContainerStyled>
+            <Show when={props.wallet.name === AT_WALLET_NAME}>
+                <TgButtonStyled
+                    rightIcon={<TgImageStyled src={IMG.TG} />}
+                    scale="s"
+                    onClick={onClickTelegram}
+                >
+                    Open Wallet on Telegram on desktop
+                </TgButtonStyled>
+            </Show>
+            <Show when={props.wallet.name !== AT_WALLET_NAME}>
+                <ButtonsContainerStyled>
+                    <Show when={mode() !== 'mobile' && supportsMobile(props.wallet)}>
+                        <FooterButton
+                            appearance="secondary"
+                            leftIcon={<MobileIcon />}
+                            onClick={onClickMobile}
+                            mt={false}
+                        >
+                            Mobile
+                        </FooterButton>
+                    </Show>
+                    <Show when={mode() !== 'extension' && supportsExtension(props.wallet)}>
+                        <FooterButton
+                            appearance="secondary"
+                            leftIcon={<BrowserIcon />}
+                            onClick={onClickExtension}
+                            mt={mode() === 'mobile'}
+                        >
+                            Browser Extension
+                        </FooterButton>
+                    </Show>
+                    <Show when={mode() !== 'desktop' && supportsDesktop(props.wallet)}>
+                        <FooterButton
+                            appearance="secondary"
+                            leftIcon={<DesktopIcon />}
+                            onClick={onClickDesktop}
+                            mt={mode() === 'mobile'}
+                        >
+                            Desktop
+                        </FooterButton>
+                    </Show>
+                </ButtonsContainerStyled>
+            </Show>
         </DesktopConnectionModalStyled>
     );
 };

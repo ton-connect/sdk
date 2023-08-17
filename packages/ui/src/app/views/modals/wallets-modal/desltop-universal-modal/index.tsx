@@ -18,7 +18,7 @@ interface DesktopUniversalModalProps {
 
     walletsList: PersonalizedWalletInfo[];
 
-    onSelectWallet: (walletInfo: WalletInfo) => void;
+    onSelect: (walletInfo: WalletInfo) => void;
 
     onSelectAllWallets: () => void;
 }
@@ -49,7 +49,7 @@ export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = prop
                         <li>
                             <WalletLabeledItem
                                 wallet={wallet}
-                                onClick={() => props.onSelectWallet(wallet)}
+                                onClick={() => props.onSelect(wallet)}
                             />
                         </li>
                     )}

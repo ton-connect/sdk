@@ -1,1 +1,1 @@
-export const AT_WALLET_NAME = 'Wallet';
+export const AT_WALLET_NAME = 'telegram-wallet';

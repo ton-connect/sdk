@@ -2,6 +2,7 @@ import { WalletInfo, TonConnect } from '@tonconnect/sdk';
 import { UIWallet } from 'src/models/ui-wallet';
 import { WalletsListConfiguration } from 'src/models';
 import { mergeConcat } from 'src/app/utils/array';
+import { AT_WALLET_NAME } from 'src/app/env/AT_WALLET_NAME';
 
 export function uiWalletToWalletInfo(uiWallet: UIWallet): WalletInfo {
     if ('jsBridgeKey' in uiWallet) {
@@ -44,4 +45,12 @@ export function supportsMobile(walletInfo: WalletInfo): boolean {
 
 export function supportsExtension(walletInfo: WalletInfo): boolean {
     return walletInfo.platforms.some(w => ['chrome', 'firefox', 'safari'].includes(w));
+}
+
+export function formatName(walletName: string): string {
+    if (walletName === AT_WALLET_NAME) {
+        return 'Wallet';
+    }
+
+    return walletName;
 }

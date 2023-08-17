@@ -70,7 +70,12 @@ export const WalletsModal: Component = () => {
             );
         }
 
-        return walletsList;
+        return walletsList
+            .concat(walletsList)
+            .concat(walletsList)
+            .concat(walletsList)
+            .concat(walletsList)
+            .concat(walletsList);
     });
 
     const additionalRequestLoading = (): boolean =>
@@ -145,7 +150,7 @@ export const WalletsModal: Component = () => {
                         </Match>
                         <Match when={selectedTab() === 'all-wallets'}>
                             <AllWalletsListModal
-                                walletsList={walletsList()!.concat(walletsList()!).concat(walletsList()!).concat(walletsList()!)}
+                                walletsList={walletsList()!}
                                 onBack={() => setSelectedTab('universal')}
                                 onSelect={setSelectedWalletInfo}
                             />

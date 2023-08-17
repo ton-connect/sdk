@@ -1,12 +1,17 @@
 /* @refresh reload */
 import { TonConnectUI } from 'src/ton-connect-ui';
 import { THEME } from 'src/models';
-import { SendTransactionRequest } from '@tonconnect/sdk';
+import { SendTransactionRequest, TonConnect } from '@tonconnect/sdk';
 
 async function dev(): Promise<void> {
+    const connector = new TonConnect({
+        manifestUrl: 'https://demo-dapp.walletbot.net/demo-dapp/tonconnect-manifest.json',
+        walletsListSource:
+            'https://raw.githubusercontent.com/ton-blockchain/wallets-list/feature/at-wallet/wallets.json'
+    });
     const tonConnectUI = new TonConnectUI({
+        connector,
         buttonRootId: 'button-root',
-        manifestUrl: 'https://ton-connect.github.io/demo-dapp/tonconnect-manifest.json',
         actionsConfiguration: {
             modals: ['error'],
             notifications: ['before']
@@ -16,18 +21,19 @@ async function dev(): Promise<void> {
             borderRadius: 'm'
         },
         language: 'en',
-        restoreConnection: true,
-        walletsListConfiguration: {
-            /* includeWallets: [...new Array(11)].map((_, index) => ({
-                name: `tonkeeper${index}`,
-                bridgeUrl: `https://bridge${
-                    index < 9 ? `0${index + 1}` : index + 1
-                }.subgroup.org/bridge`,
-                universalLink: 'https://app.tonkeeper.com/ton-connect',
-                aboutUrl: '',
-                imageUrl: 'https://tonkeeper.com/assets/tonconnect-icon.png'
-            })),*/
-        }
+        restoreConnection: true
+        /*walletsListConfiguration: {
+            includeWallets: [
+                {
+                    name: 'Wallet',
+                    bridgeUrl: `https://bridge.tonapi.io/bridge`,
+                    universalLink: 'https://t.me/wallet',
+                    aboutUrl: '',
+                    imageUrl: 'https://tonkeeper.com/assets/tonconnect-icon.png',
+                    platforms: ['ios']
+                }
+            ]
+        }*/
     });
 
     /* tonConnectUI.setConnectRequestParameters({ state: 'loading' });
