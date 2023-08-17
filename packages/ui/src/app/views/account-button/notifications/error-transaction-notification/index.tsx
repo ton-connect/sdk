@@ -10,7 +10,7 @@ export const ErrorTransactionNotification: Component<ErrorTransactionNotificatio
         <Notification
             header={{ translationKey: 'notifications.transactionCanceled.header' }}
             text={{ translationKey: 'notifications.transactionCanceled.text' }}
-            icon={<ErrorIconStyled />}
+            icon={<ErrorIconStyled size="xs" />}
             class={props.class}
             data-tc-notification-tx-cancelled="true"
         >

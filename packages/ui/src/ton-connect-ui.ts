@@ -1,5 +1,6 @@
 import type { Account, ConnectAdditionalRequest } from '@tonconnect/sdk';
 import {
+    isTelegramUrl,
     isWalletInfoCurrentlyEmbedded,
     ITonConnect,
     SendTransactionRequest,
@@ -18,6 +19,7 @@ import {
     getSystemTheme,
     getUserAgent,
     openLink,
+    openLinkBlank,
     preloadImages,
     subscribeToThemeChange
 } from 'src/app/utils/web-api';
@@ -301,7 +303,11 @@ export class TonConnectUI {
             this.walletInfo.openMethod === 'universal-link' &&
             !shouldSkipRedirectToWallet
         ) {
-            openLink(addReturnStrategy(this.walletInfo.universalLink, returnStrategy));
+            if (isTelegramUrl(this.walletInfo.universalLink)) {
+                this.redirectToTelegram(this.walletInfo.universalLink);
+            } else {
+                openLink(addReturnStrategy(this.walletInfo.universalLink, returnStrategy));
+            }
         }
 
         widgetController.setAction({
@@ -473,5 +479,11 @@ export class TonConnectUI {
             returnStrategy,
             skipRedirectToWallet
         };
+    }
+
+    private redirectToTelegram(universalLink: string): void {
+        const url = new URL(universalLink);
+        url.searchParams.append('startattach', 'tonconnect');
+        openLinkBlank(url.toString());
     }
 }

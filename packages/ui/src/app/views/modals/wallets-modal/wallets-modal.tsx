@@ -70,12 +70,7 @@ export const WalletsModal: Component = () => {
             );
         }
 
-        return walletsList
-            .concat(walletsList)
-            .concat(walletsList)
-            .concat(walletsList)
-            .concat(walletsList)
-            .concat(walletsList);
+        return walletsList;
     });
 
     const additionalRequestLoading = (): boolean =>
