@@ -3,9 +3,14 @@
  */
 export interface WalletInfoBase {
     /**
-     * Name of the wallet.
+     * Human-readable name of the wallet.
      */
     name: string;
+
+    /**
+     * ID of the wallet, equals to the `appName` property into {@link Wallet.device}.
+     */
+    appName: string;
 
     /**
      * Url to the icon of the wallet. Resolution 288×288px. On non-transparent background, without rounded corners. PNG format.
@@ -109,6 +114,7 @@ export type WalletInfo =
 
 export interface WalletInfoDTO {
     name: string;
+    app_name: string;
     image: string;
     tondns?: string;
     about_url: string;

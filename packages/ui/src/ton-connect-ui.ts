@@ -31,7 +31,7 @@ import { unwrap } from 'solid-js/store';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { ActionConfiguration, StrictActionConfiguration } from 'src/models/action-configuration';
 import { ConnectedWallet, WalletInfoWithOpenMethod } from 'src/models/connected-wallet';
-import { applyWalletsListConfiguration } from 'src/app/utils/wallets';
+import { applyWalletsListConfiguration, eqWalletName } from 'src/app/utils/wallets';
 import { uniq } from 'src/app/utils/array';
 import { Loadable } from 'src/models/loadable';
 
@@ -346,7 +346,7 @@ export class TonConnectUI {
         this.connector.onStatusChange(async wallet => {
             if (wallet) {
                 await this.updateWalletInfo(wallet);
-                this.setPreferredWalletName(this.walletInfo?.name || wallet.device.appName);
+                this.setPreferredWalletName(this.walletInfo?.appName || wallet.device.appName);
             } else {
                 this.walletInfoStorage.removeWalletInfo();
             }
@@ -371,9 +371,7 @@ export class TonConnectUI {
                 await this.walletsList,
                 appState.walletsListConfiguration
             );
-            const walletInfo = walletsList.find(
-                item => item.name.toLowerCase() === wallet.device.appName.toLowerCase()
-            );
+            const walletInfo = walletsList.find(item => eqWalletName(item, wallet.device.appName));
 
             if (!walletInfo) {
                 throw new TonConnectUIError(

@@ -50,7 +50,7 @@ describe('Wallets list manager tests', () => {
         expect(walletsList).toEqual(walletsListWithWrongWallet.parsed);
         expect(logError).toBeCalledTimes(1);
         expect(logError).toBeCalledWith(
-            'Wallet(s) Tonhub config format is wrong. They were removed from the wallets list.'
+            'Wallet(s) Tonhub, TonFlow, DeWallet config format is wrong. They were removed from the wallets list.'
         );
     });
 

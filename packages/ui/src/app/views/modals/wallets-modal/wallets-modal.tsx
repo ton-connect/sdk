@@ -17,7 +17,7 @@ import { StyledModal, LoaderContainerStyled, H1Styled } from './style';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { useI18n } from '@solid-primitives/i18n';
 import { appState } from 'src/app/state/app.state';
-import { applyWalletsListConfiguration } from 'src/app/utils/wallets';
+import { applyWalletsListConfiguration, eqWalletName } from 'src/app/utils/wallets';
 import isMobile from 'src/app/hooks/isMobile';
 import { AllWalletsListModal } from 'src/app/views/modals/wallets-modal/all-wallets-list-modal';
 import { LoaderIcon } from 'src/app/components';
@@ -53,14 +53,14 @@ export const WalletsModal: Component = () => {
             appState.walletsListConfiguration
         );
         const preferredWalletName = appState.preferredWalletName;
-        const preferredWallet = walletsList.find(item => item.name === preferredWalletName);
+        const preferredWallet = walletsList.find(item => eqWalletName(item, preferredWalletName));
         const someWalletsWithSameName =
-            walletsList.filter(item => item.name === preferredWalletName).length >= 2;
+            walletsList.filter(item => eqWalletName(item, preferredWalletName)).length >= 2;
 
         if (preferredWalletName && preferredWallet && !someWalletsWithSameName) {
             walletsList = [
                 { ...preferredWallet, isPreferred: true } as PersonalizedWalletInfo
-            ].concat(walletsList.filter(item => item.name !== preferredWalletName));
+            ].concat(walletsList.filter(item => !eqWalletName(item, preferredWalletName));
         }
 
         const atWallet = walletsList.find(item => item.name === AT_WALLET_NAME);
