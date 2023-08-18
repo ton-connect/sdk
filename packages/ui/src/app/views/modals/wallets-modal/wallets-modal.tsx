@@ -29,7 +29,7 @@ import { openLinkBlank } from 'src/app/utils/web-api';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { useI18n } from '@solid-primitives/i18n';
 import { appState } from 'src/app/state/app.state';
-import { applyWalletsListConfiguration } from 'src/app/utils/wallets';
+import { applyWalletsListConfiguration, eqWalletName } from 'src/app/utils/wallets';
 import isMobile from 'src/app/hooks/isMobile';
 import { MobileSelectWalletModal } from 'src/app/views/modals/wallets-modal/mobile-select-wallet-modal';
 import { UniversalQrModal } from 'src/app/views/modals/wallets-modal/universal-qr-modal';
@@ -58,13 +58,13 @@ export const WalletsModal: Component = () => {
             appState.walletsListConfiguration
         );
         const preferredWalletName = appState.preferredWalletName;
-        const preferredWallet = walletsList.find(item => item.name === preferredWalletName);
+        const preferredWallet = walletsList.find(item => eqWalletName(item, preferredWalletName));
         const someWalletsWithSameName =
-            walletsList.filter(item => item.name === preferredWalletName).length >= 2;
+            walletsList.filter(item => eqWalletName(item, preferredWalletName)).length >= 2;
 
         if (preferredWalletName && preferredWallet && !someWalletsWithSameName) {
             walletsList = [preferredWallet].concat(
-                walletsList.filter(item => item.name !== preferredWalletName)
+                walletsList.filter(item => !eqWalletName(item, preferredWalletName))
             );
         }
 
