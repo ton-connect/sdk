@@ -33,3 +33,14 @@ export function applyWalletsListConfiguration(
 
     return walletsList;
 }
+
+export function eqWalletName(wallet1: { name: string; appName: string }, name?: string): boolean {
+    if (!name) {
+        return false;
+    }
+
+    return (
+        wallet1.name.toLowerCase() === name.toLowerCase() ||
+        wallet1.appName.toLowerCase() === name.toLowerCase()
+    );
+}

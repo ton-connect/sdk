@@ -6,7 +6,8 @@ import {
     WalletInfoDTO,
     isWalletInfoCurrentlyEmbedded,
     WalletInfoCurrentlyEmbedded,
-    WalletInfoCurrentlyInjected
+    WalletInfoCurrentlyInjected,
+    WalletInfoBase
 } from 'src/models/wallet/wallet-info';
 import { InjectedProvider } from 'src/provider/injected/injected-provider';
 import { logError } from 'src/utils/log';
@@ -114,13 +115,16 @@ export class WalletsListManager {
 
     private walletConfigDTOListToWalletConfigList(walletConfigDTO: WalletInfoDTO[]): WalletInfo[] {
         return walletConfigDTO.map(walletConfigDTO => {
-            const walletConfig: WalletInfo = {
+            const walletConfigBase: WalletInfoBase = {
                 name: walletConfigDTO.name,
+                appName: walletConfigDTO.app_name,
                 imageUrl: walletConfigDTO.image,
                 aboutUrl: walletConfigDTO.about_url,
                 tondns: walletConfigDTO.tondns,
                 platforms: walletConfigDTO.platforms
-            } as WalletInfo;
+            };
+
+            const walletConfig: WalletInfo = walletConfigBase as WalletInfo;
 
             walletConfigDTO.bridge.forEach(bridge => {
                 if (bridge.type === 'sse') {
@@ -158,17 +162,25 @@ export class WalletsListManager {
         });
     }
 
+    // eslint-disable-next-line complexity
     private isCorrectWalletConfigDTO(value: unknown): value is WalletInfoDTO {
         if (!value || !(typeof value === 'object')) {
             return false;
         }
 
         const containsName = 'name' in value;
+        const containsAppName = 'app_name' in value;
         const containsImage = 'image' in value;
         const containsAbout = 'about_url' in value;
         const containsPlatforms = 'platforms' in value;
 
-        if (!containsName || !containsImage || !containsAbout || !containsPlatforms) {
+        if (
+            !containsName ||
+            !containsImage ||
+            !containsAbout ||
+            !containsPlatforms ||
+            !containsAppName
+        ) {
             return false;
         }
 

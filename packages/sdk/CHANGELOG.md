@@ -1,5 +1,19 @@
 # Changelog @tonconnect/sdk 
 
+# [2.2.0](https://github.com/ton-connect/sdk/compare/sdk-2.1.4...sdk-2.2.0) (2023-08-18)
+
+
+### Bug Fixes
+
+* **sdk:** `app_name` added to WalletInfo ([a0fa12e](https://github.com/ton-connect/sdk/commit/a0fa12ebb976f385a3f870a3b551fb74fc591136))
+
+
+### Features
+
+* **sdk:** [@wallet](https://github.com/wallet) universal links supported ([05f7000](https://github.com/ton-connect/sdk/commit/05f70005523808694bcb985584f49b6eb039b1b3))
+
+
+
 ## [2.1.4](https://github.com/ton-connect/sdk/compare/sdk-2.1.3...sdk-2.1.4) (2023-08-15)
 
 

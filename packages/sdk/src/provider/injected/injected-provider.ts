@@ -58,6 +58,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
 
         return wallets.map(([jsBridgeKey, wallet]) => ({
             name: wallet.tonconnect.walletInfo.name,
+            appName: wallet.tonconnect.walletInfo.app_name,
             aboutUrl: wallet.tonconnect.walletInfo.about_url,
             imageUrl: wallet.tonconnect.walletInfo.image,
             tondns: wallet.tonconnect.walletInfo.tondns,

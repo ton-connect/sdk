@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui 
 
+# [1.0.0-beta.7](https://github.com/ton-connect/sdk/compare/ui-1.0.0-beta.6...ui-1.0.0-beta.7) (2023-08-18)
+
+
+### Bug Fixes
+
+* **ui:** wallet name replaced with `app_name` when ([21f7d8b](https://github.com/ton-connect/sdk/commit/21f7d8b81f0bb69b145d8020880b37f963374849))
+
+
+
 # [1.0.0-beta.6](https://github.com/ton-connect/sdk/compare/ui-1.0.0-beta.5...ui-1.0.0-beta.6) (2023-08-11)
 
 

@@ -23,6 +23,7 @@ import { IStorage } from 'src/storage/models/storage.interface';
 import { Optional, WithoutId, WithoutIdDistributive } from 'src/utils/types';
 import { PROTOCOL_VERSION } from 'src/resources/protocol';
 import { logDebug, logError } from 'src/utils/log';
+import { isTelegramUrl } from 'src/utils/url';
 
 export class BridgeProvider implements HTTPProvider {
     public static async fromStorage(storage: IStorage): Promise<BridgeProvider> {
@@ -321,10 +322,37 @@ export class BridgeProvider implements HTTPProvider {
     }
 
     private generateUniversalLink(universalLink: string, message: ConnectRequest): string {
+        if (isTelegramUrl(universalLink)) {
+            return this.generateTGUniversalLink(universalLink, message);
+        }
+
+        return this.generateRegularUniversalLink(universalLink, message);
+    }
+
+    private generateRegularUniversalLink(universalLink: string, message: ConnectRequest): string {
         const url = new URL(universalLink);
         url.searchParams.append('v', PROTOCOL_VERSION.toString());
         url.searchParams.append('id', this.session!.sessionCrypto.sessionId);
         url.searchParams.append('r', JSON.stringify(message));
+        return url.toString();
+    }
+
+    private generateTGUniversalLink(universalLink: string, message: ConnectRequest): string {
+        const urlToWrap = this.generateRegularUniversalLink('about:blank', message);
+        const linkParams = urlToWrap.split('?')[1]!;
+
+        const startattach =
+            'tonconnect-' +
+            linkParams
+                .replaceAll('.', '%2E')
+                .replaceAll('-', '%2D')
+                .replaceAll('_', '%5F')
+                .replaceAll('&', '-')
+                .replaceAll('=', '__')
+                .replaceAll('%', '--');
+
+        const url = new URL(universalLink);
+        url.searchParams.append('startattach', startattach);
         return url.toString();
     }
 
