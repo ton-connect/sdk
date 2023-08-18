@@ -6,7 +6,7 @@ If you don't use React for your app, take a look at [TonConnect UI](https://gith
 
 If you want to use TonConnect on the server side, you should use the [TonConnect SDK](https://github.com/ton-connect/sdk/tree/main/packages/sdk).
 
-You can find more details and the protocol specification in the [docs](https://github.com/ton-connect/docs).
+You can find more details and the protocol specification in the [docs](https://docs.ton.org/develop/dapps/ton-connect/overview).
 
 ---
 
