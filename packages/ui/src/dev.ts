@@ -85,11 +85,7 @@ async function dev(): Promise<void> {
             validUntil: Math.round(Date.now() / 1000) + 1000,
             messages: [
                 {
-                    address: '-1:4d5c0210b35daddaa219fac459dba0fdefb1fae4e97a0d0797739fe050d694ca',
-                    amount: '1000000'
-                },
-                {
-                    address: '-1:4d5c0210b35daddaa219fac459dba0fdefb1fae4e97a0d0797739fe050d694ca',
+                    address: '0:4d5c0210b35daddaa219fac459dba0fdefb1fae4e97a0d0797739fe050d694ca',
                     amount: '1000000'
                 }
             ]
