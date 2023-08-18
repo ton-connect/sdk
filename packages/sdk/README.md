@@ -215,17 +215,17 @@ if (!connector.connected) {
 }
 
 const transaction = {
-    validUntil: 1658253458,
+    validUntil: Math.floor(Date.now() / 1000) + 60, // 60 sec
     messages: [
         {
-            address: "0:412410771DA82CBA306A55FA9E0D43C9D245E38133CB58F1457DFB8D5CD8892F",
+            address: "EQBBJBB3HagsujBqVfqeDUPJ0kXjgTPLWPFFffuNXNiJL0aA",
             amount: "20000000",
-         /* stateInit: "base64_YOUR_STATE_INIT" */ // just for instance. Replace with your transaction stateInit or remove
+         // stateInit: "base64bocblahblahblah==" // just for instance. Replace with your transaction initState or remove
         },
         {
-            address: "0:E69F10CC84877ABF539F83F879291E5CA169451BA7BCE91A37A5CED3AB8080D3",
-            amount: "60000000", 
-         /* payload: "base64_YOUR_PAYLOAD" */ // just for instance. Replace with your transaction payload or remove
+            address: "EQDmnxDMhId6v1Ofg_h5KR5coWlFG6e86Ro3pc7Tq4CA0-Jn",
+            amount: "60000000",
+         // payload: "base64bocblahblahblah==" // just for instance. Replace with your transaction payload or remove
         }
     ]
 }
