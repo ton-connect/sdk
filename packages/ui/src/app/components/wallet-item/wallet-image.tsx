@@ -5,10 +5,9 @@ import { Styleable } from 'src/app/models/styleable';
 
 export interface WalletImageProps extends Styleable {
     src: string;
-    borderRadius?: 's' | 'm';
 }
 
-const ImageContainer = styled.div<{ borderRadius: string }>`
+const ImageContainer = styled.div`
     position: relative;
 
     &::after {
@@ -21,20 +20,20 @@ const ImageContainer = styled.div<{ borderRadius: string }>`
         right: 0;
         border: 0.5px solid rgba(0, 0, 0, 0.08);
 
-        border-radius: ${props => (props.borderRadius === 'm' ? '12px' : '6px')};
+        border-radius: inherit;
     }
 `;
 
-export const ImageStyled = styled(Image)<{ borderRadius: string }>`
+export const ImageStyled = styled(Image)`
     width: 100%;
     height: 100%;
-    border-radius: ${props => (props.borderRadius === 'm' ? '12px' : '6px')};
+    border-radius: inherit;
 `;
 
 export const WalletImage: Component<WalletImageProps> = props => {
     return (
-        <ImageContainer class={props.class} borderRadius={props.borderRadius || 'm'}>
-            <ImageStyled src={props.src} borderRadius={props.borderRadius || 'm'} />
+        <ImageContainer class={props.class}>
+            <ImageStyled src={props.src} />
         </ImageContainer>
     );
 };

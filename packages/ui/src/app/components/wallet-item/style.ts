@@ -3,6 +3,20 @@ import { Text } from '../typography/text';
 import { Image } from '../image';
 import { media, mediaNotTouch, mediaTouch } from 'src/app/styles/media';
 import { WalletImage } from './wallet-image';
+import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
+
+const borders: BorderRadiusConfig = {
+    m: '16px',
+    s: '12px',
+    none: '0'
+};
+
+const badgeBorders: BorderRadiusConfig = {
+    m: '6px',
+    s: '6px',
+    none: '0'
+};
+
 export const WalletItemStyled = styled.button`
     position: relative;
     cursor: pointer;
@@ -41,6 +55,7 @@ export const WalletItemStyled = styled.button`
 export const ImageStyled = styled(WalletImage)`
     width: 60px;
     height: 60px;
+    border-radius: ${props => borders[props.theme!.borderRadius]};
 
     margin-bottom: 8px;
 `;
@@ -51,7 +66,7 @@ export const BadgeStyled = styled(Image)`
     top: 50px;
     width: 24px;
     height: 24px;
-    border-radius: 6px;
+    border-radius: ${props => badgeBorders[props.theme!.borderRadius]};
     box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.08);
 `;
 

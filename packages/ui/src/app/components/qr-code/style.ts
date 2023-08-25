@@ -4,8 +4,14 @@ import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
 import { toPx } from 'src/app/utils/css';
 import { mediaNotTouch, mediaTouch } from 'src/app/styles/media';
 
-const borders: BorderRadiusConfig = {
+const backgroundBorders: BorderRadiusConfig = {
     m: '16px',
+    s: '12px',
+    none: '0'
+};
+
+const imageBorders: BorderRadiusConfig = {
+    m: '12px',
     s: '8px',
     none: '0'
 };
@@ -36,7 +42,7 @@ export const QrCodeBackground = styled.button`
     align-items: center;
     position: relative;
     background-color: ${props => props.theme!.colors.background.qr};
-    border-radius: ${props => borders[props.theme!.borderRadius]};
+    border-radius: ${props => backgroundBorders[props.theme!.borderRadius]};
     padding: ${toPx(qrPaddingTop)} 0;
     height: ${toPx(qrNormalSize + qrPaddingTop * 2)};
     width: 100%;
@@ -103,7 +109,7 @@ export const ImageBackground = styled.div`
 export const ImageStyled = styled(Image)<{ size: number }>`
     width: ${props => toPx(props.size)};
     height: ${props => toPx(props.size)};
-    border-radius: 12px;
+    border-radius: ${props => imageBorders[props.theme!.borderRadius]};
 `;
 
 export const CopiedBoxStyled = styled.div`

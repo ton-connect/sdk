@@ -2,9 +2,15 @@ import { styled } from 'solid-styled-components';
 import { Button, ErrorIcon, H1, H2, IconButton, LoaderIcon, Text, Image } from 'src/app/components';
 import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
 
-const borders: BorderRadiusConfig = {
+const tgButtonBorders: BorderRadiusConfig = {
     m: '16px',
-    s: '8px',
+    s: '12px',
+    none: '0'
+};
+
+const tgIconBorders: BorderRadiusConfig = {
+    m: '6px',
+    s: '6px',
     none: '0'
 };
 
@@ -51,27 +57,6 @@ export const FooterButton = styled(Button)<{ mt: boolean }>`
     margin-top: ${props => (props.mt ? '24px' : '0')};
 `;
 
-export const ActionButtonStyled = styled(Button)`
-    padding: 0 16px;
-    height: 56px;
-    font-size: 16px;
-    line-height: 20px;
-    width: 100%;
-    border-radius: ${props => borders[props.theme!.borderRadius]};
-`;
-
-export const GetWalletStyled = styled.div`
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-`;
-
-export const TextStyled = styled(Text)`
-    padding-left: 8px;
-    color: ${props => props.theme!.colors.text.secondary};
-    font-size: 16px;
-`;
-
 export const LoaderStyled = styled(LoaderIcon)`
     margin-bottom: 16px;
 `;
@@ -90,7 +75,7 @@ export const TgButtonStyled = styled(Button)`
     margin-top: 16px;
     width: 100%;
     padding: 12px 12px 12px 20px;
-    border-radius: 16px;
+    border-radius: ${props => tgButtonBorders[props.theme!.borderRadius]};
     font-size: 16px;
     line-height: 20px;
 `;
@@ -98,5 +83,5 @@ export const TgButtonStyled = styled(Button)`
 export const TgImageStyled = styled(Image)`
     width: 32px;
     height: 32px;
-    border-radius: 6px;
+    border-radius: ${props => tgIconBorders[props.theme!.borderRadius]};
 `;

@@ -1,6 +1,19 @@
 import { styled } from 'solid-styled-components';
 import { Button, H1, H2, Image } from 'src/app/components';
 import { mediaNotTouch, mediaTouch } from 'src/app/styles/media';
+import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
+
+const borders: BorderRadiusConfig = {
+    m: '16px',
+    s: '12px',
+    none: '0'
+};
+
+const tgBorders: BorderRadiusConfig = {
+    m: '6px',
+    s: '6px',
+    none: '0'
+};
 
 export const UlStyled = styled.ul`
     display: flex;
@@ -64,7 +77,7 @@ export const Divider = styled.div`
 export const IconContainer = styled.div`
     width: 64px;
     height: 64px;
-    border-radius: 16px;
+    border-radius: ${props => borders[props.theme!.borderRadius]};
     display: flex;
     align-items: center;
     justify-content: center;
@@ -93,7 +106,7 @@ export const ButtonStyled = styled(Button)`
 export const TelegramButtonStyled = styled(Button)`
     margin: 0 24px 24px;
     width: calc(100% - 48px);
-    border-radius: 16px;
+    border-radius: ${props => borders[props.theme!.borderRadius]};
     padding: 14px 16px 14px 14px;
     background-color: ${props => props.theme!.colors.telegramButton};
 
@@ -104,7 +117,7 @@ export const TelegramButtonStyled = styled(Button)`
 `;
 
 export const TGImageStyled = styled(Image)`
-    border-radius: 6px;
+    border-radius: ${props => tgBorders[props.theme!.borderRadius]};
     width: 24px;
     height: 24px;
 `;
