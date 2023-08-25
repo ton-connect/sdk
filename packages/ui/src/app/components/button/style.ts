@@ -17,12 +17,13 @@ const scaleValues = {
 export const ButtonStyled = styled.button<{
     appearance: 'primary' | 'flat' | 'secondary';
     scale: 's' | 'm';
-    hasIcon: boolean;
+    leftIcon: boolean;
+    rightIcon: boolean;
 }>`
-    display: ${props => (props.hasIcon ? 'flex' : 'inline-block')};
-    gap: ${props => (props.hasIcon ? '6px' : 'unset')};
-    align-items: ${props => (props.hasIcon ? 'center' : 'unset')};
-    justify-content: ${props => (props.hasIcon ? 'space-between' : 'unset')};
+    display: ${props => (props.leftIcon || props.rightIcon ? 'flex' : 'inline-block')};
+    gap: ${props => (props.leftIcon || props.rightIcon ? '6px' : 'unset')};
+    align-items: ${props => (props.leftIcon || props.rightIcon ? 'center' : 'unset')};
+    justify-content: ${props => (props.leftIcon || props.rightIcon ? 'space-between' : 'unset')};
     background-color: ${props =>
         props.appearance === 'flat'
             ? 'transparent'
@@ -35,6 +36,8 @@ export const ButtonStyled = styled.button<{
             : props.theme!.colors.accent};
 
     padding: ${props => (props.appearance === 'flat' ? '0' : '9px 16px')};
+    padding-left: ${props => (props.leftIcon && props.appearance !== 'flat' ? '12px' : '16px')};
+    padding-right: ${props => (props.rightIcon && props.appearance !== 'flat' ? '12px' : '16px')};
     border: none;
     border-radius: ${props => borders[props.theme!.borderRadius]};
     cursor: ${props => (props.disabled ? 'not-allowed' : 'pointer')};

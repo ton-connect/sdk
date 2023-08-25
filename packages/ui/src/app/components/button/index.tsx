@@ -31,7 +31,8 @@ export const Button: Component<ButtonProps> = props => {
             ref={props.ref}
             disabled={props.disabled}
             scale={props.scale || 'm'}
-            hasIcon={!!props.leftIcon || !!props.rightIcon}
+            leftIcon={!!props.leftIcon}
+            rightIcon={!!props.rightIcon}
             data-tc-button="true"
             {...dataAttrs}
         >
