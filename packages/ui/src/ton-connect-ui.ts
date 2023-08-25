@@ -176,10 +176,10 @@ export class TonConnectUI {
         }
 
         this.uiOptions = mergeOptions(options, { uiPreferences: { theme: 'SYSTEM' } });
-        const preferredWalletName = this.preferredWalletStorage.getPreferredWalletName();
+        const preferredWalletName = this.preferredWalletStorage.getPreferredWalletAppName();
         setAppState({
             connector: this.connector,
-            preferredWalletName
+            preferredWalletAppName: preferredWalletName
         });
 
         widgetController.renderApp(rootId, this);
@@ -346,16 +346,16 @@ export class TonConnectUI {
         this.connector.onStatusChange(async wallet => {
             if (wallet) {
                 await this.updateWalletInfo(wallet);
-                this.setPreferredWalletName(this.walletInfo?.appName || wallet.device.appName);
+                this.setPreferredWalletAppName(this.walletInfo?.appName || wallet.device.appName);
             } else {
                 this.walletInfoStorage.removeWalletInfo();
             }
         });
     }
 
-    private setPreferredWalletName(value: string): void {
-        this.preferredWalletStorage.setPreferredWalletName(value);
-        setAppState({ preferredWalletName: value });
+    private setPreferredWalletAppName(value: string): void {
+        this.preferredWalletStorage.setPreferredWalletAppName(value);
+        setAppState({ preferredWalletAppName: value });
     }
 
     private async getSelectedWalletInfo(wallet: Wallet): Promise<WalletInfoWithOpenMethod | null> {

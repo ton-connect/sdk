@@ -24,7 +24,7 @@ import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { appState } from 'src/app/state/app.state';
 import { IMG } from 'src/app/env/IMG';
 import { supportsMobile } from 'src/app/utils/wallets';
-import { AT_WALLET_NAME } from 'src/app/env/AT_WALLET_NAME';
+import { AT_WALLET_APP_NAME } from 'src/app/env/AT_WALLET_APP_NAME';
 import { copyToClipboard } from 'src/app/utils/copy-to-clipboard';
 import { TonConnectUIError } from 'src/errors';
 
@@ -41,7 +41,7 @@ interface MobileUniversalModalProps {
 export const MobileUniversalModal: Component<MobileUniversalModalProps> = props => {
     const connector = appState.connector;
     const walletsList = (): WalletInfo[] =>
-        props.walletsList.filter(w => supportsMobile(w) && w.name !== AT_WALLET_NAME);
+        props.walletsList.filter(w => supportsMobile(w) && w.appName !== AT_WALLET_APP_NAME);
     const shouldShowMoreButton = (): boolean => walletsList().length > 7;
 
     const universalLink = createMemo(() =>
@@ -74,7 +74,7 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
     };
 
     const onSelectTelegram = (): void => {
-        const atWallet = props.walletsList.find(wallet => wallet.name === AT_WALLET_NAME);
+        const atWallet = props.walletsList.find(wallet => wallet.appName === AT_WALLET_APP_NAME);
         if (!atWallet || !isWalletInfoRemote(atWallet)) {
             throw new TonConnectUIError('@wallet bot not found in the wallets list');
         }

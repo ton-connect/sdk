@@ -12,7 +12,7 @@ export type AppState = {
     walletsListConfiguration: WalletsListConfiguration | {};
     connectRequestParameters?: Loadable<ConnectAdditionalRequest> | null;
     returnStrategy: ReturnStrategy;
-    preferredWalletName: string | undefined;
+    preferredWalletAppName: string | undefined;
 };
 
 export const [appState, setAppState] = createStore<AppState>({

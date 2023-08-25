@@ -1,4 +1,9 @@
-import { ConnectAdditionalRequest, WalletInfo, WalletInfoRemote } from '@tonconnect/sdk';
+import {
+    ConnectAdditionalRequest,
+    isWalletInfoCurrentlyInjected,
+    WalletInfo,
+    WalletInfoRemote
+} from '@tonconnect/sdk';
 import {
     Component,
     createEffect,
@@ -23,7 +28,7 @@ import { AllWalletsListModal } from 'src/app/views/modals/wallets-modal/all-wall
 import { LoaderIcon } from 'src/app/components';
 import { LoadableReady } from 'src/models/loadable';
 import { PersonalizedWalletInfo } from 'src/app/models/personalized-wallet-info';
-import { AT_WALLET_NAME } from 'src/app/env/AT_WALLET_NAME';
+import { AT_WALLET_APP_NAME } from 'src/app/env/AT_WALLET_APP_NAME';
 import { DesktopConnectionModal } from 'src/app/views/modals/wallets-modal/desktop-connection-modal';
 import { InfoModal } from 'src/app/views/modals/wallets-modal/info-modal';
 import { MobileConnectionModal } from 'src/app/views/modals/wallets-modal/mobile-connection-modal';
@@ -52,21 +57,27 @@ export const WalletsModal: Component = () => {
             fetchedWalletsList(),
             appState.walletsListConfiguration
         );
-        const preferredWalletName = appState.preferredWalletName;
-        const preferredWallet = walletsList.find(item => eqWalletName(item, preferredWalletName));
-        const someWalletsWithSameName =
-            walletsList.filter(item => eqWalletName(item, preferredWalletName)).length >= 2;
 
-        if (preferredWalletName && preferredWallet && !someWalletsWithSameName) {
+        const injectedWallets: WalletInfo[] = walletsList.filter(isWalletInfoCurrentlyInjected);
+        const notInjectedWallets = walletsList.filter(w => !isWalletInfoCurrentlyInjected(w));
+        walletsList = (injectedWallets || []).concat(notInjectedWallets);
+
+        const preferredWalletAppName = appState.preferredWalletAppName;
+        const preferredWallet = walletsList.find(item =>
+            eqWalletName(item, preferredWalletAppName)
+        );
+        const someWalletsWithSameName =
+            walletsList.filter(item => eqWalletName(item, preferredWalletAppName)).length >= 2;
+        if (preferredWalletAppName && preferredWallet && !someWalletsWithSameName) {
             walletsList = [
                 { ...preferredWallet, isPreferred: true } as PersonalizedWalletInfo
-            ].concat(walletsList.filter(item => !eqWalletName(item, preferredWalletName));
+            ].concat(walletsList.filter(item => !eqWalletName(item, preferredWalletAppName)));
         }
 
-        const atWallet = walletsList.find(item => item.name === AT_WALLET_NAME);
+        const atWallet = walletsList.find(item => eqWalletName(item, AT_WALLET_APP_NAME));
         if (atWallet) {
             walletsList = [atWallet].concat(
-                walletsList.filter(item => item.name !== AT_WALLET_NAME)
+                walletsList.filter(item => !eqWalletName(item, AT_WALLET_APP_NAME))
             );
         }
 

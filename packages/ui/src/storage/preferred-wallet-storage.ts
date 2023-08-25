@@ -11,11 +11,11 @@ export class PreferredWalletStorage {
         this.localStorage = localStorage;
     }
 
-    public setPreferredWalletName(name: string): void {
+    public setPreferredWalletAppName(name: string): void {
         this.localStorage.setItem(this.storageKey, name);
     }
 
-    public getPreferredWalletName(): string | undefined {
+    public getPreferredWalletAppName(): string | undefined {
         return this.localStorage.getItem(this.storageKey) || undefined;
     }
 }
