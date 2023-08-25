@@ -1,6 +1,6 @@
 {
   "name": "@tonconnect/ui-react",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build"
@@ -52,7 +52,7 @@
     "vite-plugin-dts": "^1.7.1"
   },
   "dependencies": {
-    "@tonconnect/ui": "https://github.com/ton-connect/sdk/tree/feature_next-build/packages/ui"
+    "@tonconnect/ui": "https://gitpkg.now.sh/ton-connect/sdk/packages/ui?feature_next-build"
   },
   "peerDependencies": {
     "react": ">=17.0.0",
