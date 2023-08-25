@@ -183,7 +183,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                     </Match>
                     <Match when={mode() === 'extension'}>
                         <Show when={isWalletInfoCurrentlyInjected(props.wallet)}>
-                            <LoaderStyled size="m" />
+                            <LoaderStyled size="s" />
                             <BodyTextStyled>
                                 Continue in {props.wallet.name} browser extension…
                             </BodyTextStyled>

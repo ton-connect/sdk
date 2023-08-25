@@ -87,7 +87,8 @@ export const QRCode: Component<QRCodeProps> = props => {
                             { opacity: 1, transform: 'translate(-50%, 0)' }
                         ],
                         {
-                            duration: 200
+                            duration: 150,
+                            easing: 'ease-out'
                         }
                     );
                 }}
@@ -98,7 +99,8 @@ export const QRCode: Component<QRCodeProps> = props => {
                             { opacity: 0, transform: 'translate(-50%, 44px)' }
                         ],
                         {
-                            duration: 200
+                            duration: 150,
+                            easing: 'ease-out'
                         }
                     ).finished.then(() => {
                         done();

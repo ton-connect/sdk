@@ -110,6 +110,7 @@ export const ImageStyled = styled(Image)<{ size: number }>`
     width: ${props => toPx(props.size)};
     height: ${props => toPx(props.size)};
     border-radius: ${props => imageBorders[props.theme!.borderRadius]};
+    background-color: ${props => props.theme!.colors.background.qr};
 `;
 
 export const CopiedBoxStyled = styled.div`

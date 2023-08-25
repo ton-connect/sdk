@@ -17,10 +17,12 @@ const tgBorders: BorderRadiusConfig = {
 
 export const UlStyled = styled.ul`
     display: flex;
+    justify-content: space-between;
     margin: 0 auto;
     width: fit-content;
-    min-height: 124px;
     max-width: 100%;
+    min-width: 100%;
+    height: fit-content;
     overflow-x: auto;
     overflow-y: hidden;
     padding: 0 13px 24px;
@@ -31,6 +33,10 @@ export const UlStyled = styled.ul`
 
     -ms-overflow-style: none;
     scrollbar-width: none;
+
+    > li {
+        height: fit-content;
+    }
 `;
 
 export const OtherOptionButton = styled.li`
@@ -69,14 +75,14 @@ export const Divider = styled.div`
     margin: 0 10px;
     height: 24px;
     position: relative;
-    top: 30px;
+    top: 26px;
 
     background-color: ${props => props.theme!.colors.icon.tertiary};
 `;
 
 export const IconContainer = styled.div`
-    width: 64px;
-    height: 64px;
+    width: 60px;
+    height: 60px;
     border-radius: ${props => borders[props.theme!.borderRadius]};
     display: flex;
     align-items: center;

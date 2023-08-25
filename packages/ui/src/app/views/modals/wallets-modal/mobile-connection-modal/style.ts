@@ -31,7 +31,7 @@ export const FooterStyled = styled.div`
     display: flex;
     align-items: center;
     gap: 12px;
-    border-top: 1px solid ${props => rgba(props.theme!.colors.icon.secondary, 0.2)};
+    border-top: 0.5px solid ${props => rgba(props.theme!.colors.icon.secondary, 0.2)};
 `;
 
 export const ImageStyled = styled(Image)`

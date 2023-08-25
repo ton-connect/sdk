@@ -26,7 +26,7 @@ export const BodyStyled = styled.div<{ qr: boolean }>`
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    padding-top: 47px;
     min-height: 232px;
 `;
 
