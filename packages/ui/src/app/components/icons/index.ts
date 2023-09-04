@@ -19,3 +19,4 @@ export { SwapIcon } from './swap-icon';
 export { AtWalletIcon } from './at-wallet-icon';
 export { DoneIcon } from './done-icon';
 export { CopyLightIcon } from './copy-light-icon';
+export { QRIcon } from './qr-icon';

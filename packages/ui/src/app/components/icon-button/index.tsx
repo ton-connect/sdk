@@ -11,13 +11,13 @@ import { QuestionIcon } from 'src/app/components';
 export interface IconButtonProps extends Styleable, WithDataAttributes {
     fill?: Property.Color;
     children?: JSXElement;
-    icon?: 'close' | 'arrow' | 'question';
+    icon?: 'close' | 'arrow' | 'question' | JSXElement;
     onClick: () => void;
 }
 
 export const IconButton: Component<IconButtonProps> = props => {
     const dataAttrs = useDataAttributes(props);
-    const icon = (): 'close' | 'arrow' | 'question' => props.icon || 'close';
+    const icon = (): 'close' | 'arrow' | 'question' | JSXElement => props.icon || 'close';
     return (
         <IconButtonStyled
             class={props.class}
@@ -37,6 +37,7 @@ export const IconButton: Component<IconButtonProps> = props => {
                     <Match when={icon() === 'question'}>
                         <QuestionIcon fill={props.fill} />
                     </Match>
+                    <Match when={typeof icon() !== 'string'}>{icon()}</Match>
                 </Switch>
             </Show>
         </IconButtonStyled>

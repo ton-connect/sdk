@@ -114,9 +114,11 @@ export const QRCode: Component<QRCodeProps> = props => {
                     </CopiedBoxStyled>
                 </Show>
             </Transition>
-            <CopyIconButton>
-                <CopyLightIcon />
-            </CopyIconButton>
+            <Show when={!props.disableCopy}>
+                <CopyIconButton>
+                    <CopyLightIcon />
+                </CopyIconButton>
+            </Show>
         </QrCodeBackground>
     );
 };

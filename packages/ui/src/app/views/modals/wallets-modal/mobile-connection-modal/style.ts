@@ -57,3 +57,9 @@ export const BodyTextStyled = styled(Text)`
     text-align: center;
     margin-bottom: 20px;
 `;
+
+export const ButtonsContainerStyled = styled.div`
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+`;
