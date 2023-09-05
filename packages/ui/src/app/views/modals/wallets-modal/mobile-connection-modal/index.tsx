@@ -20,6 +20,7 @@ import { addReturnStrategy, openLinkBlank } from 'src/app/utils/web-api';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { useTheme } from 'solid-styled-components';
 import { MobileConnectionQR } from 'src/app/views/modals/wallets-modal/mobile-connection-modal/mobile-connection-qr';
+import { Translation } from 'src/app/components/typography/Translation';
 
 export interface MobileConnectionProps {
     additionalRequest?: ConnectAdditionalRequest;
@@ -98,25 +99,34 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
                 <BodyStyled>
                     <Show when={connectionErrored()}>
                         <ErrorIconStyled size="s" />
-                        <BodyTextStyled>Connection declined</BodyTextStyled>
+                        <BodyTextStyled translationKey="walletModal.mobileConnectionModal.connectionDeclined">
+                            Connection declined
+                        </BodyTextStyled>
                         <ButtonsContainerStyled>
                             <Button leftIcon={<RetryIcon />} onClick={onRetry}>
-                                Retry
+                                <Translation translationKey="common.retry">Retry</Translation>
                             </Button>
                         </ButtonsContainerStyled>
                     </Show>
                     <Show when={!connectionErrored()}>
                         <LoaderStyled size="s" />
-                        <BodyTextStyled>Continue in {props.wallet.name}…</BodyTextStyled>
+                        <BodyTextStyled
+                            translationKey="walletModal.mobileConnectionModal.continueIn"
+                            translationValues={{ name: props.wallet.name }}
+                        >
+                            Continue in {props.wallet.name}…
+                        </BodyTextStyled>
                         <ButtonsContainerStyled>
                             <Button leftIcon={<RetryIcon />} onClick={onRetry}>
-                                Retry
+                                <Translation translationKey="common.retry">Retry</Translation>
                             </Button>
                             <Button
                                 leftIcon={<QRIcon fill={theme.colors.accent} />}
                                 onClick={onOpenQR}
                             >
-                                Show QR Code
+                                <Translation translationKey="walletModal.mobileConnectionModal.showQR">
+                                    Show QR Code
+                                </Translation>
                             </Button>
                         </ButtonsContainerStyled>
                     </Show>
@@ -126,7 +136,9 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
                     <ImageStyled src={props.wallet.imageUrl} />
                     <H3>{props.wallet.name}</H3>
                     <FooterButton href={props.wallet.aboutUrl} blank>
-                        <Button>GET</Button>
+                        <Button>
+                            <Translation translationKey="common.get">GET</Translation>
+                        </Button>
                     </FooterButton>
                 </FooterStyled>
             </Show>

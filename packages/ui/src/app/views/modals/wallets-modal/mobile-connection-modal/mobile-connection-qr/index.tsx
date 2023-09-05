@@ -12,7 +12,10 @@ export const MobileConnectionQR: Component<MobileConnectionQRProps> = props => {
     return (
         <>
             <H1Styled>{props.walletInfo.name}</H1Styled>
-            <H2Styled>
+            <H2Styled
+                translationKey="walletModal.mobileConnectionModal.scanQR"
+                translationValues={{ name: props.walletInfo.name }}
+            >
                 Scan the QR code below with your phone’s or {props.walletInfo.name}’s camera
             </H2Styled>
             <QrCodeWrapper>

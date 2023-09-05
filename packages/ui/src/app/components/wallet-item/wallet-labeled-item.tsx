@@ -5,6 +5,7 @@ import { AT_WALLET_APP_NAME } from 'src/app/env/AT_WALLET_APP_NAME';
 import { WalletItem } from 'src/app/components';
 import { isWalletInfoCurrentlyInjected } from '@tonconnect/sdk';
 import { IMG } from 'src/app/env/IMG';
+import { useI18n } from '@solid-primitives/i18n';
 
 export interface WalletLabeledItemProps extends Styleable {
     wallet: PersonalizedWalletInfo;
@@ -12,18 +13,20 @@ export interface WalletLabeledItemProps extends Styleable {
 }
 
 export const WalletLabeledItem: Component<WalletLabeledItemProps> = props => {
+    const [t] = useI18n();
+
     const walletsSecondLine = (): string | undefined => {
         if (props.wallet.appName === AT_WALLET_APP_NAME) {
             return undefined;
         }
         if ('isPreferred' in props.wallet && props.wallet.isPreferred) {
-            return 'Recent';
+            return t('walletItem.recent', {}, 'Recent');
         }
         if (isWalletInfoCurrentlyInjected(props.wallet)) {
-            return 'Installed';
+            return t('walletItem.installed', {}, 'Installed');
         }
         if (props.wallet.name === 'Tonkeeper') {
-            return 'Popular';
+            return t('walletItem.popular', {}, 'Popular');
         }
         return undefined;
     };
@@ -33,7 +36,7 @@ export const WalletLabeledItem: Component<WalletLabeledItemProps> = props => {
             {props.wallet.appName === AT_WALLET_APP_NAME ? (
                 <WalletItem
                     icon={props.wallet.imageUrl}
-                    name="Wallet on"
+                    name={t('walletItem.walletOn', {}, 'Wallet On')}
                     secondLine="Telegram"
                     badgeUrl={IMG.TG}
                     onClick={() => props.onClick()}

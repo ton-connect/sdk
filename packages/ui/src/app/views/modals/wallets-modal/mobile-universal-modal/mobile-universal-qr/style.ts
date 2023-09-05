@@ -9,7 +9,6 @@ export const H1Styled = styled(H1)`
 export const H2Styled = styled(H2)`
     margin-bottom: 20px;
     padding: 0 64px;
-    min-height: 44px;
 `;
 
 export const QrCodeWrapper = styled.div`

@@ -30,6 +30,7 @@ import { AT_WALLET_APP_NAME } from 'src/app/env/AT_WALLET_APP_NAME';
 import { copyToClipboard } from 'src/app/utils/copy-to-clipboard';
 import { TonConnectUIError } from 'src/errors';
 import { MobileUniversalQR } from './mobile-universal-qr';
+import { Translation } from 'src/app/components/typography/Translation';
 
 interface MobileUniversalModalProps {
     walletsList: WalletInfo[];
@@ -114,10 +115,10 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
             </Show>
             <Show when={!showQR()}>
                 <StyledLeftActionButton icon={<QRIcon />} onClick={onOpenQR} />
-                <H1Styled translationKey="walletModal.mobileSelectWalletModal.connectWallet">
+                <H1Styled translationKey="walletModal.mobileUniversalModal.connectYourWallet">
                     Connect your wallet
                 </H1Styled>
-                <H2Styled translationKey="walletModal.mobileSelectWalletModal.selectWallet">
+                <H2Styled translationKey="walletModal.mobileUniversalModal.openWalletOnTelegramOrSelect">
                     Open Wallet on Telegram or select your wallet to connect
                 </H2Styled>
                 <TelegramButtonStyled
@@ -126,7 +127,9 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
                     onClick={onSelectTelegram}
                     scale="s"
                 >
-                    Open Wallet on Telegram
+                    <Translation translationKey="walletModal.mobileUniversalModal.openWalletOnTelegram">
+                        Open Wallet on Telegram
+                    </Translation>
                 </TelegramButtonStyled>
                 <UlStyled>
                     <For each={shouldShowMoreButton() ? walletsList().slice(0, 4) : walletsList()}>
@@ -159,9 +162,9 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
                         </IconContainer>
                         <Text
                             fontWeight={590}
-                            translationKey="walletModal.mobileSelectWalletModal.openLink"
+                            translationKey="walletModal.mobileUniversalModal.openLink"
                         >
-                            OpenLink
+                            Open Link
                         </Text>
                     </OtherOptionButton>
                     <OtherOptionButton onClick={onCopy}>
