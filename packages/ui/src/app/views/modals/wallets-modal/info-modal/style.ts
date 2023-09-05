@@ -1,5 +1,6 @@
 import { css, styled } from 'solid-styled-components';
 import { H1, H3, IconButton, Text } from 'src/app/components';
+import {ScrollContainer} from "src/app/components/scroll-container";
 
 export const InfoModalStyled = styled.div``;
 
@@ -42,6 +43,3 @@ export const ButtonsBlock = styled.div`
     justify-content: center;
     gap: 8px;
 `;
-
-export const ScrollContainer = styled.div`
-`

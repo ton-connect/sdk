@@ -32,24 +32,11 @@ export const WalletsUl = styled.ul`
     align-content: flex-start;
     justify-content: center;
     row-gap: 8px;
-    overflow-y: auto;
-    max-height: 510px;
     width: 100%;
     padding: 0 0 16px;
     align-self: flex-start;
-
-    scrollbar-width: none;
-    &&::-webkit-scrollbar {
-        display: none;
-    }
-
-    &&::-webkit-scrollbar-track {
-        background: transparent;
-    }
-
-    &&::-webkit-scrollbar-thumb {
-        display: none;
-    }
+    max-width: 400px;
+    margin: 0 auto;
 
     > li {
         display: block;
@@ -57,7 +44,6 @@ export const WalletsUl = styled.ul`
     }
 
     ${media('mobile')} {
-        max-height: 410px;
         grid-template-columns: repeat(auto-fit, 82px);
     }
 `;

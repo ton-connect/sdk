@@ -7,12 +7,12 @@ import {
     InfoBlockIconClass,
     H3Styled,
     TextStyled,
-    ButtonsBlock,
-    ScrollContainer
+    ButtonsBlock
 } from './style';
 import { Button, PersonalityIcon, SecurityIcon, SwapIcon, WalletIcon } from 'src/app/components/';
 import { Link } from 'src/app/components/link';
 import { LINKS } from 'src/app/env/LINKS';
+import { ScrollContainer } from 'src/app/components/scroll-container';
 
 interface InfoModalProps {
     onBackClick: () => void;
