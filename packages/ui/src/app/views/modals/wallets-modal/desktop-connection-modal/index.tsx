@@ -18,13 +18,14 @@ import {
 import {
     BodyStyled,
     BodyTextStyled,
+    BottomButtonsContainerStyled,
     ButtonsContainerStyled,
     DesktopConnectionModalStyled,
     ErrorIconStyled,
     FooterButton,
     H1Styled,
     H2Styled,
-    LoaderStyled,
+    LoaderStyled, QRCodeStyled,
     StyledIconButton,
     TgButtonStyled,
     TgImageStyled
@@ -165,7 +166,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
             <BodyStyled qr={mode() === 'mobile'}>
                 <Switch>
                     <Match when={mode() === 'mobile'}>
-                        <QRCode
+                        <QRCodeStyled
                             disableCopy={false}
                             sourceUrl={universalLink()!}
                             imageUrl={props.wallet.imageUrl}
@@ -174,12 +175,14 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                     <Match when={connectionErrored()}>
                         <ErrorIconStyled size="s" />
                         <BodyTextStyled>Connection declined</BodyTextStyled>
-                        <Button
-                            leftIcon={<RetryIcon />}
-                            onClick={mode() === 'extension' ? onClickExtension : onClickDesktop}
-                        >
-                            Retry
-                        </Button>
+                        <ButtonsContainerStyled>
+                            <Button
+                                leftIcon={<RetryIcon />}
+                                onClick={mode() === 'extension' ? onClickExtension : onClickDesktop}
+                            >
+                                Retry
+                            </Button>
+                        </ButtonsContainerStyled>
                     </Match>
                     <Match when={mode() === 'extension'}>
                         <Show when={isWalletInfoCurrentlyInjected(props.wallet)}>
@@ -187,19 +190,23 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                             <BodyTextStyled>
                                 Continue in {props.wallet.name} browser extension…
                             </BodyTextStyled>
-                            <Button leftIcon={<RetryIcon />} onClick={onClickExtension}>
-                                Retry
-                            </Button>
+                            <ButtonsContainerStyled>
+                                <Button leftIcon={<RetryIcon />} onClick={onClickExtension}>
+                                    Retry
+                                </Button>
+                            </ButtonsContainerStyled>
                         </Show>
                         <Show when={!isWalletInfoCurrentlyInjected(props.wallet)}>
                             <BodyTextStyled>
                                 Seems you don't have installed {props.wallet.name} browser extension
                             </BodyTextStyled>
-                            <Link href={props.wallet.aboutUrl} blank>
-                                <Button rightIcon={<LinkIcon />} onClick={onClickExtension}>
-                                    Get {props.wallet.name}
-                                </Button>
-                            </Link>
+                            <ButtonsContainerStyled>
+                                <Link href={props.wallet.aboutUrl} blank>
+                                    <Button rightIcon={<LinkIcon />} onClick={onClickExtension}>
+                                        Get {props.wallet.name}
+                                    </Button>
+                                </Link>
+                            </ButtonsContainerStyled>
                         </Show>
                     </Match>
                     <Match when={mode() === 'desktop'}>
@@ -227,13 +234,12 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                 </TgButtonStyled>
             </Show>
             <Show when={props.wallet.appName !== AT_WALLET_APP_NAME}>
-                <ButtonsContainerStyled>
+                <BottomButtonsContainerStyled>
                     <Show when={mode() !== 'mobile' && supportsMobile(props.wallet)}>
                         <FooterButton
                             appearance="secondary"
                             leftIcon={<MobileIcon />}
                             onClick={onClickMobile}
-                            mt={false}
                         >
                             Mobile
                         </FooterButton>
@@ -243,7 +249,6 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                             appearance="secondary"
                             leftIcon={<BrowserIcon />}
                             onClick={onClickExtension}
-                            mt={mode() === 'mobile'}
                         >
                             Browser Extension
                         </FooterButton>
@@ -253,12 +258,11 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                             appearance="secondary"
                             leftIcon={<DesktopIcon />}
                             onClick={onClickDesktop}
-                            mt={mode() === 'mobile'}
                         >
                             Desktop
                         </FooterButton>
                     </Show>
-                </ButtonsContainerStyled>
+                </BottomButtonsContainerStyled>
             </Show>
         </DesktopConnectionModalStyled>
     );

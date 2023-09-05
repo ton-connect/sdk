@@ -28,6 +28,8 @@ export const ScrollDivider = styled.div<{ isShown: boolean }>`
 export const WalletsUl = styled.ul`
     display: grid;
     grid-template-columns: repeat(auto-fit, 92px);
+    grid-template-rows: auto;
+    align-content: flex-start;
     justify-content: center;
     row-gap: 8px;
     overflow-y: auto;
@@ -47,6 +49,11 @@ export const WalletsUl = styled.ul`
 
     &&::-webkit-scrollbar-thumb {
         display: none;
+    }
+
+    > li {
+        display: block;
+        height: fit-content;
     }
 
     ${media('mobile')} {

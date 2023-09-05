@@ -99,12 +99,14 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
                     <Show when={connectionErrored()}>
                         <ErrorIconStyled size="s" />
                         <BodyTextStyled>Connection declined</BodyTextStyled>
-                        <Button leftIcon={<RetryIcon />} onClick={onRetry}>
-                            Retry
-                        </Button>
+                        <ButtonsContainerStyled>
+                            <Button leftIcon={<RetryIcon />} onClick={onRetry}>
+                                Retry
+                            </Button>
+                        </ButtonsContainerStyled>
                     </Show>
                     <Show when={!connectionErrored()}>
-                        <LoaderStyled size="m" />
+                        <LoaderStyled size="s" />
                         <BodyTextStyled>Continue in {props.wallet.name}…</BodyTextStyled>
                         <ButtonsContainerStyled>
                             <Button leftIcon={<RetryIcon />} onClick={onRetry}>
