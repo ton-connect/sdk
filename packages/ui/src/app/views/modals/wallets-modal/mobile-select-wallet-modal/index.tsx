@@ -50,7 +50,7 @@ export const MobileSelectWalletModal: Component<MobileSelectWalletModalProps> = 
                 props.additionalRequest
             );
 
-            openLink(addReturnStrategy(universalLink, appState.returnStrategy));
+            openLinkBlank(addReturnStrategy(universalLink, appState.returnStrategy));
             return;
         }
 
