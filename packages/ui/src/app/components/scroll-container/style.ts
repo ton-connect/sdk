@@ -24,7 +24,7 @@ export const ScrollDivider = styled.div<{ isShown: boolean }>`
     height: 1px;
     margin: 0 -24px;
     width: calc(100% + 48px);
-    opacity: 0.12;
+    opacity: 0.08;
     background: ${props => (props.isShown ? props.theme!.colors.icon.secondary : 'transparent')};
     transition: background 0.15s ease-in-out;
 

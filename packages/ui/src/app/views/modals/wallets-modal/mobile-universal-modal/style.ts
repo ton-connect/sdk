@@ -77,7 +77,8 @@ export const Divider = styled.div`
     position: relative;
     top: 26px;
 
-    background-color: ${props => props.theme!.colors.icon.tertiary};
+    background-color: ${props => props.theme!.colors.icon.secondary};
+    opacity: 0.2;
 `;
 
 export const IconContainer = styled.div`

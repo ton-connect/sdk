@@ -17,7 +17,7 @@ async function dev(): Promise<void> {
             notifications: ['before']
         },
         uiPreferences: {
-            theme: THEME.LIGHT,
+            theme: THEME.DARK,
             borderRadius: 'm'
         },
         language: 'ru',

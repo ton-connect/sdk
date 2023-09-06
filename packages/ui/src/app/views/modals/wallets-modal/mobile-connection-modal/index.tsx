@@ -61,6 +61,7 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
     };
 
     const onOpenQR = (): void => {
+        setConnectionErrored(false);
         setShowQR(true);
         setLastSelectedWalletInfo({
             ...props.wallet,
@@ -105,6 +106,14 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
                         <ButtonsContainerStyled>
                             <Button leftIcon={<RetryIcon />} onClick={onRetry}>
                                 <Translation translationKey="common.retry">Retry</Translation>
+                            </Button>
+                            <Button
+                                leftIcon={<QRIcon fill={theme.colors.accent} />}
+                                onClick={onOpenQR}
+                            >
+                                <Translation translationKey="walletModal.mobileConnectionModal.showQR">
+                                    Show QR Code
+                                </Translation>
                             </Button>
                         </ButtonsContainerStyled>
                     </Show>
