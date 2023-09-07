@@ -42,7 +42,7 @@ var __async = (__this, __arguments, generator) => {
   });
 };
 var _a;
-import { TonConnectError, isWalletInfoCurrentlyInjected, toUserFriendlyAddress, CHAIN, TonConnect, isWalletInfoRemote, isTelegramUrl, isWalletInfoCurrentlyEmbedded } from "@tonconnect/sdk";
+import { TonConnectError, isTelegramUrl, encodeTelegramUrlParameters, isWalletInfoCurrentlyInjected, toUserFriendlyAddress, CHAIN, TonConnect, isWalletInfoRemote, isWalletInfoCurrentlyEmbedded } from "@tonconnect/sdk";
 export * from "@tonconnect/sdk";
 import UAParser from "ua-parser-js";
 import deepmerge from "deepmerge";
@@ -1735,7 +1735,12 @@ function addQueryParameter(url, key, value) {
   return parsed.toString();
 }
 function addReturnStrategy(url, returnStrategy) {
-  return addQueryParameter(url, "ret", returnStrategy);
+  const newUrl = addQueryParameter(url, "ret", returnStrategy);
+  if (!isTelegramUrl(url)) {
+    return newUrl;
+  }
+  const lastParam = newUrl.slice(newUrl.lastIndexOf("&") + 1);
+  return newUrl.slice(0, newUrl.lastIndexOf("&")) + "-" + encodeTelegramUrlParameters(lastParam);
 }
 function disableScroll() {
   if (document.documentElement.scrollHeight === document.documentElement.clientHeight) {
@@ -1819,10 +1824,10 @@ function getUserAgent() {
     browser
   };
 }
-function redirectToTelegram(universalLink) {
+function redirectToTelegram(universalLink, ret) {
   const url = new URL(universalLink);
   url.searchParams.append("startattach", "tonconnect");
-  openLinkBlank(url.toString());
+  openLinkBlank(addReturnStrategy(url.toString(), ret));
 }
 function isInTWA() {
   var _a2;
@@ -1927,7 +1932,7 @@ const notifications$1 = {
   },
   transactionCanceled: {
     header: "Transaction canceled",
-    text: "There will be no changes to your account."
+    text: "There will be no changes to\xA0your account."
   }
 };
 const walletItem$1 = {
@@ -1959,10 +1964,10 @@ const walletModal$1 = {
   },
   desktopConnectionModal: {
     scanQR: "Scan the\xA0QR code below with your phone\u2019s\xA0or\xA0{{ name }}\u2019s camera",
-    continueInExtension: "Continue in {{ name }} browser extension\u2026",
-    dontHaveExtension: "Seems you don't have installed {{ name }}\xA0browser extension",
+    continueInExtension: "Continue in\xA0{{ name }} browser extension\u2026",
+    dontHaveExtension: "Seems you don't have installed {{ name }}\xA0browser\xA0extension",
     getWallet: "Get {{ name }}",
-    continueOnDesktop: "Continue in {{ name }} on desktop\u2026",
+    continueOnDesktop: "Continue in\xA0{{ name }} on desktop\u2026",
     openWalletOnTelegram: "Open Wallet on Telegram on desktop",
     connectionDeclined: "Connection declined"
   },
@@ -1995,12 +2000,12 @@ const en = {
 };
 const common = {
   close: "\u0417\u0430\u043A\u0440\u044B\u0442\u044C",
-  openWallet: "\u041E\u0442\u043A\u0440\u044B\u0442\u044C \u043A\u043E\u0448\u0435\u043B\u0435\u043A",
+  openWallet: "\u041E\u0442\u043A\u0440\u044B\u0442\u044C \u043A\u043E\u0448\u0435\u043B\u0451\u043A",
   copyLink: "\u041A\u043E\u043F\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u0441\u0441\u044B\u043B\u043A\u0443",
-  linkCopied: "\u0421\u043A\u043E\u043F\u0438\u0440\u043E\u0432\u0430\u043D\u043E",
-  copied: "\u0421\u043A\u043E\u043F\u0438\u0440\u043E\u0432\u0430\u043D\u043E",
-  yourWallet: "\u0412\u0430\u0448 \u043A\u043E\u0448\u0435\u043B\u0435\u043A",
-  retry: "\u041E\u0431\u043D\u043E\u0432\u0438\u0442\u044C",
+  linkCopied: "\u0421\u0441\u044B\u043B\u043A\u0430 \u0441\u043A\u043E\u043F\u0438\u0440\u043E\u0432\u0430\u043D\u0430",
+  copied: "\u0421\u0441\u044B\u043B\u043A\u0430 \u0441\u043A\u043E\u043F\u0438\u0440\u043E\u0432\u0430\u043D\u0430",
+  yourWallet: "\u0412\u0430\u0448 \u043A\u043E\u0448\u0435\u043B\u0451\u043A",
+  retry: "\u041F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u044C",
   get: "\u0421\u043A\u0430\u0447\u0430\u0442\u044C",
   mobile: "\u041C\u043E\u0431\u0438\u043B\u044C\u043D\u044B\u0439",
   browserExtension: "\u0420\u0430\u0441\u0448\u0438\u0440\u0435\u043D\u0438\u0435",
@@ -2016,7 +2021,7 @@ const button = {
 };
 const notifications = {
   confirm: {
-    header: "\u041E\u0442\u043A\u0440\u043E\u0439\u0442\u0435 {{ name }}, \u0447\u0442\u043E\u0431\u044B \u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u044C \u0442\u0440\u0430\u043D\u0437\u0430\u043A\u0446\u0438\u044E."
+    header: "\u041E\u0442\u043A\u0440\u043E\u0439\u0442\u0435 {{ name }}, \u0447\u0442\u043E\u0431\u044B\xA0\u043F\u043E\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u044C \u0442\u0440\u0430\u043D\u0437\u0430\u043A\u0446\u0438\u044E."
   },
   transactionSent: {
     header: "\u0422\u0440\u0430\u043D\u0437\u0430\u043A\u0446\u0438\u044F \u043E\u0442\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0430",
@@ -2024,54 +2029,54 @@ const notifications = {
   },
   transactionCanceled: {
     header: "\u0422\u0440\u0430\u043D\u0437\u0430\u043A\u0446\u0438\u044F \u043E\u0442\u043C\u0435\u043D\u0435\u043D\u0430",
-    text: "\u0421\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u0432\u0430\u0448\u0435\u0433\u043E \u0441\u0447\u0451\u0442\u0430 \u043D\u0435 \u0438\u0437\u043C\u0435\u043D\u0438\u0442\u0441\u044F."
+    text: "\u0421\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u0432\u0430\u0448\u0435\u0433\u043E \u0441\u0447\u0451\u0442\u0430 \u043D\u0435\xA0\u0438\u0437\u043C\u0435\u043D\u0438\u0442\u0441\u044F."
   }
 };
 const walletItem = {
   walletOn: "Wallet \u0432",
   recent: "\u041D\u0435\u0434\u0430\u0432\u043D\u0438\u0439",
-  installed: "\u0423\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D\u043E",
-  popular: "\u041F\u043E\u043F\u0443\u043B\u044F\u0440\u043D\u043E"
+  installed: "\u0423\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D",
+  popular: "\u041F\u043E\u043F\u0443\u043B\u044F\u0440\u0435\u043D"
 };
 const walletModal = {
   loading: "\u041A\u043E\u0448\u0435\u043B\u044C\u043A\u0438 \u0437\u0430\u0433\u0440\u0443\u0436\u0430\u044E\u0442\u0441\u044F",
   wallets: "\u041A\u043E\u0448\u0435\u043B\u044C\u043A\u0438",
   mobileUniversalModal: {
-    connectYourWallet: "\u041F\u043E\u0434\u043A\u043B\u044E\u0447\u0438\u0442\u0435 \u043A\u043E\u0448\u0435\u043B\u0435\u043A",
-    openWalletOnTelegramOrSelect: "\u041F\u043E\u0434\u043A\u043B\u044E\u0447\u0438\u0442\u0435 Wallet \u0432 Telegram \u0438\u043B\u0438 \u0432\u044B\u0431\u0435\u0440\u0435\u0442\u0435 \u043A\u043E\u0448\u0435\u043B\u0435\u043A \u0434\u043B\u044F \u043F\u043E\u0434\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u044F",
+    connectYourWallet: "\u041F\u043E\u0434\u043A\u043B\u044E\u0447\u0438\u0442\u0435 \u043A\u043E\u0448\u0435\u043B\u0451\u043A",
+    openWalletOnTelegramOrSelect: "\u041F\u043E\u0434\u043A\u043B\u044E\u0447\u0438\u0442\u0435 Wallet \u0432\xA0Telegram \u0438\u043B\u0438\xA0\u0432\u044B\u0431\u0435\u0440\u0435\u0442\u0435 \u043A\u043E\u0448\u0435\u043B\u0451\u043A \u0434\u043B\u044F\xA0\u043F\u043E\u0434\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u044F",
     openWalletOnTelegram: "\u041E\u0442\u043A\u0440\u044B\u0442\u044C Wallet \u0432 Telegram",
     openLink: "\u041E\u0442\u043A\u0440\u044B\u0442\u044C \u0441\u0441\u044B\u043B\u043A\u0443",
-    scan: "\u041E\u0442\u0441\u043A\u0430\u043D\u0438\u0440\u0443\u0439\u0442\u0435 \u0432\u0430\u0448\u0438\u043C \u0441\u043C\u0430\u0440\u0442\u0444\u043E\u043D\u043E\u043C"
+    scan: "\u041E\u0442\u0441\u043A\u0430\u043D\u0438\u0440\u0443\u0439\u0442\u0435 \u043A\u0430\u043C\u0435\u0440\u043E\u0439 \u0432\u0430\u0448\u0435\u0433\u043E\xA0\u0442\u0435\u043B\u0435\u0444\u043E\u043D\u0430"
   },
   desktopUniversalModal: {
-    connectYourWallet: "\u041F\u043E\u0434\u043A\u043B\u044E\u0447\u0438\u0442\u0435 \u043A\u043E\u0448\u0435\u043B\u0435\u043A",
-    scan: "\u041E\u0442\u0441\u043A\u0430\u043D\u0438\u0440\u0443\u0439\u0442\u0435 \u043A\u043E\u0434 \u043A\u0430\u043C\u0435\u0440\u043E\u0439 \u0441\u043C\u0430\u0440\u0442\u0444\u043E\u043D\u0430",
+    connectYourWallet: "\u041F\u043E\u0434\u043A\u043B\u044E\u0447\u0438\u0442\u0435 \u043A\u043E\u0448\u0435\u043B\u0451\u043A",
+    scan: "\u041E\u0442\u0441\u043A\u0430\u043D\u0438\u0440\u0443\u0439\u0442\u0435 QR-\u043A\u043E\u0434 \u043A\u0430\u043C\u0435\u0440\u043E\u0439 \u0432\u0430\u0448\u0435\u0433\u043E\xA0\u0442\u0435\u043B\u0435\u0444\u043E\u043D\u0430",
     availableWallets: "\u0414\u043E\u0441\u0442\u0443\u043F\u043D\u044B\u0435 \u043A\u043E\u0448\u0435\u043B\u044C\u043A\u0438"
   },
   mobileConnectionModal: {
     showQR: "\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C QR-\u043A\u043E\u0434",
-    scanQR: "\u041E\u0442\u0441\u043A\u0430\u043D\u0438\u0440\u0443\u0439\u0442\u0435 QR-\u043A\u043E\u0434 \u043D\u0438\u0436\u0435 \u043A\u0430\u043C\u0435\u0440\u043E\u0439 \u0432 \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u0438 {{ name }}, \u0438\u043B\u0438 \u043A\u0430\u043C\u0435\u0440\u043E\u0439 \u0441\u043C\u0430\u0440\u0442\u0444\u043E\u043D\u0430",
+    scanQR: "\u041E\u0442\u0441\u043A\u0430\u043D\u0438\u0440\u0443\u0439\u0442\u0435 QR-\u043A\u043E\u0434 \u043D\u0438\u0436\u0435 \u043A\u0430\u043C\u0435\u0440\u043E\u0439 \u0432\xA0\u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u0438 {{ name }}, \u0438\u043B\u0438\xA0\u043A\u0430\u043C\u0435\u0440\u043E\u0439 \u0442\u0435\u043B\u0435\u0444\u043E\u043D\u0430",
     continueIn: "\u041F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u0435 \u0432 {{ name }}\u2026",
     connectionDeclined: "\u041F\u043E\u0434\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u0435 \u043E\u0442\u043A\u043B\u043E\u043D\u0435\u043D\u043E"
   },
   desktopConnectionModal: {
-    scanQR: "\u041E\u0442\u0441\u043A\u0430\u043D\u0438\u0440\u0443\u0439\u0442\u0435 QR-\u043A\u043E\u0434 \u043D\u0438\u0436\u0435 \u043A\u0430\u043C\u0435\u0440\u043E\u0439 \u0432 \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u0438 {{ name }}, \u0438\u043B\u0438 \u043A\u0430\u043C\u0435\u0440\u043E\u0439 \u0441\u043C\u0430\u0440\u0442\u0444\u043E\u043D\u0430",
+    scanQR: "\u041E\u0442\u0441\u043A\u0430\u043D\u0438\u0440\u0443\u0439\u0442\u0435 QR-\u043A\u043E\u0434 \u043D\u0438\u0436\u0435 \u043A\u0430\u043C\u0435\u0440\u043E\u0439 \u0432\xA0\u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u0438 {{ name }}, \u0438\u043B\u0438\xA0\u043A\u0430\u043C\u0435\u0440\u043E\u0439 \u0442\u0435\u043B\u0435\u0444\u043E\u043D\u0430",
     continueInExtension: "\u041E\u0442\u043A\u0440\u043E\u0439\u0442\u0435 \u0431\u0440\u0430\u0443\u0437\u0435\u0440\u043D\u043E\u0435 \u0440\u0430\u0441\u0448\u0438\u0440\u0435\u043D\u0438\u0435 {{ name }}",
-    dontHaveExtension: "\u041F\u043E\u0445\u043E\u0436\u0435, \u0443 \u0432\u0430\u0441 \u043D\u0435 \u0443\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D\u043E \u0431\u0440\u0430\u0443\u0437\u0435\u0440\u043D\u043E\u0435 \u0440\u0430\u0441\u0448\u0438\u0440\u0435\u043D\u0438\u0435 {{ name }}",
+    dontHaveExtension: "\u041F\u043E\u0445\u043E\u0436\u0435, \u0443 \u0432\u0430\u0441 \u043D\u0435\xA0\u0443\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D\u043E \u0431\u0440\u0430\u0443\u0437\u0435\u0440\u043D\u043E\u0435\xA0\u0440\u0430\u0441\u0448\u0438\u0440\u0435\u043D\u0438\u0435\xA0{{ name }}",
     getWallet: "\u0421\u043A\u0430\u0447\u0430\u0442\u044C {{ name }}",
-    continueOnDesktop: "\u041E\u0442\u043A\u0440\u043E\u0439\u0442\u0435 {{ name }} \u043D\u0430 \u043A\u043E\u043C\u043F\u044C\u044E\u0442\u0435\u0440\u0435\u2026",
-    openWalletOnTelegram: "\u041E\u0442\u043A\u0440\u044B\u0442\u044C Wallet o\u0432 Telegram \u043D\u0430 \u043A\u043E\u043C\u043F\u044C\u044E\u0442\u0435\u0440\u0435",
+    continueOnDesktop: "\u041E\u0442\u043A\u0440\u043E\u0439\u0442\u0435 {{ name }} \u043D\u0430\xA0\u043A\u043E\u043C\u043F\u044C\u044E\u0442\u0435\u0440\u0435\u2026",
+    openWalletOnTelegram: "\u041E\u0442\u043A\u0440\u044B\u0442\u044C Wallet \u0432\xA0Telegram",
     connectionDeclined: "\u041F\u043E\u0434\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u0435 \u043E\u0442\u043A\u043B\u043E\u043D\u0435\u043D\u043E"
   },
   infoModal: {
-    whatIsAWallet: "\u0427\u0442\u043E \u0442\u0430\u043A\u043E\u0435 \u043A\u043E\u0448\u0435\u043B\u0435\u043A?",
-    secureDigitalAssets: "\u041D\u0430\u0434\u0435\u0436\u043D\u043E\u0435 \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0435 \u0446\u0438\u0444\u0440\u043E\u0432\u044B\u0445 \u0430\u0441\u0441\u0435\u0442\u043E\u0432",
-    walletProtects: "\u041A\u043E\u0448\u0435\u043B\u0435\u043A \u0437\u0430\u0449\u0438\u0449\u0430\u0435\u0442 \u0432\u0430\u0448\u0438 \u0446\u0438\u0444\u0440\u043E\u0432\u044B\u0435 \u0430\u043A\u0442\u0438\u0432\u044B, \u0432\u043A\u043B\u044E\u0447\u0430\u044F TON, \u0442\u043E\u043A\u0435\u043D\u044B \u0438 \u043F\u0440\u0435\u0434\u043C\u0435\u0442\u044B \u043A\u043E\u043B\u043B\u0435\u043A\u0446\u0438\u043E\u043D\u0438\u0440\u043E\u0432\u0430\u043D\u0438\u044F, \u0438 \u0443\u043F\u0440\u0430\u0432\u043B\u044F\u0435\u0442 \u0438\u043C\u0438.",
-    controlIdentity: "\u041A\u043E\u043D\u0442\u0440\u043E\u043B\u0438\u0440\u0443\u0439\u0442\u0435 \u0441\u0432\u043E\u044E \u043B\u0438\u0447\u043D\u043E\u0441\u0442\u044C Web3",
-    manageIdentity: "\u0423\u043F\u0440\u0430\u0432\u043B\u044F\u0439\u0442\u0435 \u0441\u0432\u043E\u0435\u0439 \u0446\u0438\u0444\u0440\u043E\u0432\u043E\u0439 \u0438\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0446\u0438\u0435\u0439 \u0438 \u0441 \u043B\u0435\u0433\u043A\u043E\u0441\u0442\u044C\u044E \u043F\u043E\u043B\u0443\u0447\u0430\u0439\u0442\u0435 \u0434\u043E\u0441\u0442\u0443\u043F \u043A \u0434\u0435\u0446\u0435\u043D\u0442\u0440\u0430\u043B\u0438\u0437\u043E\u0432\u0430\u043D\u043D\u044B\u043C \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u044F\u043C. \u0421\u043E\u0445\u0440\u0430\u043D\u044F\u0439\u0442\u0435 \u043A\u043E\u043D\u0442\u0440\u043E\u043B\u044C \u043D\u0430\u0434 \u0441\u0432\u043E\u0438\u043C\u0438 \u0434\u0430\u043D\u043D\u044B\u043C\u0438 \u0438 \u0431\u0435\u0437\u043E\u043F\u0430\u0441\u043D\u043E \u0443\u0447\u0430\u0441\u0442\u0432\u0443\u0439\u0442\u0435 \u0432\xA0\u044D\u043A\u043E\u0441\u0438\u0441\u0442\u0435\u043C\u0435\xA0\u0431\u043B\u043E\u043A\u0447\u0435\u0439\u043D\u0430.",
+    whatIsAWallet: "\u0427\u0442\u043E \u0442\u0430\u043A\u043E\u0435 \u043A\u043E\u0448\u0435\u043B\u0451\u043A?",
+    secureDigitalAssets: "\u041D\u0430\u0434\u0435\u0436\u043D\u043E\u0435 \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0435 \u0446\u0438\u0444\u0440\u043E\u0432\u044B\u0445 \u0430\u043A\u0442\u0438\u0432\u043E\u0432",
+    walletProtects: "\u041A\u043E\u0448\u0435\u043B\u0451\u043A \u0437\u0430\u0449\u0438\u0449\u0430\u0435\u0442 \u0432\u0430\u0448\u0438 \u0446\u0438\u0444\u0440\u043E\u0432\u044B\u0435 \u0430\u043A\u0442\u0438\u0432\u044B, \u0432\u043A\u043B\u044E\u0447\u0430\u044F TON, \u0442\u043E\u043A\u0435\u043D\u044B \u0438\xA0\u043F\u0440\u0435\u0434\u043C\u0435\u0442\u044B \u043A\u043E\u043B\u043B\u0435\u043A\u0446\u0438\u043E\u043D\u0438\u0440\u043E\u0432\u0430\u043D\u0438\u044F, \u0438\xA0\u0443\u043F\u0440\u0430\u0432\u043B\u044F\u0435\u0442 \u0438\u043C\u0438.",
+    controlIdentity: "\u041A\u043E\u043D\u0442\u0440\u043E\u043B\u044C \u0441\u0432\u043E\u0435\u0439 \u043B\u0438\u0447\u043D\u043E\u0441\u0442\u0438 Web3",
+    manageIdentity: "\u0423\u043F\u0440\u0430\u0432\u043B\u044F\u0439\u0442\u0435 \u0441\u0432\u043E\u0435\u0439 \u0446\u0438\u0444\u0440\u043E\u0432\u043E\u0439 \u0438\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0446\u0438\u0435\u0439 \u0438\xA0\u0441\xA0\u043B\u0435\u0433\u043A\u043E\u0441\u0442\u044C\u044E \u043F\u043E\u043B\u0443\u0447\u0430\u0439\u0442\u0435 \u0434\u043E\u0441\u0442\u0443\u043F \u043A\xA0\u0434\u0435\u0446\u0435\u043D\u0442\u0440\u0430\u043B\u0438\u0437\u043E\u0432\u0430\u043D\u043D\u044B\u043C \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u044F\u043C. \u0421\u043E\u0445\u0440\u0430\u043D\u044F\u0439\u0442\u0435 \u043A\u043E\u043D\u0442\u0440\u043E\u043B\u044C \u043D\u0430\u0434\xA0\u0441\u0432\u043E\u0438\u043C\u0438 \u0434\u0430\u043D\u043D\u044B\u043C\u0438 \u0438\xA0\u0431\u0435\u0437\u043E\u043F\u0430\u0441\u043D\u043E \u0443\u0447\u0430\u0441\u0442\u0432\u0443\u0439\u0442\u0435 \u0432\xA0\u044D\u043A\u043E\u0441\u0438\u0441\u0442\u0435\u043C\u0435\xA0\u0431\u043B\u043E\u043A\u0447\u0435\u0439\u043D\u0430.",
     effortlessCryptoTransactions: "\u041F\u0440\u043E\u0441\u0442\u044B\u0435 \u043A\u0440\u0438\u043F\u0442\u043E\u0442\u0440\u0430\u043D\u0437\u0430\u043A\u0446\u0438\u0438",
-    easilySend: "\u041B\u0435\u0433\u043A\u043E \u043E\u0442\u043F\u0440\u0430\u0432\u043B\u044F\u0439\u0442\u0435, \u043F\u043E\u043B\u0443\u0447\u0430\u0439\u0442\u0435 \u0438 \u043E\u0442\u0441\u043B\u0435\u0436\u0438\u0432\u0430\u0439\u0442\u0435 \u0441\u0432\u043E\u0438 \u043A\u0440\u0438\u043F\u0442\u043E\u0432\u0430\u043B\u044E\u0442\u044B. \u041E\u043F\u0442\u0438\u043C\u0438\u0437\u0438\u0440\u0443\u0439\u0442\u0435 \u0441\u0432\u043E\u0438 \u043E\u043F\u0435\u0440\u0430\u0446\u0438\u0438 \u0441 \u043F\u043E\u043C\u043E\u0449\u044C\u044E \u0434\u0435\u0446\u0435\u043D\u0442\u0440\u0430\u043B\u0438\u0437\u043E\u0432\u0430\u043D\u043D\u044B\u0445 \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u0439.",
-    getAWallet: "\u0421\u043A\u0430\u0447\u0430\u0442\u044C \u043A\u043E\u0448\u0435\u043B\u0435\u043A"
+    easilySend: "\u041B\u0435\u0433\u043A\u043E \u043E\u0442\u043F\u0440\u0430\u0432\u043B\u044F\u0439\u0442\u0435, \u043F\u043E\u043B\u0443\u0447\u0430\u0439\u0442\u0435 \u0438\xA0\u043E\u0442\u0441\u043B\u0435\u0436\u0438\u0432\u0430\u0439\u0442\u0435 \u0441\u0432\u043E\u0438 \u043A\u0440\u0438\u043F\u0442\u043E\u0432\u0430\u043B\u044E\u0442\u044B. \u041E\u043F\u0442\u0438\u043C\u0438\u0437\u0438\u0440\u0443\u0439\u0442\u0435 \u0441\u0432\u043E\u0438 \u043E\u043F\u0435\u0440\u0430\u0446\u0438\u0438 \u0441\xA0\u043F\u043E\u043C\u043E\u0449\u044C\u044E \u0434\u0435\u0446\u0435\u043D\u0442\u0440\u0430\u043B\u0438\u0437\u043E\u0432\u0430\u043D\u043D\u044B\u0445 \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u0439.",
+    getAWallet: "\u0421\u043A\u0430\u0447\u0430\u0442\u044C \u043A\u043E\u0448\u0435\u043B\u0451\u043A"
   }
 };
 const actionModal = {
@@ -5510,19 +5515,27 @@ const BadgeStyled = styled(Image)`
     box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.08);
 `;
 const StyledText = styled(Text)`
+    max-width: 90px;
     font-weight: 590;
-    max-width: 76px;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
+
+    ${media("mobile")} {
+        max-width: 80px;
+    }
 `;
 const StyledSecondLine = styled(Text)`
     font-weight: 510;
-    max-width: 76px;
+    max-width: 90px;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
     color: ${(props) => props.colorPrimary ? props.theme.colors.text.primary : props.theme.colors.text.secondary};
+
+    ${media("mobile")} {
+        max-width: 80px;
+    }
 `;
 const WalletItem = (props) => {
   return createComponent(WalletItemStyled, {
@@ -7762,7 +7775,7 @@ const AllWalletsListModal = (props) => {
   const maxHeight = () => isMobile() ? void 0 : 510;
   const walletsList = () => isMobile() ? props.walletsList.filter(supportsMobile) : props.walletsList;
   return createComponent(DesktopSelectWalletModalStyled, {
-    "data-tc-select-wallet-desktop": "true",
+    "data-tc-wallets-modal-list": "true",
     get children() {
       return [createComponent(StyledIconButton$3, {
         icon: "arrow",
@@ -7930,7 +7943,7 @@ const DesktopConnectionModal = (props) => {
     setLastSelectedWalletInfo(__spreadProps(__spreadValues({}, props.wallet), {
       openMethod: "universal-link"
     }));
-    openLinkBlank(universalLink());
+    openLinkBlank(addReturnStrategy(universalLink(), appState.returnStrategy));
   };
   const onClickExtension = () => {
     setConnectionErrored(false);
@@ -7950,7 +7963,7 @@ const DesktopConnectionModal = (props) => {
     onClickDesktop();
   }
   return createComponent(DesktopConnectionModalStyled, {
-    "data-tc-wallet-qr-modal-desktop": "true",
+    "data-tc-wallets-modal-connection-desktop": "true",
     get children() {
       return [createComponent(StyledIconButton$2, {
         icon: "arrow",
@@ -8312,6 +8325,7 @@ const LINKS = {
 };
 const InfoModal = (props) => {
   return createComponent(InfoModalStyled, {
+    "data-tc-wallets-modal-info": "true",
     get children() {
       return [createComponent(StyledIconButton$1, {
         icon: "arrow",
@@ -8521,7 +8535,7 @@ const MobileConnectionModal = (props) => {
   onCleanup(unsubscribe);
   onRetry();
   return createComponent(MobileConnectionModalStyled, {
-    "data-tc-wallet-qr-modal-desktop": "true",
+    "data-tc-wallets-modal-connection-mobile": "true",
     get children() {
       return [createComponent(StyledIconButton, {
         icon: "arrow",
@@ -8829,7 +8843,7 @@ const MobileUniversalQR = (props) => {
     }
   })];
 };
-const _tmpl$$1 = /* @__PURE__ */ template$1(`<li></li>`), _tmpl$2 = /* @__PURE__ */ template$1(`<div data-tc-wallets-modal-mobile="true"></div>`);
+const _tmpl$$1 = /* @__PURE__ */ template$1(`<li></li>`), _tmpl$2 = /* @__PURE__ */ template$1(`<div data-tc-wallets-modal-universal-mobile="true"></div>`);
 const MobileUniversalModal = (props) => {
   const [showQR, setShowQR] = createSignal(false);
   const connector = appState.connector;
@@ -8863,7 +8877,7 @@ const MobileUniversalModal = (props) => {
       bridgeUrl: atWallet.bridgeUrl,
       universalLink: atWallet.universalLink
     }, props.additionalRequest);
-    openLinkBlank(walletLink);
+    openLinkBlank(addReturnStrategy(walletLink, appState.returnStrategy));
   };
   const onOpenQR = () => {
     setShowQR(true);
@@ -9121,7 +9135,7 @@ const DesktopUniversalModal = (props) => {
   const request = createMemo(() => connector.connect(walletsBridges, props.additionalRequest));
   return createComponent(DesktopUniversalModalStyled, {
     onClick: () => setPopupOpened(false),
-    "data-tc-universal-qr-desktop": "true",
+    "data-tc-wallets-modal-universal-desktop": "true",
     get children() {
       return [createComponent(H1, {
         translationKey: "walletModal.desktopUniversalModal.connectYourWallet",
@@ -9359,9 +9373,9 @@ const ActionModal = (props) => {
   }
   const onOpenWallet = () => {
     if (isTelegramUrl(universalLink)) {
-      redirectToTelegram(universalLink);
+      redirectToTelegram(universalLink, appState.returnStrategy);
     } else {
-      openLink(addReturnStrategy(universalLink, "back"));
+      openLink(addReturnStrategy(universalLink, appState.returnStrategy));
     }
   };
   return createComponent(ActionModalStyled, mergeProps(dataAttrs, {
@@ -9729,7 +9743,7 @@ class TonConnectUI {
       const shouldSkipRedirectToWallet = skipRedirectToWallet === "ios" && userOSIsIos || skipRedirectToWallet === "always";
       if (this.walletInfo && "universalLink" in this.walletInfo && this.walletInfo.openMethod === "universal-link" && !shouldSkipRedirectToWallet) {
         if (isTelegramUrl(this.walletInfo.universalLink)) {
-          redirectToTelegram(this.walletInfo.universalLink);
+          redirectToTelegram(this.walletInfo.universalLink, appState.returnStrategy);
         } else {
           openLink(addReturnStrategy(this.walletInfo.universalLink, returnStrategy));
         }
