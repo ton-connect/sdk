@@ -1,7 +1,4 @@
 ../../.idea
 
-dist
-lib
-types-dist
 node_modules
 .env
