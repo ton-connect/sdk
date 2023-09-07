@@ -147,3 +147,13 @@ export function getUserAgent(): UserAgent {
         browser
     };
 }
+
+export function redirectToTelegram(universalLink: string): void {
+    const url = new URL(universalLink);
+    url.searchParams.append('startattach', 'tonconnect');
+    openLinkBlank(url.toString());
+}
+
+export function isInTWA(): boolean {
+    return !!(getWindow() as { TelegramWebviewProxy: unknown } | undefined)?.TelegramWebviewProxy;
+}
