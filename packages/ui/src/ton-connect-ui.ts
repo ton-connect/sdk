@@ -19,8 +19,8 @@ import {
     getSystemTheme,
     getUserAgent,
     openLink,
-    openLinkBlank,
     preloadImages,
+    redirectToTelegram,
     subscribeToThemeChange
 } from 'src/app/utils/web-api';
 import { TonConnectUiOptions } from 'src/models/ton-connect-ui-options';
@@ -274,6 +274,7 @@ export class TonConnectUI {
      */
     public disconnect(): Promise<void> {
         widgetController.clearAction();
+        widgetController.removeSelectedWalletInfo();
         this.walletInfoStorage.removeWalletInfo();
         return this.connector.disconnect();
     }
@@ -305,7 +306,7 @@ export class TonConnectUI {
             !shouldSkipRedirectToWallet
         ) {
             if (isTelegramUrl(this.walletInfo.universalLink)) {
-                this.redirectToTelegram(this.walletInfo.universalLink);
+                redirectToTelegram(this.walletInfo.universalLink);
             } else {
                 openLink(addReturnStrategy(this.walletInfo.universalLink, returnStrategy));
             }
@@ -487,11 +488,5 @@ export class TonConnectUI {
             returnStrategy,
             skipRedirectToWallet
         };
-    }
-
-    private redirectToTelegram(universalLink: string): void {
-        const url = new URL(universalLink);
-        url.searchParams.append('startattach', 'tonconnect');
-        openLinkBlank(url.toString());
     }
 }
