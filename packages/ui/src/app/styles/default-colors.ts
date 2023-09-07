@@ -54,7 +54,7 @@ export const defaultDarkColorsSet: ColorsSet = {
         secondary: '#18181A',
         segment: '#262629',
         tint: '#222224',
-        qr: '#F1F3F5'
+        qr: '#FFFFFF'
     },
     text: {
         primary: '#E5E5EA',

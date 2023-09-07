@@ -28,29 +28,22 @@ export const ScrollDivider = styled.div<{ isShown: boolean }>`
 export const WalletsUl = styled.ul`
     display: grid;
     grid-template-columns: repeat(auto-fit, 92px);
+    grid-template-rows: auto;
+    align-content: flex-start;
     justify-content: center;
     row-gap: 8px;
-    overflow-y: auto;
-    max-height: 510px;
     width: 100%;
     padding: 0 0 16px;
     align-self: flex-start;
+    max-width: 400px;
+    margin: 0 auto;
 
-    scrollbar-width: none;
-    &&::-webkit-scrollbar {
-        display: none;
-    }
-
-    &&::-webkit-scrollbar-track {
-        background: transparent;
-    }
-
-    &&::-webkit-scrollbar-thumb {
-        display: none;
+    > li {
+        display: block;
+        height: fit-content;
     }
 
     ${media('mobile')} {
-        max-height: 410px;
         grid-template-columns: repeat(auto-fit, 82px);
     }
 `;

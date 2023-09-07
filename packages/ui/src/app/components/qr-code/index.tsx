@@ -110,13 +110,15 @@ export const QRCode: Component<QRCodeProps> = props => {
                 <Show when={copyButtonOpened() && !props.disableCopy}>
                     <CopiedBoxStyled>
                         <SuccessIcon size="xs" />
-                        <Text translationKey="common.linlCopied">Link Copied</Text>
+                        <Text translationKey="common.linkCopied">Link Copied</Text>
                     </CopiedBoxStyled>
                 </Show>
             </Transition>
-            <CopyIconButton>
-                <CopyLightIcon />
-            </CopyIconButton>
+            <Show when={!props.disableCopy}>
+                <CopyIconButton>
+                    <CopyLightIcon />
+                </CopyIconButton>
+            </Show>
         </QrCodeBackground>
     );
 };

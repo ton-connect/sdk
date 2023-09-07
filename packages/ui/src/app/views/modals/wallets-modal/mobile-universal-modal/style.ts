@@ -1,5 +1,5 @@
 import { styled } from 'solid-styled-components';
-import { Button, H1, H2, Image } from 'src/app/components';
+import { Button, H1, H2, IconButton, Image } from 'src/app/components';
 import { mediaNotTouch, mediaTouch } from 'src/app/styles/media';
 import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
 
@@ -77,7 +77,8 @@ export const Divider = styled.div`
     position: relative;
     top: 26px;
 
-    background-color: ${props => props.theme!.colors.icon.tertiary};
+    background-color: ${props => props.theme!.colors.icon.secondary};
+    opacity: 0.2;
 `;
 
 export const IconContainer = styled.div`
@@ -126,4 +127,10 @@ export const TGImageStyled = styled(Image)`
     border-radius: ${props => tgBorders[props.theme!.borderRadius]};
     width: 24px;
     height: 24px;
+`;
+
+export const StyledLeftActionButton = styled(IconButton)`
+    position: absolute;
+    top: 16px;
+    left: 16px;
 `;

@@ -1,5 +1,5 @@
 import { styled } from 'solid-styled-components';
-import { Button, ErrorIcon, H1, H2, IconButton, LoaderIcon, Text, Image } from 'src/app/components';
+import {Button, ErrorIcon, H1, H2, IconButton, LoaderIcon, Image, QRCode} from 'src/app/components';
 import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
 
 const tgButtonBorders: BorderRadiusConfig = {
@@ -16,7 +16,6 @@ const tgIconBorders: BorderRadiusConfig = {
 
 export const DesktopConnectionModalStyled = styled.div`
     display: flex;
-    padding-bottom: 24px;
     flex-direction: column;
 `;
 
@@ -26,8 +25,12 @@ export const BodyStyled = styled.div<{ qr: boolean }>`
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-top: 47px;
+    justify-content: center;
     min-height: 232px;
+`;
+
+export const QRCodeStyled = styled(QRCode)`
+    margin-bottom: 24px;
 `;
 
 export const H1Styled = styled(H1)`
@@ -51,28 +54,35 @@ export const ButtonsContainerStyled = styled.div`
     display: flex;
     justify-content: center;
     gap: 8px;
+    padding-bottom: 16px;
 `;
 
-export const FooterButton = styled(Button)<{ mt: boolean }>`
-    margin-top: ${props => (props.mt ? '24px' : '0')};
+export const BottomButtonsContainerStyled = styled(ButtonsContainerStyled)`
+    padding-bottom: 0;
+`;
+
+export const FooterButton = styled(Button)`
+    margin-bottom: 24px;
 `;
 
 export const LoaderStyled = styled(LoaderIcon)`
-    margin-bottom: 16px;
+    margin-bottom: 18px;
+    margin-top: 2px;
 `;
 
 export const ErrorIconStyled = styled(ErrorIcon)`
     margin-bottom: 16px;
 `;
 
-export const BodyTextStyled = styled(Text)`
+export const BodyTextStyled = styled(H2)`
     color: ${props => props.theme!.colors.text.secondary};
     text-align: center;
     margin-bottom: 20px;
 `;
 
 export const TgButtonStyled = styled(Button)`
-    margin-top: 16px;
+    margin-top: -8px;
+    margin-bottom: 24px;
     width: 100%;
     padding: 12px 12px 12px 20px;
     border-radius: ${props => tgButtonBorders[props.theme!.borderRadius]};

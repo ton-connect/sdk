@@ -1,15 +1,15 @@
-import { Component, createSignal, For } from 'solid-js';
+import { Component, For } from 'solid-js';
 import {
     DesktopSelectWalletModalStyled,
     WalletsUl,
     H1Styled,
     StyledIconButton,
-    WalletLabeledItemStyled,
-    ScrollDivider
+    WalletLabeledItemStyled
 } from './style';
 import { WalletInfo } from '@tonconnect/sdk';
 import isMobile from 'src/app/hooks/isMobile';
 import { supportsMobile } from 'src/app/utils/wallets';
+import { ScrollContainer } from 'src/app/components/scroll-container';
 export interface DesktopSelectWalletModalProps {
     walletsList: WalletInfo[];
 
@@ -19,11 +19,7 @@ export interface DesktopSelectWalletModalProps {
 }
 
 export const AllWalletsListModal: Component<DesktopSelectWalletModalProps> = props => {
-    const [scrolled, setScrolled] = createSignal(false);
-
-    const onScroll = (e: Event): void => {
-        setScrolled((e.target as HTMLUListElement).scrollTop !== 0);
-    };
+    const maxHeight = (): number | undefined => (isMobile() ? undefined : 510);
 
     const walletsList = (): WalletInfo[] =>
         isMobile() ? props.walletsList.filter(supportsMobile) : props.walletsList;
@@ -31,20 +27,21 @@ export const AllWalletsListModal: Component<DesktopSelectWalletModalProps> = pro
     return (
         <DesktopSelectWalletModalStyled data-tc-select-wallet-desktop="true">
             <StyledIconButton icon="arrow" onClick={() => props.onBack()} />
-            <H1Styled>Wallets</H1Styled>
-            <ScrollDivider isShown={scrolled()} />
-            <WalletsUl onScroll={onScroll}>
-                <For each={walletsList()}>
-                    {wallet => (
-                        <li>
-                            <WalletLabeledItemStyled
-                                wallet={wallet}
-                                onClick={() => props.onSelect(wallet)}
-                            />
-                        </li>
-                    )}
-                </For>
-            </WalletsUl>
+            <H1Styled translationKey="walletModal.wallets">Wallets</H1Styled>
+            <ScrollContainer maxHeight={maxHeight()}>
+                <WalletsUl>
+                    <For each={walletsList()}>
+                        {wallet => (
+                            <li>
+                                <WalletLabeledItemStyled
+                                    wallet={wallet}
+                                    onClick={() => props.onSelect(wallet)}
+                                />
+                            </li>
+                        )}
+                    </For>
+                </WalletsUl>
+            </ScrollContainer>
         </DesktopSelectWalletModalStyled>
     );
 };

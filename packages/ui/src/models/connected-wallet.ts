@@ -8,7 +8,7 @@ export type WalletInfoWithOpenMethod =
     | (WalletInfoInjectable & WalletInfoRemoteWithOpenMethod);
 
 export type WalletInfoRemoteWithOpenMethod = WalletInfoRemote & {
-    openMethod: WalletOpenMethod;
+    openMethod?: WalletOpenMethod;
 };
 
 export type ConnectedWallet = Wallet & WalletInfoWithOpenMethod;

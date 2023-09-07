@@ -1,5 +1,5 @@
 import { styled } from 'solid-styled-components';
-import { ErrorIcon, H1, IconButton, LoaderIcon, Text, Image } from 'src/app/components';
+import { ErrorIcon, H1, IconButton, LoaderIcon, Image, H2 } from 'src/app/components';
 import { Link } from 'src/app/components/link';
 import { rgba } from 'src/app/utils/css';
 
@@ -45,15 +45,23 @@ export const FooterButton = styled(Link)`
 `;
 
 export const LoaderStyled = styled(LoaderIcon)`
-    margin-bottom: 16px;
+    margin-bottom: 18px;
+    margin-top: 2px;
 `;
 
 export const ErrorIconStyled = styled(ErrorIcon)`
     margin-bottom: 16px;
 `;
 
-export const BodyTextStyled = styled(Text)`
+export const BodyTextStyled = styled(H2)`
     color: ${props => props.theme!.colors.text.secondary};
     text-align: center;
     margin-bottom: 20px;
+`;
+
+export const ButtonsContainerStyled = styled.div`
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding-bottom: 16px;
 `;

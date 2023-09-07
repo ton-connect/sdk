@@ -17,10 +17,10 @@ async function dev(): Promise<void> {
             notifications: ['before']
         },
         uiPreferences: {
-            theme: THEME.LIGHT,
+            theme: THEME.DARK,
             borderRadius: 'm'
         },
-        language: 'en',
+        language: 'ru',
         restoreConnection: true
         /*walletsListConfiguration: {
             includeWallets: [
@@ -36,12 +36,12 @@ async function dev(): Promise<void> {
         }*/
     });
 
-    /* tonConnectUI.setConnectRequestParameters({ state: 'loading' });
+    /*tonConnectUI.setConnectRequestParameters({ state: 'loading' });
 
-    setTimeout(() => {
+    setInterval(() => {
         tonConnectUI.setConnectRequestParameters({
             state: 'ready',
-            value: { tonProof: 'tonProofPayload' }
+            value: { tonProof: 'tonProofPayload' + Math.random().toString() }
         });
     }, 3000);*/
 

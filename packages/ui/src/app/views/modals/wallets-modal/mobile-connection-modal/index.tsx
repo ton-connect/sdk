@@ -3,6 +3,7 @@ import { Component, createMemo, createSignal, onCleanup, Show, useContext } from
 import {
     BodyStyled,
     BodyTextStyled,
+    ButtonsContainerStyled,
     ErrorIconStyled,
     FooterButton,
     FooterStyled,
@@ -13,10 +14,13 @@ import {
     StyledIconButton
 } from './style';
 import { ConnectorContext } from 'src/app/state/connector.context';
-import { Button, H3, RetryIcon } from 'src/app/components';
+import { Button, H3, QRIcon, RetryIcon } from 'src/app/components';
 import { appState } from 'src/app/state/app.state';
 import { addReturnStrategy, openLinkBlank } from 'src/app/utils/web-api';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
+import { useTheme } from 'solid-styled-components';
+import { MobileConnectionQR } from 'src/app/views/modals/wallets-modal/mobile-connection-modal/mobile-connection-qr';
+import { Translation } from 'src/app/components/typography/Translation';
 
 export interface MobileConnectionProps {
     additionalRequest?: ConnectAdditionalRequest;
@@ -25,6 +29,8 @@ export interface MobileConnectionProps {
 }
 
 export const MobileConnectionModal: Component<MobileConnectionProps> = props => {
+    const theme = useTheme();
+    const [showQR, setShowQR] = createSignal(false);
     const [connectionErrored, setConnectionErrored] = createSignal(false);
     const connector = useContext(ConnectorContext)!;
 
@@ -54,38 +60,97 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
         openLinkBlank(addReturnStrategy(universalLink()!, appState.returnStrategy));
     };
 
+    const onOpenQR = (): void => {
+        setConnectionErrored(false);
+        setShowQR(true);
+        setLastSelectedWalletInfo({
+            ...props.wallet,
+            openMethod: 'qrcode'
+        });
+    };
+
+    const onCloseQR = (): void => {
+        setShowQR(false);
+        setLastSelectedWalletInfo({
+            ...props.wallet,
+            openMethod: 'universal-link'
+        });
+    };
+
+    const onBack = (): void => {
+        if (showQR()) {
+            onCloseQR();
+        } else {
+            props.onBackClick();
+        }
+    };
+
     onCleanup(unsubscribe);
     onRetry();
 
     return (
         <MobileConnectionModalStyled data-tc-wallet-qr-modal-desktop="true">
-            <StyledIconButton icon="arrow" onClick={() => props.onBackClick()} />
-            <H1Styled>{props.wallet.name}</H1Styled>
+            <StyledIconButton icon="arrow" onClick={onBack} />
+            <Show when={showQR()}>
+                <MobileConnectionQR universalLink={universalLink()} walletInfo={props.wallet} />
+            </Show>
+            <Show when={!showQR()}>
+                <H1Styled>{props.wallet.name}</H1Styled>
 
-            <BodyStyled>
-                <Show when={connectionErrored()}>
-                    <ErrorIconStyled size="s" />
-                    <BodyTextStyled>Connection declined</BodyTextStyled>
-                    <Button leftIcon={<RetryIcon />} onClick={onRetry}>
-                        Retry
-                    </Button>
-                </Show>
-                <Show when={!connectionErrored()}>
-                    <LoaderStyled size="m" />
-                    <BodyTextStyled>Continue in {props.wallet.name}…</BodyTextStyled>
-                    <Button leftIcon={<RetryIcon />} onClick={onRetry}>
-                        Retry
-                    </Button>
-                </Show>
-            </BodyStyled>
+                <BodyStyled>
+                    <Show when={connectionErrored()}>
+                        <ErrorIconStyled size="s" />
+                        <BodyTextStyled translationKey="walletModal.mobileConnectionModal.connectionDeclined">
+                            Connection declined
+                        </BodyTextStyled>
+                        <ButtonsContainerStyled>
+                            <Button leftIcon={<RetryIcon />} onClick={onRetry}>
+                                <Translation translationKey="common.retry">Retry</Translation>
+                            </Button>
+                            <Button
+                                leftIcon={<QRIcon fill={theme.colors.accent} />}
+                                onClick={onOpenQR}
+                            >
+                                <Translation translationKey="walletModal.mobileConnectionModal.showQR">
+                                    Show QR Code
+                                </Translation>
+                            </Button>
+                        </ButtonsContainerStyled>
+                    </Show>
+                    <Show when={!connectionErrored()}>
+                        <LoaderStyled size="s" />
+                        <BodyTextStyled
+                            translationKey="walletModal.mobileConnectionModal.continueIn"
+                            translationValues={{ name: props.wallet.name }}
+                        >
+                            Continue in {props.wallet.name}…
+                        </BodyTextStyled>
+                        <ButtonsContainerStyled>
+                            <Button leftIcon={<RetryIcon />} onClick={onRetry}>
+                                <Translation translationKey="common.retry">Retry</Translation>
+                            </Button>
+                            <Button
+                                leftIcon={<QRIcon fill={theme.colors.accent} />}
+                                onClick={onOpenQR}
+                            >
+                                <Translation translationKey="walletModal.mobileConnectionModal.showQR">
+                                    Show QR Code
+                                </Translation>
+                            </Button>
+                        </ButtonsContainerStyled>
+                    </Show>
+                </BodyStyled>
 
-            <FooterStyled>
-                <ImageStyled src={props.wallet.imageUrl} />
-                <H3>{props.wallet.name}</H3>
-                <FooterButton href={props.wallet.aboutUrl} blank>
-                    <Button>GET</Button>
-                </FooterButton>
-            </FooterStyled>
+                <FooterStyled>
+                    <ImageStyled src={props.wallet.imageUrl} />
+                    <H3>{props.wallet.name}</H3>
+                    <FooterButton href={props.wallet.aboutUrl} blank>
+                        <Button>
+                            <Translation translationKey="common.get">GET</Translation>
+                        </Button>
+                    </FooterButton>
+                </FooterStyled>
+            </Show>
         </MobileConnectionModalStyled>
     );
 };

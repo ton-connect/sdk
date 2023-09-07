@@ -17,7 +17,7 @@ export const FourWalletsItem: Component<FourWallets> = props => {
             icon={
                 <FourWalletsCard>
                     <For each={[0, 1, 2, 3]}>
-                        {index => <FourWalletsImage src={props.images[index]!} borderRadius="s" />}
+                        {index => <FourWalletsImage src={props.images[index]!} />}
                     </For>
                 </FourWalletsCard>
             }

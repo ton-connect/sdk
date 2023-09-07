@@ -39,10 +39,16 @@ export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = prop
             onClick={() => setPopupOpened(false)}
             data-tc-universal-qr-desktop="true"
         >
-            <H1>Connect your wallet</H1>
-            <H2Styled>Scan with your mobile wallet</H2Styled>
+            <H1 translationKey="walletModal.desktopUniversalModal.connectYourWallet">
+                Connect your wallet
+            </H1>
+            <H2Styled translationKey="walletModal.desktopUniversalModal.scan">
+                Scan with your mobile wallet
+            </H2Styled>
             <QRCodeStyled sourceUrl={request()} disableCopy={popupOpened()} imageUrl={IMG.TON} />
-            <H2AvailableWalletsStyled>Available wallets</H2AvailableWalletsStyled>
+            <H2AvailableWalletsStyled translationKey="walletModal.desktopUniversalModal.availableWallets">
+                Available wallets
+            </H2AvailableWalletsStyled>
             <WalletsContainerStyled>
                 <For each={props.walletsList.slice(0, 3)}>
                     {wallet => (
