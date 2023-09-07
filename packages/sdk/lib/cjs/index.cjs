@@ -333,6 +333,15 @@ function isTelegramUrl(link) {
     const url = new URL(link);
     return url.protocol === 'tg:' || url.hostname === 't.me';
 }
+function encodeTelegramUrlParameters(parameters) {
+    return parameters
+        .replaceAll('.', '%2E')
+        .replaceAll('-', '%2D')
+        .replaceAll('_', '%5F')
+        .replaceAll('&', '-')
+        .replaceAll('=', '__')
+        .replaceAll('%', '--');
+}
 
 class BridgeGateway {
     constructor(storage, bridgeUrl, sessionId, listener, errorsListener) {
@@ -844,14 +853,7 @@ class BridgeProvider {
     generateTGUniversalLink(universalLink, message) {
         const urlToWrap = this.generateRegularUniversalLink('about:blank', message);
         const linkParams = urlToWrap.split('?')[1];
-        const startattach = 'tonconnect-' +
-            linkParams
-                .replaceAll('.', '%2E')
-                .replaceAll('-', '%2D')
-                .replaceAll('_', '%5F')
-                .replaceAll('&', '-')
-                .replaceAll('=', '__')
-                .replaceAll('%', '--');
+        const startattach = 'tonconnect-' + encodeTelegramUrlParameters(linkParams);
         const url = new URL(universalLink);
         url.searchParams.append('startattach', startattach);
         return url.toString();
@@ -1881,6 +1883,7 @@ exports.WalletNotInjectedError = WalletNotInjectedError;
 exports.WalletsListManager = WalletsListManager;
 exports.WrongAddressError = WrongAddressError;
 exports.default = TonConnect;
+exports.encodeTelegramUrlParameters = encodeTelegramUrlParameters;
 exports.isTelegramUrl = isTelegramUrl;
 exports.isWalletInfoCurrentlyEmbedded = isWalletInfoCurrentlyEmbedded;
 exports.isWalletInfoCurrentlyInjected = isWalletInfoCurrentlyInjected;

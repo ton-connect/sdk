@@ -330,6 +330,15 @@ function isTelegramUrl(link) {
     const url = new URL(link);
     return url.protocol === 'tg:' || url.hostname === 't.me';
 }
+function encodeTelegramUrlParameters(parameters) {
+    return parameters
+        .replaceAll('.', '%2E')
+        .replaceAll('-', '%2D')
+        .replaceAll('_', '%5F')
+        .replaceAll('&', '-')
+        .replaceAll('=', '__')
+        .replaceAll('%', '--');
+}
 
 class BridgeGateway {
     constructor(storage, bridgeUrl, sessionId, listener, errorsListener) {
@@ -841,14 +850,7 @@ class BridgeProvider {
     generateTGUniversalLink(universalLink, message) {
         const urlToWrap = this.generateRegularUniversalLink('about:blank', message);
         const linkParams = urlToWrap.split('?')[1];
-        const startattach = 'tonconnect-' +
-            linkParams
-                .replaceAll('.', '%2E')
-                .replaceAll('-', '%2D')
-                .replaceAll('_', '%5F')
-                .replaceAll('&', '-')
-                .replaceAll('=', '__')
-                .replaceAll('%', '--');
+        const startattach = 'tonconnect-' + encodeTelegramUrlParameters(linkParams);
         const url = new URL(universalLink);
         url.searchParams.append('startattach', startattach);
         return url.toString();
@@ -1855,5 +1857,5 @@ function hexToBytes(hex) {
     return result;
 }
 
-export { BadRequestError, FetchWalletsError, LocalstorageNotFoundError, ParseHexError, TonConnect, TonConnectError, UnknownAppError, UnknownError, UserRejectsError, WalletAlreadyConnectedError, WalletNotConnectedError, WalletNotInjectedError, WalletsListManager, WrongAddressError, TonConnect as default, isTelegramUrl, isWalletInfoCurrentlyEmbedded, isWalletInfoCurrentlyInjected, isWalletInfoInjectable, isWalletInfoInjected, isWalletInfoRemote, toUserFriendlyAddress };
+export { BadRequestError, FetchWalletsError, LocalstorageNotFoundError, ParseHexError, TonConnect, TonConnectError, UnknownAppError, UnknownError, UserRejectsError, WalletAlreadyConnectedError, WalletNotConnectedError, WalletNotInjectedError, WalletsListManager, WrongAddressError, TonConnect as default, encodeTelegramUrlParameters, isTelegramUrl, isWalletInfoCurrentlyEmbedded, isWalletInfoCurrentlyInjected, isWalletInfoInjectable, isWalletInfoInjected, isWalletInfoRemote, toUserFriendlyAddress };
 //# sourceMappingURL=index.mjs.map

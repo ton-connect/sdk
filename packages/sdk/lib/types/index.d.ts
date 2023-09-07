@@ -78,6 +78,8 @@ export declare interface DeviceInfo {
     features: Feature[];
 }
 
+export declare function encodeTelegramUrlParameters(parameters: string): string;
+
 export declare type Feature = SendTransactionFeatureDeprecated | SendTransactionFeature | SignDataFeature;
 
 /**
