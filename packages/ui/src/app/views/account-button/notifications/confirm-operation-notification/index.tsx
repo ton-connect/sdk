@@ -10,11 +10,17 @@ interface ConfirmOperationNotificationProps extends Styleable {}
 export const ConfirmOperationNotification: Component<ConfirmOperationNotificationProps> = props => {
     const tonConnectUI = useContext(TonConnectUiContext);
     const [t] = useI18n();
-    const name = tonConnectUI!.wallet?.name || t('common.yourWallet', {}, 'your wallet');
+    const name = (): string =>
+        tonConnectUI!.wallet && 'name' in tonConnectUI!.wallet
+            ? tonConnectUI!.wallet.name
+            : t('common.yourWallet', {}, 'Your wallet');
 
     return (
         <Notification
-            header={{ translationKey: 'notifications.confirm.header', translationValues: { name } }}
+            header={{
+                translationKey: 'notifications.confirm.header',
+                translationValues: { name: name() }
+            }}
             class={props.class}
             icon={<LoaderIconStyled />}
             data-tc-notification-confirm="true"

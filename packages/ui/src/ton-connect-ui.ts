@@ -81,8 +81,8 @@ export class TonConnectUI {
     /**
      * Curren connected wallet app and its info or null.
      */
-    public get wallet(): (Wallet & WalletInfoWithOpenMethod) | null {
-        if (!this.connector.wallet || !this.walletInfo) {
+    public get wallet(): Wallet | (Wallet & WalletInfoWithOpenMethod) | null {
+        if (!this.connector.wallet) {
             return null;
         }
 
@@ -287,7 +287,7 @@ export class TonConnectUI {
         tx: SendTransactionRequest,
         options?: ActionConfiguration
     ): Promise<SendTransactionResponse> {
-        if (!this.connected || !this.walletInfo) {
+        if (!this.connected) {
             throw new TonConnectUIError('Connect wallet to send a transaction.');
         }
 
@@ -299,6 +299,7 @@ export class TonConnectUI {
             (skipRedirectToWallet === 'ios' && userOSIsIos) || skipRedirectToWallet === 'always';
 
         if (
+            this.walletInfo &&
             'universalLink' in this.walletInfo &&
             this.walletInfo.openMethod === 'universal-link' &&
             !shouldSkipRedirectToWallet
@@ -392,13 +393,22 @@ export class TonConnectUI {
 
     private async updateWalletInfo(wallet: Wallet): Promise<void> {
         const selectedWalletInfo = await this.getSelectedWalletInfo(wallet);
-
         if (selectedWalletInfo) {
             this.walletInfo = selectedWalletInfo;
             this.walletInfoStorage.setWalletInfo(selectedWalletInfo);
-        } else {
-            this.walletInfo = this.walletInfoStorage.getWalletInfo();
+            return;
         }
+
+        const storedWalletInfo = this.walletInfoStorage.getWalletInfo();
+        if (storedWalletInfo) {
+            this.walletInfo = storedWalletInfo;
+            return;
+        }
+
+        this.walletInfo =
+            (await this.walletsList).find(walletInfo =>
+                eqWalletName(walletInfo, wallet.device.appName)
+            ) || null;
     }
 
     private normalizeWidgetRoot(rootId: string | undefined): string {
