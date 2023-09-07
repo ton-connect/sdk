@@ -71,19 +71,27 @@ export const BadgeStyled = styled(Image)`
 `;
 
 export const StyledText = styled(Text)`
+    max-width: 90px;
     font-weight: 590;
-    max-width: 76px;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
+
+    ${media('mobile')} {
+        max-width: 80px;
+    }
 `;
 
 export const StyledSecondLine = styled(Text)<{ colorPrimary: boolean }>`
     font-weight: 510;
-    max-width: 76px;
+    max-width: 90px;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
     color: ${props =>
         props.colorPrimary ? props.theme!.colors.text.primary : props.theme!.colors.text.secondary};
+
+    ${media('mobile')} {
+        max-width: 80px;
+    }
 `;

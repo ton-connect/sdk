@@ -5,7 +5,7 @@ import { toPx } from 'src/app/utils/css';
 import { TonConnectUIError } from 'src/errors';
 import { UserAgent } from 'src/models/user-agent';
 import UAParser from 'ua-parser-js';
-import { isTelegramUrl } from '@tonconnect/sdk';
+import { encodeTelegramUrlParameters, isTelegramUrl } from '@tonconnect/sdk';
 
 export function openLink(href: string, target = '_self'): ReturnType<typeof window.open> {
     return window.open(href, target, 'noreferrer noopener');
@@ -45,17 +45,7 @@ export function addReturnStrategy(url: string, returnStrategy: ReturnStrategy): 
     }
 
     const lastParam = newUrl.slice(newUrl.lastIndexOf('&') + 1);
-    return (
-        newUrl.slice(0, newUrl.lastIndexOf('&')) +
-        '-' +
-        lastParam
-            .replaceAll('.', '%2E')
-            .replaceAll('-', '%2D')
-            .replaceAll('_', '%5F')
-            .replaceAll('&', '-')
-            .replaceAll('=', '__')
-            .replaceAll('%', '--')
-    );
+    return newUrl.slice(0, newUrl.lastIndexOf('&')) + '-' + encodeTelegramUrlParameters(lastParam);
 }
 
 export function disableScroll(): void {

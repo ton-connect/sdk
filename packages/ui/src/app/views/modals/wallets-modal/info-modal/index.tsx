@@ -27,7 +27,7 @@ interface InfoModalProps {
 
 export const InfoModal: Component<InfoModalProps> = props => {
     return (
-        <InfoModalStyled>
+        <InfoModalStyled data-tc-wallets-modal-info="true">
             <StyledIconButton icon="arrow" onClick={() => props.onBackClick()} />
             <H1Styled translationKey="walletModal.infoModal.whatIsAWallet">
                 What is a wallet

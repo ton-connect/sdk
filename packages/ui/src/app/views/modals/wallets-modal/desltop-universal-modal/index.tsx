@@ -37,7 +37,7 @@ export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = prop
     return (
         <DesktopUniversalModalStyled
             onClick={() => setPopupOpened(false)}
-            data-tc-universal-qr-desktop="true"
+            data-tc-wallets-modal-universal-desktop="true"
         >
             <H1 translationKey="walletModal.desktopUniversalModal.connectYourWallet">
                 Connect your wallet

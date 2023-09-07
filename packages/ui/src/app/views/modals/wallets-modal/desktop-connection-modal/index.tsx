@@ -152,7 +152,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
     }
 
     return (
-        <DesktopConnectionModalStyled data-tc-wallet-qr-modal-desktop="true">
+        <DesktopConnectionModalStyled data-tc-wallets-modal-connection-desktop="true">
             <StyledIconButton icon="arrow" onClick={() => props.onBackClick()} />
             <H1Styled>{props.wallet.name}</H1Styled>
             <Show when={mode() === 'mobile'}>
