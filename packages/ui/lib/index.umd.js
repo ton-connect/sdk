@@ -9361,10 +9361,11 @@ var __async = (__this, __arguments, generator) => {
       universalLink = tonConnectUI.wallet.universalLink;
     }
     const onOpenWallet = () => {
-      if (eqWalletName(tonConnectUI.wallet, AT_WALLET_APP_NAME)) {
-        openLinkBlank(addReturnStrategy(universalLink, "back"));
+      if (sdk.isTelegramUrl(universalLink)) {
+        redirectToTelegram(universalLink);
+      } else {
+        openLink(addReturnStrategy(universalLink, "back"));
       }
-      openLink(addReturnStrategy(universalLink, "back"));
     };
     return createComponent(ActionModalStyled, mergeProps(dataAttrs, {
       get children() {
