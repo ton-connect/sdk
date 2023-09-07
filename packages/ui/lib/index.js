@@ -42,10 +42,10 @@ var __async = (__this, __arguments, generator) => {
   });
 };
 var _a;
-import { TonConnectError, isWalletInfoCurrentlyInjected, toUserFriendlyAddress, CHAIN, TonConnect, isWalletInfoRemote, isWalletInfoCurrentlyEmbedded, isTelegramUrl } from "@tonconnect/sdk";
+import { TonConnectError, isWalletInfoCurrentlyInjected, toUserFriendlyAddress, CHAIN, TonConnect, isWalletInfoRemote, isTelegramUrl, isWalletInfoCurrentlyEmbedded } from "@tonconnect/sdk";
 export * from "@tonconnect/sdk";
-import deepmerge from "deepmerge";
 import UAParser from "ua-parser-js";
+import deepmerge from "deepmerge";
 import cn from "classnames";
 const sharedConfig = {};
 function setHydrateContext(context) {
@@ -1515,9 +1515,11 @@ function Dynamic(props) {
     }
   });
 }
-const [walletsModalOpen, setWalletsModalOpen] = createSignal(false);
-const [lastSelectedWalletInfo, setLastSelectedWalletInfo] = createSignal(null);
-const [action, setAction] = createSignal(null);
+var THEME = /* @__PURE__ */ ((THEME2) => {
+  THEME2["DARK"] = "DARK";
+  THEME2["LIGHT"] = "LIGHT";
+  return THEME2;
+})(THEME || {});
 let e = { data: "" }, t = (t2) => "object" == typeof window ? ((t2 ? t2.querySelector("#_goober") : window._goober) || Object.assign((t2 || document.head).appendChild(document.createElement("style")), { innerHTML: " ", id: "_goober" })).firstChild : t2 || e, l = /(?:([\u0080-\uFFFF\w-%@]+) *:? *([^{;]+?);|([^;}{]*?) *{)|(}\s*)/g, a = /\/\*[^]*?\*\/|  +/g, n = /\n+/g, o = (e2, t2) => {
   let r = "", l2 = "", a2 = "";
   for (let n2 in e2) {
@@ -1633,6 +1635,267 @@ function createGlobalStyles() {
     return null;
   };
 }
+const globalStylesTag = "tc-root";
+const disableScrollClass = "tc-disable-scroll";
+const usingMouseClass = "tc-using-mouse";
+const GlobalStyles = () => {
+  document.body.addEventListener("mousedown", () => document.body.classList.add(usingMouseClass));
+  document.body.addEventListener("keydown", (event) => {
+    if (event.key === "Tab") {
+      document.body.classList.remove(usingMouseClass);
+    }
+  });
+  const Styles = createGlobalStyles`
+    ${globalStylesTag} * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        
+        font-family: -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica Neue', Arial, Tahoma, Verdana, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;        
+        -webkit-tap-highlight-color: transparent;
+    }
+    
+    ${globalStylesTag} img {
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }   
+ 
+    ${globalStylesTag} *:focus {
+        outline: #08f auto 2px;
+    }
+    
+    ${globalStylesTag} li {
+        list-style: none;
+    }
+    
+    ${globalStylesTag} button {
+        outline: none;
+    }
+    
+    body.${disableScrollClass} {
+        position: fixed; 
+        overflow-y: scroll;
+        right: 0;
+        left: 0;
+    }
+    
+    body.${usingMouseClass} ${globalStylesTag} *:focus {
+        outline: none;
+    }
+`;
+  return createComponent(Styles, {});
+};
+function hexToRgb(hex) {
+  if (hex[0] === "#") {
+    hex = hex.slice(1);
+  }
+  const bigint = parseInt(hex, 16);
+  const r = bigint >> 16 & 255;
+  const g = bigint >> 8 & 255;
+  const b = bigint & 255;
+  return [r, g, b].join(",");
+}
+function rgba(color, opacity) {
+  if (color[0] === "#") {
+    color = hexToRgb(color);
+  }
+  return `rgba(${color}, ${opacity})`;
+}
+function toPx(value) {
+  return value.toString() + "px";
+}
+class TonConnectUIError extends TonConnectError {
+  constructor(...args) {
+    super(...args);
+    Object.setPrototypeOf(this, TonConnectUIError.prototype);
+  }
+}
+function openLink(href, target = "_self") {
+  return window.open(href, target, "noreferrer noopener");
+}
+function openLinkBlank(href) {
+  openLink(href, "_blank");
+}
+function getSystemTheme() {
+  if (window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches) {
+    return THEME.LIGHT;
+  }
+  return THEME.DARK;
+}
+function subscribeToThemeChange(callback) {
+  const handler = (event) => callback(event.matches ? THEME.DARK : THEME.LIGHT);
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", handler);
+  return () => window.matchMedia("(prefers-color-scheme: dark)").removeEventListener("change", handler);
+}
+function addQueryParameter(url, key, value) {
+  const parsed = new URL(url);
+  parsed.searchParams.append(key, value);
+  return parsed.toString();
+}
+function addReturnStrategy(url, returnStrategy) {
+  return addQueryParameter(url, "ret", returnStrategy);
+}
+function disableScroll() {
+  if (document.documentElement.scrollHeight === document.documentElement.clientHeight) {
+    return;
+  }
+  document.body.style.top = toPx(-document.documentElement.scrollTop);
+  document.body.classList.add(disableScrollClass);
+}
+function enableScroll() {
+  document.body.classList.remove(disableScrollClass);
+  document.documentElement.scrollTo({ top: -parseFloat(getComputedStyle(document.body).top) });
+  document.body.style.top = "auto";
+}
+function fixMobileSafariActiveTransition() {
+  if (!document.body.hasAttribute("ontouchstart")) {
+    document.body.setAttribute("ontouchstart", "");
+  }
+}
+function defineStylesRoot() {
+  customElements.define(globalStylesTag, class TcRootElement extends HTMLDivElement {
+  }, {
+    extends: "div"
+  });
+}
+function preloadImages(images) {
+  images.forEach((img) => {
+    const node = new window.Image();
+    node.src = img;
+  });
+}
+function checkLocalStorageExists() {
+  if (typeof localStorage === "undefined") {
+    throw new TonConnectUIError(
+      "window.localStorage is undefined. localStorage is required for TonConnectUI"
+    );
+  }
+}
+function getWindow$1() {
+  if (typeof window !== "undefined") {
+    return window;
+  }
+  return void 0;
+}
+function getUserAgent() {
+  var _a2, _b;
+  const results = new UAParser().getResult();
+  const osName = (_a2 = results.os.name) == null ? void 0 : _a2.toLowerCase();
+  let os;
+  switch (true) {
+    case osName === "ios":
+      os = "ios";
+      break;
+    case osName === "android":
+      os = "android";
+      break;
+    case osName === "mac os":
+      os = "macos";
+      break;
+    case osName === "linux":
+      os = "linux";
+      break;
+    case (osName == null ? void 0 : osName.includes("windows")):
+      os = "windows";
+      break;
+  }
+  const browserName = (_b = results.browser.name) == null ? void 0 : _b.toLowerCase();
+  let browser;
+  switch (true) {
+    case browserName === "chrome":
+      browser = "chrome";
+      break;
+    case browserName === "firefox":
+      browser = "firefox";
+      break;
+    case (browserName == null ? void 0 : browserName.includes("safari")):
+      browser = "safari";
+      break;
+  }
+  return {
+    os,
+    browser
+  };
+}
+function redirectToTelegram(universalLink) {
+  const url = new URL(universalLink);
+  url.searchParams.append("startattach", "tonconnect");
+  openLinkBlank(url.toString());
+}
+function isInTWA() {
+  var _a2;
+  return !!((_a2 = getWindow$1()) == null ? void 0 : _a2.TelegramWebviewProxy);
+}
+class WalletInfoStorage {
+  constructor() {
+    __publicField(this, "localStorage");
+    __publicField(this, "storageKey", "ton-connect-ui_wallet-info");
+    checkLocalStorageExists();
+    this.localStorage = localStorage;
+  }
+  setWalletInfo(walletInfo) {
+    this.localStorage.setItem(this.storageKey, JSON.stringify(walletInfo));
+  }
+  getWalletInfo() {
+    const walletInfoString = this.localStorage.getItem(this.storageKey);
+    if (!walletInfoString) {
+      return null;
+    }
+    return JSON.parse(walletInfoString);
+  }
+  removeWalletInfo() {
+    this.localStorage.removeItem(this.storageKey);
+  }
+}
+class PreferredWalletStorage {
+  constructor() {
+    __publicField(this, "localStorage");
+    __publicField(this, "storageKey", "ton-connect-ui_preferred-wallet");
+    checkLocalStorageExists();
+    this.localStorage = localStorage;
+  }
+  setPreferredWalletAppName(name) {
+    this.localStorage.setItem(this.storageKey, name);
+  }
+  getPreferredWalletAppName() {
+    return this.localStorage.getItem(this.storageKey) || void 0;
+  }
+}
+class LastSelectedWalletInfoStorage {
+  constructor() {
+    __publicField(this, "localStorage");
+    __publicField(this, "storageKey", "ton-connect-ui_last-selected-wallet-info");
+    checkLocalStorageExists();
+    this.localStorage = localStorage;
+  }
+  setLastSelectedWalletInfo(walletInfo) {
+    this.localStorage.setItem(this.storageKey, JSON.stringify(walletInfo));
+  }
+  getLastSelectedWalletInfo() {
+    const walletInfoString = this.localStorage.getItem(this.storageKey);
+    if (!walletInfoString) {
+      return null;
+    }
+    return JSON.parse(walletInfoString);
+  }
+  removeLastSelectedWalletInfo() {
+    this.localStorage.removeItem(this.storageKey);
+  }
+}
+const [walletsModalOpen, setWalletsModalOpen] = createSignal(false);
+const lastSelectedWalletInfoStorage = new LastSelectedWalletInfoStorage();
+const [lastSelectedWalletInfo, _setLastSelectedWalletInfo] = createSignal(lastSelectedWalletInfoStorage.getLastSelectedWalletInfo());
+const setLastSelectedWalletInfo = (walletInfo) => {
+  if (walletInfo) {
+    lastSelectedWalletInfoStorage.setLastSelectedWalletInfo(walletInfo);
+  } else {
+    lastSelectedWalletInfoStorage.removeLastSelectedWalletInfo();
+  }
+  _setLastSelectedWalletInfo(walletInfo);
+};
+const [action, setAction] = createSignal(null);
 const common$1 = {
   close: "Close",
   openWallet: "Open wallet",
@@ -2094,11 +2357,6 @@ function createStore(...[store, options]) {
   }
   return [wrappedStore, setStore];
 }
-var THEME = /* @__PURE__ */ ((THEME2) => {
-  THEME2["DARK"] = "DARK";
-  THEME2["LIGHT"] = "LIGHT";
-  return THEME2;
-})(THEME || {});
 const defaultLightColorsSet = {
   constant: {
     black: "#000000",
@@ -2241,58 +2499,6 @@ function setColors(colorsSet) {
     )
   }));
 }
-const globalStylesTag = "tc-root";
-const disableScrollClass = "tc-disable-scroll";
-const usingMouseClass = "tc-using-mouse";
-const GlobalStyles = () => {
-  document.body.addEventListener("mousedown", () => document.body.classList.add(usingMouseClass));
-  document.body.addEventListener("keydown", (event) => {
-    if (event.key === "Tab") {
-      document.body.classList.remove(usingMouseClass);
-    }
-  });
-  const Styles = createGlobalStyles`
-    ${globalStylesTag} * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        
-        font-family: -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica Neue', Arial, Tahoma, Verdana, sans-serif;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;        
-        -webkit-tap-highlight-color: transparent;
-    }
-    
-    ${globalStylesTag} img {
-      -webkit-user-select: none;
-      -webkit-touch-callout: none;
-    }   
- 
-    ${globalStylesTag} *:focus {
-        outline: #08f auto 2px;
-    }
-    
-    ${globalStylesTag} li {
-        list-style: none;
-    }
-    
-    ${globalStylesTag} button {
-        outline: none;
-    }
-    
-    body.${disableScrollClass} {
-        position: fixed; 
-        overflow-y: scroll;
-        right: 0;
-        left: 0;
-    }
-    
-    body.${usingMouseClass} ${globalStylesTag} *:focus {
-        outline: none;
-    }
-`;
-  return createComponent(Styles, {});
-};
 const ImagePlaceholder = styled.div`
     background-color: ${(props) => props.theme.colors.background.secondary};
 `;
@@ -2337,138 +2543,6 @@ const Image = (props) => {
     }
   })];
 };
-function hexToRgb(hex) {
-  if (hex[0] === "#") {
-    hex = hex.slice(1);
-  }
-  const bigint = parseInt(hex, 16);
-  const r = bigint >> 16 & 255;
-  const g = bigint >> 8 & 255;
-  const b = bigint & 255;
-  return [r, g, b].join(",");
-}
-function rgba(color, opacity) {
-  if (color[0] === "#") {
-    color = hexToRgb(color);
-  }
-  return `rgba(${color}, ${opacity})`;
-}
-function toPx(value) {
-  return value.toString() + "px";
-}
-class TonConnectUIError extends TonConnectError {
-  constructor(...args) {
-    super(...args);
-    Object.setPrototypeOf(this, TonConnectUIError.prototype);
-  }
-}
-function openLink(href, target = "_self") {
-  return window.open(href, target, "noreferrer noopener");
-}
-function openLinkBlank(href) {
-  openLink(href, "_blank");
-}
-function getSystemTheme() {
-  if (window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches) {
-    return THEME.LIGHT;
-  }
-  return THEME.DARK;
-}
-function subscribeToThemeChange(callback) {
-  const handler = (event) => callback(event.matches ? THEME.DARK : THEME.LIGHT);
-  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", handler);
-  return () => window.matchMedia("(prefers-color-scheme: dark)").removeEventListener("change", handler);
-}
-function addQueryParameter(url, key, value) {
-  const parsed = new URL(url);
-  parsed.searchParams.append(key, value);
-  return parsed.toString();
-}
-function addReturnStrategy(url, returnStrategy) {
-  return addQueryParameter(url, "ret", returnStrategy);
-}
-function disableScroll() {
-  if (document.documentElement.scrollHeight === document.documentElement.clientHeight) {
-    return;
-  }
-  document.body.style.top = toPx(-document.documentElement.scrollTop);
-  document.body.classList.add(disableScrollClass);
-}
-function enableScroll() {
-  document.body.classList.remove(disableScrollClass);
-  document.documentElement.scrollTo({ top: -parseFloat(getComputedStyle(document.body).top) });
-  document.body.style.top = "auto";
-}
-function fixMobileSafariActiveTransition() {
-  if (!document.body.hasAttribute("ontouchstart")) {
-    document.body.setAttribute("ontouchstart", "");
-  }
-}
-function defineStylesRoot() {
-  customElements.define(globalStylesTag, class TcRootElement extends HTMLDivElement {
-  }, {
-    extends: "div"
-  });
-}
-function preloadImages(images) {
-  images.forEach((img) => {
-    const node = new window.Image();
-    node.src = img;
-  });
-}
-function checkLocalStorageExists() {
-  if (typeof localStorage === "undefined") {
-    throw new TonConnectUIError(
-      "window.localStorage is undefined. localStorage is required for TonConnectUI"
-    );
-  }
-}
-function getWindow$1() {
-  if (typeof window !== "undefined") {
-    return window;
-  }
-  return void 0;
-}
-function getUserAgent() {
-  var _a2, _b;
-  const results = new UAParser().getResult();
-  const osName = (_a2 = results.os.name) == null ? void 0 : _a2.toLowerCase();
-  let os;
-  switch (true) {
-    case osName === "ios":
-      os = "ios";
-      break;
-    case osName === "android":
-      os = "android";
-      break;
-    case osName === "mac os":
-      os = "macos";
-      break;
-    case osName === "linux":
-      os = "linux";
-      break;
-    case (osName == null ? void 0 : osName.includes("windows")):
-      os = "windows";
-      break;
-  }
-  const browserName = (_b = results.browser.name) == null ? void 0 : _b.toLowerCase();
-  let browser;
-  switch (true) {
-    case browserName === "chrome":
-      browser = "chrome";
-      break;
-    case browserName === "firefox":
-      browser = "firefox";
-      break;
-    case (browserName == null ? void 0 : browserName.includes("safari")):
-      browser = "safari";
-      break;
-  }
-  return {
-    os,
-    browser
-  };
-}
 const maxWidth = {
   mobile: 440,
   tablet: 1020
@@ -9280,10 +9354,13 @@ const ActionModal = (props) => {
   const dataAttrs = useDataAttributes(props);
   const tonConnectUI = useContext(TonConnectUiContext);
   let universalLink;
-  if ((tonConnectUI == null ? void 0 : tonConnectUI.wallet) && "universalLink" in tonConnectUI.wallet && tonConnectUI.wallet.openMethod === "universal-link") {
+  if ((tonConnectUI == null ? void 0 : tonConnectUI.wallet) && "universalLink" in tonConnectUI.wallet && (tonConnectUI.wallet.openMethod === "universal-link" || isTelegramUrl(tonConnectUI.wallet.universalLink) && isInTWA())) {
     universalLink = tonConnectUI.wallet.universalLink;
   }
   const onOpenWallet = () => {
+    if (eqWalletName(tonConnectUI.wallet, AT_WALLET_APP_NAME)) {
+      openLinkBlank(addReturnStrategy(universalLink, "back"));
+    }
     openLink(addReturnStrategy(universalLink, "back"));
   };
   return createComponent(ActionModalStyled, mergeProps(dataAttrs, {
@@ -9483,45 +9560,11 @@ const widgetController = {
   setAction: (action2) => void setTimeout(() => setAction(action2)),
   clearAction: () => void setTimeout(() => setAction(null)),
   getSelectedWalletInfo: () => lastSelectedWalletInfo(),
+  removeSelectedWalletInfo: () => setLastSelectedWalletInfo(null),
   renderApp: (root, tonConnectUI) => render(() => createComponent(App, {
     tonConnectUI
   }), document.getElementById(root))
 };
-class WalletInfoStorage {
-  constructor() {
-    __publicField(this, "localStorage");
-    __publicField(this, "storageKey", "ton-connect-ui_wallet-info");
-    checkLocalStorageExists();
-    this.localStorage = localStorage;
-  }
-  setWalletInfo(walletInfo) {
-    this.localStorage.setItem(this.storageKey, JSON.stringify(walletInfo));
-  }
-  getWalletInfo() {
-    const walletInfoString = this.localStorage.getItem(this.storageKey);
-    if (!walletInfoString) {
-      return null;
-    }
-    return JSON.parse(walletInfoString);
-  }
-  removeWalletInfo() {
-    this.localStorage.removeItem(this.storageKey);
-  }
-}
-class PreferredWalletStorage {
-  constructor() {
-    __publicField(this, "localStorage");
-    __publicField(this, "storageKey", "ton-connect-ui_preferred-wallet");
-    checkLocalStorageExists();
-    this.localStorage = localStorage;
-  }
-  setPreferredWalletAppName(name) {
-    this.localStorage.setItem(this.storageKey, name);
-  }
-  getPreferredWalletAppName() {
-    return this.localStorage.getItem(this.storageKey) || void 0;
-  }
-}
 class TonConnectUI {
   constructor(options) {
     __publicField(this, "walletInfoStorage", new WalletInfoStorage());
@@ -9671,6 +9714,7 @@ class TonConnectUI {
   }
   disconnect() {
     widgetController.clearAction();
+    widgetController.removeSelectedWalletInfo();
     this.walletInfoStorage.removeWalletInfo();
     return this.connector.disconnect();
   }
@@ -9684,7 +9728,7 @@ class TonConnectUI {
       const shouldSkipRedirectToWallet = skipRedirectToWallet === "ios" && userOSIsIos || skipRedirectToWallet === "always";
       if (this.walletInfo && "universalLink" in this.walletInfo && this.walletInfo.openMethod === "universal-link" && !shouldSkipRedirectToWallet) {
         if (isTelegramUrl(this.walletInfo.universalLink)) {
-          this.redirectToTelegram(this.walletInfo.universalLink);
+          redirectToTelegram(this.walletInfo.universalLink);
         } else {
           openLink(addReturnStrategy(this.walletInfo.universalLink, returnStrategy));
         }
@@ -9833,11 +9877,6 @@ class TonConnectUI {
       returnStrategy,
       skipRedirectToWallet
     };
-  }
-  redirectToTelegram(universalLink) {
-    const url = new URL(universalLink);
-    url.searchParams.append("startattach", "tonconnect");
-    openLinkBlank(url.toString());
   }
 }
 export {

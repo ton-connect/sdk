@@ -270,7 +270,6 @@ declare class TonConnectUI {
     private normalizeWidgetRoot;
     private checkButtonRootExist;
     private getModalsAndNotificationsConfiguration;
-    private redirectToTelegram;
 }
 
 declare type Color = Property.Color;
