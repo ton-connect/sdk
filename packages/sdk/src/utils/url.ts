@@ -14,3 +14,13 @@ export function isTelegramUrl(link: string): boolean {
     const url = new URL(link);
     return url.protocol === 'tg:' || url.hostname === 't.me';
 }
+
+export function encodeTelegramUrlParameters(parameters: string): string {
+    return parameters
+        .replaceAll('.', '%2E')
+        .replaceAll('-', '%2D')
+        .replaceAll('_', '%5F')
+        .replaceAll('&', '-')
+        .replaceAll('=', '__')
+        .replaceAll('%', '--');
+}
