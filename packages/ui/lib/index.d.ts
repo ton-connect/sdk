@@ -187,7 +187,7 @@ interface TonConnectUiCreateOptionsBase extends TonConnectUiOptions {
 declare type WalletOpenMethod = 'qrcode' | 'universal-link';
 declare type WalletInfoWithOpenMethod = WalletInfoInjectable | WalletInfoRemoteWithOpenMethod | (WalletInfoInjectable & WalletInfoRemoteWithOpenMethod);
 declare type WalletInfoRemoteWithOpenMethod = WalletInfoRemote & {
-    openMethod: WalletOpenMethod;
+    openMethod?: WalletOpenMethod;
 };
 declare type ConnectedWallet = Wallet & WalletInfoWithOpenMethod;
 
@@ -226,7 +226,7 @@ declare class TonConnectUI {
     /**
      * Curren connected wallet app and its info or null.
      */
-    get wallet(): (Wallet & WalletInfoWithOpenMethod) | null;
+    get wallet(): Wallet | (Wallet & WalletInfoWithOpenMethod) | null;
     /**
      * Set and apply new UI options. Object with partial options should be passed. Passed options will be merged with current options.
      * @param options

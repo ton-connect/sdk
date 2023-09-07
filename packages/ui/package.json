@@ -49,7 +49,7 @@
   "dependencies": {
     "classnames": "^2.3.2",
     "deepmerge": "^4.2.2",
-    "@tonconnect/sdk": "^2.2.0",
+    "@tonconnect/sdk": "https://gitpkg.now.sh/ton-connect/sdk/packages/sdk?feature_next-build",
     "ua-parser-js": "^1.0.35"
   },
   "devDependencies": {

@@ -44,6 +44,7 @@ var __async = (__this, __arguments, generator) => {
 (function(global, factory) {
   typeof exports === "object" && typeof module !== "undefined" ? factory(exports, require("@tonconnect/sdk"), require("deepmerge"), require("ua-parser-js"), require("classnames")) : typeof define === "function" && define.amd ? define(["exports", "@tonconnect/sdk", "deepmerge", "ua-parser-js", "classnames"], factory) : (global = typeof globalThis !== "undefined" ? globalThis : global || self, factory(global.TON_CONNECT_UI = {}, global.TonConnectSDK, global.deepmerge, global.UAParser, global.classNames));
 })(this, function(exports2, sdk, deepmerge, UAParser, cn) {
+  var _a;
   "use strict";
   const _interopDefaultLegacy = (e2) => e2 && typeof e2 === "object" && "default" in e2 ? e2 : { default: e2 };
   const deepmerge__default = /* @__PURE__ */ _interopDefaultLegacy(deepmerge);
@@ -1638,13 +1639,15 @@ var __async = (__this, __arguments, generator) => {
   const common$1 = {
     close: "Close",
     openWallet: "Open wallet",
-    get: "GET",
-    learnMore: "Learn more",
-    openExtension: "Open Extension",
     copyLink: "Copy Link",
     linkCopied: "Link Copied",
     copied: "Copied",
-    yourWallet: "your wallet"
+    yourWallet: "Your Wallet",
+    retry: "Retry",
+    get: "GET",
+    mobile: "Mobile",
+    browserExtension: "Browser Extension",
+    desktop: "Desktop"
   };
   const button$1 = {
     connectWallet: "Connect Wallet",
@@ -1667,30 +1670,51 @@ var __async = (__this, __arguments, generator) => {
       text: "There will be no changes to your account."
     }
   };
+  const walletItem$1 = {
+    walletOn: "Wallet On",
+    recent: "Recent",
+    installed: "Installed",
+    popular: "Popular"
+  };
   const walletModal$1 = {
     loading: "Loading wallets",
-    qrCode: "QR Code",
     wallets: "Wallets",
-    universalQRModal: {
-      scanQR: "Scan the\xA0code below with a camera in your TON wallet.",
-      openWallet: "Open Wallet",
-      openInstalledWallet: "Open Wallet",
-      dontHave: "Explore TON wallets"
+    mobileUniversalModal: {
+      connectYourWallet: "Connect your wallet",
+      openWalletOnTelegramOrSelect: "Open Wallet on Telegram or\xA0select your\xA0wallet\xA0to\xA0connect",
+      openWalletOnTelegram: "Open Wallet on Telegram",
+      openLink: "Open Link",
+      scan: "Scan with your mobile wallet"
     },
-    desktopSelectWalletModal: {
-      selectWallet: "Select a\xA0wallet to\xA0connect."
+    desktopUniversalModal: {
+      connectYourWallet: "Connect your wallet",
+      scan: "Scan with your mobile wallet",
+      availableWallets: "Available wallets"
     },
-    mobileSelectWalletModal: {
-      connectWallet: "Connect your wallet",
-      selectWallet: "Open Wallet on Telegram or\xA0select your\xA0wallet\xA0to\xA0connect",
-      openLink: "Open Link"
+    mobileConnectionModal: {
+      showQR: "Show QR Code",
+      scanQR: "Scan the\xA0QR code below with your phone\u2019s\xA0or\xA0{{ name }}\u2019s camera",
+      continueIn: "Continue in {{ name }}\u2026",
+      connectionDeclined: "Connection declined"
     },
-    qrCodeModal: {
-      connectWith: "Connect with\xA0{{ name }}",
-      scan: "Scan QR code with your phone\u2019s\xA0or\xA0{{ name }} camera.",
-      openWallet: "Open {{ name }}",
-      openExtension: "Open Extension",
-      dontHave: "Don't have {{ name }}?"
+    desktopConnectionModal: {
+      scanQR: "Scan the\xA0QR code below with your phone\u2019s\xA0or\xA0{{ name }}\u2019s camera",
+      continueInExtension: "Continue in {{ name }} browser extension\u2026",
+      dontHaveExtension: "Seems you don't have installed {{ name }}\xA0browser extension",
+      getWallet: "Get {{ name }}",
+      continueOnDesktop: "Continue in {{ name }} on desktop\u2026",
+      openWalletOnTelegram: "Open Wallet on Telegram on desktop",
+      connectionDeclined: "Connection declined"
+    },
+    infoModal: {
+      whatIsAWallet: "What is a wallet",
+      secureDigitalAssets: "Secure digital assets storage",
+      walletProtects: "A wallet protects and manages your digital assets\xA0including TON, tokens and collectables.",
+      controlIdentity: "Control your Web3 identity",
+      manageIdentity: "Manage your digital identity and access decentralized applications with ease. Maintain control over your data and engage securely in\xA0the\xA0blockchain ecosystem.",
+      effortlessCryptoTransactions: "Effortless crypto transactions",
+      easilySend: "Easily send, receive, monitor your cryptocurrencies.\xA0Streamline your operations with\xA0decentralized applications.",
+      getAWallet: "Get a Wallet"
     }
   };
   const actionModal$1 = {
@@ -1705,18 +1729,22 @@ var __async = (__this, __arguments, generator) => {
     common: common$1,
     button: button$1,
     notifications: notifications$1,
+    walletItem: walletItem$1,
     walletModal: walletModal$1,
     actionModal: actionModal$1
   };
   const common = {
     close: "\u0417\u0430\u043A\u0440\u044B\u0442\u044C",
     openWallet: "\u041E\u0442\u043A\u0440\u044B\u0442\u044C \u043A\u043E\u0448\u0435\u043B\u0435\u043A",
-    get: "\u0421\u043A\u0430\u0447\u0430\u0442\u044C",
-    learnMore: "\u041F\u043E\u0434\u0440\u043E\u0431\u043D\u0435\u0435",
-    openExtension: "\u0420\u0430\u0441\u0448\u0438\u0440\u0435\u043D\u0438\u0435",
     copyLink: "\u041A\u043E\u043F\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u0441\u0441\u044B\u043B\u043A\u0443",
-    copied: "\u0421\u043A\u043E\u043F\u0438\u0440\u043E\u0432\u0430\u043D\u043E!",
-    yourWallet: "\u0432\u0430\u0448\u0435\u043C \u043A\u043E\u0448\u0435\u043B\u044C\u043A\u0435"
+    linkCopied: "\u0421\u043A\u043E\u043F\u0438\u0440\u043E\u0432\u0430\u043D\u043E",
+    copied: "\u0421\u043A\u043E\u043F\u0438\u0440\u043E\u0432\u0430\u043D\u043E",
+    yourWallet: "\u0412\u0430\u0448 \u043A\u043E\u0448\u0435\u043B\u0435\u043A",
+    retry: "\u041E\u0431\u043D\u043E\u0432\u0438\u0442\u044C",
+    get: "\u0421\u043A\u0430\u0447\u0430\u0442\u044C",
+    mobile: "\u041C\u043E\u0431\u0438\u043B\u044C\u043D\u044B\u0439",
+    browserExtension: "\u0420\u0430\u0441\u0448\u0438\u0440\u0435\u043D\u0438\u0435",
+    desktop: "\u0414\u0435\u0441\u043A\u0442\u043E\u043F"
   };
   const button = {
     connectWallet: "\u041F\u043E\u0434\u043A\u043B\u044E\u0447\u0438\u0442\u044C \u043A\u043E\u0448\u0435\u043B\u0451\u043A",
@@ -1739,30 +1767,51 @@ var __async = (__this, __arguments, generator) => {
       text: "\u0421\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435 \u0432\u0430\u0448\u0435\u0433\u043E \u0441\u0447\u0451\u0442\u0430 \u043D\u0435 \u0438\u0437\u043C\u0435\u043D\u0438\u0442\u0441\u044F."
     }
   };
+  const walletItem = {
+    walletOn: "Wallet \u0432",
+    recent: "\u041D\u0435\u0434\u0430\u0432\u043D\u0438\u0439",
+    installed: "\u0423\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D\u043E",
+    popular: "\u041F\u043E\u043F\u0443\u043B\u044F\u0440\u043D\u043E"
+  };
   const walletModal = {
-    loading: "\u0421\u043F\u0438\u0441\u043E\u043A \u043A\u043E\u0448\u0435\u043B\u044C\u043A\u043E\u0432 \u0437\u0430\u0433\u0440\u0443\u0436\u0430\u0435\u0442\u0441\u044F",
-    qrCode: "QR-\u043A\u043E\u0434",
+    loading: "\u041A\u043E\u0448\u0435\u043B\u044C\u043A\u0438 \u0437\u0430\u0433\u0440\u0443\u0436\u0430\u044E\u0442\u0441\u044F",
     wallets: "\u041A\u043E\u0448\u0435\u043B\u044C\u043A\u0438",
-    universalQRModal: {
-      scanQR: "\u041E\u0442\u0441\u043A\u0430\u043D\u0438\u0440\u0443\u0439\u0442\u0435 \u043A\u043E\u0434 \u043D\u0438\u0436\u0435 \u0441\xA0\u043F\u043E\u043C\u043E\u0449\u044C\u044E \u043A\u0430\u043C\u0435\u0440\u044B \u0432 \u0432\u0430\u0448\u0435\u043C TON-\u043A\u043E\u0448\u0435\u043B\u044C\u043A\u0435.",
-      openWallet: "\u041E\u0442\u043A\u0440\u044B\u0442\u044C \u043A\u043E\u0448\u0435\u043B\u0451\u043A",
-      openInstalledWallet: "\u041E\u0442\u043A\u0440\u044B\u0442\u044C \u043A\u043E\u0448\u0435\u043B\u0451\u043A",
-      dontHave: "\u041F\u043E\u0434\u0440\u043E\u0431\u043D\u0435\u0435 \u043E\xA0TON\xA0\u043A\u043E\u0448\u0435\u043B\u044C\u043A\u0430\u0445"
+    mobileUniversalModal: {
+      connectYourWallet: "\u041F\u043E\u0434\u043A\u043B\u044E\u0447\u0438\u0442\u0435 \u043A\u043E\u0448\u0435\u043B\u0435\u043A",
+      openWalletOnTelegramOrSelect: "\u041F\u043E\u0434\u043A\u043B\u044E\u0447\u0438\u0442\u0435 Wallet \u0432 Telegram \u0438\u043B\u0438 \u0432\u044B\u0431\u0435\u0440\u0435\u0442\u0435 \u043A\u043E\u0448\u0435\u043B\u0435\u043A \u0434\u043B\u044F \u043F\u043E\u0434\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u044F",
+      openWalletOnTelegram: "\u041E\u0442\u043A\u0440\u044B\u0442\u044C Wallet \u0432 Telegram",
+      openLink: "\u041E\u0442\u043A\u0440\u044B\u0442\u044C \u0441\u0441\u044B\u043B\u043A\u0443",
+      scan: "\u041E\u0442\u0441\u043A\u0430\u043D\u0438\u0440\u0443\u0439\u0442\u0435 \u0432\u0430\u0448\u0438\u043C \u0441\u043C\u0430\u0440\u0442\u0444\u043E\u043D\u043E\u043C"
     },
-    desktopSelectWalletModal: {
-      selectWallet: "\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043A\u043E\u0448\u0435\u043B\u0451\u043A \u0434\u043B\u044F\xA0\u043F\u043E\u0434\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u044F."
+    desktopUniversalModal: {
+      connectYourWallet: "\u041F\u043E\u0434\u043A\u043B\u044E\u0447\u0438\u0442\u0435 \u043A\u043E\u0448\u0435\u043B\u0435\u043A",
+      scan: "\u041E\u0442\u0441\u043A\u0430\u043D\u0438\u0440\u0443\u0439\u0442\u0435 \u043A\u043E\u0434 \u043A\u0430\u043C\u0435\u0440\u043E\u0439 \u0441\u043C\u0430\u0440\u0442\u0444\u043E\u043D\u0430",
+      availableWallets: "\u0414\u043E\u0441\u0442\u0443\u043F\u043D\u044B\u0435 \u043A\u043E\u0448\u0435\u043B\u044C\u043A\u0438"
     },
-    mobileSelectWalletModal: {
-      connectWallet: "\u041F\u043E\u0434\u043A\u043B\u044E\u0447\u0438\u0442\u0435 \u043A\u043E\u0448\u0435\u043B\u0451\u043A",
-      selectWallet: "$walletModal.desktopSelectWalletModal.selectWallet",
-      installedWallet: "\u041E\u0442\u043A\u0440\u044B\u0442\u044C \u043A\u043E\u0448\u0435\u043B\u0451\u043A"
+    mobileConnectionModal: {
+      showQR: "\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C QR-\u043A\u043E\u0434",
+      scanQR: "\u041E\u0442\u0441\u043A\u0430\u043D\u0438\u0440\u0443\u0439\u0442\u0435 QR-\u043A\u043E\u0434 \u043D\u0438\u0436\u0435 \u043A\u0430\u043C\u0435\u0440\u043E\u0439 \u0432 \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u0438 {{ name }}, \u0438\u043B\u0438 \u043A\u0430\u043C\u0435\u0440\u043E\u0439 \u0441\u043C\u0430\u0440\u0442\u0444\u043E\u043D\u0430",
+      continueIn: "\u041F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u0435 \u0432 {{ name }}\u2026",
+      connectionDeclined: "\u041F\u043E\u0434\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u0435 \u043E\u0442\u043A\u043B\u043E\u043D\u0435\u043D\u043E"
     },
-    qrCodeModal: {
-      connectWith: "\u041F\u043E\u0434\u043A\u043B\u044E\u0447\u0438\u0442\u044C\u0441\u044F \u0447\u0435\u0440\u0435\u0437\xA0{{ name }}",
-      scan: "\u041E\u0442\u0441\u043A\u0430\u043D\u0438\u0440\u0443\u0439\u0442\u0435 \u043A\u043E\u0434 \u043D\u0438\u0436\u0435.",
-      openWallet: "\u041E\u0442\u043A\u0440\u044B\u0442\u044C {{ name }}",
-      openExtension: "\u0420\u0430\u0441\u0448\u0438\u0440\u0435\u043D\u0438\u0435",
-      dontHave: "\u0423 \u0432\u0430\u0441 \u043D\u0435\u0442 {{ name }}?"
+    desktopConnectionModal: {
+      scanQR: "\u041E\u0442\u0441\u043A\u0430\u043D\u0438\u0440\u0443\u0439\u0442\u0435 QR-\u043A\u043E\u0434 \u043D\u0438\u0436\u0435 \u043A\u0430\u043C\u0435\u0440\u043E\u0439 \u0432 \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u0438 {{ name }}, \u0438\u043B\u0438 \u043A\u0430\u043C\u0435\u0440\u043E\u0439 \u0441\u043C\u0430\u0440\u0442\u0444\u043E\u043D\u0430",
+      continueInExtension: "\u041E\u0442\u043A\u0440\u043E\u0439\u0442\u0435 \u0431\u0440\u0430\u0443\u0437\u0435\u0440\u043D\u043E\u0435 \u0440\u0430\u0441\u0448\u0438\u0440\u0435\u043D\u0438\u0435 {{ name }}",
+      dontHaveExtension: "\u041F\u043E\u0445\u043E\u0436\u0435, \u0443 \u0432\u0430\u0441 \u043D\u0435 \u0443\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D\u043E \u0431\u0440\u0430\u0443\u0437\u0435\u0440\u043D\u043E\u0435 \u0440\u0430\u0441\u0448\u0438\u0440\u0435\u043D\u0438\u0435 {{ name }}",
+      getWallet: "\u0421\u043A\u0430\u0447\u0430\u0442\u044C {{ name }}",
+      continueOnDesktop: "\u041E\u0442\u043A\u0440\u043E\u0439\u0442\u0435 {{ name }} \u043D\u0430 \u043A\u043E\u043C\u043F\u044C\u044E\u0442\u0435\u0440\u0435\u2026",
+      openWalletOnTelegram: "\u041E\u0442\u043A\u0440\u044B\u0442\u044C Wallet o\u0432 Telegram \u043D\u0430 \u043A\u043E\u043C\u043F\u044C\u044E\u0442\u0435\u0440\u0435",
+      connectionDeclined: "\u041F\u043E\u0434\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u0435 \u043E\u0442\u043A\u043B\u043E\u043D\u0435\u043D\u043E"
+    },
+    infoModal: {
+      whatIsAWallet: "\u0427\u0442\u043E \u0442\u0430\u043A\u043E\u0435 \u043A\u043E\u0448\u0435\u043B\u0435\u043A?",
+      secureDigitalAssets: "\u041D\u0430\u0434\u0435\u0436\u043D\u043E\u0435 \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0435 \u0446\u0438\u0444\u0440\u043E\u0432\u044B\u0445 \u0430\u0441\u0441\u0435\u0442\u043E\u0432",
+      walletProtects: "\u041A\u043E\u0448\u0435\u043B\u0435\u043A \u0437\u0430\u0449\u0438\u0449\u0430\u0435\u0442 \u0432\u0430\u0448\u0438 \u0446\u0438\u0444\u0440\u043E\u0432\u044B\u0435 \u0430\u043A\u0442\u0438\u0432\u044B, \u0432\u043A\u043B\u044E\u0447\u0430\u044F TON, \u0442\u043E\u043A\u0435\u043D\u044B \u0438 \u043F\u0440\u0435\u0434\u043C\u0435\u0442\u044B \u043A\u043E\u043B\u043B\u0435\u043A\u0446\u0438\u043E\u043D\u0438\u0440\u043E\u0432\u0430\u043D\u0438\u044F, \u0438 \u0443\u043F\u0440\u0430\u0432\u043B\u044F\u0435\u0442 \u0438\u043C\u0438.",
+      controlIdentity: "\u041A\u043E\u043D\u0442\u0440\u043E\u043B\u0438\u0440\u0443\u0439\u0442\u0435 \u0441\u0432\u043E\u044E \u043B\u0438\u0447\u043D\u043E\u0441\u0442\u044C Web3",
+      manageIdentity: "\u0423\u043F\u0440\u0430\u0432\u043B\u044F\u0439\u0442\u0435 \u0441\u0432\u043E\u0435\u0439 \u0446\u0438\u0444\u0440\u043E\u0432\u043E\u0439 \u0438\u0434\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0446\u0438\u0435\u0439 \u0438 \u0441 \u043B\u0435\u0433\u043A\u043E\u0441\u0442\u044C\u044E \u043F\u043E\u043B\u0443\u0447\u0430\u0439\u0442\u0435 \u0434\u043E\u0441\u0442\u0443\u043F \u043A \u0434\u0435\u0446\u0435\u043D\u0442\u0440\u0430\u043B\u0438\u0437\u043E\u0432\u0430\u043D\u043D\u044B\u043C \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u044F\u043C. \u0421\u043E\u0445\u0440\u0430\u043D\u044F\u0439\u0442\u0435 \u043A\u043E\u043D\u0442\u0440\u043E\u043B\u044C \u043D\u0430\u0434 \u0441\u0432\u043E\u0438\u043C\u0438 \u0434\u0430\u043D\u043D\u044B\u043C\u0438 \u0438 \u0431\u0435\u0437\u043E\u043F\u0430\u0441\u043D\u043E \u0443\u0447\u0430\u0441\u0442\u0432\u0443\u0439\u0442\u0435 \u0432\xA0\u044D\u043A\u043E\u0441\u0438\u0441\u0442\u0435\u043C\u0435\xA0\u0431\u043B\u043E\u043A\u0447\u0435\u0439\u043D\u0430.",
+      effortlessCryptoTransactions: "\u041F\u0440\u043E\u0441\u0442\u044B\u0435 \u043A\u0440\u0438\u043F\u0442\u043E\u0442\u0440\u0430\u043D\u0437\u0430\u043A\u0446\u0438\u0438",
+      easilySend: "\u041B\u0435\u0433\u043A\u043E \u043E\u0442\u043F\u0440\u0430\u0432\u043B\u044F\u0439\u0442\u0435, \u043F\u043E\u043B\u0443\u0447\u0430\u0439\u0442\u0435 \u0438 \u043E\u0442\u0441\u043B\u0435\u0436\u0438\u0432\u0430\u0439\u0442\u0435 \u0441\u0432\u043E\u0438 \u043A\u0440\u0438\u043F\u0442\u043E\u0432\u0430\u043B\u044E\u0442\u044B. \u041E\u043F\u0442\u0438\u043C\u0438\u0437\u0438\u0440\u0443\u0439\u0442\u0435 \u0441\u0432\u043E\u0438 \u043E\u043F\u0435\u0440\u0430\u0446\u0438\u0438 \u0441 \u043F\u043E\u043C\u043E\u0449\u044C\u044E \u0434\u0435\u0446\u0435\u043D\u0442\u0440\u0430\u043B\u0438\u0437\u043E\u0432\u0430\u043D\u043D\u044B\u0445 \u043F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u0439.",
+      getAWallet: "\u0421\u043A\u0430\u0447\u0430\u0442\u044C \u043A\u043E\u0448\u0435\u043B\u0435\u043A"
     }
   };
   const actionModal = {
@@ -1777,6 +1826,7 @@ var __async = (__this, __arguments, generator) => {
     common,
     button,
     notifications,
+    walletItem,
     walletModal,
     actionModal
   };
@@ -2105,7 +2155,7 @@ var __async = (__this, __arguments, generator) => {
       secondary: "#18181A",
       segment: "#262629",
       tint: "#222224",
-      qr: "#F1F3F5"
+      qr: "#FFFFFF"
     },
     text: {
       primary: "#E5E5EA",
@@ -2383,7 +2433,7 @@ var __async = (__this, __arguments, generator) => {
     return void 0;
   }
   function getUserAgent() {
-    var _a2, _b;
+    var _a2, _b2;
     const results = new UAParser__default.default().getResult();
     const osName = (_a2 = results.os.name) == null ? void 0 : _a2.toLowerCase();
     let os;
@@ -2404,7 +2454,7 @@ var __async = (__this, __arguments, generator) => {
         os = "windows";
         break;
     }
-    const browserName = (_b = results.browser.name) == null ? void 0 : _b.toLowerCase();
+    const browserName = (_b2 = results.browser.name) == null ? void 0 : _b2.toLowerCase();
     let browser;
     switch (true) {
       case browserName === "chrome":
@@ -2853,16 +2903,16 @@ var __async = (__this, __arguments, generator) => {
   }
   function escPressed(_, accessor) {
     const onKeyPress = (e2) => {
-      var _a2, _b;
+      var _a2, _b2;
       if (e2.key === "Escape") {
         (_a2 = document.activeElement) == null ? void 0 : _a2.blur();
-        (_b = accessor()) == null ? void 0 : _b();
+        (_b2 = accessor()) == null ? void 0 : _b2();
       }
     };
     document.body.addEventListener("keydown", onKeyPress);
     onCleanup(() => document.body.removeEventListener("keydown", onKeyPress));
   }
-  const _tmpl$$u = /* @__PURE__ */ template$1(`<svg><path d="M9.1 3.40012L5.5 8.0001L9.1 12.6001" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>`, 4, true);
+  const _tmpl$$v = /* @__PURE__ */ template$1(`<svg><path fill-rule="evenodd" clip-rule="evenodd" d="M10.2122 14.3407C10.5384 14.0854 10.5959 13.614 10.3406 13.2878L6.20237 8.00003L10.3406 2.71227C10.5959 2.38607 10.5384 1.91469 10.2122 1.6594C9.88604 1.40412 9.41465 1.46161 9.15937 1.7878L4.65937 7.5378C4.44688 7.80932 4.44688 8.19074 4.65937 8.46226L9.15937 14.2123C9.41465 14.5385 9.88604 14.5959 10.2122 14.3407Z"></path></svg>`, 4, true);
   const rotationDegrees = {
     left: 0,
     top: 90,
@@ -2878,28 +2928,28 @@ var __async = (__this, __arguments, generator) => {
         transition: transform 0.1s ease-in-out;
     `;
     return createComponent(Svg, {
+      xmlns: "http://www.w3.org/2000/svg",
       width: "16",
       height: "16",
       viewBox: "0 0 16 16",
       fill: "none",
-      xmlns: "http://www.w3.org/2000/svg",
       get svgDirection() {
         return direction();
       },
       get children() {
-        const _el$ = _tmpl$$u.cloneNode(true);
-        createRenderEffect(() => setAttribute(_el$, "stroke", fill()));
+        const _el$ = _tmpl$$v.cloneNode(true);
+        createRenderEffect(() => setAttribute(_el$, "fill", fill()));
         return _el$;
       }
     });
   };
-  const _tmpl$$t = /* @__PURE__ */ template$1(`<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.90003 3.89991L8.00002 7.9999M8.00002 7.9999L12.1 12.0999M8.00002 7.9999L12.1 3.8999M8.00002 7.9999L3.90002 12.0999" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>`);
+  const _tmpl$$u = /* @__PURE__ */ template$1(`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M2.71966 2.71968C3.01255 2.42678 3.48743 2.42677 3.78032 2.71966L8.00002 6.93925L12.2197 2.71967C12.5126 2.42677 12.9874 2.42678 13.2803 2.71967C13.5732 3.01257 13.5732 3.48744 13.2803 3.78033L9.06068 7.99991L13.2803 12.2197C13.5732 12.5126 13.5732 12.9874 13.2803 13.2803C12.9874 13.5732 12.5126 13.5732 12.2197 13.2803L8.00002 9.06057L3.78033 13.2803C3.48744 13.5732 3.01257 13.5732 2.71967 13.2803C2.42678 12.9874 2.42677 12.5126 2.71967 12.2197L6.93936 7.99991L2.71968 3.78034C2.42678 3.48745 2.42677 3.01257 2.71966 2.71968Z"></path></svg>`);
   const CloseIcon = (props) => {
     const theme = useTheme();
     const fill = () => props.fill || theme.colors.icon.secondary;
     return (() => {
-      const _el$ = _tmpl$$t.cloneNode(true), _el$2 = _el$.firstChild;
-      createRenderEffect(() => setAttribute(_el$2, "stroke", fill()));
+      const _el$ = _tmpl$$u.cloneNode(true), _el$2 = _el$.firstChild;
+      createRenderEffect(() => setAttribute(_el$2, "fill", fill()));
       return _el$;
     })();
   };
@@ -2991,6 +3041,13 @@ var __async = (__this, __arguments, generator) => {
                       }
                     });
                   }
+                }), createComponent(Match, {
+                  get when() {
+                    return typeof icon() !== "string";
+                  },
+                  get children() {
+                    return icon();
+                  }
                 })];
               }
             });
@@ -3062,7 +3119,7 @@ var __async = (__this, __arguments, generator) => {
   const QuestionButtonStyled = styled(IconButton)`
     background-color: ${(props) => rgba(props.theme.colors.icon.secondary, 0.12)};
 `;
-  const _tmpl$$s = /* @__PURE__ */ template$1(`<div></div>`);
+  const _tmpl$$t = /* @__PURE__ */ template$1(`<div></div>`);
   const clickOutside = clickOutside$1;
   const keyPressed = escPressed;
   const Modal = (props) => {
@@ -3127,7 +3184,7 @@ var __async = (__this, __arguments, generator) => {
               "data-tc-modal": "true"
             }, dataAttrs, {
               get children() {
-                const _el$ = _tmpl$$s.cloneNode(true);
+                const _el$ = _tmpl$$t.cloneNode(true);
                 use(keyPressed, _el$, () => () => props.onClose());
                 use(clickOutside, _el$, () => () => props.onClose());
                 insert(_el$, createComponent(ModalBodyStyled, {
@@ -3344,7 +3401,7 @@ var __async = (__this, __arguments, generator) => {
         }
     }
 `;
-  const QrCodeWrapper = styled.div`
+  const QrCodeWrapper$2 = styled.div`
     position: relative;
 
     width: fit-content;
@@ -5064,7 +5121,7 @@ var __async = (__this, __arguments, generator) => {
       document.body.removeChild(textArea);
     }
   }
-  const _tmpl$$r = /* @__PURE__ */ template$1(`<div></div>`);
+  const _tmpl$$s = /* @__PURE__ */ template$1(`<div></div>`);
   const QRCode = (props) => {
     let qrCodeCanvasRef;
     let qrCodeWrapperRef;
@@ -5106,14 +5163,14 @@ var __async = (__this, __arguments, generator) => {
       },
       onClick: onCopyClick,
       get children() {
-        return [createComponent(QrCodeWrapper, {
+        return [createComponent(QrCodeWrapper$2, {
           ref(r$) {
             const _ref$ = qrCodeWrapperRef;
             typeof _ref$ === "function" ? _ref$(r$) : qrCodeWrapperRef = r$;
           },
           get children() {
             return [(() => {
-              const _el$ = _tmpl$$r.cloneNode(true);
+              const _el$ = _tmpl$$s.cloneNode(true);
               const _ref$2 = qrCodeCanvasRef;
               typeof _ref$2 === "function" ? use(_ref$2, _el$) : qrCodeCanvasRef = _el$;
               return _el$;
@@ -5180,7 +5237,7 @@ var __async = (__this, __arguments, generator) => {
                     return [createComponent(SuccessIcon, {
                       size: "xs"
                     }), createComponent(Text, {
-                      translationKey: "common.linlCopied",
+                      translationKey: "common.linkCopied",
                       children: "Link Copied"
                     })];
                   }
@@ -5188,9 +5245,16 @@ var __async = (__this, __arguments, generator) => {
               }
             });
           }
-        }), createComponent(CopyIconButton, {
+        }), createComponent(Show, {
+          get when() {
+            return !props.disableCopy;
+          },
           get children() {
-            return createComponent(CopyLightIcon, {});
+            return createComponent(CopyIconButton, {
+              get children() {
+                return createComponent(CopyLightIcon, {});
+              }
+            });
           }
         })];
       }
@@ -5421,7 +5485,7 @@ var __async = (__this, __arguments, generator) => {
       }
     });
   };
-  const H1Styled$7 = styled.h1`
+  const H1Styled$9 = styled.h1`
     font-style: normal;
     font-weight: 700;
     font-size: 20px;
@@ -5438,7 +5502,7 @@ var __async = (__this, __arguments, generator) => {
 `;
   const H1 = (props) => {
     const [t2] = useI18n();
-    return createComponent(H1Styled$7, {
+    return createComponent(H1Styled$9, {
       get ["class"]() {
         return props.class;
       },
@@ -5449,7 +5513,7 @@ var __async = (__this, __arguments, generator) => {
       }
     });
   };
-  const H2Styled$3 = styled.h2`
+  const H2Styled$5 = styled.h2`
     font-style: normal;
     font-weight: 510;
     font-size: 16px;
@@ -5466,7 +5530,7 @@ var __async = (__this, __arguments, generator) => {
 `;
   const H2 = (props) => {
     const [t2] = useI18n();
-    return createComponent(H2Styled$3, {
+    return createComponent(H2Styled$5, {
       get ["class"]() {
         return props.class;
       },
@@ -5503,12 +5567,12 @@ var __async = (__this, __arguments, generator) => {
       }
     });
   };
-  const _tmpl$$q = /* @__PURE__ */ template$1(`<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28"><path fill-rule="evenodd" clip-rule="evenodd" d="M9.75 7.5C9.33579 7.5 9 7.16421 9 6.75C9 6.33579 9.33579 6 9.75 6H21.25C21.6642 6 22 6.33579 22 6.75V18.25C22 18.6642 21.6642 19 21.25 19C20.8358 19 20.5 18.6642 20.5 18.25V8.56066L6.28033 22.7803C5.98744 23.0732 5.51256 23.0732 5.21967 22.7803C4.92678 22.4874 4.92678 22.0126 5.21967 21.7197L19.4393 7.5H9.75Z"></path></svg>`);
+  const _tmpl$$r = /* @__PURE__ */ template$1(`<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28"><path fill-rule="evenodd" clip-rule="evenodd" d="M9.75 7.5C9.33579 7.5 9 7.16421 9 6.75C9 6.33579 9.33579 6 9.75 6H21.25C21.6642 6 22 6.33579 22 6.75V18.25C22 18.6642 21.6642 19 21.25 19C20.8358 19 20.5 18.6642 20.5 18.25V8.56066L6.28033 22.7803C5.98744 23.0732 5.51256 23.0732 5.21967 22.7803C4.92678 22.4874 4.92678 22.0126 5.21967 21.7197L19.4393 7.5H9.75Z"></path></svg>`);
   const LongArrowIcon = (props) => {
     const theme = useTheme();
     const fill = () => props.fill || theme.colors.icon.secondary;
     return (() => {
-      const _el$ = _tmpl$$q.cloneNode(true), _el$2 = _el$.firstChild;
+      const _el$ = _tmpl$$r.cloneNode(true), _el$2 = _el$.firstChild;
       createRenderEffect((_p$) => {
         const _v$ = fill(), _v$2 = fill();
         _v$ !== _p$._v$ && setAttribute(_el$, "fill", _p$._v$ = _v$);
@@ -5521,17 +5585,17 @@ var __async = (__this, __arguments, generator) => {
       return _el$;
     })();
   };
-  const _tmpl$$p = /* @__PURE__ */ template$1(`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M14.1839 17.7069C13.6405 18.6507 13.3688 19.1226 13.0591 19.348C12.4278 19.8074 11.5723 19.8074 10.941 19.348C10.6312 19.1226 10.3595 18.6507 9.81613 17.7069L5.52066 10.2464C4.76864 8.94024 4.39263 8.28717 4.33762 7.75894C4.2255 6.68236 4.81894 5.65591 5.80788 5.21589C6.29309 5 7.04667 5 8.55383 5H15.4462C16.9534 5 17.7069 5 18.1922 5.21589C19.1811 5.65591 19.7745 6.68236 19.6624 7.75894C19.6074 8.28717 19.2314 8.94024 18.4794 10.2464L14.1839 17.7069ZM11.1 16.3412L6.56139 8.48002C6.31995 8.06185 6.19924 7.85276 6.18146 7.68365C6.14523 7.33896 6.33507 7.01015 6.65169 6.86919C6.80703 6.80002 7.04847 6.80002 7.53133 6.80002H7.53134L11.1 6.80002V16.3412ZM12.9 16.3412L17.4387 8.48002C17.6801 8.06185 17.8008 7.85276 17.8186 7.68365C17.8548 7.33896 17.665 7.01015 17.3484 6.86919C17.193 6.80002 16.9516 6.80002 16.4687 6.80002L12.9 6.80002V16.3412Z"></path></svg>`);
+  const _tmpl$$q = /* @__PURE__ */ template$1(`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M14.1839 17.7069C13.6405 18.6507 13.3688 19.1226 13.0591 19.348C12.4278 19.8074 11.5723 19.8074 10.941 19.348C10.6312 19.1226 10.3595 18.6507 9.81613 17.7069L5.52066 10.2464C4.76864 8.94024 4.39263 8.28717 4.33762 7.75894C4.2255 6.68236 4.81894 5.65591 5.80788 5.21589C6.29309 5 7.04667 5 8.55383 5H15.4462C16.9534 5 17.7069 5 18.1922 5.21589C19.1811 5.65591 19.7745 6.68236 19.6624 7.75894C19.6074 8.28717 19.2314 8.94024 18.4794 10.2464L14.1839 17.7069ZM11.1 16.3412L6.56139 8.48002C6.31995 8.06185 6.19924 7.85276 6.18146 7.68365C6.14523 7.33896 6.33507 7.01015 6.65169 6.86919C6.80703 6.80002 7.04847 6.80002 7.53133 6.80002H7.53134L11.1 6.80002V16.3412ZM12.9 16.3412L17.4387 8.48002C17.6801 8.06185 17.8008 7.85276 17.8186 7.68365C17.8548 7.33896 17.665 7.01015 17.3484 6.86919C17.193 6.80002 16.9516 6.80002 16.4687 6.80002L12.9 6.80002V16.3412Z"></path></svg>`);
   const TonIcon = (props) => {
     const theme = useTheme();
     const fill = () => props.fill || theme.colors.icon.primary;
     return (() => {
-      const _el$ = _tmpl$$p.cloneNode(true), _el$2 = _el$.firstChild;
+      const _el$ = _tmpl$$q.cloneNode(true), _el$2 = _el$.firstChild;
       createRenderEffect(() => setAttribute(_el$2, "fill", fill()));
       return _el$;
     })();
   };
-  const _tmpl$$o = /* @__PURE__ */ template$1(`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none"><g clip-path="url(#clip0_3783_2045)"><circle cx="8" cy="8.00098" r="8"></circle><path d="M4.75 8.50098L7 10.751L11.75 6.00098" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clipPath id="clip0_3783_2045"><rect width="16" height="16" fill="white" transform="translate(0 0.000976562)"></rect></clipPath></defs></svg>`), _tmpl$2$3 = /* @__PURE__ */ template$1(`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="11"></circle><path d="M17.1364 9.6364C17.4879 9.28493 17.4879 8.71508 17.1364 8.36361C16.7849 8.01214 16.2151 8.01214 15.8636 8.36361L10 14.2272L8.1364 12.3636C7.78493 12.0121 7.21508 12.0121 6.86361 12.3636C6.51214 12.7151 6.51214 13.2849 6.86361 13.6364L9.36361 16.1364C9.71508 16.4879 10.2849 16.4879 10.6364 16.1364L17.1364 9.6364Z"></path></svg>`), _tmpl$3$2 = /* @__PURE__ */ template$1(`<svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="36" cy="36" r="33"></circle><path d="M50.9142 28.4142C51.6953 27.6332 51.6953 26.3668 50.9142 25.5858C50.1332 24.8047 48.8668 24.8047 48.0858 25.5858L30 43.6716L23.9142 37.5858C23.1332 36.8047 21.8668 36.8047 21.0858 37.5858C20.3047 38.3668 20.3047 39.6332 21.0858 40.4142L28.5858 47.9142C29.3668 48.6953 30.6332 48.6953 31.4142 47.9142L50.9142 28.4142Z"></path></svg>`);
+  const _tmpl$$p = /* @__PURE__ */ template$1(`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none"><g clip-path="url(#clip0_3783_2045)"><circle cx="8" cy="8.00098" r="8"></circle><path d="M4.75 8.50098L7 10.751L11.75 6.00098" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clipPath id="clip0_3783_2045"><rect width="16" height="16" fill="white" transform="translate(0 0.000976562)"></rect></clipPath></defs></svg>`), _tmpl$2$3 = /* @__PURE__ */ template$1(`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="11"></circle><path d="M17.1364 9.6364C17.4879 9.28493 17.4879 8.71508 17.1364 8.36361C16.7849 8.01214 16.2151 8.01214 15.8636 8.36361L10 14.2272L8.1364 12.3636C7.78493 12.0121 7.21508 12.0121 6.86361 12.3636C6.51214 12.7151 6.51214 13.2849 6.86361 13.6364L9.36361 16.1364C9.71508 16.4879 10.2849 16.4879 10.6364 16.1364L17.1364 9.6364Z"></path></svg>`), _tmpl$3$2 = /* @__PURE__ */ template$1(`<svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="36" cy="36" r="33"></circle><path d="M50.9142 28.4142C51.6953 27.6332 51.6953 26.3668 50.9142 25.5858C50.1332 24.8047 48.8668 24.8047 48.0858 25.5858L30 43.6716L23.9142 37.5858C23.1332 36.8047 21.8668 36.8047 21.0858 37.5858C20.3047 38.3668 20.3047 39.6332 21.0858 40.4142L28.5858 47.9142C29.3668 48.6953 30.6332 48.6953 31.4142 47.9142L50.9142 28.4142Z"></path></svg>`);
   const SuccessIcon = (props) => {
     const theme = useTheme();
     const size = () => props.size || "s";
@@ -5539,7 +5603,7 @@ var __async = (__this, __arguments, generator) => {
     return createMemo((() => {
       const _c$ = createMemo(() => size() === "xs");
       return () => _c$() ? (() => {
-        const _el$ = _tmpl$$o.cloneNode(true), _el$2 = _el$.firstChild, _el$3 = _el$2.firstChild, _el$4 = _el$3.nextSibling;
+        const _el$ = _tmpl$$p.cloneNode(true), _el$2 = _el$.firstChild, _el$3 = _el$2.firstChild, _el$4 = _el$3.nextSibling;
         createRenderEffect((_p$) => {
           const _v$ = props.class, _v$2 = fill(), _v$3 = theme.colors.constant.white;
           _v$ !== _p$._v$ && setAttribute(_el$, "class", _p$._v$ = _v$);
@@ -5586,7 +5650,7 @@ var __async = (__this, __arguments, generator) => {
       })();
     })());
   };
-  const _tmpl$$n = /* @__PURE__ */ template$1(`<svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="36" cy="36" r="33"></circle><path d="M24.0858 26.9142C23.3047 26.1332 23.3047 24.8668 24.0858 24.0858C24.8668 23.3047 26.1332 23.3047 26.9142 24.0858L36 33.1716L45.0858 24.0858C45.8668 23.3047 47.1332 23.3047 47.9142 24.0858C48.6953 24.8668 48.6953 26.1332 47.9142 26.9142L38.8284 36L47.9142 45.0858C48.6953 45.8668 48.6953 47.1332 47.9142 47.9142C47.1332 48.6953 45.8668 48.6953 45.0858 47.9142L36 38.8284L26.9142 47.9142C26.1332 48.6953 24.8668 48.6953 24.0858 47.9142C23.3047 47.1332 23.3047 45.8668 24.0858 45.0858L33.1716 36L24.0858 26.9142Z"></path></svg>`), _tmpl$2$2 = /* @__PURE__ */ template$1(`<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24.001" r="22"></circle><path d="M24 24.001L31.5 16.501M24 24.001L16.5 16.501M24 24.001L16.5 31.501M24 24.001L31.5 31.501" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>`), _tmpl$3$1 = /* @__PURE__ */ template$1(`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="11"></circle><path d="M7.86361 9.1364C7.51214 8.78493 7.51214 8.21508 7.86361 7.86361C8.21508 7.51214 8.78493 7.51214 9.1364 7.86361L12 10.7272L14.8636 7.86361C15.2151 7.51214 15.7849 7.51214 16.1364 7.86361C16.4879 8.21508 16.4879 8.78493 16.1364 9.1364L13.2728 12L16.1364 14.8636C16.4879 15.2151 16.4879 15.7849 16.1364 16.1364C15.7849 16.4879 15.2151 16.4879 14.8636 16.1364L12 13.2728L9.1364 16.1364C8.78493 16.4879 8.21508 16.4879 7.86361 16.1364C7.51214 15.7849 7.51214 15.2151 7.86361 14.8636L10.7272 12L7.86361 9.1364Z"></path></svg>`);
+  const _tmpl$$o = /* @__PURE__ */ template$1(`<svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="36" cy="36" r="33"></circle><path d="M24.0858 26.9142C23.3047 26.1332 23.3047 24.8668 24.0858 24.0858C24.8668 23.3047 26.1332 23.3047 26.9142 24.0858L36 33.1716L45.0858 24.0858C45.8668 23.3047 47.1332 23.3047 47.9142 24.0858C48.6953 24.8668 48.6953 26.1332 47.9142 26.9142L38.8284 36L47.9142 45.0858C48.6953 45.8668 48.6953 47.1332 47.9142 47.9142C47.1332 48.6953 45.8668 48.6953 45.0858 47.9142L36 38.8284L26.9142 47.9142C26.1332 48.6953 24.8668 48.6953 24.0858 47.9142C23.3047 47.1332 23.3047 45.8668 24.0858 45.0858L33.1716 36L24.0858 26.9142Z"></path></svg>`), _tmpl$2$2 = /* @__PURE__ */ template$1(`<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24.001" r="22"></circle><path d="M24 24.001L31.5 16.501M24 24.001L16.5 16.501M24 24.001L16.5 31.501M24 24.001L31.5 31.501" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>`), _tmpl$3$1 = /* @__PURE__ */ template$1(`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="11"></circle><path d="M7.86361 9.1364C7.51214 8.78493 7.51214 8.21508 7.86361 7.86361C8.21508 7.51214 8.78493 7.51214 9.1364 7.86361L12 10.7272L14.8636 7.86361C15.2151 7.51214 15.7849 7.51214 16.1364 7.86361C16.4879 8.21508 16.4879 8.78493 16.1364 9.1364L13.2728 12L16.1364 14.8636C16.4879 15.2151 16.4879 15.7849 16.1364 16.1364C15.7849 16.4879 15.2151 16.4879 14.8636 16.1364L12 13.2728L9.1364 16.1364C8.78493 16.4879 8.21508 16.4879 7.86361 16.1364C7.51214 15.7849 7.51214 15.2151 7.86361 14.8636L10.7272 12L7.86361 9.1364Z"></path></svg>`);
   const ErrorIcon = (props) => {
     const theme = useTheme();
     const size = () => props.size || "m";
@@ -5594,7 +5658,7 @@ var __async = (__this, __arguments, generator) => {
     return createMemo((() => {
       const _c$ = createMemo(() => size() === "m");
       return () => _c$() ? (() => {
-        const _el$ = _tmpl$$n.cloneNode(true), _el$2 = _el$.firstChild, _el$3 = _el$2.nextSibling;
+        const _el$ = _tmpl$$o.cloneNode(true), _el$2 = _el$.firstChild, _el$3 = _el$2.nextSibling;
         createRenderEffect((_p$) => {
           const _v$ = props.class, _v$2 = fill(), _v$3 = theme.colors.constant.white;
           _v$ !== _p$._v$ && setAttribute(_el$, "class", _p$._v$ = _v$);
@@ -5641,7 +5705,7 @@ var __async = (__this, __arguments, generator) => {
       })();
     })());
   };
-  const _tmpl$$m = /* @__PURE__ */ template$1(`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15.55 5.85123C18.9459 7.81184 20.1094 12.1541 18.1488 15.55C16.1882 18.9459 11.8459 20.1094 8.44998 18.1488C8.01952 17.9003 7.46909 18.0478 7.22056 18.4782C6.97203 18.9087 7.11952 19.4591 7.54998 19.7076C11.8068 22.1653 17.2499 20.7068 19.7076 16.45C22.1653 12.1932 20.7068 6.75005 16.45 4.29239C12.1932 1.83472 6.75003 3.29321 4.29236 7.55001C4.04383 7.98047 4.19132 8.53091 4.62178 8.77943C5.05224 9.02796 5.60268 8.88048 5.8512 8.45001C7.81181 5.05413 12.1541 3.89062 15.55 5.85123Z"></path></svg>`), _tmpl$2$1 = /* @__PURE__ */ template$1(`<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 44 44" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M22 2.99951C11.5066 2.99951 3 11.5061 3 21.9995C3 32.4929 11.5066 40.9995 22 40.9995C22.8284 40.9995 23.5 41.6711 23.5 42.4995C23.5 43.3279 22.8284 43.9995 22 43.9995C9.84974 43.9995 0 34.1498 0 21.9995C0 9.84925 9.84974 -0.000488281 22 -0.000488281C34.1503 -0.000488281 44 9.84925 44 21.9995C44 22.8279 43.3284 23.4995 42.5 23.4995C41.6716 23.4995 41 22.8279 41 21.9995C41 11.5061 32.4934 2.99951 22 2.99951Z"></path></svg>`), _tmpl$3 = /* @__PURE__ */ template$1(`<svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M24 56.7846C35.479 63.412 50.1572 59.479 56.7846 47.9999C63.412 36.5209 59.479 21.8427 48 15.2153C36.521 8.58791 21.8428 12.5209 15.2154 23.9999" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path></svg>`);
+  const _tmpl$$n = /* @__PURE__ */ template$1(`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15.55 5.85123C18.9459 7.81184 20.1094 12.1541 18.1488 15.55C16.1882 18.9459 11.8459 20.1094 8.44998 18.1488C8.01952 17.9003 7.46909 18.0478 7.22056 18.4782C6.97203 18.9087 7.11952 19.4591 7.54998 19.7076C11.8068 22.1653 17.2499 20.7068 19.7076 16.45C22.1653 12.1932 20.7068 6.75005 16.45 4.29239C12.1932 1.83472 6.75003 3.29321 4.29236 7.55001C4.04383 7.98047 4.19132 8.53091 4.62178 8.77943C5.05224 9.02796 5.60268 8.88048 5.8512 8.45001C7.81181 5.05413 12.1541 3.89062 15.55 5.85123Z"></path></svg>`), _tmpl$2$1 = /* @__PURE__ */ template$1(`<svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M22 2.99951C11.5066 2.99951 3 11.5061 3 21.9995C3 32.4929 11.5066 40.9995 22 40.9995C22.8284 40.9995 23.5 41.6711 23.5 42.4995C23.5 43.3279 22.8284 43.9995 22 43.9995C9.84974 43.9995 0 34.1498 0 21.9995C0 9.84925 9.84974 -0.000488281 22 -0.000488281C34.1503 -0.000488281 44 9.84925 44 21.9995C44 22.8279 43.3284 23.4995 42.5 23.4995C41.6716 23.4995 41 22.8279 41 21.9995C41 11.5061 32.4934 2.99951 22 2.99951Z"></path></svg>`), _tmpl$3 = /* @__PURE__ */ template$1(`<svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M24 56.7846C35.479 63.412 50.1572 59.479 56.7846 47.9999C63.412 36.5209 59.479 21.8427 48 15.2153C36.521 8.58791 21.8428 12.5209 15.2154 23.9999" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path></svg>`);
   const LoaderIcon = (props) => {
     const theme = useTheme();
     const size = () => props.size || "xs";
@@ -5660,7 +5724,7 @@ var __async = (__this, __arguments, generator) => {
     return createMemo((() => {
       const _c$ = createMemo(() => size() === "xs");
       return () => _c$() ? (() => {
-        const _el$ = _tmpl$$m.cloneNode(true), _el$2 = _el$.firstChild;
+        const _el$ = _tmpl$$n.cloneNode(true), _el$2 = _el$.firstChild;
         createRenderEffect((_p$) => {
           const _v$ = cn__default.default(svgClass, props.class), _v$2 = fill();
           _v$ !== _p$._v$ && setAttribute(_el$, "class", _p$._v$ = _v$);
@@ -5701,28 +5765,38 @@ var __async = (__this, __arguments, generator) => {
       })();
     })());
   };
-  const _tmpl$$l = /* @__PURE__ */ template$1(`<svg width="158" height="28" viewBox="0 0 158 28" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M28 14.001C28 21.733 21.732 28.001 14 28.001C6.26801 28.001 0 21.733 0 14.001C0 6.26899 6.26801 0.000976562 14 0.000976562C21.732 0.000976562 28 6.26899 28 14.001ZM9.21931 8.00098H18.7801H18.7813C20.538 8.00098 21.6522 9.89966 20.7691 11.4302L14.8672 21.6576C14.4822 22.3254 13.5172 22.3254 13.1322 21.6576L7.23158 11.4302C6.34721 9.89726 7.4614 8.00098 9.21931 8.00098ZM13.1262 18.5882V9.74806H9.21811C8.78976 9.74806 8.53708 10.2029 8.74163 10.5578L11.8423 16.1035L13.1262 18.5882ZM16.1559 16.1047L19.2554 10.5566C19.4599 10.2017 19.2073 9.74685 18.7789 9.74685H14.8709V18.5906L16.1559 16.1047Z" fill="#0098EA"></path><path d="M18.7802 8.00098H9.21936C7.46145 8.00098 6.34727 9.89726 7.23164 11.4302L13.1322 21.6576C13.5173 22.3254 14.4823 22.3254 14.8673 21.6576L20.7691 11.4302C21.6523 9.89966 20.5381 8.00098 18.7814 8.00098H18.7802ZM13.1274 18.5906L11.8424 16.1035L8.74168 10.5578C8.53714 10.2029 8.78981 9.74806 9.21816 9.74806H13.1262V18.5918L13.1274 18.5906ZM19.2555 10.5566L16.156 16.1047L14.8709 18.5906V9.74685H18.779C19.2073 9.74685 19.46 10.2017 19.2555 10.5566Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M51.7483 22.1967C55.7182 22.1967 58.9609 18.954 58.9609 14.9841C58.9609 11.0142 55.7182 7.77148 51.7483 7.77148C47.7588 7.77148 44.5357 11.0142 44.5357 14.9841C44.5357 18.954 47.7588 22.1967 51.7483 22.1967ZM51.7483 19.1702C49.4686 19.1702 47.6802 17.2442 47.6802 14.9841C47.6802 12.724 49.4686 10.798 51.7483 10.798C54.0084 10.798 55.7968 12.724 55.7968 14.9841C55.7968 17.2442 54.0084 19.1702 51.7483 19.1702ZM37.0698 21.9609H40.2142V10.9946H44.2843V8.00732H33V10.9946H37.0698V21.9609ZM69.9379 8.00732H73.0823V21.9609H70.3899L63.59 13.3333V21.9609H60.4652V8.00732H63.1576L69.9379 16.6153V8.00732ZM79.2259 14.9887C79.2259 10.9202 82.351 7.77539 86.4982 7.77539C89.8592 7.77539 92.5519 9.95709 93.2202 12.6891H90.7437C90.154 11.0971 88.4637 9.9964 86.4982 9.9964C83.5893 9.9964 81.5452 12.1781 81.5452 14.9887C81.5452 17.7994 83.5893 19.9811 86.4982 19.9811C88.4637 19.9811 90.154 18.8804 90.7437 17.2884H93.2202C92.5519 20.0204 89.8592 22.2021 86.4982 22.2021C82.351 22.2021 79.2259 19.0573 79.2259 14.9887ZM104.584 17.0525C104.584 19.9025 102.343 22.1628 99.4342 22.1628C96.5253 22.1628 94.2846 19.9025 94.2846 17.0525C94.2846 14.2025 96.5253 11.9422 99.4342 11.9422C102.343 11.9422 104.584 14.2025 104.584 17.0525ZM96.4663 17.0525C96.4663 18.8018 97.6849 20.158 99.4342 20.158C101.164 20.158 102.382 18.8018 102.382 17.0525C102.382 15.3032 101.164 13.947 99.4342 13.947C97.6849 13.947 96.4663 15.3032 96.4663 17.0525ZM108.626 12.1388H106.463V21.9662H108.626V17.1311C108.626 15.0281 109.726 13.9077 111.161 13.9077C112.419 13.9077 113.205 14.8512 113.205 16.4039V21.9662H115.367V16.0501C115.367 13.5539 113.893 11.9422 111.613 11.9422C110.335 11.9422 109.215 12.4926 108.626 13.4753V12.1388ZM117.839 12.1388H120.001V13.4753C120.59 12.4926 121.711 11.9422 122.988 11.9422C125.268 11.9422 126.742 13.5539 126.742 16.0501V21.9662H124.58V16.4039C124.58 14.8512 123.794 13.9077 122.536 13.9077C121.101 13.9077 120.001 15.0281 120.001 17.1311V21.9662H117.839V12.1388ZM133.558 22.1628C136.054 22.1628 137.823 20.728 138.373 18.8804H136.113C135.661 19.8238 134.717 20.2563 133.636 20.2563C131.887 20.2563 130.747 19.077 130.668 17.5832H138.491C138.688 14.2419 136.585 11.9422 133.577 11.9422C130.551 11.9422 128.526 14.1436 128.526 17.0525C128.526 20.0007 130.629 22.1628 133.558 22.1628ZM130.747 16.0501C131.042 14.5367 132.162 13.7505 133.518 13.7505C134.717 13.7505 135.838 14.4581 136.172 16.0501H130.747ZM149.851 18.3694C149.32 20.5511 147.453 22.1628 144.859 22.1628C141.871 22.1628 139.709 19.8828 139.709 17.0525C139.709 14.2222 141.871 11.9422 144.859 11.9422C147.453 11.9422 149.32 13.5539 149.851 15.7356H147.571C147.178 14.6743 146.215 13.9077 144.859 13.9077C143.109 13.9077 141.91 15.2246 141.91 17.0525C141.91 18.8804 143.109 20.1973 144.859 20.1973C146.215 20.1973 147.178 19.4307 147.571 18.3694H149.851ZM155.75 22.0645C156.418 22.0645 156.929 21.9859 157.362 21.8483V19.9221C157.047 20.0401 156.615 20.1187 156.202 20.1187C155.082 20.1187 154.551 19.6666 154.551 18.448V14.065H157.362V12.1388H154.551V9.40675H152.389V12.1388H150.345V14.065H152.389V18.8018C152.389 21.0228 153.863 22.0645 155.75 22.0645Z"></path></svg>`);
+  const _tmpl$$m = /* @__PURE__ */ template$1(`<svg width="158" height="28" viewBox="0 0 158 28" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M28 14.001C28 21.733 21.732 28.001 14 28.001C6.26801 28.001 0 21.733 0 14.001C0 6.26899 6.26801 0.000976562 14 0.000976562C21.732 0.000976562 28 6.26899 28 14.001ZM9.21931 8.00098H18.7801H18.7813C20.538 8.00098 21.6522 9.89966 20.7691 11.4302L14.8672 21.6576C14.4822 22.3254 13.5172 22.3254 13.1322 21.6576L7.23158 11.4302C6.34721 9.89726 7.4614 8.00098 9.21931 8.00098ZM13.1262 18.5882V9.74806H9.21811C8.78976 9.74806 8.53708 10.2029 8.74163 10.5578L11.8423 16.1035L13.1262 18.5882ZM16.1559 16.1047L19.2554 10.5566C19.4599 10.2017 19.2073 9.74685 18.7789 9.74685H14.8709V18.5906L16.1559 16.1047Z" fill="#0098EA"></path><path d="M18.7802 8.00098H9.21936C7.46145 8.00098 6.34727 9.89726 7.23164 11.4302L13.1322 21.6576C13.5173 22.3254 14.4823 22.3254 14.8673 21.6576L20.7691 11.4302C21.6523 9.89966 20.5381 8.00098 18.7814 8.00098H18.7802ZM13.1274 18.5906L11.8424 16.1035L8.74168 10.5578C8.53714 10.2029 8.78981 9.74806 9.21816 9.74806H13.1262V18.5918L13.1274 18.5906ZM19.2555 10.5566L16.156 16.1047L14.8709 18.5906V9.74685H18.779C19.2073 9.74685 19.46 10.2017 19.2555 10.5566Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M51.7483 22.1967C55.7182 22.1967 58.9609 18.954 58.9609 14.9841C58.9609 11.0142 55.7182 7.77148 51.7483 7.77148C47.7588 7.77148 44.5357 11.0142 44.5357 14.9841C44.5357 18.954 47.7588 22.1967 51.7483 22.1967ZM51.7483 19.1702C49.4686 19.1702 47.6802 17.2442 47.6802 14.9841C47.6802 12.724 49.4686 10.798 51.7483 10.798C54.0084 10.798 55.7968 12.724 55.7968 14.9841C55.7968 17.2442 54.0084 19.1702 51.7483 19.1702ZM37.0698 21.9609H40.2142V10.9946H44.2843V8.00732H33V10.9946H37.0698V21.9609ZM69.9379 8.00732H73.0823V21.9609H70.3899L63.59 13.3333V21.9609H60.4652V8.00732H63.1576L69.9379 16.6153V8.00732ZM79.2259 14.9887C79.2259 10.9202 82.351 7.77539 86.4982 7.77539C89.8592 7.77539 92.5519 9.95709 93.2202 12.6891H90.7437C90.154 11.0971 88.4637 9.9964 86.4982 9.9964C83.5893 9.9964 81.5452 12.1781 81.5452 14.9887C81.5452 17.7994 83.5893 19.9811 86.4982 19.9811C88.4637 19.9811 90.154 18.8804 90.7437 17.2884H93.2202C92.5519 20.0204 89.8592 22.2021 86.4982 22.2021C82.351 22.2021 79.2259 19.0573 79.2259 14.9887ZM104.584 17.0525C104.584 19.9025 102.343 22.1628 99.4342 22.1628C96.5253 22.1628 94.2846 19.9025 94.2846 17.0525C94.2846 14.2025 96.5253 11.9422 99.4342 11.9422C102.343 11.9422 104.584 14.2025 104.584 17.0525ZM96.4663 17.0525C96.4663 18.8018 97.6849 20.158 99.4342 20.158C101.164 20.158 102.382 18.8018 102.382 17.0525C102.382 15.3032 101.164 13.947 99.4342 13.947C97.6849 13.947 96.4663 15.3032 96.4663 17.0525ZM108.626 12.1388H106.463V21.9662H108.626V17.1311C108.626 15.0281 109.726 13.9077 111.161 13.9077C112.419 13.9077 113.205 14.8512 113.205 16.4039V21.9662H115.367V16.0501C115.367 13.5539 113.893 11.9422 111.613 11.9422C110.335 11.9422 109.215 12.4926 108.626 13.4753V12.1388ZM117.839 12.1388H120.001V13.4753C120.59 12.4926 121.711 11.9422 122.988 11.9422C125.268 11.9422 126.742 13.5539 126.742 16.0501V21.9662H124.58V16.4039C124.58 14.8512 123.794 13.9077 122.536 13.9077C121.101 13.9077 120.001 15.0281 120.001 17.1311V21.9662H117.839V12.1388ZM133.558 22.1628C136.054 22.1628 137.823 20.728 138.373 18.8804H136.113C135.661 19.8238 134.717 20.2563 133.636 20.2563C131.887 20.2563 130.747 19.077 130.668 17.5832H138.491C138.688 14.2419 136.585 11.9422 133.577 11.9422C130.551 11.9422 128.526 14.1436 128.526 17.0525C128.526 20.0007 130.629 22.1628 133.558 22.1628ZM130.747 16.0501C131.042 14.5367 132.162 13.7505 133.518 13.7505C134.717 13.7505 135.838 14.4581 136.172 16.0501H130.747ZM149.851 18.3694C149.32 20.5511 147.453 22.1628 144.859 22.1628C141.871 22.1628 139.709 19.8828 139.709 17.0525C139.709 14.2222 141.871 11.9422 144.859 11.9422C147.453 11.9422 149.32 13.5539 149.851 15.7356H147.571C147.178 14.6743 146.215 13.9077 144.859 13.9077C143.109 13.9077 141.91 15.2246 141.91 17.0525C141.91 18.8804 143.109 20.1973 144.859 20.1973C146.215 20.1973 147.178 19.4307 147.571 18.3694H149.851ZM155.75 22.0645C156.418 22.0645 156.929 21.9859 157.362 21.8483V19.9221C157.047 20.0401 156.615 20.1187 156.202 20.1187C155.082 20.1187 154.551 19.6666 154.551 18.448V14.065H157.362V12.1388H154.551V9.40675H152.389V12.1388H150.345V14.065H152.389V18.8018C152.389 21.0228 153.863 22.0645 155.75 22.0645Z"></path></svg>`);
   const TonConnectBrand = () => {
     const theme = useTheme();
     const fill = () => theme.theme === THEME.DARK ? theme.colors.constant.white : theme.colors.constant.black;
     return (() => {
-      const _el$ = _tmpl$$l.cloneNode(true), _el$2 = _el$.firstChild, _el$3 = _el$2.nextSibling, _el$4 = _el$3.nextSibling;
+      const _el$ = _tmpl$$m.cloneNode(true), _el$2 = _el$.firstChild, _el$3 = _el$2.nextSibling, _el$4 = _el$3.nextSibling;
       createRenderEffect(() => setAttribute(_el$4, "fill", fill()));
       return _el$;
     })();
   };
-  const _tmpl$$k = /* @__PURE__ */ template$1(`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M5.56608 4.42584C5.82527 3.32158 6.8176 2.5 8.00001 2.5C9.38072 2.5 10.5 3.61929 10.5 5C10.5 5.63026 10.3391 6.0386 10.1264 6.34455C9.90018 6.66993 9.58561 6.92478 9.18864 7.20877C9.12579 7.25372 9.05873 7.30025 8.9887 7.34883C8.27392 7.84472 7.25001 8.55507 7.25001 10V10.25C7.25001 10.6642 7.5858 11 8.00001 11C8.41422 11 8.75001 10.6642 8.75001 10.25V10C8.75001 9.36502 9.10777 9.1096 9.94554 8.51149L10.0614 8.42873C10.4769 8.13147 10.9748 7.75194 11.358 7.20076C11.7547 6.63015 12 5.91973 12 5C12 2.79086 10.2091 1 8.00001 1C6.10564 1 4.5205 2.31615 4.10577 4.08308C4.01112 4.48634 4.26129 4.88997 4.66454 4.98462C5.0678 5.07927 5.47143 4.8291 5.56608 4.42584ZM8.00001 15C8.60752 15 9.10001 14.5075 9.10001 13.9C9.10001 13.2925 8.60752 12.8 8.00001 12.8C7.39249 12.8 6.90001 13.2925 6.90001 13.9C6.90001 14.5075 7.39249 15 8.00001 15Z"></path></svg>`);
+  const _tmpl$$l = /* @__PURE__ */ template$1(`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M5.56608 4.42584C5.82527 3.32158 6.8176 2.5 8.00001 2.5C9.38072 2.5 10.5 3.61929 10.5 5C10.5 5.63026 10.3391 6.0386 10.1264 6.34455C9.90018 6.66993 9.58561 6.92478 9.18864 7.20877C9.12579 7.25372 9.05873 7.30025 8.9887 7.34883C8.27392 7.84472 7.25001 8.55507 7.25001 10V10.25C7.25001 10.6642 7.5858 11 8.00001 11C8.41422 11 8.75001 10.6642 8.75001 10.25V10C8.75001 9.36502 9.10777 9.1096 9.94554 8.51149L10.0614 8.42873C10.4769 8.13147 10.9748 7.75194 11.358 7.20076C11.7547 6.63015 12 5.91973 12 5C12 2.79086 10.2091 1 8.00001 1C6.10564 1 4.5205 2.31615 4.10577 4.08308C4.01112 4.48634 4.26129 4.88997 4.66454 4.98462C5.0678 5.07927 5.47143 4.8291 5.56608 4.42584ZM8.00001 15C8.60752 15 9.10001 14.5075 9.10001 13.9C9.10001 13.2925 8.60752 12.8 8.00001 12.8C7.39249 12.8 6.90001 13.2925 6.90001 13.9C6.90001 14.5075 7.39249 15 8.00001 15Z"></path></svg>`);
   const QuestionIcon = (props) => {
     const theme = useTheme();
     const fill = () => props.fill || theme.colors.icon.secondary;
+    return (() => {
+      const _el$ = _tmpl$$l.cloneNode(true), _el$2 = _el$.firstChild;
+      createRenderEffect(() => setAttribute(_el$2, "fill", fill()));
+      return _el$;
+    })();
+  };
+  const _tmpl$$k = /* @__PURE__ */ template$1(`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M9.98156 8.75C9.84854 11.4328 9.01206 13.5 8 13.5C6.98794 13.5 6.15146 11.4328 6.01844 8.75H9.98156ZM11.4832 8.75C11.4217 10.1155 11.1929 11.3869 10.8239 12.4017C10.7734 12.5405 10.7188 12.6789 10.6595 12.8154C12.1454 11.993 13.2103 10.5029 13.4493 8.75H11.4832ZM13.4493 7.25H11.4832C11.4217 5.88453 11.1929 4.61314 10.8239 3.5983C10.7734 3.4595 10.7188 3.32111 10.6595 3.18459C12.1454 4.00697 13.2103 5.49709 13.4493 7.25ZM9.98156 7.25H6.01844C6.15144 4.56764 6.98769 2.50062 7.99955 2.5H8C9.01206 2.5 9.84854 4.56724 9.98156 7.25ZM4.51678 7.25C4.57826 5.88453 4.80706 4.61314 5.1761 3.5983C5.22657 3.4595 5.28124 3.32111 5.3405 3.18459C3.85463 4.00697 2.78972 5.49709 2.55071 7.25H4.51678ZM2.55071 8.75C2.78972 10.5029 3.85463 11.993 5.3405 12.8154C5.28124 12.6789 5.22657 12.5405 5.1761 12.4017C4.80706 11.3869 4.57826 10.1155 4.51678 8.75H2.55071ZM15 8C15 11.866 11.866 15 8 15C4.13401 15 1 11.866 1 8C1 4.13401 4.13401 1 8 1C11.866 1 15 4.13401 15 8Z"></path></svg>`);
+  const BrowserIcon = (props) => {
+    const theme = useTheme();
+    const fill = () => props.fill || theme.colors.icon.primary;
     return (() => {
       const _el$ = _tmpl$$k.cloneNode(true), _el$2 = _el$.firstChild;
       createRenderEffect(() => setAttribute(_el$2, "fill", fill()));
       return _el$;
     })();
   };
-  const _tmpl$$j = /* @__PURE__ */ template$1(`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M9.98156 8.75C9.84854 11.4328 9.01206 13.5 8 13.5C6.98794 13.5 6.15146 11.4328 6.01844 8.75H9.98156ZM11.4832 8.75C11.4217 10.1155 11.1929 11.3869 10.8239 12.4017C10.7734 12.5405 10.7188 12.6789 10.6595 12.8154C12.1454 11.993 13.2103 10.5029 13.4493 8.75H11.4832ZM13.4493 7.25H11.4832C11.4217 5.88453 11.1929 4.61314 10.8239 3.5983C10.7734 3.4595 10.7188 3.32111 10.6595 3.18459C12.1454 4.00697 13.2103 5.49709 13.4493 7.25ZM9.98156 7.25H6.01844C6.15144 4.56764 6.98769 2.50062 7.99955 2.5H8C9.01206 2.5 9.84854 4.56724 9.98156 7.25ZM4.51678 7.25C4.57826 5.88453 4.80706 4.61314 5.1761 3.5983C5.22657 3.4595 5.28124 3.32111 5.3405 3.18459C3.85463 4.00697 2.78972 5.49709 2.55071 7.25H4.51678ZM2.55071 8.75C2.78972 10.5029 3.85463 11.993 5.3405 12.8154C5.28124 12.6789 5.22657 12.5405 5.1761 12.4017C4.80706 11.3869 4.57826 10.1155 4.51678 8.75H2.55071ZM15 8C15 11.866 11.866 15 8 15C4.13401 15 1 11.866 1 8C1 4.13401 4.13401 1 8 1C11.866 1 15 4.13401 15 8Z"></path></svg>`);
-  const BrowserIcon = (props) => {
+  const _tmpl$$j = /* @__PURE__ */ template$1(`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M2.5 4.8C2.5 3.11984 2.5 2.27976 2.82698 1.63803C3.1146 1.07354 3.57354 0.614601 4.13803 0.32698C4.77976 0 5.61984 0 7.3 0H8.7C10.3802 0 11.2202 0 11.862 0.32698C12.4265 0.614601 12.8854 1.07354 13.173 1.63803C13.5 2.27976 13.5 3.11984 13.5 4.8V11.2C13.5 12.8802 13.5 13.7202 13.173 14.362C12.8854 14.9265 12.4265 15.3854 11.862 15.673C11.2202 16 10.3802 16 8.7 16H7.3C5.61984 16 4.77976 16 4.13803 15.673C3.57354 15.3854 3.1146 14.9265 2.82698 14.362C2.5 13.7202 2.5 12.8802 2.5 11.2V4.8ZM4 3.9C4 3.05992 4 2.63988 4.16349 2.31901C4.3073 2.03677 4.53677 1.8073 4.81901 1.66349C5.13988 1.5 5.55992 1.5 6.4 1.5H9.6C10.4401 1.5 10.8601 1.5 11.181 1.66349C11.4632 1.8073 11.6927 2.03677 11.8365 2.31901C12 2.63988 12 3.05992 12 3.9V12.1C12 12.9401 12 13.3601 11.8365 13.681C11.6927 13.9632 11.4632 14.1927 11.181 14.3365C10.8601 14.5 10.4401 14.5 9.6 14.5H6.4C5.55992 14.5 5.13988 14.5 4.81901 14.3365C4.53677 14.1927 4.3073 13.9632 4.16349 13.681C4 13.3601 4 12.9401 4 12.1V3.9ZM7 2.5C6.58579 2.5 6.25 2.83579 6.25 3.25C6.25 3.66421 6.58579 4 7 4H9C9.41421 4 9.75 3.66421 9.75 3.25C9.75 2.83579 9.41421 2.5 9 2.5H7Z"></path></svg>`);
+  const MobileIcon = (props) => {
     const theme = useTheme();
     const fill = () => props.fill || theme.colors.icon.primary;
     return (() => {
@@ -5731,8 +5805,8 @@ var __async = (__this, __arguments, generator) => {
       return _el$;
     })();
   };
-  const _tmpl$$i = /* @__PURE__ */ template$1(`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M2.5 4.8C2.5 3.11984 2.5 2.27976 2.82698 1.63803C3.1146 1.07354 3.57354 0.614601 4.13803 0.32698C4.77976 0 5.61984 0 7.3 0H8.7C10.3802 0 11.2202 0 11.862 0.32698C12.4265 0.614601 12.8854 1.07354 13.173 1.63803C13.5 2.27976 13.5 3.11984 13.5 4.8V11.2C13.5 12.8802 13.5 13.7202 13.173 14.362C12.8854 14.9265 12.4265 15.3854 11.862 15.673C11.2202 16 10.3802 16 8.7 16H7.3C5.61984 16 4.77976 16 4.13803 15.673C3.57354 15.3854 3.1146 14.9265 2.82698 14.362C2.5 13.7202 2.5 12.8802 2.5 11.2V4.8ZM4 3.9C4 3.05992 4 2.63988 4.16349 2.31901C4.3073 2.03677 4.53677 1.8073 4.81901 1.66349C5.13988 1.5 5.55992 1.5 6.4 1.5H9.6C10.4401 1.5 10.8601 1.5 11.181 1.66349C11.4632 1.8073 11.6927 2.03677 11.8365 2.31901C12 2.63988 12 3.05992 12 3.9V12.1C12 12.9401 12 13.3601 11.8365 13.681C11.6927 13.9632 11.4632 14.1927 11.181 14.3365C10.8601 14.5 10.4401 14.5 9.6 14.5H6.4C5.55992 14.5 5.13988 14.5 4.81901 14.3365C4.53677 14.1927 4.3073 13.9632 4.16349 13.681C4 13.3601 4 12.9401 4 12.1V3.9ZM7 2.5C6.58579 2.5 6.25 2.83579 6.25 3.25C6.25 3.66421 6.58579 4 7 4H9C9.41421 4 9.75 3.66421 9.75 3.25C9.75 2.83579 9.41421 2.5 9 2.5H7Z"></path></svg>`);
-  const MobileIcon = (props) => {
+  const _tmpl$$i = /* @__PURE__ */ template$1(`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M1.5 6.8C1.5 5.11984 1.5 4.27976 1.82698 3.63803C2.1146 3.07354 2.57354 2.6146 3.13803 2.32698C3.77976 2 4.61984 2 6.3 2H9.7C11.3802 2 12.2202 2 12.862 2.32698C13.4265 2.6146 13.8854 3.07354 14.173 3.63803C14.5 4.27976 14.5 5.11984 14.5 6.8V11.5H15.25C15.6642 11.5 16 11.8358 16 12.25C16 12.6642 15.6642 13 15.25 13H0.75C0.335786 13 0 12.6642 0 12.25C0 11.8358 0.335786 11.5 0.75 11.5H1.5V6.8ZM3 11.5H13V5.9C13 5.05992 13 4.63988 12.8365 4.31901C12.6927 4.03677 12.4632 3.8073 12.181 3.66349C11.8601 3.5 11.4401 3.5 10.6 3.5H5.4C4.55992 3.5 4.13988 3.5 3.81901 3.66349C3.53677 3.8073 3.3073 4.03677 3.16349 4.31901C3 4.63988 3 5.05992 3 5.9V11.5Z"></path></svg>`);
+  const DesktopIcon = (props) => {
     const theme = useTheme();
     const fill = () => props.fill || theme.colors.icon.primary;
     return (() => {
@@ -5741,48 +5815,56 @@ var __async = (__this, __arguments, generator) => {
       return _el$;
     })();
   };
-  const _tmpl$$h = /* @__PURE__ */ template$1(`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M1.5 6.8C1.5 5.11984 1.5 4.27976 1.82698 3.63803C2.1146 3.07354 2.57354 2.6146 3.13803 2.32698C3.77976 2 4.61984 2 6.3 2H9.7C11.3802 2 12.2202 2 12.862 2.32698C13.4265 2.6146 13.8854 3.07354 14.173 3.63803C14.5 4.27976 14.5 5.11984 14.5 6.8V11.5H15.25C15.6642 11.5 16 11.8358 16 12.25C16 12.6642 15.6642 13 15.25 13H0.75C0.335786 13 0 12.6642 0 12.25C0 11.8358 0.335786 11.5 0.75 11.5H1.5V6.8ZM3 11.5H13V5.9C13 5.05992 13 4.63988 12.8365 4.31901C12.6927 4.03677 12.4632 3.8073 12.181 3.66349C11.8601 3.5 11.4401 3.5 10.6 3.5H5.4C4.55992 3.5 4.13988 3.5 3.81901 3.66349C3.53677 3.8073 3.3073 4.03677 3.16349 4.31901C3 4.63988 3 5.05992 3 5.9V11.5Z"></path></svg>`);
-  const DesktopIcon = (props) => {
-    const theme = useTheme();
-    const fill = () => props.fill || theme.colors.icon.primary;
-    return (() => {
-      const _el$ = _tmpl$$h.cloneNode(true), _el$2 = _el$.firstChild;
-      createRenderEffect(() => setAttribute(_el$2, "fill", fill()));
-      return _el$;
-    })();
-  };
-  const _tmpl$$g = /* @__PURE__ */ template$1(`<svg xmlns="http://www.w3.org/2000/svg" width="17" height="16" viewBox="0 0 17 16" fill="none"><g clip-path="url(#clip0_3676_1603)"><path fill-rule="evenodd" clip-rule="evenodd" d="M15.5 1.25049C15.5 0.836275 15.1642 0.500488 14.75 0.500488C14.3358 0.500488 14 0.836275 14 1.25049V3.67012C12.7187 2.04487 10.7318 1.00049 8.5 1.00049C4.63401 1.00049 1.5 4.1345 1.5 8.00049C1.5 11.8665 4.63401 15.0005 8.5 15.0005C11.6844 15.0005 14.3703 12.8748 15.2199 9.96661C15.3361 9.56902 15.1079 9.15254 14.7103 9.03638C14.3127 8.92023 13.8962 9.14838 13.7801 9.54597C13.1123 11.8319 11 13.5005 8.5 13.5005C5.46243 13.5005 3 11.0381 3 8.00049C3 4.96292 5.46243 2.50049 8.5 2.50049C10.321 2.50049 11.9363 3.3855 12.9377 4.75049H10.5C10.0858 4.75049 9.75 5.08627 9.75 5.50049C9.75 5.9147 10.0858 6.25049 10.5 6.25049H14.75C15.1642 6.25049 15.5 5.9147 15.5 5.50049V1.25049Z"></path></g><defs><clipPath id="clip0_3676_1603"><rect width="16" height="16" fill="white" transform="translate(0.5 0.000488281)"></rect></clipPath></defs></svg>`);
+  const _tmpl$$h = /* @__PURE__ */ template$1(`<svg xmlns="http://www.w3.org/2000/svg" width="17" height="16" viewBox="0 0 17 16" fill="none"><g clip-path="url(#clip0_3676_1603)"><path fill-rule="evenodd" clip-rule="evenodd" d="M15.5 1.25049C15.5 0.836275 15.1642 0.500488 14.75 0.500488C14.3358 0.500488 14 0.836275 14 1.25049V3.67012C12.7187 2.04487 10.7318 1.00049 8.5 1.00049C4.63401 1.00049 1.5 4.1345 1.5 8.00049C1.5 11.8665 4.63401 15.0005 8.5 15.0005C11.6844 15.0005 14.3703 12.8748 15.2199 9.96661C15.3361 9.56902 15.1079 9.15254 14.7103 9.03638C14.3127 8.92023 13.8962 9.14838 13.7801 9.54597C13.1123 11.8319 11 13.5005 8.5 13.5005C5.46243 13.5005 3 11.0381 3 8.00049C3 4.96292 5.46243 2.50049 8.5 2.50049C10.321 2.50049 11.9363 3.3855 12.9377 4.75049H10.5C10.0858 4.75049 9.75 5.08627 9.75 5.50049C9.75 5.9147 10.0858 6.25049 10.5 6.25049H14.75C15.1642 6.25049 15.5 5.9147 15.5 5.50049V1.25049Z"></path></g><defs><clipPath id="clip0_3676_1603"><rect width="16" height="16" fill="white" transform="translate(0.5 0.000488281)"></rect></clipPath></defs></svg>`);
   const RetryIcon = (props) => {
     const theme = useTheme();
     const fill = () => props.fill || theme.colors.accent;
     return (() => {
-      const _el$ = _tmpl$$g.cloneNode(true), _el$2 = _el$.firstChild, _el$3 = _el$2.firstChild;
+      const _el$ = _tmpl$$h.cloneNode(true), _el$2 = _el$.firstChild, _el$3 = _el$2.firstChild;
       createRenderEffect(() => setAttribute(_el$3, "fill", fill()));
       return _el$;
     })();
   };
-  const _tmpl$$f = /* @__PURE__ */ template$1(`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M13 4.06119V6.75053C13 7.16474 13.3358 7.50053 13.75 7.50053C14.1642 7.50053 14.5 7.16474 14.5 6.75053V2.75053L14.5 2.72807C14.5001 2.63191 14.5003 2.49627 14.4842 2.37627C14.4638 2.22503 14.4063 1.99261 14.2071 1.79342C14.0079 1.59423 13.7755 1.5367 13.6243 1.51637C13.5043 1.50023 13.3686 1.50039 13.2725 1.50051L13.25 1.50053H9.25C8.83579 1.50053 8.5 1.83631 8.5 2.25053C8.5 2.66474 8.83579 3.00053 9.25 3.00053H11.9393L7.21967 7.7202C6.92678 8.01309 6.92678 8.48796 7.21967 8.78086C7.51256 9.07375 7.98744 9.07375 8.28033 8.78086L13 4.06119ZM5.85 1.50053H5.81903H5.81899C5.21528 1.50052 4.71702 1.50051 4.31113 1.53367C3.88956 1.56812 3.50203 1.64204 3.13803 1.82751C2.57354 2.11513 2.1146 2.57407 1.82698 3.13856C1.64151 3.50256 1.56759 3.89009 1.53315 4.31166C1.49998 4.71755 1.49999 5.21581 1.5 5.81953V5.81955V5.85053V10.1505V10.1815V10.1815C1.49999 10.7852 1.49998 11.2835 1.53315 11.6894C1.56759 12.111 1.64151 12.4985 1.82698 12.8625C2.1146 13.427 2.57354 13.8859 3.13803 14.1735C3.50203 14.359 3.88956 14.4329 4.31113 14.4674C4.71702 14.5005 5.21527 14.5005 5.81897 14.5005H5.81901H5.85H10.15H10.181H10.181C10.7847 14.5005 11.283 14.5005 11.6889 14.4674C12.1104 14.4329 12.498 14.359 12.862 14.1735C13.4265 13.8859 13.8854 13.427 14.173 12.8625C14.3585 12.4985 14.4324 12.111 14.4669 11.6894C14.5 11.2835 14.5 10.7853 14.5 10.1816V10.1815V10.1505V9.75053C14.5 9.33631 14.1642 9.00053 13.75 9.00053C13.3358 9.00053 13 9.33631 13 9.75053V10.1505C13 10.793 12.9994 11.2297 12.9718 11.5672C12.945 11.8961 12.8963 12.0642 12.8365 12.1815C12.6927 12.4638 12.4632 12.6932 12.181 12.837C12.0637 12.8968 11.8955 12.9455 11.5667 12.9724C11.2292 12.9999 10.7924 13.0005 10.15 13.0005H5.85C5.20757 13.0005 4.77085 12.9999 4.43328 12.9724C4.10447 12.9455 3.93632 12.8968 3.81902 12.837C3.53677 12.6932 3.3073 12.4638 3.16349 12.1815C3.10372 12.0642 3.05503 11.8961 3.02816 11.5672C3.00058 11.2297 3 10.793 3 10.1505V5.85053C3 5.20809 3.00058 4.77137 3.02816 4.43381C3.05503 4.10499 3.10372 3.93684 3.16349 3.81954C3.3073 3.5373 3.53677 3.30783 3.81902 3.16402C3.93632 3.10425 4.10447 3.05556 4.43328 3.02869C4.77085 3.00111 5.20757 3.00053 5.85 3.00053H6.25C6.66422 3.00053 7 2.66474 7 2.25053C7 1.83631 6.66422 1.50053 6.25 1.50053H5.85Z"></path></svg>`);
+  const _tmpl$$g = /* @__PURE__ */ template$1(`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M13 4.06119V6.75053C13 7.16474 13.3358 7.50053 13.75 7.50053C14.1642 7.50053 14.5 7.16474 14.5 6.75053V2.75053L14.5 2.72807C14.5001 2.63191 14.5003 2.49627 14.4842 2.37627C14.4638 2.22503 14.4063 1.99261 14.2071 1.79342C14.0079 1.59423 13.7755 1.5367 13.6243 1.51637C13.5043 1.50023 13.3686 1.50039 13.2725 1.50051L13.25 1.50053H9.25C8.83579 1.50053 8.5 1.83631 8.5 2.25053C8.5 2.66474 8.83579 3.00053 9.25 3.00053H11.9393L7.21967 7.7202C6.92678 8.01309 6.92678 8.48796 7.21967 8.78086C7.51256 9.07375 7.98744 9.07375 8.28033 8.78086L13 4.06119ZM5.85 1.50053H5.81903H5.81899C5.21528 1.50052 4.71702 1.50051 4.31113 1.53367C3.88956 1.56812 3.50203 1.64204 3.13803 1.82751C2.57354 2.11513 2.1146 2.57407 1.82698 3.13856C1.64151 3.50256 1.56759 3.89009 1.53315 4.31166C1.49998 4.71755 1.49999 5.21581 1.5 5.81953V5.81955V5.85053V10.1505V10.1815V10.1815C1.49999 10.7852 1.49998 11.2835 1.53315 11.6894C1.56759 12.111 1.64151 12.4985 1.82698 12.8625C2.1146 13.427 2.57354 13.8859 3.13803 14.1735C3.50203 14.359 3.88956 14.4329 4.31113 14.4674C4.71702 14.5005 5.21527 14.5005 5.81897 14.5005H5.81901H5.85H10.15H10.181H10.181C10.7847 14.5005 11.283 14.5005 11.6889 14.4674C12.1104 14.4329 12.498 14.359 12.862 14.1735C13.4265 13.8859 13.8854 13.427 14.173 12.8625C14.3585 12.4985 14.4324 12.111 14.4669 11.6894C14.5 11.2835 14.5 10.7853 14.5 10.1816V10.1815V10.1505V9.75053C14.5 9.33631 14.1642 9.00053 13.75 9.00053C13.3358 9.00053 13 9.33631 13 9.75053V10.1505C13 10.793 12.9994 11.2297 12.9718 11.5672C12.945 11.8961 12.8963 12.0642 12.8365 12.1815C12.6927 12.4638 12.4632 12.6932 12.181 12.837C12.0637 12.8968 11.8955 12.9455 11.5667 12.9724C11.2292 12.9999 10.7924 13.0005 10.15 13.0005H5.85C5.20757 13.0005 4.77085 12.9999 4.43328 12.9724C4.10447 12.9455 3.93632 12.8968 3.81902 12.837C3.53677 12.6932 3.3073 12.4638 3.16349 12.1815C3.10372 12.0642 3.05503 11.8961 3.02816 11.5672C3.00058 11.2297 3 10.793 3 10.1505V5.85053C3 5.20809 3.00058 4.77137 3.02816 4.43381C3.05503 4.10499 3.10372 3.93684 3.16349 3.81954C3.3073 3.5373 3.53677 3.30783 3.81902 3.16402C3.93632 3.10425 4.10447 3.05556 4.43328 3.02869C4.77085 3.00111 5.20757 3.00053 5.85 3.00053H6.25C6.66422 3.00053 7 2.66474 7 2.25053C7 1.83631 6.66422 1.50053 6.25 1.50053H5.85Z"></path></svg>`);
   const LinkIcon = (props) => {
     const theme = useTheme();
     const fill = () => props.fill || theme.colors.accent;
     return (() => {
-      const _el$ = _tmpl$$f.cloneNode(true), _el$2 = _el$.firstChild;
+      const _el$ = _tmpl$$g.cloneNode(true), _el$2 = _el$.firstChild;
       createRenderEffect(() => setAttribute(_el$2, "fill", fill()));
       return _el$;
     })();
   };
-  const _tmpl$$e = /* @__PURE__ */ template$1(`<svg xmlns="http://www.w3.org/2000/svg" width="17" height="16" viewBox="0 0 17 16" fill="none"><g clip-path="url(#clip0_3676_1274)"><path fill-rule="evenodd" clip-rule="evenodd" d="M1.82698 2.63901C1.5 3.28074 1.5 4.12082 1.5 5.80098V8.80098V9.00098V10.201C1.5 11.8811 1.5 12.7212 1.82698 13.3629C2.1146 13.9274 2.57354 14.3864 3.13803 14.674C3.77976 15.001 4.61984 15.001 6.3 15.001H11.7C13.3802 15.001 14.2202 15.001 14.862 14.674C15.4265 14.3864 15.8854 13.9274 16.173 13.3629C16.5 12.7212 16.5 11.8811 16.5 10.201V8.80098C16.5 7.12082 16.5 6.28074 16.173 5.63901C15.8854 5.07452 15.4265 4.61558 14.862 4.32796C14.743 4.26733 14.6172 4.21795 14.4805 4.17772C14.4501 3.49449 14.3722 3.02994 14.173 2.63901C13.8854 2.07452 13.4265 1.61558 12.862 1.32796C12.2202 1.00098 11.3802 1.00098 9.7 1.00098H6.3C4.61984 1.00098 3.77976 1.00098 3.13803 1.32796C2.57354 1.61558 2.1146 2.07452 1.82698 2.63901ZM12.9861 4.00942C12.9684 3.7108 12.9281 3.49982 12.8365 3.31999C12.6927 3.03775 12.4632 2.80828 12.181 2.66447C11.8601 2.50098 11.4401 2.50098 10.6 2.50098H5.4C4.55992 2.50098 4.13988 2.50098 3.81901 2.66447C3.53677 2.80828 3.3073 3.03775 3.16349 3.31999C3.03615 3.56991 3.00799 3.88 3.00177 4.40188C3.04646 4.37612 3.09189 4.35146 3.13803 4.32796C3.77976 4.00098 4.61984 4.00098 6.3 4.00098H11.7C12.1966 4.00098 12.6197 4.00098 12.9861 4.00942ZM3 7.90098V8.10098C3 8.47468 3 8.76527 3.01439 9.00098H3V11.101C3 11.9411 3 12.3611 3.16349 12.682C3.3073 12.9642 3.53677 13.1937 3.81901 13.3375C4.13988 13.501 4.55992 13.501 5.4 13.501H12.6C13.4401 13.501 13.8601 13.501 14.181 13.3375C14.4632 13.1937 14.6927 12.9642 14.8365 12.682C15 12.3611 15 11.9411 15 11.101V7.90098C15 7.0609 15 6.64086 14.8365 6.31999C14.6927 6.03775 14.4632 5.80828 14.181 5.66447C13.8601 5.50098 13.4401 5.50098 12.6 5.50098H5.4C4.55992 5.50098 4.13988 5.50098 3.81901 5.66447C3.53677 5.80828 3.3073 6.03775 3.16349 6.31999C3 6.64086 3 7.0609 3 7.90098ZM10.5 9.75098C10.5 9.33676 10.8358 9.00098 11.25 9.00098H12.75C13.1642 9.00098 13.5 9.33676 13.5 9.75098C13.5 10.1652 13.1642 10.501 12.75 10.501H11.25C10.8358 10.501 10.5 10.1652 10.5 9.75098Z"></path></g><defs><clipPath id="clip0_3676_1274"><rect width="16" height="16" fill="white" transform="translate(0.5 0.000976562)"></rect></clipPath></defs></svg>`);
+  const _tmpl$$f = /* @__PURE__ */ template$1(`<svg xmlns="http://www.w3.org/2000/svg" width="17" height="16" viewBox="0 0 17 16" fill="none"><g clip-path="url(#clip0_3676_1274)"><path fill-rule="evenodd" clip-rule="evenodd" d="M1.82698 2.63901C1.5 3.28074 1.5 4.12082 1.5 5.80098V8.80098V9.00098V10.201C1.5 11.8811 1.5 12.7212 1.82698 13.3629C2.1146 13.9274 2.57354 14.3864 3.13803 14.674C3.77976 15.001 4.61984 15.001 6.3 15.001H11.7C13.3802 15.001 14.2202 15.001 14.862 14.674C15.4265 14.3864 15.8854 13.9274 16.173 13.3629C16.5 12.7212 16.5 11.8811 16.5 10.201V8.80098C16.5 7.12082 16.5 6.28074 16.173 5.63901C15.8854 5.07452 15.4265 4.61558 14.862 4.32796C14.743 4.26733 14.6172 4.21795 14.4805 4.17772C14.4501 3.49449 14.3722 3.02994 14.173 2.63901C13.8854 2.07452 13.4265 1.61558 12.862 1.32796C12.2202 1.00098 11.3802 1.00098 9.7 1.00098H6.3C4.61984 1.00098 3.77976 1.00098 3.13803 1.32796C2.57354 1.61558 2.1146 2.07452 1.82698 2.63901ZM12.9861 4.00942C12.9684 3.7108 12.9281 3.49982 12.8365 3.31999C12.6927 3.03775 12.4632 2.80828 12.181 2.66447C11.8601 2.50098 11.4401 2.50098 10.6 2.50098H5.4C4.55992 2.50098 4.13988 2.50098 3.81901 2.66447C3.53677 2.80828 3.3073 3.03775 3.16349 3.31999C3.03615 3.56991 3.00799 3.88 3.00177 4.40188C3.04646 4.37612 3.09189 4.35146 3.13803 4.32796C3.77976 4.00098 4.61984 4.00098 6.3 4.00098H11.7C12.1966 4.00098 12.6197 4.00098 12.9861 4.00942ZM3 7.90098V8.10098C3 8.47468 3 8.76527 3.01439 9.00098H3V11.101C3 11.9411 3 12.3611 3.16349 12.682C3.3073 12.9642 3.53677 13.1937 3.81901 13.3375C4.13988 13.501 4.55992 13.501 5.4 13.501H12.6C13.4401 13.501 13.8601 13.501 14.181 13.3375C14.4632 13.1937 14.6927 12.9642 14.8365 12.682C15 12.3611 15 11.9411 15 11.101V7.90098C15 7.0609 15 6.64086 14.8365 6.31999C14.6927 6.03775 14.4632 5.80828 14.181 5.66447C13.8601 5.50098 13.4401 5.50098 12.6 5.50098H5.4C4.55992 5.50098 4.13988 5.50098 3.81901 5.66447C3.53677 5.80828 3.3073 6.03775 3.16349 6.31999C3 6.64086 3 7.0609 3 7.90098ZM10.5 9.75098C10.5 9.33676 10.8358 9.00098 11.25 9.00098H12.75C13.1642 9.00098 13.5 9.33676 13.5 9.75098C13.5 10.1652 13.1642 10.501 12.75 10.501H11.25C10.8358 10.501 10.5 10.1652 10.5 9.75098Z"></path></g><defs><clipPath id="clip0_3676_1274"><rect width="16" height="16" fill="white" transform="translate(0.5 0.000976562)"></rect></clipPath></defs></svg>`);
   const WalletIcon = (props) => {
     const theme = useTheme();
     const fill = () => props.fill || theme.colors.accent;
     return (() => {
-      const _el$ = _tmpl$$e.cloneNode(true), _el$2 = _el$.firstChild, _el$3 = _el$2.firstChild;
+      const _el$ = _tmpl$$f.cloneNode(true), _el$2 = _el$.firstChild, _el$3 = _el$2.firstChild;
       createRenderEffect(() => setAttribute(_el$3, "fill", fill()));
       return _el$;
     })();
   };
-  const _tmpl$$d = /* @__PURE__ */ template$1(`<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M39.6319 16.8719C38.3212 16.2041 36.7002 16.0478 34 16.0112V11C34 5.47715 29.5228 1 24 1C18.4772 1 14 5.47715 14 11V16.0112C11.2998 16.0478 9.6788 16.2041 8.36808 16.8719C6.86278 17.6389 5.63893 18.8628 4.87195 20.3681C4 22.0794 4 24.3196 4 28.8V32.2C4 36.6804 4 38.9206 4.87195 40.6319C5.63893 42.1372 6.86278 43.3611 8.36808 44.1281C10.0794 45 12.3196 45 16.8 45H31.2C35.6804 45 37.9206 45 39.6319 44.1281C41.1372 43.3611 42.3611 42.1372 43.1281 40.6319C44 38.9206 44 36.6804 44 32.2V28.8C44 24.3196 44 22.0794 43.1281 20.3681C42.3611 18.8628 41.1372 17.6389 39.6319 16.8719ZM31 11V16H17V11C17 7.13401 20.134 4 24 4C27.866 4 31 7.13401 31 11ZM7.54497 21.73C7 22.7996 7 24.1997 7 27V34C7 36.8003 7 38.2004 7.54497 39.27C8.02433 40.2108 8.78924 40.9757 9.73005 41.455C10.7996 42 12.1997 42 15 42H33C35.8003 42 37.2004 42 38.27 41.455C39.2108 40.9757 39.9757 40.2108 40.455 39.27C41 38.2004 41 36.8003 41 34V27C41 24.1997 41 22.7996 40.455 21.73C39.9757 20.7892 39.2108 20.0243 38.27 19.545C37.2004 19 35.8003 19 33 19H15C12.1997 19 10.7996 19 9.73005 19.545C8.78924 20.0243 8.02433 20.7892 7.54497 21.73ZM24 24C23.1716 24 22.5 24.6716 22.5 25.5V29.5C22.5 30.3284 23.1716 31 24 31C24.8284 31 25.5 30.3284 25.5 29.5V25.5C25.5 24.6716 24.8284 24 24 24Z"></path></svg>`);
+  const _tmpl$$e = /* @__PURE__ */ template$1(`<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M39.6319 16.8719C38.3212 16.2041 36.7002 16.0478 34 16.0112V11C34 5.47715 29.5228 1 24 1C18.4772 1 14 5.47715 14 11V16.0112C11.2998 16.0478 9.6788 16.2041 8.36808 16.8719C6.86278 17.6389 5.63893 18.8628 4.87195 20.3681C4 22.0794 4 24.3196 4 28.8V32.2C4 36.6804 4 38.9206 4.87195 40.6319C5.63893 42.1372 6.86278 43.3611 8.36808 44.1281C10.0794 45 12.3196 45 16.8 45H31.2C35.6804 45 37.9206 45 39.6319 44.1281C41.1372 43.3611 42.3611 42.1372 43.1281 40.6319C44 38.9206 44 36.6804 44 32.2V28.8C44 24.3196 44 22.0794 43.1281 20.3681C42.3611 18.8628 41.1372 17.6389 39.6319 16.8719ZM31 11V16H17V11C17 7.13401 20.134 4 24 4C27.866 4 31 7.13401 31 11ZM7.54497 21.73C7 22.7996 7 24.1997 7 27V34C7 36.8003 7 38.2004 7.54497 39.27C8.02433 40.2108 8.78924 40.9757 9.73005 41.455C10.7996 42 12.1997 42 15 42H33C35.8003 42 37.2004 42 38.27 41.455C39.2108 40.9757 39.9757 40.2108 40.455 39.27C41 38.2004 41 36.8003 41 34V27C41 24.1997 41 22.7996 40.455 21.73C39.9757 20.7892 39.2108 20.0243 38.27 19.545C37.2004 19 35.8003 19 33 19H15C12.1997 19 10.7996 19 9.73005 19.545C8.78924 20.0243 8.02433 20.7892 7.54497 21.73ZM24 24C23.1716 24 22.5 24.6716 22.5 25.5V29.5C22.5 30.3284 23.1716 31 24 31C24.8284 31 25.5 30.3284 25.5 29.5V25.5C25.5 24.6716 24.8284 24 24 24Z"></path></svg>`);
   const SecurityIcon = (props) => {
+    const theme = useTheme();
+    const fill = () => props.fill || theme.colors.icon.secondary;
+    return (() => {
+      const _el$ = _tmpl$$e.cloneNode(true), _el$2 = _el$.firstChild;
+      createRenderEffect((_p$) => {
+        const _v$ = props.class, _v$2 = fill();
+        _v$ !== _p$._v$ && setAttribute(_el$, "class", _p$._v$ = _v$);
+        _v$2 !== _p$._v$2 && setAttribute(_el$2, "fill", _p$._v$2 = _v$2);
+        return _p$;
+      }, {
+        _v$: void 0,
+        _v$2: void 0
+      });
+      return _el$;
+    })();
+  };
+  const _tmpl$$d = /* @__PURE__ */ template$1(`<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M37.485 37.3849C40.894 33.9506 43 29.2212 43 24C43 13.5066 34.4934 5 24 5C13.5066 5 5 13.5066 5 24C5 29.2213 7.1061 33.9507 10.5151 37.385C13.3583 32.9438 18.3354 30 24.0001 30C29.6647 30 34.6418 32.9437 37.485 37.3849ZM35.1809 39.3635C32.9143 35.5532 28.7554 33 24.0001 33C19.2448 33 15.0858 35.5533 12.8193 39.3636C15.9564 41.6506 19.8206 43 24 43C28.1795 43 32.0437 41.6505 35.1809 39.3635ZM24 46C36.1503 46 46 36.1503 46 24C46 11.8497 36.1503 2 24 2C11.8497 2 2 11.8497 2 24C2 36.1503 11.8497 46 24 46ZM24 24C26.7614 24 29 21.7614 29 19C29 16.2386 26.7614 14 24 14C21.2386 14 19 16.2386 19 19C19 21.7614 21.2386 24 24 24ZM24 27C28.4183 27 32 23.4183 32 19C32 14.5817 28.4183 11 24 11C19.5817 11 16 14.5817 16 19C16 23.4183 19.5817 27 24 27Z"></path></svg>`);
+  const PersonalityIcon = (props) => {
     const theme = useTheme();
     const fill = () => props.fill || theme.colors.icon.secondary;
     return (() => {
@@ -5799,8 +5881,8 @@ var __async = (__this, __arguments, generator) => {
       return _el$;
     })();
   };
-  const _tmpl$$c = /* @__PURE__ */ template$1(`<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M37.485 37.3849C40.894 33.9506 43 29.2212 43 24C43 13.5066 34.4934 5 24 5C13.5066 5 5 13.5066 5 24C5 29.2213 7.1061 33.9507 10.5151 37.385C13.3583 32.9438 18.3354 30 24.0001 30C29.6647 30 34.6418 32.9437 37.485 37.3849ZM35.1809 39.3635C32.9143 35.5532 28.7554 33 24.0001 33C19.2448 33 15.0858 35.5533 12.8193 39.3636C15.9564 41.6506 19.8206 43 24 43C28.1795 43 32.0437 41.6505 35.1809 39.3635ZM24 46C36.1503 46 46 36.1503 46 24C46 11.8497 36.1503 2 24 2C11.8497 2 2 11.8497 2 24C2 36.1503 11.8497 46 24 46ZM24 24C26.7614 24 29 21.7614 29 19C29 16.2386 26.7614 14 24 14C21.2386 14 19 16.2386 19 19C19 21.7614 21.2386 24 24 24ZM24 27C28.4183 27 32 23.4183 32 19C32 14.5817 28.4183 11 24 11C19.5817 11 16 14.5817 16 19C16 23.4183 19.5817 27 24 27Z"></path></svg>`);
-  const PersonalityIcon = (props) => {
+  const _tmpl$$c = /* @__PURE__ */ template$1(`<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M34.5607 4.43934C33.9749 3.85355 33.0251 3.85355 32.4393 4.43934C31.8536 5.02513 31.8536 5.97487 32.4393 6.56066L37.8787 12H10.5C9.67157 12 9 12.6716 9 13.5C9 14.3284 9.67157 15 10.5 15H37.8787L32.4393 20.4393C31.8536 21.0251 31.8536 21.9749 32.4393 22.5607C33.0251 23.1464 33.9749 23.1464 34.5607 22.5607L42.5607 14.5607C43.1464 13.9749 43.1464 13.0251 42.5607 12.4393L34.5607 4.43934ZM13.4393 25.4393C14.0251 24.8536 14.9749 24.8536 15.5607 25.4393C16.1464 26.0251 16.1464 26.9749 15.5607 27.5607L10.1213 33H37.5C38.3284 33 39 33.6716 39 34.5C39 35.3284 38.3284 36 37.5 36H10.1213L15.5607 41.4393C16.1464 42.0251 16.1464 42.9749 15.5607 43.5607C14.9749 44.1464 14.0251 44.1464 13.4393 43.5607L5.43934 35.5607C4.85355 34.9749 4.85355 34.0251 5.43934 33.4393L13.4393 25.4393Z"></path></svg>`);
+  const SwapIcon = (props) => {
     const theme = useTheme();
     const fill = () => props.fill || theme.colors.icon.secondary;
     return (() => {
@@ -5817,10 +5899,10 @@ var __async = (__this, __arguments, generator) => {
       return _el$;
     })();
   };
-  const _tmpl$$b = /* @__PURE__ */ template$1(`<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M34.5607 4.43934C33.9749 3.85355 33.0251 3.85355 32.4393 4.43934C31.8536 5.02513 31.8536 5.97487 32.4393 6.56066L37.8787 12H10.5C9.67157 12 9 12.6716 9 13.5C9 14.3284 9.67157 15 10.5 15H37.8787L32.4393 20.4393C31.8536 21.0251 31.8536 21.9749 32.4393 22.5607C33.0251 23.1464 33.9749 23.1464 34.5607 22.5607L42.5607 14.5607C43.1464 13.9749 43.1464 13.0251 42.5607 12.4393L34.5607 4.43934ZM13.4393 25.4393C14.0251 24.8536 14.9749 24.8536 15.5607 25.4393C16.1464 26.0251 16.1464 26.9749 15.5607 27.5607L10.1213 33H37.5C38.3284 33 39 33.6716 39 34.5C39 35.3284 38.3284 36 37.5 36H10.1213L15.5607 41.4393C16.1464 42.0251 16.1464 42.9749 15.5607 43.5607C14.9749 44.1464 14.0251 44.1464 13.4393 43.5607L5.43934 35.5607C4.85355 34.9749 4.85355 34.0251 5.43934 33.4393L13.4393 25.4393Z"></path></svg>`);
-  const SwapIcon = (props) => {
+  const _tmpl$$b = /* @__PURE__ */ template$1(`<svg xmlns="http://www.w3.org/2000/svg" width="28" height="29" viewBox="0 0 28 29" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M1.75 12.002C1.75 9.20169 1.75 7.80156 2.29497 6.732C2.77433 5.79119 3.53924 5.02629 4.48005 4.54692C5.54961 4.00195 6.94974 4.00195 9.75 4.00195H17.25C20.0503 4.00195 21.4504 4.00195 22.52 4.54692C23.4608 5.02629 24.2257 5.79119 24.705 6.732C24.8256 6.96861 24.9195 7.2214 24.9926 7.50195H21.5C19.6377 7.50195 18.7065 7.50195 17.9609 7.77334C16.711 8.22828 15.7263 9.21291 15.2714 10.4629C15 11.2085 15 12.1396 15 14.002C15 15.8643 15 16.7954 15.2714 17.541C15.7263 18.791 16.711 19.7756 17.9609 20.2306C18.7065 20.502 19.6377 20.502 21.5 20.502H24.9926C24.9195 20.7825 24.8256 21.0353 24.705 21.2719C24.2257 22.2127 23.4608 22.9776 22.52 23.457C21.4504 24.002 20.0503 24.002 17.25 24.002H9.75C6.94974 24.002 5.54961 24.002 4.48005 23.457C3.53924 22.9776 2.77433 22.2127 2.29497 21.2719C1.75 20.2023 1.75 18.8022 1.75 16.002V12.002ZM16.4999 13.802C16.4999 12.1218 16.4999 11.2817 16.8269 10.64C17.1145 10.0755 17.5735 9.61656 18.138 9.32894C18.7797 9.00196 19.6198 9.00196 21.2999 9.00196H23.1999C24.8801 9.00196 25.7202 9.00196 26.3619 9.32894C26.9264 9.61656 27.3853 10.0755 27.673 10.64C27.9999 11.2817 27.9999 12.1218 27.9999 13.802V14.202C27.9999 15.8821 27.9999 16.7222 27.673 17.3639C27.3853 17.9284 26.9264 18.3874 26.3619 18.675C25.7202 19.002 24.8801 19.002 23.1999 19.002H21.2999C19.6198 19.002 18.7797 19.002 18.138 18.675C17.5735 18.3874 17.1145 17.9284 16.8269 17.3639C16.4999 16.7222 16.4999 15.8821 16.4999 14.202V13.802ZM22.4999 14.002C22.4999 14.9685 21.7164 15.752 20.7499 15.752C19.7834 15.752 18.9999 14.9685 18.9999 14.002C18.9999 13.0355 19.7834 12.252 20.7499 12.252C21.7164 12.252 22.4999 13.0355 22.4999 14.002Z"></path></svg>`);
+  const AtWalletIcon = (props) => {
     const theme = useTheme();
-    const fill = () => props.fill || theme.colors.icon.secondary;
+    const fill = () => props.fill || theme.colors.constant.white;
     return (() => {
       const _el$ = _tmpl$$b.cloneNode(true), _el$2 = _el$.firstChild;
       createRenderEffect((_p$) => {
@@ -5835,10 +5917,10 @@ var __async = (__this, __arguments, generator) => {
       return _el$;
     })();
   };
-  const _tmpl$$a = /* @__PURE__ */ template$1(`<svg xmlns="http://www.w3.org/2000/svg" width="28" height="29" viewBox="0 0 28 29" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M1.75 12.002C1.75 9.20169 1.75 7.80156 2.29497 6.732C2.77433 5.79119 3.53924 5.02629 4.48005 4.54692C5.54961 4.00195 6.94974 4.00195 9.75 4.00195H17.25C20.0503 4.00195 21.4504 4.00195 22.52 4.54692C23.4608 5.02629 24.2257 5.79119 24.705 6.732C24.8256 6.96861 24.9195 7.2214 24.9926 7.50195H21.5C19.6377 7.50195 18.7065 7.50195 17.9609 7.77334C16.711 8.22828 15.7263 9.21291 15.2714 10.4629C15 11.2085 15 12.1396 15 14.002C15 15.8643 15 16.7954 15.2714 17.541C15.7263 18.791 16.711 19.7756 17.9609 20.2306C18.7065 20.502 19.6377 20.502 21.5 20.502H24.9926C24.9195 20.7825 24.8256 21.0353 24.705 21.2719C24.2257 22.2127 23.4608 22.9776 22.52 23.457C21.4504 24.002 20.0503 24.002 17.25 24.002H9.75C6.94974 24.002 5.54961 24.002 4.48005 23.457C3.53924 22.9776 2.77433 22.2127 2.29497 21.2719C1.75 20.2023 1.75 18.8022 1.75 16.002V12.002ZM16.4999 13.802C16.4999 12.1218 16.4999 11.2817 16.8269 10.64C17.1145 10.0755 17.5735 9.61656 18.138 9.32894C18.7797 9.00196 19.6198 9.00196 21.2999 9.00196H23.1999C24.8801 9.00196 25.7202 9.00196 26.3619 9.32894C26.9264 9.61656 27.3853 10.0755 27.673 10.64C27.9999 11.2817 27.9999 12.1218 27.9999 13.802V14.202C27.9999 15.8821 27.9999 16.7222 27.673 17.3639C27.3853 17.9284 26.9264 18.3874 26.3619 18.675C25.7202 19.002 24.8801 19.002 23.1999 19.002H21.2999C19.6198 19.002 18.7797 19.002 18.138 18.675C17.5735 18.3874 17.1145 17.9284 16.8269 17.3639C16.4999 16.7222 16.4999 15.8821 16.4999 14.202V13.802ZM22.4999 14.002C22.4999 14.9685 21.7164 15.752 20.7499 15.752C19.7834 15.752 18.9999 14.9685 18.9999 14.002C18.9999 13.0355 19.7834 12.252 20.7499 12.252C21.7164 12.252 22.4999 13.0355 22.4999 14.002Z"></path></svg>`);
-  const AtWalletIcon = (props) => {
+  const _tmpl$$a = /* @__PURE__ */ template$1(`<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M24.7803 7.21967C25.0732 7.51256 25.0732 7.98744 24.7803 8.28033L11.5303 21.5303C11.2374 21.8232 10.7626 21.8232 10.4697 21.5303L4.21967 15.2803C3.92678 14.9874 3.92678 14.5126 4.21967 14.2197C4.51256 13.9268 4.98744 13.9268 5.28033 14.2197L11 19.9393L23.7197 7.21967C24.0126 6.92678 24.4874 6.92678 24.7803 7.21967Z"></path></svg>`);
+  const DoneIcon = (props) => {
     const theme = useTheme();
-    const fill = () => props.fill || theme.colors.constant.white;
+    const fill = () => props.fill || theme.colors.icon.secondary;
     return (() => {
       const _el$ = _tmpl$$a.cloneNode(true), _el$2 = _el$.firstChild;
       createRenderEffect((_p$) => {
@@ -5853,30 +5935,12 @@ var __async = (__this, __arguments, generator) => {
       return _el$;
     })();
   };
-  const _tmpl$$9 = /* @__PURE__ */ template$1(`<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M24.7803 7.21967C25.0732 7.51256 25.0732 7.98744 24.7803 8.28033L11.5303 21.5303C11.2374 21.8232 10.7626 21.8232 10.4697 21.5303L4.21967 15.2803C3.92678 14.9874 3.92678 14.5126 4.21967 14.2197C4.51256 13.9268 4.98744 13.9268 5.28033 14.2197L11 19.9393L23.7197 7.21967C24.0126 6.92678 24.4874 6.92678 24.7803 7.21967Z"></path></svg>`);
-  const DoneIcon = (props) => {
-    const theme = useTheme();
-    const fill = () => props.fill || theme.colors.icon.secondary;
-    return (() => {
-      const _el$ = _tmpl$$9.cloneNode(true), _el$2 = _el$.firstChild;
-      createRenderEffect((_p$) => {
-        const _v$ = props.class, _v$2 = fill();
-        _v$ !== _p$._v$ && setAttribute(_el$, "class", _p$._v$ = _v$);
-        _v$2 !== _p$._v$2 && setAttribute(_el$2, "fill", _p$._v$2 = _v$2);
-        return _p$;
-      }, {
-        _v$: void 0,
-        _v$2: void 0
-      });
-      return _el$;
-    })();
-  };
-  const _tmpl$$8 = /* @__PURE__ */ template$1(`<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.0001 10.0001C10.0016 8.02333 10.0267 6.98719 10.436 6.18404C10.8195 5.43139 11.4314 4.81947 12.184 4.43597C13.0397 4 14.1598 4 16.4 4H17.6C19.8402 4 20.9603 4 21.816 4.43597C22.5686 4.81947 23.1805 5.43139 23.564 6.18404C24 7.03969 24 8.15979 24 10.4V11.6C24 13.8402 24 14.9603 23.564 15.816C23.1805 16.5686 22.5686 17.1805 21.816 17.564C21.0128 17.9733 19.9767 17.9984 17.9999 17.9999C17.9984 19.9767 17.9733 21.0128 17.564 21.816C17.1805 22.5686 16.5686 23.1805 15.816 23.564C14.9603 24 13.8402 24 11.6 24H10.4C8.15979 24 7.03969 24 6.18404 23.564C5.43139 23.1805 4.81947 22.5686 4.43597 21.816C4 20.9603 4 19.8402 4 17.6V16.4C4 14.1598 4 13.0397 4.43597 12.184C4.81947 11.4314 5.43139 10.8195 6.18404 10.436C6.98719 10.0267 8.02333 10.0016 10.0001 10.0001ZM10 11.5H9.5C8.09987 11.5 7.3998 11.5 6.86502 11.7725C6.39462 12.0122 6.01217 12.3946 5.77248 12.865C5.5 13.3998 5.5 14.0999 5.5 15.5V18.5C5.5 19.9001 5.5 20.6002 5.77248 21.135C6.01217 21.6054 6.39462 21.9878 6.86502 22.2275C7.3998 22.5 8.09987 22.5 9.5 22.5H12.5C13.9001 22.5 14.6002 22.5 15.135 22.2275C15.6054 21.9878 15.9878 21.6054 16.2275 21.135C16.5 20.6002 16.5 19.9001 16.5 18.5V18H16.4C14.1598 18 13.0397 18 12.184 17.564C11.4314 17.1805 10.8195 16.5686 10.436 15.816C10 14.9603 10 13.8402 10 11.6V11.5ZM11.5 9.5C11.5 8.09987 11.5 7.3998 11.7725 6.86502C12.0122 6.39462 12.3946 6.01217 12.865 5.77248C13.3998 5.5 14.0999 5.5 15.5 5.5H18.5C19.9001 5.5 20.6002 5.5 21.135 5.77248C21.6054 6.01217 21.9878 6.39462 22.2275 6.86502C22.5 7.3998 22.5 8.09987 22.5 9.5V12.5C22.5 13.9001 22.5 14.6002 22.2275 15.135C21.9878 15.6054 21.6054 15.9878 21.135 16.2275C20.6002 16.5 19.9001 16.5 18.5 16.5H15.5C14.0999 16.5 13.3998 16.5 12.865 16.2275C12.3946 15.9878 12.0122 15.6054 11.7725 15.135C11.5 14.6002 11.5 13.9001 11.5 12.5V9.5Z"></path></svg>`);
+  const _tmpl$$9 = /* @__PURE__ */ template$1(`<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.0001 10.0001C10.0016 8.02333 10.0267 6.98719 10.436 6.18404C10.8195 5.43139 11.4314 4.81947 12.184 4.43597C13.0397 4 14.1598 4 16.4 4H17.6C19.8402 4 20.9603 4 21.816 4.43597C22.5686 4.81947 23.1805 5.43139 23.564 6.18404C24 7.03969 24 8.15979 24 10.4V11.6C24 13.8402 24 14.9603 23.564 15.816C23.1805 16.5686 22.5686 17.1805 21.816 17.564C21.0128 17.9733 19.9767 17.9984 17.9999 17.9999C17.9984 19.9767 17.9733 21.0128 17.564 21.816C17.1805 22.5686 16.5686 23.1805 15.816 23.564C14.9603 24 13.8402 24 11.6 24H10.4C8.15979 24 7.03969 24 6.18404 23.564C5.43139 23.1805 4.81947 22.5686 4.43597 21.816C4 20.9603 4 19.8402 4 17.6V16.4C4 14.1598 4 13.0397 4.43597 12.184C4.81947 11.4314 5.43139 10.8195 6.18404 10.436C6.98719 10.0267 8.02333 10.0016 10.0001 10.0001ZM10 11.5H9.5C8.09987 11.5 7.3998 11.5 6.86502 11.7725C6.39462 12.0122 6.01217 12.3946 5.77248 12.865C5.5 13.3998 5.5 14.0999 5.5 15.5V18.5C5.5 19.9001 5.5 20.6002 5.77248 21.135C6.01217 21.6054 6.39462 21.9878 6.86502 22.2275C7.3998 22.5 8.09987 22.5 9.5 22.5H12.5C13.9001 22.5 14.6002 22.5 15.135 22.2275C15.6054 21.9878 15.9878 21.6054 16.2275 21.135C16.5 20.6002 16.5 19.9001 16.5 18.5V18H16.4C14.1598 18 13.0397 18 12.184 17.564C11.4314 17.1805 10.8195 16.5686 10.436 15.816C10 14.9603 10 13.8402 10 11.6V11.5ZM11.5 9.5C11.5 8.09987 11.5 7.3998 11.7725 6.86502C12.0122 6.39462 12.3946 6.01217 12.865 5.77248C13.3998 5.5 14.0999 5.5 15.5 5.5H18.5C19.9001 5.5 20.6002 5.5 21.135 5.77248C21.6054 6.01217 21.9878 6.39462 22.2275 6.86502C22.5 7.3998 22.5 8.09987 22.5 9.5V12.5C22.5 13.9001 22.5 14.6002 22.2275 15.135C21.9878 15.6054 21.6054 15.9878 21.135 16.2275C20.6002 16.5 19.9001 16.5 18.5 16.5H15.5C14.0999 16.5 13.3998 16.5 12.865 16.2275C12.3946 15.9878 12.0122 15.6054 11.7725 15.135C11.5 14.6002 11.5 13.9001 11.5 12.5V9.5Z"></path></svg>`);
   const CopyLightIcon = (props) => {
     const theme = useTheme();
     const fill = () => props.fill || theme.colors.icon.secondary;
     return (() => {
-      const _el$ = _tmpl$$8.cloneNode(true), _el$2 = _el$.firstChild;
+      const _el$ = _tmpl$$9.cloneNode(true), _el$2 = _el$.firstChild;
       createRenderEffect((_p$) => {
         const _v$ = fill(), _v$2 = fill();
         _v$ !== _p$._v$ && setAttribute(_el$, "fill", _p$._v$ = _v$);
@@ -5886,6 +5950,16 @@ var __async = (__this, __arguments, generator) => {
         _v$: void 0,
         _v$2: void 0
       });
+      return _el$;
+    })();
+  };
+  const _tmpl$$8 = /* @__PURE__ */ template$1(`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M1 4.12695C1 3.07754 1 2.55284 1.19202 2.14684C1.38986 1.72856 1.7266 1.39181 2.14489 1.19397C2.55088 1.00195 3.07559 1.00195 4.125 1.00195C5.17441 1.00195 5.69912 1.00195 6.10511 1.19397C6.5234 1.39181 6.86014 1.72856 7.05798 2.14684C7.25 2.55284 7.25 3.07754 7.25 4.12695C7.25 5.17636 7.25 5.70107 7.05798 6.10706C6.86014 6.52535 6.5234 6.8621 6.10511 7.05993C5.69912 7.25195 5.17441 7.25195 4.125 7.25195C3.07559 7.25195 2.55088 7.25195 2.14489 7.05993C1.7266 6.8621 1.38986 6.52535 1.19202 6.10706C1 5.70107 1 5.17636 1 4.12695ZM2.5 3.30195C2.5 3.02193 2.5 2.88191 2.5545 2.77496C2.60243 2.68088 2.67892 2.60439 2.773 2.55645C2.87996 2.50195 3.01997 2.50195 3.3 2.50195H4.95C5.23003 2.50195 5.37004 2.50195 5.477 2.55645C5.57108 2.60439 5.64757 2.68088 5.6955 2.77496C5.75 2.88191 5.75 3.02193 5.75 3.30195V4.95195C5.75 5.23198 5.75 5.37199 5.6955 5.47895C5.64757 5.57303 5.57108 5.64952 5.477 5.69746C5.37004 5.75195 5.23003 5.75195 4.95 5.75195H3.3C3.01997 5.75195 2.87996 5.75195 2.773 5.69746C2.67892 5.64952 2.60243 5.57303 2.5545 5.47895C2.5 5.37199 2.5 5.23198 2.5 4.95195V3.30195ZM1 11.877C1 10.8275 1 10.3028 1.19202 9.89684C1.38986 9.47856 1.7266 9.14181 2.14489 8.94397C2.55088 8.75195 3.07559 8.75195 4.125 8.75195C5.17441 8.75195 5.69912 8.75195 6.10511 8.94397C6.5234 9.14181 6.86014 9.47856 7.05798 9.89684C7.25 10.3028 7.25 10.8275 7.25 11.877C7.25 12.9264 7.25 13.4511 7.05798 13.8571C6.86014 14.2753 6.5234 14.6121 6.10511 14.8099C5.69912 15.002 5.17441 15.002 4.125 15.002C3.07559 15.002 2.55088 15.002 2.14489 14.8099C1.7266 14.6121 1.38986 14.2753 1.19202 13.8571C1 13.4511 1 12.9264 1 11.877ZM2.5 11.052C2.5 10.7719 2.5 10.6319 2.5545 10.525C2.60243 10.4309 2.67892 10.3544 2.773 10.3064C2.87996 10.252 3.01997 10.252 3.3 10.252H4.95C5.23003 10.252 5.37004 10.252 5.477 10.3064C5.57108 10.3544 5.64757 10.4309 5.6955 10.525C5.75 10.6319 5.75 10.7719 5.75 11.052V12.702C5.75 12.982 5.75 13.122 5.6955 13.2289C5.64757 13.323 5.57108 13.3995 5.477 13.4475C5.37004 13.502 5.23003 13.502 4.95 13.502H3.3C3.01997 13.502 2.87996 13.502 2.773 13.4475C2.67892 13.3995 2.60243 13.323 2.5545 13.2289C2.5 13.122 2.5 12.982 2.5 12.702V11.052ZM8.94202 2.14684C8.75 2.55284 8.75 3.07754 8.75 4.12695C8.75 5.17636 8.75 5.70107 8.94202 6.10706C9.13986 6.52535 9.4766 6.8621 9.89489 7.05993C10.3009 7.25195 10.8256 7.25195 11.875 7.25195C12.9244 7.25195 13.4491 7.25195 13.8551 7.05993C14.2734 6.8621 14.6101 6.52535 14.808 6.10706C15 5.70107 15 5.17636 15 4.12695C15 3.07754 15 2.55284 14.808 2.14684C14.6101 1.72856 14.2734 1.39181 13.8551 1.19397C13.4491 1.00195 12.9244 1.00195 11.875 1.00195C10.8256 1.00195 10.3009 1.00195 9.89489 1.19397C9.4766 1.39181 9.13986 1.72856 8.94202 2.14684ZM10.3045 2.77496C10.25 2.88191 10.25 3.02193 10.25 3.30195V4.95195C10.25 5.23198 10.25 5.37199 10.3045 5.47895C10.3524 5.57303 10.4289 5.64952 10.523 5.69746C10.63 5.75195 10.77 5.75195 11.05 5.75195H12.7C12.98 5.75195 13.12 5.75195 13.227 5.69746C13.3211 5.64952 13.3976 5.57303 13.4455 5.47895C13.5 5.37199 13.5 5.23198 13.5 4.95195V3.30195C13.5 3.02193 13.5 2.88191 13.4455 2.77496C13.3976 2.68088 13.3211 2.60439 13.227 2.55645C13.12 2.50195 12.98 2.50195 12.7 2.50195H11.05C10.77 2.50195 10.63 2.50195 10.523 2.55645C10.4289 2.60439 10.3524 2.68088 10.3045 2.77496ZM8.80727 9.13518C8.75 9.26242 8.75 9.4256 8.75 9.75195C8.75 10.0783 8.75 10.2415 8.80727 10.3687C8.87245 10.5136 8.9884 10.6295 9.13323 10.6947C9.26047 10.752 9.42365 10.752 9.75 10.752C10.0764 10.752 10.2395 10.752 10.3668 10.6947C10.5116 10.6295 10.6276 10.5136 10.6927 10.3687C10.75 10.2415 10.75 10.0783 10.75 9.75195C10.75 9.4256 10.75 9.26242 10.6927 9.13518C10.6276 8.99035 10.5116 8.8744 10.3668 8.80922C10.2395 8.75195 10.0764 8.75195 9.75 8.75195C9.42365 8.75195 9.26047 8.75195 9.13323 8.80922C8.9884 8.8744 8.87245 8.99035 8.80727 9.13518ZM10.87 11.8771C10.87 11.546 10.87 11.3805 10.9289 11.2517C10.9938 11.1098 11.1077 10.9959 11.2497 10.931C11.3784 10.8721 11.5439 10.8721 11.875 10.8721C12.2061 10.8721 12.3716 10.8721 12.5003 10.931C12.6423 10.9959 12.7562 11.1098 12.8211 11.2517C12.88 11.3805 12.88 11.546 12.88 11.8771C12.88 12.2081 12.88 12.3737 12.8211 12.5024C12.7562 12.6444 12.6423 12.7583 12.5003 12.8232C12.3716 12.8821 12.2061 12.8821 11.875 12.8821C11.5439 12.8821 11.3784 12.8821 11.2497 12.8232C11.1077 12.7583 10.9938 12.6444 10.9289 12.5024C10.87 12.3737 10.87 12.2081 10.87 11.8771ZM8.80727 13.3852C8.75 13.5124 8.75 13.6756 8.75 14.002C8.75 14.3283 8.75 14.4915 8.80727 14.6187C8.87245 14.7636 8.9884 14.8795 9.13323 14.9447C9.26047 15.002 9.42365 15.002 9.75 15.002C10.0764 15.002 10.2395 15.002 10.3668 14.9447C10.5116 14.8795 10.6276 14.7636 10.6927 14.6187C10.75 14.4915 10.75 14.3283 10.75 14.002C10.75 13.6756 10.75 13.5124 10.6927 13.3852C10.6276 13.2404 10.5116 13.1244 10.3668 13.0592C10.2395 13.002 10.0764 13.002 9.75 13.002C9.42365 13.002 9.26047 13.002 9.13323 13.0592C8.9884 13.1244 8.87245 13.2404 8.80727 13.3852ZM13 9.75195C13 9.4256 13 9.26242 13.0573 9.13518C13.1224 8.99035 13.2384 8.8744 13.3832 8.80922C13.5105 8.75195 13.6736 8.75195 14 8.75195C14.3264 8.75195 14.4895 8.75195 14.6168 8.80922C14.7616 8.8744 14.8776 8.99035 14.9427 9.13518C15 9.26242 15 9.4256 15 9.75195C15 10.0783 15 10.2415 14.9427 10.3687C14.8776 10.5136 14.7616 10.6295 14.6168 10.6947C14.4895 10.752 14.3264 10.752 14 10.752C13.6736 10.752 13.5105 10.752 13.3832 10.6947C13.2384 10.6295 13.1224 10.5136 13.0573 10.3687C13 10.2415 13 10.0783 13 9.75195ZM13.0573 13.3852C13 13.5124 13 13.6756 13 14.002C13 14.3283 13 14.4915 13.0573 14.6187C13.1224 14.7636 13.2384 14.8795 13.3832 14.9447C13.5105 15.002 13.6736 15.002 14 15.002C14.3264 15.002 14.4895 15.002 14.6168 14.9447C14.7616 14.8795 14.8776 14.7636 14.9427 14.6187C15 14.4915 15 14.3283 15 14.002C15 13.6756 15 13.5124 14.9427 13.3852C14.8776 13.2404 14.7616 13.1244 14.6168 13.0592C14.4895 13.002 14.3264 13.002 14 13.002C13.6736 13.002 13.5105 13.002 13.3832 13.0592C13.2384 13.1244 13.1224 13.2404 13.0573 13.3852Z"></path></svg>`);
+  const QRIcon = (props) => {
+    const theme = useTheme();
+    const fill = () => props.fill || theme.colors.icon.secondary;
+    return (() => {
+      const _el$ = _tmpl$$8.cloneNode(true), _el$2 = _el$.firstChild;
+      createRenderEffect(() => setAttribute(_el$2, "fill", fill()));
       return _el$;
     })();
   };
@@ -5931,8 +6005,7 @@ var __async = (__this, __arguments, generator) => {
               children: (index) => createComponent(FourWalletsImage, {
                 get src() {
                   return props.images[index];
-                },
-                borderRadius: "s"
+                }
               })
             });
           }
@@ -5947,18 +6020,19 @@ var __async = (__this, __arguments, generator) => {
     TG: "https://raw.githubusercontent.com/ton-connect/sdk/main/assets/tg.png"
   };
   const WalletLabeledItem = (props) => {
+    const [t2] = useI18n();
     const walletsSecondLine = () => {
       if (props.wallet.appName === AT_WALLET_APP_NAME) {
         return void 0;
       }
       if ("isPreferred" in props.wallet && props.wallet.isPreferred) {
-        return "Recent";
+        return t2("walletItem.recent", {}, "Recent");
       }
       if (sdk.isWalletInfoCurrentlyInjected(props.wallet)) {
-        return "Installed";
+        return t2("walletItem.installed", {}, "Installed");
       }
       if (props.wallet.name === "Tonkeeper") {
-        return "Popular";
+        return t2("walletItem.popular", {}, "Popular");
       }
       return void 0;
     };
@@ -5968,7 +6042,9 @@ var __async = (__this, __arguments, generator) => {
         get icon() {
           return props.wallet.imageUrl;
         },
-        name: "Wallet on",
+        get name() {
+          return t2("walletItem.walletOn", {}, "Wallet On");
+        },
         secondLine: "Telegram",
         get badgeUrl() {
           return IMG.TG;
@@ -5988,6 +6064,93 @@ var __async = (__this, __arguments, generator) => {
         onClick: () => props.onClick()
       });
     })());
+  };
+  const ScrollContainerStyled = styled.div`
+    width: 100%;
+    overflow-y: auto;
+    max-height: ${(props) => props.maxHeight};
+
+    scrollbar-width: none;
+    &&::-webkit-scrollbar {
+        display: none;
+    }
+
+    &&::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    &&::-webkit-scrollbar-thumb {
+        display: none;
+    }
+`;
+  const ScrollDivider = styled.div`
+    height: 1px;
+    margin: 0 -24px;
+    width: calc(100% + 48px);
+    opacity: 0.08;
+    background: ${(props) => props.isShown ? props.theme.colors.icon.secondary : "transparent"};
+    transition: background 0.15s ease-in-out;
+
+    ${media("mobile")} {
+        width: 100%;
+        margin: 0;
+    }
+`;
+  const [windowHeight, setWindowHeight] = createSignal(((_a = getWindow$1()) == null ? void 0 : _a.innerHeight) || 0);
+  if (getWindow$1()) {
+    window.addEventListener("resize", () => setWindowHeight(window.innerHeight));
+  }
+  const [isMobile, setIsMobile] = createSignal(isDevice("mobile"));
+  if (getWindow$1()) {
+    window.addEventListener("resize", () => setIsMobile(isDevice("mobile")));
+  }
+  const ScrollContainer = (props) => {
+    const [scrolled, setScrolled] = createSignal(false);
+    const onScroll = (e2) => {
+      setScrolled(e2.target.scrollTop > 0);
+    };
+    const offset = () => isMobile() ? 150 : 200;
+    const maxHeight = () => props.maxHeight !== void 0 ? `${props.maxHeight}px` : `${windowHeight() - offset()}px`;
+    return [createComponent(ScrollDivider, {
+      get isShown() {
+        return scrolled();
+      }
+    }), createComponent(ScrollContainerStyled, {
+      get maxHeight() {
+        return maxHeight();
+      },
+      onScroll,
+      get ["class"]() {
+        return props.class;
+      },
+      get children() {
+        return props.children;
+      }
+    })];
+  };
+  const AStyled = styled.a`
+    display: block;
+    text-decoration: unset;
+`;
+  const Link = (props) => {
+    const attributes = () => props.blank ? {
+      rel: "noreferrer noopener"
+    } : {};
+    return createComponent(AStyled, mergeProps({
+      get href() {
+        return props.href;
+      },
+      get target() {
+        return props.blank ? "_blank" : "_self";
+      },
+      get ["class"]() {
+        return props.class;
+      }
+    }, attributes, {
+      get children() {
+        return props.children;
+      }
+    }));
   };
   const TonConnectUiContext = createContext();
   const _tmpl$$7 = /* @__PURE__ */ template$1(`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M7.76228 2.09998H10.2378C11.0458 2.09997 11.7067 2.09996 12.2438 2.14384C12.7997 2.18926 13.3017 2.28614 13.7706 2.52505C14.5045 2.89896 15.1011 3.49558 15.475 4.22941C15.7139 4.6983 15.8108 5.20038 15.8562 5.75629C15.9001 6.29337 15.9001 6.95422 15.9001 7.76227V8.1H16.2377C17.0457 8.09999 17.7066 8.09998 18.2437 8.14386C18.7996 8.18928 19.3017 8.28616 19.7705 8.52507C20.5044 8.89898 21.101 9.4956 21.4749 10.2294C21.7138 10.6983 21.8107 11.2004 21.8561 11.7563C21.9 12.2934 21.9 12.9542 21.9 13.7623V16.2377C21.9 17.0458 21.9 17.7066 21.8561 18.2437C21.8107 18.7996 21.7138 19.3017 21.4749 19.7706C21.101 20.5044 20.5044 21.101 19.7705 21.4749C19.3017 21.7138 18.7996 21.8107 18.2437 21.8561C17.7066 21.9 17.0458 21.9 16.2378 21.9H13.7623C12.9543 21.9 12.2934 21.9 11.7563 21.8561C11.2004 21.8107 10.6983 21.7138 10.2294 21.4749C9.49561 21.101 8.89898 20.5044 8.52508 19.7706C8.28616 19.3017 8.18928 18.7996 8.14386 18.2437C8.09998 17.7066 8.09999 17.0458 8.1 16.2377V15.9H7.76227C6.95426 15.9 6.29335 15.9 5.75629 15.8561C5.20038 15.8107 4.6983 15.7138 4.22941 15.4749C3.49558 15.101 2.89896 14.5044 2.52505 13.7705C2.28614 13.3017 2.18926 12.7996 2.14384 12.2437C2.09996 11.7066 2.09997 11.0458 2.09998 10.2377V7.76228C2.09997 6.95424 2.09996 6.29336 2.14384 5.75629C2.18926 5.20038 2.28614 4.6983 2.52505 4.22941C2.89896 3.49558 3.49558 2.89896 4.22941 2.52505C4.6983 2.28614 5.20038 2.18926 5.75629 2.14384C6.29336 2.09996 6.95425 2.09997 7.76228 2.09998ZM8.1 14.1V13.7623C8.09999 12.9542 8.09998 12.2934 8.14386 11.7563C8.18928 11.2004 8.28616 10.6983 8.52508 10.2294C8.89898 9.4956 9.49561 8.89898 10.2294 8.52507C10.6983 8.28616 11.2004 8.18928 11.7563 8.14386C12.2934 8.09998 12.9542 8.09999 13.7623 8.1H14.1001V7.79998C14.1001 6.94505 14.0994 6.35798 14.0622 5.90287C14.0259 5.45827 13.9593 5.21944 13.8712 5.0466C13.6699 4.65146 13.3486 4.3302 12.9535 4.12886C12.7806 4.04079 12.5418 3.97419 12.0972 3.93786C11.6421 3.90068 11.055 3.89998 10.2001 3.89998H7.79998C6.94505 3.89998 6.35798 3.90068 5.90287 3.93786C5.45827 3.97419 5.21944 4.04079 5.0466 4.12886C4.65146 4.3302 4.3302 4.65146 4.12886 5.0466C4.04079 5.21944 3.97419 5.45827 3.93786 5.90287C3.90068 6.35798 3.89998 6.94505 3.89998 7.79998V10.2C3.89998 11.0549 3.90068 11.642 3.93786 12.0971C3.97419 12.5417 4.04079 12.7805 4.12886 12.9534C4.3302 13.3485 4.65146 13.6698 5.0466 13.8711C5.21944 13.9592 5.45827 14.0258 5.90287 14.0621C6.35798 14.0993 6.94505 14.1 7.79998 14.1H8.1ZM11.0466 10.1289C11.2195 10.0408 11.4583 9.97421 11.9029 9.93788C12.358 9.9007 12.9451 9.9 13.8 9.9H16.2C17.0549 9.9 17.642 9.9007 18.0971 9.93788C18.5417 9.97421 18.7805 10.0408 18.9534 10.1289C19.3485 10.3302 19.6698 10.6515 19.8711 11.0466C19.9592 11.2195 20.0258 11.4583 20.0621 11.9029C20.0993 12.358 20.1 12.9451 20.1 13.8V16.2C20.1 17.0549 20.0993 17.642 20.0621 18.0971C20.0258 18.5417 19.9592 18.7805 19.8711 18.9534C19.6698 19.3485 19.3485 19.6698 18.9534 19.8711C18.7805 19.9592 18.5417 20.0258 18.0971 20.0621C17.642 20.0993 17.0549 20.1 16.2 20.1H13.8C12.9451 20.1 12.358 20.0993 11.9029 20.0621C11.4583 20.0258 11.2195 19.9592 11.0466 19.8711C10.6515 19.6698 10.3302 19.3485 10.1289 18.9534C10.0408 18.7805 9.97421 18.5417 9.93788 18.0971C9.9007 17.642 9.9 17.0549 9.9 16.2V13.8C9.9 12.9451 9.9007 12.358 9.93788 11.9029C9.97421 11.4583 10.0408 11.2195 10.1289 11.0466C10.3302 10.6515 10.6515 10.3302 11.0466 10.1289Z"></path></svg>`);
@@ -6226,16 +6389,17 @@ var __async = (__this, __arguments, generator) => {
     align-self: center;
 `;
   const ConfirmOperationNotification = (props) => {
-    var _a2;
     const tonConnectUI = useContext(TonConnectUiContext);
     const [t2] = useI18n();
-    const name = ((_a2 = tonConnectUI.wallet) == null ? void 0 : _a2.name) || t2("common.yourWallet", {}, "your wallet");
+    const name = () => tonConnectUI.wallet && "name" in tonConnectUI.wallet ? tonConnectUI.wallet.name : t2("common.yourWallet", {}, "Your wallet");
     return createComponent(Notification, {
-      header: {
-        translationKey: "notifications.confirm.header",
-        translationValues: {
-          name
-        }
+      get header() {
+        return {
+          translationKey: "notifications.confirm.header",
+          translationValues: {
+            name: name()
+          }
+        };
       },
       get ["class"]() {
         return props.class;
@@ -7351,8 +7515,8 @@ var __async = (__this, __arguments, generator) => {
                         }), null);
                         insert(_el$, createComponent(NotificationsStyled, {}), null);
                         createRenderEffect((_p$) => {
-                          var _a2, _b;
-                          const _v$ = position.strategy, _v$2 = `${(_a2 = position.y) != null ? _a2 : 0}px`, _v$3 = `${(_b = position.x) != null ? _b : 0}px`;
+                          var _a2, _b2;
+                          const _v$ = position.strategy, _v$2 = `${(_a2 = position.y) != null ? _a2 : 0}px`, _v$3 = `${(_b2 = position.x) != null ? _b2 : 0}px`;
                           _v$ !== _p$._v$ && _el$.style.setProperty("position", _p$._v$ = _v$);
                           _v$2 !== _p$._v$2 && _el$.style.setProperty("top", _p$._v$2 = _v$2);
                           _v$3 !== _p$._v$3 && _el$.style.setProperty("left", _p$._v$3 = _v$3);
@@ -7387,7 +7551,7 @@ var __async = (__this, __arguments, generator) => {
         min-height: 364px;
     }
 `;
-  const H1Styled$6 = styled(H1)`
+  const H1Styled$8 = styled(H1)`
     margin-top: 12px;
 
     ${media("mobile")} {
@@ -7467,19 +7631,15 @@ var __async = (__this, __arguments, generator) => {
     }
     return wallet1.name.toLowerCase() === name.toLowerCase() || wallet1.appName.toLowerCase() === name.toLowerCase();
   }
-  const [isMobile, setIsMobile] = createSignal(isDevice("mobile"));
-  if (getWindow$1()) {
-    window.addEventListener("resize", () => setIsMobile(isDevice("mobile")));
-  }
   const DesktopSelectWalletModalStyled = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
 `;
-  const H1Styled$5 = styled(H1)`
+  const H1Styled$7 = styled(H1)`
     margin-bottom: 18px;
 `;
-  const ScrollDivider = styled.div`
+  styled.div`
     height: 1px;
     margin: 0 -24px;
     width: calc(100% + 48px);
@@ -7494,29 +7654,22 @@ var __async = (__this, __arguments, generator) => {
   const WalletsUl = styled.ul`
     display: grid;
     grid-template-columns: repeat(auto-fit, 92px);
+    grid-template-rows: auto;
+    align-content: flex-start;
     justify-content: center;
     row-gap: 8px;
-    overflow-y: auto;
-    max-height: 510px;
     width: 100%;
     padding: 0 0 16px;
     align-self: flex-start;
+    max-width: 400px;
+    margin: 0 auto;
 
-    scrollbar-width: none;
-    &&::-webkit-scrollbar {
-        display: none;
-    }
-
-    &&::-webkit-scrollbar-track {
-        background: transparent;
-    }
-
-    &&::-webkit-scrollbar-thumb {
-        display: none;
+    > li {
+        display: block;
+        height: fit-content;
     }
 
     ${media("mobile")} {
-        max-height: 410px;
         grid-template-columns: repeat(auto-fit, 82px);
     }
 `;
@@ -7535,10 +7688,7 @@ var __async = (__this, __arguments, generator) => {
 `;
   const _tmpl$$2 = /* @__PURE__ */ template$1(`<li></li>`);
   const AllWalletsListModal = (props) => {
-    const [scrolled, setScrolled] = createSignal(false);
-    const onScroll = (e2) => {
-      setScrolled(e2.target.scrollTop !== 0);
-    };
+    const maxHeight = () => isMobile() ? void 0 : 510;
     const walletsList = () => isMobile() ? props.walletsList.filter(supportsMobile) : props.walletsList;
     return createComponent(DesktopSelectWalletModalStyled, {
       "data-tc-select-wallet-desktop": "true",
@@ -7546,27 +7696,30 @@ var __async = (__this, __arguments, generator) => {
         return [createComponent(StyledIconButton$3, {
           icon: "arrow",
           onClick: () => props.onBack()
-        }), createComponent(H1Styled$5, {
+        }), createComponent(H1Styled$7, {
+          translationKey: "walletModal.wallets",
           children: "Wallets"
-        }), createComponent(ScrollDivider, {
-          get isShown() {
-            return scrolled();
-          }
-        }), createComponent(WalletsUl, {
-          onScroll,
+        }), createComponent(ScrollContainer, {
+          get maxHeight() {
+            return maxHeight();
+          },
           get children() {
-            return createComponent(For, {
-              get each() {
-                return walletsList();
-              },
-              children: (wallet) => (() => {
-                const _el$ = _tmpl$$2.cloneNode(true);
-                insert(_el$, createComponent(WalletLabeledItemStyled, {
-                  wallet,
-                  onClick: () => props.onSelect(wallet)
-                }));
-                return _el$;
-              })()
+            return createComponent(WalletsUl, {
+              get children() {
+                return createComponent(For, {
+                  get each() {
+                    return walletsList();
+                  },
+                  children: (wallet) => (() => {
+                    const _el$ = _tmpl$$2.cloneNode(true);
+                    insert(_el$, createComponent(WalletLabeledItemStyled, {
+                      wallet,
+                      onClick: () => props.onSelect(wallet)
+                    }));
+                    return _el$;
+                  })()
+                });
+              }
             });
           }
         })];
@@ -7585,7 +7738,6 @@ var __async = (__this, __arguments, generator) => {
   };
   const DesktopConnectionModalStyled = styled.div`
     display: flex;
-    padding-bottom: 24px;
     flex-direction: column;
 `;
   const BodyStyled$1 = styled.div`
@@ -7594,14 +7746,17 @@ var __async = (__this, __arguments, generator) => {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-top: 47px;
+    justify-content: center;
     min-height: 232px;
 `;
-  const H1Styled$4 = styled(H1)`
+  const QRCodeStyled$1 = styled(QRCode)`
+    margin-bottom: 24px;
+`;
+  const H1Styled$6 = styled(H1)`
     max-width: 288px;
     margin: 0 auto 2px;
 `;
-  const H2Styled$2 = styled(H2)`
+  const H2Styled$4 = styled(H2)`
     max-width: 288px;
     text-align: center;
     margin: 0 auto 20px;
@@ -7611,27 +7766,33 @@ var __async = (__this, __arguments, generator) => {
     top: 16px;
     left: 16px;
 `;
-  const ButtonsContainerStyled = styled.div`
+  const ButtonsContainerStyled$1 = styled.div`
     display: flex;
     justify-content: center;
     gap: 8px;
+    padding-bottom: 16px;
+`;
+  const BottomButtonsContainerStyled = styled(ButtonsContainerStyled$1)`
+    padding-bottom: 0;
 `;
   const FooterButton$1 = styled(Button)`
-    margin-top: ${(props) => props.mt ? "24px" : "0"};
+    margin-bottom: 24px;
 `;
   const LoaderStyled$1 = styled(LoaderIcon)`
-    margin-bottom: 16px;
+    margin-bottom: 18px;
+    margin-top: 2px;
 `;
   const ErrorIconStyled$1 = styled(ErrorIcon)`
     margin-bottom: 16px;
 `;
-  const BodyTextStyled$1 = styled(Text)`
+  const BodyTextStyled$1 = styled(H2)`
     color: ${(props) => props.theme.colors.text.secondary};
     text-align: center;
     margin-bottom: 20px;
 `;
   const TgButtonStyled = styled(Button)`
-    margin-top: 16px;
+    margin-top: -8px;
+    margin-bottom: 24px;
     width: 100%;
     padding: 12px 12px 12px 20px;
     border-radius: ${(props) => tgButtonBorders[props.theme.borderRadius]};
@@ -7643,29 +7804,12 @@ var __async = (__this, __arguments, generator) => {
     height: 32px;
     border-radius: ${(props) => tgIconBorders[props.theme.borderRadius]};
 `;
-  const AStyled = styled.a`
-    display: block;
-    text-decoration: unset;
-`;
-  const Link = (props) => {
-    const attributes = () => props.blank ? {
-      rel: "noreferrer noopener"
-    } : {};
-    return createComponent(AStyled, mergeProps({
-      get href() {
-        return props.href;
-      },
-      get target() {
-        return props.blank ? "_blank" : "_self";
-      },
-      get ["class"]() {
-        return props.class;
-      }
-    }, attributes, {
-      get children() {
-        return props.children;
-      }
-    }));
+  const Translation = (props) => {
+    const [t2] = useI18n();
+    return createMemo(() => {
+      var _a2;
+      return t2(props.translationKey, props.translationValues, (_a2 = props.children) == null ? void 0 : _a2.toString());
+    });
   };
   const DesktopConnectionModal = (props) => {
     const [mode, setMode] = createSignal("mobile");
@@ -7740,7 +7884,7 @@ var __async = (__this, __arguments, generator) => {
         return [createComponent(StyledIconButton$2, {
           icon: "arrow",
           onClick: () => props.onBackClick()
-        }), createComponent(H1Styled$4, {
+        }), createComponent(H1Styled$6, {
           get children() {
             return props.wallet.name;
           }
@@ -7749,15 +7893,15 @@ var __async = (__this, __arguments, generator) => {
             return mode() === "mobile";
           },
           get children() {
-            return createComponent(H2Styled$2, {
-              translationKey: "walletModal.qrCodeModal.scan",
+            return createComponent(H2Styled$4, {
+              translationKey: "walletModal.desktopConnectionModal.scanQR",
               get translationValues() {
                 return {
                   name: props.wallet.name
                 };
               },
               get children() {
-                return ["Scan QR code with your phone\u2019s or ", createMemo(() => props.wallet.name), "\u2019s camera."];
+                return ["Scan the QR code below with your phone\u2019s or ", createMemo(() => props.wallet.name), "\u2019s camera"];
               }
             });
           }
@@ -7773,7 +7917,7 @@ var __async = (__this, __arguments, generator) => {
                     return mode() === "mobile";
                   },
                   get children() {
-                    return createComponent(QRCode, {
+                    return createComponent(QRCodeStyled$1, {
                       disableCopy: false,
                       get sourceUrl() {
                         return universalLink();
@@ -7791,15 +7935,25 @@ var __async = (__this, __arguments, generator) => {
                     return [createComponent(ErrorIconStyled$1, {
                       size: "s"
                     }), createComponent(BodyTextStyled$1, {
+                      translationKey: "walletModal.desktopConnectionModal.connectionDeclined",
                       children: "Connection declined"
-                    }), createComponent(Button, {
-                      get leftIcon() {
-                        return createComponent(RetryIcon, {});
-                      },
-                      get onClick() {
-                        return mode() === "extension" ? onClickExtension : onClickDesktop;
-                      },
-                      children: "Retry"
+                    }), createComponent(ButtonsContainerStyled$1, {
+                      get children() {
+                        return createComponent(Button, {
+                          get leftIcon() {
+                            return createComponent(RetryIcon, {});
+                          },
+                          get onClick() {
+                            return mode() === "extension" ? onClickExtension : onClickDesktop;
+                          },
+                          get children() {
+                            return createComponent(Translation, {
+                              translationKey: "common.retry",
+                              children: "Retry"
+                            });
+                          }
+                        });
+                      }
                     })];
                   }
                 }), createComponent(Match, {
@@ -7815,15 +7969,30 @@ var __async = (__this, __arguments, generator) => {
                         return [createComponent(LoaderStyled$1, {
                           size: "s"
                         }), createComponent(BodyTextStyled$1, {
+                          translationKey: "walletModal.desktopConnectionModal.continueInExtension",
+                          get translationValues() {
+                            return {
+                              name: props.wallet.name
+                            };
+                          },
                           get children() {
                             return ["Continue in ", createMemo(() => props.wallet.name), " browser extension\u2026"];
                           }
-                        }), createComponent(Button, {
-                          get leftIcon() {
-                            return createComponent(RetryIcon, {});
-                          },
-                          onClick: onClickExtension,
-                          children: "Retry"
+                        }), createComponent(ButtonsContainerStyled$1, {
+                          get children() {
+                            return createComponent(Button, {
+                              get leftIcon() {
+                                return createComponent(RetryIcon, {});
+                              },
+                              onClick: onClickExtension,
+                              get children() {
+                                return createComponent(Translation, {
+                                  translationKey: "common.retry",
+                                  children: "Retry"
+                                });
+                              }
+                            });
+                          }
                         })];
                       }
                     }), createComponent(Show, {
@@ -7832,22 +8001,42 @@ var __async = (__this, __arguments, generator) => {
                       },
                       get children() {
                         return [createComponent(BodyTextStyled$1, {
+                          translationKey: "walletModal.desktopConnectionModal.dontHaveExtension",
+                          get translationValues() {
+                            return {
+                              name: props.wallet.name
+                            };
+                          },
                           get children() {
                             return ["Seems you don't have installed ", createMemo(() => props.wallet.name), " browser extension"];
                           }
-                        }), createComponent(Link, {
-                          get href() {
-                            return props.wallet.aboutUrl;
-                          },
-                          blank: true,
+                        }), createComponent(ButtonsContainerStyled$1, {
                           get children() {
-                            return createComponent(Button, {
-                              get rightIcon() {
-                                return createComponent(LinkIcon, {});
+                            return createComponent(Link, {
+                              get href() {
+                                return props.wallet.aboutUrl;
                               },
-                              onClick: onClickExtension,
+                              blank: true,
                               get children() {
-                                return ["Get ", createMemo(() => props.wallet.name)];
+                                return createComponent(Button, {
+                                  get rightIcon() {
+                                    return createComponent(LinkIcon, {});
+                                  },
+                                  onClick: onClickExtension,
+                                  get children() {
+                                    return createComponent(Translation, {
+                                      translationKey: "walletModal.desktopConnectionModal.getWallet",
+                                      get translationValues() {
+                                        return {
+                                          name: props.wallet.name
+                                        };
+                                      },
+                                      get children() {
+                                        return ["Get ", createMemo(() => props.wallet.name)];
+                                      }
+                                    });
+                                  }
+                                });
                               }
                             });
                           }
@@ -7863,17 +8052,28 @@ var __async = (__this, __arguments, generator) => {
                     return [createComponent(LoaderIcon, {
                       size: "m"
                     }), createComponent(BodyTextStyled$1, {
+                      translationKey: "walletModal.desktopConnectionModal.continueOnDesktop",
+                      get translationValues() {
+                        return {
+                          name: props.wallet.name
+                        };
+                      },
                       get children() {
                         return ["Continue in ", createMemo(() => props.wallet.name), " on desktop\u2026"];
                       }
-                    }), createComponent(ButtonsContainerStyled, {
+                    }), createComponent(ButtonsContainerStyled$1, {
                       get children() {
                         return [createComponent(Button, {
                           get leftIcon() {
                             return createComponent(RetryIcon, {});
                           },
                           onClick: onClickDesktop,
-                          children: "Retry"
+                          get children() {
+                            return createComponent(Translation, {
+                              translationKey: "common.retry",
+                              children: "Retry"
+                            });
+                          }
                         }), createComponent(Link, {
                           get href() {
                             return props.wallet.aboutUrl;
@@ -7885,7 +8085,17 @@ var __async = (__this, __arguments, generator) => {
                                 return createComponent(LinkIcon, {});
                               },
                               get children() {
-                                return ["Get ", createMemo(() => props.wallet.name)];
+                                return createComponent(Translation, {
+                                  translationKey: "walletModal.desktopConnectionModal.getWallet",
+                                  get translationValues() {
+                                    return {
+                                      name: props.wallet.name
+                                    };
+                                  },
+                                  get children() {
+                                    return ["Get ", createMemo(() => props.wallet.name)];
+                                  }
+                                });
                               }
                             });
                           }
@@ -7912,7 +8122,12 @@ var __async = (__this, __arguments, generator) => {
               },
               scale: "s",
               onClick: onClickTelegram,
-              children: "Open Wallet on Telegram on desktop"
+              get children() {
+                return createComponent(Translation, {
+                  translationKey: "walletModal.desktopConnectionModal.openWalletOnTelegram",
+                  children: "Open Wallet on Telegram on desktop"
+                });
+              }
             });
           }
         }), createComponent(Show, {
@@ -7920,7 +8135,7 @@ var __async = (__this, __arguments, generator) => {
             return props.wallet.appName !== AT_WALLET_APP_NAME;
           },
           get children() {
-            return createComponent(ButtonsContainerStyled, {
+            return createComponent(BottomButtonsContainerStyled, {
               get children() {
                 return [createComponent(Show, {
                   get when() {
@@ -7933,8 +8148,12 @@ var __async = (__this, __arguments, generator) => {
                         return createComponent(MobileIcon, {});
                       },
                       onClick: onClickMobile,
-                      mt: false,
-                      children: "Mobile"
+                      get children() {
+                        return createComponent(Translation, {
+                          translationKey: "common.mobile",
+                          children: "Mobile"
+                        });
+                      }
                     });
                   }
                 }), createComponent(Show, {
@@ -7948,10 +8167,12 @@ var __async = (__this, __arguments, generator) => {
                         return createComponent(BrowserIcon, {});
                       },
                       onClick: onClickExtension,
-                      get mt() {
-                        return mode() === "mobile";
-                      },
-                      children: "Browser Extension"
+                      get children() {
+                        return createComponent(Translation, {
+                          translationKey: "common.browserExtension",
+                          children: "Browser Extension"
+                        });
+                      }
                     });
                   }
                 }), createComponent(Show, {
@@ -7965,10 +8186,12 @@ var __async = (__this, __arguments, generator) => {
                         return createComponent(DesktopIcon, {});
                       },
                       onClick: onClickDesktop,
-                      get mt() {
-                        return mode() === "mobile";
-                      },
-                      children: "Desktop"
+                      get children() {
+                        return createComponent(Translation, {
+                          translationKey: "common.desktop",
+                          children: "Desktop"
+                        });
+                      }
                     });
                   }
                 })];
@@ -7985,7 +8208,7 @@ var __async = (__this, __arguments, generator) => {
     top: 16px;
     left: 16px;
 `;
-  const H1Styled$3 = styled(H1)`
+  const H1Styled$5 = styled(H1)`
     margin-bottom: 18px;
 `;
   const InfoBlock = styled.div`
@@ -8013,8 +8236,6 @@ var __async = (__this, __arguments, generator) => {
     justify-content: center;
     gap: 8px;
 `;
-  const ScrollContainer = styled.div`
-`;
   const LINKS = {
     GET_A_WALLET: "https://ton.org/wallets?filters[wallet_features][slug][$in]=dapp-auth&pagination[limit]=-1"
   };
@@ -8024,7 +8245,8 @@ var __async = (__this, __arguments, generator) => {
         return [createComponent(StyledIconButton$1, {
           icon: "arrow",
           onClick: () => props.onBackClick()
-        }), createComponent(H1Styled$3, {
+        }), createComponent(H1Styled$5, {
+          translationKey: "walletModal.infoModal.whatIsAWallet",
           children: "What is a wallet"
         }), createComponent(ScrollContainer, {
           get children() {
@@ -8033,8 +8255,10 @@ var __async = (__this, __arguments, generator) => {
                 return [createComponent(SecurityIcon, {
                   "class": InfoBlockIconClass
                 }), createComponent(H3Styled, {
+                  translationKey: "walletModal.infoModal.secureDigitalAssets",
                   children: "Secure digital assets storage"
                 }), createComponent(TextStyled$1, {
+                  translationKey: "walletModal.infoModal.walletProtects",
                   children: "A wallet protects and manages your digital assets including TON, tokens and collectables."
                 })];
               }
@@ -8043,8 +8267,10 @@ var __async = (__this, __arguments, generator) => {
                 return [createComponent(PersonalityIcon, {
                   "class": InfoBlockIconClass
                 }), createComponent(H3Styled, {
+                  translationKey: "walletModal.infoModal.controlIdentity",
                   children: "Control your Web3 identity"
                 }), createComponent(TextStyled$1, {
+                  translationKey: "walletModal.infoModal.manageIdentity",
                   children: "Manage your digital identity and access decentralized applications with ease. Maintain control over your data and engage securely in the blockchain ecosystem."
                 })];
               }
@@ -8053,8 +8279,10 @@ var __async = (__this, __arguments, generator) => {
                 return [createComponent(SwapIcon, {
                   "class": InfoBlockIconClass
                 }), createComponent(H3Styled, {
+                  translationKey: "walletModal.infoModal.effortlessCryptoTransactions",
                   children: "Effortless crypto transactions"
                 }), createComponent(TextStyled$1, {
+                  translationKey: "walletModal.infoModal.easilySend",
                   children: "Easily send, receive, monitor your cryptocurrencies. Streamline your operations with decentralized applications."
                 })];
               }
@@ -8070,7 +8298,12 @@ var __async = (__this, __arguments, generator) => {
                       get rightIcon() {
                         return createComponent(WalletIcon, {});
                       },
-                      children: "Get a Wallet"
+                      get children() {
+                        return createComponent(Translation, {
+                          translationKey: "walletModal.infoModal.getAWallet",
+                          children: "Get a Wallet"
+                        });
+                      }
                     });
                   }
                 });
@@ -8091,7 +8324,7 @@ var __async = (__this, __arguments, generator) => {
     justify-content: center;
     min-height: 232px;
 `;
-  const H1Styled$2 = styled(H1)`
+  const H1Styled$4 = styled(H1)`
     max-width: 262px;
     margin: 0 auto 8px;
 `;
@@ -8116,17 +8349,67 @@ var __async = (__this, __arguments, generator) => {
     margin-left: auto;
 `;
   const LoaderStyled = styled(LoaderIcon)`
-    margin-bottom: 16px;
+    margin-bottom: 18px;
+    margin-top: 2px;
 `;
   const ErrorIconStyled = styled(ErrorIcon)`
     margin-bottom: 16px;
 `;
-  const BodyTextStyled = styled(Text)`
+  const BodyTextStyled = styled(H2)`
     color: ${(props) => props.theme.colors.text.secondary};
     text-align: center;
     margin-bottom: 20px;
 `;
+  const ButtonsContainerStyled = styled.div`
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding-bottom: 16px;
+`;
+  const H1Styled$3 = styled(H1)`
+    margin-bottom: 2px;
+    padding: 0 64px;
+`;
+  const H2Styled$3 = styled(H2)`
+    margin-bottom: 20px;
+    padding: 0 64px;
+    min-height: 44px;
+`;
+  const QrCodeWrapper$1 = styled.div`
+    padding: 0 24px 24px;
+`;
+  const MobileConnectionQR = (props) => {
+    return [createComponent(H1Styled$3, {
+      get children() {
+        return props.walletInfo.name;
+      }
+    }), createComponent(H2Styled$3, {
+      translationKey: "walletModal.mobileConnectionModal.scanQR",
+      get translationValues() {
+        return {
+          name: props.walletInfo.name
+        };
+      },
+      get children() {
+        return ["Scan the QR code below with your phone\u2019s or ", createMemo(() => props.walletInfo.name), "\u2019s camera"];
+      }
+    }), createComponent(QrCodeWrapper$1, {
+      get children() {
+        return createComponent(QRCode, {
+          get imageUrl() {
+            return props.walletInfo.imageUrl;
+          },
+          get sourceUrl() {
+            return props.universalLink;
+          },
+          disableCopy: true
+        });
+      }
+    })];
+  };
   const MobileConnectionModal = (props) => {
+    const theme = useTheme();
+    const [showQR, setShowQR] = createSignal(false);
     const [connectionErrored, setConnectionErrored] = createSignal(false);
     const connector = useContext(ConnectorContext);
     const unsubscribe = connector.onStatusChange(() => {
@@ -8144,6 +8427,26 @@ var __async = (__this, __arguments, generator) => {
       }));
       openLinkBlank(addReturnStrategy(universalLink(), appState.returnStrategy));
     };
+    const onOpenQR = () => {
+      setConnectionErrored(false);
+      setShowQR(true);
+      setLastSelectedWalletInfo(__spreadProps(__spreadValues({}, props.wallet), {
+        openMethod: "qrcode"
+      }));
+    };
+    const onCloseQR = () => {
+      setShowQR(false);
+      setLastSelectedWalletInfo(__spreadProps(__spreadValues({}, props.wallet), {
+        openMethod: "universal-link"
+      }));
+    };
+    const onBack = () => {
+      if (showQR()) {
+        onCloseQR();
+      } else {
+        props.onBackClick();
+      }
+    };
     onCleanup(unsubscribe);
     onRetry();
     return createComponent(MobileConnectionModalStyled, {
@@ -8151,70 +8454,151 @@ var __async = (__this, __arguments, generator) => {
       get children() {
         return [createComponent(StyledIconButton, {
           icon: "arrow",
-          onClick: () => props.onBackClick()
-        }), createComponent(H1Styled$2, {
+          onClick: onBack
+        }), createComponent(Show, {
+          get when() {
+            return showQR();
+          },
           get children() {
-            return props.wallet.name;
-          }
-        }), createComponent(BodyStyled, {
-          get children() {
-            return [createComponent(Show, {
-              get when() {
-                return connectionErrored();
+            return createComponent(MobileConnectionQR, {
+              get universalLink() {
+                return universalLink();
               },
-              get children() {
-                return [createComponent(ErrorIconStyled, {
-                  size: "s"
-                }), createComponent(BodyTextStyled, {
-                  children: "Connection declined"
-                }), createComponent(Button, {
-                  get leftIcon() {
-                    return createComponent(RetryIcon, {});
-                  },
-                  onClick: onRetry,
-                  children: "Retry"
-                })];
+              get walletInfo() {
+                return props.wallet;
               }
-            }), createComponent(Show, {
-              get when() {
-                return !connectionErrored();
-              },
-              get children() {
-                return [createComponent(LoaderStyled, {
-                  size: "m"
-                }), createComponent(BodyTextStyled, {
-                  get children() {
-                    return ["Continue in ", createMemo(() => props.wallet.name), "\u2026"];
-                  }
-                }), createComponent(Button, {
-                  get leftIcon() {
-                    return createComponent(RetryIcon, {});
-                  },
-                  onClick: onRetry,
-                  children: "Retry"
-                })];
-              }
-            })];
+            });
           }
-        }), createComponent(FooterStyled, {
+        }), createComponent(Show, {
+          get when() {
+            return !showQR();
+          },
           get children() {
-            return [createComponent(ImageStyled, {
-              get src() {
-                return props.wallet.imageUrl;
-              }
-            }), createComponent(H3, {
+            return [createComponent(H1Styled$4, {
               get children() {
                 return props.wallet.name;
               }
-            }), createComponent(FooterButton, {
-              get href() {
-                return props.wallet.aboutUrl;
-              },
-              blank: true,
+            }), createComponent(BodyStyled, {
               get children() {
-                return createComponent(Button, {
-                  children: "GET"
-                });
+                return [createComponent(Show, {
+                  get when() {
+                    return connectionErrored();
+                  },
+                  get children() {
+                    return [createComponent(ErrorIconStyled, {
+                      size: "s"
+                    }), createComponent(BodyTextStyled, {
+                      translationKey: "walletModal.mobileConnectionModal.connectionDeclined",
+                      children: "Connection declined"
+                    }), createComponent(ButtonsContainerStyled, {
+                      get children() {
+                        return [createComponent(Button, {
+                          get leftIcon() {
+                            return createComponent(RetryIcon, {});
+                          },
+                          onClick: onRetry,
+                          get children() {
+                            return createComponent(Translation, {
+                              translationKey: "common.retry",
+                              children: "Retry"
+                            });
+                          }
+                        }), createComponent(Button, {
+                          get leftIcon() {
+                            return createComponent(QRIcon, {
+                              get fill() {
+                                return theme.colors.accent;
+                              }
+                            });
+                          },
+                          onClick: onOpenQR,
+                          get children() {
+                            return createComponent(Translation, {
+                              translationKey: "walletModal.mobileConnectionModal.showQR",
+                              children: "Show QR Code"
+                            });
+                          }
+                        })];
+                      }
+                    })];
+                  }
+                }), createComponent(Show, {
+                  get when() {
+                    return !connectionErrored();
+                  },
+                  get children() {
+                    return [createComponent(LoaderStyled, {
+                      size: "s"
+                    }), createComponent(BodyTextStyled, {
+                      translationKey: "walletModal.mobileConnectionModal.continueIn",
+                      get translationValues() {
+                        return {
+                          name: props.wallet.name
+                        };
+                      },
+                      get children() {
+                        return ["Continue in ", createMemo(() => props.wallet.name), "\u2026"];
+                      }
+                    }), createComponent(ButtonsContainerStyled, {
+                      get children() {
+                        return [createComponent(Button, {
+                          get leftIcon() {
+                            return createComponent(RetryIcon, {});
+                          },
+                          onClick: onRetry,
+                          get children() {
+                            return createComponent(Translation, {
+                              translationKey: "common.retry",
+                              children: "Retry"
+                            });
+                          }
+                        }), createComponent(Button, {
+                          get leftIcon() {
+                            return createComponent(QRIcon, {
+                              get fill() {
+                                return theme.colors.accent;
+                              }
+                            });
+                          },
+                          onClick: onOpenQR,
+                          get children() {
+                            return createComponent(Translation, {
+                              translationKey: "walletModal.mobileConnectionModal.showQR",
+                              children: "Show QR Code"
+                            });
+                          }
+                        })];
+                      }
+                    })];
+                  }
+                })];
+              }
+            }), createComponent(FooterStyled, {
+              get children() {
+                return [createComponent(ImageStyled, {
+                  get src() {
+                    return props.wallet.imageUrl;
+                  }
+                }), createComponent(H3, {
+                  get children() {
+                    return props.wallet.name;
+                  }
+                }), createComponent(FooterButton, {
+                  get href() {
+                    return props.wallet.aboutUrl;
+                  },
+                  blank: true,
+                  get children() {
+                    return createComponent(Button, {
+                      get children() {
+                        return createComponent(Translation, {
+                          translationKey: "common.get",
+                          children: "GET"
+                        });
+                      }
+                    });
+                  }
+                })];
               }
             })];
           }
@@ -8292,7 +8676,8 @@ var __async = (__this, __arguments, generator) => {
     position: relative;
     top: 26px;
 
-    background-color: ${(props) => props.theme.colors.icon.tertiary};
+    background-color: ${(props) => props.theme.colors.icon.secondary};
+    opacity: 0.2;
 `;
   const IconContainer = styled.div`
     width: 60px;
@@ -8305,12 +8690,12 @@ var __async = (__this, __arguments, generator) => {
     background-color: ${(props) => props.theme.colors.background.tint};
     margin-bottom: 8px;
 `;
-  const H1Styled$1 = styled(H1)`
+  const H1Styled$2 = styled(H1)`
     margin-top: 38px;
     margin-bottom: 4px;
     padding: 0 24px;
 `;
-  const H2Styled$1 = styled(H2)`
+  const H2Styled$2 = styled(H2)`
     margin-bottom: 24px;
     padding: 0 24px;
     min-height: 44px;
@@ -8336,8 +8721,46 @@ var __async = (__this, __arguments, generator) => {
     width: 24px;
     height: 24px;
 `;
+  const StyledLeftActionButton = styled(IconButton)`
+    position: absolute;
+    top: 16px;
+    left: 16px;
+`;
+  const H1Styled$1 = styled(H1)`
+    margin-bottom: 2px;
+    padding: 0 64px;
+`;
+  const H2Styled$1 = styled(H2)`
+    margin-bottom: 20px;
+    padding: 0 64px;
+`;
+  const QrCodeWrapper = styled.div`
+    padding: 0 24px 24px;
+`;
+  const MobileUniversalQR = (props) => {
+    return [createComponent(H1Styled$1, {
+      translationKey: "walletModal.mobileUniversalModal.connectYourWallet",
+      children: "Connect your wallet"
+    }), createComponent(H2Styled$1, {
+      translationKey: "walletModal.mobileUniversalModal.scan",
+      children: "Scan with your mobile wallet"
+    }), createComponent(QrCodeWrapper, {
+      get children() {
+        return createComponent(QRCode, {
+          get imageUrl() {
+            return IMG.TON;
+          },
+          get sourceUrl() {
+            return props.universalLink;
+          },
+          disableCopy: true
+        });
+      }
+    })];
+  };
   const _tmpl$$1 = /* @__PURE__ */ template$1(`<li></li>`), _tmpl$2 = /* @__PURE__ */ template$1(`<div data-tc-wallets-modal-mobile="true"></div>`);
   const MobileUniversalModal = (props) => {
+    const [showQR, setShowQR] = createSignal(false);
     const connector = appState.connector;
     const walletsList = () => props.walletsList.filter((w) => supportsMobile(w) && w.appName !== AT_WALLET_APP_NAME);
     const shouldShowMoreButton = () => walletsList().length > 7;
@@ -8371,95 +8794,136 @@ var __async = (__this, __arguments, generator) => {
       }, props.additionalRequest);
       openLinkBlank(walletLink);
     };
+    const onOpenQR = () => {
+      setShowQR(true);
+      setLastSelectedWalletInfo({
+        openMethod: "qrcode"
+      });
+    };
+    const onCloseQR = () => {
+      setShowQR(false);
+      setLastSelectedWalletInfo({
+        openMethod: "universal-link"
+      });
+    };
     return (() => {
       const _el$ = _tmpl$2.cloneNode(true);
-      insert(_el$, createComponent(H1Styled$1, {
-        translationKey: "walletModal.mobileSelectWalletModal.connectWallet",
-        children: "Connect your wallet"
-      }), null);
-      insert(_el$, createComponent(H2Styled$1, {
-        translationKey: "walletModal.mobileSelectWalletModal.selectWallet",
-        children: "Open Wallet on Telegram or select your wallet to connect"
-      }), null);
-      insert(_el$, createComponent(TelegramButtonStyled, {
-        get leftIcon() {
-          return createComponent(AtWalletIcon, {});
+      insert(_el$, createComponent(Show, {
+        get when() {
+          return showQR();
         },
-        get rightIcon() {
-          return createComponent(TGImageStyled, {
-            get src() {
-              return IMG.TG;
-            }
-          });
-        },
-        onClick: onSelectTelegram,
-        scale: "s",
-        children: "Open Wallet on Telegram"
-      }), null);
-      insert(_el$, createComponent(UlStyled, {
         get children() {
-          return [createComponent(For, {
-            get each() {
-              return createMemo(() => !!shouldShowMoreButton())() ? walletsList().slice(0, 4) : walletsList();
-            },
-            children: (wallet) => (() => {
-              const _el$3 = _tmpl$$1.cloneNode(true);
-              insert(_el$3, createComponent(WalletItem, {
-                get icon() {
-                  return wallet.imageUrl;
-                },
-                get name() {
-                  return wallet.name;
-                },
-                onClick: () => props.onSelect(wallet)
-              }));
-              return _el$3;
-            })()
-          }), createComponent(Show, {
-            get when() {
-              return shouldShowMoreButton();
-            },
-            get children() {
-              const _el$2 = _tmpl$$1.cloneNode(true);
-              insert(_el$2, createComponent(FourWalletsItem, {
-                labelLine1: "View all",
-                labelLine2: "wallets",
-                get images() {
-                  return walletsList().slice(3, 7).map((i2) => i2.imageUrl);
-                },
-                onClick: () => props.onSelectAllWallets()
-              }));
-              return _el$2;
+          return [createComponent(StyledLeftActionButton, {
+            icon: "arrow",
+            onClick: onCloseQR
+          }), createComponent(MobileUniversalQR, {
+            get universalLink() {
+              return universalLink();
             }
-          }), createComponent(Divider, {
-            children: "\xA0"
-          }), createComponent(OtherOptionButton, {
-            onClick: onSelectUniversal,
-            get children() {
-              return [createComponent(IconContainer, {
-                get children() {
-                  return createComponent(LongArrowIcon, {});
+          })];
+        }
+      }), null);
+      insert(_el$, createComponent(Show, {
+        get when() {
+          return !showQR();
+        },
+        get children() {
+          return [createComponent(StyledLeftActionButton, {
+            get icon() {
+              return createComponent(QRIcon, {});
+            },
+            onClick: onOpenQR
+          }), createComponent(H1Styled$2, {
+            translationKey: "walletModal.mobileUniversalModal.connectYourWallet",
+            children: "Connect your wallet"
+          }), createComponent(H2Styled$2, {
+            translationKey: "walletModal.mobileUniversalModal.openWalletOnTelegramOrSelect",
+            children: "Open Wallet on Telegram or select your wallet to connect"
+          }), createComponent(TelegramButtonStyled, {
+            get leftIcon() {
+              return createComponent(AtWalletIcon, {});
+            },
+            get rightIcon() {
+              return createComponent(TGImageStyled, {
+                get src() {
+                  return IMG.TG;
                 }
-              }), createComponent(Text, {
-                fontWeight: 590,
-                translationKey: "walletModal.mobileSelectWalletModal.openLink",
-                children: "OpenLink"
-              })];
+              });
+            },
+            onClick: onSelectTelegram,
+            scale: "s",
+            get children() {
+              return createComponent(Translation, {
+                translationKey: "walletModal.mobileUniversalModal.openWalletOnTelegram",
+                children: "Open Wallet on Telegram"
+              });
             }
-          }), createComponent(OtherOptionButton, {
-            onClick: onCopy,
+          }), createComponent(UlStyled, {
             get children() {
-              return [createComponent(IconContainer, {
-                get children() {
-                  return createMemo(() => isCopiedShown() !== void 0)() ? createComponent(DoneIcon, {}) : createComponent(CopyLightIcon, {});
-                }
-              }), createComponent(Text, {
-                fontWeight: 590,
-                get translationKey() {
-                  return isCopiedShown() !== void 0 ? "common.copied" : "common.copyLink";
+              return [createComponent(For, {
+                get each() {
+                  return createMemo(() => !!shouldShowMoreButton())() ? walletsList().slice(0, 4) : walletsList();
+                },
+                children: (wallet) => (() => {
+                  const _el$3 = _tmpl$$1.cloneNode(true);
+                  insert(_el$3, createComponent(WalletItem, {
+                    get icon() {
+                      return wallet.imageUrl;
+                    },
+                    get name() {
+                      return wallet.name;
+                    },
+                    onClick: () => props.onSelect(wallet)
+                  }));
+                  return _el$3;
+                })()
+              }), createComponent(Show, {
+                get when() {
+                  return shouldShowMoreButton();
                 },
                 get children() {
-                  return isCopiedShown() !== void 0 ? "Copied" : "Copy Link";
+                  const _el$2 = _tmpl$$1.cloneNode(true);
+                  insert(_el$2, createComponent(FourWalletsItem, {
+                    labelLine1: "View all",
+                    labelLine2: "wallets",
+                    get images() {
+                      return walletsList().slice(3, 7).map((i2) => i2.imageUrl);
+                    },
+                    onClick: () => props.onSelectAllWallets()
+                  }));
+                  return _el$2;
+                }
+              }), createComponent(Divider, {
+                children: "\xA0"
+              }), createComponent(OtherOptionButton, {
+                onClick: onSelectUniversal,
+                get children() {
+                  return [createComponent(IconContainer, {
+                    get children() {
+                      return createComponent(LongArrowIcon, {});
+                    }
+                  }), createComponent(Text, {
+                    fontWeight: 590,
+                    translationKey: "walletModal.mobileUniversalModal.openLink",
+                    children: "Open Link"
+                  })];
+                }
+              }), createComponent(OtherOptionButton, {
+                onClick: onCopy,
+                get children() {
+                  return [createComponent(IconContainer, {
+                    get children() {
+                      return createMemo(() => isCopiedShown() !== void 0)() ? createComponent(DoneIcon, {}) : createComponent(CopyLightIcon, {});
+                    }
+                  }), createComponent(Text, {
+                    fontWeight: 590,
+                    get translationKey() {
+                      return isCopiedShown() !== void 0 ? "common.copied" : "common.copyLink";
+                    },
+                    get children() {
+                      return isCopiedShown() !== void 0 ? "Copied" : "Copy Link";
+                    }
+                  })];
                 }
               })];
             }
@@ -8589,8 +9053,10 @@ var __async = (__this, __arguments, generator) => {
       "data-tc-universal-qr-desktop": "true",
       get children() {
         return [createComponent(H1, {
+          translationKey: "walletModal.desktopUniversalModal.connectYourWallet",
           children: "Connect your wallet"
         }), createComponent(H2Styled, {
+          translationKey: "walletModal.desktopUniversalModal.scan",
           children: "Scan with your mobile wallet"
         }), createComponent(QRCodeStyled, {
           get sourceUrl() {
@@ -8603,6 +9069,7 @@ var __async = (__this, __arguments, generator) => {
             return IMG.TON;
           }
         }), createComponent(H2AvailableWalletsStyled, {
+          translationKey: "walletModal.desktopUniversalModal.availableWallets",
           children: "Available wallets"
         }), createComponent(WalletsContainerStyled, {
           get children() {
@@ -8713,7 +9180,7 @@ var __async = (__this, __arguments, generator) => {
                 return additionalRequestLoading() || !walletsList();
               },
               get children() {
-                return [createComponent(H1Styled$6, {
+                return [createComponent(H1Styled$8, {
                   translationKey: "walletModal.loading",
                   children: "Wallets list is loading"
                 }), createComponent(LoaderContainerStyled, {
@@ -8789,13 +9256,6 @@ var __async = (__this, __arguments, generator) => {
           }
         })];
       }
-    });
-  };
-  const Translation = (props) => {
-    const [t2] = useI18n();
-    return createMemo(() => {
-      var _a2;
-      return t2(props.translationKey, props.translationValues, (_a2 = props.children) == null ? void 0 : _a2.toString());
     });
   };
   const ActionModalStyled = styled.div`
@@ -8880,14 +9340,15 @@ var __async = (__this, __arguments, generator) => {
     }));
   };
   const ConfirmTransactionModal = (props) => {
-    var _a2;
     const tonConnectUI = useContext(TonConnectUiContext);
     const [t2] = useI18n();
-    const name = ((_a2 = tonConnectUI.wallet) == null ? void 0 : _a2.name) || t2("common.yourWallet", {}, "your wallet");
+    const name = () => tonConnectUI.wallet && "name" in tonConnectUI.wallet ? tonConnectUI.wallet.name : t2("common.yourWallet", {}, "Your wallet");
     return createComponent(ActionModal, {
       headerTranslationKey: "actionModal.confirmTransaction.header",
-      headerTranslationValues: {
-        name
+      get headerTranslationValues() {
+        return {
+          name: name()
+        };
       },
       textTranslationKey: "actionModal.confirmTransaction.text",
       get icon() {
@@ -9115,17 +9576,17 @@ var __async = (__this, __arguments, generator) => {
       return this.connector.account;
     }
     get wallet() {
-      if (!this.connector.wallet || !this.walletInfo) {
+      if (!this.connector.wallet) {
         return null;
       }
       return __spreadValues(__spreadValues({}, this.connector.wallet), this.walletInfo);
     }
     set uiOptions(options) {
-      var _a2, _b, _c, _d, _e;
+      var _a2, _b2, _c, _d, _e;
       this.checkButtonRootExist(options.buttonRootId);
       this.actionsConfiguration = options.actionsConfiguration;
       if ((_a2 = options.uiPreferences) == null ? void 0 : _a2.theme) {
-        if (((_b = options.uiPreferences) == null ? void 0 : _b.theme) !== "SYSTEM") {
+        if (((_b2 = options.uiPreferences) == null ? void 0 : _b2.theme) !== "SYSTEM") {
           (_c = this.systemThemeChangeUnsubscribe) == null ? void 0 : _c.call(this);
           setTheme(options.uiPreferences.theme, options.uiPreferences.colorsSet);
         } else {
@@ -9218,13 +9679,13 @@ var __async = (__this, __arguments, generator) => {
     }
     sendTransaction(tx, options) {
       return __async(this, null, function* () {
-        if (!this.connected || !this.walletInfo) {
+        if (!this.connected) {
           throw new TonConnectUIError("Connect wallet to send a transaction.");
         }
         const { notifications: notifications2, modals, returnStrategy, skipRedirectToWallet } = this.getModalsAndNotificationsConfiguration(options);
         const userOSIsIos = getUserAgent().os === "ios";
         const shouldSkipRedirectToWallet = skipRedirectToWallet === "ios" && userOSIsIos || skipRedirectToWallet === "always";
-        if ("universalLink" in this.walletInfo && this.walletInfo.openMethod === "universal-link" && !shouldSkipRedirectToWallet) {
+        if (this.walletInfo && "universalLink" in this.walletInfo && this.walletInfo.openMethod === "universal-link" && !shouldSkipRedirectToWallet) {
           if (sdk.isTelegramUrl(this.walletInfo.universalLink)) {
             this.redirectToTelegram(this.walletInfo.universalLink);
           } else {
@@ -9305,9 +9766,16 @@ var __async = (__this, __arguments, generator) => {
         if (selectedWalletInfo) {
           this.walletInfo = selectedWalletInfo;
           this.walletInfoStorage.setWalletInfo(selectedWalletInfo);
-        } else {
-          this.walletInfo = this.walletInfoStorage.getWalletInfo();
+          return;
         }
+        const storedWalletInfo = this.walletInfoStorage.getWalletInfo();
+        if (storedWalletInfo) {
+          this.walletInfo = storedWalletInfo;
+          return;
+        }
+        this.walletInfo = (yield this.walletsList).find(
+          (walletInfo) => eqWalletName(walletInfo, wallet.device.appName)
+        ) || null;
       });
     }
     normalizeWidgetRoot(rootId) {
@@ -9328,14 +9796,14 @@ var __async = (__this, __arguments, generator) => {
       }
     }
     getModalsAndNotificationsConfiguration(options) {
-      var _a2, _b, _c, _d, _e;
+      var _a2, _b2, _c, _d, _e;
       const allActions = [
         "before",
         "success",
         "error"
       ];
       let notifications2 = allActions;
-      if (((_a2 = this.actionsConfiguration) == null ? void 0 : _a2.notifications) && ((_b = this.actionsConfiguration) == null ? void 0 : _b.notifications) !== "all") {
+      if (((_a2 = this.actionsConfiguration) == null ? void 0 : _a2.notifications) && ((_b2 = this.actionsConfiguration) == null ? void 0 : _b2.notifications) !== "all") {
         notifications2 = this.actionsConfiguration.notifications;
       }
       if (options == null ? void 0 : options.notifications) {
