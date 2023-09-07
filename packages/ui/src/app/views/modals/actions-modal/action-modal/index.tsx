@@ -4,10 +4,8 @@ import { ActionModalStyled, ButtonStyled, H1Styled, TextStyled } from './style';
 import { WithDataAttributes } from 'src/app/models/with-data-attributes';
 import { useDataAttributes } from 'src/app/hooks/use-data-attributes';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
-import { addReturnStrategy, isInTWA, openLink, openLinkBlank } from 'src/app/utils/web-api';
-import { eqWalletName } from 'src/app/utils/wallets';
-import { AT_WALLET_APP_NAME } from 'src/app/env/AT_WALLET_APP_NAME';
-import { isTelegramUrl, WalletInfo } from '@tonconnect/sdk';
+import { addReturnStrategy, isInTWA, openLink, redirectToTelegram } from 'src/app/utils/web-api';
+import { isTelegramUrl } from '@tonconnect/sdk';
 
 interface ActionModalProps extends WithDataAttributes {
     headerTranslationKey: string;
@@ -34,10 +32,11 @@ export const ActionModal: Component<ActionModalProps> = props => {
     }
 
     const onOpenWallet = (): void => {
-        if (eqWalletName(tonConnectUI!.wallet as WalletInfo, AT_WALLET_APP_NAME)) {
-            openLinkBlank(addReturnStrategy(universalLink!, 'back'));
+        if (isTelegramUrl(universalLink!)) {
+            redirectToTelegram(universalLink!);
+        } else {
+            openLink(addReturnStrategy(universalLink!, 'back'));
         }
-        openLink(addReturnStrategy(universalLink!, 'back'));
     };
 
     return (
