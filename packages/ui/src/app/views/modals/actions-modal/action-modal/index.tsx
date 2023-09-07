@@ -6,6 +6,7 @@ import { useDataAttributes } from 'src/app/hooks/use-data-attributes';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { addReturnStrategy, isInTWA, openLink, redirectToTelegram } from 'src/app/utils/web-api';
 import { isTelegramUrl } from '@tonconnect/sdk';
+import { appState } from 'src/app/state/app.state';
 
 interface ActionModalProps extends WithDataAttributes {
     headerTranslationKey: string;
@@ -33,9 +34,9 @@ export const ActionModal: Component<ActionModalProps> = props => {
 
     const onOpenWallet = (): void => {
         if (isTelegramUrl(universalLink!)) {
-            redirectToTelegram(universalLink!);
+            redirectToTelegram(universalLink!, appState.returnStrategy);
         } else {
-            openLink(addReturnStrategy(universalLink!, 'back'));
+            openLink(addReturnStrategy(universalLink!, appState.returnStrategy));
         }
     };
 

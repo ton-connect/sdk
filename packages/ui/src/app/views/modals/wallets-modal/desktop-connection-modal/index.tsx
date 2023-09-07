@@ -126,7 +126,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
             ...props.wallet,
             openMethod: 'universal-link'
         });
-        openLinkBlank(universalLink()!);
+        openLinkBlank(addReturnStrategy(universalLink()!, appState.returnStrategy));
     };
 
     const onClickExtension = (): void => {

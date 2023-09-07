@@ -5,6 +5,7 @@ import { toPx } from 'src/app/utils/css';
 import { TonConnectUIError } from 'src/errors';
 import { UserAgent } from 'src/models/user-agent';
 import UAParser from 'ua-parser-js';
+import { isTelegramUrl } from '@tonconnect/sdk';
 
 export function openLink(href: string, target = '_self'): ReturnType<typeof window.open> {
     return window.open(href, target, 'noreferrer noopener');
@@ -37,7 +38,24 @@ export function addQueryParameter(url: string, key: string, value: string): stri
 }
 
 export function addReturnStrategy(url: string, returnStrategy: ReturnStrategy): string {
-    return addQueryParameter(url, 'ret', returnStrategy);
+    const newUrl = addQueryParameter(url, 'ret', returnStrategy);
+
+    if (!isTelegramUrl(url)) {
+        return newUrl;
+    }
+
+    const lastParam = newUrl.slice(newUrl.lastIndexOf('&') + 1);
+    return (
+        newUrl.slice(0, newUrl.lastIndexOf('&')) +
+        '-' +
+        lastParam
+            .replaceAll('.', '%2E')
+            .replaceAll('-', '%2D')
+            .replaceAll('_', '%5F')
+            .replaceAll('&', '-')
+            .replaceAll('=', '__')
+            .replaceAll('%', '--')
+    );
 }
 
 export function disableScroll(): void {
@@ -148,10 +166,10 @@ export function getUserAgent(): UserAgent {
     };
 }
 
-export function redirectToTelegram(universalLink: string): void {
+export function redirectToTelegram(universalLink: string, ret: ReturnStrategy): void {
     const url = new URL(universalLink);
     url.searchParams.append('startattach', 'tonconnect');
-    openLinkBlank(url.toString());
+    openLinkBlank(addReturnStrategy(url.toString(), ret));
 }
 
 export function isInTWA(): boolean {

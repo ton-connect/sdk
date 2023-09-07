@@ -90,7 +90,7 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
             },
             props.additionalRequest
         );
-        openLinkBlank(walletLink);
+        openLinkBlank(addReturnStrategy(walletLink, appState.returnStrategy));
     };
 
     const onOpenQR = (): void => {
