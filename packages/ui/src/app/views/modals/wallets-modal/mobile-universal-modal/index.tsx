@@ -90,7 +90,7 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
             },
             props.additionalRequest
         );
-        openLinkBlank(walletLink);
+        openLinkBlank(addReturnStrategy(walletLink, appState.returnStrategy));
     };
 
     const onOpenQR = (): void => {
@@ -108,7 +108,7 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
     };
 
     return (
-        <div data-tc-wallets-modal-mobile="true">
+        <div data-tc-wallets-modal-universal-mobile="true">
             <Show when={showQR()}>
                 <StyledLeftActionButton icon="arrow" onClick={onCloseQR} />
                 <MobileUniversalQR universalLink={universalLink()} />

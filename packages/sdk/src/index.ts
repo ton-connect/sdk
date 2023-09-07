@@ -19,4 +19,4 @@ export {
     CONNECT_ITEM_ERROR_CODES
 } from '@tonconnect/protocol';
 export { toUserFriendlyAddress } from './utils/address';
-export { isTelegramUrl } from './utils/url';
+export { isTelegramUrl, encodeTelegramUrlParameters } from './utils/url';

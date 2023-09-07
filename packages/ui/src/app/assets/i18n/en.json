@@ -30,7 +30,7 @@
     },
     "transactionCanceled": {
       "header": "Transaction canceled",
-      "text": "There will be no changes to your account."
+      "text": "There will be no changes to your account."
     }
   },
   "walletItem": {
@@ -62,10 +62,10 @@
     },
     "desktopConnectionModal": {
       "scanQR": "Scan the QR code below with your phone’s or {{ name }}’s camera",
-      "continueInExtension": "Continue in {{ name }} browser extension…",
-      "dontHaveExtension": "Seems you don't have installed {{ name }} browser extension",
+      "continueInExtension": "Continue in {{ name }} browser extension…",
+      "dontHaveExtension": "Seems you don't have installed {{ name }} browser extension",
       "getWallet": "Get {{ name }}",
-      "continueOnDesktop": "Continue in {{ name }} on desktop…",
+      "continueOnDesktop": "Continue in {{ name }} on desktop…",
       "openWalletOnTelegram": "Open Wallet on Telegram on desktop",
       "connectionDeclined": "Connection declined"
     },

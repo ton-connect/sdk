@@ -25,7 +25,7 @@ export const AllWalletsListModal: Component<DesktopSelectWalletModalProps> = pro
         isMobile() ? props.walletsList.filter(supportsMobile) : props.walletsList;
 
     return (
-        <DesktopSelectWalletModalStyled data-tc-select-wallet-desktop="true">
+        <DesktopSelectWalletModalStyled data-tc-wallets-modal-list="true">
             <StyledIconButton icon="arrow" onClick={() => props.onBack()} />
             <H1Styled translationKey="walletModal.wallets">Wallets</H1Styled>
             <ScrollContainer maxHeight={maxHeight()}>

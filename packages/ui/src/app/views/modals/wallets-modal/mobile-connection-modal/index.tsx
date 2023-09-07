@@ -89,7 +89,7 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
     onRetry();
 
     return (
-        <MobileConnectionModalStyled data-tc-wallet-qr-modal-desktop="true">
+        <MobileConnectionModalStyled data-tc-wallets-modal-connection-mobile="true">
             <StyledIconButton icon="arrow" onClick={onBack} />
             <Show when={showQR()}>
                 <MobileConnectionQR universalLink={universalLink()} walletInfo={props.wallet} />

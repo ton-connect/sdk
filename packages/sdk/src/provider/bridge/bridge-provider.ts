@@ -26,7 +26,7 @@ import { IStorage } from 'src/storage/models/storage.interface';
 import { Optional, WithoutId, WithoutIdDistributive } from 'src/utils/types';
 import { PROTOCOL_VERSION } from 'src/resources/protocol';
 import { logDebug, logError } from 'src/utils/log';
-import { isTelegramUrl } from 'src/utils/url';
+import { encodeTelegramUrlParameters, isTelegramUrl } from 'src/utils/url';
 
 export class BridgeProvider implements HTTPProvider {
     public static async fromStorage(storage: IStorage): Promise<BridgeProvider> {
@@ -339,16 +339,7 @@ export class BridgeProvider implements HTTPProvider {
         const urlToWrap = this.generateRegularUniversalLink('about:blank', message);
         const linkParams = urlToWrap.split('?')[1]!;
 
-        const startattach =
-            'tonconnect-' +
-            linkParams
-                .replaceAll('.', '%2E')
-                .replaceAll('-', '%2D')
-                .replaceAll('_', '%5F')
-                .replaceAll('&', '-')
-                .replaceAll('=', '__')
-                .replaceAll('%', '--');
-
+        const startattach = 'tonconnect-' + encodeTelegramUrlParameters(linkParams);
         const url = new URL(universalLink);
         url.searchParams.append('startattach', startattach);
         return url.toString();
