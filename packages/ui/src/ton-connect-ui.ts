@@ -18,7 +18,7 @@ import {
     addReturnStrategy,
     getSystemTheme,
     getUserAgent,
-    openLink,
+    openLinkBlank,
     preloadImages,
     redirectToTelegram,
     subscribeToThemeChange
@@ -308,7 +308,7 @@ export class TonConnectUI {
             if (isTelegramUrl(this.walletInfo.universalLink)) {
                 redirectToTelegram(this.walletInfo.universalLink, appState.returnStrategy);
             } else {
-                openLink(addReturnStrategy(this.walletInfo.universalLink, returnStrategy));
+                openLinkBlank(addReturnStrategy(this.walletInfo.universalLink, returnStrategy));
             }
         }
 

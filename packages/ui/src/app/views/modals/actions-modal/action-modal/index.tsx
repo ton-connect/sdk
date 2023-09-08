@@ -4,7 +4,7 @@ import { ActionModalStyled, ButtonStyled, H1Styled, TextStyled } from './style';
 import { WithDataAttributes } from 'src/app/models/with-data-attributes';
 import { useDataAttributes } from 'src/app/hooks/use-data-attributes';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
-import { addReturnStrategy, isInTWA, openLink, redirectToTelegram } from 'src/app/utils/web-api';
+import {addReturnStrategy, isInTWA, openLink, openLinkBlank, redirectToTelegram} from 'src/app/utils/web-api';
 import { isTelegramUrl } from '@tonconnect/sdk';
 import { appState } from 'src/app/state/app.state';
 
@@ -36,7 +36,7 @@ export const ActionModal: Component<ActionModalProps> = props => {
         if (isTelegramUrl(universalLink!)) {
             redirectToTelegram(universalLink!, appState.returnStrategy);
         } else {
-            openLink(addReturnStrategy(universalLink!, appState.returnStrategy));
+            openLinkBlank(addReturnStrategy(universalLink!, appState.returnStrategy));
         }
     };
 
