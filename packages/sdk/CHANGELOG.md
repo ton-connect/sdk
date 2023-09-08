@@ -1,5 +1,20 @@
 # Changelog @tonconnect/sdk 
 
+# [3.0.0-beta.0](https://github.com/ton-connect/sdk/compare/sdk-2.2.0...sdk-3.0.0-beta.0) (2023-09-08)
+
+
+### Bug Fixes
+
+* **sdk:** storing pending connection ([260653c](https://github.com/ton-connect/sdk/commit/260653c4ccb9acef09d1c983a1207d5957b6de80))
+* **sdk:** telegram parameters encoding function exported ([95fc07b](https://github.com/ton-connect/sdk/commit/95fc07b399d808ab99b07804ecf7bbc9963730f8))
+
+
+### Features
+
+* **sdk:** new wallets-list source added ([07f25de](https://github.com/ton-connect/sdk/commit/07f25de8910d8efb9d972a2f64c4375aaf579c99))
+
+
+
 # [2.2.0](https://github.com/ton-connect/sdk/compare/sdk-2.1.4...sdk-2.2.0) (2023-08-18)
 
 
