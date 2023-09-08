@@ -16,7 +16,7 @@
 <li><a href="_tonconnect_ui.html">@tonconnect/ui</a></li></ul>
 <h1>Module @tonconnect/ui</h1></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/1524cdd/packages/ui/src/library.ts#L1">packages/ui/src/library.ts:1</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/476e20a/packages/ui/src/library.ts#L1">packages/ui/src/library.ts:1</a></li></ul></aside>
 <section class="tsd-panel-group">
 <section class="tsd-panel tsd-typography">
 <a href="#ton-connect-ui" id="ton-connect-ui" style="color: inherit; text-decoration: none;">
@@ -174,6 +174,19 @@ a URL: wallet will open this URL after completing the user&#39;s action. Note, t
 <pre><code class="language-ts"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">result</span><span class="hl-1"> = </span><span class="hl-0">await</span><span class="hl-1"> </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-5">sendTransaction</span><span class="hl-1">(</span><span class="hl-2">defaultTx</span><span class="hl-1">, {</span><br/><span class="hl-1">    </span><span class="hl-2">returnStrategy:</span><span class="hl-1"> </span><span class="hl-3">&#39;&lt;protocol&gt;://&lt;your_return_url&gt;&#39;</span><span class="hl-1"> </span><span class="hl-7">// Note, that you shouldn&#39;t pass your app&#39;s URL if it is a webpage.</span><br/><span class="hl-1">     </span><span class="hl-7">// This option should be used for native apps to work around possible OS-specific issues with &#39;back&#39; option.</span><br/><span class="hl-1">});</span>
 </code></pre>
 
+<a href="#use-inside-twa-telegram-web-app" id="use-inside-twa-telegram-web-app" style="color: inherit; text-decoration: none;">
+  <h2>Use inside TWA (Telegram web app)</h2>
+</a>
+<p>TonConnect UI will work in TWA in the same way as in a regular website!
+Basically, no changes are required from the dApp&#39;s developers. The only thing you have to set is a dynamic return strategy.</p>
+<p>Currently, it is impossible for TWA-wallets to redirect back to previous opened TWA-dApp like native wallet-apps do.
+It means, that you need to specify the return strategy as a link to your TWA that will be only applied if the dApp is opened in TWA mode.</p>
+<pre><code class="language-ts"><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-2">uiOptions</span><span class="hl-1"> = {</span><br/><span class="hl-1">        </span><span class="hl-2">twaReturnUrl:</span><span class="hl-1"> </span><span class="hl-3">&#39;https://t.me/durov&#39;</span><br/><span class="hl-1">    };</span>
+</code></pre>
+<p>In other words,</p>
+<pre><code class="language-ts"><span class="hl-0">if</span><span class="hl-1"> (</span><span class="hl-5">isLinkToTelegram</span><span class="hl-1">()) {</span><br/><span class="hl-1">    </span><span class="hl-0">if</span><span class="hl-1"> (</span><span class="hl-5">isInTWA</span><span class="hl-1">()) {</span><br/><span class="hl-1">        </span><span class="hl-8">FINAL_RETURN_STRATEGY</span><span class="hl-1"> = </span><span class="hl-2">actionsConfiguration</span><span class="hl-1">.</span><span class="hl-2">twaReturnUrl</span><span class="hl-1"> || </span><span class="hl-2">actionsConfiguration</span><span class="hl-1">.</span><span class="hl-2">returnStrategy</span><span class="hl-1">;</span><br/><span class="hl-1">    } </span><span class="hl-0">else</span><span class="hl-1"> {</span><br/><span class="hl-1">        </span><span class="hl-8">FINAL_RETURN_STRATEGY</span><span class="hl-1"> = </span><span class="hl-3">&#39;none&#39;</span><span class="hl-1">;</span><br/><span class="hl-1">    }</span><br/><span class="hl-1">} </span><span class="hl-0">else</span><span class="hl-1"> {</span><br/><span class="hl-1">    </span><span class="hl-8">FINAL_RETURN_STRATEGY</span><span class="hl-1"> = </span><span class="hl-2">actionsConfiguration</span><span class="hl-1">.</span><span class="hl-2">returnStrategy</span><span class="hl-1">;</span><br/><span class="hl-1">}</span><br/>
+</code></pre>
+
 <a href="#detect-end-of-the-connection-restoring-process" id="detect-end-of-the-connection-restoring-process" style="color: inherit; text-decoration: none;">
   <h2>Detect end of the connection restoring process</h2>
 </a>
@@ -260,29 +273,34 @@ However, it is possible if needed. You can add css styles to the specified selec
 <td>Container of the modal window that opens when you click on the &quot;connect wallet&quot; button.</td>
 </tr>
 <tr>
-<td>Select wallet mobile modal content</td>
-<td><code>[data-tc-wallets-modal-mobile=&quot;true&quot;]</code></td>
-<td>Content of the mobile modal window with wallet selection.</td>
+<td>Mobile universal modal page content</td>
+<td><code>[data-tc-wallets-modal-universal-mobile=&quot;true&quot;]</code></td>
+<td>Content of the general mobile modal page with horizontal list.</td>
 </tr>
 <tr>
-<td>Select wallet desktop modal content</td>
-<td><code>[data-tc-wallets-modal-desktop=&quot;true&quot;]</code></td>
-<td>Content of the desktop window with wallet selection.</td>
+<td>Desktop universal modal page content</td>
+<td><code>[data-tc-wallets-modal-universal-desktop=&quot;true&quot;]</code></td>
+<td>Content of the universal desktop modal page with QR.</td>
 </tr>
 <tr>
-<td>Desktop Universal QR content</td>
-<td><code>[data-tc-universal-qr-desktop=&quot;true&quot;]</code></td>
-<td>Universal QR page content under the tab bar in the desktop wallets selection modal window.</td>
+<td>Mobile selected wallet&#39;s modal page</td>
+<td><code>[data-tc-wallets-modal-connection-mobile=&quot;true&quot;]</code></td>
+<td>Content of the selected wallet&#39;s modal page on mobile.</td>
 </tr>
 <tr>
-<td>Desktop wallets list content</td>
-<td><code>[data-tc-select-wallet-desktop=&quot;true&quot;]</code></td>
-<td>Wallets list page content under the tab bar in the desktop wallets selection modal window.</td>
+<td>Desktop selected wallet&#39;s modal page</td>
+<td><code>[data-tc-wallets-modal-connection-desktop=&quot;true&quot;]</code></td>
+<td>Content of the selected wallet&#39;s modal page on desktop.</td>
 </tr>
 <tr>
-<td>Concrete wallet QR-code modal content</td>
-<td><code>[data-tc-wallet-qr-modal-desktop=&quot;true&quot;]</code></td>
-<td>Content of the modal window with the concrete wallet QR-code.</td>
+<td>Wallets list modal page</td>
+<td><code>[data-tc-wallets-modal-list=&quot;true&quot;]</code></td>
+<td>Content of the modal page with all available wallets list (desktop and mobile).</td>
+</tr>
+<tr>
+<td>Info modal page</td>
+<td><code>[data-tc-wallets-modal-info=&quot;true&quot;]</code></td>
+<td>Content of the modal page with &quot;What is a wallet information&quot;.</td>
 </tr>
 <tr>
 <td>Action modal container</td>
