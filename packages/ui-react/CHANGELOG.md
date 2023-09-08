@@ -1,5 +1,19 @@
 # Changelog @tonconnect/ui-react 
 
+# [2.0.0-beta.0](https://github.com/ton-connect/sdk/compare/ui-react-1.0.0-beta.9...ui-react-2.0.0-beta.0) (2023-09-08)
+
+
+### Bug Fixes
+
+* **ui-react:** useTonWallet hook types changed ([456f5eb](https://github.com/ton-connect/sdk/commit/456f5ebdc061b35aa131c0f2a892dc49ebdcf2ba))
+
+
+### BREAKING CHANGES
+
+* **ui-react:** `useTonWallet` now returns `Wallet | (Wallet & WalletInfoWithOpenMethod) | null` instead of `(Wallet & WalletInfoWithOpenMethod) | null`
+
+
+
 # [1.0.0-beta.9](https://github.com/ton-connect/sdk/compare/ui-react-1.0.0-beta.8...ui-react-1.0.0-beta.9) (2023-08-18)
 
 
