@@ -1,5 +1,47 @@
 # Changelog @tonconnect/ui 
 
+# [2.0.0-beta.0](https://github.com/ton-connect/sdk/compare/ui-1.0.0-beta.7...ui-2.0.0-beta.0) (2023-09-08)
+
+
+### Bug Fixes
+
+* dark theme fixes ([7aab019](https://github.com/ton-connect/sdk/commit/7aab019ca72e1300caa6c88457452b0cf79cca4b))
+* desktop wallet connection modal updates ([04bf064](https://github.com/ton-connect/sdk/commit/04bf064f6c74fde28e30bff499e3f00971ea3c6c))
+* info modal layout created ([a5bf026](https://github.com/ton-connect/sdk/commit/a5bf0263a43d153e373e34df891df1d26f3ca44c))
+* mobile layout improved ([765f63c](https://github.com/ton-connect/sdk/commit/765f63cb52f7b26dd80c6e14fa0de6f2519e07ae))
+* **ui:** [@wallet](https://github.com/wallet) updates ([cad46a7](https://github.com/ton-connect/sdk/commit/cad46a77227bf668392e1639829efec554de545b))
+* **ui:** border-radius updated ([4223842](https://github.com/ton-connect/sdk/commit/4223842442e23e034ff9f0f8f8c1f174e81fd4aa))
+* **ui:** button icon padding fixes ([c7c23e8](https://github.com/ton-connect/sdk/commit/c7c23e8f8e280caf2627e30ca6abaf0ed1fe8b26))
+* **ui:** data attributes added, wallet-items labels added ([06a0d17](https://github.com/ton-connect/sdk/commit/06a0d170781f35d242e43b3a8fae13e8171b6400))
+* **ui:** i18n updated ([a5cd091](https://github.com/ton-connect/sdk/commit/a5cd091c9899bc7ec4aa08d27a15f3f60d35bb47))
+* **ui:** Installed wallets order fixed ([eb9ad28](https://github.com/ton-connect/sdk/commit/eb9ad28347166104969d7e0b42a4bb4ec5be5a1a))
+* **ui:** mobile qr added ([9983e98](https://github.com/ton-connect/sdk/commit/9983e98ecc28e072c951194dd31a1444717cb36e))
+* **ui:** mobile scroll container improvements ([68a79df](https://github.com/ton-connect/sdk/commit/68a79df648b3c4afc89cf5b72a29116072b8ac7c))
+* **ui:** open link replaced with open link blank everywhere ([75d394d](https://github.com/ton-connect/sdk/commit/75d394d096727c970b05ad710b74b68b05c56f44))
+* **ui:** return strategy added for telegram wallets ([97cc8ef](https://github.com/ton-connect/sdk/commit/97cc8ef1b47ab05f48168b3abfbb6a37f6bc77fc))
+* **ui:** telegram links `ret` param handling ([0be57ca](https://github.com/ton-connect/sdk/commit/0be57caa275c075a3fa5b76ea3c9d51fc9ee790b))
+* **ui:** tonConnectUI wallet info property was maiden optional ([0f7f46a](https://github.com/ton-connect/sdk/commit/0f7f46a105234f7f815185b83e103b54ac865c92))
+* **ui:** twa "Open Wallet" button fixes ([8f8a797](https://github.com/ton-connect/sdk/commit/8f8a797eee3e02116aec11242ad67a4c82ddbc66))
+* **ui:** twa redirect updated ([da7ed34](https://github.com/ton-connect/sdk/commit/da7ed340b696402792c1ff8311843b33f5e4c463))
+* **ui:** ui fixes: safari all wallets list & wallet page loader padding ([6b1c574](https://github.com/ton-connect/sdk/commit/6b1c57428bef141b2f5bdc72f715cb374257f4df))
+* **ui:** ui improvements ([b4e87cc](https://github.com/ton-connect/sdk/commit/b4e87cc15ff41ae48c3567c0ff4b17638d6f7b61))
+* **ui:** ui improvements ([c0660f9](https://github.com/ton-connect/sdk/commit/c0660f932fe9d4e27d90d43405c8252f4f529a4b))
+* **ui:** ui updates ([b810692](https://github.com/ton-connect/sdk/commit/b810692328887690305d582adf428f3282de4483))
+
+
+### Features
+
+* new ui for main screen implemented ([fca8c70](https://github.com/ton-connect/sdk/commit/fca8c70a94ceb6664e378f1d4f7e7eb9ab244c64))
+* new ui for wallet connection page implemented ([c713f6e](https://github.com/ton-connect/sdk/commit/c713f6ef918ec60f91e9acccd558e752819dd6e4))
+* new ui wallets list implemented ([0b748f4](https://github.com/ton-connect/sdk/commit/0b748f480cd1f18b7df891e7970e353221ad29f4))
+
+
+### BREAKING CHANGES
+
+* **ui:** `tonConnectUI.wallet` now is  `Wallet | (Wallet & WalletInfoWithOpenMethod) | null` instead of `(Wallet & WalletInfoWithOpenMethod) | null`
+
+
+
 # [1.0.0-beta.7](https://github.com/ton-connect/sdk/compare/ui-1.0.0-beta.6...ui-1.0.0-beta.7) (2023-08-18)
 
 
