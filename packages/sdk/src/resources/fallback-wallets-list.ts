@@ -2,6 +2,20 @@ import { WalletInfoDTO } from 'src/models/wallet/wallet-info';
 
 export const FALLBACK_WALLETS_LIST: WalletInfoDTO[] = [
     {
+        app_name: 'telegram-wallet',
+        name: 'Wallet',
+        image: 'https://wallet.tg/images/logo-288.png',
+        about_url: 'https://wallet.tg/',
+        universal_url: 'https://t.me/wallet?attach=wallet',
+        bridge: [
+            {
+                type: 'sse',
+                url: 'https://bridge.tonapi.io/bridge'
+            }
+        ],
+        platforms: ['ios', 'android', 'macos', 'windows', 'linux']
+    },
+    {
         app_name: 'tonkeeper',
         name: 'Tonkeeper',
         image: 'https://tonkeeper.com/assets/tonconnect-icon.png',
