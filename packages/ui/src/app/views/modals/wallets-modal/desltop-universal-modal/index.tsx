@@ -12,6 +12,7 @@ import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { FourWalletsItem, H1, WalletLabeledItem } from 'src/app/components';
 import { PersonalizedWalletInfo } from 'src/app/models/personalized-wallet-info';
 import { IMG } from 'src/app/env/IMG';
+import { addReturnStrategy } from 'src/app/utils/web-api';
 
 interface DesktopUniversalModalProps {
     additionalRequest: ConnectAdditionalRequest;
@@ -45,7 +46,11 @@ export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = prop
             <H2Styled translationKey="walletModal.desktopUniversalModal.scan">
                 Scan with your mobile wallet
             </H2Styled>
-            <QRCodeStyled sourceUrl={request()} disableCopy={popupOpened()} imageUrl={IMG.TON} />
+            <QRCodeStyled
+                sourceUrl={addReturnStrategy(request()!, 'none')}
+                disableCopy={popupOpened()}
+                imageUrl={IMG.TON}
+            />
             <H2AvailableWalletsStyled translationKey="walletModal.desktopUniversalModal.availableWallets">
                 Available wallets
             </H2AvailableWalletsStyled>

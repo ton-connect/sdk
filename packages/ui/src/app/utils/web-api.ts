@@ -37,7 +37,18 @@ export function addQueryParameter(url: string, key: string, value: string): stri
     return parsed.toString();
 }
 
-export function addReturnStrategy(url: string, returnStrategy: ReturnStrategy): string {
+export function addReturnStrategy(
+    url: string,
+    strategy:
+        | ReturnStrategy
+        | { returnStrategy: ReturnStrategy; twaReturnUrl: `${string}://${string}` | undefined }
+): string {
+    let returnStrategy;
+    if (typeof strategy === 'string') {
+        returnStrategy = strategy;
+    } else {
+        returnStrategy = isInTWA() ? strategy.twaReturnUrl || strategy.returnStrategy : 'none';
+    }
     const newUrl = addQueryParameter(url, 'ret', returnStrategy);
 
     if (!isTelegramUrl(url)) {
@@ -156,10 +167,17 @@ export function getUserAgent(): UserAgent {
     };
 }
 
-export function redirectToTelegram(universalLink: string, ret: ReturnStrategy): void {
+export function redirectToTelegram(
+    universalLink: string,
+    options: {
+        returnStrategy: ReturnStrategy;
+        twaReturnUrl: `${string}://${string}` | undefined;
+    }
+): void {
     const url = new URL(universalLink);
     url.searchParams.append('startattach', 'tonconnect');
-    openLinkBlank(addReturnStrategy(url.toString(), ret));
+
+    openLinkBlank(addReturnStrategy(url.toString(), options));
 }
 
 export function isInTWA(): boolean {

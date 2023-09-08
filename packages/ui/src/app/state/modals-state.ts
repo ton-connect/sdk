@@ -1,13 +1,22 @@
 import { createSignal } from 'solid-js';
 import { WalletInfoWithOpenMethod, WalletOpenMethod } from 'src/models/connected-wallet';
 import { LastSelectedWalletInfoStorage } from 'src/storage';
+import { ReturnStrategy } from 'src/models';
 
 export type ActionName = 'confirm-transaction' | 'transaction-sent' | 'transaction-canceled';
 
-export type Action = {
+export type Action = BasicAction | ConfirmTransactionAction;
+
+type BasicAction = {
     name: ActionName;
     openModal: boolean;
     showNotification: boolean;
+};
+
+export type ConfirmTransactionAction = BasicAction & {
+    name: 'confirm-transaction';
+    returnStrategy: ReturnStrategy;
+    twaReturnUrl: `${string}://${string}`;
 };
 
 export const [walletsModalOpen, setWalletsModalOpen] = createSignal(false);

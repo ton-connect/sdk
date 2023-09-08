@@ -284,6 +284,33 @@ const result = await tonConnectUI.sendTransaction(defaultTx, {
 });
 ```
 
+## Use inside TWA (Telegram web app)
+TonConnect UI will work in TWA in the same way as in a regular website!
+Basically, no changes are required from the dApp's developers. The only thing you have to set is a dynamic return strategy.
+
+Currently, it is impossible for TWA-wallets to redirect back to previous opened TWA-dApp like native wallet-apps do.
+It means, that you need to specify the return strategy as a link to your TWA that will be only applied if the dApp is opened in TWA mode.
+
+```ts
+tonConnectUI.uiOptions = {
+        twaReturnUrl: 'https://t.me/durov'
+    };
+```
+
+In other words,
+```ts
+if (isLinkToTelegram()) {
+    if (isInTWA()) {
+        FINAL_RETURN_STRATEGY = actionsConfiguration.twaReturnUrl || actionsConfiguration.returnStrategy;
+    } else {
+        FINAL_RETURN_STRATEGY = 'none';
+    }
+} else {
+    FINAL_RETURN_STRATEGY = actionsConfiguration.returnStrategy;
+}
+
+```
+
 ## Detect end of the connection restoring process
 Before restoring previous connected wallet TonConnect has to set up SSE connection with bridge, so you have to wait a little while connection restoring.
 If you need to update your UI depending on if connection is restoring, you can use `tonConnectUI.connectionRestored` promise.

@@ -12,14 +12,15 @@ async function dev(): Promise<void> {
         buttonRootId: 'button-root',
         actionsConfiguration: {
             modals: ['error'],
-            notifications: ['before']
+            notifications: ['before'],
+            twaReturnUrl: 'https://google.com'
         },
         uiPreferences: {
             theme: THEME.DARK,
             borderRadius: 'm'
         },
         language: 'ru',
-        restoreConnection: true
+        restoreConnection: true,
         /*walletsListConfiguration: {
             includeWallets: [
                 {

@@ -126,7 +126,12 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
             ...props.wallet,
             openMethod: 'universal-link'
         });
-        openLinkBlank(addReturnStrategy(universalLink()!, appState.returnStrategy));
+        openLinkBlank(
+            addReturnStrategy(universalLink()!, {
+                returnStrategy: appState.returnStrategy,
+                twaReturnUrl: appState.twaReturnUrl
+            })
+        );
     };
 
     const onClickExtension = (): void => {
@@ -169,7 +174,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                     <Match when={mode() === 'mobile'}>
                         <QRCodeStyled
                             disableCopy={false}
-                            sourceUrl={universalLink()!}
+                            sourceUrl={addReturnStrategy(universalLink()!, 'none')}
                             imageUrl={props.wallet.imageUrl}
                         />
                     </Match>

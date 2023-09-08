@@ -129,6 +129,9 @@ export class TonConnectUI {
                     ...(!!options.actionsConfiguration?.returnStrategy && {
                         returnStrategy: options.actionsConfiguration.returnStrategy
                     }),
+                    ...(!!options.actionsConfiguration?.twaReturnUrl && {
+                        twaReturnUrl: options.actionsConfiguration.twaReturnUrl
+                    }),
                     ...(!!options.walletsListConfiguration && {
                         walletsListConfiguration: options.walletsListConfiguration
                     })
@@ -292,7 +295,7 @@ export class TonConnectUI {
             throw new TonConnectUIError('Connect wallet to send a transaction.');
         }
 
-        const { notifications, modals, returnStrategy, skipRedirectToWallet } =
+        const { notifications, modals, returnStrategy, twaReturnUrl, skipRedirectToWallet } =
             this.getModalsAndNotificationsConfiguration(options);
 
         const userOSIsIos = getUserAgent().os === 'ios';
@@ -306,7 +309,7 @@ export class TonConnectUI {
             !shouldSkipRedirectToWallet
         ) {
             if (isTelegramUrl(this.walletInfo.universalLink)) {
-                redirectToTelegram(this.walletInfo.universalLink, appState.returnStrategy);
+                redirectToTelegram(this.walletInfo.universalLink, { returnStrategy, twaReturnUrl });
             } else {
                 openLinkBlank(addReturnStrategy(this.walletInfo.universalLink, returnStrategy));
             }
@@ -477,6 +480,8 @@ export class TonConnectUI {
         const returnStrategy =
             options?.returnStrategy || this.actionsConfiguration?.returnStrategy || 'back';
 
+        const twaReturnUrl = options?.twaReturnUrl || this.actionsConfiguration?.twaReturnUrl;
+
         const skipRedirectToWallet =
             options?.skipRedirectToWallet ||
             this.actionsConfiguration?.skipRedirectToWallet ||
@@ -486,6 +491,7 @@ export class TonConnectUI {
             notifications,
             modals,
             returnStrategy,
+            twaReturnUrl,
             skipRedirectToWallet
         };
     }

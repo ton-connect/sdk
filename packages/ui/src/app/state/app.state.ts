@@ -12,6 +12,7 @@ export type AppState = {
     walletsListConfiguration: WalletsListConfiguration | {};
     connectRequestParameters?: Loadable<ConnectAdditionalRequest> | null;
     returnStrategy: ReturnStrategy;
+    twaReturnUrl: `${string}://${string}` | undefined;
     preferredWalletAppName: string | undefined;
 };
 
@@ -19,5 +20,6 @@ export const [appState, setAppState] = createStore<AppState>({
     buttonRootId: null,
     language: 'en',
     returnStrategy: 'back',
+    twaReturnUrl: undefined,
     walletsListConfiguration: {}
 } as AppState);

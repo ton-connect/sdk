@@ -2,6 +2,7 @@ import { Component } from 'solid-js';
 import { H1Styled, H2Styled, QrCodeWrapper } from './style';
 import { QRCode } from 'src/app/components';
 import { WalletInfo } from '@tonconnect/sdk';
+import { addReturnStrategy } from 'src/app/utils/web-api';
 
 interface MobileConnectionQRProps {
     universalLink: string;
@@ -21,7 +22,7 @@ export const MobileConnectionQR: Component<MobileConnectionQRProps> = props => {
             <QrCodeWrapper>
                 <QRCode
                     imageUrl={props.walletInfo.imageUrl}
-                    sourceUrl={props.universalLink}
+                    sourceUrl={addReturnStrategy(props.universalLink, 'none')}
                     disableCopy
                 />
             </QrCodeWrapper>
