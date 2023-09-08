@@ -2,12 +2,15 @@
   "common": {
     "close": "Close",
     "openWallet": "Open wallet",
-    "get": "GET",
-    "learnMore": "Learn more",
-    "openExtension": "Open Extension",
     "copyLink": "Copy Link",
-    "copied": "Copied!",
-    "yourWallet": "your wallet"
+    "linkCopied": "Link Copied",
+    "copied": "Copied",
+    "yourWallet": "Your Wallet",
+    "retry": "Retry",
+    "get": "GET",
+    "mobile": "Mobile",
+    "browserExtension": "Browser Extension",
+    "desktop": "Desktop"
   },
   "button": {
     "connectWallet": "Connect Wallet",
@@ -27,33 +30,54 @@
     },
     "transactionCanceled": {
       "header": "Transaction canceled",
-      "text": "There will be no changes to your account."
+      "text": "There will be no changes to your account."
     }
+  },
+  "walletItem": {
+    "walletOn": "Wallet On",
+    "recent": "Recent",
+    "installed": "Installed",
+    "popular": "Popular"
   },
   "walletModal": {
     "loading":  "Loading wallets",
-    "qrCode": "QR Code",
     "wallets": "Wallets",
-    "universalQRModal": {
-      "scanQR": "Scan the code below with a camera in your TON wallet.",
-      "openWallet": "Open Wallet",
-      "openInstalledWallet": "Open Wallet",
-      "dontHave": "Explore TON wallets"
+    "mobileUniversalModal": {
+      "connectYourWallet": "Connect your wallet",
+      "openWalletOnTelegramOrSelect": "Open Wallet on Telegram or select your wallet to connect",
+      "openWalletOnTelegram": "Open Wallet on Telegram",
+      "openLink": "Open Link",
+      "scan": "Scan with your mobile wallet"
     },
-    "desktopSelectWalletModal": {
-      "selectWallet": "Select a wallet to connect."
+    "desktopUniversalModal": {
+      "connectYourWallet": "Connect your wallet",
+      "scan": "Scan with your mobile wallet",
+      "availableWallets": "Available wallets"
     },
-    "mobileSelectWalletModal": {
-      "connectWallet": "Connect a Wallet",
-      "selectWallet": "$walletModal.desktopSelectWalletModal.selectWallet",
-      "installedWallet": "Installed Wallet"
+    "mobileConnectionModal": {
+      "showQR": "Show QR Code",
+      "scanQR": "Scan the QR code below with your phone’s or {{ name }}’s camera",
+      "continueIn": "Continue in {{ name }}…",
+      "connectionDeclined": "Connection declined"
     },
-    "qrCodeModal": {
-      "connectWith": "Connect with {{ name }}",
-      "scan": "Scan the code below.",
-      "openWallet": "Open {{ name }}",
-      "openExtension": "Open Extension",
-      "dontHave": "Don't have {{ name }}?"
+    "desktopConnectionModal": {
+      "scanQR": "Scan the QR code below with your phone’s or {{ name }}’s camera",
+      "continueInExtension": "Continue in {{ name }} browser extension…",
+      "dontHaveExtension": "Seems you don't have installed {{ name }} browser extension",
+      "getWallet": "Get {{ name }}",
+      "continueOnDesktop": "Continue in {{ name }} on desktop…",
+      "openWalletOnTelegram": "Open Wallet on Telegram on desktop",
+      "connectionDeclined": "Connection declined"
+    },
+    "infoModal": {
+      "whatIsAWallet": "What is a wallet",
+      "secureDigitalAssets": "Secure digital assets storage",
+      "walletProtects": "A wallet protects and manages your digital assets including TON, tokens and collectables.",
+      "controlIdentity": "Control your Web3 identity",
+      "manageIdentity": "Manage your digital identity and access decentralized applications with ease. Maintain control over your data and engage securely in the blockchain ecosystem.",
+      "effortlessCryptoTransactions": "Effortless crypto transactions",
+      "easilySend": "Easily send, receive, monitor your cryptocurrencies. Streamline your operations with decentralized applications.",
+      "getAWallet": "Get a Wallet"
     }
   },
   "actionModal": {

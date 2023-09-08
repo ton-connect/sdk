@@ -284,6 +284,33 @@ const result = await tonConnectUI.sendTransaction(defaultTx, {
 });
 ```
 
+## Use inside TWA (Telegram web app)
+TonConnect UI will work in TWA in the same way as in a regular website!
+Basically, no changes are required from the dApp's developers. The only thing you have to set is a dynamic return strategy.
+
+Currently, it is impossible for TWA-wallets to redirect back to previous opened TWA-dApp like native wallet-apps do.
+It means, that you need to specify the return strategy as a link to your TWA that will be only applied if the dApp is opened in TWA mode.
+
+```ts
+tonConnectUI.uiOptions = {
+        twaReturnUrl: 'https://t.me/durov'
+    };
+```
+
+In other words,
+```ts
+if (isLinkToTelegram()) {
+    if (isInTWA()) {
+        FINAL_RETURN_STRATEGY = actionsConfiguration.twaReturnUrl || actionsConfiguration.returnStrategy;
+    } else {
+        FINAL_RETURN_STRATEGY = 'none';
+    }
+} else {
+    FINAL_RETURN_STRATEGY = actionsConfiguration.returnStrategy;
+}
+
+```
+
 ## Detect end of the connection restoring process
 Before restoring previous connected wallet TonConnect has to set up SSE connection with bridge, so you have to wait a little while connection restoring.
 If you need to update your UI depending on if connection is restoring, you can use `tonConnectUI.connectionRestored` promise.
@@ -480,27 +507,28 @@ However, it is possible if needed. You can add css styles to the specified selec
 
 UI components:
 
-| Element                               | Selector                                      | Element description                                                                                                   |
-|---------------------------------------|-----------------------------------------------|-----------------------------------------------------------------------------------------------------------------------|
-| Connect wallet modal container        | `[data-tc-wallets-modal-container="true"]`    | Container of the modal window that opens when you click on the "connect wallet" button.                               |
-| Select wallet mobile modal content    | `[data-tc-wallets-modal-mobile="true"]`       | Content of the mobile modal window with wallet selection.                                                             |
-| Select wallet desktop modal content   | `[data-tc-wallets-modal-desktop="true"]`      | Content of the desktop window with wallet selection.                                                                  |
-| Desktop Universal QR content          | `[data-tc-universal-qr-desktop="true"]`       | Universal QR page content under the tab bar in the desktop wallets selection modal window.                            |
-| Desktop wallets list content          | `[data-tc-select-wallet-desktop="true"]`      | Wallets list page content under the tab bar in the desktop wallets selection modal window.                            |
-| Concrete wallet QR-code modal content | `[data-tc-wallet-qr-modal-desktop="true"]`    | Content of the modal window with the concrete wallet QR-code.                                                         |
-| Action modal container                | `[data-tc-actions-modal-container="true"]`    | Container of the modal window that opens when you call `sendTransaction` or other action.                             |
-| Confirm action modal content          | `[data-tc-confirm-modal="true"]`              | Content of the modal window asking for confirmation of the action in the wallet.                                      |
-| "Transaction sent" modal content      | `[data-tc-transaction-sent-modal="true"]`     | Content of the modal window informing that the transaction was successfully sent.                                     |
-| "Transaction canceled" modal content  | `[data-tc-transaction-canceled-modal="true"]` | Content of the modal window informing that the transaction was not sent.                                              |
-| "Connect Wallet" button               | `[data-tc-connect-button="true"]`             | "Connect Wallet" button element.                                                                                      |
-| Wallet menu loading button            | `[data-tc-connect-button-loading="true"]`     | Button element which appears instead of "Connect Wallet" and dropdown menu buttons while restoring connection process |
-| Wallet menu dropdown button           | `[data-tc-dropdown-button="true"]`            | Wallet menu button -- host of the dropdown wallet menu (copy address/disconnect).                                     |
-| Wallet menu dropdown container        | `[data-tc-dropdown-container="true"]`         | Container of the dropdown that opens when you click on the "wallet menu" button with ton address.                     |
-| Wallet menu dropdown content          | `[data-tc-dropdown="true"]`                   | Content of the dropdown that opens when you click on the "wallet menu" button with ton address.                       |
-| Notifications container               | `[data-tc-list-notifications="true"]`         | Container of the actions notifications.                                                                               |
-| Notification confirm                  | `[data-tc-notification-confirm="true"]`       | Confirmation notification element.                                                                                    |
-| Notification tx sent                  | `[data-tc-notification-tx-sent="true"]`       | Transaction sent notification element.                                                                                |
-| Notification cancelled tx             | `[data-tc-notification-tx-cancelled="true"]`  | Cancelled transaction notification element.                                                                           |
+| Element                              | Selector                                            | Element description                                                                                                   |
+|--------------------------------------|-----------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------|
+| Connect wallet modal container       | `[data-tc-wallets-modal-container="true"]`          | Container of the modal window that opens when you click on the "connect wallet" button.                               |
+| Mobile universal modal page content  | `[data-tc-wallets-modal-universal-mobile="true"]`   | Content of the general mobile modal page with horizontal list.                                                        |
+| Desktop universal modal page content | `[data-tc-wallets-modal-universal-desktop="true"]`  | Content of the universal desktop modal page with QR.                                                                  |
+| Mobile selected wallet's modal page  | `[data-tc-wallets-modal-connection-mobile="true"]`  | Content of the selected wallet's modal page on mobile.                                                                |
+| Desktop selected wallet's modal page | `[data-tc-wallets-modal-connection-desktop="true"]` | Content of the selected wallet's modal page on desktop.                                                               |
+| Wallets list modal page              | `[data-tc-wallets-modal-list="true"]`               | Content of the modal page with all available wallets list (desktop and mobile).                                       |
+| Info modal page                      | `[data-tc-wallets-modal-info="true"]`               | Content of the modal page with "What is a wallet information".                                                        |
+| Action modal container               | `[data-tc-actions-modal-container="true"]`          | Container of the modal window that opens when you call `sendTransaction` or other action.                             |
+| Confirm action modal content         | `[data-tc-confirm-modal="true"]`                    | Content of the modal window asking for confirmation of the action in the wallet.                                      |
+| "Transaction sent" modal content     | `[data-tc-transaction-sent-modal="true"]`           | Content of the modal window informing that the transaction was successfully sent.                                     |
+| "Transaction canceled" modal content | `[data-tc-transaction-canceled-modal="true"]`       | Content of the modal window informing that the transaction was not sent.                                              |
+| "Connect Wallet" button              | `[data-tc-connect-button="true"]`                   | "Connect Wallet" button element.                                                                                      |
+| Wallet menu loading button           | `[data-tc-connect-button-loading="true"]`           | Button element which appears instead of "Connect Wallet" and dropdown menu buttons while restoring connection process |
+| Wallet menu dropdown button          | `[data-tc-dropdown-button="true"]`                  | Wallet menu button -- host of the dropdown wallet menu (copy address/disconnect).                                     |
+| Wallet menu dropdown container       | `[data-tc-dropdown-container="true"]`               | Container of the dropdown that opens when you click on the "wallet menu" button with ton address.                     |
+| Wallet menu dropdown content         | `[data-tc-dropdown="true"]`                         | Content of the dropdown that opens when you click on the "wallet menu" button with ton address.                       |
+| Notifications container              | `[data-tc-list-notifications="true"]`               | Container of the actions notifications.                                                                               |
+| Notification confirm                 | `[data-tc-notification-confirm="true"]`             | Confirmation notification element.                                                                                    |
+| Notification tx sent                 | `[data-tc-notification-tx-sent="true"]`             | Transaction sent notification element.                                                                                |
+| Notification cancelled tx            | `[data-tc-notification-tx-cancelled="true"]`        | Cancelled transaction notification element.                                                                           |
 
 ---
 

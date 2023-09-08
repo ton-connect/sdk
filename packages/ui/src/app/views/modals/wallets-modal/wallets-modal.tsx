@@ -1,7 +1,6 @@
 import {
     ConnectAdditionalRequest,
     isWalletInfoCurrentlyInjected,
-    isWalletInfoRemote,
     WalletInfo,
     WalletInfoRemote
 } from '@tonconnect/sdk';
@@ -18,24 +17,24 @@ import {
     useContext
 } from 'solid-js';
 import { ConnectorContext } from 'src/app/state/connector.context';
-import {
-    setLastSelectedWalletInfo,
-    setWalletsModalOpen,
-    walletsModalOpen
-} from 'src/app/state/modals-state';
-import { QrCodeModal } from 'src/app/views/modals/wallets-modal/qr-code-modal';
-import { StyledModal, LoaderContainerStyled, H1Styled, TabBarStyled, TabTextStyled } from './style';
-import { openLinkBlank } from 'src/app/utils/web-api';
+import { setWalletsModalOpen, walletsModalOpen } from 'src/app/state/modals-state';
+import { StyledModal, LoaderContainerStyled, H1Styled } from './style';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { useI18n } from '@solid-primitives/i18n';
 import { appState } from 'src/app/state/app.state';
 import { applyWalletsListConfiguration, eqWalletName } from 'src/app/utils/wallets';
 import isMobile from 'src/app/hooks/isMobile';
-import { MobileSelectWalletModal } from 'src/app/views/modals/wallets-modal/mobile-select-wallet-modal';
-import { UniversalQrModal } from 'src/app/views/modals/wallets-modal/universal-qr-modal';
-import { DesktopSelectWalletModal } from 'src/app/views/modals/wallets-modal/desktop-select-wallet-modal';
+import { AllWalletsListModal } from 'src/app/views/modals/wallets-modal/all-wallets-list-modal';
 import { LoaderIcon } from 'src/app/components';
 import { LoadableReady } from 'src/models/loadable';
+import { PersonalizedWalletInfo } from 'src/app/models/personalized-wallet-info';
+import { AT_WALLET_APP_NAME } from 'src/app/env/AT_WALLET_APP_NAME';
+import { DesktopConnectionModal } from 'src/app/views/modals/wallets-modal/desktop-connection-modal';
+import { InfoModal } from 'src/app/views/modals/wallets-modal/info-modal';
+import { MobileConnectionModal } from 'src/app/views/modals/wallets-modal/mobile-connection-modal';
+import { MobileUniversalModal } from 'src/app/views/modals/wallets-modal/mobile-universal-modal';
+import { DesktopUniversalModal } from 'src/app/views/modals/wallets-modal/desltop-universal-modal';
+import { Dynamic } from 'solid-js/web';
 
 export const WalletsModal: Component = () => {
     const { locale } = useI18n()[1];
@@ -46,9 +45,10 @@ export const WalletsModal: Component = () => {
     const [fetchedWalletsList] = createResource(() => tonConnectUI!.getWallets());
 
     const [selectedWalletInfo, setSelectedWalletInfo] = createSignal<WalletInfo | null>(null);
-    const [selectedTabIndex, setSelectedTabIndex] = createSignal(0);
+    const [selectedTab, setSelectedTab] = createSignal<'universal' | 'all-wallets'>('universal');
+    const [infoTab, setInfoTab] = createSignal(false);
 
-    const walletsList = createMemo(() => {
+    const walletsList = createMemo<PersonalizedWalletInfo[] | null>(() => {
         if (fetchedWalletsList.state !== 'ready') {
             return null;
         }
@@ -57,14 +57,27 @@ export const WalletsModal: Component = () => {
             fetchedWalletsList(),
             appState.walletsListConfiguration
         );
-        const preferredWalletName = appState.preferredWalletName;
-        const preferredWallet = walletsList.find(item => eqWalletName(item, preferredWalletName));
-        const someWalletsWithSameName =
-            walletsList.filter(item => eqWalletName(item, preferredWalletName)).length >= 2;
 
-        if (preferredWalletName && preferredWallet && !someWalletsWithSameName) {
-            walletsList = [preferredWallet].concat(
-                walletsList.filter(item => !eqWalletName(item, preferredWalletName))
+        const injectedWallets: WalletInfo[] = walletsList.filter(isWalletInfoCurrentlyInjected);
+        const notInjectedWallets = walletsList.filter(w => !isWalletInfoCurrentlyInjected(w));
+        walletsList = (injectedWallets || []).concat(notInjectedWallets);
+
+        const preferredWalletAppName = appState.preferredWalletAppName;
+        const preferredWallet = walletsList.find(item =>
+            eqWalletName(item, preferredWalletAppName)
+        );
+        const someWalletsWithSameName =
+            walletsList.filter(item => eqWalletName(item, preferredWalletAppName)).length >= 2;
+        if (preferredWalletAppName && preferredWallet && !someWalletsWithSameName) {
+            walletsList = [
+                { ...preferredWallet, isPreferred: true } as PersonalizedWalletInfo
+            ].concat(walletsList.filter(item => !eqWalletName(item, preferredWalletAppName)));
+        }
+
+        const atWallet = walletsList.find(item => eqWalletName(item, AT_WALLET_APP_NAME));
+        if (atWallet) {
+            walletsList = [atWallet].concat(
+                walletsList.filter(item => !eqWalletName(item, AT_WALLET_APP_NAME))
             );
         }
 
@@ -86,27 +99,7 @@ export const WalletsModal: Component = () => {
     const onClose = (): void => {
         setWalletsModalOpen(false);
         setSelectedWalletInfo(null);
-    };
-
-    const onSelectInDesktopList = (walletInfo: WalletInfo): void => {
-        if (isWalletInfoCurrentlyInjected(walletInfo)) {
-            setLastSelectedWalletInfo(walletInfo);
-            connector.connect(
-                {
-                    jsBridgeKey: walletInfo.jsBridgeKey
-                },
-                additionalRequest()
-            );
-            return;
-        }
-
-        if (isWalletInfoRemote(walletInfo)) {
-            setLastSelectedWalletInfo({ ...walletInfo, openMethod: 'qrcode' });
-            setSelectedWalletInfo(walletInfo);
-            return;
-        }
-
-        openLinkBlank(walletInfo.aboutUrl);
+        setInfoTab(false);
     };
 
     const unsubscribe = connector.onStatusChange(wallet => {
@@ -121,72 +114,54 @@ export const WalletsModal: Component = () => {
         <StyledModal
             opened={walletsModalOpen()}
             onClose={onClose}
+            onClickQuestion={() => setInfoTab(v => !v)}
             data-tc-wallets-modal-container="true"
         >
-            <Show when={additionalRequestLoading() || !walletsList()}>
-                <H1Styled translationKey="walletModal.loading">Wallets list is loading</H1Styled>
-                <LoaderContainerStyled>
-                    <LoaderIcon size="m" />
-                </LoaderContainerStyled>
+            <Show when={infoTab()}>
+                <InfoModal onBackClick={() => setInfoTab(false)} />
             </Show>
 
-            <Show when={!additionalRequestLoading() && walletsList()}>
-                <Show when={isMobile() && !selectedWalletInfo()}>
-                    <MobileSelectWalletModal
-                        onSelect={onSelectInDesktopList}
-                        walletsList={walletsList()!}
-                        additionalRequest={additionalRequest()!}
-                    />
+            <Show when={!infoTab()}>
+                <Show when={additionalRequestLoading() || !walletsList()}>
+                    <H1Styled translationKey="walletModal.loading">
+                        Wallets list is loading
+                    </H1Styled>
+                    <LoaderContainerStyled>
+                        <LoaderIcon size="m" />
+                    </LoaderContainerStyled>
                 </Show>
 
-                <Show when={!isMobile()}>
-                    <Show when={!selectedWalletInfo()}>
-                        <div data-tc-wallets-modal-desktop="true">
-                            <TabBarStyled
-                                tab1={
-                                    <TabTextStyled
-                                        translationKey="walletModal.qrCode"
-                                        cursor="unset"
-                                    >
-                                        QR Code
-                                    </TabTextStyled>
+                <Show when={!additionalRequestLoading() && walletsList()}>
+                    <Switch>
+                        <Match when={selectedWalletInfo()}>
+                            <Dynamic
+                                component={
+                                    isMobile() ? MobileConnectionModal : DesktopConnectionModal
                                 }
-                                tab2={
-                                    <TabTextStyled
-                                        translationKey="walletModal.wallets"
-                                        cursor="unset"
-                                    >
-                                        Wallets
-                                    </TabTextStyled>
-                                }
-                                selectedTabIndex={selectedTabIndex()}
-                                onSelectedTabIndexChange={setSelectedTabIndex}
+                                wallet={selectedWalletInfo()! as WalletInfoRemote}
+                                additionalRequest={additionalRequest()}
+                                onBackClick={() => setSelectedWalletInfo(null)}
                             />
-
-                            <Switch>
-                                <Match when={selectedTabIndex() === 0}>
-                                    <UniversalQrModal
-                                        walletsList={walletsList()!}
-                                        additionalRequest={additionalRequest()!}
-                                        openWalletFallback={() => setSelectedTabIndex(1)}
-                                    />
-                                </Match>
-                                <Match when={selectedTabIndex() === 1}>
-                                    <DesktopSelectWalletModal
-                                        walletsList={walletsList()!}
-                                        onSelect={onSelectInDesktopList}
-                                    />
-                                </Match>
-                            </Switch>
-                        </div>
-                    </Show>
-                </Show>
-                <Show when={selectedWalletInfo()}>
-                    <QrCodeModal
-                        additionalRequest={additionalRequest()}
-                        wallet={selectedWalletInfo() as WalletInfoRemote}
-                        onBackClick={() => setSelectedWalletInfo(null)}
-                    />
+                        </Match>
+                        <Match when={selectedTab() === 'universal'}>
+                            <Dynamic
+                                component={
+                                    isMobile() ? MobileUniversalModal : DesktopUniversalModal
+                                }
+                                onSelect={setSelectedWalletInfo}
+                                walletsList={walletsList()!}
+                                additionalRequest={additionalRequest()!}
+                                onSelectAllWallets={() => setSelectedTab('all-wallets')}
+                            />
+                        </Match>
+                        <Match when={selectedTab() === 'all-wallets'}>
+                            <AllWalletsListModal
+                                walletsList={walletsList()!}
+                                onBack={() => setSelectedTab('universal')}
+                                onSelect={setSelectedWalletInfo}
+                            />
+                        </Match>
+                    </Switch>
                 </Show>
             </Show>
         </StyledModal>

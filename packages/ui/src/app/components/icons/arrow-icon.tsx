@@ -26,19 +26,18 @@ export const ArrowIcon: Component<ArrowIconProps> = props => {
 
     return (
         <Svg
+            xmlns="http://www.w3.org/2000/svg"
             width="16"
             height="16"
             viewBox="0 0 16 16"
             fill="none"
-            xmlns="http://www.w3.org/2000/svg"
             svgDirection={direction()}
         >
             <path
-                d="M9.1 3.40012L5.5 8.0001L9.1 12.6001"
-                stroke={fill()}
-                stroke-width="1.8"
-                stroke-linecap="round"
-                stroke-linejoin="round"
+                fill-rule="evenodd"
+                clip-rule="evenodd"
+                d="M10.2122 14.3407C10.5384 14.0854 10.5959 13.614 10.3406 13.2878L6.20237 8.00003L10.3406 2.71227C10.5959 2.38607 10.5384 1.91469 10.2122 1.6594C9.88604 1.40412 9.41465 1.46161 9.15937 1.7878L4.65937 7.5378C4.44688 7.80932 4.44688 8.19074 4.65937 8.46226L9.15937 14.2123C9.41465 14.5385 9.88604 14.5959 10.2122 14.3407Z"
+                fill={fill()}
             />
         </Svg>
     );

@@ -1,13 +1,16 @@
 {
   "common": {
     "close": "Закрыть",
-    "openWallet": "Открыть кошелек",
-    "get": "Скачать",
-    "learnMore": "Подробнее",
-    "openExtension": "Расширение",
+    "openWallet": "Открыть кошелёк",
     "copyLink": "Копировать ссылку",
-    "copied": "Скопировано!",
-    "yourWallet": "вашем кошельке"
+    "linkCopied": "Ссылка скопирована",
+    "copied": "Ссылка скопирована",
+    "yourWallet": "Ваш кошелёк",
+    "retry": "Повторить",
+    "get": "Скачать",
+    "mobile": "Мобильный",
+    "browserExtension": "Расширение",
+    "desktop": "Десктоп"
   },
   "button": {
     "connectWallet": "Подключить кошелёк",
@@ -19,7 +22,7 @@
   },
   "notifications": {
     "confirm": {
-      "header": "Откройте {{ name }}, чтобы подтвердить транзакцию."
+      "header": "Откройте {{ name }}, чтобы подтвердить транзакцию."
     },
     "transactionSent": {
       "header": "Транзакция отправлена",
@@ -27,33 +30,54 @@
     },
     "transactionCanceled": {
       "header": "Транзакция отменена",
-      "text": "Состояние вашего счёта не изменится."
+      "text": "Состояние вашего счёта не изменится."
     }
   },
+  "walletItem": {
+    "walletOn": "Wallet в",
+    "recent": "Недавний",
+    "installed": "Установлен",
+    "popular": "Популярен"
+  },
   "walletModal": {
-    "loading":  "Список кошельков загружается",
-    "qrCode": "QR-код",
+    "loading":  "Кошельки загружаются",
     "wallets": "Кошельки",
-    "universalQRModal": {
-      "scanQR": "Отсканируйте код ниже с помощью камеры в вашем TON-кошельке.",
-      "openWallet": "Открыть кошелёк",
-      "openInstalledWallet": "Открыть кошелёк",
-      "dontHave": "Подробнее о TON кошельках"
+    "mobileUniversalModal": {
+      "connectYourWallet": "Подключите кошелёк",
+      "openWalletOnTelegramOrSelect": "Подключите Wallet в Telegram или выберете кошелёк для подключения",
+      "openWalletOnTelegram": "Открыть Wallet в Telegram",
+      "openLink": "Открыть ссылку",
+      "scan": "Отсканируйте камерой вашего телефона"
     },
-    "desktopSelectWalletModal": {
-      "selectWallet": "Выберите кошелёк для подключения."
+    "desktopUniversalModal": {
+      "connectYourWallet": "Подключите кошелёк",
+      "scan": "Отсканируйте QR-код камерой вашего телефона",
+      "availableWallets": "Доступные кошельки"
     },
-    "mobileSelectWalletModal": {
-      "connectWallet": "Подключите кошелёк",
-      "selectWallet": "$walletModal.desktopSelectWalletModal.selectWallet",
-      "installedWallet": "Открыть кошелёк"
+    "mobileConnectionModal": {
+      "showQR": "Показать QR-код",
+      "scanQR": "Отсканируйте QR-код ниже камерой в приложении {{ name }}, или камерой телефона",
+      "continueIn": "Продолжите в {{ name }}…",
+      "connectionDeclined": "Подключение отклонено"
     },
-    "qrCodeModal": {
-      "connectWith": "Подключиться через {{ name }}",
-      "scan": "Отсканируйте код ниже.",
-      "openWallet": "Открыть {{ name }}",
-      "openExtension": "Расширение",
-      "dontHave": "У вас нет {{ name }}?"
+    "desktopConnectionModal": {
+      "scanQR": "Отсканируйте QR-код ниже камерой в приложении {{ name }}, или камерой телефона",
+      "continueInExtension": "Откройте браузерное расширение {{ name }}",
+      "dontHaveExtension": "Похоже, у вас не установлено браузерное расширение {{ name }}",
+      "getWallet": "Скачать {{ name }}",
+      "continueOnDesktop": "Откройте {{ name }} на компьютере…",
+      "openWalletOnTelegram": "Открыть Wallet в Telegram",
+      "connectionDeclined": "Подключение отклонено"
+    },
+    "infoModal": {
+      "whatIsAWallet": "Что такое кошелёк?",
+      "secureDigitalAssets": "Надежное хранилище цифровых активов",
+      "walletProtects": "Кошелёк защищает ваши цифровые активы, включая TON, токены и предметы коллекционирования, и управляет ими.",
+      "controlIdentity": "Контроль своей личности Web3",
+      "manageIdentity": "Управляйте своей цифровой идентификацией и с легкостью получайте доступ к децентрализованным приложениям. Сохраняйте контроль над своими данными и безопасно участвуйте в экосистеме блокчейна.",
+      "effortlessCryptoTransactions": "Простые криптотранзакции",
+      "easilySend": "Легко отправляйте, получайте и отслеживайте свои криптовалюты. Оптимизируйте свои операции с помощью децентрализованных приложений.",
+      "getAWallet": "Скачать кошелёк"
     }
   },
   "actionModal": {

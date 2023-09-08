@@ -4,6 +4,7 @@ import {
     Action,
     lastSelectedWalletInfo,
     setAction,
+    setLastSelectedWalletInfo,
     setWalletsModalOpen
 } from 'src/app/state/modals-state';
 import { TonConnectUI } from 'src/ton-connect-ui';
@@ -21,6 +22,7 @@ export const widgetController = {
               openMethod: WalletOpenMethod;
           }
         | null => lastSelectedWalletInfo(),
+    removeSelectedWalletInfo: (): void => setLastSelectedWalletInfo(null),
     renderApp: (root: string, tonConnectUI: TonConnectUI): (() => void) =>
         render(
             () => <App tonConnectUI={tonConnectUI} />,

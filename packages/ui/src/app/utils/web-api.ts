@@ -5,6 +5,7 @@ import { toPx } from 'src/app/utils/css';
 import { TonConnectUIError } from 'src/errors';
 import { UserAgent } from 'src/models/user-agent';
 import UAParser from 'ua-parser-js';
+import { encodeTelegramUrlParameters, isTelegramUrl } from '@tonconnect/sdk';
 
 export function openLink(href: string, target = '_self'): ReturnType<typeof window.open> {
     return window.open(href, target, 'noreferrer noopener');
@@ -36,8 +37,26 @@ export function addQueryParameter(url: string, key: string, value: string): stri
     return parsed.toString();
 }
 
-export function addReturnStrategy(url: string, returnStrategy: ReturnStrategy): string {
-    return addQueryParameter(url, 'ret', returnStrategy);
+export function addReturnStrategy(
+    url: string,
+    strategy:
+        | ReturnStrategy
+        | { returnStrategy: ReturnStrategy; twaReturnUrl: `${string}://${string}` | undefined }
+): string {
+    let returnStrategy;
+    if (typeof strategy === 'string') {
+        returnStrategy = strategy;
+    } else {
+        returnStrategy = isInTWA() ? strategy.twaReturnUrl || strategy.returnStrategy : 'none';
+    }
+    const newUrl = addQueryParameter(url, 'ret', returnStrategy);
+
+    if (!isTelegramUrl(url)) {
+        return newUrl;
+    }
+
+    const lastParam = newUrl.slice(newUrl.lastIndexOf('&') + 1);
+    return newUrl.slice(0, newUrl.lastIndexOf('&')) + '-' + encodeTelegramUrlParameters(lastParam);
 }
 
 export function disableScroll(): void {
@@ -146,4 +165,21 @@ export function getUserAgent(): UserAgent {
         os,
         browser
     };
+}
+
+export function redirectToTelegram(
+    universalLink: string,
+    options: {
+        returnStrategy: ReturnStrategy;
+        twaReturnUrl: `${string}://${string}` | undefined;
+    }
+): void {
+    const url = new URL(universalLink);
+    url.searchParams.append('startattach', 'tonconnect');
+
+    openLinkBlank(addReturnStrategy(url.toString(), options));
+}
+
+export function isInTWA(): boolean {
+    return !!(getWindow() as { TelegramWebviewProxy: unknown } | undefined)?.TelegramWebviewProxy;
 }

@@ -1,5 +1,6 @@
 import type { Account, ConnectAdditionalRequest } from '@tonconnect/sdk';
 import {
+    isTelegramUrl,
     isWalletInfoCurrentlyEmbedded,
     ITonConnect,
     SendTransactionRequest,
@@ -17,8 +18,9 @@ import {
     addReturnStrategy,
     getSystemTheme,
     getUserAgent,
-    openLink,
+    openLinkBlank,
     preloadImages,
+    redirectToTelegram,
     subscribeToThemeChange
 } from 'src/app/utils/web-api';
 import { TonConnectUiOptions } from 'src/models/ton-connect-ui-options';
@@ -79,8 +81,8 @@ export class TonConnectUI {
     /**
      * Curren connected wallet app and its info or null.
      */
-    public get wallet(): (Wallet & WalletInfoWithOpenMethod) | null {
-        if (!this.connector.wallet || !this.walletInfo) {
+    public get wallet(): Wallet | (Wallet & WalletInfoWithOpenMethod) | null {
+        if (!this.connector.wallet) {
             return null;
         }
 
@@ -126,6 +128,9 @@ export class TonConnectUI {
                     ...(options.language && { language: options.language }),
                     ...(!!options.actionsConfiguration?.returnStrategy && {
                         returnStrategy: options.actionsConfiguration.returnStrategy
+                    }),
+                    ...(!!options.actionsConfiguration?.twaReturnUrl && {
+                        twaReturnUrl: options.actionsConfiguration.twaReturnUrl
                     }),
                     ...(!!options.walletsListConfiguration && {
                         walletsListConfiguration: options.walletsListConfiguration
@@ -174,10 +179,10 @@ export class TonConnectUI {
         }
 
         this.uiOptions = mergeOptions(options, { uiPreferences: { theme: 'SYSTEM' } });
-        const preferredWalletName = this.preferredWalletStorage.getPreferredWalletName();
+        const preferredWalletName = this.preferredWalletStorage.getPreferredWalletAppName();
         setAppState({
             connector: this.connector,
-            preferredWalletName
+            preferredWalletAppName: preferredWalletName
         });
 
         widgetController.renderApp(rootId, this);
@@ -272,6 +277,7 @@ export class TonConnectUI {
      */
     public disconnect(): Promise<void> {
         widgetController.clearAction();
+        widgetController.removeSelectedWalletInfo();
         this.walletInfoStorage.removeWalletInfo();
         return this.connector.disconnect();
     }
@@ -285,11 +291,11 @@ export class TonConnectUI {
         tx: SendTransactionRequest,
         options?: ActionConfiguration
     ): Promise<SendTransactionResponse> {
-        if (!this.connected || !this.walletInfo) {
+        if (!this.connected) {
             throw new TonConnectUIError('Connect wallet to send a transaction.');
         }
 
-        const { notifications, modals, returnStrategy, skipRedirectToWallet } =
+        const { notifications, modals, returnStrategy, twaReturnUrl, skipRedirectToWallet } =
             this.getModalsAndNotificationsConfiguration(options);
 
         const userOSIsIos = getUserAgent().os === 'ios';
@@ -297,11 +303,16 @@ export class TonConnectUI {
             (skipRedirectToWallet === 'ios' && userOSIsIos) || skipRedirectToWallet === 'always';
 
         if (
+            this.walletInfo &&
             'universalLink' in this.walletInfo &&
             this.walletInfo.openMethod === 'universal-link' &&
             !shouldSkipRedirectToWallet
         ) {
-            openLink(addReturnStrategy(this.walletInfo.universalLink, returnStrategy));
+            if (isTelegramUrl(this.walletInfo.universalLink)) {
+                redirectToTelegram(this.walletInfo.universalLink, { returnStrategy, twaReturnUrl });
+            } else {
+                openLinkBlank(addReturnStrategy(this.walletInfo.universalLink, returnStrategy));
+            }
         }
 
         widgetController.setAction({
@@ -340,16 +351,16 @@ export class TonConnectUI {
         this.connector.onStatusChange(async wallet => {
             if (wallet) {
                 await this.updateWalletInfo(wallet);
-                this.setPreferredWalletName(this.walletInfo?.appName || wallet.device.appName);
+                this.setPreferredWalletAppName(this.walletInfo?.appName || wallet.device.appName);
             } else {
                 this.walletInfoStorage.removeWalletInfo();
             }
         });
     }
 
-    private setPreferredWalletName(value: string): void {
-        this.preferredWalletStorage.setPreferredWalletName(value);
-        setAppState({ preferredWalletName: value });
+    private setPreferredWalletAppName(value: string): void {
+        this.preferredWalletStorage.setPreferredWalletAppName(value);
+        setAppState({ preferredWalletAppName: value });
     }
 
     private async getSelectedWalletInfo(wallet: Wallet): Promise<WalletInfoWithOpenMethod | null> {
@@ -386,13 +397,22 @@ export class TonConnectUI {
 
     private async updateWalletInfo(wallet: Wallet): Promise<void> {
         const selectedWalletInfo = await this.getSelectedWalletInfo(wallet);
-
         if (selectedWalletInfo) {
             this.walletInfo = selectedWalletInfo;
             this.walletInfoStorage.setWalletInfo(selectedWalletInfo);
-        } else {
-            this.walletInfo = this.walletInfoStorage.getWalletInfo();
+            return;
         }
+
+        const storedWalletInfo = this.walletInfoStorage.getWalletInfo();
+        if (storedWalletInfo) {
+            this.walletInfo = storedWalletInfo;
+            return;
+        }
+
+        this.walletInfo =
+            (await this.walletsList).find(walletInfo =>
+                eqWalletName(walletInfo, wallet.device.appName)
+            ) || null;
     }
 
     private normalizeWidgetRoot(rootId: string | undefined): string {
@@ -460,6 +480,8 @@ export class TonConnectUI {
         const returnStrategy =
             options?.returnStrategy || this.actionsConfiguration?.returnStrategy || 'back';
 
+        const twaReturnUrl = options?.twaReturnUrl || this.actionsConfiguration?.twaReturnUrl;
+
         const skipRedirectToWallet =
             options?.skipRedirectToWallet ||
             this.actionsConfiguration?.skipRedirectToWallet ||
@@ -469,6 +491,7 @@ export class TonConnectUI {
             notifications,
             modals,
             returnStrategy,
+            twaReturnUrl,
             skipRedirectToWallet
         };
     }

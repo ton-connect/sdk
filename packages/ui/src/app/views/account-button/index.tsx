@@ -98,6 +98,7 @@ export const AccountButton: Component<AccountButtonProps> = () => {
                     <AccountButtonStyled
                         onClick={() => tonConnectUI.connectWallet()}
                         data-tc-connect-button="true"
+                        scale="s"
                     >
                         <TonIcon fill={theme.colors.connectButton.foreground} />
                         <Text
@@ -117,6 +118,7 @@ export const AccountButton: Component<AccountButtonProps> = () => {
                             onClick={() => setIsOpened(v => !v)}
                             ref={setAnchor}
                             data-tc-dropdown-button="true"
+                            scale="s"
                         >
                             <Text fontSize="15px" fontWeight="590" lineHeight="18px">
                                 {normalizedAddress()}

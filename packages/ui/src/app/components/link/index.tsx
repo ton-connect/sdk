@@ -15,7 +15,12 @@ export const Link: Component<LinkProps> = props => {
         props.blank ? { rel: 'noreferrer noopener' } : {};
 
     return (
-        <AStyled href={props.href} target={props.blank ? '_blank' : '_self'} {...attributes}>
+        <AStyled
+            href={props.href}
+            target={props.blank ? '_blank' : '_self'}
+            class={props.class}
+            {...attributes}
+        >
             {props.children}
         </AStyled>
     );
