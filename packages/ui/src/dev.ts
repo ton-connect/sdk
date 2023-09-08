@@ -5,9 +5,7 @@ import { SendTransactionRequest, TonConnect } from '@tonconnect/sdk';
 
 async function dev(): Promise<void> {
     const connector = new TonConnect({
-        manifestUrl: 'https://demo-dapp.walletbot.net/demo-dapp/tonconnect-manifest.json',
-        walletsListSource:
-            'https://raw.githubusercontent.com/ton-blockchain/wallets-list/feature/at-wallet/wallets.json'
+        manifestUrl: 'https://demo-dapp.walletbot.net/demo-dapp/tonconnect-manifest.json'
     });
     const tonConnectUI = new TonConnectUI({
         connector,
