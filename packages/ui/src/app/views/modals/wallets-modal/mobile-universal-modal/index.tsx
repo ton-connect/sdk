@@ -49,11 +49,15 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
         props.walletsList.filter(w => supportsMobile(w) && w.appName !== AT_WALLET_APP_NAME);
     const shouldShowMoreButton = (): boolean => walletsList().length > 7;
 
+    const walletsBridges = () => [...new Set(props.walletsList
+        .filter(isWalletInfoRemote)
+        .map(item => item.bridgeUrl ))
+        .values()]
+        .map(bridgeUrl => ({ bridgeUrl }));
+
     const universalLink = createMemo(() =>
         connector.connect(
-            props.walletsList
-                .filter(isWalletInfoRemote)
-                .map(item => ({ bridgeUrl: item.bridgeUrl, universalLink: item.universalLink })),
+            walletsBridges(),
             props.additionalRequest
         )
     );
