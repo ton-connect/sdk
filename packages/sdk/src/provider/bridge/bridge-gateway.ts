@@ -1,5 +1,5 @@
 import { Base64, RpcMethod } from '@tonconnect/protocol';
-import { TonConnectError } from 'src/errors';
+import { TonConnectError } from 'src/errors/ton-connect.error';
 import { BridgeIncomingMessage } from 'src/provider/bridge/models/bridge-incomming-message';
 import { HttpBridgeGatewayStorage } from 'src/storage/http-bridge-gateway-storage';
 import { IStorage } from 'src/storage/models/storage.interface';
@@ -32,7 +32,7 @@ export class BridgeGateway {
         this.bridgeGatewayStorage = new HttpBridgeGatewayStorage(storage, bridgeUrl);
     }
 
-    public async registerSession(): Promise<void> {
+    public async registerSession(options?: { openingDeadlineMS?: number }): Promise<void> {
         const url = new URL(addPathToUrl(this.bridgeUrl, this.ssePath));
         url.searchParams.append('client_id', this.sessionId);
 
@@ -49,8 +49,17 @@ export class BridgeGateway {
         this.eventSource = new EventSource(url.toString());
 
         return new Promise((resolve, reject) => {
-            this.eventSource!.onerror = reject;
+            const timeout = options?.openingDeadlineMS ? setTimeout(() => {
+                if (this.eventSource?.readyState !== EventSource.OPEN) {
+                    reject(new TonConnectError('Bridge connection timeout'))
+                    this.close();
+                }
+            }, options.openingDeadlineMS) : undefined;
+
+            this.eventSource!.onerror = () => reject;
             this.eventSource!.onopen! = (): void => {
+                clearTimeout(timeout);
+                this.isClosed = false;
                 this.eventSource!.onerror = this.errorsHandler.bind(this);
                 this.eventSource!.onmessage = this.messagesHandler.bind(this);
                 resolve();

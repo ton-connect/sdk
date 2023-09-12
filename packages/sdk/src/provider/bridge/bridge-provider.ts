@@ -113,7 +113,7 @@ export class BridgeProvider implements HTTPProvider {
                         : ''
             };
 
-            return this.openGateways(storedConnection.sessionCrypto);
+            return this.openGateways(storedConnection.sessionCrypto, { openingDeadlineMS: 5000 });
         }
 
         if (Array.isArray(this.walletConnectionSource)) {
@@ -132,7 +132,12 @@ export class BridgeProvider implements HTTPProvider {
             this.gatewayErrorsListener.bind(this)
         );
 
-        await this.gateway.registerSession();
+        try {
+            await this.gateway.registerSession({ openingDeadlineMS: 5000 });
+        } catch (e) {
+            await this.disconnect();
+            return;
+        }
 
         this.listeners.forEach(listener => listener(storedConnection.connectEvent));
     }
@@ -345,7 +350,7 @@ export class BridgeProvider implements HTTPProvider {
         return url.toString();
     }
 
-    private async openGateways(sessionCrypto: SessionCrypto): Promise<void> {
+    private async openGateways(sessionCrypto: SessionCrypto, options?: { openingDeadlineMS?: number }): Promise<void> {
         if (Array.isArray(this.walletConnectionSource)) {
             this.pendingGateways = this.walletConnectionSource.map(source => {
                 const gateway = new BridgeGateway(
@@ -365,7 +370,7 @@ export class BridgeProvider implements HTTPProvider {
                 return gateway;
             });
 
-            await Promise.race(this.pendingGateways.map(bridge => bridge.registerSession()));
+            await Promise.allSettled(this.pendingGateways.map(bridge => bridge.registerSession(options)));
             return;
         } else {
             this.gateway = new BridgeGateway(
@@ -375,7 +380,7 @@ export class BridgeProvider implements HTTPProvider {
                 this.gatewayListener.bind(this),
                 this.gatewayErrorsListener.bind(this)
             );
-            return this.gateway.registerSession();
+            return this.gateway.registerSession(options);
         }
     }
 
