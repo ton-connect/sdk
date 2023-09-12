@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui 
 
+# [2.0.0-beta.1](https://github.com/ton-connect/sdk/compare/ui-2.0.0-beta.0...ui-2.0.0-beta.1) (2023-09-12)
+
+
+### Bug Fixes
+
+* **ui:** uniqueness filtration added for universal connection bridges list ([87e53b0](https://github.com/ton-connect/sdk/commit/87e53b076a5f86146bed8dd6f06c6c205a2f09b9))
+
+
+
 # [2.0.0-beta.0](https://github.com/ton-connect/sdk/compare/ui-1.0.0-beta.7...ui-2.0.0-beta.0) (2023-09-08)
 
 
