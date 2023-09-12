@@ -28,12 +28,14 @@ export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = prop
     const [popupOpened, setPopupOpened] = createSignal(false);
     const connector = appState.connector;
 
-    const walletsBridges = props.walletsList
+    const walletsBridges = () => [...new Set(props.walletsList
         .filter(isWalletInfoRemote)
-        .map(item => ({ bridgeUrl: item.bridgeUrl, universalLink: item.universalLink }));
+        .map(item => item.bridgeUrl ))
+        .values()]
+        .map(bridgeUrl => ({ bridgeUrl }));
 
     setLastSelectedWalletInfo({ openMethod: 'qrcode' });
-    const request = createMemo(() => connector.connect(walletsBridges, props.additionalRequest));
+    const request = createMemo(() => connector.connect(walletsBridges(), props.additionalRequest));
 
     return (
         <DesktopUniversalModalStyled

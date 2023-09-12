@@ -1,5 +1,14 @@
 # Changelog @tonconnect/sdk 
 
+# [3.0.0-beta.1](https://github.com/ton-connect/sdk/compare/sdk-3.0.0-beta.0...sdk-3.0.0-beta.1) (2023-09-12)
+
+
+### Bug Fixes
+
+* **sdk:** bridge unavailability handled, max timeout added ([c0056d5](https://github.com/ton-connect/sdk/commit/c0056d5df16c15fc17bdd6e6bf119ff6c8cd60dc))
+
+
+
 # [3.0.0-beta.0](https://github.com/ton-connect/sdk/compare/sdk-2.2.0...sdk-3.0.0-beta.0) (2023-09-08)
 
 
