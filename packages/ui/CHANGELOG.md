@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui 
 
+# [2.0.0-beta.2](https://github.com/ton-connect/sdk/compare/ui-2.0.0-beta.1...ui-2.0.0-beta.2) (2023-09-15)
+
+
+### Bug Fixes
+
+* **ui:** next js compatibility ([2f3c644](https://github.com/ton-connect/sdk/commit/2f3c6446941d68aad6c2f544fea7caebd824e8ca))
+
+
+
 # [2.0.0-beta.1](https://github.com/ton-connect/sdk/compare/ui-2.0.0-beta.0...ui-2.0.0-beta.1) (2023-09-12)
 
 
