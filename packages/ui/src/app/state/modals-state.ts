@@ -21,14 +21,14 @@ export type ConfirmTransactionAction = BasicAction & {
 
 export const [walletsModalOpen, setWalletsModalOpen] = createSignal(false);
 
-const lastSelectedWalletInfoStorage = new LastSelectedWalletInfoStorage();
+let lastSelectedWalletInfoStorage = typeof window !== 'undefined' ? new LastSelectedWalletInfoStorage() : undefined;
 export const [lastSelectedWalletInfo, _setLastSelectedWalletInfo] = createSignal<
     | WalletInfoWithOpenMethod
     | {
           openMethod: WalletOpenMethod;
       }
     | null
->(lastSelectedWalletInfoStorage.getLastSelectedWalletInfo());
+>(lastSelectedWalletInfoStorage?.getLastSelectedWalletInfo() || null);
 
 export const setLastSelectedWalletInfo = (
     walletInfo:
@@ -38,6 +38,10 @@ export const setLastSelectedWalletInfo = (
           }
         | null
 ): void => {
+    if (!lastSelectedWalletInfoStorage) {
+        lastSelectedWalletInfoStorage = new LastSelectedWalletInfoStorage();
+    }
+
     if (walletInfo) {
         lastSelectedWalletInfoStorage.setLastSelectedWalletInfo(walletInfo);
     } else {
