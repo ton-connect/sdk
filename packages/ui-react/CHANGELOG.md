@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui-react 
 
+# [2.0.0-beta.2](https://github.com/ton-connect/sdk/compare/ui-react-2.0.0-beta.1...ui-react-2.0.0-beta.2) (2023-09-15)
+
+
+### Bug Fixes
+
+* **ui-react:** next js compatibility ([a746046](https://github.com/ton-connect/sdk/commit/a74604643d65b010b2043b7edf642370c976324b))
+
+
+
 # [2.0.0-beta.1](https://github.com/ton-connect/sdk/compare/ui-react-2.0.0-beta.0...ui-react-2.0.0-beta.1) (2023-09-12)
 
 
