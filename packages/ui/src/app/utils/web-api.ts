@@ -81,9 +81,7 @@ export function fixMobileSafariActiveTransition(): void {
 }
 
 export function defineStylesRoot(): void {
-    customElements.define(globalStylesTag, class TcRootElement extends HTMLDivElement {}, {
-        extends: 'div'
-    });
+    customElements.define(globalStylesTag, class TcRootElement extends HTMLElement {});
 }
 
 export function preloadImages(images: string[]): void {
