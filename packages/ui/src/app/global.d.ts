@@ -4,7 +4,7 @@ import { globalStylesTag } from 'src/app/styles/global-styles';
 declare module 'solid-js' {
     namespace JSX {
         interface IntrinsicElements {
-            [globalStylesTag]: JSX.HTMLAttributes<HTMLDivElement>;
+            [globalStylesTag]: JSX.HTMLAttributes<HTMLElement>;
         }
     }
 }
