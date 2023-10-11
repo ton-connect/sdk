@@ -1,4 +1,8 @@
-import type { Account, ConnectAdditionalRequest } from '@tonconnect/sdk';
+import type {
+    Account,
+    ConnectAdditionalRequest,
+    WalletInfoCurrentlyEmbedded
+} from '@tonconnect/sdk';
 import {
     isTelegramUrl,
     isWalletInfoCurrentlyEmbedded,
@@ -13,7 +17,7 @@ import {
 import { widgetController } from 'src/app/widget-controller';
 import { TonConnectUIError } from 'src/errors/ton-connect-ui.error';
 import { TonConnectUiCreateOptions } from 'src/models/ton-connect-ui-create-options';
-import { WalletInfoStorage, PreferredWalletStorage } from 'src/storage';
+import { PreferredWalletStorage, WalletInfoStorage } from 'src/storage';
 import {
     addReturnStrategy,
     getSystemTheme,
@@ -234,42 +238,18 @@ export class TonConnectUI {
 
     /**
      * Opens the modal window and handles a wallet connection.
+     * @return Connected wallet.
+     * @throws TonConnectUIError if connection was aborted.
      */
     public async connectWallet(): Promise<ConnectedWallet> {
         const walletsList = await this.getWallets();
         const embeddedWallet = walletsList.find(isWalletInfoCurrentlyEmbedded);
 
         if (embeddedWallet) {
-            const connect = (parameters?: ConnectAdditionalRequest): void => {
-                setLastSelectedWalletInfo(embeddedWallet);
-                this.connector.connect({ jsBridgeKey: embeddedWallet.jsBridgeKey }, parameters);
-            };
-
-            const additionalRequest = appState.connectRequestParameters;
-            if (additionalRequest?.state === 'loading') {
-                this.connectRequestParametersCallback = connect;
-            } else {
-                connect(additionalRequest?.value);
-            }
+            return await this.connectEmbeddedWallet(embeddedWallet);
         } else {
-            widgetController.openWalletsModal();
+            return await this.connectExternalWallet();
         }
-
-        return new Promise((resolve, reject) => {
-            const unsubscribe = this.connector.onStatusChange(async wallet => {
-                unsubscribe!();
-                if (wallet) {
-                    const lastSelectedWalletInfo = await this.getSelectedWalletInfo(wallet);
-
-                    resolve({
-                        ...wallet,
-                        ...(lastSelectedWalletInfo || this.walletInfoStorage.getWalletInfo())!
-                    });
-                } else {
-                    reject(new TonConnectUIError('Wallet was not connected'));
-                }
-            }, reject);
-        });
     }
 
     /**
@@ -347,7 +327,112 @@ export class TonConnectUI {
         }
     }
 
+    /**
+     * Initiates a connection with an embedded wallet, awaits its completion, and returns the connected wallet information.
+     * @param embeddedWallet - Information about the embedded wallet to connect to.
+     * @throws Error if the connection process fails.
+     * @internal
+     */
+    private async connectEmbeddedWallet(
+        embeddedWallet: WalletInfoCurrentlyEmbedded
+    ): Promise<ConnectedWallet> {
+        const connect = (parameters?: ConnectAdditionalRequest): void => {
+            setLastSelectedWalletInfo(embeddedWallet);
+            this.connector.connect({ jsBridgeKey: embeddedWallet.jsBridgeKey }, parameters);
+        };
+
+        const additionalRequest = appState.connectRequestParameters;
+        if (additionalRequest?.state === 'loading') {
+            this.connectRequestParametersCallback = connect;
+        } else {
+            connect(additionalRequest?.value);
+        }
+
+        return await this.waitForWalletConnection({
+            ignoreErrors: false
+        });
+    }
+
+    /**
+     * Initiates the connection process for an external wallet by opening the wallet modal
+     * and returns the connected wallet information upon successful connection.
+     * @throws Error if the user cancels the connection process or if the connection process fails.
+     * @internal
+     */
+    private async connectExternalWallet(): Promise<ConnectedWallet> {
+        const abortController = new AbortController();
+
+        widgetController.openWalletsModal(reason => {
+            if (reason === 'cancel') {
+                abortController.abort();
+            }
+        });
+
+        return await this.waitForWalletConnection({
+            ignoreErrors: true,
+            abortSignal: abortController.signal
+        });
+    }
+
+    /**
+     * Waits for a wallet connection based on provided options, returning connected wallet information.
+     * @param options - Configuration for connection statuses and errors handling.
+     * @options.ignoreErrors - If true, ignores errors during waiting, waiting continues until a valid wallet connects. Default is false.
+     * @options.abortSignal - Optional AbortSignal for external cancellation. Throws TonConnectUIError if aborted.
+     * @throws TonConnectUIError if waiting is aborted or no valid wallet connection is received and ignoreErrors is false.
+     * @internal
+     */
+    private async waitForWalletConnection(
+        options: WaitWalletConnectionOptions
+    ): Promise<ConnectedWallet> {
+        return new Promise((resolve, reject) => {
+            const { ignoreErrors = false, abortSignal = null } = options;
+
+            if (abortSignal && abortSignal.aborted) {
+                return reject(new TonConnectUIError('Wallet was not connected'));
+            }
+
+            const onStatusChangeHandler = async (wallet: ConnectedWallet | null): Promise<void> => {
+                if (!wallet) {
+                    if (ignoreErrors) {
+                        // skip empty wallet status changes to avoid aborting the process
+                        return;
+                    }
+
+                    unsubscribe();
+                    reject(new TonConnectUIError('Wallet was not connected'));
+                } else {
+                    unsubscribe();
+                    resolve(wallet);
+                }
+            };
+
+            const onErrorsHandler = (reason: TonConnectError): void => {
+                if (ignoreErrors) {
+                    // skip errors to avoid aborting the process
+                    return;
+                }
+
+                unsubscribe();
+                reject(reason);
+            };
+
+            const unsubscribe = this.onStatusChange(
+                (wallet: ConnectedWallet | null) => onStatusChangeHandler(wallet),
+                (reason: TonConnectError) => onErrorsHandler(reason)
+            );
+
+            if (abortSignal) {
+                abortSignal.addEventListener('abort', (): void => {
+                    unsubscribe();
+                    reject(new TonConnectUIError('Wallet was not connected'));
+                });
+            }
+        });
+    }
+
     private subscribeToWalletChange(): void {
+        // TODO: possible memory leak here, check it
         this.connector.onStatusChange(async wallet => {
             if (wallet) {
                 await this.updateWalletInfo(wallet);
@@ -496,3 +581,8 @@ export class TonConnectUI {
         };
     }
 }
+
+type WaitWalletConnectionOptions = {
+    ignoreErrors?: boolean;
+    abortSignal?: AbortSignal | null;
+};

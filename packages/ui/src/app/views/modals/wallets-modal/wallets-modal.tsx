@@ -17,7 +17,11 @@ import {
     useContext
 } from 'solid-js';
 import { ConnectorContext } from 'src/app/state/connector.context';
-import { setWalletsModalOpen, walletsModalOpen } from 'src/app/state/modals-state';
+import {
+    closeWalletsModal,
+    getWalletsModalIsOpened,
+    WalletsModalCloseReason
+} from 'src/app/state/modals-state';
 import { StyledModal, LoaderContainerStyled, H1Styled } from './style';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { useI18n } from '@solid-primitives/i18n';
@@ -96,15 +100,15 @@ export const WalletsModal: Component = () => {
             ?.value;
     });
 
-    const onClose = (): void => {
-        setWalletsModalOpen(false);
+    const onClose = (reason: WalletsModalCloseReason): void => {
+        closeWalletsModal(reason);
         setSelectedWalletInfo(null);
         setInfoTab(false);
     };
 
     const unsubscribe = connector.onStatusChange(wallet => {
         if (wallet) {
-            onClose();
+            onClose('select-wallet');
         }
     });
 
@@ -112,8 +116,8 @@ export const WalletsModal: Component = () => {
 
     return (
         <StyledModal
-            opened={walletsModalOpen()}
-            onClose={onClose}
+            opened={getWalletsModalIsOpened()}
+            onClose={() => onClose('cancel')}
             onClickQuestion={() => setInfoTab(v => !v)}
             data-tc-wallets-modal-container="true"
         >

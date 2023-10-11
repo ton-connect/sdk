@@ -1,4 +1,4 @@
-import { createSignal } from 'solid-js';
+import { createMemo, createSignal } from 'solid-js';
 import { WalletInfoWithOpenMethod, WalletOpenMethod } from 'src/models/connected-wallet';
 import { LastSelectedWalletInfoStorage } from 'src/storage';
 import { ReturnStrategy } from 'src/models';
@@ -19,9 +19,50 @@ export type ConfirmTransactionAction = BasicAction & {
     twaReturnUrl: `${string}://${string}`;
 };
 
-export const [walletsModalOpen, setWalletsModalOpen] = createSignal(false);
+export type WalletModalOpened = {
+    state: 'opened';
+    onClose: WalletsModalCloseFn;
+};
 
-let lastSelectedWalletInfoStorage = typeof window !== 'undefined' ? new LastSelectedWalletInfoStorage() : undefined;
+export type WalletModalClosed = {
+    state: 'closed';
+};
+
+export type WalletsModalState = WalletModalOpened | WalletModalClosed;
+
+export type WalletsModalCloseReason = 'cancel' | 'select-wallet' | 'close';
+
+export type WalletsModalCloseFn = (reason: WalletsModalCloseReason) => void;
+
+export const [walletsModalState, setWalletsModalState] = createSignal<WalletsModalState>({
+    state: 'closed'
+});
+
+export const getWalletsModalIsOpened = createMemo(() => walletsModalState().state === 'opened');
+
+export const getWalletsModalOnClose = createMemo(() => {
+    const state = walletsModalState();
+    return state.state === 'opened' ? state.onClose : () => {};
+});
+
+export const openWalletsModal = (onClose: WalletsModalCloseFn): void => {
+    setWalletsModalState({
+        state: 'opened',
+        onClose
+    });
+};
+
+export const closeWalletsModal = (reason: WalletsModalCloseReason): void => {
+    const onClose = getWalletsModalOnClose();
+    onClose(reason);
+
+    setWalletsModalState({
+        state: 'closed'
+    });
+};
+
+let lastSelectedWalletInfoStorage =
+    typeof window !== 'undefined' ? new LastSelectedWalletInfoStorage() : undefined;
 export const [lastSelectedWalletInfo, _setLastSelectedWalletInfo] = createSignal<
     | WalletInfoWithOpenMethod
     | {
