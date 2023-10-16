@@ -32,12 +32,14 @@ import { setBorderRadius, setColors, setTheme } from 'src/app/state/theme-state'
 import { mergeOptions } from 'src/app/utils/options';
 import { appState, setAppState } from 'src/app/state/app.state';
 import { unwrap } from 'solid-js/store';
-import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
+import { Action, setLastSelectedWalletInfo, WalletsModalState } from 'src/app/state/modals-state';
 import { ActionConfiguration, StrictActionConfiguration } from 'src/models/action-configuration';
 import { ConnectedWallet, WalletInfoWithOpenMethod } from 'src/models/connected-wallet';
 import { applyWalletsListConfiguration, eqWalletName } from 'src/app/utils/wallets';
 import { uniq } from 'src/app/utils/array';
 import { Loadable } from 'src/models/loadable';
+import { WalletsModalManager } from 'src/managers/wallets-modal-manager';
+import { TransactionModalManager } from 'src/managers/transaction-modal-manager';
 
 export class TonConnectUI {
     public static getWallets(): Promise<WalletInfo[]> {
@@ -67,6 +69,16 @@ export class TonConnectUI {
      * Resolved value `true`/`false` indicates if the session was restored successfully.
      */
     public readonly connectionRestored = Promise.resolve(false);
+
+    /**
+     * Manages the modal window state.
+     */
+    public readonly modal: WalletsModalManager;
+
+    /**
+     * Manages the transaction modal window state.
+     */
+    public readonly transactionModal: TransactionModalManager;
 
     /**
      * Current connection status.
@@ -162,6 +174,19 @@ export class TonConnectUI {
             );
         }
 
+        this.modal = new WalletsModalManager({
+            connector: this.connector,
+            setConnectRequestParametersCallback: (
+                callback: (parameters?: ConnectAdditionalRequest) => void
+            ) => {
+                this.connectRequestParametersCallback = callback;
+            }
+        });
+
+        this.transactionModal = new TransactionModalManager({
+            connector: this.connector
+        });
+
         this.walletsList = this.getWallets();
 
         this.walletsList.then(list => preloadImages(uniq(list.map(item => item.imageUrl))));
@@ -237,6 +262,35 @@ export class TonConnectUI {
     }
 
     /**
+     * Opens the modal window, returns a promise that resolves after the modal window is opened.
+     */
+    public async openModal(): Promise<void> {
+        return await this.modal.open();
+    }
+
+    /**
+     * Closes the modal window.
+     */
+    public closeModal(): void {
+        this.modal.close();
+    }
+
+    /**
+     * Subscribe to the modal window state changes, returns a function which has to be called to unsubscribe.
+     */
+    public onModalStateChange(onChange: (state: WalletsModalState) => void): () => void {
+        return this.modal.onStateChange(onChange);
+    }
+
+    /**
+     * Returns current modal window state.
+     */
+    public get modalState(): WalletsModalState {
+        return this.modal.state;
+    }
+
+    /**
+     * @deprecated Use `tonConnectUI.openModal()` instead. Will be removed in the next major version.
      * Opens the modal window and handles a wallet connection.
      * @return Connected wallet.
      * @throws TonConnectUIError if connection was aborted.
@@ -301,8 +355,24 @@ export class TonConnectUI {
             openModal: modals.includes('before')
         });
 
+        const abortController = new AbortController();
+
+        const unsubscribe = this.onTransactionModalStateChange(action => {
+            if (action?.openModal) {
+                return;
+            }
+
+            unsubscribe();
+            if (!action) {
+                abortController.abort();
+            }
+        });
+
         try {
-            const result = await this.connector.sendTransaction(tx);
+            const result = await this.waitForSendTransaction({
+                transaction: tx,
+                abortSignal: abortController.signal
+            });
 
             widgetController.setAction({
                 name: 'transaction-sent',
@@ -324,6 +394,8 @@ export class TonConnectUI {
                 console.error(e);
                 throw new TonConnectUIError('Unhandled error:' + e);
             }
+        } finally {
+            unsubscribe();
         }
     }
 
@@ -362,8 +434,16 @@ export class TonConnectUI {
     private async connectExternalWallet(): Promise<ConnectedWallet> {
         const abortController = new AbortController();
 
-        widgetController.openWalletsModal(reason => {
-            if (reason === 'cancel') {
+        widgetController.openWalletsModal();
+
+        const unsubscribe = this.onModalStateChange(state => {
+            const { status, closeReason } = state;
+            if (status === 'opened') {
+                return;
+            }
+
+            unsubscribe();
+            if (closeReason === 'action-cancelled') {
                 abortController.abort();
             }
         });
@@ -429,6 +509,50 @@ export class TonConnectUI {
                 });
             }
         });
+    }
+
+    /**
+     * Waits for a transaction to be sent based on provided options, returning the transaction response.
+     * @param options - Configuration for transaction statuses and errors handling.
+     * @options.transaction - Transaction to send.
+     * @options.ignoreErrors - If true, ignores errors during waiting, waiting continues until a valid transaction is sent. Default is false.
+     * @options.abortSignal - Optional AbortSignal for external cancellation. Throws TonConnectUIError if aborted.
+     * @throws TonConnectUIError if waiting is aborted or no valid transaction response is received and ignoreErrors is false.
+     * @internal
+     */
+    private async waitForSendTransaction(
+        options: WaitSendTransactionOptions
+    ): Promise<SendTransactionResponse> {
+        return new Promise((resolve, reject) => {
+            const { transaction, abortSignal } = options;
+
+            if (abortSignal.aborted) {
+                return reject(new TonConnectUIError('Transaction was not sent'));
+            }
+
+            const onTransactionHandler = async (
+                transaction: SendTransactionResponse
+            ): Promise<void> => {
+                resolve(transaction);
+            };
+
+            const onErrorsHandler = (reason: TonConnectError): void => {
+                reject(reason);
+            };
+
+            this.connector
+                .sendTransaction(transaction)
+                .then(result => onTransactionHandler(result))
+                .catch(reason => onErrorsHandler(reason));
+
+            abortSignal.addEventListener('abort', (): void => {
+                reject(new TonConnectUIError('Transaction was not sent'));
+            });
+        });
+    }
+
+    private onTransactionModalStateChange(onChange: (action: Action | null) => void): () => void {
+        return this.transactionModal.onStateChange(onChange);
     }
 
     private subscribeToWalletChange(): void {
@@ -585,4 +709,9 @@ export class TonConnectUI {
 type WaitWalletConnectionOptions = {
     ignoreErrors?: boolean;
     abortSignal?: AbortSignal | null;
+};
+
+type WaitSendTransactionOptions = {
+    transaction: SendTransactionRequest;
+    abortSignal: AbortSignal;
 };

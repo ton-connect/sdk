@@ -19,47 +19,52 @@ export type ConfirmTransactionAction = BasicAction & {
     twaReturnUrl: `${string}://${string}`;
 };
 
+/**
+ * Opened modal window state.
+ */
 export type WalletModalOpened = {
-    state: 'opened';
-    onClose: WalletsModalCloseFn;
+    /**
+     * Modal window status.
+     */
+    status: 'opened';
+
+    /**
+     * Always `null` for opened modal window.
+     */
+    closeReason: null;
 };
 
+/**
+ * Closed modal window state.
+ */
 export type WalletModalClosed = {
-    state: 'closed';
+    /**
+     * Modal window status.
+     */
+    status: 'closed';
+
+    /**
+     * Close reason, if the modal window was closed.
+     */
+    closeReason: WalletsModalCloseReason | null;
 };
 
+/**
+ * Modal window state.
+ */
 export type WalletsModalState = WalletModalOpened | WalletModalClosed;
 
-export type WalletsModalCloseReason = 'cancel' | 'select-wallet' | 'close';
-
-export type WalletsModalCloseFn = (reason: WalletsModalCloseReason) => void;
+/**
+ * Modal window close reason.
+ */
+export type WalletsModalCloseReason = 'action-cancelled' | 'wallet-selected';
 
 export const [walletsModalState, setWalletsModalState] = createSignal<WalletsModalState>({
-    state: 'closed'
+    status: 'closed',
+    closeReason: null
 });
 
-export const getWalletsModalIsOpened = createMemo(() => walletsModalState().state === 'opened');
-
-export const getWalletsModalOnClose = createMemo(() => {
-    const state = walletsModalState();
-    return state.state === 'opened' ? state.onClose : () => {};
-});
-
-export const openWalletsModal = (onClose: WalletsModalCloseFn): void => {
-    setWalletsModalState({
-        state: 'opened',
-        onClose
-    });
-};
-
-export const closeWalletsModal = (reason: WalletsModalCloseReason): void => {
-    const onClose = getWalletsModalOnClose();
-    onClose(reason);
-
-    setWalletsModalState({
-        state: 'closed'
-    });
-};
+export const getWalletsModalIsOpened = createMemo(() => walletsModalState().status === 'opened');
 
 let lastSelectedWalletInfoStorage =
     typeof window !== 'undefined' ? new LastSelectedWalletInfoStorage() : undefined;
