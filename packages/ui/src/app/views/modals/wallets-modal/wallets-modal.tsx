@@ -18,11 +18,11 @@ import {
 } from 'solid-js';
 import { ConnectorContext } from 'src/app/state/connector.context';
 import {
-    closeWalletsModal,
     getWalletsModalIsOpened,
+    setWalletsModalState,
     WalletsModalCloseReason
 } from 'src/app/state/modals-state';
-import { StyledModal, LoaderContainerStyled, H1Styled } from './style';
+import { H1Styled, LoaderContainerStyled, StyledModal } from './style';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { useI18n } from '@solid-primitives/i18n';
 import { appState } from 'src/app/state/app.state';
@@ -100,15 +100,15 @@ export const WalletsModal: Component = () => {
             ?.value;
     });
 
-    const onClose = (reason: WalletsModalCloseReason): void => {
-        closeWalletsModal(reason);
+    const onClose = (closeReason: WalletsModalCloseReason): void => {
+        setWalletsModalState({ status: 'closed', closeReason: closeReason });
         setSelectedWalletInfo(null);
         setInfoTab(false);
     };
 
     const unsubscribe = connector.onStatusChange(wallet => {
         if (wallet) {
-            onClose('select-wallet');
+            onClose('wallet-selected');
         }
     });
 
@@ -117,7 +117,7 @@ export const WalletsModal: Component = () => {
     return (
         <StyledModal
             opened={getWalletsModalIsOpened()}
-            onClose={() => onClose('cancel')}
+            onClose={() => onClose('action-cancelled')}
             onClickQuestion={() => setInfoTab(v => !v)}
             data-tc-wallets-modal-container="true"
         >
