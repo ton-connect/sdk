@@ -1,8 +1,4 @@
-import {
-    setLastSelectedWalletInfo,
-    walletsModalState,
-    WalletsModalState
-} from 'src/app/state/modals-state';
+import { setLastSelectedWalletInfo, walletsModalState } from 'src/app/state/modals-state';
 import { createEffect } from 'solid-js';
 import {
     ConnectAdditionalRequest,
@@ -12,6 +8,7 @@ import {
 } from '@tonconnect/sdk';
 import { appState } from 'src/app/state/app.state';
 import { widgetController } from 'src/app/widget-controller';
+import { WalletsModal, WalletsModalState } from 'src/models/wallets-modal';
 
 interface WalletsModalManagerCreateOptions {
     /**
@@ -30,7 +27,7 @@ interface WalletsModalManagerCreateOptions {
 /**
  * Manages the modal window state.
  */
-export class WalletsModalManager {
+export class WalletsModalManager implements WalletsModal {
     /**
      * TonConnect instance.
      * @internal

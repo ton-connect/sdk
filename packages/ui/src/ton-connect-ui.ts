@@ -32,7 +32,7 @@ import { setBorderRadius, setColors, setTheme } from 'src/app/state/theme-state'
 import { mergeOptions } from 'src/app/utils/options';
 import { appState, setAppState } from 'src/app/state/app.state';
 import { unwrap } from 'solid-js/store';
-import { Action, setLastSelectedWalletInfo, WalletsModalState } from 'src/app/state/modals-state';
+import { Action, setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { ActionConfiguration, StrictActionConfiguration } from 'src/models/action-configuration';
 import { ConnectedWallet, WalletInfoWithOpenMethod } from 'src/models/connected-wallet';
 import { applyWalletsListConfiguration, eqWalletName } from 'src/app/utils/wallets';
@@ -40,6 +40,7 @@ import { uniq } from 'src/app/utils/array';
 import { Loadable } from 'src/models/loadable';
 import { WalletsModalManager } from 'src/managers/wallets-modal-manager';
 import { TransactionModalManager } from 'src/managers/transaction-modal-manager';
+import { WalletsModal, WalletsModalState } from 'src/models/wallets-modal';
 
 export class TonConnectUI {
     public static getWallets(): Promise<WalletInfo[]> {
@@ -49,8 +50,6 @@ export class TonConnectUI {
     private readonly walletInfoStorage = new WalletInfoStorage();
 
     private readonly preferredWalletStorage = new PreferredWalletStorage();
-
-    public readonly connector: ITonConnect;
 
     private walletInfo: WalletInfoWithOpenMethod | null = null;
 
@@ -65,20 +64,25 @@ export class TonConnectUI {
     ) => void;
 
     /**
-     * Promise that resolves after end of th connection restoring process (promise will fire after `onStatusChange`, so you can get actual information about wallet and session after when promise resolved).
-     * Resolved value `true`/`false` indicates if the session was restored successfully.
+     * TonConnect instance.
      */
-    public readonly connectionRestored = Promise.resolve(false);
+    public readonly connector: ITonConnect;
 
     /**
      * Manages the modal window state.
      */
-    public readonly modal: WalletsModalManager;
+    public readonly modal: WalletsModal;
 
     /**
      * Manages the transaction modal window state.
      */
     public readonly transactionModal: TransactionModalManager;
+
+    /**
+     * Promise that resolves after end of th connection restoring process (promise will fire after `onStatusChange`, so you can get actual information about wallet and session after when promise resolved).
+     * Resolved value `true`/`false` indicates if the session was restored successfully.
+     */
+    public readonly connectionRestored = Promise.resolve(false);
 
     /**
      * Current connection status.
@@ -265,7 +269,7 @@ export class TonConnectUI {
      * Opens the modal window, returns a promise that resolves after the modal window is opened.
      */
     public async openModal(): Promise<void> {
-        return await this.modal.open();
+        return this.modal.open();
     }
 
     /**
@@ -400,6 +404,7 @@ export class TonConnectUI {
     }
 
     /**
+     * TODO: remove in the next major version.
      * Initiates a connection with an embedded wallet, awaits its completion, and returns the connected wallet information.
      * @param embeddedWallet - Information about the embedded wallet to connect to.
      * @throws Error if the connection process fails.
@@ -426,6 +431,7 @@ export class TonConnectUI {
     }
 
     /**
+     * TODO: remove in the next major version.
      * Initiates the connection process for an external wallet by opening the wallet modal
      * and returns the connected wallet information upon successful connection.
      * @throws Error if the user cancels the connection process or if the connection process fails.
@@ -455,6 +461,7 @@ export class TonConnectUI {
     }
 
     /**
+     * TODO: remove in the next major version.
      * Waits for a wallet connection based on provided options, returning connected wallet information.
      * @param options - Configuration for connection statuses and errors handling.
      * @options.ignoreErrors - If true, ignores errors during waiting, waiting continues until a valid wallet connects. Default is false.
@@ -551,6 +558,10 @@ export class TonConnectUI {
         });
     }
 
+    /**
+     * Subscribe to the transaction modal window state changes, returns a function which has to be called to unsubscribe.
+     * @internal
+     */
     private onTransactionModalStateChange(onChange: (action: Action | null) => void): () => void {
         return this.transactionModal.onStateChange(onChange);
     }

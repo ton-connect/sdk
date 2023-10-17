@@ -5,12 +5,12 @@ import {
     lastSelectedWalletInfo,
     setAction,
     setLastSelectedWalletInfo,
-    setWalletsModalState,
-    WalletsModalCloseReason
+    setWalletsModalState
 } from 'src/app/state/modals-state';
 import { TonConnectUI } from 'src/ton-connect-ui';
 import App from './App';
 import { WalletInfoWithOpenMethod, WalletOpenMethod } from 'src/models/connected-wallet';
+import { WalletsModalCloseReason } from 'src/models';
 
 export const widgetController = {
     openWalletsModal: (): void =>

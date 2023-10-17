@@ -25,3 +25,10 @@ import { Property } from 'csstype';
 type Color = Property.Color;
 export type { Color };
 export type { Loadable, LoadableReady, LoadableLoading } from './loadable';
+export type {
+    WalletsModal,
+    WalletsModalState,
+    WalletModalOpened,
+    WalletModalClosed,
+    WalletsModalCloseReason
+} from './wallets-modal';
