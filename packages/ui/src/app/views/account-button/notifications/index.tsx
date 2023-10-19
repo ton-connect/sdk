@@ -1,51 +1,16 @@
-import { Component, createEffect, createSignal, For, Match, on, onCleanup, Switch } from 'solid-js';
+import { Component, For, Match, Switch } from 'solid-js';
 import { TransitionGroup } from 'solid-transition-group';
-import { ActionName, action } from 'src/app/state/modals-state';
 import { ConfirmOperationNotification } from './confirm-operation-notification';
 import { ErrorTransactionNotification } from './error-transaction-notification';
 import { SuccessTransactionNotification } from './success-transaction-notification';
 import { NotificationClass } from './style';
 import { Styleable } from 'src/app/models/styleable';
+import { useOpenedNotifications } from 'src/app/hooks/use-notifications';
 
 export interface NotificationsProps extends Styleable {}
 
 export const Notifications: Component<NotificationsProps> = props => {
-    const timeouts: ReturnType<typeof setTimeout>[] = [];
-
-    const [openedNotifications, setOpenedNotifications] = createSignal<
-        { id: number; action: ActionName }[]
-    >([]);
-
-    let lastId = -1;
-    const liveTimeoutMs = 4500;
-
-    createEffect(
-        on(action, action => {
-            if (action && action.showNotification) {
-                lastId++;
-                const id = lastId;
-
-                setOpenedNotifications(notifications =>
-                    notifications
-                        .filter(notification => notification.action !== 'confirm-transaction')
-                        .concat({ id, action: action.name })
-                );
-                timeouts.push(
-                    setTimeout(
-                        () =>
-                            setOpenedNotifications(notifications =>
-                                notifications.filter(notification => notification.id !== id)
-                            ),
-                        liveTimeoutMs
-                    )
-                );
-            }
-        })
-    );
-
-    onCleanup(() => {
-        timeouts.forEach(clearTimeout);
-    });
+    const openedNotifications = useOpenedNotifications();
 
     return (
         <div class={props.class} data-tc-list-notifications="true">
