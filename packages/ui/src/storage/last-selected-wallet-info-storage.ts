@@ -1,5 +1,5 @@
 import { WalletInfoWithOpenMethod, WalletOpenMethod } from 'src/models/connected-wallet';
-import { checkLocalStorageExists } from 'src/app/utils/web-api';
+import { tryGetLocalStorage } from 'src/app/utils/web-api';
 
 export class LastSelectedWalletInfoStorage {
     private readonly localStorage: Storage;
@@ -7,9 +7,7 @@ export class LastSelectedWalletInfoStorage {
     private readonly storageKey = 'ton-connect-ui_last-selected-wallet-info';
 
     constructor() {
-        checkLocalStorageExists();
-
-        this.localStorage = localStorage;
+        this.localStorage = tryGetLocalStorage();
     }
 
     public setLastSelectedWalletInfo(
