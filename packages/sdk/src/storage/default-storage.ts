@@ -1,31 +1,25 @@
-import { LocalstorageNotFoundError } from 'src/errors/storage/localstorage-not-found.error';
 import { IStorage } from 'src/storage/models/storage.interface';
-import { getWindow } from 'src/utils/web-api';
+import { tryGetLocalStorage } from 'src/utils/web-api';
 
+/**
+ * Default storage to save protocol data, uses `localStorage` if it is available, for Safari in private mode and Node.js it uses `InMemoryStorage`.
+ */
 export class DefaultStorage implements IStorage {
-    private readonly window: Window;
+    private readonly localStorage: Storage;
 
     constructor() {
-        const window = getWindow();
-
-        if (!window?.localStorage) {
-            throw new LocalstorageNotFoundError();
-        }
-
-        this.window = window;
+        this.localStorage = tryGetLocalStorage();
     }
 
     public async getItem(key: string): Promise<string | null> {
-        return Promise.resolve(this.window.localStorage.getItem(key));
+        return this.localStorage.getItem(key);
     }
 
     public async removeItem(key: string): Promise<void> {
-        this.window.localStorage.removeItem(key);
-        return Promise.resolve();
+        this.localStorage.removeItem(key);
     }
 
-    setItem(key: string, value: string): Promise<void> {
-        this.window.localStorage.setItem(key, value);
-        return Promise.resolve();
+    public async setItem(key: string, value: string): Promise<void> {
+        this.localStorage.setItem(key, value);
     }
 }

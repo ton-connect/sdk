@@ -1,11 +1,11 @@
 import { WalletNotInjectedError } from 'src/errors/wallet/wallet-not-injected.error';
 import {
     AppRequest,
-    RpcMethod,
-    WalletResponse,
+    ConnectEventError,
     ConnectRequest,
+    RpcMethod,
     WalletEvent,
-    ConnectEventError
+    WalletResponse
 } from '@tonconnect/protocol';
 import {
     InjectedWalletApi,
@@ -15,7 +15,7 @@ import { InternalProvider } from 'src/provider/provider';
 import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { IStorage } from 'src/storage/models/storage.interface';
 import { WithoutId, WithoutIdDistributive } from 'src/utils/types';
-import { getWindow } from 'src/utils/web-api';
+import { getWindow, tryGetWindowKeys } from 'src/utils/web-api';
 import { PROTOCOL_VERSION } from 'src/resources/protocol';
 import { WalletInfoCurrentlyInjected } from 'src/models';
 import { logDebug } from 'src/utils/log';
@@ -52,7 +52,8 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             return [];
         }
 
-        const wallets = Object.entries(this.window).filter(([_, value]) =>
+        const windowKeys = tryGetWindowKeys();
+        const wallets = windowKeys.filter(([_, value]) =>
             isJSBridgeWithMetadata(value)
         ) as unknown as [string, { tonconnect: InjectedWalletApi }][];
 
