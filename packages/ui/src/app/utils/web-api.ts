@@ -2,10 +2,10 @@ import { THEME } from 'src/models/THEME';
 import { ReturnStrategy } from 'src/models/return-strategy';
 import { disableScrollClass, globalStylesTag } from 'src/app/styles/global-styles';
 import { toPx } from 'src/app/utils/css';
-import { TonConnectUIError } from 'src/errors';
 import { UserAgent } from 'src/models/user-agent';
 import UAParser from 'ua-parser-js';
 import { encodeTelegramUrlParameters, isTelegramUrl } from '@tonconnect/sdk';
+import { InMemoryStorage } from 'src/app/models/in-memory-storage';
 
 export function openLink(href: string, target = '_self'): ReturnType<typeof window.open> {
     return window.open(href, target, 'noreferrer noopener');
@@ -93,20 +93,23 @@ export function preloadImages(images: string[]): void {
     });
 }
 
-export function checkLocalStorageExists(): never | void {
-    if (typeof localStorage === 'undefined') {
-        throw new TonConnectUIError(
-            'window.localStorage is undefined. localStorage is required for TonConnectUI'
-        );
-    }
-}
-
 export function getWindow(): Window | undefined {
     if (typeof window !== 'undefined') {
         return window;
     }
 
     return undefined;
+}
+
+/**
+ * Returns `localStorage` if it is available, for Safari in private mode and Node.js it returns `InMemoryStorage`.
+ */
+export function tryGetLocalStorage(): Storage {
+    try {
+        return localStorage;
+    } catch {
+        return InMemoryStorage.getInstance();
+    }
 }
 
 export function isMobileUserAgent(): boolean {
