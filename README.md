@@ -43,3 +43,7 @@ It allows you to integrate TonConnect to your app easier using our UI elements s
 
 
 TonConnect UI React is a React UI kit for TonConnect SDK. Use it to connect your app to TON wallets via TonConnect protocol in React apps.
+
+## Development
+
+Follow the instructions in [DEVELOPERS.md](./DEVELOPERS.md) to setup the development environment.
