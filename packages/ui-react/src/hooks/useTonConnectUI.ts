@@ -12,7 +12,12 @@ export function useTonConnectUI(): [TonConnectUI, (options: TonConnectUiOptions)
     const setOptions = useCallback(
         (options: TonConnectUiOptions) => {
             if (tonConnectUI) {
-                tonConnectUI!.uiOptions = options;
+                try {
+                    tonConnectUI!.uiOptions = options;
+                } catch (e) {
+                    console.log(`Error while updating TonConnectUI options: ${e}`);
+                    throw e;
+                }
             }
         },
         [tonConnectUI]

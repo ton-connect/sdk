@@ -1,6 +1,6 @@
 import './global.d.ts';
-import { Show } from 'solid-js';
 import type { Component } from 'solid-js';
+import { onCleanup, Show } from 'solid-js';
 import { Dynamic, Portal } from 'solid-js/web';
 import { ThemeProvider } from 'solid-styled-components';
 import { i18nDictionary } from 'src/app/i18n';
@@ -25,6 +25,16 @@ const App: Component<AppProps> = props => {
 
     defineStylesRoot();
     fixMobileSafariActiveTransition();
+
+    // const rootId = appState.buttonRootId;
+    // const rootElement = document.getElementById(rootId);
+    //
+    // onCleanup(() => {
+    //     const portalElement = document.getElementById(rootId);
+    //     if (portalElement) {
+    //         portalElement.innerHTML = '';
+    //     }
+    // });
 
     return (
         <I18nContext.Provider value={translations}>

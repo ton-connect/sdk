@@ -13,7 +13,7 @@ import {
 import { widgetController } from 'src/app/widget-controller';
 import { TonConnectUIError } from 'src/errors/ton-connect-ui.error';
 import { TonConnectUiCreateOptions } from 'src/models/ton-connect-ui-create-options';
-import { WalletInfoStorage, PreferredWalletStorage } from 'src/storage';
+import { PreferredWalletStorage, WalletInfoStorage } from 'src/storage';
 import {
     addReturnStrategy,
     getSystemTheme,
@@ -48,8 +48,6 @@ export class TonConnectUI {
 
     private walletInfo: WalletInfoWithOpenMethod | null = null;
 
-    private systemThemeChangeUnsubscribe: (() => void) | null = null;
-
     private actionsConfiguration?: ActionConfiguration;
 
     private readonly walletsList: Promise<WalletInfo[]>;
@@ -57,6 +55,47 @@ export class TonConnectUI {
     private connectRequestParametersCallback?: (
         parameters: ConnectAdditionalRequest | undefined
     ) => void;
+
+    /**
+     * Function that unsubscribes from the system theme change event.
+     * @internal
+     */
+    private systemThemeChangeUnsubscribe: (() => void) | null = null;
+
+    /**
+     * Function that unsubscribes from the wallet change event.
+     * @internal
+     */
+    private onStatusChangeUnsubscribe: (() => void) | null = null;
+
+    /**
+     * Function that unmounts the widget, call it to remove the widget from the DOM.
+     * @internal
+     */
+    private readonly unmountApp: () => void;
+
+    /**
+     * Function that removes the root element, call it to remove the root element from the DOM.
+     * @internal
+     */
+    private readonly unmountRootId: () => void;
+
+    private unmounted: boolean = false;
+
+    /**
+     * Function that unmounts the app. Should be called after the widget is not needed anymore.
+     */
+    public unmount(): void {
+        if (this.unmounted) {
+            return;
+        }
+
+        this.unmounted = true;
+        this.systemThemeChangeUnsubscribe?.();
+        this.onStatusChangeUnsubscribe?.();
+        this.unmountApp();
+        this.unmountRootId();
+    }
 
     /**
      * Promise that resolves after end of th connection restoring process (promise will fire after `onStatusChange`, so you can get actual information about wallet and session after when promise resolved).
@@ -97,6 +136,11 @@ export class TonConnectUI {
      * @param options
      */
     public set uiOptions(options: TonConnectUiOptions) {
+        console.log(`Setting new UI options: ${JSON.stringify(options)}, is unmounted: ${this.unmounted}`);
+        if (this.unmounted) {
+            return;
+        }
+
         this.checkButtonRootExist(options.buttonRootId);
 
         this.actionsConfiguration = options.actionsConfiguration;
@@ -162,7 +206,9 @@ export class TonConnectUI {
 
         this.walletsList.then(list => preloadImages(uniq(list.map(item => item.imageUrl))));
 
-        const rootId = this.normalizeWidgetRoot(options?.widgetRootId);
+        const widgetRootId = options?.widgetRootId || 'tc-widget-root';
+
+        this.unmountRootId = this.normalizeWidgetRoot(widgetRootId);
 
         this.subscribeToWalletChange();
 
@@ -185,7 +231,7 @@ export class TonConnectUI {
             preferredWalletAppName: preferredWalletName
         });
 
-        widgetController.renderApp(rootId, this);
+        this.unmountApp = widgetController.renderApp(widgetRootId, this);
     }
 
     /**
@@ -348,7 +394,7 @@ export class TonConnectUI {
     }
 
     private subscribeToWalletChange(): void {
-        this.connector.onStatusChange(async wallet => {
+        this.onStatusChangeUnsubscribe = this.connector.onStatusChange(async wallet => {
             if (wallet) {
                 await this.updateWalletInfo(wallet);
                 this.setPreferredWalletAppName(this.walletInfo?.appName || wallet.device.appName);
@@ -415,15 +461,23 @@ export class TonConnectUI {
             ) || null;
     }
 
-    private normalizeWidgetRoot(rootId: string | undefined): string {
-        if (!rootId || !document.getElementById(rootId)) {
-            rootId = 'tc-widget-root';
-            const rootElement = document.createElement('div');
+    private normalizeWidgetRoot(rootId: string): () => void {
+        let rootElement: HTMLElement | null = null;
+
+        if (!document.getElementById(rootId)) {
+            console.log(`Creating root element with id ${rootId}`);
+            rootElement = document.createElement('div');
             rootElement.id = rootId;
             document.body.appendChild(rootElement);
+        } else {
+            console.log(
+              `Skipping root element creation with id ${rootId}, because it already exists, 4`
+            );
         }
 
-        return rootId;
+        return () => {
+            rootElement?.remove();
+        };
     }
 
     private checkButtonRootExist(buttonRootId: string | null | undefined): void | never {

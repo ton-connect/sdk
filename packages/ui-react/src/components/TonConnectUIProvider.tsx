@@ -1,4 +1,4 @@
-import { createContext, FunctionComponent, memo, ReactNode } from 'react';
+import { createContext, FunctionComponent, memo, ReactNode, useEffect } from 'react';
 import {
     ActionConfiguration,
     Locales,
@@ -67,6 +67,7 @@ export interface TonConnectUIProviderPropsBase {
 }
 
 let tonConnectUI: TonConnectUI | null = null;
+let refCount: number = 0;
 
 /**
  * Add TonConnectUIProvider to the root of the app. You can specify UI options using props.
@@ -82,6 +83,27 @@ const TonConnectUIProvider: FunctionComponent<TonConnectUIProviderProps> = ({
     if (isClientSide() && !tonConnectUI) {
         tonConnectUI = new TonConnectUI(options);
     }
+
+    // remove widget root on unmount to prevent memory leaks
+    useEffect(() => {
+        // increment refCount on mount
+        console.log(`Incrementing refCount from ${refCount} to ${refCount + 1}`);
+        refCount++;
+
+        return () => {
+            // decrement refCount on unmount
+            refCount--;
+            console.log(`Decrementing refCount from ${refCount + 1} to ${refCount}`);
+
+            if (refCount === 0) {
+                console.log(`Unmounting TonConnectUI, refCount is ${refCount}`);
+                tonConnectUI?.unmount();
+                tonConnectUI = null;
+            } else {
+                console.log(`Skipping unmounting TonConnectUI, refCount is ${refCount}`);
+            }
+        };
+    }, []);
 
     return (
         <TonConnectUIContext.Provider value={tonConnectUI}>{children}</TonConnectUIContext.Provider>
