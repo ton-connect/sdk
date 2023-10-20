@@ -1,5 +1,28 @@
 # Changelog @tonconnect/ui 
 
+# [2.0.0-beta.3](https://github.com/ton-connect/sdk/compare/ui-2.0.0-beta.2...ui-2.0.0-beta.3) (2023-10-20)
+
+
+### Bug Fixes
+
+* **ui:** implement back button handler for modal popup on Android devices ([ff83611](https://github.com/ton-connect/sdk/commit/ff8361138dac5efb1086ab5791e0700e67190491)), closes [#70](https://github.com/ton-connect/sdk/issues/70)
+* **ui:** prevent reappearing of success tooltip on re-render ([17bbc9a](https://github.com/ton-connect/sdk/commit/17bbc9a66eb01aad10dcc9bd91ba25696c652ba8))
+* **ui:** resolve illegal constructor error in safari ([512678f](https://github.com/ton-connect/sdk/commit/512678ff25ae877a7a2f608e8d8c06fda5dcbd21)), closes [#87](https://github.com/ton-connect/sdk/issues/87)
+* **ui:** resolve premature promise resolution and unhandled popup closing scenarios ([5e7b825](https://github.com/ton-connect/sdk/commit/5e7b825b809856f6bd3dff969464beeb9d372a08)), closes [#67](https://github.com/ton-connect/sdk/issues/67) [#68](https://github.com/ton-connect/sdk/issues/68)
+
+
+### Features
+
+* **ui:** introduce modal, fix promise handling, and refactor internal classes ([ac803aa](https://github.com/ton-connect/sdk/commit/ac803aa7bec56f6358071a906879d814eb485c8d))
+* **ui:** refactor wallet modal interfaces and expose them publicly ([5618a0a](https://github.com/ton-connect/sdk/commit/5618a0ae945b2aad50cb994d4cad8371f029bf65))
+
+
+### BREAKING CHANGES
+
+* **ui:** The method tonConnectUI.connectWallet() is now deprecated and will be removed in subsequent versions. Use tonConnectUI.openModal() instead.
+
+
+
 # [2.0.0-beta.2](https://github.com/ton-connect/sdk/compare/ui-2.0.0-beta.1...ui-2.0.0-beta.2) (2023-09-15)
 
 
