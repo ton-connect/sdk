@@ -75,8 +75,9 @@ export class TonConnectUI {
 
     /**
      * Manages the transaction modal window state.
+     * TODO: make it public when interface will be ready for external usage.
      */
-    public readonly transactionModal: TransactionModalManager;
+    private readonly transactionModal: TransactionModalManager;
 
     /**
      * Promise that resolves after end of th connection restoring process (promise will fire after `onStatusChange`, so you can get actual information about wallet and session after when promise resolved).
