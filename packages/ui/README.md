@@ -341,31 +341,51 @@ const result = await tonConnectUI.sendTransaction(defaultTx, {
 });
 ```
 
-## Use inside TWA (Telegram web app)
-TonConnect UI will work in TWA in the same way as in a regular website!
+## Use inside TMA (Telegram Mini Apps)
+TonConnect UI will work in TMA in the same way as in a regular website!
 Basically, no changes are required from the dApp's developers. The only thing you have to set is a dynamic return strategy.
 
-Currently, it is impossible for TWA-wallets to redirect back to previous opened TWA-dApp like native wallet-apps do.
-It means, that you need to specify the return strategy as a link to your TWA that will be only applied if the dApp is opened in TWA mode.
+Currently, it is impossible for TMA-wallets to redirect back to previous opened TMA-dApp like native wallet-apps do.
+It means, that you need to specify the return strategy as a link to your TMA that will be only applied if the dApp is opened in TMA mode.
 
 ```ts
 tonConnectUI.uiOptions = {
-        twaReturnUrl: 'https://t.me/durov'
-    };
+    twaReturnUrl: 'https://t.me/durov'
+};
 ```
 
-In other words,
+In other words, TonConnect UI will automatically handle the return strategy based on the environment. **The following pseudo-code demonstrates the internal logic of TonConnect UI**:
+
+> Please note that you **don't need to add this code to your dApp**. It's just an example of how TonConnect UI processes the return strategy internally.
+
 ```ts
-if (isLinkToTelegram()) {
+let finalReturnStrategy;
+
+// Determine if the provided link opens Telegram (using protocols tg:// or domain t.me).
+if (isLinkToTelegram('https://example.com')) {
+    // In the Telegram Mini Apps environment,
     if (isInTWA()) {
-        FINAL_RETURN_STRATEGY = actionsConfiguration.twaReturnUrl || actionsConfiguration.returnStrategy;
-    } else {
-        FINAL_RETURN_STRATEGY = 'none';
+        // preference is given to 'twaReturnUrl',
+        finalReturnStrategy = actionsConfiguration.twaReturnUrl;
+
+        // but if it's not set, fallback to 'returnStrategy'.
+        if (!finalReturnStrategy) {
+            finalReturnStrategy = actionsConfiguration.returnStrategy;
+        }
     }
-} else {
-    FINAL_RETURN_STRATEGY = actionsConfiguration.returnStrategy;
+    // If not in a TMA environment,
+    else {
+        // the return strategy is set to 'none'.
+        finalReturnStrategy = 'none';
+    }
+}
+// When the link does not open Telegram,
+else {
+    // use the predefined 'returnStrategy'.
+    finalReturnStrategy = actionsConfiguration.returnStrategy;
 }
 
+// Now, 'finalReturnStrategy' contains the correct strategy based on the link's destination and the dApp's environment.
 ```
 
 ## Detect end of the connection restoring process
