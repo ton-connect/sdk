@@ -16,7 +16,7 @@
 <li><a href="_tonconnect_ui.html">@tonconnect/ui</a></li></ul>
 <h1>Module @tonconnect/ui</h1></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/e18e3b8/packages/ui/src/library.ts#L1">packages/ui/src/library.ts:1</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/955cbf7/packages/ui/src/library.ts#L1">packages/ui/src/library.ts:1</a></li></ul></aside>
 <section class="tsd-panel-group">
 <section class="tsd-panel tsd-typography">
 <a href="#ton-connect-ui" id="ton-connect-ui" style="color: inherit; text-decoration: none;">
@@ -85,28 +85,61 @@ Passed options will be merged with current UI options. Note, that you have to pa
 <pre><code class="language-ts"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">walletsList</span><span class="hl-1"> = </span><span class="hl-0">await</span><span class="hl-1"> </span><span class="hl-2">TonConnectUI</span><span class="hl-1">.</span><span class="hl-5">getWallets</span><span class="hl-1">();</span>
 </code></pre>
 
-<a href="#call-connect" id="call-connect" style="color: inherit; text-decoration: none;">
-  <h2>Call connect</h2>
+<a href="#open-connect-modal" id="open-connect-modal" style="color: inherit; text-decoration: none;">
+  <h2>Open connect modal</h2>
 </a>
 <p>&quot;TonConnect UI connect button&quot; (which is added at <code>buttonRootId</code>) automatically handles clicks and calls connect.
 But you are still able to open &quot;connect modal&quot; programmatically, e.g. after click on your custom connect button.</p>
-<pre><code class="language-ts"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">connectedWallet</span><span class="hl-1"> = </span><span class="hl-0">await</span><span class="hl-1"> </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-5">connectWallet</span><span class="hl-1">();</span>
+<pre><code class="language-ts"><span class="hl-0">await</span><span class="hl-1"> </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-5">openModal</span><span class="hl-1">();</span>
 </code></pre>
-<p>If there is an error while wallet connecting, <code>TonConnectUIError</code> or <code>TonConnectError</code> will be thrown depends on situation.</p>
+<p>This method opens the modal window and returns a promise that resolves after the modal window is opened.</p>
+<p>If there is an error while modal opening, <code>TonConnectUIError</code> or <code>TonConnectError</code> will be thrown depends on situation.</p>
+
+<a href="#close-connect-modal" id="close-connect-modal" style="color: inherit; text-decoration: none;">
+  <h2>Close connect modal</h2>
+</a>
+<pre><code class="language-ts"><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-5">closeModal</span><span class="hl-1">();</span>
+</code></pre>
+<p>This method closes the modal window.</p>
+
+<a href="#get-current-modal-state" id="get-current-modal-state" style="color: inherit; text-decoration: none;">
+  <h2>Get current modal state</h2>
+</a>
+<p>This getter returns the current state of the modal window. The state will be an object with <code>status</code> and <code>closeReason</code> properties. The <code>status</code> can be either &#39;opened&#39; or &#39;closed&#39;. If the modal is closed, you can check the <code>closeReason</code> to find out the reason of closing.</p>
+<pre><code class="language-ts"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">currentModalState</span><span class="hl-1"> = </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-2">modalState</span><span class="hl-1">;</span>
+</code></pre>
+
+<a href="#subscribe-to-the-modal-window-state-changes" id="subscribe-to-the-modal-window-state-changes" style="color: inherit; text-decoration: none;">
+  <h2>Subscribe to the modal window state changes</h2>
+</a>
+<p>To subscribe to the changes of the modal window state, you can use the <code>onModalStateChange</code> method. It returns a function which has to be called to unsubscribe.</p>
+<pre><code class="language-js"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">unsubscribeModal</span><span class="hl-1"> = </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-5">onModalStateChange</span><span class="hl-1">(</span><br/><span class="hl-1">    (</span><span class="hl-2">state</span><span class="hl-1">: </span><span class="hl-6">WalletsModalState</span><span class="hl-1">) </span><span class="hl-4">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">        </span><span class="hl-7">// update state/reactive variables to show updates in the ui</span><br/><span class="hl-1">        </span><span class="hl-7">// state.status will be &#39;opened&#39; or &#39;closed&#39;</span><br/><span class="hl-1">        </span><span class="hl-7">// if state.status is &#39;closed&#39;, you can check state.closeReason to find out the reason</span><br/><span class="hl-1">    }</span><br/><span class="hl-1">);</span>
+</code></pre>
+<p>Call <code>unsubscribeModal()</code> later to save resources when you don&#39;t need to listen for updates anymore.</p>
+
+<a href="#wallets-modal-control" id="wallets-modal-control" style="color: inherit; text-decoration: none;">
+  <h2>Wallets Modal Control</h2>
+</a>
+<p>The <code>tonConnectUI</code> provides methods for managing the modal window, such as <code>openModal()</code>, <code>closeModal()</code> and other, which are designed for ease of use and cover most use cases.</p>
+<pre><code class="language-typescript"><span class="hl-4">const</span><span class="hl-1"> { </span><span class="hl-8">modal</span><span class="hl-1"> } = </span><span class="hl-2">tonConnectUI</span><span class="hl-1">;</span><br/><br/><span class="hl-7">// Open and close the modal</span><br/><span class="hl-0">await</span><span class="hl-1"> </span><span class="hl-2">modal</span><span class="hl-1">.</span><span class="hl-5">open</span><span class="hl-1">();</span><br/><span class="hl-2">modal</span><span class="hl-1">.</span><span class="hl-5">close</span><span class="hl-1">();</span><br/><br/><span class="hl-7">// Get the current modal state</span><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">currentState</span><span class="hl-1"> = </span><span class="hl-2">modal</span><span class="hl-1">.</span><span class="hl-2">state</span><span class="hl-1">;</span><br/><br/><span class="hl-7">// Subscribe and unsubscribe to modal state changes</span><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">unsubscribe</span><span class="hl-1"> = </span><span class="hl-2">modal</span><span class="hl-1">.</span><span class="hl-5">onStateChange</span><span class="hl-1">(</span><span class="hl-2">state</span><span class="hl-1"> </span><span class="hl-4">=&gt;</span><span class="hl-1"> { </span><span class="hl-7">/* ... */</span><span class="hl-1"> });</span><br/><span class="hl-5">unsubscribe</span><span class="hl-1">();</span>
+</code></pre>
+<p>While <code>tonConnectUI</code> internally delegates these calls to the <code>modal</code>, it is recommended to use the <code>tonConnectUI</code> methods for a more straightforward and consistent experience. The <code>modal</code> is exposed in case you need direct access to the modal window&#39;s state and behavior, but this should generally be avoided unless necessary.</p>
 
 <a href="#get-current-connected-wallet-and-walletinfo" id="get-current-connected-wallet-and-walletinfo" style="color: inherit; text-decoration: none;">
   <h2>Get current connected Wallet and WalletInfo</h2>
 </a>
 <p>You can use special getters to read current connection state. Note that this getter only represents current value, so they are not reactive. 
-To react and handle wallet changes use <code>onStatusChange</code> mathod.</p>
-<pre><code class="language-ts"><span class="hl-1">    </span><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">currentWallet</span><span class="hl-1"> = </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-2">wallet</span><span class="hl-1">;</span><br/><span class="hl-1">    </span><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">currentWalletInfo</span><span class="hl-1"> = </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-2">walletInfo</span><span class="hl-1">;</span><br/><span class="hl-1">    </span><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">currentAccount</span><span class="hl-1"> = </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-2">account</span><span class="hl-1">;</span><br/><span class="hl-1">    </span><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">currentIsConnectedStatus</span><span class="hl-1"> = </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-2">connected</span><span class="hl-1">;</span>
+To react and handle wallet changes use <code>onStatusChange</code> method.</p>
+<pre><code class="language-ts"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">currentWallet</span><span class="hl-1"> = </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-2">wallet</span><span class="hl-1">;</span><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">currentWalletInfo</span><span class="hl-1"> = </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-2">walletInfo</span><span class="hl-1">;</span><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">currentAccount</span><span class="hl-1"> = </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-2">account</span><span class="hl-1">;</span><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">currentIsConnectedStatus</span><span class="hl-1"> = </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-2">connected</span><span class="hl-1">;</span>
 </code></pre>
 
 <a href="#subscribe-to-the-connection-status-changes" id="subscribe-to-the-connection-status-changes" style="color: inherit; text-decoration: none;">
   <h2>Subscribe to the connection status changes</h2>
 </a>
-<pre><code class="language-js"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">unsubscribe</span><span class="hl-1"> = </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-5">onStatusChange</span><span class="hl-1">(</span><br/><span class="hl-1">    </span><span class="hl-2">walletAndwalletInfo</span><span class="hl-1"> </span><span class="hl-4">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">        </span><span class="hl-7">// update state/reactive variables to show updates in the ui</span><br/><span class="hl-1">    } </span><br/><span class="hl-1">);</span><br/><br/><span class="hl-7">// call `unsubscribe()` later to save resources when you don&#39;t need to listen for updates anymore.</span>
+<p>To subscribe to the changes of the connection status, you can use the <code>onStatusChange</code> method. It returns a function which has to be called to unsubscribe.</p>
+<pre><code class="language-ts"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">unsubscribe</span><span class="hl-1"> = </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-5">onStatusChange</span><span class="hl-1">(</span><br/><span class="hl-1">    </span><span class="hl-2">walletAndwalletInfo</span><span class="hl-1"> </span><span class="hl-4">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">        </span><span class="hl-7">// update state/reactive variables to show updates in the ui</span><br/><span class="hl-1">    } </span><br/><span class="hl-1">);</span>
 </code></pre>
+<p>Call <code>unsubscribe()</code> later to save resources when you don&#39;t need to listen for updates anymore.</p>
 
 <a href="#disconnect-wallet" id="disconnect-wallet" style="color: inherit; text-decoration: none;">
   <h2>Disconnect wallet</h2>
@@ -481,6 +514,7 @@ However, it is possible if needed. You can add css styles to the specified selec
 <a href="../interfaces/_tonconnect_ui.TonConnectUiOptionsWithConnector.html" class="tsd-index-link tsd-kind-interface tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Ton<wbr/>Connect<wbr/>Ui<wbr/>Options<wbr/>With<wbr/>Connector</span></a>
 <a href="../interfaces/_tonconnect_ui.TonConnectUiOptionsWithManifest.html" class="tsd-index-link tsd-kind-interface tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Ton<wbr/>Connect<wbr/>Ui<wbr/>Options<wbr/>With<wbr/>Manifest</span></a>
 <a href="../interfaces/_tonconnect_ui.UIPreferences.html" class="tsd-index-link tsd-kind-interface tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>UIPreferences</span></a>
+<a href="../interfaces/_tonconnect_ui.WalletsModal.html" class="tsd-index-link tsd-kind-interface tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Wallets<wbr/>Modal</span></a>
 </div></section>
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading">Type Aliases</h3>
@@ -499,8 +533,12 @@ However, it is possible if needed. You can add css styles to the specified selec
 <a href="../types/_tonconnect_ui.UIWallet.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>UIWallet</span></a>
 <a href="../types/_tonconnect_ui.WalletInfoRemoteWithOpenMethod.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Wallet<wbr/>Info<wbr/>Remote<wbr/>With<wbr/>Open<wbr/>Method</span></a>
 <a href="../types/_tonconnect_ui.WalletInfoWithOpenMethod.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Wallet<wbr/>Info<wbr/>With<wbr/>Open<wbr/>Method</span></a>
+<a href="../types/_tonconnect_ui.WalletModalClosed.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Wallet<wbr/>Modal<wbr/>Closed</span></a>
+<a href="../types/_tonconnect_ui.WalletModalOpened.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Wallet<wbr/>Modal<wbr/>Opened</span></a>
 <a href="../types/_tonconnect_ui.WalletOpenMethod.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Wallet<wbr/>Open<wbr/>Method</span></a>
 <a href="../types/_tonconnect_ui.WalletsListConfiguration.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Wallets<wbr/>List<wbr/>Configuration</span></a>
+<a href="../types/_tonconnect_ui.WalletsModalCloseReason.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Wallets<wbr/>Modal<wbr/>Close<wbr/>Reason</span></a>
+<a href="../types/_tonconnect_ui.WalletsModalState.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Wallets<wbr/>Modal<wbr/>State</span></a>
 </div></section></div></details></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>References</h2>
@@ -541,6 +579,7 @@ However, it is possible if needed. You can add css styles to the specified selec
 <li class="tsd-kind-interface tsd-parent-kind-module"><a href="../interfaces/_tonconnect_ui.TonConnectUiOptionsWithConnector.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg>Ton<wbr/>Connect<wbr/>Ui<wbr/>Options<wbr/>With<wbr/>Connector</a></li>
 <li class="tsd-kind-interface tsd-parent-kind-module"><a href="../interfaces/_tonconnect_ui.TonConnectUiOptionsWithManifest.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg>Ton<wbr/>Connect<wbr/>Ui<wbr/>Options<wbr/>With<wbr/>Manifest</a></li>
 <li class="tsd-kind-interface tsd-parent-kind-module"><a href="../interfaces/_tonconnect_ui.UIPreferences.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg>UIPreferences</a></li>
+<li class="tsd-kind-interface tsd-parent-kind-module"><a href="../interfaces/_tonconnect_ui.WalletsModal.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg>Wallets<wbr/>Modal</a></li>
 <li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.BorderRadius.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Border<wbr/>Radius</a></li>
 <li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.Color.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Color</a></li>
 <li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.ColorsSet.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Colors<wbr/>Set</a></li>
@@ -556,8 +595,12 @@ However, it is possible if needed. You can add css styles to the specified selec
 <li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.UIWallet.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>UIWallet</a></li>
 <li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.WalletInfoRemoteWithOpenMethod.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Wallet<wbr/>Info<wbr/>Remote<wbr/>With<wbr/>Open<wbr/>Method</a></li>
 <li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.WalletInfoWithOpenMethod.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Wallet<wbr/>Info<wbr/>With<wbr/>Open<wbr/>Method</a></li>
+<li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.WalletModalClosed.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Wallet<wbr/>Modal<wbr/>Closed</a></li>
+<li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.WalletModalOpened.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Wallet<wbr/>Modal<wbr/>Opened</a></li>
 <li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.WalletOpenMethod.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Wallet<wbr/>Open<wbr/>Method</a></li>
-<li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.WalletsListConfiguration.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Wallets<wbr/>List<wbr/>Configuration</a></li></ul></nav></div></div>
+<li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.WalletsListConfiguration.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Wallets<wbr/>List<wbr/>Configuration</a></li>
+<li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.WalletsModalCloseReason.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Wallets<wbr/>Modal<wbr/>Close<wbr/>Reason</a></li>
+<li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.WalletsModalState.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Wallets<wbr/>Modal<wbr/>State</a></li></ul></nav></div></div>
 <div class="container tsd-generator">
 <p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></div>
 <div class="overlay"></div><script src="../assets/main.js"></script></body></html>
