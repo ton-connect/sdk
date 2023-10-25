@@ -59,7 +59,9 @@ Make sure that manifest is available to GET by its URL.
 
 If your manifest placed not in the root of your app, you can specify its path:
 ```ts
-    const connector = new TonConnect({ manifestUrl: 'https://myApp.com/assets/tonconnect-manifest.json' });
+const connector = new TonConnect({
+    manifestUrl: 'https://myApp.com/assets/tonconnect-manifest.json'
+});
 ```
 
 ## Subscribe to the connection status changes
@@ -273,29 +275,32 @@ To authorize user in your backend with TonConnect you can use following schema:
 1. Fetch auth payload from your backend. It might be any random value. Backend must save information that this payload was sent to the client to check payload correctness later.
 2. Connect to the wallet when user clicks to the connection button:
 ```ts
-    connector.connect(walletConnectionSource, { tonProof: "<your-fetched-payload>" });
+connector.connect(
+  walletConnectionSource, 
+  { tonProof: "<your-fetched-payload>" }
+);
 ```
 Note that you can use `tonProof` only with `connector.connect()` method. This feature is not available in `connector.restoreConnection()`.
 
 3. Read a signed result after user approves connection:
 ```ts
 connector.onStatusChange(wallet => {
-			if (!wallet) {
-				return;
-			}
+    if (!wallet) {
+        return;
+    }
 
-			const tonProof = wallet.connectItems?.tonProof;
+    const tonProof = wallet.connectItems?.tonProof;
 
-			if (tonProof) {
-				if ('proof' in tonProof) {
-                    // send proof to your backend
-					// e.g. myBackendCheckProof(tonProof.proof, wallet.account);
-					return;
-				}
+    if (tonProof) {
+        if ('proof' in tonProof) {
+            // send proof to your backend
+            // e.g. myBackendCheckProof(tonProof.proof, wallet.account);
+            return;
+        }
 
-				console.error(tonProof.error);
-			}
-		});
+        console.error(tonProof.error);
+    }
+});
 ```
 4. Send proof and user's account data to your backend. Backend should check the proof correctness and check that payload inside the proof was generated before. After all checks backend should return an auth token to the client. Notice that `Account` contains the `walletStateInit` property which can be helpful for your backend to get user's public key if user's wallet contract doesn't support corresponding get method.
 5. Client saves the auth token in the `localStorage` and use it to access to auth-required endpoints. Client should delete the token when user disconnects the wallet.
