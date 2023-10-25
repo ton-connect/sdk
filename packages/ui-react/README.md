@@ -107,6 +107,26 @@ export const Wallet = () => {
 };
 ```
 
+### useTonConnectModal
+
+Use this hook to access the functions for opening and closing the modal window. The hook returns an object with the current modal state and methods to open and close the modal.
+
+```tsx
+import { useTonConnectModal } from '@tonconnect/ui-react';
+
+export const ModalControl = () => {
+    const { state, open, close } = useTonConnectModal();
+
+    return (
+      <div>
+          <div>Modal state: {state?.status}</div>
+          <button onClick={open}>Open modal</button>
+          <button onClick={close}>Close modal</button>
+      </div>
+    );
+};
+```
+
 ### useTonConnectUI
 Use it to get access to the `TonConnectUI` instance and UI options updating function.
 

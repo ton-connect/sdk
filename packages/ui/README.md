@@ -103,37 +103,94 @@ or
 const walletsList = await TonConnectUI.getWallets();
 ```
 
-## Call connect
+## Open connect modal
 "TonConnect UI connect button" (which is added at `buttonRootId`) automatically handles clicks and calls connect.
 But you are still able to open "connect modal" programmatically, e.g. after click on your custom connect button.
 
 ```ts
-const connectedWallet = await tonConnectUI.connectWallet();
+await tonConnectUI.openModal();
 ```
 
-If there is an error while wallet connecting, `TonConnectUIError` or `TonConnectError` will be thrown depends on situation.
+This method opens the modal window and returns a promise that resolves after the modal window is opened.
+
+If there is an error while modal opening, `TonConnectUIError` or `TonConnectError` will be thrown depends on situation.
+
+## Close connect modal
+
+```ts
+tonConnectUI.closeModal();
+```
+
+This method closes the modal window.
+
+## Get current modal state
+
+This getter returns the current state of the modal window. The state will be an object with `status` and `closeReason` properties. The `status` can be either 'opened' or 'closed'. If the modal is closed, you can check the `closeReason` to find out the reason of closing.
+
+```ts
+const currentModalState = tonConnectUI.modalState;
+```
+
+## Subscribe to the modal window state changes
+To subscribe to the changes of the modal window state, you can use the `onModalStateChange` method. It returns a function which has to be called to unsubscribe.
+
+```js
+const unsubscribeModal = tonConnectUI.onModalStateChange(
+    (state: WalletsModalState) => {
+        // update state/reactive variables to show updates in the ui
+        // state.status will be 'opened' or 'closed'
+        // if state.status is 'closed', you can check state.closeReason to find out the reason
+    }
+);
+```
+
+Call `unsubscribeModal()` later to save resources when you don't need to listen for updates anymore.
+
+## Wallets Modal Control
+
+The `tonConnectUI` provides methods for managing the modal window, such as `openModal()`, `closeModal()` and other, which are designed for ease of use and cover most use cases.
+
+```typescript
+const { modal } = tonConnectUI;
+
+// Open and close the modal
+await modal.open();
+modal.close();
+
+// Get the current modal state
+const currentState = modal.state;
+
+// Subscribe and unsubscribe to modal state changes
+const unsubscribe = modal.onStateChange(state => { /* ... */ });
+unsubscribe();
+```
+
+While `tonConnectUI` internally delegates these calls to the `modal`, it is recommended to use the `tonConnectUI` methods for a more straightforward and consistent experience. The `modal` is exposed in case you need direct access to the modal window's state and behavior, but this should generally be avoided unless necessary.
 
 ## Get current connected Wallet and WalletInfo
 You can use special getters to read current connection state. Note that this getter only represents current value, so they are not reactive. 
-To react and handle wallet changes use `onStatusChange` mathod.
+To react and handle wallet changes use `onStatusChange` method.
 
 ```ts
-    const currentWallet = tonConnectUI.wallet;
-    const currentWalletInfo = tonConnectUI.walletInfo;
-    const currentAccount = tonConnectUI.account;
-    const currentIsConnectedStatus = tonConnectUI.connected;
+const currentWallet = tonConnectUI.wallet;
+const currentWalletInfo = tonConnectUI.walletInfo;
+const currentAccount = tonConnectUI.account;
+const currentIsConnectedStatus = tonConnectUI.connected;
 ```
 
 ## Subscribe to the connection status changes
-```js
+
+To subscribe to the changes of the connection status, you can use the `onStatusChange` method. It returns a function which has to be called to unsubscribe.
+
+```ts
 const unsubscribe = tonConnectUI.onStatusChange(
     walletAndwalletInfo => {
         // update state/reactive variables to show updates in the ui
     } 
 );
-
-// call `unsubscribe()` later to save resources when you don't need to listen for updates anymore.
 ```
+
+Call `unsubscribe()` later to save resources when you don't need to listen for updates anymore.
 
 ## Disconnect wallet
 Call to disconnect the wallet.

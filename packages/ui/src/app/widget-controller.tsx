@@ -5,15 +5,28 @@ import {
     lastSelectedWalletInfo,
     setAction,
     setLastSelectedWalletInfo,
-    setWalletsModalOpen
+    setWalletsModalState
 } from 'src/app/state/modals-state';
 import { TonConnectUI } from 'src/ton-connect-ui';
 import App from './App';
 import { WalletInfoWithOpenMethod, WalletOpenMethod } from 'src/models/connected-wallet';
+import { WalletsModalCloseReason } from 'src/models';
 
 export const widgetController = {
-    openWalletsModal: (): void => void setTimeout(() => setWalletsModalOpen(true)),
-    closeWalletsModal: (): void => void setTimeout(() => setWalletsModalOpen(false)),
+    openWalletsModal: (): void =>
+        void setTimeout(() =>
+            setWalletsModalState({
+                status: 'opened',
+                closeReason: null
+            })
+        ),
+    closeWalletsModal: (reason: WalletsModalCloseReason): void =>
+        void setTimeout(() =>
+            setWalletsModalState({
+                status: 'closed',
+                closeReason: reason
+            })
+        ),
     setAction: (action: Action): void => void setTimeout(() => setAction(action)),
     clearAction: (): void => void setTimeout(() => setAction(null)),
     getSelectedWalletInfo: ():

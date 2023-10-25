@@ -17,8 +17,8 @@ import {
     useContext
 } from 'solid-js';
 import { ConnectorContext } from 'src/app/state/connector.context';
-import { setWalletsModalOpen, walletsModalOpen } from 'src/app/state/modals-state';
-import { StyledModal, LoaderContainerStyled, H1Styled } from './style';
+import { getWalletsModalIsOpened, setWalletsModalState } from 'src/app/state/modals-state';
+import { H1Styled, LoaderContainerStyled, StyledModal } from './style';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { useI18n } from '@solid-primitives/i18n';
 import { appState } from 'src/app/state/app.state';
@@ -35,6 +35,7 @@ import { MobileConnectionModal } from 'src/app/views/modals/wallets-modal/mobile
 import { MobileUniversalModal } from 'src/app/views/modals/wallets-modal/mobile-universal-modal';
 import { DesktopUniversalModal } from 'src/app/views/modals/wallets-modal/desltop-universal-modal';
 import { Dynamic } from 'solid-js/web';
+import { WalletsModalCloseReason } from 'src/models';
 
 export const WalletsModal: Component = () => {
     const { locale } = useI18n()[1];
@@ -96,15 +97,15 @@ export const WalletsModal: Component = () => {
             ?.value;
     });
 
-    const onClose = (): void => {
-        setWalletsModalOpen(false);
+    const onClose = (closeReason: WalletsModalCloseReason): void => {
+        setWalletsModalState({ status: 'closed', closeReason: closeReason });
         setSelectedWalletInfo(null);
         setInfoTab(false);
     };
 
     const unsubscribe = connector.onStatusChange(wallet => {
         if (wallet) {
-            onClose();
+            onClose('wallet-selected');
         }
     });
 
@@ -112,8 +113,8 @@ export const WalletsModal: Component = () => {
 
     return (
         <StyledModal
-            opened={walletsModalOpen()}
-            onClose={onClose}
+            opened={getWalletsModalIsOpened()}
+            onClose={() => onClose('action-cancelled')}
             onClickQuestion={() => setInfoTab(v => !v)}
             data-tc-wallets-modal-container="true"
         >

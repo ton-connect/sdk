@@ -1,7 +1,8 @@
-import { createSignal } from 'solid-js';
+import { createMemo, createSignal } from 'solid-js';
 import { WalletInfoWithOpenMethod, WalletOpenMethod } from 'src/models/connected-wallet';
 import { LastSelectedWalletInfoStorage } from 'src/storage';
 import { ReturnStrategy } from 'src/models';
+import { WalletsModalState } from 'src/models/wallets-modal';
 
 export type ActionName = 'confirm-transaction' | 'transaction-sent' | 'transaction-canceled';
 
@@ -19,9 +20,15 @@ export type ConfirmTransactionAction = BasicAction & {
     twaReturnUrl: `${string}://${string}`;
 };
 
-export const [walletsModalOpen, setWalletsModalOpen] = createSignal(false);
+export const [walletsModalState, setWalletsModalState] = createSignal<WalletsModalState>({
+    status: 'closed',
+    closeReason: null
+});
 
-let lastSelectedWalletInfoStorage = typeof window !== 'undefined' ? new LastSelectedWalletInfoStorage() : undefined;
+export const getWalletsModalIsOpened = createMemo(() => walletsModalState().status === 'opened');
+
+let lastSelectedWalletInfoStorage =
+    typeof window !== 'undefined' ? new LastSelectedWalletInfoStorage() : undefined;
 export const [lastSelectedWalletInfo, _setLastSelectedWalletInfo] = createSignal<
     | WalletInfoWithOpenMethod
     | {

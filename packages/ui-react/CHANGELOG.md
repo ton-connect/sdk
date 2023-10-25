@@ -1,5 +1,18 @@
 # Changelog @tonconnect/ui-react 
 
+# [2.0.0-beta.4](https://github.com/ton-connect/sdk/compare/ui-react-2.0.0-beta.3...ui-react-2.0.0-beta.4) (2023-10-25)
+
+
+
+# [2.0.0-beta.3](https://github.com/ton-connect/sdk/compare/ui-react-2.0.0-beta.2...ui-react-2.0.0-beta.3) (2023-10-20)
+
+
+### Features
+
+* **ui-react:** add useTonConnectModal() hook for modal management ([d1e2381](https://github.com/ton-connect/sdk/commit/d1e238154694d142bae67b21bfc81deb30647d49))
+
+
+
 # [2.0.0-beta.2](https://github.com/ton-connect/sdk/compare/ui-react-2.0.0-beta.1...ui-react-2.0.0-beta.2) (2023-09-15)
 
 
