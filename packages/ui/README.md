@@ -696,3 +696,20 @@ tonConnectUI.onStatusChange(wallet => {
         }
     });
 ```
+
+# Troubleshooting
+
+## Android Back Handler
+
+If you encounter any issues with the Android back handler, such as modals not closing properly when the back button is pressed, or conflicts with `history.pushState()` if you are manually handling browser history in your application, you can disable the back handler by setting `enableAndroidBackHandler` to `false`:
+
+```ts
+const tonConnectUI = new TonConnectUI({
+    // ...
+    enableAndroidBackHandler: false
+});
+```
+
+This will disable the custom back button behavior on Android, and you can then handle the back button press manually in your application.
+
+While we do not foresee any problems arising with the Android back handler, but if you find yourself needing to disable it due to an issue, please describe the problem in on [GitHub Issues](https://github.com/ton-connect/sdk/issues), so we can assist you further.
