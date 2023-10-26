@@ -64,6 +64,12 @@ export interface TonConnectUIProviderPropsBase {
      * Configuration for action-period (e.g. sendTransaction) UI elements: modals and notifications and wallet behaviour (return strategy).
      */
     actionsConfiguration?: ActionConfiguration;
+
+    /**
+     * Specifies whether the Android back button should be used to close modals and notifications on Android devices.
+     * @default true
+     */
+    enableAndroidBackHandler?: boolean;
 }
 
 let tonConnectUI: TonConnectUI | null = null;
