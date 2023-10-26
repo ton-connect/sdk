@@ -28,6 +28,7 @@ const androidBackHandler = androidBackHandlerDirective;
 export interface ModalProps extends Styleable, WithDataAttributes {
     children: JSXElement;
     opened: boolean;
+    enableAndroidBackHandler: boolean;
     onClose: () => void;
     onClickQuestion?: () => void;
 }
@@ -102,7 +103,10 @@ export const Modal: Component<ModalProps> = props => {
                         )}
                         use:clickOutside={() => props.onClose()}
                         use:keyPressed={() => props.onClose()}
-                        use:androidBackHandler={() => props.onClose()}
+                        use:androidBackHandler={{
+                            isEnabled: props.enableAndroidBackHandler,
+                            onClose: () => props.onClose()
+                        }}
                     >
                         <ModalBodyStyled class={props.class}>
                             <CloseButtonStyled icon="close" onClick={() => props.onClose()} />
