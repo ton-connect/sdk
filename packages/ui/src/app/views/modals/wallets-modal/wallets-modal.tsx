@@ -114,6 +114,7 @@ export const WalletsModal: Component = () => {
     return (
         <StyledModal
             opened={getWalletsModalIsOpened()}
+            enableAndroidBackHandler={appState.enableAndroidBackHandler}
             onClose={() => onClose('action-cancelled')}
             onClickQuestion={() => setInfoTab(v => !v)}
             data-tc-wallets-modal-container="true"
