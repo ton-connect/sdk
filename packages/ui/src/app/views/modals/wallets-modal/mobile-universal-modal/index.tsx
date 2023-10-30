@@ -1,5 +1,5 @@
 import { ConnectAdditionalRequest, isWalletInfoRemote, WalletInfo } from '@tonconnect/sdk';
-import { Component, createMemo, createSignal, For, Show } from 'solid-js';
+import { Component, createSignal, For, Show } from 'solid-js';
 import {
     LongArrowIcon,
     WalletItem,
@@ -55,12 +55,8 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
         .values()]
         .map(bridgeUrl => ({ bridgeUrl }));
 
-    const universalLink = createMemo(() =>
-        connector.connect(
-            walletsBridges(),
-            props.additionalRequest
-        )
-    );
+    const getUniversalLink = (): string =>
+        connector.connect(walletsBridges(), props.additionalRequest);
 
     setLastSelectedWalletInfo({ openMethod: 'universal-link' });
 
@@ -73,13 +69,13 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
             clearTimeout(isCopiedShown());
         }
 
-        await copyToClipboard(universalLink());
+        await copyToClipboard(getUniversalLink());
         const timeoutId = setTimeout(() => setIsCopiedShown(undefined), 1500);
         setIsCopiedShown(timeoutId);
     };
 
     const onSelectUniversal = (): void => {
-        openLinkBlank(addReturnStrategy(universalLink(), appState.returnStrategy));
+        openLinkBlank(addReturnStrategy(getUniversalLink(), appState.returnStrategy));
     };
 
     const onSelectTelegram = (): void => {
@@ -120,7 +116,7 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
         <div data-tc-wallets-modal-universal-mobile="true">
             <Show when={showQR()}>
                 <StyledLeftActionButton icon="arrow" onClick={onCloseQR} />
-                <MobileUniversalQR universalLink={universalLink()} />
+                <MobileUniversalQR universalLink={getUniversalLink()} />
             </Show>
             <Show when={!showQR()}>
                 <StyledLeftActionButton icon={<QRIcon />} onClick={onOpenQR} />
