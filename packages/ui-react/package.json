@@ -29,15 +29,15 @@
   "files": [
     "lib"
   ],
-  "main": "./lib/index.umd.cjs",
+  "main": "./lib/index.umd.js",
   "module": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "exports": {
     ".": {
       "types": "./lib/index.d.ts",
-      "require": "./lib/index.umd.cjs",
+      "require": "./lib/index.umd.js",
       "import": "./lib/index.js",
-      "default": "./lib/index.umd.cjs"
+      "default": "./lib/index.umd.js"
     }
   },
   "devDependencies": {
