@@ -35,15 +35,15 @@
     "lib",
     "dist"
   ],
-  "main": "./lib/index.umd.cjs",
-  "module": "./lib/index.js",
+  "main": "./lib/index.cjs",
+  "module": "./lib/index.mjs",
   "types": "./lib/index.d.ts",
   "exports": {
     ".": {
       "types": "./lib/index.d.ts",
-      "require": "./lib/index.umd.cjs",
-      "import": "./lib/index.js",
-      "default": "./lib/index.umd.cjs"
+      "require": "./lib/index.cjs",
+      "import": "./lib/index.mjs",
+      "default": "./lib/index.cjs"
     }
   },
   "dependencies": {
