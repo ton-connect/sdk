@@ -1,18 +1,18 @@
 import { WrongAddressError, ParseHexError } from 'src/errors';
 import { Base64 } from '@tonconnect/protocol';
 
-const bounceableTag = 0x11;
+const noBounceableTag = 0x51;
 const testOnlyTag = 0x80;
 
 /**
- * Converts raw TON address to bounceable user-friendly format. [See details]{@link https://ton.org/docs/learn/overviews/addresses#user-friendly-address}
+ * Converts raw TON address to no-bounceable user-friendly format. [See details]{@link https://ton.org/docs/learn/overviews/addresses#user-friendly-address}
  * @param hexAddress raw TON address formatted as "0:<hex string without 0x>".
  * @param [testOnly=false] convert address to test-only form. [See details]{@link https://ton.org/docs/learn/overviews/addresses#user-friendly-address}
  */
 export function toUserFriendlyAddress(hexAddress: string, testOnly = false): string {
     const { wc, hex } = parseHexAddress(hexAddress);
 
-    let tag = bounceableTag;
+    let tag = noBounceableTag;
     if (testOnly) {
         tag |= testOnlyTag;
     }
