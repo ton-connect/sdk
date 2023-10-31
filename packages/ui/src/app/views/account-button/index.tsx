@@ -19,6 +19,7 @@ import { Transition } from 'solid-transition-group';
 import { useTheme } from 'solid-styled-components';
 import { CHAIN } from '@tonconnect/sdk';
 import { globalStylesTag } from 'src/app/styles/global-styles';
+import { animate } from 'src/app/utils/animate';
 
 interface AccountButtonProps {}
 
@@ -138,7 +139,8 @@ export const AccountButton: Component<AccountButtonProps> = () => {
                             >
                                 <Transition
                                     onBeforeEnter={el => {
-                                        el.animate(
+                                        animate(
+                                            el,
                                             [
                                                 { opacity: 0, transform: 'translateY(-8px)' },
                                                 { opacity: 1, transform: 'translateY(0)' }
@@ -149,7 +151,8 @@ export const AccountButton: Component<AccountButtonProps> = () => {
                                         );
                                     }}
                                     onExit={(el, done) => {
-                                        const a = el.animate(
+                                        const a = animate(
+                                            el,
                                             [
                                                 { opacity: 1, transform: 'translateY(0)' },
                                                 { opacity: 0, transform: 'translateY(-8px)' }

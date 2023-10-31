@@ -6,6 +6,7 @@ import { SuccessTransactionNotification } from './success-transaction-notificati
 import { NotificationClass } from './style';
 import { Styleable } from 'src/app/models/styleable';
 import { useOpenedNotifications } from 'src/app/hooks/use-notifications';
+import { animate } from 'src/app/utils/animate';
 
 export interface NotificationsProps extends Styleable {}
 
@@ -16,7 +17,8 @@ export const Notifications: Component<NotificationsProps> = props => {
         <div class={props.class} data-tc-list-notifications="true">
             <TransitionGroup
                 onBeforeEnter={el => {
-                    el.animate(
+                    animate(
+                        el,
                         [
                             { opacity: 0, transform: 'translateY(0)' },
                             { opacity: 1, transform: 'translateY(-8px)' }
@@ -27,7 +29,8 @@ export const Notifications: Component<NotificationsProps> = props => {
                     );
                 }}
                 onExit={(el, done) => {
-                    const a = el.animate(
+                    const a = animate(
+                        el,
                         [
                             { opacity: 1, transform: 'translateY(-8px)' },
                             { opacity: 0, transform: 'translateY(-30px)' }
