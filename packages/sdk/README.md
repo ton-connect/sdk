@@ -356,3 +356,28 @@ myTelegramBot.userIsOnline(user => {
     connector.unPauseConnection();
 })
 ```
+
+# Troubleshooting
+
+## Warning about 'encoding' module in Next.js
+
+If you are using Next.js and see a warning similar to the following:
+
+```
+ ⚠ ./node_modules/node-fetch/lib/index.js
+Module not found: Can't resolve 'encoding' in '.../node_modules/node-fetch/lib'
+
+Import trace for requested module:
+./node_modules/node-fetch/lib/index.js
+./node_modules/@tonconnect/isomorphic-fetch/index.mjs
+./node_modules/@tonconnect/sdk/lib/esm/index.mjs
+```
+
+Please note that this is just a warning and should not affect the functionality of your application. If you wish to suppress the warning, you have two options:
+
+1. (Recommended) Wait for us to remove the dependency on `@tonconnect/isomorphic-fetch` in future releases. This dependency will be removed when we drop support for Node.js versions below 18.
+
+2. (Not recommended) Install the `encoding` package:
+```shell
+npm install encoding
+```
