@@ -84,11 +84,18 @@ export function defineStylesRoot(): void {
     customElements.define(globalStylesTag, class TcRootElement extends HTMLElement {});
 }
 
+/**
+ * Preload images after page load to improve UX and Web Vitals metrics without affecting initial page load performance.
+ */
 export function preloadImages(images: string[]): void {
-    images.forEach(img => {
-        const node = new window.Image();
-        node.src = img;
-    });
+    if (document.readyState !== 'complete') {
+        window.addEventListener('load', () => preloadImages(images), { once: true });
+    } else {
+        images.forEach(img => {
+            const node = new window.Image();
+            node.src = img;
+        });
+    }
 }
 
 export function checkLocalStorageExists(): never | void {
