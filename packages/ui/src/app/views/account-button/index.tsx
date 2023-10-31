@@ -96,7 +96,7 @@ export const AccountButton: Component<AccountButtonProps> = () => {
             <Show when={!restoringProcess()}>
                 <Show when={!account()}>
                     <AccountButtonStyled
-                        onClick={() => tonConnectUI.connectWallet()}
+                        onClick={() => tonConnectUI.openModal()}
                         data-tc-connect-button="true"
                         scale="s"
                     >
