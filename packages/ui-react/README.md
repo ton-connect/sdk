@@ -328,3 +328,28 @@ Alternatively, you can include the polyfill via CDN by adding the following scri
 ```
 
 Both methods will provide a fallback implementation of the Web Animations API and should resolve the animation issues you are facing.
+
+## Warning about 'encoding' module in Next.js
+
+If you are using Next.js and see a warning similar to the following:
+
+```
+ ⚠ ./node_modules/node-fetch/lib/index.js
+Module not found: Can't resolve 'encoding' in '.../node_modules/node-fetch/lib'
+
+Import trace for requested module:
+./node_modules/node-fetch/lib/index.js
+./node_modules/@tonconnect/isomorphic-fetch/index.mjs
+./node_modules/@tonconnect/sdk/lib/esm/index.mjs
+./node_modules/@tonconnect/ui/lib/esm/index.mjs
+./node_modules/@tonconnect/ui-react/lib/esm/index.js
+```
+
+Please note that this is just a warning and should not affect the functionality of your application. If you wish to suppress the warning, you have two options:
+
+1. (Recommended) Wait for us to remove the dependency on `@tonconnect/isomorphic-fetch` in future releases. This dependency will be removed when we drop support for Node.js versions below 18.
+
+2. (Optional) Install the `encoding` package, to resolve the warning:
+```shell
+npm install encoding
+```
