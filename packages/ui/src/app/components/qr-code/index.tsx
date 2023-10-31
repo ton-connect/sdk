@@ -16,6 +16,7 @@ import { copyToClipboard } from 'src/app/utils/copy-to-clipboard';
 import { Styleable } from 'src/app/models/styleable';
 import { toPx } from 'src/app/utils/css';
 import { CopyLightIcon, SuccessIcon, Text } from 'src/app/components';
+import { animate } from 'src/app/utils/animate';
 
 export interface QRCodeProps extends Styleable {
     sourceUrl: string;
@@ -81,7 +82,8 @@ export const QRCode: Component<QRCodeProps> = props => {
             </QrCodeWrapper>
             <Transition
                 onBeforeEnter={el => {
-                    el.animate(
+                    animate(
+                        el,
                         [
                             { opacity: 0, transform: 'translate(-50%, 44px)' },
                             { opacity: 1, transform: 'translate(-50%, 0)' }
@@ -93,7 +95,8 @@ export const QRCode: Component<QRCodeProps> = props => {
                     );
                 }}
                 onExit={(el, done) => {
-                    el.animate(
+                    animate(
+                        el,
                         [
                             { opacity: 1, transform: 'translate(-50%, 0)' },
                             { opacity: 0, transform: 'translate(-50%, 44px)' }

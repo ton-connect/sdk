@@ -20,6 +20,7 @@ import { disableScroll, enableScroll } from 'src/app/utils/web-api';
 import { WithDataAttributes } from 'src/app/models/with-data-attributes';
 import { useDataAttributes } from 'src/app/hooks/use-data-attributes';
 import { TonConnectBrand } from 'src/app/components';
+import { animate } from 'src/app/utils/animate';
 
 const clickOutside = clickOutsideDirective;
 const keyPressed = keyPressedDirective;
@@ -50,12 +51,13 @@ export const Modal: Component<ModalProps> = props => {
             onBeforeEnter={el => {
                 const duration = isDevice('mobile') ? 200 : 100;
 
-                el.animate([{ opacity: 0 }, { opacity: 1 }], {
+                animate(el, [{ opacity: 0 }, { opacity: 1 }], {
                     duration
                 });
 
                 if (isDevice('mobile')) {
-                    el.firstElementChild!.animate(
+                    animate(
+                        el.firstElementChild!,
                         [{ transform: 'translateY(390px)' }, { transform: 'translateY(0)' }],
                         {
                             duration
@@ -66,12 +68,13 @@ export const Modal: Component<ModalProps> = props => {
             onExit={(el, done) => {
                 const duration = isDevice('mobile') ? 200 : 100;
 
-                const backgroundAnimation = el.animate([{ opacity: 1 }, { opacity: 0 }], {
+                const backgroundAnimation = animate(el, [{ opacity: 1 }, { opacity: 0 }], {
                     duration
                 });
 
                 if (isDevice('mobile')) {
-                    const contentAnimation = el.firstElementChild!.animate(
+                    const contentAnimation = animate(
+                        el.firstElementChild!,
                         [{ transform: 'translateY(0)' }, { transform: 'translateY(390px)' }],
                         {
                             duration
