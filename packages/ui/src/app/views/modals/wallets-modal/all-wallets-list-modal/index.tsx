@@ -7,7 +7,7 @@ import {
     WalletLabeledItemStyled
 } from './style';
 import { WalletInfo } from '@tonconnect/sdk';
-import isMobile from 'src/app/hooks/isMobile';
+import { isMobile } from 'src/app/hooks/isMobile';
 import { supportsMobile } from 'src/app/utils/wallets';
 import { ScrollContainer } from 'src/app/components/scroll-container';
 export interface DesktopSelectWalletModalProps {
