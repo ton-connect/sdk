@@ -2,7 +2,7 @@ import { Component, createSignal, JSXElement } from 'solid-js';
 import { Styleable } from 'src/app/models/styleable';
 import { ScrollContainerStyled, ScrollDivider } from './style';
 import windowHeight from 'src/app/hooks/windowSize';
-import isMobile from 'src/app/hooks/isMobile';
+import { isMobile } from 'src/app/hooks/isMobile';
 
 export interface ScrollContainerProps extends Styleable {
     children: JSXElement;

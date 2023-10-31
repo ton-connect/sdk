@@ -23,7 +23,7 @@ import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { useI18n } from '@solid-primitives/i18n';
 import { appState } from 'src/app/state/app.state';
 import { applyWalletsListConfiguration, eqWalletName } from 'src/app/utils/wallets';
-import isMobile from 'src/app/hooks/isMobile';
+import { isMobile, updateIsMobile } from 'src/app/hooks/isMobile';
 import { AllWalletsListModal } from 'src/app/views/modals/wallets-modal/all-wallets-list-modal';
 import { LoaderIcon } from 'src/app/components';
 import { LoadableReady } from 'src/models/loadable';
@@ -40,6 +40,12 @@ import { WalletsModalCloseReason } from 'src/models';
 export const WalletsModal: Component = () => {
     const { locale } = useI18n()[1];
     createEffect(() => locale(appState.language));
+
+    createEffect(() => {
+        if (getWalletsModalIsOpened()) {
+            updateIsMobile();
+        }
+    });
 
     const connector = useContext(ConnectorContext)!;
     const tonConnectUI = useContext(TonConnectUiContext);
