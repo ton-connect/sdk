@@ -300,3 +300,31 @@ export function App() {
 This will disable the custom back button behavior on Android, and you can then handle the back button press manually in your application.
 
 While we do not foresee any problems arising with the Android back handler, but if you find yourself needing to disable it due to an issue, please describe the problem in on [GitHub Issues](https://github.com/ton-connect/sdk/issues), so we can assist you further.
+
+## Animations not working
+
+If you are experiencing issues with animations not working in your environment, it might be due to a lack of support for the Web Animations API. To resolve this issue, you can use the `web-animations-js` polyfill.
+
+### Using npm
+
+To install the polyfill, run the following command:
+
+```shell
+npm install web-animations-js
+```
+
+Then, import the polyfill in your project:
+
+```typescript
+import 'web-animations-js';
+```
+
+### Using CDN
+
+Alternatively, you can include the polyfill via CDN by adding the following script tag to your HTML:
+
+```html
+<script src="https://www.unpkg.com/web-animations-js@latest/web-animations.min.js"></script>
+```
+
+Both methods will provide a fallback implementation of the Web Animations API and should resolve the animation issues you are facing.
