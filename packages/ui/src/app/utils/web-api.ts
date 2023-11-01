@@ -6,6 +6,7 @@ import { UserAgent } from 'src/models/user-agent';
 import UAParser from 'ua-parser-js';
 import { encodeTelegramUrlParameters, isTelegramUrl } from '@tonconnect/sdk';
 import { InMemoryStorage } from 'src/app/models/in-memory-storage';
+import { TonConnectUIError } from 'src/errors';
 
 export function openLink(href: string, target = '_self'): ReturnType<typeof window.open> {
     return window.open(href, target, 'noreferrer noopener');
@@ -102,14 +103,41 @@ export function getWindow(): Window | undefined {
 }
 
 /**
- * Returns `localStorage` if it is available, for Safari in private mode and Node.js it returns `InMemoryStorage`.
+ * Returns `localStorage` if it is available. In Safari's private mode, it returns `InMemoryStorage`. In Node.js, it throws an error.
  */
 export function tryGetLocalStorage(): Storage {
-    try {
+    if (isLocalStorageAvailable()) {
         return localStorage;
-    } catch {
-        return InMemoryStorage.getInstance();
     }
+
+    if (isNodeJs()) {
+        throw new TonConnectUIError(
+            '`localStorage` is unavailable, but it is required for TonConnect. For more details, see https://github.com/ton-connect/sdk/tree/main/packages/sdk#init-connector'
+        );
+    }
+
+    return InMemoryStorage.getInstance();
+}
+
+/**
+ * Checks if `localStorage` is available.
+ */
+function isLocalStorageAvailable(): boolean {
+    // We use a try/catch block because Safari in private mode throws an error when attempting to access localStorage.
+    try {
+        return typeof localStorage !== 'undefined';
+    } catch {
+        return false;
+    }
+}
+
+/**
+ * Checks if the environment is Node.js.
+ */
+function isNodeJs(): boolean {
+    return (
+        typeof process !== 'undefined' && process.versions != null && process.versions.node != null
+    );
 }
 
 export function isMobileUserAgent(): boolean {
