@@ -31,11 +31,19 @@ export default defineConfig({
     minify: false,
     sourcemap: true,
     lib: {
+      formats: ['es', 'cjs'],
       entry: path.resolve('src/index.ts'),
       name: 'TON_CONNECT_UI',
-      fileName: format => {
-        return format === 'es' ? 'index.js' : 'index.umd.js'
-      },
+      fileName: (format) => {
+        switch (format) {
+          case 'es':
+            return 'index.mjs';
+          case 'cjs':
+            return 'index.cjs';
+          default:
+            throw new Error('Unknown format');
+        }
+      }
     },
     rollupOptions: {
       external: ['classnames', 'deepmerge', '@tonconnect/sdk', 'ua-parser-js'],
