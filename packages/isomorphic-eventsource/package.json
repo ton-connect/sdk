@@ -23,7 +23,6 @@
   "module": "./index.mjs",
   "browser": "./browser.js",
   "types": "./index.d.ts",
-  "typings": "./index.d.ts",
   "exports": {
     ".": {
       "types": "./index.d.ts",
