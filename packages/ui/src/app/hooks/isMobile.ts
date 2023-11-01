@@ -4,13 +4,13 @@ import { getWindow } from 'src/app/utils/web-api';
 
 const [isMobile, setIsMobile] = createSignal(isDevice('mobile'));
 
-const updateIsMobile = (): void => setIsMobile(isDevice('mobile'));
+const updateIsMobile = (): boolean => setIsMobile(isDevice('mobile'));
 
 if (getWindow()) {
-    // It's important to check the device type on page load because the value of window.innerWidth can change after the page has loaded
-    window.addEventListener('load', () => updateIsMobile());
-
     window.addEventListener('resize', () => updateIsMobile());
+
+    // Browsers may throttle `resize` if page hasn't loaded, so recalculate on page `load`
+    window.addEventListener('load', () => updateIsMobile(), { once: true });
 }
 
 export { isMobile, updateIsMobile };
