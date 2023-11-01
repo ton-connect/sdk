@@ -2,7 +2,7 @@ import { IStorage } from 'src/storage/models/storage.interface';
 import { tryGetLocalStorage } from 'src/utils/web-api';
 
 /**
- * Default storage to save protocol data, uses `localStorage` if it is available, for Safari in private mode and Node.js it uses `InMemoryStorage`.
+ * Default storage to save protocol data, uses `localStorage` if it is available. In Safari's private mode, it uses `InMemoryStorage`. In Node.js, it throws an error.
  */
 export class DefaultStorage implements IStorage {
     private readonly localStorage: Storage;
