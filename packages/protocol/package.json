@@ -28,7 +28,6 @@
   "main": "./lib/cjs/index.cjs",
   "module": "./lib/esm/index.mjs",
   "types": "./lib/types/index.d.ts",
-  "typings": "./lib/types/index.d.ts",
   "exports": {
     ".": {
       "types": "./lib/types/index.d.ts",
