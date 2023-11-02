@@ -1,5 +1,19 @@
 # Changelog @tonconnect/ui-react 
 
+# [2.0.0-beta.5](https://github.com/ton-connect/sdk/compare/ui-react-2.0.0-beta.4...ui-react-2.0.0-beta.5) (2023-11-02)
+
+
+### Bug Fixes
+
+* **ui-react:** add CommonJS support and update build process ([46642f6](https://github.com/ton-connect/sdk/commit/46642f649d11d10245f0e45a2eb27a3e4984769c))
+
+
+### Features
+
+* **ui-react:** add enableAndroidBackHandler config option for android back button handling ([519e7e3](https://github.com/ton-connect/sdk/commit/519e7e305b3d3d8cd4a6e31656ad1b2fe0309b73))
+
+
+
 # [2.0.0-beta.4](https://github.com/ton-connect/sdk/compare/ui-react-2.0.0-beta.3...ui-react-2.0.0-beta.4) (2023-10-25)
 
 
