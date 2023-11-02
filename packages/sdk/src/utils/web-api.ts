@@ -11,7 +11,7 @@ export function getWindow(): Window | undefined {
 
 /**
  * The function try to get window keys, if it is not available it returns empty array.
- * As an example, for Safari in private mode it returns empty array, because the browser does not allow to get window keys.
+ * As an example, for Safari's private mode it returns empty array, because the browser does not allow to get window keys.
  */
 export function tryGetWindowKeys(): string[] {
     const window = getWindow();
@@ -64,7 +64,7 @@ export function tryGetLocalStorage(): Storage {
  * Checks if `localStorage` is available.
  */
 function isLocalStorageAvailable(): boolean {
-    // We use a try/catch block because Safari in private mode throws an error when attempting to access localStorage.
+    // We use a try/catch block because Safari's private mode throws an error when attempting to access localStorage.
     try {
         return typeof localStorage !== 'undefined';
     } catch {

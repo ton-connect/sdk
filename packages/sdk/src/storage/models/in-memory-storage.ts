@@ -1,6 +1,6 @@
 /**
  * In memory storage like localStorage, but without persistence.
- * Uses as a fallback for localStorage in Safari in private mode or Node.js.
+ * Uses as a fallback for localStorage in Safari's private mode.
  */
 export class InMemoryStorage implements Storage {
     private static instance: InMemoryStorage;
