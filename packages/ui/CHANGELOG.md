@@ -1,5 +1,25 @@
 # Changelog @tonconnect/ui 
 
+# [2.0.0-beta.5](https://github.com/ton-connect/sdk/compare/ui-2.0.0-beta.4...ui-2.0.0-beta.5) (2023-11-02)
+
+
+### Bug Fixes
+
+* **ui:** add CommonJS support and update build process ([18ad83a](https://github.com/ton-connect/sdk/commit/18ad83a14c998fac608deb6e161896a0f5936cc5))
+* **ui:** add fallback for browsers without Web Animations API ([5c2d885](https://github.com/ton-connect/sdk/commit/5c2d8857ba7eceef9de111eb84f3744302ab2827))
+* **ui:** correct detection of mobile devices for modal widget ([a34ce5b](https://github.com/ton-connect/sdk/commit/a34ce5b33077bf77739a96006335fe7b605dd96f))
+* **ui:** mock localStorage in Safari private mode ([239a20f](https://github.com/ton-connect/sdk/commit/239a20f86712252bbc5d9e83236be8f9653c9ae1)), closes [#93](https://github.com/ton-connect/sdk/issues/93)
+* **ui:** regenerate universal link to prevent using outdated links ([e5a6acc](https://github.com/ton-connect/sdk/commit/e5a6acc9986061802cc22cc3966609d1af6baf3e))
+* **ui:** resolve android back handler issue ([a2ce2e3](https://github.com/ton-connect/sdk/commit/a2ce2e3fe6d864e2ebb34ee4144f22c9d648466b))
+* **ui:** update isMobile state on opening wallet modal ([60aa2c9](https://github.com/ton-connect/sdk/commit/60aa2c9d53129ce64caa55d0396e4d53b1fcb4ed))
+
+
+### Features
+
+* **ui:** preload images after page load to improve UX and Web Vitals metrics ([f39266e](https://github.com/ton-connect/sdk/commit/f39266e519105566470d3134b1bb3024c42de0ac))
+
+
+
 # [2.0.0-beta.4](https://github.com/ton-connect/sdk/compare/ui-2.0.0-beta.3...ui-2.0.0-beta.4) (2023-10-25)
 
 
