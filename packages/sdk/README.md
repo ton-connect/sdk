@@ -377,7 +377,7 @@ Please note that this is just a warning and should not affect the functionality 
 
 1. (Recommended) Wait for us to remove the dependency on `@tonconnect/isomorphic-fetch` in future releases. This dependency will be removed when we drop support for Node.js versions below 18.
 
-2. (Not recommended) Install the `encoding` package:
+2. (Optional) Install the `encoding` package, to resolve the warning:
 ```shell
 npm install encoding
 ```
