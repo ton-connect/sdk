@@ -1,5 +1,19 @@
 # Changelog @tonconnect/sdk 
 
+# [3.0.0-beta.2](https://github.com/ton-connect/sdk/compare/sdk-3.0.0-beta.1...sdk-3.0.0-beta.2) (2023-11-02)
+
+
+### Bug Fixes
+
+* **sdk:** mock localStorage in Safari private mode ([0d30b83](https://github.com/ton-connect/sdk/commit/0d30b8399a188de6ae9dc9dbd952639a761d3c06)), closes [#93](https://github.com/ton-connect/sdk/issues/93)
+
+
+### Features
+
+* **sdk:** change address format from bounceable to no-bounceable ([a000d6e](https://github.com/ton-connect/sdk/commit/a000d6ed6974babdbb335b47e0221c852890cb26))
+
+
+
 # [3.0.0-beta.1](https://github.com/ton-connect/sdk/compare/sdk-3.0.0-beta.0...sdk-3.0.0-beta.1) (2023-09-12)
 
 
