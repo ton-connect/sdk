@@ -123,7 +123,7 @@ export function tryGetLocalStorage(): Storage {
  * Checks if `localStorage` is available.
  */
 function isLocalStorageAvailable(): boolean {
-    // We use a try/catch block because Safari in private mode throws an error when attempting to access localStorage.
+    // We use a try/catch block because Safari's private mode throws an error when attempting to access localStorage.
     try {
         return typeof localStorage !== 'undefined';
     } catch {
