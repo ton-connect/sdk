@@ -16,7 +16,7 @@
 <li><a href="_tonconnect_ui_react.html">@tonconnect/ui-react</a></li></ul>
 <h1>Module @tonconnect/ui-react</h1></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/955cbf7/packages/ui-react/src/library.ts#L1">packages/ui-react/src/library.ts:1</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/082a16d/packages/ui-react/src/library.ts#L1">packages/ui-react/src/library.ts:1</a></li></ul></aside>
 <section class="tsd-panel-group">
 <section class="tsd-panel tsd-typography">
 <a href="#ton-connect-ui-react" id="ton-connect-ui-react" style="color: inherit; text-decoration: none;">
@@ -131,6 +131,58 @@ You can use it to detect when connection restoring process if finished.</p>
 </code></pre>
 <p>You can find <code>ton_proof</code> result in the <code>wallet</code> object when wallet will be connected:</p>
 <pre><code class="language-ts"><span class="hl-0">import</span><span class="hl-1"> {</span><span class="hl-2">useTonConnectUI</span><span class="hl-1">} </span><span class="hl-0">from</span><span class="hl-1"> </span><span class="hl-3">&quot;@tonconnect/ui-react&quot;</span><span class="hl-1">;</span><br/><br/><span class="hl-4">const</span><span class="hl-1"> [</span><span class="hl-8">tonConnectUI</span><span class="hl-1">] = </span><span class="hl-5">useTonConnectUI</span><span class="hl-1">();</span><br/><br/><span class="hl-5">useEffect</span><span class="hl-1">(() </span><span class="hl-4">=&gt;</span><br/><span class="hl-1">    </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-5">onStatusChange</span><span class="hl-1">(</span><span class="hl-2">wallet</span><span class="hl-1"> </span><span class="hl-4">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">        </span><span class="hl-0">if</span><span class="hl-1"> (</span><span class="hl-2">wallet</span><span class="hl-1">.</span><span class="hl-2">connectItems</span><span class="hl-1">?.</span><span class="hl-2">tonProof</span><span class="hl-1"> &amp;&amp; </span><span class="hl-3">&#39;proof&#39;</span><span class="hl-1"> </span><span class="hl-4">in</span><span class="hl-1"> </span><span class="hl-2">wallet</span><span class="hl-1">.</span><span class="hl-2">connectItems</span><span class="hl-1">.</span><span class="hl-2">tonProof</span><span class="hl-1">) {</span><br/><span class="hl-1">            </span><span class="hl-5">checkProofInYourBackend</span><span class="hl-1">(</span><span class="hl-2">wallet</span><span class="hl-1">.</span><span class="hl-2">connectItems</span><span class="hl-1">.</span><span class="hl-2">tonProof</span><span class="hl-1">.</span><span class="hl-2">proof</span><span class="hl-1">, </span><span class="hl-2">wallet</span><span class="hl-1">.</span><span class="hl-2">account</span><span class="hl-1">);</span><br/><span class="hl-1">        }</span><br/><span class="hl-1">    }), []);</span>
+</code></pre>
+
+<a href="#troubleshooting" id="troubleshooting" style="color: inherit; text-decoration: none;">
+  <h1>Troubleshooting</h1>
+</a>
+
+<a href="#android-back-handler" id="android-back-handler" style="color: inherit; text-decoration: none;">
+  <h2>Android Back Handler</h2>
+</a>
+<p>If you encounter any issues with the Android back handler, such as modals not closing properly when the back button is pressed, or conflicts with <code>history.pushState()</code> if you are manually handling browser history in your application, you can disable the back handler by setting <code>enableAndroidBackHandler</code> to <code>false</code>:</p>
+<pre><code class="language-tsx"><span class="hl-0">import</span><span class="hl-1"> { </span><span class="hl-2">TonConnectUIProvider</span><span class="hl-1"> } </span><span class="hl-0">from</span><span class="hl-1"> </span><span class="hl-3">&#39;@tonconnect/ui-react&#39;</span><span class="hl-1">;</span><br/><br/><span class="hl-0">export</span><span class="hl-1"> </span><span class="hl-4">function</span><span class="hl-1"> </span><span class="hl-5">App</span><span class="hl-1">() {</span><br/><span class="hl-1">    </span><span class="hl-0">return</span><span class="hl-1"> (</span><br/><span class="hl-1">        </span><span class="hl-9">&lt;</span><span class="hl-6">TonConnectUIProvider</span><span class="hl-1"> </span><br/><span class="hl-1">          </span><span class="hl-12">manifestUrl</span><span class="hl-1">=</span><span class="hl-3">&quot;https://&lt;YOUR_APP_URL&gt;/tonconnect-manifest.json&quot;</span><br/><span class="hl-1">          </span><span class="hl-12">enableAndroidBackHandler</span><span class="hl-1">=</span><span class="hl-4">{false}</span><br/><span class="hl-1">        </span><span class="hl-9">&gt;</span><br/><span class="hl-1">            </span><span class="hl-4">{</span><span class="hl-11"> </span><span class="hl-7">/* Your app */</span><span class="hl-11"> </span><span class="hl-4">}</span><br/><span class="hl-1">        </span><span class="hl-9">&lt;/</span><span class="hl-6">TonConnectUIProvider</span><span class="hl-9">&gt;</span><br/><span class="hl-1">    );</span><br/><span class="hl-1">}</span>
+</code></pre>
+<p>This will disable the custom back button behavior on Android, and you can then handle the back button press manually in your application.</p>
+<p>While we do not foresee any problems arising with the Android back handler, but if you find yourself needing to disable it due to an issue, please describe the problem in on <a href="https://github.com/ton-connect/sdk/issues">GitHub Issues</a>, so we can assist you further.</p>
+
+<a href="#animations-not-working" id="animations-not-working" style="color: inherit; text-decoration: none;">
+  <h2>Animations not working</h2>
+</a>
+<p>If you are experiencing issues with animations not working in your environment, it might be due to a lack of support for the Web Animations API. To resolve this issue, you can use the <code>web-animations-js</code> polyfill.</p>
+
+<a href="#using-npm" id="using-npm" style="color: inherit; text-decoration: none;">
+  <h3>Using npm</h3>
+</a>
+<p>To install the polyfill, run the following command:</p>
+<pre><code class="language-shell"><span class="hl-1">npm install web-animations-js</span>
+</code></pre>
+<p>Then, import the polyfill in your project:</p>
+<pre><code class="language-typescript"><span class="hl-0">import</span><span class="hl-1"> </span><span class="hl-3">&#39;web-animations-js&#39;</span><span class="hl-1">;</span>
+</code></pre>
+
+<a href="#using-cdn" id="using-cdn" style="color: inherit; text-decoration: none;">
+  <h3>Using CDN</h3>
+</a>
+<p>Alternatively, you can include the polyfill via CDN by adding the following script tag to your HTML:</p>
+<pre><code class="language-html"><span class="hl-9">&lt;</span><span class="hl-10">script</span><span class="hl-11"> </span><span class="hl-12">src</span><span class="hl-11">=</span><span class="hl-13">&quot;https://www.unpkg.com/web-animations-js@latest/web-animations.min.js&quot;</span><span class="hl-9">&gt;&lt;/</span><span class="hl-10">script</span><span class="hl-9">&gt;</span>
+</code></pre>
+<p>Both methods will provide a fallback implementation of the Web Animations API and should resolve the animation issues you are facing.</p>
+
+<a href="#warning-about-39encoding39-module-in-nextjs" id="warning-about-39encoding39-module-in-nextjs" style="color: inherit; text-decoration: none;">
+  <h2>Warning about &#39;encoding&#39; module in Next.js</h2>
+</a>
+<p>If you are using Next.js and see a warning similar to the following:</p>
+<pre><code><span class="hl-1"> ⚠ ./</span><span class="hl-2">node_modules</span><span class="hl-1">/</span><span class="hl-2">node</span><span class="hl-1">-</span><span class="hl-2">fetch</span><span class="hl-1">/</span><span class="hl-2">lib</span><span class="hl-1">/</span><span class="hl-2">index</span><span class="hl-1">.</span><span class="hl-2">js</span><br/><span class="hl-2">Module</span><span class="hl-1"> </span><span class="hl-2">not</span><span class="hl-1"> </span><span class="hl-16">found</span><span class="hl-1">: </span><span class="hl-2">Can</span><span class="hl-3">&#39;t resolve &#39;</span><span class="hl-2">encoding</span><span class="hl-3">&#39; in &#39;</span><span class="hl-1">.../</span><span class="hl-2">node_modules</span><span class="hl-1">/</span><span class="hl-2">node</span><span class="hl-1">-</span><span class="hl-2">fetch</span><span class="hl-1">/</span><span class="hl-2">lib</span><span class="hl-3">&#39;</span><br/><br/><span class="hl-3">Import trace for requested module</span><span class="hl-17">:</span><br/><span class="hl-1">./</span><span class="hl-2">node_modules</span><span class="hl-1">/</span><span class="hl-2">node</span><span class="hl-1">-</span><span class="hl-2">fetch</span><span class="hl-1">/</span><span class="hl-2">lib</span><span class="hl-1">/</span><span class="hl-2">index</span><span class="hl-1">.</span><span class="hl-2">js</span><br/><span class="hl-1">.</span><span class="hl-18">/node_modules/</span><span class="hl-1">@</span><span class="hl-2">tonconnect</span><span class="hl-1">/</span><span class="hl-2">isomorphic</span><span class="hl-1">-</span><span class="hl-2">fetch</span><span class="hl-1">/</span><span class="hl-2">index</span><span class="hl-1">.</span><span class="hl-2">mjs</span><br/><span class="hl-1">.</span><span class="hl-18">/node_modules/</span><span class="hl-1">@</span><span class="hl-2">tonconnect</span><span class="hl-1">/</span><span class="hl-2">sdk</span><span class="hl-1">/</span><span class="hl-2">lib</span><span class="hl-1">/</span><span class="hl-2">esm</span><span class="hl-1">/</span><span class="hl-2">index</span><span class="hl-1">.</span><span class="hl-2">mjs</span><br/><span class="hl-1">.</span><span class="hl-18">/node_modules/</span><span class="hl-1">@</span><span class="hl-2">tonconnect</span><span class="hl-1">/</span><span class="hl-2">ui</span><span class="hl-1">/</span><span class="hl-2">lib</span><span class="hl-1">/</span><span class="hl-2">esm</span><span class="hl-1">/</span><span class="hl-2">index</span><span class="hl-1">.</span><span class="hl-2">mjs</span><br/><span class="hl-1">.</span><span class="hl-18">/node_modules/</span><span class="hl-1">@</span><span class="hl-2">tonconnect</span><span class="hl-1">/</span><span class="hl-2">ui</span><span class="hl-1">-</span><span class="hl-2">react</span><span class="hl-1">/</span><span class="hl-2">lib</span><span class="hl-1">/</span><span class="hl-2">esm</span><span class="hl-1">/</span><span class="hl-2">index</span><span class="hl-1">.</span><span class="hl-2">js</span>
+</code></pre>
+<p>Please note that this is just a warning and should not affect the functionality of your application. If you wish to suppress the warning, you have two options:</p>
+<ol>
+<li><p>(Recommended) Wait for us to remove the dependency on <code>@tonconnect/isomorphic-fetch</code> in future releases. This dependency will be removed when we drop support for Node.js versions below 18.</p>
+</li>
+<li><p>(Optional) Install the <code>encoding</code> package, to resolve the warning:</p>
+</li>
+</ol>
+<pre><code class="language-shell"><span class="hl-1">npm install encoding</span>
 </code></pre>
 </section></section>
 <section class="tsd-panel-group tsd-index-group">

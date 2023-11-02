@@ -16,7 +16,7 @@
 <li><a href="_tonconnect_sdk.html">@tonconnect/sdk</a></li></ul>
 <h1>Module @tonconnect/sdk</h1></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/955cbf7/packages/sdk/src/index.ts#L1">packages/sdk/src/index.ts:1</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/082a16d/packages/sdk/src/index.ts#L1">packages/sdk/src/index.ts:1</a></li></ul></aside>
 <section class="tsd-panel-group">
 <section class="tsd-panel tsd-typography">
 <a href="#ton-connect-sdk" id="ton-connect-sdk" style="color: inherit; text-decoration: none;">
@@ -206,6 +206,26 @@ parameter to make it &#39;testnet only&#39; (disabled by default).</p>
 </a>
 <p>You can pause and unpause HTTP connection using <code>tonConnect.pauseConnection()</code> and <code>tonConnect.unPauseConnection()</code> to save your server resources.   </p>
 <pre><code class="language-ts"><span class="hl-2">myTelegramBot</span><span class="hl-1">.</span><span class="hl-5">userIsOffline</span><span class="hl-1">(</span><span class="hl-2">user</span><span class="hl-1"> </span><span class="hl-4">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">    </span><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">connector</span><span class="hl-1"> = </span><span class="hl-5">myFunctionGetConnectorByUser</span><span class="hl-1">(</span><span class="hl-2">user</span><span class="hl-1">);</span><br/><span class="hl-1">    </span><span class="hl-2">connector</span><span class="hl-1">.</span><span class="hl-5">pauseConnection</span><span class="hl-1">();  </span><br/><span class="hl-1">})</span><br/><br/><span class="hl-2">myTelegramBot</span><span class="hl-1">.</span><span class="hl-5">userIsOnline</span><span class="hl-1">(</span><span class="hl-2">user</span><span class="hl-1"> </span><span class="hl-4">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">    </span><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">connector</span><span class="hl-1"> = </span><span class="hl-5">myFunctionGetConnectorByUser</span><span class="hl-1">(</span><span class="hl-2">user</span><span class="hl-1">);</span><br/><span class="hl-1">    </span><span class="hl-2">connector</span><span class="hl-1">.</span><span class="hl-5">unPauseConnection</span><span class="hl-1">();</span><br/><span class="hl-1">})</span>
+</code></pre>
+
+<a href="#troubleshooting" id="troubleshooting" style="color: inherit; text-decoration: none;">
+  <h1>Troubleshooting</h1>
+</a>
+
+<a href="#warning-about-39encoding39-module-in-nextjs" id="warning-about-39encoding39-module-in-nextjs" style="color: inherit; text-decoration: none;">
+  <h2>Warning about &#39;encoding&#39; module in Next.js</h2>
+</a>
+<p>If you are using Next.js and see a warning similar to the following:</p>
+<pre><code><span class="hl-1"> ⚠ ./</span><span class="hl-2">node_modules</span><span class="hl-1">/</span><span class="hl-2">node</span><span class="hl-1">-</span><span class="hl-2">fetch</span><span class="hl-1">/</span><span class="hl-2">lib</span><span class="hl-1">/</span><span class="hl-2">index</span><span class="hl-1">.</span><span class="hl-2">js</span><br/><span class="hl-2">Module</span><span class="hl-1"> </span><span class="hl-2">not</span><span class="hl-1"> </span><span class="hl-16">found</span><span class="hl-1">: </span><span class="hl-2">Can</span><span class="hl-3">&#39;t resolve &#39;</span><span class="hl-2">encoding</span><span class="hl-3">&#39; in &#39;</span><span class="hl-1">.../</span><span class="hl-2">node_modules</span><span class="hl-1">/</span><span class="hl-2">node</span><span class="hl-1">-</span><span class="hl-2">fetch</span><span class="hl-1">/</span><span class="hl-2">lib</span><span class="hl-3">&#39;</span><br/><br/><span class="hl-3">Import trace for requested module</span><span class="hl-17">:</span><br/><span class="hl-1">./</span><span class="hl-2">node_modules</span><span class="hl-1">/</span><span class="hl-2">node</span><span class="hl-1">-</span><span class="hl-2">fetch</span><span class="hl-1">/</span><span class="hl-2">lib</span><span class="hl-1">/</span><span class="hl-2">index</span><span class="hl-1">.</span><span class="hl-2">js</span><br/><span class="hl-1">.</span><span class="hl-18">/node_modules/</span><span class="hl-1">@</span><span class="hl-2">tonconnect</span><span class="hl-1">/</span><span class="hl-2">isomorphic</span><span class="hl-1">-</span><span class="hl-2">fetch</span><span class="hl-1">/</span><span class="hl-2">index</span><span class="hl-1">.</span><span class="hl-2">mjs</span><br/><span class="hl-1">.</span><span class="hl-18">/node_modules/</span><span class="hl-1">@</span><span class="hl-2">tonconnect</span><span class="hl-1">/</span><span class="hl-2">sdk</span><span class="hl-1">/</span><span class="hl-2">lib</span><span class="hl-1">/</span><span class="hl-2">esm</span><span class="hl-1">/</span><span class="hl-2">index</span><span class="hl-1">.</span><span class="hl-2">mjs</span>
+</code></pre>
+<p>Please note that this is just a warning and should not affect the functionality of your application. If you wish to suppress the warning, you have two options:</p>
+<ol>
+<li><p>(Recommended) Wait for us to remove the dependency on <code>@tonconnect/isomorphic-fetch</code> in future releases. This dependency will be removed when we drop support for Node.js versions below 18.</p>
+</li>
+<li><p>(Optional) Install the <code>encoding</code> package, to resolve the warning:</p>
+</li>
+</ol>
+<pre><code class="language-shell"><span class="hl-1">npm install encoding</span>
 </code></pre>
 </section></section>
 <section class="tsd-panel-group tsd-index-group">

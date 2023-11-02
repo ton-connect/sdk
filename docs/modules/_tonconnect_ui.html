@@ -16,7 +16,7 @@
 <li><a href="_tonconnect_ui.html">@tonconnect/ui</a></li></ul>
 <h1>Module @tonconnect/ui</h1></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/955cbf7/packages/ui/src/library.ts#L1">packages/ui/src/library.ts:1</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/082a16d/packages/ui/src/library.ts#L1">packages/ui/src/library.ts:1</a></li></ul></aside>
 <section class="tsd-panel-group">
 <section class="tsd-panel tsd-typography">
 <a href="#ton-connect-ui" id="ton-connect-ui" style="color: inherit; text-decoration: none;">
@@ -207,17 +207,20 @@ a URL: wallet will open this URL after completing the user&#39;s action. Note, t
 <pre><code class="language-ts"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">result</span><span class="hl-1"> = </span><span class="hl-0">await</span><span class="hl-1"> </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-5">sendTransaction</span><span class="hl-1">(</span><span class="hl-2">defaultTx</span><span class="hl-1">, {</span><br/><span class="hl-1">    </span><span class="hl-2">returnStrategy:</span><span class="hl-1"> </span><span class="hl-3">&#39;&lt;protocol&gt;://&lt;your_return_url&gt;&#39;</span><span class="hl-1"> </span><span class="hl-7">// Note, that you shouldn&#39;t pass your app&#39;s URL if it is a webpage.</span><br/><span class="hl-1">     </span><span class="hl-7">// This option should be used for native apps to work around possible OS-specific issues with &#39;back&#39; option.</span><br/><span class="hl-1">});</span>
 </code></pre>
 
-<a href="#use-inside-twa-telegram-web-app" id="use-inside-twa-telegram-web-app" style="color: inherit; text-decoration: none;">
-  <h2>Use inside TWA (Telegram web app)</h2>
+<a href="#use-inside-tma-telegram-mini-apps" id="use-inside-tma-telegram-mini-apps" style="color: inherit; text-decoration: none;">
+  <h2>Use inside TMA (Telegram Mini Apps)</h2>
 </a>
-<p>TonConnect UI will work in TWA in the same way as in a regular website!
+<p>TonConnect UI will work in TMA in the same way as in a regular website!
 Basically, no changes are required from the dApp&#39;s developers. The only thing you have to set is a dynamic return strategy.</p>
-<p>Currently, it is impossible for TWA-wallets to redirect back to previous opened TWA-dApp like native wallet-apps do.
-It means, that you need to specify the return strategy as a link to your TWA that will be only applied if the dApp is opened in TWA mode.</p>
-<pre><code class="language-ts"><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-2">uiOptions</span><span class="hl-1"> = {</span><br/><span class="hl-1">        </span><span class="hl-2">twaReturnUrl:</span><span class="hl-1"> </span><span class="hl-3">&#39;https://t.me/durov&#39;</span><br/><span class="hl-1">    };</span>
+<p>Currently, it is impossible for TMA-wallets to redirect back to previous opened TMA-dApp like native wallet-apps do.
+It means, that you need to specify the return strategy as a link to your TMA that will be only applied if the dApp is opened in TMA mode.</p>
+<pre><code class="language-ts"><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-2">uiOptions</span><span class="hl-1"> = {</span><br/><span class="hl-1">    </span><span class="hl-2">twaReturnUrl:</span><span class="hl-1"> </span><span class="hl-3">&#39;https://t.me/durov&#39;</span><br/><span class="hl-1">};</span>
 </code></pre>
-<p>In other words,</p>
-<pre><code class="language-ts"><span class="hl-0">if</span><span class="hl-1"> (</span><span class="hl-5">isLinkToTelegram</span><span class="hl-1">()) {</span><br/><span class="hl-1">    </span><span class="hl-0">if</span><span class="hl-1"> (</span><span class="hl-5">isInTWA</span><span class="hl-1">()) {</span><br/><span class="hl-1">        </span><span class="hl-8">FINAL_RETURN_STRATEGY</span><span class="hl-1"> = </span><span class="hl-2">actionsConfiguration</span><span class="hl-1">.</span><span class="hl-2">twaReturnUrl</span><span class="hl-1"> || </span><span class="hl-2">actionsConfiguration</span><span class="hl-1">.</span><span class="hl-2">returnStrategy</span><span class="hl-1">;</span><br/><span class="hl-1">    } </span><span class="hl-0">else</span><span class="hl-1"> {</span><br/><span class="hl-1">        </span><span class="hl-8">FINAL_RETURN_STRATEGY</span><span class="hl-1"> = </span><span class="hl-3">&#39;none&#39;</span><span class="hl-1">;</span><br/><span class="hl-1">    }</span><br/><span class="hl-1">} </span><span class="hl-0">else</span><span class="hl-1"> {</span><br/><span class="hl-1">    </span><span class="hl-8">FINAL_RETURN_STRATEGY</span><span class="hl-1"> = </span><span class="hl-2">actionsConfiguration</span><span class="hl-1">.</span><span class="hl-2">returnStrategy</span><span class="hl-1">;</span><br/><span class="hl-1">}</span><br/>
+<p>In other words, TonConnect UI will automatically handle the return strategy based on the environment. <strong>The following pseudo-code demonstrates the internal logic of TonConnect UI</strong>:</p>
+<blockquote>
+<p>Please note that you <strong>don&#39;t need to add this code to your dApp</strong>. It&#39;s just an example of how TonConnect UI processes the return strategy internally.</p>
+</blockquote>
+<pre><code class="language-ts"><span class="hl-4">let</span><span class="hl-1"> </span><span class="hl-2">finalReturnStrategy</span><span class="hl-1">;</span><br/><br/><span class="hl-7">// Determine if the provided link opens Telegram (using protocols tg:// or domain t.me).</span><br/><span class="hl-0">if</span><span class="hl-1"> (</span><span class="hl-5">isLinkToTelegram</span><span class="hl-1">(</span><span class="hl-3">&#39;https://example.com&#39;</span><span class="hl-1">)) {</span><br/><span class="hl-1">    </span><span class="hl-7">// In the Telegram Mini Apps environment,</span><br/><span class="hl-1">    </span><span class="hl-0">if</span><span class="hl-1"> (</span><span class="hl-5">isInTWA</span><span class="hl-1">()) {</span><br/><span class="hl-1">        </span><span class="hl-7">// preference is given to &#39;twaReturnUrl&#39;,</span><br/><span class="hl-1">        </span><span class="hl-2">finalReturnStrategy</span><span class="hl-1"> = </span><span class="hl-2">actionsConfiguration</span><span class="hl-1">.</span><span class="hl-2">twaReturnUrl</span><span class="hl-1">;</span><br/><br/><span class="hl-1">        </span><span class="hl-7">// but if it&#39;s not set, fallback to &#39;returnStrategy&#39;.</span><br/><span class="hl-1">        </span><span class="hl-0">if</span><span class="hl-1"> (!</span><span class="hl-2">finalReturnStrategy</span><span class="hl-1">) {</span><br/><span class="hl-1">            </span><span class="hl-2">finalReturnStrategy</span><span class="hl-1"> = </span><span class="hl-2">actionsConfiguration</span><span class="hl-1">.</span><span class="hl-2">returnStrategy</span><span class="hl-1">;</span><br/><span class="hl-1">        }</span><br/><span class="hl-1">    }</span><br/><span class="hl-1">    </span><span class="hl-7">// If not in a TMA environment,</span><br/><span class="hl-1">    </span><span class="hl-0">else</span><span class="hl-1"> {</span><br/><span class="hl-1">        </span><span class="hl-7">// the return strategy is set to &#39;none&#39;.</span><br/><span class="hl-1">        </span><span class="hl-2">finalReturnStrategy</span><span class="hl-1"> = </span><span class="hl-3">&#39;none&#39;</span><span class="hl-1">;</span><br/><span class="hl-1">    }</span><br/><span class="hl-1">}</span><br/><span class="hl-7">// When the link does not open Telegram,</span><br/><span class="hl-0">else</span><span class="hl-1"> {</span><br/><span class="hl-1">    </span><span class="hl-7">// use the predefined &#39;returnStrategy&#39;.</span><br/><span class="hl-1">    </span><span class="hl-2">finalReturnStrategy</span><span class="hl-1"> = </span><span class="hl-2">actionsConfiguration</span><span class="hl-1">.</span><span class="hl-2">returnStrategy</span><span class="hl-1">;</span><br/><span class="hl-1">}</span><br/><br/><span class="hl-7">// Now, &#39;finalReturnStrategy&#39; contains the correct strategy based on the link&#39;s destination and the dApp&#39;s environment.</span>
 </code></pre>
 
 <a href="#detect-end-of-the-connection-restoring-process" id="detect-end-of-the-connection-restoring-process" style="color: inherit; text-decoration: none;">
@@ -486,6 +489,58 @@ However, it is possible if needed. You can add css styles to the specified selec
 </code></pre>
 <p>You can find <code>ton_proof</code> result in the <code>wallet</code> object when wallet will be connected:</p>
 <pre><code class="language-ts"><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-5">onStatusChange</span><span class="hl-1">(</span><span class="hl-2">wallet</span><span class="hl-1"> </span><span class="hl-4">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">        </span><span class="hl-0">if</span><span class="hl-1"> (</span><span class="hl-2">wallet</span><span class="hl-1"> &amp;&amp; </span><span class="hl-2">wallet</span><span class="hl-1">.</span><span class="hl-2">connectItems</span><span class="hl-1">?.</span><span class="hl-2">tonProof</span><span class="hl-1"> &amp;&amp; </span><span class="hl-3">&#39;proof&#39;</span><span class="hl-1"> </span><span class="hl-4">in</span><span class="hl-1"> </span><span class="hl-2">wallet</span><span class="hl-1">.</span><span class="hl-2">connectItems</span><span class="hl-1">.</span><span class="hl-2">tonProof</span><span class="hl-1">) {</span><br/><span class="hl-1">            </span><span class="hl-5">checkProofInYourBackend</span><span class="hl-1">(</span><span class="hl-2">wallet</span><span class="hl-1">.</span><span class="hl-2">connectItems</span><span class="hl-1">.</span><span class="hl-2">tonProof</span><span class="hl-1">.</span><span class="hl-2">proof</span><span class="hl-1">);</span><br/><span class="hl-1">        }</span><br/><span class="hl-1">    });</span>
+</code></pre>
+
+<a href="#troubleshooting" id="troubleshooting" style="color: inherit; text-decoration: none;">
+  <h1>Troubleshooting</h1>
+</a>
+
+<a href="#android-back-handler" id="android-back-handler" style="color: inherit; text-decoration: none;">
+  <h2>Android Back Handler</h2>
+</a>
+<p>If you encounter any issues with the Android back handler, such as modals not closing properly when the back button is pressed, or conflicts with <code>history.pushState()</code> if you are manually handling browser history in your application, you can disable the back handler by setting <code>enableAndroidBackHandler</code> to <code>false</code>:</p>
+<pre><code class="language-ts"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">tonConnectUI</span><span class="hl-1"> = </span><span class="hl-4">new</span><span class="hl-1"> </span><span class="hl-5">TonConnectUI</span><span class="hl-1">({</span><br/><span class="hl-1">    </span><span class="hl-7">// ...</span><br/><span class="hl-1">    </span><span class="hl-2">enableAndroidBackHandler:</span><span class="hl-1"> </span><span class="hl-4">false</span><br/><span class="hl-1">});</span>
+</code></pre>
+<p>This will disable the custom back button behavior on Android, and you can then handle the back button press manually in your application.</p>
+<p>While we do not foresee any problems arising with the Android back handler, but if you find yourself needing to disable it due to an issue, please describe the problem in on <a href="https://github.com/ton-connect/sdk/issues">GitHub Issues</a>, so we can assist you further.</p>
+
+<a href="#animations-not-working" id="animations-not-working" style="color: inherit; text-decoration: none;">
+  <h2>Animations not working</h2>
+</a>
+<p>If you are experiencing issues with animations not working in your environment, it might be due to a lack of support for the Web Animations API. To resolve this issue, you can use the <code>web-animations-js</code> polyfill.</p>
+
+<a href="#using-npm" id="using-npm" style="color: inherit; text-decoration: none;">
+  <h3>Using npm</h3>
+</a>
+<p>To install the polyfill, run the following command:</p>
+<pre><code class="language-shell"><span class="hl-1">npm install web-animations-js</span>
+</code></pre>
+<p>Then, import the polyfill in your project:</p>
+<pre><code class="language-typescript"><span class="hl-0">import</span><span class="hl-1"> </span><span class="hl-3">&#39;web-animations-js&#39;</span><span class="hl-1">;</span>
+</code></pre>
+
+<a href="#using-cdn" id="using-cdn" style="color: inherit; text-decoration: none;">
+  <h3>Using CDN</h3>
+</a>
+<p>Alternatively, you can include the polyfill via CDN by adding the following script tag to your HTML:</p>
+<pre><code class="language-html"><span class="hl-9">&lt;</span><span class="hl-10">script</span><span class="hl-11"> </span><span class="hl-12">src</span><span class="hl-11">=</span><span class="hl-13">&quot;https://www.unpkg.com/web-animations-js@latest/web-animations.min.js&quot;</span><span class="hl-9">&gt;&lt;/</span><span class="hl-10">script</span><span class="hl-9">&gt;</span>
+</code></pre>
+<p>Both methods will provide a fallback implementation of the Web Animations API and should resolve the animation issues you are facing.</p>
+
+<a href="#warning-about-39encoding39-module-in-nextjs" id="warning-about-39encoding39-module-in-nextjs" style="color: inherit; text-decoration: none;">
+  <h2>Warning about &#39;encoding&#39; module in Next.js</h2>
+</a>
+<p>If you are using Next.js and see a warning similar to the following:</p>
+<pre><code><span class="hl-1"> ⚠ ./</span><span class="hl-2">node_modules</span><span class="hl-1">/</span><span class="hl-2">node</span><span class="hl-1">-</span><span class="hl-2">fetch</span><span class="hl-1">/</span><span class="hl-2">lib</span><span class="hl-1">/</span><span class="hl-2">index</span><span class="hl-1">.</span><span class="hl-2">js</span><br/><span class="hl-2">Module</span><span class="hl-1"> </span><span class="hl-2">not</span><span class="hl-1"> </span><span class="hl-16">found</span><span class="hl-1">: </span><span class="hl-2">Can</span><span class="hl-3">&#39;t resolve &#39;</span><span class="hl-2">encoding</span><span class="hl-3">&#39; in &#39;</span><span class="hl-1">.../</span><span class="hl-2">node_modules</span><span class="hl-1">/</span><span class="hl-2">node</span><span class="hl-1">-</span><span class="hl-2">fetch</span><span class="hl-1">/</span><span class="hl-2">lib</span><span class="hl-3">&#39;</span><br/><br/><span class="hl-3">Import trace for requested module</span><span class="hl-17">:</span><br/><span class="hl-1">./</span><span class="hl-2">node_modules</span><span class="hl-1">/</span><span class="hl-2">node</span><span class="hl-1">-</span><span class="hl-2">fetch</span><span class="hl-1">/</span><span class="hl-2">lib</span><span class="hl-1">/</span><span class="hl-2">index</span><span class="hl-1">.</span><span class="hl-2">js</span><br/><span class="hl-1">.</span><span class="hl-18">/node_modules/</span><span class="hl-1">@</span><span class="hl-2">tonconnect</span><span class="hl-1">/</span><span class="hl-2">isomorphic</span><span class="hl-1">-</span><span class="hl-2">fetch</span><span class="hl-1">/</span><span class="hl-2">index</span><span class="hl-1">.</span><span class="hl-2">mjs</span><br/><span class="hl-1">.</span><span class="hl-18">/node_modules/</span><span class="hl-1">@</span><span class="hl-2">tonconnect</span><span class="hl-1">/</span><span class="hl-2">sdk</span><span class="hl-1">/</span><span class="hl-2">lib</span><span class="hl-1">/</span><span class="hl-2">esm</span><span class="hl-1">/</span><span class="hl-2">index</span><span class="hl-1">.</span><span class="hl-2">mjs</span><br/><span class="hl-1">.</span><span class="hl-18">/node_modules/</span><span class="hl-1">@</span><span class="hl-2">tonconnect</span><span class="hl-1">/</span><span class="hl-2">ui</span><span class="hl-1">/</span><span class="hl-2">lib</span><span class="hl-1">/</span><span class="hl-2">esm</span><span class="hl-1">/</span><span class="hl-2">index</span><span class="hl-1">.</span><span class="hl-2">mjs</span>
+</code></pre>
+<p>Please note that this is just a warning and should not affect the functionality of your application. If you wish to suppress the warning, you have two options:</p>
+<ol>
+<li><p>(Recommended) Wait for us to remove the dependency on <code>@tonconnect/isomorphic-fetch</code> in future releases. This dependency will be removed when we drop support for Node.js versions below 18.</p>
+</li>
+<li><p>(Optional) Install the <code>encoding</code> package, to resolve the warning:</p>
+</li>
+</ol>
+<pre><code class="language-shell"><span class="hl-1">npm install encoding</span>
 </code></pre>
 </section></section>
 <section class="tsd-panel-group tsd-index-group">
