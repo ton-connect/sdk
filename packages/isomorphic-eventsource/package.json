@@ -1,6 +1,6 @@
 {
   "name": "@tonconnect/isomorphic-eventsource",
-  "version": "0.0.1",
+  "version": "0.0.2-beta.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ton-connect/sdk.git"
@@ -17,8 +17,13 @@
   ],
   "author": "tonconnect",
   "license": "Apache-2.0",
-  "scripts": { },
-  "files": ["browser.js", "index.js", "index.mjs", "index.d.ts"],
+  "scripts": {},
+  "files": [
+    "browser.js",
+    "index.js",
+    "index.mjs",
+    "index.d.ts"
+  ],
   "main": "./index.js",
   "module": "./index.mjs",
   "browser": "./browser.js",
