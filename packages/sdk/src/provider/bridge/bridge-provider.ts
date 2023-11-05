@@ -346,7 +346,8 @@ export class BridgeProvider implements HTTPProvider {
 
         const startattach = 'tonconnect-' + encodeTelegramUrlParameters(linkParams);
         const url = new URL(universalLink);
-        url.searchParams.append('startattach', startattach);
+        const paramName = url.searchParams.has('startapp') ? 'startapp' : 'startattach';
+        url.searchParams.append(paramName, startattach);
         return url.toString();
     }
 
