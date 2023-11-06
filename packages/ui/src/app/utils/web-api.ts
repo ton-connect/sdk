@@ -210,10 +210,25 @@ export function redirectToTelegram(
         twaReturnUrl: `${string}://${string}` | undefined;
     }
 ): void {
-    const url = new URL(universalLink);
-    url.searchParams.append('startattach', 'tonconnect');
+    // TODO: Remove this line after all dApps and the wallets-list.json have been updated
+    const updatedUniversalLink = convertToDirectLink(universalLink);
+
+    const url = new URL(updatedUniversalLink);
+    url.searchParams.append('startapp', 'tonconnect');
 
     openLinkBlank(addReturnStrategy(url.toString(), options));
+}
+
+// TODO: Remove this method after all dApps and the wallets-list.json have been updated
+function convertToDirectLink(universalLink: string): string {
+    const url = new URL(universalLink);
+
+    if (url.searchParams.has('attach')) {
+        url.searchParams.delete('attach');
+        url.pathname += '/start';
+    }
+
+    return url.toString();
 }
 
 export function isInTWA(): boolean {
