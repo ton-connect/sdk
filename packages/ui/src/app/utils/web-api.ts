@@ -210,6 +210,16 @@ export function redirectToTelegram(
         twaReturnUrl: `${string}://${string}` | undefined;
     }
 ): void {
+    // TODO: refactor this check after testing
+    if (isInTWA()) {
+        options.returnStrategy = 'back';
+    }
+
+    // TODO: refactor this check after testing
+    if (isInTWA()) {
+        options.twaReturnUrl = undefined;
+    }
+
     // TODO: Remove this line after all dApps and the wallets-list.json have been updated
     const updatedUniversalLink = convertToDirectLink(universalLink);
 
