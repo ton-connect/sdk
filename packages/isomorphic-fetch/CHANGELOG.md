@@ -1,5 +1,9 @@
 # Changelog @tonconnect/isomorphic-fetch 
 
+## [0.0.2](https://github.com/ton-connect/sdk/compare/isomorphic-fetch-0.0.2-beta.0...isomorphic-fetch-0.0.2) (2023-11-06)
+
+
+
 ## [0.0.2-beta.0](https://github.com/ton-connect/sdk/compare/isomorphic-fetch-0.0.1...isomorphic-fetch-0.0.2-beta.0) (2023-11-02)
 
 
