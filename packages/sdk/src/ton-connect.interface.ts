@@ -1,5 +1,5 @@
 import { TonConnectError } from 'src/errors';
-import { Account, WalletConnectionSource, Wallet, WalletConnectionSourceHTTP } from 'src/models';
+import { Account, Wallet, WalletConnectionSource, WalletConnectionSourceHTTP } from 'src/models';
 import { SendTransactionRequest, SendTransactionResponse } from 'src/models/methods';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
 import { WalletInfo } from 'src/models/wallet/wallet-info';
@@ -72,8 +72,12 @@ export interface ITonConnect {
     /**
      * Asks connected wallet to sign and send the transaction.
      * @param transaction transaction to send.
+     * @param onRequestSent (optional) will be called after the transaction is sent to the wallet.
      * @returns signed transaction boc that allows you to find the transaction in the blockchain.
      * If user rejects transaction, method will throw the corresponding error.
      */
-    sendTransaction(transaction: SendTransactionRequest): Promise<SendTransactionResponse>;
+    sendTransaction(
+        transaction: SendTransactionRequest,
+        onRequestSent?: () => void
+    ): Promise<SendTransactionResponse>;
 }

@@ -226,11 +226,13 @@ export class TonConnect implements ITonConnect {
     /**
      * Asks connected wallet to sign and send the transaction.
      * @param transaction transaction to send.
+     * @param onRequestSent (optional) will be called after the transaction is sent to the wallet.
      * @returns signed transaction boc that allows you to find the transaction in the blockchain.
      * If user rejects transaction, method will throw the corresponding error.
      */
     public async sendTransaction(
-        transaction: SendTransactionRequest
+        transaction: SendTransactionRequest,
+        onRequestSent?: () => void
     ): Promise<SendTransactionResponse> {
         this.checkConnection();
         checkSendTransactionSupport(this.wallet!.device.features, {
@@ -247,7 +249,8 @@ export class TonConnect implements ITonConnect {
                 valid_until: validUntil,
                 from,
                 network
-            })
+            }),
+            onRequestSent
         );
 
         if (sendTransactionParser.isError(response)) {

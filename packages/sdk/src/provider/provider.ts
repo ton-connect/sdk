@@ -29,7 +29,8 @@ interface BaseProvider {
     closeConnection(): void;
     disconnect(): Promise<void>;
     sendRequest<T extends RpcMethod>(
-        request: WithoutId<AppRequest<T>>
+        request: WithoutId<AppRequest<T>>,
+        onRequestSent?: () => void
     ): Promise<WithoutId<WalletResponse<T>>>;
     listen(eventsCallback: (e: WithoutIdDistributive<WalletEvent>) => void): void;
 }
