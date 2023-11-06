@@ -341,28 +341,34 @@ export class TonConnectUI {
         const { notifications, modals, returnStrategy, twaReturnUrl, skipRedirectToWallet } =
             this.getModalsAndNotificationsConfiguration(options);
 
-        const userOSIsIos = getUserAgent().os === 'ios';
-        const shouldSkipRedirectToWallet =
-            (skipRedirectToWallet === 'ios' && userOSIsIos) || skipRedirectToWallet === 'always';
-
-        if (
-            this.walletInfo &&
-            'universalLink' in this.walletInfo &&
-            this.walletInfo.openMethod === 'universal-link' &&
-            !shouldSkipRedirectToWallet
-        ) {
-            if (isTelegramUrl(this.walletInfo.universalLink)) {
-                redirectToTelegram(this.walletInfo.universalLink, { returnStrategy, twaReturnUrl });
-            } else {
-                openLinkBlank(addReturnStrategy(this.walletInfo.universalLink, returnStrategy));
-            }
-        }
-
         widgetController.setAction({
             name: 'confirm-transaction',
             showNotification: notifications.includes('before'),
             openModal: modals.includes('before')
         });
+
+        const onRequestSent = (): void => {
+            const userOSIsIos = getUserAgent().os === 'ios';
+            const shouldSkipRedirectToWallet =
+                (skipRedirectToWallet === 'ios' && userOSIsIos) ||
+                skipRedirectToWallet === 'always';
+
+            if (
+                this.walletInfo &&
+                'universalLink' in this.walletInfo &&
+                this.walletInfo.openMethod === 'universal-link' &&
+                !shouldSkipRedirectToWallet
+            ) {
+                if (isTelegramUrl(this.walletInfo.universalLink)) {
+                    redirectToTelegram(this.walletInfo.universalLink, {
+                        returnStrategy,
+                        twaReturnUrl
+                    });
+                } else {
+                    openLinkBlank(addReturnStrategy(this.walletInfo.universalLink, returnStrategy));
+                }
+            }
+        };
 
         const abortController = new AbortController();
 
@@ -378,10 +384,13 @@ export class TonConnectUI {
         });
 
         try {
-            const result = await this.waitForSendTransaction({
-                transaction: tx,
-                abortSignal: abortController.signal
-            });
+            const result = await this.waitForSendTransaction(
+                {
+                    transaction: tx,
+                    abortSignal: abortController.signal
+                },
+                onRequestSent
+            );
 
             widgetController.setAction({
                 name: 'transaction-sent',
@@ -529,11 +538,13 @@ export class TonConnectUI {
      * @options.transaction - Transaction to send.
      * @options.ignoreErrors - If true, ignores errors during waiting, waiting continues until a valid transaction is sent. Default is false.
      * @options.abortSignal - Optional AbortSignal for external cancellation. Throws TonConnectUIError if aborted.
+     * @param onRequestSent (optional) will be called after the transaction is sent to the wallet.
      * @throws TonConnectUIError if waiting is aborted or no valid transaction response is received and ignoreErrors is false.
      * @internal
      */
     private async waitForSendTransaction(
-        options: WaitSendTransactionOptions
+        options: WaitSendTransactionOptions,
+        onRequestSent?: () => void
     ): Promise<SendTransactionResponse> {
         return new Promise((resolve, reject) => {
             const { transaction, abortSignal } = options;
@@ -553,7 +564,7 @@ export class TonConnectUI {
             };
 
             this.connector
-                .sendTransaction(transaction)
+                .sendTransaction(transaction, onRequestSent)
                 .then(result => onTransactionHandler(result))
                 .catch(reason => onErrorsHandler(reason));
 
