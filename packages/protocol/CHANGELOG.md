@@ -1,5 +1,9 @@
 # Changelog @tonconnect/protocol 
 
+## [2.2.6](https://github.com/ton-connect/sdk/compare/protocol-2.2.6-beta.0...protocol-2.2.6) (2023-11-06)
+
+
+
 ## [2.2.6-beta.0](https://github.com/ton-connect/sdk/compare/protocol-2.2.5...protocol-2.2.6-beta.0) (2023-11-02)
 
 
