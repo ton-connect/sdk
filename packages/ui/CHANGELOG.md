@@ -1,5 +1,9 @@
 # Changelog @tonconnect/ui 
 
+# [2.0.0-beta.6](https://github.com/ton-connect/sdk/compare/ui-2.0.0-beta.5...ui-2.0.0-beta.6) (2023-11-06)
+
+
+
 # [2.0.0-beta.5](https://github.com/ton-connect/sdk/compare/ui-2.0.0-beta.4...ui-2.0.0-beta.5) (2023-11-02)
 
 
