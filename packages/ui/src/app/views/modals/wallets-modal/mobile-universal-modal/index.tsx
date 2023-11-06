@@ -1,14 +1,19 @@
-import { ConnectAdditionalRequest, isWalletInfoRemote, WalletInfo } from '@tonconnect/sdk';
+import {
+    ConnectAdditionalRequest,
+    isTelegramUrl,
+    isWalletInfoRemote,
+    WalletInfo
+} from '@tonconnect/sdk';
 import { Component, createSignal, For, Show } from 'solid-js';
 import {
-    LongArrowIcon,
-    WalletItem,
-    Text,
     AtWalletIcon,
-    DoneIcon,
     CopyLightIcon,
+    DoneIcon,
     FourWalletsItem,
-    QRIcon
+    LongArrowIcon,
+    QRIcon,
+    Text,
+    WalletItem
 } from 'src/app/components';
 import {
     Divider,
@@ -21,7 +26,7 @@ import {
     TGImageStyled,
     UlStyled
 } from './style';
-import { addReturnStrategy, openLinkBlank } from 'src/app/utils/web-api';
+import { addReturnStrategy, isInTWA, openLinkBlank } from 'src/app/utils/web-api';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { appState } from 'src/app/state/app.state';
 import { IMG } from 'src/app/env/IMG';
@@ -83,6 +88,7 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
         if (!atWallet || !isWalletInfoRemote(atWallet)) {
             throw new TonConnectUIError('@wallet bot not found in the wallets list');
         }
+
         const walletLink = connector.connect(
             {
                 bridgeUrl: atWallet.bridgeUrl,
@@ -90,10 +96,23 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
             },
             props.additionalRequest
         );
+
+        // TODO: refactor this check after testing
+        let returnStrategy = appState.returnStrategy;
+        if (isTelegramUrl(walletLink) && isInTWA()) {
+            returnStrategy = 'back';
+        }
+
+        // TODO: refactor this check after testing
+        let twaReturnUrl = appState.twaReturnUrl;
+        if (isTelegramUrl(walletLink) && isInTWA()) {
+            twaReturnUrl = undefined;
+        }
+
         openLinkBlank(
             addReturnStrategy(walletLink, {
-                returnStrategy: appState.returnStrategy,
-                twaReturnUrl: appState.twaReturnUrl
+                returnStrategy: returnStrategy,
+                twaReturnUrl: twaReturnUrl
             })
         );
     };

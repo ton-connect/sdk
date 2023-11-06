@@ -22,6 +22,7 @@ import {
     addReturnStrategy,
     getSystemTheme,
     getUserAgent,
+    isInTWA,
     openLinkBlank,
     preloadImages,
     redirectToTelegram,
@@ -718,10 +719,15 @@ export class TonConnectUI {
 
         const twaReturnUrl = options?.twaReturnUrl || this.actionsConfiguration?.twaReturnUrl;
 
-        const skipRedirectToWallet =
+        let skipRedirectToWallet =
             options?.skipRedirectToWallet ||
             this.actionsConfiguration?.skipRedirectToWallet ||
             'ios';
+
+        // TODO: refactor this check after testing
+        if (isInTWA()) {
+            skipRedirectToWallet = 'never';
+        }
 
         return {
             notifications,
