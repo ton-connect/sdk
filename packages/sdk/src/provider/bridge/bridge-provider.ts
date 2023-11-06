@@ -344,10 +344,10 @@ export class BridgeProvider implements HTTPProvider {
         const urlToWrap = this.generateRegularUniversalLink('about:blank', message);
         const linkParams = urlToWrap.split('?')[1]!;
 
-        const startattach = 'tonconnect-' + encodeTelegramUrlParameters(linkParams);
+        const paramValue = 'tonconnect-' + encodeTelegramUrlParameters(linkParams);
         const url = new URL(universalLink);
         const paramName = url.searchParams.has('startapp') ? 'startapp' : 'startattach';
-        url.searchParams.append(paramName, startattach);
+        url.searchParams.set(paramName, paramValue);
         return url.toString();
     }
 
