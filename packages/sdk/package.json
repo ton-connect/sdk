@@ -24,9 +24,9 @@
   "author": "tonconnect",
   "license": "Apache-2.0",
   "dependencies": {
-    "@tonconnect/isomorphic-eventsource": "^0.0.2-beta.0",
-    "@tonconnect/isomorphic-fetch": "^0.0.2-beta.0",
-    "@tonconnect/protocol": "^2.2.6-beta.0"
+    "@tonconnect/isomorphic-eventsource": "^0.0.2",
+    "@tonconnect/isomorphic-fetch": "^0.0.3",
+    "@tonconnect/protocol": "^2.2.6"
   },
   "files": [
     "lib",
