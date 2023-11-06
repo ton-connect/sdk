@@ -344,9 +344,25 @@ export class BridgeProvider implements HTTPProvider {
         const urlToWrap = this.generateRegularUniversalLink('about:blank', message);
         const linkParams = urlToWrap.split('?')[1]!;
 
-        const startattach = 'tonconnect-' + encodeTelegramUrlParameters(linkParams);
+        const startapp = 'tonconnect-' + encodeTelegramUrlParameters(linkParams);
+
+        // TODO: Remove this line after all dApps and the wallets-list.json have been updated
+        const updatedUniversalLink = this.convertToDirectLink(universalLink);
+
+        const url = new URL(updatedUniversalLink);
+        url.searchParams.append('startapp', startapp);
+        return url.toString();
+    }
+
+    // TODO: Remove this method after all dApps and the wallets-list.json have been updated
+    private convertToDirectLink(universalLink: string): string {
         const url = new URL(universalLink);
-        url.searchParams.append('startattach', startattach);
+
+        if (url.searchParams.has('attach')) {
+            url.searchParams.delete('attach');
+            url.pathname += '/start';
+        }
+
         return url.toString();
     }
 
