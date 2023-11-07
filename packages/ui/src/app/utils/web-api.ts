@@ -211,12 +211,11 @@ export function redirectToTelegram(
     }
 ): void {
     // TODO: refactor this check after testing
-    if (isInTWA()) {
+    const isIOS = getUserAgent().os === 'ios';
+    const isAndroid = getUserAgent().os === 'android';
+    const shouldUseBackStrategy = isInTWA() && (isIOS || isAndroid);
+    if (shouldUseBackStrategy) {
         options.returnStrategy = 'back';
-    }
-
-    // TODO: refactor this check after testing
-    if (isInTWA()) {
         options.twaReturnUrl = undefined;
     }
 

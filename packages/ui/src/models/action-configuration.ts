@@ -26,6 +26,7 @@ export interface ActionConfiguration {
     twaReturnUrl?: `${string}://${string}`;
 
     /**
+     * @deprecated Shouldn't be used anymore, SDK will automatically detect return strategy for TWA-TWA connections.
      * Specifies whether the method should redirect user to the connected wallet
      * @default 'ios'
      */
