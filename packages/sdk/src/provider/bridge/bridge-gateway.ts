@@ -78,10 +78,15 @@ export class BridgeGateway {
         url.searchParams.append('to', receiver);
         url.searchParams.append('ttl', (ttl || this.defaultTtl).toString());
         url.searchParams.append('topic', topic);
-        await fetch(url, {
+
+        const response = await fetch(url, {
             method: 'post',
             body: Base64.encode(message)
         });
+
+        if (!response.ok) {
+            throw new TonConnectError(`Bridge send failed, status ${response.status}`);
+        }
     }
 
     public pause(): void {
