@@ -26,7 +26,7 @@ import {
     TGImageStyled,
     UlStyled
 } from './style';
-import { addReturnStrategy, isInTWA, openLinkBlank } from 'src/app/utils/web-api';
+import { addReturnStrategy, getUserAgent, isInTWA, openLinkBlank } from 'src/app/utils/web-api';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { appState } from 'src/app/state/app.state';
 import { IMG } from 'src/app/env/IMG';
@@ -99,13 +99,13 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
 
         // TODO: refactor this check after testing
         let returnStrategy = appState.returnStrategy;
-        if (isTelegramUrl(walletLink) && isInTWA()) {
-            returnStrategy = 'back';
-        }
-
-        // TODO: refactor this check after testing
         let twaReturnUrl = appState.twaReturnUrl;
-        if (isTelegramUrl(walletLink) && isInTWA()) {
+
+        const isIOS = getUserAgent().os === 'ios';
+        const isAndroid = getUserAgent().os === 'android';
+        const shouldUseBackStrategy = isInTWA() && (isIOS || isAndroid);
+        if (shouldUseBackStrategy) {
+            returnStrategy = 'back';
             twaReturnUrl = undefined;
         }
 
