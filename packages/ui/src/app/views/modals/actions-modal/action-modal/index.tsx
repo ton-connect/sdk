@@ -6,13 +6,13 @@ import { useDataAttributes } from 'src/app/hooks/use-data-attributes';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import {
     addReturnStrategy,
-    isInTWA,
     openLinkBlank,
     redirectToTelegram
 } from 'src/app/utils/web-api';
 import { isTelegramUrl } from '@tonconnect/sdk';
 import { appState } from 'src/app/state/app.state';
 import { action } from 'src/app/state/modals-state';
+import { isInTWA } from 'src/app/utils/tma-api';
 
 interface ActionModalProps extends WithDataAttributes {
     headerTranslationKey: string;

@@ -7,6 +7,7 @@ import UAParser from 'ua-parser-js';
 import { encodeTelegramUrlParameters, isTelegramUrl } from '@tonconnect/sdk';
 import { InMemoryStorage } from 'src/app/models/in-memory-storage';
 import { TonConnectUIError } from 'src/errors';
+import { isInTWA, isTwaPlatform, sendOpenTelegramLink } from 'src/app/utils/tma-api';
 
 export function openLink(href: string, target = '_self'): ReturnType<typeof window.open> {
     return window.open(href, target, 'noreferrer noopener');
@@ -203,6 +204,11 @@ export function getUserAgent(): UserAgent {
     };
 }
 
+function isOS(...os: UserAgent['os'][]): boolean {
+    return os.includes(getUserAgent().os);
+}
+
+// TODO: should be implemented separately for connect button and send transaction button
 export function redirectToTelegram(
     universalLink: string,
     options: {
@@ -210,22 +216,81 @@ export function redirectToTelegram(
         twaReturnUrl: `${string}://${string}` | undefined;
     }
 ): void {
-    // TODO: refactor this check after testing
-    const isIOS = getUserAgent().os === 'ios';
-    const isAndroid = getUserAgent().os === 'android';
-    const shouldUseBackStrategy = isInTWA() && (isIOS || isAndroid);
-    if (shouldUseBackStrategy) {
-        options.returnStrategy = 'back';
-        options.twaReturnUrl = undefined;
-    }
-
+    options = { ...options };
     // TODO: Remove this line after all dApps and the wallets-list.json have been updated
-    const updatedUniversalLink = convertToDirectLink(universalLink);
+    universalLink = convertToDirectLink(universalLink);
+    const url = new URL(universalLink);
 
-    const url = new URL(updatedUniversalLink);
-    url.searchParams.append('startapp', 'tonconnect');
+    // TODO: uncomment for send transaction button, it is broke connect button
+    // url.searchParams.append('startapp', 'tonconnect');
 
-    openLinkBlank(addReturnStrategy(url.toString(), options));
+    if (isInTWA()) {
+        console.log('twa');
+        if (isTwaPlatform('ios', 'android')) {
+            console.log('twa ios/android');
+            // Use the `none` strategy, the current TMA instance will keep open.
+            // TON Space should automatically open in stack and should close
+            // itself after the user action.
+
+            options.returnStrategy = 'none';
+            options.twaReturnUrl = undefined;
+
+            openLinkBlank(addReturnStrategy(url.toString(), options));
+        } else if (isTwaPlatform('macos', 'tdesktop')) {
+            console.log('twa macos/tdesktop', options);
+            // Use a strategy involving a direct link to return to the app.
+            // The current TMA instance will close, and TON Space should
+            // automatically open, and reopen the application once the user
+            // action is completed.
+
+            if (!options.twaReturnUrl) {
+                throw new TonConnectUIError('`twaReturnUrl` is required for this platform');
+            }
+
+            openLinkBlank(addReturnStrategy(url.toString(), options));
+        } else if (isTwaPlatform('web', 'webk')) {
+            console.log('twa web/webk');
+            // Similar to iOS/Android strategy, but opening another TMA occurs
+            // through sending `web_app_open_tg_link` event to `parent`.
+
+            options.returnStrategy = 'none';
+            options.twaReturnUrl = undefined;
+
+            sendOpenTelegramLink(addReturnStrategy(url.toString(), options));
+        } else {
+            console.log('twa unknown');
+            // Fallback for unknown platforms. Should use desktop strategy.
+
+            openLinkBlank(addReturnStrategy(url.toString(), options));
+        }
+    } else {
+        console.log('browser');
+        // For browser
+        if (isOS('ios', 'android')) {
+            console.log('browser ios/android');
+            // Use the `back` strategy. TON Space should pass the command to
+            // return to the initiating application to Telegram and close itself.
+
+            options.returnStrategy = 'back';
+            options.twaReturnUrl = undefined;
+
+            openLinkBlank(addReturnStrategy(url.toString(), options));
+        } else if (isOS('macos', 'windows', 'linux')) {
+            console.log('browser macos/windows/linux');
+            // Use the `none` strategy.
+            // TON Space should close itself after the user action.
+
+            options.returnStrategy = 'none';
+            options.twaReturnUrl = undefined;
+
+            openLinkBlank(addReturnStrategy(url.toString(), options));
+        } else {
+            console.log('browser unknown');
+            // Fallback for unknown platforms. Should use desktop strategy.
+
+            openLinkBlank(addReturnStrategy(url.toString(), options));
+        }
+    }
 }
 
 // TODO: Remove this method after all dApps and the wallets-list.json have been updated
@@ -238,8 +303,4 @@ function convertToDirectLink(universalLink: string): string {
     }
 
     return url.toString();
-}
-
-export function isInTWA(): boolean {
-    return !!(getWindow() as { TelegramWebviewProxy: unknown } | undefined)?.TelegramWebviewProxy;
 }
