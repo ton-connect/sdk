@@ -1,9 +1,4 @@
-import {
-    ConnectAdditionalRequest,
-    isTelegramUrl,
-    isWalletInfoRemote,
-    WalletInfo
-} from '@tonconnect/sdk';
+import { ConnectAdditionalRequest, isWalletInfoRemote, WalletInfo } from '@tonconnect/sdk';
 import { Component, createSignal, For, Show } from 'solid-js';
 import {
     AtWalletIcon,
@@ -26,7 +21,7 @@ import {
     TGImageStyled,
     UlStyled
 } from './style';
-import { addReturnStrategy, getUserAgent, isInTWA, openLinkBlank } from 'src/app/utils/web-api';
+import { addReturnStrategy, openLinkBlank, redirectToTelegram } from 'src/app/utils/web-api';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { appState } from 'src/app/state/app.state';
 import { IMG } from 'src/app/env/IMG';
@@ -54,11 +49,12 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
         props.walletsList.filter(w => supportsMobile(w) && w.appName !== AT_WALLET_APP_NAME);
     const shouldShowMoreButton = (): boolean => walletsList().length > 7;
 
-    const walletsBridges = () => [...new Set(props.walletsList
-        .filter(isWalletInfoRemote)
-        .map(item => item.bridgeUrl ))
-        .values()]
-        .map(bridgeUrl => ({ bridgeUrl }));
+    const walletsBridges = () =>
+        [
+            ...new Set(
+                props.walletsList.filter(isWalletInfoRemote).map(item => item.bridgeUrl)
+            ).values()
+        ].map(bridgeUrl => ({ bridgeUrl }));
 
     const getUniversalLink = (): string =>
         connector.connect(walletsBridges(), props.additionalRequest);
@@ -97,24 +93,20 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
             props.additionalRequest
         );
 
-        // TODO: refactor this check after testing
-        let returnStrategy = appState.returnStrategy;
-        let twaReturnUrl = appState.twaReturnUrl;
+        redirectToTelegram(walletLink, {
+            returnStrategy: appState.returnStrategy,
+            twaReturnUrl: appState.twaReturnUrl
+        });
 
-        const isIOS = getUserAgent().os === 'ios';
-        const isAndroid = getUserAgent().os === 'android';
-        const shouldUseBackStrategy = isInTWA() && (isIOS || isAndroid);
-        if (shouldUseBackStrategy) {
-            returnStrategy = 'back';
-            twaReturnUrl = undefined;
-        }
+        // let returnStrategy = appState.returnStrategy;
+        // let twaReturnUrl = appState.twaReturnUrl;
 
-        openLinkBlank(
-            addReturnStrategy(walletLink, {
-                returnStrategy: returnStrategy,
-                twaReturnUrl: twaReturnUrl
-            })
-        );
+        // openLinkBlank(
+        //     addReturnStrategy(walletLink, {
+        //         returnStrategy: returnStrategy,
+        //         twaReturnUrl: twaReturnUrl
+        //     })
+        // );
     };
 
     const onOpenQR = (): void => {
@@ -143,7 +135,7 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
                     Connect your wallet
                 </H1Styled>
                 <H2Styled translationKey="walletModal.mobileUniversalModal.openWalletOnTelegramOrSelect">
-                    Open Wallet on Telegram or select your wallet to connect
+                    Open Wallet on Telegram or select your wallet to connect
                 </H2Styled>
                 <TelegramButtonStyled
                     leftIcon={<AtWalletIcon />}
