@@ -41,7 +41,7 @@ import { Loadable } from 'src/models/loadable';
 import { WalletsModalManager } from 'src/managers/wallets-modal-manager';
 import { TransactionModalManager } from 'src/managers/transaction-modal-manager';
 import { WalletsModal, WalletsModalState } from 'src/models/wallets-modal';
-import { isInTWA } from 'src/app/utils/tma-api';
+import { isInTMA } from 'src/app/utils/tma-api';
 
 export class TonConnectUI {
     public static getWallets(): Promise<WalletInfo[]> {
@@ -368,7 +368,7 @@ export class TonConnectUI {
 
                     redirectToTelegram(url.toString(), {
                         returnStrategy,
-                        twaReturnUrl
+                        twaReturnUrl: twaReturnUrl || appState.twaReturnUrl
                     });
                 } else {
                     openLinkBlank(addReturnStrategy(this.walletInfo.universalLink, returnStrategy));
@@ -730,7 +730,7 @@ export class TonConnectUI {
             'ios';
 
         // TODO: refactor this check after testing
-        if (isInTWA()) {
+        if (isInTMA()) {
             skipRedirectToWallet = 'never';
         }
 

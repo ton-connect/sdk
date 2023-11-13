@@ -7,12 +7,21 @@ import UAParser from 'ua-parser-js';
 import { encodeTelegramUrlParameters, isTelegramUrl } from '@tonconnect/sdk';
 import { InMemoryStorage } from 'src/app/models/in-memory-storage';
 import { TonConnectUIError } from 'src/errors';
-import { isInTWA, isTwaPlatform, sendOpenTelegramLink } from 'src/app/utils/tma-api';
+import { isInTMA, isTmaPlatform, sendOpenTelegramLink } from 'src/app/utils/tma-api';
 
-export function openLink(href: string, target = '_self'): ReturnType<typeof window.open> {
-    return window.open(href, target, 'noreferrer noopener');
+/**
+ * Opens a link in a new tab and returns a function that closes the tab.
+ * @param href
+ * @param target
+ */
+export function openLink(href: string, target = '_self'): void {
+    window.open(href, target, 'noopener noreferrer');
 }
 
+/**
+ * Opens a link in a new tab and returns a function that closes the tab.
+ * @param href
+ */
 export function openLinkBlank(href: string): void {
     openLink(href, '_blank');
 }
@@ -43,13 +52,16 @@ export function addReturnStrategy(
     url: string,
     strategy:
         | ReturnStrategy
-        | { returnStrategy: ReturnStrategy; twaReturnUrl: `${string}://${string}` | undefined }
+        | {
+              returnStrategy: ReturnStrategy;
+              twaReturnUrl: `${string}://${string}` | undefined;
+          }
 ): string {
     let returnStrategy;
     if (typeof strategy === 'string') {
         returnStrategy = strategy;
     } else {
-        returnStrategy = isInTWA() ? strategy.twaReturnUrl || strategy.returnStrategy : 'none';
+        returnStrategy = isInTMA() ? strategy.twaReturnUrl || strategy.returnStrategy : 'none';
     }
     const newUrl = addQueryParameter(url, 'ret', returnStrategy);
 
@@ -158,7 +170,15 @@ export function isMobileUserAgent(): boolean {
             )
         )
             check = true;
-    })(navigator.userAgent || navigator.vendor || (window as unknown as { opera: string }).opera);
+    })(
+        navigator.userAgent ||
+            navigator.vendor ||
+            (
+                window as unknown as {
+                    opera: string;
+                }
+            ).opera
+    );
     return check;
 }
 
@@ -224,10 +244,10 @@ export function redirectToTelegram(
     // TODO: uncomment for send transaction button, it is broke connect button
     // url.searchParams.append('startapp', 'tonconnect');
 
-    if (isInTWA()) {
+    if (isInTMA()) {
         console.log('twa');
-        if (isTwaPlatform('ios', 'android')) {
-            console.log('twa ios/android');
+        if (isTmaPlatform('ios', 'android')) {
+            console.log('twa ios/android', options);
             // Use the `none` strategy, the current TMA instance will keep open.
             // TON Space should automatically open in stack and should close
             // itself after the user action.
@@ -235,8 +255,8 @@ export function redirectToTelegram(
             options.returnStrategy = 'none';
             options.twaReturnUrl = undefined;
 
-            openLinkBlank(addReturnStrategy(url.toString(), options));
-        } else if (isTwaPlatform('macos', 'tdesktop')) {
+            sendOpenTelegramLink(addReturnStrategy(url.toString(), options));
+        } else if (isTmaPlatform('macos', 'tdesktop')) {
             console.log('twa macos/tdesktop', options);
             // Use a strategy involving a direct link to return to the app.
             // The current TMA instance will close, and TON Space should
@@ -247,9 +267,15 @@ export function redirectToTelegram(
                 throw new TonConnectUIError('`twaReturnUrl` is required for this platform');
             }
 
-            openLinkBlank(addReturnStrategy(url.toString(), options));
-        } else if (isTwaPlatform('web', 'webk')) {
-            console.log('twa web/webk');
+            sendOpenTelegramLink(addReturnStrategy(url.toString(), options));
+        } else if (isTmaPlatform('weba')) {
+            console.log('twa weba');
+            // Similar to macos/tdesktop strategy, but opening another TMA occurs
+            // through sending `web_app_open_tg_link` event to `parent`.
+
+            sendOpenTelegramLink(addReturnStrategy(url.toString(), options));
+        } else if (isTmaPlatform('web')) {
+            console.log('twa web');
             // Similar to iOS/Android strategy, but opening another TMA occurs
             // through sending `web_app_open_tg_link` event to `parent`.
 
@@ -272,9 +298,8 @@ export function redirectToTelegram(
             // return to the initiating application to Telegram and close itself.
 
             options.returnStrategy = 'back';
-            options.twaReturnUrl = undefined;
 
-            openLinkBlank(addReturnStrategy(url.toString(), options));
+            openLinkBlank(addReturnStrategy(url.toString(), options.returnStrategy));
         } else if (isOS('macos', 'windows', 'linux')) {
             console.log('browser macos/windows/linux');
             // Use the `none` strategy.
