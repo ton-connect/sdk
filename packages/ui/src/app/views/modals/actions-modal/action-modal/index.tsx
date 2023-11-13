@@ -4,15 +4,11 @@ import { ActionModalStyled, ButtonStyled, H1Styled, TextStyled } from './style';
 import { WithDataAttributes } from 'src/app/models/with-data-attributes';
 import { useDataAttributes } from 'src/app/hooks/use-data-attributes';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
-import {
-    addReturnStrategy,
-    openLinkBlank,
-    redirectToTelegram
-} from 'src/app/utils/web-api';
+import { addReturnStrategy, openLinkBlank, redirectToTelegram } from 'src/app/utils/web-api';
 import { isTelegramUrl } from '@tonconnect/sdk';
 import { appState } from 'src/app/state/app.state';
 import { action } from 'src/app/state/modals-state';
-import { isInTWA } from 'src/app/utils/tma-api';
+import { isInTMA } from 'src/app/utils/tma-api';
 
 interface ActionModalProps extends WithDataAttributes {
     headerTranslationKey: string;
@@ -33,7 +29,7 @@ export const ActionModal: Component<ActionModalProps> = props => {
         tonConnectUI?.wallet &&
         'universalLink' in tonConnectUI.wallet &&
         (tonConnectUI.wallet.openMethod === 'universal-link' ||
-            (isTelegramUrl(tonConnectUI.wallet.universalLink) && isInTWA()))
+            (isTelegramUrl(tonConnectUI.wallet.universalLink) && isInTMA()))
     ) {
         universalLink = tonConnectUI.wallet.universalLink;
     }
@@ -45,8 +41,12 @@ export const ActionModal: Component<ActionModalProps> = props => {
                 ? currentAction.returnStrategy
                 : appState.returnStrategy;
 
-        if (isTelegramUrl(universalLink!)) {
-            redirectToTelegram(universalLink!, {
+        if (isTelegramUrl(universalLink)) {
+            // TODO: remove append 'startapp' param when `redirectToTelegram` will be fixed
+            let url = new URL(universalLink);
+            url.searchParams.append('startapp', 'tonconnect');
+
+            redirectToTelegram(url.toString(), {
                 returnStrategy,
                 twaReturnUrl:
                     'twaReturnUrl' in currentAction
