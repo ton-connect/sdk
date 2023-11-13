@@ -1,4 +1,5 @@
 import { getWindow } from 'src/app/utils/web-api';
+import { isTmaPlatform } from 'src/app/utils/tma-api';
 
 export type Device = 'mobile' | 'tablet' | 'desktop';
 
@@ -11,6 +12,11 @@ export function isDevice(device: keyof typeof maxWidth | 'desktop'): boolean {
     const window = getWindow();
     if (!window) {
         return device === 'desktop';
+    }
+
+    // TODO: remove this check when weba will fix viewport width
+    if (isTmaPlatform('weba')) {
+        return true;
     }
 
     const width = window.innerWidth;
