@@ -264,7 +264,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                     onClick={onClickTelegram}
                 >
                     <Translation translationKey="walletModal.desktopConnectionModal.openWalletOnTelegram">
-                        Open Wallet on Telegram on desktop
+                        Open Wallet in Telegram on desktop
                     </Translation>
                 </TgButtonStyled>
             </Show>

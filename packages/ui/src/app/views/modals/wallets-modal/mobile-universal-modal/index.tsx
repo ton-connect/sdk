@@ -130,7 +130,7 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
                     Connect your wallet
                 </H1Styled>
                 <H2Styled translationKey="walletModal.mobileUniversalModal.openWalletOnTelegramOrSelect">
-                    Open Wallet on Telegram or select your wallet to connect
+                    Open Wallet in Telegram or select your wallet to connect
                 </H2Styled>
                 <TelegramButtonStyled
                     leftIcon={<AtWalletIcon />}
@@ -139,7 +139,7 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
                     scale="s"
                 >
                     <Translation translationKey="walletModal.mobileUniversalModal.openWalletOnTelegram">
-                        Open Wallet on Telegram
+                        Open Wallet in Telegram
                     </Translation>
                 </TelegramButtonStyled>
                 <UlStyled>
