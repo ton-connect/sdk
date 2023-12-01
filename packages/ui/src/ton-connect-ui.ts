@@ -41,7 +41,7 @@ import { Loadable } from 'src/models/loadable';
 import { WalletsModalManager } from 'src/managers/wallets-modal-manager';
 import { TransactionModalManager } from 'src/managers/transaction-modal-manager';
 import { WalletsModal, WalletsModalState } from 'src/models/wallets-modal';
-import { isInTMA } from 'src/app/utils/tma-api';
+import { isInTMA, sendExpand } from 'src/app/utils/tma-api';
 
 export class TonConnectUI {
     public static getWallets(): Promise<WalletInfo[]> {
@@ -338,6 +338,10 @@ export class TonConnectUI {
     ): Promise<SendTransactionResponse> {
         if (!this.connected) {
             throw new TonConnectUIError('Connect wallet to send a transaction.');
+        }
+
+        if (isInTMA()) {
+            sendExpand();
         }
 
         const { notifications, modals, returnStrategy, twaReturnUrl, skipRedirectToWallet } =

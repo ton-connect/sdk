@@ -9,6 +9,7 @@ import {
 import { appState } from 'src/app/state/app.state';
 import { widgetController } from 'src/app/widget-controller';
 import { WalletsModal, WalletsModalState } from 'src/models/wallets-modal';
+import { isInTMA, sendExpand } from 'src/app/utils/tma-api';
 
 interface WalletsModalManagerCreateOptions {
     /**
@@ -120,6 +121,10 @@ export class WalletsModalManager implements WalletsModal {
      * @internal
      */
     private async connectExternalWallet(): Promise<void> {
+        if (isInTMA()) {
+            sendExpand();
+        }
+
         widgetController.openWalletsModal();
 
         return new Promise<void>(resolve => {
