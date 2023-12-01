@@ -53,6 +53,13 @@ export function isInTMA(): boolean {
 }
 
 /**
+ * Expand the app window.
+ */
+export function sendExpand(): void {
+    postEvent('web_app_expand', {});
+}
+
+/**
  * Opens link in TMA or in new tab and returns a function that closes the tab.
  * @param link
  */
@@ -84,6 +91,7 @@ function isIframe(): boolean {
 }
 
 function postEvent(eventType: 'web_app_open_tg_link', eventData: { path_full: string }): void;
+function postEvent(eventType: 'web_app_expand', eventData: {}): void;
 function postEvent(eventType: string, eventData: object): void {
     try {
         if (window.TelegramWebviewProxy !== undefined) {
