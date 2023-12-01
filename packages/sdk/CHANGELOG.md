@@ -1,5 +1,20 @@
 # Changelog @tonconnect/sdk 
 
+# [3.0.0-beta.4](https://github.com/ton-connect/sdk/compare/sdk-3.0.0-beta.3...sdk-3.0.0-beta.4) (2023-12-01)
+
+
+### Bug Fixes
+
+* **sdk:** throw TonConnectError for non-2xx bridge responses ([97710a6](https://github.com/ton-connect/sdk/commit/97710a6d38e347c13799c9973f26ec10d48337f4))
+
+
+### Features
+
+* **sdk:** add onRequestSent callback to sendTransaction ([86f6bed](https://github.com/ton-connect/sdk/commit/86f6bed7dc03c7c156862cccdad1218cef5b33c9))
+* **sdk:** migrate Telegram links to direct links ([0d975d1](https://github.com/ton-connect/sdk/commit/0d975d1bfe0a5ffb6996f8c4dc31cf0cf90aa5f7))
+
+
+
 # [3.0.0-beta.3](https://github.com/ton-connect/sdk/compare/sdk-3.0.0-beta.2...sdk-3.0.0-beta.3) (2023-11-06)
 
 
