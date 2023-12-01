@@ -1,5 +1,5 @@
 import { Accessor, onCleanup } from 'solid-js';
-import { getUserAgent } from 'src/app/utils/web-api';
+import { createMacrotask, getUserAgent } from 'src/app/utils/web-api';
 
 /**
  * A directive that enhances the behavior of modal-like components on Android devices, ensuring
@@ -59,7 +59,7 @@ export default function androidBackHandler(
         // Create a macrotask using `requestAnimationFrame()` to ensure that any pending microtasks,
         // such as asynchronous operations from other developers (e.g., tracking wallet connection status
         // and calling `history.pushState()), are completed before we proceed with cleaning up the history state.
-        new Promise(resolve => requestAnimationFrame(resolve)).then(() => {
+        createMacrotask(() => {
             // If the current history state is the one that was added by this directive,
             if (window.history.state?.[ROUTE_STATE_KEY] === true) {
                 // navigate back in the browser's history to clean up the state.

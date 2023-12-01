@@ -116,11 +116,23 @@ export function defineStylesRoot(): void {
 }
 
 /**
+ * Create a macrotask using `requestAnimationFrame()` to ensure that any pending microtasks,
+ * such as asynchronous operations from other developers and browser APIs, are executed before.
+ * @param callback
+ */
+export async function createMacrotask(callback: () => void): Promise<void> {
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    callback();
+}
+
+/**
  * Preload images after page load to improve UX and Web Vitals metrics without affecting initial page load performance.
  */
 export function preloadImages(images: string[]): void {
     if (document.readyState !== 'complete') {
-        window.addEventListener('load', () => preloadImages(images), { once: true });
+        window.addEventListener('load', () => createMacrotask(() => preloadImages(images)), {
+            once: true
+        });
     } else {
         images.forEach(img => {
             const node = new window.Image();
