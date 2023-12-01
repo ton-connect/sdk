@@ -1,4 +1,4 @@
-import { Component, JSXElement, Show, useContext } from 'solid-js';
+import { Component, createSignal, JSXElement, Show, useContext } from 'solid-js';
 import { Translation } from 'src/app/components/typography/Translation';
 import { ActionModalStyled, ButtonStyled, H1Styled, TextStyled } from './style';
 import { WithDataAttributes } from 'src/app/models/with-data-attributes';
@@ -23,6 +23,7 @@ interface ActionModalProps extends WithDataAttributes {
 export const ActionModal: Component<ActionModalProps> = props => {
     const dataAttrs = useDataAttributes(props);
     const tonConnectUI = useContext(TonConnectUiContext);
+    const [firstClick, setFirstClick] = createSignal(true);
 
     let universalLink: string | undefined;
     if (
@@ -42,16 +43,15 @@ export const ActionModal: Component<ActionModalProps> = props => {
                 : appState.returnStrategy;
 
         if (isTelegramUrl(universalLink)) {
-            // TODO: remove append 'startapp' param when `redirectToTelegram` will be fixed
-            let url = new URL(universalLink);
-            url.searchParams.append('startapp', 'tonconnect');
-
-            redirectToTelegram(url.toString(), {
-                returnStrategy,
+            const forceRedirect = !firstClick();
+            setFirstClick(false);
+            redirectToTelegram(universalLink, {
+                returnStrategy: returnStrategy,
                 twaReturnUrl:
                     'twaReturnUrl' in currentAction
                         ? currentAction.twaReturnUrl
-                        : appState.twaReturnUrl
+                        : appState.twaReturnUrl,
+                forceRedirect: forceRedirect
             });
         } else {
             openLinkBlank(addReturnStrategy(universalLink!, returnStrategy));

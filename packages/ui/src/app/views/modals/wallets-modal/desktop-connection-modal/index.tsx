@@ -42,7 +42,7 @@ import {
     RetryIcon
 } from 'src/app/components';
 import { appState } from 'src/app/state/app.state';
-import { addReturnStrategy, openLinkBlank } from 'src/app/utils/web-api';
+import { addReturnStrategy, openLinkBlank, redirectToTelegram } from 'src/app/utils/web-api';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { Link } from 'src/app/components/link';
 import { supportsDesktop, supportsExtension, supportsMobile } from 'src/app/utils/wallets';
@@ -60,6 +60,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
     const [mode, setMode] = createSignal<'mobile' | 'desktop' | 'extension'>('mobile');
     const [connectionErrored, setConnectionErrored] = createSignal(false);
     const [universalLink, setUniversalLink] = createSignal<string | undefined>();
+    const [firstClick, setFirstClick] = createSignal(true);
     const connector = useContext(ConnectorContext)!;
 
     const unsubscribe = connector.onStatusChange(
@@ -122,16 +123,17 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
     };
 
     const onClickTelegram = (): void => {
+        const forceRedirect = !firstClick();
+        setFirstClick(false);
         setLastSelectedWalletInfo({
             ...props.wallet,
             openMethod: 'universal-link'
         });
-        openLinkBlank(
-            addReturnStrategy(universalLink()!, {
-                returnStrategy: appState.returnStrategy,
-                twaReturnUrl: appState.twaReturnUrl
-            })
-        );
+        redirectToTelegram(universalLink()!, {
+            returnStrategy: appState.returnStrategy,
+            twaReturnUrl: appState.twaReturnUrl,
+            forceRedirect: forceRedirect
+        });
     };
 
     const onClickExtension = (): void => {
