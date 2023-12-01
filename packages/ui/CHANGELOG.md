@@ -1,5 +1,28 @@
 # Changelog @tonconnect/ui 
 
+# [2.0.0-beta.7](https://github.com/ton-connect/sdk/compare/ui-2.0.0-beta.6...ui-2.0.0-beta.7) (2023-12-01)
+
+
+### Bug Fixes
+
+* **ui:** delay image loading to next tick for fix page load in safari ([f610906](https://github.com/ton-connect/sdk/commit/f61090617439e80f29b688647f752cd760b84f66))
+* **ui:** ensure 'ret=back' for TMA-to-TMA transitions ([063b89d](https://github.com/ton-connect/sdk/commit/063b89d030614cef9e980c4d9b1e77663bda8147))
+* **ui:** ensure transaction request completion before redirect ([96e9986](https://github.com/ton-connect/sdk/commit/96e9986207e7526c150fa63e785feab1843f1593))
+* **ui:** resolve clipboard copy issue in safari ([abbc957](https://github.com/ton-connect/sdk/commit/abbc95738a3d37b597f99f278e2645590be5f685))
+* **ui:** temporary viewport width check for weba platform ([304f9ac](https://github.com/ton-connect/sdk/commit/304f9ac0d79c3019c6d92b313146fbec3c6e0220))
+
+
+### Features
+
+* **ui:** enhance twa-twa transition spec with transaction support ([0f4c961](https://github.com/ton-connect/sdk/commit/0f4c961a932c29147d2352fb4b70c0e3beb9f1ae))
+* **ui:** enhance user flow between dApp in browser and tma ([41192b7](https://github.com/ton-connect/sdk/commit/41192b74bf80f5e139d9e375f91b36f324a9de04))
+* **ui:** implement twa-twa transition spec ([fdde05d](https://github.com/ton-connect/sdk/commit/fdde05dddbb4b416081837b0e8f7a44bed68f4e3))
+* **ui:** implement window expansion for tma on connect and send transaction ([47383e3](https://github.com/ton-connect/sdk/commit/47383e374dea1b066f01d42a8f5a51c3fd505af9))
+* **ui:** migrate Telegram links to direct links ([22f3f75](https://github.com/ton-connect/sdk/commit/22f3f75a971be6e4fa5a0a02c70bb8e68d076c6a))
+* **ui:** TMA adapt twaReturnUrl or 'back' based on platform ([8221e75](https://github.com/ton-connect/sdk/commit/8221e75d2358138bd4cfc8524b71f539a8425a8a))
+
+
+
 # [2.0.0-beta.6](https://github.com/ton-connect/sdk/compare/ui-2.0.0-beta.5...ui-2.0.0-beta.6) (2023-11-06)
 
 
