@@ -366,13 +366,10 @@ export class TonConnectUI {
                 !shouldSkipRedirectToWallet
             ) {
                 if (isTelegramUrl(this.walletInfo.universalLink)) {
-                    // TODO: remove append 'startapp' param when `redirectToTelegram` will be fixed
-                    let url = new URL(this.walletInfo.universalLink);
-                    url.searchParams.append('startapp', 'tonconnect');
-
-                    redirectToTelegram(url.toString(), {
+                    redirectToTelegram(this.walletInfo.universalLink, {
                         returnStrategy,
-                        twaReturnUrl: twaReturnUrl || appState.twaReturnUrl
+                        twaReturnUrl: twaReturnUrl || appState.twaReturnUrl,
+                        forceRedirect: false
                     });
                 } else {
                     openLinkBlank(addReturnStrategy(this.walletInfo.universalLink, returnStrategy));

@@ -44,6 +44,7 @@ interface MobileUniversalModalProps {
 
 export const MobileUniversalModal: Component<MobileUniversalModalProps> = props => {
     const [showQR, setShowQR] = createSignal(false);
+    const [firstClick, setFirstClick] = createSignal(true);
     const connector = appState.connector;
     const walletsList = (): WalletInfo[] =>
         props.walletsList.filter(w => supportsMobile(w) && w.appName !== AT_WALLET_APP_NAME);
@@ -93,20 +94,14 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
             props.additionalRequest
         );
 
+        const forceRedirect = !firstClick();
+        setFirstClick(false);
+
         redirectToTelegram(walletLink, {
             returnStrategy: appState.returnStrategy,
-            twaReturnUrl: appState.twaReturnUrl
+            twaReturnUrl: appState.twaReturnUrl,
+            forceRedirect: forceRedirect
         });
-
-        // let returnStrategy = appState.returnStrategy;
-        // let twaReturnUrl = appState.twaReturnUrl;
-
-        // openLinkBlank(
-        //     addReturnStrategy(walletLink, {
-        //         returnStrategy: returnStrategy,
-        //         twaReturnUrl: twaReturnUrl
-        //     })
-        // );
     };
 
     const onOpenQR = (): void => {
