@@ -1,5 +1,14 @@
 # Changelog @tonconnect/sdk 
 
+# [3.0.0-beta.5](https://github.com/ton-connect/sdk/compare/sdk-3.0.0-beta.4...sdk-3.0.0-beta.5) (2023-12-02)
+
+
+### Bug Fixes
+
+* **sdk:** added waiting for bridge response before calling onRequestSent ([cf85057](https://github.com/ton-connect/sdk/commit/cf850572feef8d9720aba062fd6b1d76037ceb93))
+
+
+
 # [3.0.0-beta.4](https://github.com/ton-connect/sdk/compare/sdk-3.0.0-beta.3...sdk-3.0.0-beta.4) (2023-12-01)
 
 
