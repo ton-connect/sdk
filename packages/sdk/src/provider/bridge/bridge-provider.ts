@@ -161,11 +161,17 @@ export class BridgeProvider implements HTTPProvider {
                 hexToByteArray(this.session.walletPublicKey)
             );
 
-            this.gateway
-                .send(encodedRequest, this.session.walletPublicKey, request.method)
-                .catch(reject);
-            this.pendingRequests.set(id.toString(), resolve);
-            onRequestSent?.();
+            try {
+                await this.gateway.send(
+                    encodedRequest,
+                    this.session.walletPublicKey,
+                    request.method
+                );
+                onRequestSent?.();
+                this.pendingRequests.set(id.toString(), resolve);
+            } catch (e) {
+                reject(e);
+            }
         });
     }
 
