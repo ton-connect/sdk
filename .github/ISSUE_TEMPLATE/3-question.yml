@@ -1,0 +1,47 @@
+name: "Question"
+title: "[<SDK or UI or UI-REACT or PROTOCOL>]: <brief description of your question>"
+description: "Use this template for asking questions related to the SDK, UI, UI-REACT, or PROTOCOL"
+labels: ["question"]
+assignees: ["thekiba"]
+
+body:
+  - type: textarea
+    attributes:
+      label: "Your Question"
+      description: "Please write your question in detail here."
+      placeholder: "What would you like to know about..."
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "Context"
+      description: "Provide any additional context or details that might help in understanding your question better."
+      placeholder: "In my project, I am trying to..."
+
+  - type: textarea
+    attributes:
+      label: "What have you tried so far?"
+      description: "Describe any steps you have taken or research you have done in trying to find the answer to your question."
+      placeholder: "I have already tried..."
+
+  - type: textarea
+    attributes:
+      label: "Relevant Code or Commands"
+      description: "If applicable, provide any relevant code snippets or command lines that relate to your question."
+      placeholder: "Here is a snippet of my code..."
+
+  - type: checkboxes
+    attributes:
+      label: "Documentation Check"
+      description: |
+        Please confirm that you have checked the relevant documentation. It might have the answer you're looking for.
+
+        Documentation resources:
+        - [@tonconnect/ui-react Documentation](https://github.com/ton-connect/sdk/blob/main/packages/ui-react/README.md)
+        - [@tonconnect/ui Documentation](https://github.com/ton-connect/sdk/tree/main/packages/ui/README.md)
+        - [@tonconnect/sdk Documentation](https://github.com/ton-connect/sdk/blob/main/packages/sdk/README.md)
+        - [@tonconnect/protocol Documentation](https://github.com/ton-connect/sdk/blob/main/packages/protocol/README.md)
+      options:
+        - label: "Yes, I have checked the documentation."
+          required: true
