@@ -280,7 +280,7 @@ export function redirectToTelegram(
             // TON Space should automatically open in stack and should close
             // itself after the user action.
 
-            options.returnStrategy = 'none';
+            options.returnStrategy = 'back';
             options.twaReturnUrl = undefined;
 
             sendOpenTelegramLink(addReturnStrategy(directLinkUrl.toString(), options));
@@ -289,10 +289,6 @@ export function redirectToTelegram(
             // The current TMA instance will close, and TON Space should
             // automatically open, and reopen the application once the user
             // action is completed.
-
-            if (!options.twaReturnUrl) {
-                throw new TonConnectUIError('`twaReturnUrl` is required for this platform');
-            }
 
             sendOpenTelegramLink(addReturnStrategy(directLinkUrl.toString(), options));
         } else if (isTmaPlatform('weba')) {
@@ -304,7 +300,7 @@ export function redirectToTelegram(
             // Similar to iOS/Android strategy, but opening another TMA occurs
             // through sending `web_app_open_tg_link` event to `parent`.
 
-            options.returnStrategy = 'none';
+            options.returnStrategy = 'back';
             options.twaReturnUrl = undefined;
 
             sendOpenTelegramLink(addReturnStrategy(directLinkUrl.toString(), options));
@@ -316,15 +312,13 @@ export function redirectToTelegram(
     } else {
         // For browser
         if (isOS('ios', 'android')) {
-            // Use the `back` strategy. TON Space should pass the command to
-            // return to the initiating application to Telegram and close itself.
+            // Use the `none` strategy. TON Space should do nothing after the user action.
 
-            options.returnStrategy = 'back';
+            options.returnStrategy = 'none';
 
             openLinkBlank(addReturnStrategy(directLinkUrl.toString(), options.returnStrategy));
         } else if (isOS('macos', 'windows', 'linux')) {
-            // Use the `none` strategy.
-            // TON Space should close itself after the user action.
+            // Use the `none` strategy. TON Space should do nothing after the user action.
 
             options.returnStrategy = 'none';
             options.twaReturnUrl = undefined;
