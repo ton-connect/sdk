@@ -15,6 +15,12 @@ declare global {
 
     interface Window {
         TelegramWebviewProxy?: TelegramWebviewProxy;
+        Telegram?: {
+            WebApp?: {
+                platform?: TmaPlatform;
+                version?: string;
+            };
+        };
     }
 }
 
@@ -25,13 +31,19 @@ try {
 } catch (e) {}
 
 let tmaPlatform: TmaPlatform = 'unknown';
-if (initParams.tgWebAppPlatform) {
-    tmaPlatform = initParams.tgWebAppPlatform as TmaPlatform;
+if (initParams?.tgWebAppPlatform) {
+    tmaPlatform = (initParams.tgWebAppPlatform as TmaPlatform) ?? 'unknown';
+}
+if (tmaPlatform === 'unknown') {
+    tmaPlatform = window?.Telegram?.WebApp?.platform ?? 'unknown';
 }
 
 let webAppVersion = '6.0';
-if (initParams.tgWebAppVersion) {
+if (initParams?.tgWebAppVersion) {
     webAppVersion = initParams.tgWebAppVersion;
+}
+if (!webAppVersion) {
+    webAppVersion = window?.Telegram?.WebApp?.version ?? '6.0';
 }
 
 /**
