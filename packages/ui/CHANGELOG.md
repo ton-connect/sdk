@@ -1,5 +1,19 @@
 # Changelog @tonconnect/ui 
 
+# [2.0.0-beta.9](https://github.com/ton-connect/sdk/compare/ui-2.0.0-beta.8...ui-2.0.0-beta.9) (2023-12-15)
+
+
+### Bug Fixes
+
+* **ui:** correct data retrieval in tma ([d462342](https://github.com/ton-connect/sdk/commit/d4623427cb5119979a766e6ed0cdbf576c993ff5))
+
+
+### Features
+
+* **ui:** enhance transition strategies in tma ([5c4670d](https://github.com/ton-connect/sdk/commit/5c4670d542a634ea1e87c6e06b4b56cc6614c1c4))
+
+
+
 # [2.0.0-beta.8](https://github.com/ton-connect/sdk/compare/ui-2.0.0-beta.7...ui-2.0.0-beta.8) (2023-12-02)
 
 
