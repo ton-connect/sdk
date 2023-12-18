@@ -27,20 +27,24 @@ export function openLinkBlank(href: string): void {
 }
 
 /**
- * Open link in iframe.
+ * Open a deeplink in the same tab and fallback to a direct link after 1 second.
+ * In Safari, the fallback will not work.
  * @param href
  * @param fallback
  */
-export function openIframeLink(href: string, fallback: () => void): void {
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    iframe.src = href;
-    document.body.appendChild(iframe);
+export function openDeeplinkWithFallback(href: string, fallback: () => void): void {
+    const doFallback = (): void => {
+        if (isBrowser('safari')) {
+            // Safari does not support fallback to direct link.
+            return;
+        }
 
-    const fallbackTimeout = setTimeout(() => fallback(), 1000);
+        fallback();
+    };
+    const fallbackTimeout = setTimeout(() => doFallback(), 1000);
     window.addEventListener('blur', () => clearTimeout(fallbackTimeout), { once: true });
 
-    setTimeout(() => document.body.removeChild(iframe), 1000);
+    openLink(href, '_self');
 }
 
 export function getSystemTheme(): THEME {
@@ -257,6 +261,10 @@ function isOS(...os: UserAgent['os'][]): boolean {
     return os.includes(getUserAgent().os);
 }
 
+function isBrowser(...browser: UserAgent['browser'][]): boolean {
+    return browser.includes(getUserAgent().browser);
+}
+
 export function redirectToTelegram(
     universalLink: string,
     options: {
@@ -329,7 +337,7 @@ export function redirectToTelegram(
                 const link = addReturnStrategy(directLinkUrl.toString(), options);
                 const deepLink = convertToDeepLink(link);
 
-                openIframeLink(deepLink, () => openLinkBlank(link));
+                openDeeplinkWithFallback(deepLink, () => openLinkBlank(link));
             }
         } else {
             // Fallback for unknown platforms. Should use desktop strategy.
