@@ -22,6 +22,7 @@ export const FALLBACK_WALLETS_LIST: WalletInfoDTO[] = [
         tondns: 'tonkeeper.ton',
         about_url: 'https://tonkeeper.com',
         universal_url: 'https://app.tonkeeper.com/ton-connect',
+        deepLink: 'tonkeeper-tc://',
         bridge: [
             {
                 type: 'sse',
