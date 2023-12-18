@@ -230,3 +230,42 @@ export function isOS(...os: UserAgent['os'][]): boolean {
 export function isBrowser(...browser: UserAgent['browser'][]): boolean {
     return browser.includes(getUserAgent().browser);
 }
+
+/**
+ * Convert universal link to the given deeplink: replace protocol and path, but keep query params
+ * @param universalLink
+ * @param deeplink
+ */
+export function toDeeplink(universalLink: string, deeplink: string): string {
+    const url = new URL(universalLink);
+    return deeplink + url.search;
+}
+
+/**
+ * Try to open deeplink with given fallback universal link that is opened if none app supports the deeplink
+ * @param deeplink
+ * @param universalLink
+ * @param options
+ */
+export function openDeeplinkWithUniversalFallback(deeplink: string, universalLink: string, options?: { notBlank?: boolean; onFallbackRun?: () => void }): void {
+    let blurred = false;
+    function blurHandler(): void {
+        blurred = true;
+        window.removeEventListener('blur', blurHandler);
+    }
+
+    window.addEventListener('blur', blurHandler);
+
+    openLink(deeplink);
+
+    setTimeout(() => {
+        if (!blurred) {
+            if (options?.notBlank) {
+                openLink(universalLink);
+            } else {
+                openLinkBlank(universalLink);
+            }
+        }
+        window.removeEventListener('blur', blurHandler);
+    }, 100);
+}

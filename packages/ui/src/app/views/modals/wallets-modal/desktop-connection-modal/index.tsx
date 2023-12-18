@@ -42,7 +42,11 @@ import {
     RetryIcon
 } from 'src/app/components';
 import { appState } from 'src/app/state/app.state';
-import { openLinkBlank } from 'src/app/utils/web-api';
+import {
+    openDeeplinkWithUniversalFallback,
+    openLinkBlank,
+    toDeeplink
+} from 'src/app/utils/web-api';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { Link } from 'src/app/components/link';
 import { supportsDesktop, supportsExtension, supportsMobile } from 'src/app/utils/wallets';
@@ -116,11 +120,28 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
         }
 
         setMode('desktop');
-        setLastSelectedWalletInfo({
-            ...props.wallet,
-            openMethod: 'universal-link'
-        });
-        openLinkBlank(addReturnStrategy(universalLink()!, appState.returnStrategy));
+        const linkWithStrategy = addReturnStrategy(universalLink()!, appState.returnStrategy);
+        if (props.wallet.deepLink) {
+            setLastSelectedWalletInfo({
+                ...props.wallet,
+                openMethod: 'custom-deeplink'
+            });
+
+            openDeeplinkWithUniversalFallback(toDeeplink(linkWithStrategy, props.wallet.deepLink), linkWithStrategy, {
+                onFallbackRun: () => {
+                    setLastSelectedWalletInfo({
+                        ...props.wallet,
+                        openMethod: 'universal-link'
+                    });
+                }
+            });
+        } else {
+            setLastSelectedWalletInfo({
+                ...props.wallet,
+                openMethod: 'universal-link'
+            });
+            openLinkBlank(addReturnStrategy(universalLink()!, appState.returnStrategy));
+        }
     };
 
     const onClickTelegram = (): void => {
