@@ -4,11 +4,12 @@ import { ActionModalStyled, ButtonStyled, H1Styled, TextStyled } from './style';
 import { WithDataAttributes } from 'src/app/models/with-data-attributes';
 import { useDataAttributes } from 'src/app/hooks/use-data-attributes';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
-import { addReturnStrategy, openLinkBlank, redirectToTelegram } from 'src/app/utils/web-api';
+import { openLinkBlank } from 'src/app/utils/web-api';
 import { isTelegramUrl } from '@tonconnect/sdk';
 import { appState } from 'src/app/state/app.state';
 import { action } from 'src/app/state/modals-state';
 import { isInTMA } from 'src/app/utils/tma-api';
+import { addReturnStrategy, redirectToTelegram } from 'src/app/utils/url-strategy-helpers';
 
 interface ActionModalProps extends WithDataAttributes {
     headerTranslationKey: string;

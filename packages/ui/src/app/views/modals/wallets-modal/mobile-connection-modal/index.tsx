@@ -16,11 +16,12 @@ import {
 import { ConnectorContext } from 'src/app/state/connector.context';
 import { Button, H3, QRIcon, RetryIcon } from 'src/app/components';
 import { appState } from 'src/app/state/app.state';
-import { addReturnStrategy, openLinkBlank } from 'src/app/utils/web-api';
+import { openLinkBlank } from 'src/app/utils/web-api';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { useTheme } from 'solid-styled-components';
 import { MobileConnectionQR } from 'src/app/views/modals/wallets-modal/mobile-connection-modal/mobile-connection-qr';
 import { Translation } from 'src/app/components/typography/Translation';
+import { addReturnStrategy } from 'src/app/utils/url-strategy-helpers';
 
 export interface MobileConnectionProps {
     additionalRequest?: ConnectAdditionalRequest;
