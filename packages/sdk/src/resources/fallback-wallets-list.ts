@@ -33,7 +33,7 @@ export const FALLBACK_WALLETS_LIST: WalletInfoDTO[] = [
                 key: 'tonkeeper'
             }
         ],
-        platforms: ['ios', 'android', 'chrome', 'firefox']
+        platforms: ['ios', 'android', 'chrome', 'firefox', 'macos']
     },
     {
         app_name: 'openmask',
