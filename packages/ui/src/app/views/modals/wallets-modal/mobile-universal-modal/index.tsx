@@ -21,7 +21,7 @@ import {
     TGImageStyled,
     UlStyled
 } from './style';
-import { addReturnStrategy, openLinkBlank, redirectToTelegram } from 'src/app/utils/web-api';
+import { openLinkBlank } from 'src/app/utils/web-api';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { appState } from 'src/app/state/app.state';
 import { IMG } from 'src/app/env/IMG';
@@ -31,6 +31,7 @@ import { copyToClipboard } from 'src/app/utils/copy-to-clipboard';
 import { TonConnectUIError } from 'src/errors';
 import { MobileUniversalQR } from './mobile-universal-qr';
 import { Translation } from 'src/app/components/typography/Translation';
+import { addReturnStrategy, redirectToTelegram } from 'src/app/utils/url-strategy-helpers';
 
 interface MobileUniversalModalProps {
     walletsList: WalletInfo[];

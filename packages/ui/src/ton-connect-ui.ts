@@ -19,12 +19,10 @@ import { TonConnectUIError } from 'src/errors/ton-connect-ui.error';
 import { TonConnectUiCreateOptions } from 'src/models/ton-connect-ui-create-options';
 import { PreferredWalletStorage, WalletInfoStorage } from 'src/storage';
 import {
-    addReturnStrategy,
     getSystemTheme,
     getUserAgent,
     openLinkBlank,
     preloadImages,
-    redirectToTelegram,
     subscribeToThemeChange
 } from 'src/app/utils/web-api';
 import { TonConnectUiOptions } from 'src/models/ton-connect-ui-options';
@@ -42,6 +40,7 @@ import { WalletsModalManager } from 'src/managers/wallets-modal-manager';
 import { TransactionModalManager } from 'src/managers/transaction-modal-manager';
 import { WalletsModal, WalletsModalState } from 'src/models/wallets-modal';
 import { isInTMA, sendExpand } from 'src/app/utils/tma-api';
+import { addReturnStrategy, redirectToTelegram } from 'src/app/utils/url-strategy-helpers';
 
 export class TonConnectUI {
     public static getWallets(): Promise<WalletInfo[]> {

@@ -1,4 +1,4 @@
-import { getWindow } from 'src/app/utils/web-api';
+import { getWindow, openLinkBlank } from 'src/app/utils/web-api';
 import { TonConnectUIError } from 'src/errors';
 import { logError } from 'src/app/utils/log';
 
@@ -35,6 +35,7 @@ if (initParams?.tgWebAppPlatform) {
     tmaPlatform = (initParams.tgWebAppPlatform as TmaPlatform) ?? 'unknown';
 }
 if (tmaPlatform === 'unknown') {
+    const window = getWindow();
     tmaPlatform = window?.Telegram?.WebApp?.platform ?? 'unknown';
 }
 
@@ -43,6 +44,7 @@ if (initParams?.tgWebAppVersion) {
     webAppVersion = initParams.tgWebAppVersion;
 }
 if (!webAppVersion) {
+    const window = getWindow();
     webAppVersion = window?.Telegram?.WebApp?.version ?? '6.0';
 }
 
@@ -89,13 +91,16 @@ export function sendOpenTelegramLink(link: string): void {
     if (isIframe() || versionAtLeast('6.1')) {
         postEvent('web_app_open_tg_link', { path_full: pathFull });
     } else {
-        // TODO: alias for openLinkBlank('https://t.me' + pathFull);, remove duplicated code
-        window.open('https://t.me' + pathFull, '_blank', 'noreferrer noopener');
+        openLinkBlank('https://t.me' + pathFull);
     }
 }
 
 function isIframe(): boolean {
     try {
+        const window = getWindow();
+        if (!window) {
+            return false;
+        }
         return window.parent != null && window !== window.parent;
     } catch (e) {
         return false;
@@ -106,6 +111,11 @@ function postEvent(eventType: 'web_app_open_tg_link', eventData: { path_full: st
 function postEvent(eventType: 'web_app_expand', eventData: {}): void;
 function postEvent(eventType: string, eventData: object): void {
     try {
+        const window = getWindow();
+        if (!window) {
+            throw new TonConnectUIError(`Can't post event to parent window: window is not defined`);
+        }
+
         if (window.TelegramWebviewProxy !== undefined) {
             window.TelegramWebviewProxy.postEvent(eventType, JSON.stringify(eventData));
         } else if (window.external && 'notify' in window.external) {

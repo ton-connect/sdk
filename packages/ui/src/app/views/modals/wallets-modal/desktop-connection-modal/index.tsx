@@ -42,13 +42,14 @@ import {
     RetryIcon
 } from 'src/app/components';
 import { appState } from 'src/app/state/app.state';
-import { addReturnStrategy, openLinkBlank, redirectToTelegram } from 'src/app/utils/web-api';
+import { openLinkBlank } from 'src/app/utils/web-api';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { Link } from 'src/app/components/link';
 import { supportsDesktop, supportsExtension, supportsMobile } from 'src/app/utils/wallets';
 import { AT_WALLET_APP_NAME } from 'src/app/env/AT_WALLET_APP_NAME';
 import { IMG } from 'src/app/env/IMG';
 import { Translation } from 'src/app/components/typography/Translation';
+import { addReturnStrategy, redirectToTelegram } from 'src/app/utils/url-strategy-helpers';
 
 export interface DesktopConnectionProps {
     additionalRequest?: ConnectAdditionalRequest;
