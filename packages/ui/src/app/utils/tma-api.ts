@@ -114,9 +114,9 @@ function postEvent(eventType: string, eventData: object): void {
             const trustedTarget = '*';
             const message = JSON.stringify({ eventType: eventType, eventData: eventData });
             window.parent.postMessage(message, trustedTarget);
+        } else {
+            throw new TonConnectUIError(`Can't post event to TMA`);
         }
-
-        throw new TonConnectUIError(`Can't post event to TMA`);
     } catch (e) {
         logError(`Can't post event to parent window: ${e}`);
     }
