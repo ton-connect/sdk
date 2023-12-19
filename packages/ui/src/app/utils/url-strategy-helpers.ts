@@ -57,7 +57,7 @@ export function redirectToTelegram(
 ): void {
     options = { ...options };
     // TODO: Remove this line after all dApps and the wallets-list.json have been updated
-    const directLink = convertToDirectLink(universalLink);
+    const directLink = convertToTGDirectLink(universalLink);
     const directLinkUrl = new URL(directLink);
 
     if (!directLinkUrl.searchParams.has('startapp')) {
@@ -117,7 +117,7 @@ export function redirectToTelegram(
                 openLinkBlank(addReturnStrategy(directLinkUrl.toString(), options));
             } else {
                 const link = addReturnStrategy(directLinkUrl.toString(), options);
-                const deepLink = convertToDeepLink(link);
+                const deepLink = convertToTGDeepLink(link);
 
                 openDeeplinkWithFallback(deepLink, () => openLinkBlank(link));
             }
@@ -146,7 +146,7 @@ function addQueryParameter(url: string, key: string, value: string): string {
  * @param universalLink
  * TODO: Remove this method after all dApps and the wallets-list.json have been updated
  */
-function convertToDirectLink(universalLink: string): string {
+function convertToTGDirectLink(universalLink: string): string {
     const url = new URL(universalLink);
 
     if (url.searchParams.has('attach')) {
@@ -161,7 +161,7 @@ function convertToDirectLink(universalLink: string): string {
  * Converts a direct link to a deep link.
  * @param directLink
  */
-function convertToDeepLink(directLink: string): string {
+function convertToTGDeepLink(directLink: string): string {
     const parsed = new URL(directLink);
     const [, domain, appname] = parsed.pathname.split('/');
     const startapp = parsed.searchParams.get('startapp');
