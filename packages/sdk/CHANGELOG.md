@@ -1,5 +1,15 @@
 # Changelog @tonconnect/sdk 
 
+# [3.0.0-beta.6](https://github.com/ton-connect/sdk/compare/sdk-3.0.0-beta.5...sdk-3.0.0-beta.6) (2023-12-19)
+
+
+### Bug Fixes
+
+* **sdk:** added tonkeeper deeplink to the fallback wallets list ([6aa3ec4](https://github.com/ton-connect/sdk/commit/6aa3ec46283d9e962f8be7e28c2ab6529828a1f2))
+* **sdk:** tonkeeper desktop platform added ([c9b1bcd](https://github.com/ton-connect/sdk/commit/c9b1bcddc71a29926368ce2079fb7c4b602d27f6))
+
+
+
 # [3.0.0-beta.5](https://github.com/ton-connect/sdk/compare/sdk-3.0.0-beta.4...sdk-3.0.0-beta.5) (2023-12-02)
 
 
