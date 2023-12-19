@@ -1,5 +1,18 @@
 # Changelog @tonconnect/ui 
 
+# [2.0.0-beta.10](https://github.com/ton-connect/sdk/compare/ui-2.0.0-beta.9...ui-2.0.0-beta.10) (2023-12-19)
+
+
+### Bug Fixes
+
+* **ui:** added deeplink redirection for desktop wallets (triggers only in desktop selected wallet modal). If `wallet.deepLink` exists, the UI will try to use it and `wallet.universalLink` as a fallback instead. Otherwise previous flow is used ([d123c59](https://github.com/ton-connect/sdk/commit/d123c59c867bbf7a1526507816b6635fe212e166))
+* **ui:** adjust window access for ssr compatibility and refactor code ([ae10e14](https://github.com/ton-connect/sdk/commit/ae10e1439a62b310ab008f9f0d97afbfce18ff1f)), closes [#125](https://github.com/ton-connect/sdk/issues/125)
+* **ui:** prevent throwing an error on successful tma transition ([e9f643d](https://github.com/ton-connect/sdk/commit/e9f643d0fb72df5ceccd7e9147730eb2d5864f4b))
+* **ui:** replace opening tma deeplink via iframe with window.open, and ignore fallback in safari ([ea622ce](https://github.com/ton-connect/sdk/commit/ea622ce881cd428abe67bf6dbb60afcccf3876ba))
+* **ui:** safari desktop deeplink flow improved ([7c10b17](https://github.com/ton-connect/sdk/commit/7c10b171f7b8e210d1efce61282c11876fd283b1))
+
+
+
 # [2.0.0-beta.9](https://github.com/ton-connect/sdk/compare/ui-2.0.0-beta.8...ui-2.0.0-beta.9) (2023-12-15)
 
 
