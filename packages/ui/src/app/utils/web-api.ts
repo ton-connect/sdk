@@ -38,7 +38,7 @@ export function openDeeplinkWithFallback(href: string, fallback: () => void): vo
 
         fallback();
     };
-    const fallbackTimeout = setTimeout(() => doFallback(), 1000);
+    const fallbackTimeout = setTimeout(() => doFallback(), 200);
     window.addEventListener('blur', () => clearTimeout(fallbackTimeout), { once: true });
 
     openLink(href, '_self');
@@ -239,33 +239,4 @@ export function isBrowser(...browser: UserAgent['browser'][]): boolean {
 export function toDeeplink(universalLink: string, deeplink: string): string {
     const url = new URL(universalLink);
     return deeplink + url.search;
-}
-
-/**
- * Try to open deeplink with given fallback universal link that is opened if none app supports the deeplink
- * @param deeplink
- * @param universalLink
- * @param options
- */
-export function openDeeplinkWithUniversalFallback(deeplink: string, universalLink: string, options?: { notBlank?: boolean; onFallbackRun?: () => void }): void {
-    let blurred = false;
-    function blurHandler(): void {
-        blurred = true;
-        window.removeEventListener('blur', blurHandler);
-    }
-
-    window.addEventListener('blur', blurHandler);
-
-    openLink(deeplink);
-
-    setTimeout(() => {
-        if (!blurred) {
-            if (options?.notBlank) {
-                openLink(universalLink);
-            } else {
-                openLinkBlank(universalLink);
-            }
-        }
-        window.removeEventListener('blur', blurHandler);
-    }, 100);
 }

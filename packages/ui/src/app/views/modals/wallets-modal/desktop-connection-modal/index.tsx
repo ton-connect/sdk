@@ -43,7 +43,8 @@ import {
 } from 'src/app/components';
 import { appState } from 'src/app/state/app.state';
 import {
-    openDeeplinkWithUniversalFallback,
+    isBrowser,
+    openDeeplinkWithFallback,
     openLinkBlank,
     toDeeplink
 } from 'src/app/utils/web-api';
@@ -60,6 +61,8 @@ export interface DesktopConnectionProps {
     wallet: WalletInfoRemote | (WalletInfoRemote & WalletInfoInjectable);
     onBackClick: () => void;
 }
+
+let openDesktopDeeplinkAttempts = 0;
 
 export const DesktopConnectionModal: Component<DesktopConnectionProps> = props => {
     const [mode, setMode] = createSignal<'mobile' | 'desktop' | 'extension'>('mobile');
@@ -121,26 +124,29 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
 
         setMode('desktop');
         const linkWithStrategy = addReturnStrategy(universalLink()!, appState.returnStrategy);
-        if (props.wallet.deepLink) {
+
+        // check because safari doesn't support deeplinks fallbacks. Ignore deeplinks in safari after first failed attempt
+        const haveTriedToOpenDeeplinkInSafari = isBrowser('safari') && openDesktopDeeplinkAttempts >= 1;
+        if (props.wallet.deepLink && !haveTriedToOpenDeeplinkInSafari) {
+            openDesktopDeeplinkAttempts++;
             setLastSelectedWalletInfo({
                 ...props.wallet,
                 openMethod: 'custom-deeplink'
             });
 
-            openDeeplinkWithUniversalFallback(toDeeplink(linkWithStrategy, props.wallet.deepLink), linkWithStrategy, {
-                onFallbackRun: () => {
-                    setLastSelectedWalletInfo({
-                        ...props.wallet,
-                        openMethod: 'universal-link'
-                    });
-                }
-            });
+            openDeeplinkWithFallback(toDeeplink(linkWithStrategy, props.wallet.deepLink), () => {
+                setLastSelectedWalletInfo({
+                    ...props.wallet,
+                    openMethod: 'universal-link'
+                });
+                openLinkBlank(linkWithStrategy);
+            })
         } else {
             setLastSelectedWalletInfo({
                 ...props.wallet,
                 openMethod: 'universal-link'
             });
-            openLinkBlank(addReturnStrategy(universalLink()!, appState.returnStrategy));
+            openLinkBlank(linkWithStrategy);
         }
     };
 
