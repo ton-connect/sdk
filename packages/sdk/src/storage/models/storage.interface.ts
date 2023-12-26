@@ -13,7 +13,7 @@ export interface IStorage {
      * Reads the `value` from the storage. Implementation may use backend as a storage due to the fact that the function returns a promise.
      * @param key key to access the value.
      */
-    getItem(key: string): Promise<string | null>;
+    getItem(key: string): Promise<string | unknown>;
 
     /**
      * Removes the `value` from the storage. Implementation may use backend as a storage due to the fact that the function returns a promise.
