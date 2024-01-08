@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui 
 
+## [2.0.1-beta.0](https://github.com/ton-connect/sdk/compare/ui-2.0.0...ui-2.0.1-beta.0) (2024-01-08)
+
+
+### Features
+
+* **ui:** add experimental modal for single wallet ([6c1bf57](https://github.com/ton-connect/sdk/commit/6c1bf5757295ae8094023dddd7731d5cd51cc0b2))
+
+
+
 # [2.0.0](https://github.com/ton-connect/sdk/compare/ui-2.0.0-beta.10...ui-2.0.0) (2023-12-26)
 
 
