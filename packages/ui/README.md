@@ -167,6 +167,40 @@ unsubscribe();
 
 While `tonConnectUI` internally delegates these calls to the `modal`, it is recommended to use the `tonConnectUI` methods for a more straightforward and consistent experience. The `modal` is exposed in case you need direct access to the modal window's state and behavior, but this should generally be avoided unless necessary.
 
+## Open specific wallet
+
+> The methods described in this section are marked as experimental and are subject to change in future releases.
+
+To open a modal window for a specific wallet, use the `openSingleWalletModal()` method. This method accepts the wallet `app_name` as a parameter (please refer to the [wallets-list.json](https://github.com/ton-blockchain/wallets-list/blob/main/wallets-v2.json)) and opens the corresponding wallet modal. It returns a promise that resolves after the modal window is successfully opened.
+
+```typescript
+await tonConnectUI.openSingleWalletModal('wallet_identifier');
+````
+
+To close the currently open specific wallet modal, use the `closeSingleWalletModal()` method:
+
+```typescript
+tonConnectUI.closeSingleWalletModal();
+```
+
+To subscribe to the state changes of the specific wallet modal, use the `onSingleWalletModalStateChange((state) => {})` method. It accepts a callback function that will be called with the current modal state.
+
+```typescript
+const unsubscribe = tonConnectUI.onSingleWalletModalStateChange((state) => {
+    console.log('Modal state changed:', state);
+});
+
+// Call `unsubscribe` when you want to stop listening to the state changes
+unsubscribe();
+````
+
+To get the current state of the specific wallet modal window, use the `singleWalletModalState` property:
+
+```typescript
+const currentState = tonConnectUI.singleWalletModalState;
+console.log('Current modal state:', currentState);
+```
+
 ## Get current connected Wallet and WalletInfo
 You can use special getters to read current connection state. Note that this getter only represents current value, so they are not reactive. 
 To react and handle wallet changes use `onStatusChange` method.
