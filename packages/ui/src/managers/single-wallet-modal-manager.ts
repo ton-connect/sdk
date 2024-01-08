@@ -1,17 +1,21 @@
-import { setLastSelectedWalletInfo, walletsModalState } from 'src/app/state/modals-state';
+import { setLastSelectedWalletInfo, singleWalletModalState } from 'src/app/state/modals-state';
 import { createEffect } from 'solid-js';
 import {
     ConnectAdditionalRequest,
     isWalletInfoCurrentlyEmbedded,
+    isWalletInfoRemote,
     ITonConnect,
-    WalletInfoCurrentlyEmbedded
+    WalletInfoCurrentlyEmbedded,
+    WalletInfoRemote
 } from '@tonconnect/sdk';
 import { appState } from 'src/app/state/app.state';
 import { widgetController } from 'src/app/widget-controller';
-import { WalletsModal, WalletsModalState } from 'src/models/wallets-modal';
+import { SingleWalletModal, SingleWalletModalState } from 'src/models/single-wallet-modal';
 import { isInTMA, sendExpand } from 'src/app/utils/tma-api';
+import { TonConnectUIError } from 'src/errors';
+import { applyWalletsListConfiguration, eqWalletName } from 'src/app/utils/wallets';
 
-interface WalletsModalManagerCreateOptions {
+interface SingleWalletModalManagerCreateOptions {
     /**
      * TonConnect instance.
      */
@@ -28,7 +32,7 @@ interface WalletsModalManagerCreateOptions {
 /**
  * Manages the modal window state.
  */
-export class WalletsModalManager implements WalletsModal {
+export class SingleWalletModalManager implements SingleWalletModal {
     /**
      * TonConnect instance.
      * @internal
@@ -47,49 +51,65 @@ export class WalletsModalManager implements WalletsModal {
      * List of subscribers to the modal window state changes.
      * @internal
      */
-    private consumers: Array<(state: WalletsModalState) => void> = [];
+    private consumers: Array<(state: SingleWalletModalState) => void> = [];
 
     /**
      * Current modal window state.
      */
-    public state: WalletsModalState = walletsModalState();
+    public state: SingleWalletModalState = singleWalletModalState();
 
-    constructor(options: WalletsModalManagerCreateOptions) {
+    constructor(options: SingleWalletModalManagerCreateOptions) {
         this.connector = options.connector;
         this.setConnectRequestParametersCallback = options.setConnectRequestParametersCallback;
 
         createEffect(() => {
-            const state = walletsModalState();
+            const state = singleWalletModalState();
             this.state = state;
             this.consumers.forEach(consumer => consumer(state));
         });
     }
 
     /**
-     * Opens the modal window.
+     * Opens the modal window with the specified wallet.
+     * @param wallet - Wallet app name.
+     * @throws TonConnectUIError if the specified wallet is not found.
      */
-    public async open(): Promise<void> {
-        const walletsList = await this.connector.getWallets();
-        const embeddedWallet = walletsList.find(isWalletInfoCurrentlyEmbedded);
+    public async open(wallet: string): Promise<void> {
+        const fetchedWalletsList = await this.connector.getWallets();
+        const walletsList = applyWalletsListConfiguration(
+            fetchedWalletsList,
+            appState.walletsListConfiguration
+        );
 
-        if (embeddedWallet) {
+        // TODO: move to ITonConnect
+        const embeddedWallet = walletsList.find(isWalletInfoCurrentlyEmbedded);
+        const isEmbeddedWalletExist = !!embeddedWallet;
+        if (isEmbeddedWalletExist) {
             return this.connectEmbeddedWallet(embeddedWallet);
-        } else {
-            return this.openWalletsModal();
         }
+
+        // TODO: move to ITonConnect
+        const externalWallets = walletsList.filter(isWalletInfoRemote);
+        const externalWallet = externalWallets.find(walletInfo => eqWalletName(walletInfo, wallet));
+        const isExternalWalletExist = !!externalWallet;
+        if (isExternalWalletExist) {
+            return this.openSingleWalletModal(externalWallet);
+        }
+
+        throw new TonConnectUIError(`Trying to open modal window with unknown wallet "${wallet}".`);
     }
 
     /**
      * Closes the modal window.
      */
     public close(): void {
-        widgetController.closeWalletsModal('action-cancelled');
+        widgetController.closeSingleWalletModal('action-cancelled');
     }
 
     /**
      * Subscribe to the modal window state changes, returns unsubscribe function.
      */
-    public onStateChange(onChange: (state: WalletsModalState) => void): () => void {
+    public onStateChange(onChange: (state: SingleWalletModalState) => void): () => void {
         this.consumers.push(onChange);
 
         return () => {
@@ -117,15 +137,14 @@ export class WalletsModalManager implements WalletsModal {
     }
 
     /**
-     * Opens the modal window to connect to an external wallet, and waits when modal window is opened.
-     * @internal
+     * Opens the modal window to connect to a specified wallet, and waits when modal window is opened.
      */
-    private async openWalletsModal(): Promise<void> {
+    public async openSingleWalletModal(wallet: WalletInfoRemote): Promise<void> {
         if (isInTMA()) {
             sendExpand();
         }
 
-        widgetController.openWalletsModal();
+        widgetController.openSingleWalletModal(wallet);
 
         return new Promise<void>(resolve => {
             const unsubscribe = this.onStateChange(state => {

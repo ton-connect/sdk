@@ -3,6 +3,7 @@ import { WalletInfoWithOpenMethod, WalletOpenMethod } from 'src/models/connected
 import { LastSelectedWalletInfoStorage } from 'src/storage';
 import { ReturnStrategy } from 'src/models';
 import { WalletsModalState } from 'src/models/wallets-modal';
+import { SingleWalletModalState } from 'src/models/single-wallet-modal';
 
 export type ActionName = 'confirm-transaction' | 'transaction-sent' | 'transaction-canceled';
 
@@ -26,6 +27,25 @@ export const [walletsModalState, setWalletsModalState] = createSignal<WalletsMod
 });
 
 export const getWalletsModalIsOpened = createMemo(() => walletsModalState().status === 'opened');
+
+export const [singleWalletModalState, setSingleWalletModalState] =
+    createSignal<SingleWalletModalState>({
+        status: 'closed',
+        closeReason: null
+    });
+
+export const getSingleWalletModalIsOpened = createMemo(
+    () => singleWalletModalState().status === 'opened'
+);
+
+export const getSingleWalletModalWalletInfo = createMemo(() => {
+    const state = singleWalletModalState();
+    if (state.status === 'opened') {
+        return state.walletInfo;
+    }
+
+    return null;
+});
 
 let lastSelectedWalletInfoStorage =
     typeof window !== 'undefined' ? new LastSelectedWalletInfoStorage() : undefined;

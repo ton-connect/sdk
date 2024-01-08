@@ -41,6 +41,8 @@ import { TransactionModalManager } from 'src/managers/transaction-modal-manager'
 import { WalletsModal, WalletsModalState } from 'src/models/wallets-modal';
 import { isInTMA, sendExpand } from 'src/app/utils/tma-api';
 import { addReturnStrategy, redirectToTelegram } from 'src/app/utils/url-strategy-helpers';
+import { SingleWalletModalManager } from 'src/managers/single-wallet-modal-manager';
+import { SingleWalletModal, SingleWalletModalState } from 'src/models/single-wallet-modal';
 
 export class TonConnectUI {
     public static getWallets(): Promise<WalletInfo[]> {
@@ -72,6 +74,12 @@ export class TonConnectUI {
      * Manages the modal window state.
      */
     public readonly modal: WalletsModal;
+
+    /**
+     * Manages the single wallet modal window state.
+     * TODO: make it public when interface will be ready for external usage.
+     */
+    private readonly singleWalletModal: SingleWalletModal;
 
     /**
      * Manages the transaction modal window state.
@@ -193,6 +201,15 @@ export class TonConnectUI {
             }
         });
 
+        this.singleWalletModal = new SingleWalletModalManager({
+            connector: this.connector,
+            setConnectRequestParametersCallback: (
+                callback: (parameters?: ConnectAdditionalRequest) => void
+            ) => {
+                this.connectRequestParametersCallback = callback;
+            }
+        });
+
         this.transactionModal = new TransactionModalManager({
             connector: this.connector
         });
@@ -297,6 +314,40 @@ export class TonConnectUI {
      */
     public get modalState(): WalletsModalState {
         return this.modal.state;
+    }
+
+    /**
+     * Opens the single wallet modal window, returns a promise that resolves after the modal window is opened.
+     * @experimental
+     */
+    public async openSingleWalletModal(wallet: string): Promise<void> {
+        return this.singleWalletModal.open(wallet);
+    }
+
+    /**
+     * Close the single wallet modal window.
+     * @experimental
+     */
+    public closeSingleWalletModal(): void {
+        this.singleWalletModal.close();
+    }
+
+    /**
+     * Subscribe to the single wallet modal window state changes, returns a function which has to be called to unsubscribe.
+     * @experimental
+     */
+    public onSingleWalletModalStateChange(
+        onChange: (state: SingleWalletModalState) => void
+    ): () => void {
+        return this.singleWalletModal.onStateChange(onChange);
+    }
+
+    /**
+     * Returns current single wallet modal window state.
+     * @experimental
+     */
+    public get singleWalletModalState(): SingleWalletModalState {
+        return this.singleWalletModal.state;
     }
 
     /**

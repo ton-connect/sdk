@@ -60,6 +60,7 @@ export interface DesktopConnectionProps {
     additionalRequest?: ConnectAdditionalRequest;
     wallet: WalletInfoRemote | (WalletInfoRemote & WalletInfoInjectable);
     onBackClick: () => void;
+    backDisabled?: boolean;
 }
 
 let openDesktopDeeplinkAttempts = 0;
@@ -188,7 +189,9 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
 
     return (
         <DesktopConnectionModalStyled data-tc-wallets-modal-connection-desktop="true">
-            <StyledIconButton icon="arrow" onClick={() => props.onBackClick()} />
+            <Show when={!props.backDisabled}>
+                <StyledIconButton icon="arrow" onClick={() => props.onBackClick()} />
+            </Show>
             <H1Styled>{props.wallet.name}</H1Styled>
             <Show when={mode() === 'mobile'}>
                 <H2Styled
