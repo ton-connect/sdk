@@ -16,7 +16,7 @@
 <li><a href="_tonconnect_ui.html">@tonconnect/ui</a></li></ul>
 <h1>Module @tonconnect/ui</h1></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/0b11cd5/packages/ui/src/library.ts#L1">packages/ui/src/library.ts:1</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/063d682/packages/ui/src/library.ts#L1">packages/ui/src/library.ts:1</a></li></ul></aside>
 <section class="tsd-panel-group">
 <section class="tsd-panel tsd-typography">
 <a href="#ton-connect-ui" id="ton-connect-ui" style="color: inherit; text-decoration: none;">
@@ -124,6 +124,25 @@ But you are still able to open &quot;connect modal&quot; programmatically, e.g. 
 <pre><code class="language-typescript"><span class="hl-4">const</span><span class="hl-1"> { </span><span class="hl-8">modal</span><span class="hl-1"> } = </span><span class="hl-2">tonConnectUI</span><span class="hl-1">;</span><br/><br/><span class="hl-7">// Open and close the modal</span><br/><span class="hl-0">await</span><span class="hl-1"> </span><span class="hl-2">modal</span><span class="hl-1">.</span><span class="hl-5">open</span><span class="hl-1">();</span><br/><span class="hl-2">modal</span><span class="hl-1">.</span><span class="hl-5">close</span><span class="hl-1">();</span><br/><br/><span class="hl-7">// Get the current modal state</span><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">currentState</span><span class="hl-1"> = </span><span class="hl-2">modal</span><span class="hl-1">.</span><span class="hl-2">state</span><span class="hl-1">;</span><br/><br/><span class="hl-7">// Subscribe and unsubscribe to modal state changes</span><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">unsubscribe</span><span class="hl-1"> = </span><span class="hl-2">modal</span><span class="hl-1">.</span><span class="hl-5">onStateChange</span><span class="hl-1">(</span><span class="hl-2">state</span><span class="hl-1"> </span><span class="hl-4">=&gt;</span><span class="hl-1"> { </span><span class="hl-7">/* ... */</span><span class="hl-1"> });</span><br/><span class="hl-5">unsubscribe</span><span class="hl-1">();</span>
 </code></pre>
 <p>While <code>tonConnectUI</code> internally delegates these calls to the <code>modal</code>, it is recommended to use the <code>tonConnectUI</code> methods for a more straightforward and consistent experience. The <code>modal</code> is exposed in case you need direct access to the modal window&#39;s state and behavior, but this should generally be avoided unless necessary.</p>
+
+<a href="#open-specific-wallet" id="open-specific-wallet" style="color: inherit; text-decoration: none;">
+  <h2>Open specific wallet</h2>
+</a>
+<blockquote>
+<p>The methods described in this section are marked as experimental and are subject to change in future releases.</p>
+</blockquote>
+<p>To open a modal window for a specific wallet, use the <code>openSingleWalletModal()</code> method. This method accepts the wallet <code>app_name</code> as a parameter (please refer to the <a href="https://github.com/ton-blockchain/wallets-list/blob/main/wallets-v2.json">wallets-list.json</a>) and opens the corresponding wallet modal. It returns a promise that resolves after the modal window is successfully opened.</p>
+<pre><code class="language-typescript"><span class="hl-0">await</span><span class="hl-1"> </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-5">openSingleWalletModal</span><span class="hl-1">(</span><span class="hl-3">&#39;wallet_identifier&#39;</span><span class="hl-1">);</span>
+</code></pre>
+<p>To close the currently open specific wallet modal, use the <code>closeSingleWalletModal()</code> method:</p>
+<pre><code class="language-typescript"><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-5">closeSingleWalletModal</span><span class="hl-1">();</span>
+</code></pre>
+<p>To subscribe to the state changes of the specific wallet modal, use the <code>onSingleWalletModalStateChange((state) =&gt; {})</code> method. It accepts a callback function that will be called with the current modal state.</p>
+<pre><code class="language-typescript"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">unsubscribe</span><span class="hl-1"> = </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-5">onSingleWalletModalStateChange</span><span class="hl-1">((</span><span class="hl-2">state</span><span class="hl-1">) </span><span class="hl-4">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">    </span><span class="hl-2">console</span><span class="hl-1">.</span><span class="hl-5">log</span><span class="hl-1">(</span><span class="hl-3">&#39;Modal state changed:&#39;</span><span class="hl-1">, </span><span class="hl-2">state</span><span class="hl-1">);</span><br/><span class="hl-1">});</span><br/><br/><span class="hl-7">// Call `unsubscribe` when you want to stop listening to the state changes</span><br/><span class="hl-5">unsubscribe</span><span class="hl-1">();</span>
+</code></pre>
+<p>To get the current state of the specific wallet modal window, use the <code>singleWalletModalState</code> property:</p>
+<pre><code class="language-typescript"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">currentState</span><span class="hl-1"> = </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-2">singleWalletModalState</span><span class="hl-1">;</span><br/><span class="hl-2">console</span><span class="hl-1">.</span><span class="hl-5">log</span><span class="hl-1">(</span><span class="hl-3">&#39;Current modal state:&#39;</span><span class="hl-1">, </span><span class="hl-2">currentState</span><span class="hl-1">);</span>
+</code></pre>
 
 <a href="#get-current-connected-wallet-and-walletinfo" id="get-current-connected-wallet-and-walletinfo" style="color: inherit; text-decoration: none;">
   <h2>Get current connected Wallet and WalletInfo</h2>
