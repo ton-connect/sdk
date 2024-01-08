@@ -1,4 +1,4 @@
-import { ConnectAdditionalRequest, WalletInfoRemote } from '@tonconnect/sdk';
+import { ConnectAdditionalRequest, isTelegramUrl, WalletInfoRemote } from '@tonconnect/sdk';
 import { Component, createMemo, createSignal, onCleanup, Show, useContext } from 'solid-js';
 import {
     BodyStyled,
@@ -21,12 +21,13 @@ import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { useTheme } from 'solid-styled-components';
 import { MobileConnectionQR } from 'src/app/views/modals/wallets-modal/mobile-connection-modal/mobile-connection-qr';
 import { Translation } from 'src/app/components/typography/Translation';
-import { addReturnStrategy } from 'src/app/utils/url-strategy-helpers';
+import { addReturnStrategy, redirectToTelegram } from 'src/app/utils/url-strategy-helpers';
 
 export interface MobileConnectionProps {
     additionalRequest?: ConnectAdditionalRequest;
     wallet: WalletInfoRemote;
     onBackClick: () => void;
+    backDisabled?: boolean;
 }
 
 export const MobileConnectionModal: Component<MobileConnectionProps> = props => {
@@ -52,7 +53,25 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
         )
     );
 
+    const onClickTelegram = (): void => {
+        const alwaysForceRedirect = true;
+        setLastSelectedWalletInfo({
+            ...props.wallet,
+            openMethod: 'universal-link'
+        });
+        redirectToTelegram(universalLink()!, {
+            returnStrategy: appState.returnStrategy,
+            twaReturnUrl: appState.twaReturnUrl,
+            forceRedirect: alwaysForceRedirect
+        });
+    };
+
     const onRetry = (): void => {
+        const currentUniversalLink = universalLink();
+        if (isTelegramUrl(currentUniversalLink)) {
+            return onClickTelegram();
+        }
+
         setConnectionErrored(false);
         setLastSelectedWalletInfo({
             ...props.wallet,
@@ -91,7 +110,9 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
 
     return (
         <MobileConnectionModalStyled data-tc-wallets-modal-connection-mobile="true">
-            <StyledIconButton icon="arrow" onClick={onBack} />
+            <Show when={!props.backDisabled || showQR()}>
+                <StyledIconButton icon="arrow" onClick={onBack} />
+            </Show>
             <Show when={showQR()}>
                 <MobileConnectionQR universalLink={universalLink()} walletInfo={props.wallet} />
             </Show>
