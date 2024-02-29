@@ -1,5 +1,19 @@
 # Changelog @tonconnect/ui 
 
+## [2.0.1-beta.1](https://github.com/ton-connect/sdk/compare/ui-2.0.1-beta.0...ui-2.0.1-beta.1) (2024-02-29)
+
+
+### Bug Fixes
+
+* adjust modals for mobile and tablet display ([063ad8e](https://github.com/ton-connect/sdk/commit/063ad8e9b30c205b7705fe448e9a2b76c453f7a2))
+
+
+### Features
+
+* redirect mobile browsers back to the wallet after action ([ccebd56](https://github.com/ton-connect/sdk/commit/ccebd56715274763bcfefae88899749940426981))
+
+
+
 ## [2.0.1-beta.0](https://github.com/ton-connect/sdk/compare/ui-2.0.0...ui-2.0.1-beta.0) (2024-01-08)
 
 
