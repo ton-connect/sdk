@@ -104,7 +104,9 @@ export function redirectToTelegram(
         if (isOS('ios', 'android')) {
             // Use the `none` strategy. TON Space should do nothing after the user action.
 
-            options.returnStrategy = 'none';
+            // TODO: do it more elegant
+            // options.returnStrategy = 'none';
+            options.returnStrategy = location.href as ReturnStrategy;
 
             openLinkBlank(addReturnStrategy(directLinkUrl.toString(), options.returnStrategy));
         } else if (isOS('macos', 'windows', 'linux')) {
