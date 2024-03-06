@@ -1,0 +1,67 @@
+{
+    "name": "tonconnect-ui-angular-fork",
+    "version": "0.0.0",
+    "scripts": {
+        "build": "ng build ui-angular && rm lib/package.json"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/ton-connect/sdk.git"
+    },
+    "homepage": "https://github.com/ton-connect/sdk/tree/main/packages/ui-angular",
+    "bugs": {
+        "url": "https://github.com/ton-connect/sdk/issues"
+    },
+    "keywords": [
+        "TON",
+        "Wallet",
+        "ton-connect",
+        "tonconnect",
+        "Connect",
+        "Tonkeeper",
+        "sdk",
+        "UI",
+        "Angular"
+    ],
+    "author": "tonconnect",
+    "license": "Apache-2.0",
+    "files": [
+        "lib"
+    ],
+    "sideEffects": false,
+    "module": "./lib/fesm2022/tonconnect-ui-angular.mjs",
+    "typings": "./lib/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./lib/index.d.ts",
+            "esm2022": "./lib/esm2022/tonconnect-ui-angular.mjs",
+            "esm": "./lib/esm2022/tonconnect-ui-angular.mjs",
+            "default": "./lib/fesm2022/tonconnect-ui-angular.mjs"
+        }
+    },
+    "devDependencies": {
+        "@angular-devkit/build-angular": "^16.2.0",
+        "@angular/cli": "^16.2.0",
+        "@angular/compiler-cli": "^16.2.0",
+        "ng-packagr": "^16.2.0",
+        "typescript": "^4.9.3"
+    },
+    "dependencies": {
+        "@tonconnect/ui": "^2.0.1-beta.1",
+        "tslib": "^2.3.0"
+    },
+    "peerDependencies": {
+        "@angular/common": "^16.2.0",
+        "@angular/compiler": "^16.2.0",
+        "@angular/core": "^16.2.0",
+        "@angular/platform-browser": "^16.2.0",
+        "@angular/platform-browser-dynamic": "^16.2.0",
+        "rxjs": "~7.8.0",
+        "zone.js": "~0.13.0"
+    },
+    "nx": {
+        "tags": [
+            "scope:ui-angular"
+        ]
+    }
+}
