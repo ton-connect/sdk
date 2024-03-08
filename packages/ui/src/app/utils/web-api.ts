@@ -12,6 +12,7 @@ import { TonConnectUIError } from 'src/errors';
  * @param target
  */
 export function openLink(href: string, target = '_self'): void {
+    console.log('openLink', href, target);
     window.open(href, target, 'noopener noreferrer');
 }
 
@@ -24,7 +25,7 @@ export function openLinkBlank(href: string): void {
 }
 
 /**
- * Open a deeplink in the same tab and fallback to a direct link after 1 second.
+ * Open a deeplink in the same tab and fallback to a direct link after 200 ms.
  * In Safari, the fallback will not work.
  * @param href
  * @param fallback
@@ -214,6 +215,9 @@ export function getUserAgent(): UserAgent {
             break;
         case browserName?.includes('safari'):
             browser = 'safari';
+            break;
+        case browserName?.includes('opera'):
+            browser = 'opera';
             break;
     }
 

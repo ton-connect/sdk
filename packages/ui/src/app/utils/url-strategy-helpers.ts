@@ -1,6 +1,6 @@
 import { ReturnStrategy } from 'src/models/return-strategy';
 import { isInTMA, isTmaPlatform, sendOpenTelegramLink } from 'src/app/utils/tma-api';
-import { isOS, openDeeplinkWithFallback, openLinkBlank } from 'src/app/utils/web-api';
+import { isBrowser, isOS, openDeeplinkWithFallback, openLink, openLinkBlank } from 'src/app/utils/web-api';
 import { encodeTelegramUrlParameters, isTelegramUrl } from '@tonconnect/sdk';
 
 /**
@@ -106,9 +106,28 @@ export function redirectToTelegram(
 
             // TODO: do it more elegant
             // options.returnStrategy = 'none';
-            options.returnStrategy = location.href as ReturnStrategy;
+            if (options.returnStrategy === 'back') {
+                options.returnStrategy = location.href as ReturnStrategy;
+            }
 
-            openLinkBlank(addReturnStrategy(directLinkUrl.toString(), options.returnStrategy));
+            const useDeepLink = isBrowser('chrome') && !options.forceRedirect;
+
+            if (useDeepLink) {
+                const linkWithStrategy = addReturnStrategy(
+                    directLinkUrl.toString(),
+                    options.returnStrategy
+                );
+                const deepLink = convertToTGDeepLink(linkWithStrategy);
+
+                openDeeplinkWithFallback(deepLink, () => openLinkBlank(linkWithStrategy));
+            } else {
+                const linkWithStrategy = addReturnStrategy(
+                    directLinkUrl.toString(),
+                    options.returnStrategy
+                );
+
+                openLinkBlank(linkWithStrategy);
+            }
         } else if (isOS('macos', 'windows', 'linux')) {
             // Use the `none` strategy. TON Space should do nothing after the user action.
 
@@ -127,6 +146,236 @@ export function redirectToTelegram(
             // Fallback for unknown platforms. Should use desktop strategy.
 
             openLinkBlank(addReturnStrategy(directLinkUrl.toString(), options));
+        }
+    }
+}
+
+/**
+ * Redirects the user to a specified wallet link with various strategies for returning to the application.
+ * This function is primarily used for any wallet to handle different platforms and operating systems.
+ *
+ * @param universalLink A string representing the universal link to redirect to within the wallet.
+ * @param deepLink A string representing the deep link to redirect to within the wallet, or `undefined` if not applicable.
+ * @param options An object containing specific properties to customize the redirect behavior:
+ *  - returnStrategy: An enum `ReturnStrategy` dictating the method for returning to the app after the action is completed.
+ *  - forceRedirect: A boolean flag to force redirection, bypassing deep link fallback mechanisms.
+ * @param setOpenMethod A function to set the method of opening the wallet.
+ *
+ * The function adapts its behavior based on the execution context, such as the TMA or browser environment, and the operating system.
+ * Different strategies involve manipulating URL parameters and utilizing platform-specific features for optimal user experience.
+ */
+export function redirectToWallet(
+    universalLink: string,
+    deepLink: string | undefined,
+    options: {
+        returnStrategy: ReturnStrategy;
+        forceRedirect: boolean;
+    },
+    setOpenMethod: (method: 'universal-link' | 'custom-deeplink') => void
+): void {
+    options = { ...options };
+
+    if (isInTMA()) {
+        if (isTmaPlatform('ios', 'android')) {
+            // Use the `tg://resolve` strategy, the user will transition to the other app
+            // and return to the Telegram app after the action is completed.
+
+            // return back to the telegram app
+            if (options.returnStrategy === 'back') {
+                options.returnStrategy = 'tg://resolve';
+            }
+
+            setOpenMethod('universal-link');
+
+            const linkWitStrategy = addReturnStrategy(universalLink, options.returnStrategy);
+
+            sendOpenTelegramLink(linkWitStrategy, () => {
+                setOpenMethod('universal-link');
+
+                openLinkBlank(linkWitStrategy);
+            });
+        } else if (isTmaPlatform('macos', 'tdesktop')) {
+            // Use the `tg://resolve` strategy, the user will transition to the other app
+            // and return to the Telegram app after the action is completed.
+
+            // return back to the telegram app
+            if (options.returnStrategy === 'back') {
+                options.returnStrategy = 'tg://resolve';
+            }
+
+            const linkWitStrategy = addReturnStrategy(universalLink, options.returnStrategy);
+            const useDeepLink = !!deepLink && !options.forceRedirect;
+            if (useDeepLink) {
+                setOpenMethod('custom-deeplink');
+
+                openDeeplinkWithFallback(deepLink!, () => {
+                    setOpenMethod('universal-link');
+
+                    openLinkBlank(linkWitStrategy);
+                });
+            } else {
+                setOpenMethod('universal-link');
+
+                openLinkBlank(linkWitStrategy);
+            }
+        } else if (isTmaPlatform('weba')) {
+            // Use the `back` strategy, the user will transition to the other app
+            // and maybe return to the browser when the action is completed.
+
+            // return back to the telegram app
+            if (options.returnStrategy === 'back') {
+                if (isBrowser('safari')) {
+                    options.returnStrategy = location.href as ReturnStrategy;
+                } else if (isBrowser('chrome')) {
+                    options.returnStrategy = 'googlechrome://';
+                } else if (isBrowser('firefox')) {
+                    options.returnStrategy = 'firefox://';
+                } else if (isBrowser('opera')) {
+                    options.returnStrategy = 'opera-http://';
+                } else {
+                    options.returnStrategy = location.href as ReturnStrategy;
+                }
+            }
+
+            const linkWitStrategy = addReturnStrategy(universalLink, options.returnStrategy);
+            const useDeepLink = !!deepLink && !options.forceRedirect;
+            if (useDeepLink) {
+                setOpenMethod('custom-deeplink');
+
+                openDeeplinkWithFallback(deepLink, () => {
+                    setOpenMethod('universal-link');
+
+                    openLinkBlank(linkWitStrategy);
+                });
+            } else {
+                setOpenMethod('universal-link');
+
+                openLinkBlank(linkWitStrategy);
+            }
+        } else if (isTmaPlatform('web')) {
+            // Use the `back` strategy, the user will transition to the other app
+            // and maybe return to the browser when the action is completed.
+
+            // return back to the telegram app
+            if (options.returnStrategy === 'back') {
+                if (isBrowser('safari')) {
+                    options.returnStrategy = location.href as ReturnStrategy;
+                } else if (isBrowser('chrome')) {
+                    options.returnStrategy = 'googlechrome://';
+                } else if (isBrowser('firefox')) {
+                    options.returnStrategy = 'firefox://';
+                } else if (isBrowser('opera')) {
+                    options.returnStrategy = 'opera-http://';
+                } else {
+                    options.returnStrategy = location.href as ReturnStrategy;
+                }
+            }
+
+            const linkWitStrategy = addReturnStrategy(universalLink, options.returnStrategy);
+            const useDeepLink = !!deepLink && !options.forceRedirect;
+            if (useDeepLink) {
+                setOpenMethod('custom-deeplink');
+
+                openDeeplinkWithFallback(deepLink, () => {
+                    setOpenMethod('universal-link');
+
+                    openLinkBlank(linkWitStrategy);
+                });
+            } else {
+                setOpenMethod('universal-link');
+
+                openLinkBlank(linkWitStrategy);
+            }
+        } else {
+            // Fallback for unknown platforms. Should use desktop strategy.
+
+            setOpenMethod('universal-link');
+
+            const linkWitStrategy = addReturnStrategy(universalLink, options.returnStrategy);
+
+            openLinkBlank(linkWitStrategy);
+        }
+    } else {
+        if (isOS('ios')) {
+            // Use the `location.href` strategy, the user will transition to the other app
+            // and return to the Telegram app after the action is completed.
+
+            // return back to the telegram app
+            if (options.returnStrategy === 'back') {
+                if (isBrowser('safari')) {
+                    options.returnStrategy = location.href as ReturnStrategy;
+                } else if (isBrowser('chrome')) {
+                    options.returnStrategy = 'googlechrome://';
+                } else if (isBrowser('firefox')) {
+                    options.returnStrategy = 'firefox://';
+                } else if (isBrowser('opera')) {
+                    options.returnStrategy = 'opera-http://';
+                } else {
+                    options.returnStrategy = location.href as ReturnStrategy;
+                }
+            }
+
+            if (isBrowser('chrome')) {
+                setOpenMethod('universal-link');
+
+                // openLinkBlank(addReturnStrategy(universalLink, options.returnStrategy));
+                openLink(addReturnStrategy(universalLink, options.returnStrategy), '_self');
+            } else {
+                setOpenMethod('universal-link');
+
+                openLinkBlank(addReturnStrategy(universalLink, options.returnStrategy));
+            }
+        } else if (isOS('android')) {
+            // Use the `location.href` strategy, the user will transition to the other app
+            // and return to the Telegram app after the action is completed.
+
+            // return back to the telegram app
+            if (options.returnStrategy === 'back') {
+                if (isBrowser('safari')) {
+                    options.returnStrategy = location.href as ReturnStrategy;
+                } else if (isBrowser('chrome')) {
+                    options.returnStrategy = 'googlechrome://';
+                } else if (isBrowser('firefox')) {
+                    options.returnStrategy = 'firefox://';
+                } else if (isBrowser('opera')) {
+                    options.returnStrategy = 'opera-http://';
+                } else {
+                    options.returnStrategy = location.href as ReturnStrategy;
+                }
+            }
+
+            setOpenMethod('universal-link');
+
+            openLinkBlank(addReturnStrategy(universalLink, options.returnStrategy));
+        } else if (isOS('macos', 'windows', 'linux')) {
+            // Use the `location.href` strategy, the user will transition to the other app
+            // and return to the Telegram app after the action is completed.
+
+            // return back to the telegram app
+            if (options.returnStrategy === 'back') {
+                options.returnStrategy = location.href as ReturnStrategy;
+            }
+
+            const linkWitStrategy = addReturnStrategy(universalLink, options.returnStrategy);
+            const useDeepLink = !!deepLink && !options.forceRedirect;
+            if (useDeepLink) {
+                setOpenMethod('custom-deeplink');
+
+                openDeeplinkWithFallback(deepLink, () => {
+                    setOpenMethod('universal-link');
+
+                    openLinkBlank(linkWitStrategy);
+                });
+            } else {
+                setOpenMethod('universal-link');
+
+                openLinkBlank(linkWitStrategy);
+            }
+        } else {
+            // Fallback for unknown platforms. Should use desktop strategy.
+            setOpenMethod('universal-link');
+
+            openLinkBlank(addReturnStrategy(universalLink, options.returnStrategy));
         }
     }
 }

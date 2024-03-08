@@ -21,7 +21,7 @@ import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { useTheme } from 'solid-styled-components';
 import { MobileConnectionQR } from 'src/app/views/modals/wallets-modal/mobile-connection-modal/mobile-connection-qr';
 import { Translation } from 'src/app/components/typography/Translation';
-import { addReturnStrategy, redirectToTelegram } from 'src/app/utils/url-strategy-helpers';
+import { addReturnStrategy, redirectToTelegram, redirectToWallet } from 'src/app/utils/url-strategy-helpers';
 
 export interface MobileConnectionProps {
     additionalRequest?: ConnectAdditionalRequest;
@@ -32,6 +32,7 @@ export interface MobileConnectionProps {
 
 export const MobileConnectionModal: Component<MobileConnectionProps> = props => {
     const theme = useTheme();
+    const [firstClick, setFirstClick] = createSignal(true);
     const [showQR, setShowQR] = createSignal(false);
     const [connectionErrored, setConnectionErrored] = createSignal(false);
     const connector = useContext(ConnectorContext)!;
@@ -73,11 +74,24 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
         }
 
         setConnectionErrored(false);
-        setLastSelectedWalletInfo({
-            ...props.wallet,
-            openMethod: 'universal-link'
-        });
-        openLinkBlank(addReturnStrategy(universalLink()!, appState.returnStrategy));
+
+        const forceRedirect = !firstClick();
+        setFirstClick(false);
+
+        redirectToWallet(
+            universalLink()!,
+            props.wallet.deepLink,
+            {
+                returnStrategy: appState.returnStrategy,
+                forceRedirect: forceRedirect
+            },
+            (method: 'universal-link' | 'custom-deeplink') => {
+                setLastSelectedWalletInfo({
+                    ...props.wallet,
+                    openMethod: method
+                });
+            }
+        );
     };
 
     const onOpenQR = (): void => {
