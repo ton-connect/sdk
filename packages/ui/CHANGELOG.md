@@ -1,5 +1,15 @@
 # Changelog @tonconnect/ui 
 
+## [2.0.1-beta.2](https://github.com/ton-connect/sdk/compare/ui-2.0.1-beta.1...ui-2.0.1-beta.2) (2024-03-08)
+
+
+### Features
+
+* **ui:** improve transition between some browsers ([c083470](https://github.com/ton-connect/sdk/commit/c083470500bdc993afea7d172592ac4bbc0266bb))
+* **ui:** improve transition flow between dapp and all wallets across devices ([4e9d6f0](https://github.com/ton-connect/sdk/commit/4e9d6f0200c2d24293416d33d835db7d13bdcb45))
+
+
+
 ## [2.0.1-beta.1](https://github.com/ton-connect/sdk/compare/ui-2.0.1-beta.0...ui-2.0.1-beta.1) (2024-02-29)
 
 
