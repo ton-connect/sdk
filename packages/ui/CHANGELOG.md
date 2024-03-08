@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui 
 
+## [2.0.1-beta.3](https://github.com/ton-connect/sdk/compare/ui-2.0.1-beta.2...ui-2.0.1-beta.3) (2024-03-08)
+
+
+### Features
+
+* improve transition between browser and wallets in ios and android ([99c4399](https://github.com/ton-connect/sdk/commit/99c43996fc6372106880ea081c2350819dde64b9))
+
+
+
 ## [2.0.1-beta.2](https://github.com/ton-connect/sdk/compare/ui-2.0.1-beta.1...ui-2.0.1-beta.2) (2024-03-08)
 
 
