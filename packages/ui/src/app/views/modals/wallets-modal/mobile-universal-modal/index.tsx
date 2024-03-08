@@ -78,7 +78,6 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
     };
 
     const onSelectUniversal = (): void => {
-        // openLinkBlank(addReturnStrategy(getUniversalLink(), appState.returnStrategy));
         const forceRedirect = !firstClick();
         setFirstClick(false);
 
