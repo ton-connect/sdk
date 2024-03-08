@@ -75,14 +75,21 @@ export function sendExpand(): void {
 
 /**
  * Opens link in TMA or in new tab and returns a function that closes the tab.
- * @param link
+ * @param link The link to open.
+ * @param fallback The function to call if the link can't be opened in TMA.
  */
-export function sendOpenTelegramLink(link: string): void {
+export function sendOpenTelegramLink(link: string, fallback?: () => void): void {
     const url = new URL(link);
     if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+        if (fallback) {
+            return fallback();
+        }
         throw new TonConnectUIError(`Url protocol is not supported: ${url}`);
     }
     if (url.hostname !== 't.me') {
+        if (fallback) {
+            return fallback();
+        }
         throw new TonConnectUIError(`Url host is not supported: ${url}`);
     }
 
@@ -117,12 +124,15 @@ function postEvent(eventType: string, eventData: object): void {
         }
 
         if (window.TelegramWebviewProxy !== undefined) {
+            console.log('postEvent', eventType, eventData);
             window.TelegramWebviewProxy.postEvent(eventType, JSON.stringify(eventData));
         } else if (window.external && 'notify' in window.external) {
+            console.log('postEvent', eventType, eventData);
             window.external.notify(JSON.stringify({ eventType: eventType, eventData: eventData }));
         } else if (isIframe()) {
             const trustedTarget = '*';
             const message = JSON.stringify({ eventType: eventType, eventData: eventData });
+            console.log('postEvent', eventType, eventData);
             window.parent.postMessage(message, trustedTarget);
         } else {
             throw new TonConnectUIError(`Can't post event to TMA`);

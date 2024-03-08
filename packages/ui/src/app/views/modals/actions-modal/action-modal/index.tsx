@@ -9,7 +9,7 @@ import { isTelegramUrl } from '@tonconnect/sdk';
 import { appState } from 'src/app/state/app.state';
 import { action } from 'src/app/state/modals-state';
 import { isInTMA } from 'src/app/utils/tma-api';
-import { addReturnStrategy, redirectToTelegram } from 'src/app/utils/url-strategy-helpers';
+import { addReturnStrategy, redirectToTelegram, redirectToWallet } from 'src/app/utils/url-strategy-helpers';
 
 interface ActionModalProps extends WithDataAttributes {
     headerTranslationKey: string;
@@ -36,6 +36,16 @@ export const ActionModal: Component<ActionModalProps> = props => {
         universalLink = tonConnectUI.wallet.universalLink;
     }
 
+    let deepLink: string | undefined;
+    if (
+        tonConnectUI?.wallet &&
+        'deepLink' in tonConnectUI.wallet &&
+        (tonConnectUI.wallet.openMethod === 'custom-deeplink' ||
+            (isTelegramUrl(tonConnectUI.wallet.deepLink) && isInTMA()))
+    ) {
+        deepLink = tonConnectUI.wallet.deepLink;
+    }
+
     const onOpenWallet = (): void => {
         const currentAction = action()!;
         const returnStrategy =
@@ -43,9 +53,10 @@ export const ActionModal: Component<ActionModalProps> = props => {
                 ? currentAction.returnStrategy
                 : appState.returnStrategy;
 
+        const forceRedirect = !firstClick();
+        setFirstClick(false);
+
         if (isTelegramUrl(universalLink)) {
-            const forceRedirect = !firstClick();
-            setFirstClick(false);
             redirectToTelegram(universalLink, {
                 returnStrategy: returnStrategy,
                 twaReturnUrl:
@@ -55,7 +66,15 @@ export const ActionModal: Component<ActionModalProps> = props => {
                 forceRedirect: forceRedirect
             });
         } else {
-            openLinkBlank(addReturnStrategy(universalLink!, returnStrategy));
+            redirectToWallet(
+                universalLink!,
+                deepLink,
+                {
+                    returnStrategy: returnStrategy,
+                    forceRedirect: forceRedirect
+                },
+                () => {}
+            );
         }
     };
 

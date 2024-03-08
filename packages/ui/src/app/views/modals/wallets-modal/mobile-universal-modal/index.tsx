@@ -31,7 +31,7 @@ import { copyToClipboard } from 'src/app/utils/copy-to-clipboard';
 import { TonConnectUIError } from 'src/errors';
 import { MobileUniversalQR } from './mobile-universal-qr';
 import { Translation } from 'src/app/components/typography/Translation';
-import { addReturnStrategy, redirectToTelegram } from 'src/app/utils/url-strategy-helpers';
+import { addReturnStrategy, redirectToTelegram, redirectToWallet } from 'src/app/utils/url-strategy-helpers';
 
 interface MobileUniversalModalProps {
     walletsList: WalletInfo[];
@@ -78,7 +78,23 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
     };
 
     const onSelectUniversal = (): void => {
-        openLinkBlank(addReturnStrategy(getUniversalLink(), appState.returnStrategy));
+        // openLinkBlank(addReturnStrategy(getUniversalLink(), appState.returnStrategy));
+        const forceRedirect = !firstClick();
+        setFirstClick(false);
+
+        redirectToWallet(
+            getUniversalLink(),
+            undefined,
+            {
+                returnStrategy: appState.returnStrategy,
+                forceRedirect: forceRedirect
+            },
+            (method: 'universal-link' | 'custom-deeplink') => {
+                setLastSelectedWalletInfo({
+                    openMethod: method
+                });
+            }
+        );
     };
 
     const onSelectTelegram = (): void => {
