@@ -101,14 +101,42 @@ export function redirectToTelegram(
         }
     } else {
         // For browser
-        if (isOS('ios', 'android')) {
+        if (isOS('ios')) {
             // Use the `back` strategy, the user will transition to the other app
             // and return to the browser when the action is completed.
 
-            // TODO: use back to the browser
+            // TODO: use back for all browsers
             if (options.returnStrategy === 'back') {
                 options.returnStrategy = location.href as ReturnStrategy;
             }
+
+            // In case if the browser is Chrome or Firefox, use the deep link with fallback to the direct link.
+            const isChrome = isBrowser('chrome');
+            const isFirefox = isBrowser('firefox');
+            const useDeepLink = (isChrome || isFirefox) && !options.forceRedirect;
+
+            if (useDeepLink) {
+                const linkWithStrategy = addReturnStrategy(
+                    directLinkUrl.toString(),
+                    options.returnStrategy
+                );
+                const deepLink = convertToTGDeepLink(linkWithStrategy);
+
+                openDeeplinkWithFallback(deepLink, () => openLinkBlank(linkWithStrategy));
+            } else {
+                const linkWithStrategy = addReturnStrategy(
+                    directLinkUrl.toString(),
+                    options.returnStrategy
+                );
+
+                openLinkBlank(linkWithStrategy);
+            }
+        } else if (isOS('android')) {
+            // Use the `none` strategy, the user will transition to the other app
+            // and return to the browser when the action is completed.
+
+            // TODO: use back for all browsers
+            options.returnStrategy = 'none';
 
             // In case if the browser is Chrome or Firefox, use the deep link with fallback to the direct link.
             const isChrome = isBrowser('chrome');
