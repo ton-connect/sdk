@@ -1,6 +1,6 @@
 import { ReturnStrategy } from 'src/models/return-strategy';
 import { isInTMA, isTmaPlatform, sendOpenTelegramLink } from 'src/app/utils/tma-api';
-import { isBrowser, isOS, openDeeplinkWithFallback, openLink, openLinkBlank } from 'src/app/utils/web-api';
+import { isBrowser, isOS, openDeeplinkWithFallback, openLink, openLinkBlank, toDeeplink } from 'src/app/utils/web-api';
 import { encodeTelegramUrlParameters, isTelegramUrl } from '@tonconnect/sdk';
 
 /**
@@ -66,7 +66,7 @@ export function redirectToTelegram(
 
     if (isInTMA()) {
         if (isTmaPlatform('ios', 'android')) {
-            // Use the `none` strategy, the current TMA instance will keep open.
+            // Use the `back` strategy, the current TMA instance will keep open.
             // TON Space should automatically open in stack and should close
             // itself after the user action.
 
@@ -102,15 +102,18 @@ export function redirectToTelegram(
     } else {
         // For browser
         if (isOS('ios', 'android')) {
-            // Use the `none` strategy. TON Space should do nothing after the user action.
+            // Use the `back` strategy, the user will transition to the other app
+            // and return to the browser when the action is completed.
 
-            // TODO: do it more elegant
-            // options.returnStrategy = 'none';
+            // TODO: use back to the browser
             if (options.returnStrategy === 'back') {
                 options.returnStrategy = location.href as ReturnStrategy;
             }
 
-            const useDeepLink = isBrowser('chrome') && !options.forceRedirect;
+            // In case if the browser is Chrome or Firefox, use the deep link with fallback to the direct link.
+            const isChrome = isBrowser('chrome');
+            const isFirefox = isBrowser('firefox');
+            const useDeepLink = (isChrome || isFirefox) && !options.forceRedirect;
 
             if (useDeepLink) {
                 const linkWithStrategy = addReturnStrategy(
@@ -129,7 +132,8 @@ export function redirectToTelegram(
                 openLinkBlank(linkWithStrategy);
             }
         } else if (isOS('macos', 'windows', 'linux')) {
-            // Use the `none` strategy. TON Space should do nothing after the user action.
+            // Use the `none` strategy. The user will transition to the TON Space
+            // and return to the TMA after the action is completed.
 
             options.returnStrategy = 'none';
             options.twaReturnUrl = undefined;
@@ -152,7 +156,7 @@ export function redirectToTelegram(
 
 /**
  * Redirects the user to a specified wallet link with various strategies for returning to the application.
- * This function is primarily used for any wallet to handle different platforms and operating systems.
+ * This function is primarily used for any wallet (except TON Space) to handle different platforms and operating systems.
  *
  * @param universalLink A string representing the universal link to redirect to within the wallet.
  * @param deepLink A string representing the deep link to redirect to within the wallet, or `undefined` if not applicable.
@@ -177,7 +181,7 @@ export function redirectToWallet(
 
     if (isInTMA()) {
         if (isTmaPlatform('ios', 'android')) {
-            // Use the `tg://resolve` strategy, the user will transition to the other app
+            // Use the `tg://resolve` strategy instead of `back`, the user will transition to the other app
             // and return to the Telegram app after the action is completed.
 
             // return back to the telegram app
@@ -195,7 +199,7 @@ export function redirectToWallet(
                 openLinkBlank(linkWitStrategy);
             });
         } else if (isTmaPlatform('macos', 'tdesktop')) {
-            // Use the `tg://resolve` strategy, the user will transition to the other app
+            // Use the `tg://resolve` strategy instead of `back`, the user will transition to the other app
             // and return to the Telegram app after the action is completed.
 
             // return back to the telegram app
@@ -205,10 +209,12 @@ export function redirectToWallet(
 
             const linkWitStrategy = addReturnStrategy(universalLink, options.returnStrategy);
             const useDeepLink = !!deepLink && !options.forceRedirect;
+
+            // In case of deep link, use the `custom-deeplink` strategy with fallback to `universal-link`.
             if (useDeepLink) {
                 setOpenMethod('custom-deeplink');
 
-                openDeeplinkWithFallback(deepLink!, () => {
+                openDeeplinkWithFallback(toDeeplink(linkWitStrategy, deepLink), () => {
                     setOpenMethod('universal-link');
 
                     openLinkBlank(linkWitStrategy);
@@ -222,9 +228,10 @@ export function redirectToWallet(
             // Use the `back` strategy, the user will transition to the other app
             // and maybe return to the browser when the action is completed.
 
-            // return back to the telegram app
+            // return back to the browser
             if (options.returnStrategy === 'back') {
                 if (isBrowser('safari')) {
+                    // safari does not have a deep link, so we use the `location.href`
                     options.returnStrategy = location.href as ReturnStrategy;
                 } else if (isBrowser('chrome')) {
                     options.returnStrategy = 'googlechrome://';
@@ -233,16 +240,19 @@ export function redirectToWallet(
                 } else if (isBrowser('opera')) {
                     options.returnStrategy = 'opera-http://';
                 } else {
+                    // fallback to the `location.href`
                     options.returnStrategy = location.href as ReturnStrategy;
                 }
             }
 
             const linkWitStrategy = addReturnStrategy(universalLink, options.returnStrategy);
             const useDeepLink = !!deepLink && !options.forceRedirect;
+
+            // In case of deep link, use the `custom-deeplink` strategy with fallback to `universal-link`.
             if (useDeepLink) {
                 setOpenMethod('custom-deeplink');
 
-                openDeeplinkWithFallback(deepLink, () => {
+                openDeeplinkWithFallback(toDeeplink(linkWitStrategy, deepLink), () => {
                     setOpenMethod('universal-link');
 
                     openLinkBlank(linkWitStrategy);
@@ -256,9 +266,10 @@ export function redirectToWallet(
             // Use the `back` strategy, the user will transition to the other app
             // and maybe return to the browser when the action is completed.
 
-            // return back to the telegram app
+            // return back to the browser
             if (options.returnStrategy === 'back') {
                 if (isBrowser('safari')) {
+                    // safari does not have a deep link, so we use the `location.href`
                     options.returnStrategy = location.href as ReturnStrategy;
                 } else if (isBrowser('chrome')) {
                     options.returnStrategy = 'googlechrome://';
@@ -267,16 +278,19 @@ export function redirectToWallet(
                 } else if (isBrowser('opera')) {
                     options.returnStrategy = 'opera-http://';
                 } else {
+                    // fallback to the `location.href`
                     options.returnStrategy = location.href as ReturnStrategy;
                 }
             }
 
             const linkWitStrategy = addReturnStrategy(universalLink, options.returnStrategy);
             const useDeepLink = !!deepLink && !options.forceRedirect;
+
+            // In case of deep link, use the `custom-deeplink` strategy with fallback to `universal-link`.
             if (useDeepLink) {
                 setOpenMethod('custom-deeplink');
 
-                openDeeplinkWithFallback(deepLink, () => {
+                openDeeplinkWithFallback(toDeeplink(linkWitStrategy, deepLink), () => {
                     setOpenMethod('universal-link');
 
                     openLinkBlank(linkWitStrategy);
@@ -288,7 +302,6 @@ export function redirectToWallet(
             }
         } else {
             // Fallback for unknown platforms. Should use desktop strategy.
-
             setOpenMethod('universal-link');
 
             const linkWitStrategy = addReturnStrategy(universalLink, options.returnStrategy);
@@ -297,12 +310,14 @@ export function redirectToWallet(
         }
     } else {
         if (isOS('ios')) {
-            // Use the `location.href` strategy, the user will transition to the other app
-            // and return to the Telegram app after the action is completed.
+            // Use the `back` strategy, the user will transition to the other app
+            // and return to the browser when the action is completed.
 
-            // return back to the telegram app
+            // return back to the browser
             if (options.returnStrategy === 'back') {
                 if (isBrowser('safari')) {
+                    // safari does not have a deep link, so we use the `location.href`
+                    // ref: https://developer.apple.com/documentation/xcode/supporting-universal-links-in-your-app
                     options.returnStrategy = location.href as ReturnStrategy;
                 } else if (isBrowser('chrome')) {
                     options.returnStrategy = 'googlechrome://';
@@ -311,6 +326,7 @@ export function redirectToWallet(
                 } else if (isBrowser('opera')) {
                     options.returnStrategy = 'opera-http://';
                 } else {
+                    // fallback to the `location.href`
                     options.returnStrategy = location.href as ReturnStrategy;
                 }
             }
@@ -318,7 +334,7 @@ export function redirectToWallet(
             if (isBrowser('chrome')) {
                 setOpenMethod('universal-link');
 
-                // openLinkBlank(addReturnStrategy(universalLink, options.returnStrategy));
+                // TODO: in case when the wallet does not exist, the location.href will be rewritten
                 openLink(addReturnStrategy(universalLink, options.returnStrategy), '_self');
             } else {
                 setOpenMethod('universal-link');
@@ -326,14 +342,12 @@ export function redirectToWallet(
                 openLinkBlank(addReturnStrategy(universalLink, options.returnStrategy));
             }
         } else if (isOS('android')) {
-            // Use the `location.href` strategy, the user will transition to the other app
-            // and return to the Telegram app after the action is completed.
+            // Use the `back` strategy, the user will transition to the other app
+            // and return to the browser when the action is completed.
 
-            // return back to the telegram app
+            // return back to the browser
             if (options.returnStrategy === 'back') {
-                if (isBrowser('safari')) {
-                    options.returnStrategy = location.href as ReturnStrategy;
-                } else if (isBrowser('chrome')) {
+                if (isBrowser('chrome')) {
                     options.returnStrategy = 'googlechrome://';
                 } else if (isBrowser('firefox')) {
                     options.returnStrategy = 'firefox://';
@@ -348,20 +362,32 @@ export function redirectToWallet(
 
             openLinkBlank(addReturnStrategy(universalLink, options.returnStrategy));
         } else if (isOS('macos', 'windows', 'linux')) {
-            // Use the `location.href` strategy, the user will transition to the other app
-            // and return to the Telegram app after the action is completed.
+            // Use the `back` strategy, the user will transition to the other app
+            // and return to the browser when the action is completed.
 
-            // return back to the telegram app
+            // return back to the browser
             if (options.returnStrategy === 'back') {
-                options.returnStrategy = location.href as ReturnStrategy;
+                if (isBrowser('safari')) {
+                    options.returnStrategy = 'none';
+                } else if (isBrowser('chrome')) {
+                    options.returnStrategy = 'googlechrome://';
+                } else if (isBrowser('firefox')) {
+                    options.returnStrategy = 'firefox://';
+                } else if (isBrowser('opera')) {
+                    options.returnStrategy = 'opera-http://';
+                } else {
+                    options.returnStrategy = 'none';
+                }
             }
 
             const linkWitStrategy = addReturnStrategy(universalLink, options.returnStrategy);
             const useDeepLink = !!deepLink && !options.forceRedirect;
+
+            // In case of deep link, use the `custom-deeplink` strategy with fallback to `universal-link`.
             if (useDeepLink) {
                 setOpenMethod('custom-deeplink');
 
-                openDeeplinkWithFallback(deepLink, () => {
+                openDeeplinkWithFallback(toDeeplink(linkWitStrategy, deepLink), () => {
                     setOpenMethod('universal-link');
 
                     openLinkBlank(linkWitStrategy);
