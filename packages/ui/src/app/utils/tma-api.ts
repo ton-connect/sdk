@@ -1,6 +1,6 @@
 import { getWindow, openLinkBlank } from 'src/app/utils/web-api';
 import { TonConnectUIError } from 'src/errors';
-import { logError } from 'src/app/utils/log';
+import { logDebug, logError } from 'src/app/utils/log';
 
 type TmaPlatform = 'android' | 'ios' | 'macos' | 'tdesktop' | 'weba' | 'web' | 'unknown';
 
@@ -124,15 +124,15 @@ function postEvent(eventType: string, eventData: object): void {
         }
 
         if (window.TelegramWebviewProxy !== undefined) {
-            console.log('postEvent', eventType, eventData);
+            logDebug('postEvent', eventType, eventData);
             window.TelegramWebviewProxy.postEvent(eventType, JSON.stringify(eventData));
         } else if (window.external && 'notify' in window.external) {
-            console.log('postEvent', eventType, eventData);
+            logDebug('postEvent', eventType, eventData);
             window.external.notify(JSON.stringify({ eventType: eventType, eventData: eventData }));
         } else if (isIframe()) {
             const trustedTarget = '*';
             const message = JSON.stringify({ eventType: eventType, eventData: eventData });
-            console.log('postEvent', eventType, eventData);
+            logDebug('postEvent', eventType, eventData);
             window.parent.postMessage(message, trustedTarget);
         } else {
             throw new TonConnectUIError(`Can't post event to TMA`);

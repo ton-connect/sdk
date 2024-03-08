@@ -5,6 +5,7 @@ import { UserAgent } from 'src/models/user-agent';
 import UAParser from 'ua-parser-js';
 import { InMemoryStorage } from 'src/app/models/in-memory-storage';
 import { TonConnectUIError } from 'src/errors';
+import { logDebug } from 'src/app/utils/log';
 
 /**
  * Opens a link in a new tab.
@@ -12,7 +13,7 @@ import { TonConnectUIError } from 'src/errors';
  * @param target
  */
 export function openLink(href: string, target = '_self'): void {
-    console.log('openLink', href, target);
+    logDebug('openLink', href, target);
     window.open(href, target, 'noopener noreferrer');
 }
 
@@ -32,7 +33,7 @@ export function openLinkBlank(href: string): void {
  */
 export function openDeeplinkWithFallback(href: string, fallback: () => void): void {
     const doFallback = (): void => {
-        if (isBrowser('safari')) {
+        if (isBrowser('safari') || (isOS('android') && isBrowser('firefox'))) {
             // Safari does not support fallback to direct link.
             return;
         }
