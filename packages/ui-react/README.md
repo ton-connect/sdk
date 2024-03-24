@@ -12,7 +12,7 @@ You can find more details and the protocol specification in the [docs](https://d
 
 # Getting started
 
-[Latest API documentation](https://ton-connect.github.io/sdk/modules/_tonconnect_ui-react.html)
+[Latest API documentation](https://ton-connect.github.io/sdk/modules/_tonconnect_ui_react.html)
 
 # Getting started
 
