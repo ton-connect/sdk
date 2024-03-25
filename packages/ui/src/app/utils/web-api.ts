@@ -186,8 +186,12 @@ export function isMobileUserAgent(): boolean {
 export function getUserAgent(): UserAgent {
     const results = new UAParser().getResult();
     const osName = results.os.name?.toLowerCase();
+    const deviceModel = results.device.model?.toLowerCase();
     let os: UserAgent['os'];
     switch (true) {
+        case deviceModel === 'ipad':
+            os = 'ipad';
+            break;
         case osName === 'ios':
             os = 'ios';
             break;

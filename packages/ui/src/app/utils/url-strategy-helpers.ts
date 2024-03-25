@@ -159,6 +159,36 @@ export function redirectToTelegram(
 
                 openLinkBlank(linkWithStrategy);
             }
+        } else if (isOS('ipad')) {
+            // Use the `back` strategy, the user will transition to the other app
+            // and return to the browser when the action is completed.
+
+            // TODO: use back for all browsers
+            if (options.returnStrategy === 'back') {
+                options.returnStrategy = 'back';
+            }
+
+            // In case if the browser is Chrome or Firefox, use the deep link with fallback to the direct link.
+            const isChrome = isBrowser('chrome');
+            const isFirefox = isBrowser('firefox');
+            const useDeepLink = (isChrome || isFirefox) && !options.forceRedirect;
+
+            if (useDeepLink) {
+                const linkWithStrategy = addReturnStrategy(
+                  directLinkUrl.toString(),
+                  options.returnStrategy
+                );
+                const deepLink = convertToTGDeepLink(linkWithStrategy);
+
+                openDeeplinkWithFallback(deepLink, () => openLinkBlank(linkWithStrategy));
+            } else {
+                const linkWithStrategy = addReturnStrategy(
+                  directLinkUrl.toString(),
+                  options.returnStrategy
+                );
+
+                openLinkBlank(linkWithStrategy);
+            }
         } else if (isOS('macos', 'windows', 'linux')) {
             // Use the `none` strategy. The user will transition to the TON Space
             // and return to the TMA after the action is completed.
@@ -389,6 +419,25 @@ export function redirectToWallet(
             setOpenMethod('universal-link');
 
             openLinkBlank(addReturnStrategy(universalLink, options.returnStrategy));
+        } else if (isOS('ipad')) {
+            // Use the `back` strategy, the user will transition to the other app
+            // and return to the browser when the action is completed.
+
+            // return back to the browser
+            if (options.returnStrategy === 'back') {
+                options.returnStrategy = 'back';
+            }
+
+            if (isBrowser('chrome')) {
+                setOpenMethod('universal-link');
+
+                // TODO: in case when the wallet does not exist, the location.href will be rewritten
+                openLink(addReturnStrategy(universalLink, options.returnStrategy), '_self');
+            } else {
+                setOpenMethod('universal-link');
+
+                openLinkBlank(addReturnStrategy(universalLink, options.returnStrategy));
+            }
         } else if (isOS('macos', 'windows', 'linux')) {
             // Use the `back` strategy, the user will transition to the other app
             // and return to the browser when the action is completed.

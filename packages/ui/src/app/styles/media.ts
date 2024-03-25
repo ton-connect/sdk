@@ -28,7 +28,7 @@ export function isDevice(device: keyof typeof maxWidth | 'desktop'): boolean {
             return width > maxWidth.mobile;
         default:
         case 'mobile':
-            return width <= maxWidth.mobile || isOS('ios', 'android');
+            return width <= maxWidth.mobile || isOS('ios', 'android', 'ipad');
     }
 }
 
