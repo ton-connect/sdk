@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui 
 
+## [2.0.1-beta.4](https://github.com/ton-connect/sdk/compare/ui-2.0.1-beta.3...ui-2.0.1-beta.4) (2024-03-25)
+
+
+### Features
+
+* **ui:** enhance return strategies for ipad ([a7ab8e4](https://github.com/ton-connect/sdk/commit/a7ab8e406b907c3f52b8de77e918a1a7369e084b))
+
+
+
 ## [2.0.1-beta.3](https://github.com/ton-connect/sdk/compare/ui-2.0.1-beta.2...ui-2.0.1-beta.3) (2024-03-08)
 
 
