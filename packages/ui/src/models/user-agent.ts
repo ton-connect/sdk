@@ -1,4 +1,4 @@
 export interface UserAgent {
-    os: 'ios' | 'android' | 'macos' | 'windows' | 'linux' | undefined;
+    os: 'ios' | 'ipad' | 'android' | 'macos' | 'windows' | 'linux' | undefined;
     browser: 'chrome' | 'firefox' | 'safari' | 'opera' | undefined;
 }
