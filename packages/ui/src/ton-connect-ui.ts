@@ -444,7 +444,7 @@ export class TonConnectUI {
             const result = await this.waitForSendTransaction(
                 {
                     transaction: tx,
-                    abortSignal: abortController.signal
+                    signal: abortController.signal
                 },
                 onRequestSent
             );
@@ -527,7 +527,7 @@ export class TonConnectUI {
 
         return await this.waitForWalletConnection({
             ignoreErrors: true,
-            abortSignal: abortController.signal
+            signal: abortController.signal
         });
     }
 
@@ -544,9 +544,9 @@ export class TonConnectUI {
         options: WaitWalletConnectionOptions
     ): Promise<ConnectedWallet> {
         return new Promise((resolve, reject) => {
-            const { ignoreErrors = false, abortSignal = null } = options;
+            const { ignoreErrors = false, signal = null } = options;
 
-            if (abortSignal && abortSignal.aborted) {
+            if (signal && signal.aborted) {
                 return reject(new TonConnectUIError('Wallet was not connected'));
             }
 
@@ -580,11 +580,15 @@ export class TonConnectUI {
                 (reason: TonConnectError) => onErrorsHandler(reason)
             );
 
-            if (abortSignal) {
-                abortSignal.addEventListener('abort', (): void => {
-                    unsubscribe();
-                    reject(new TonConnectUIError('Wallet was not connected'));
-                });
+            if (signal) {
+                signal.addEventListener(
+                    'abort',
+                    (): void => {
+                        unsubscribe();
+                        reject(new TonConnectUIError('Wallet was not connected'));
+                    },
+                    { once: true }
+                );
             }
         });
     }
@@ -604,9 +608,9 @@ export class TonConnectUI {
         onRequestSent?: () => void
     ): Promise<SendTransactionResponse> {
         return new Promise((resolve, reject) => {
-            const { transaction, abortSignal } = options;
+            const { transaction, signal } = options;
 
-            if (abortSignal.aborted) {
+            if (signal.aborted) {
                 return reject(new TonConnectUIError('Transaction was not sent'));
             }
 
@@ -621,13 +625,17 @@ export class TonConnectUI {
             };
 
             this.connector
-                .sendTransaction(transaction, onRequestSent)
+                .sendTransaction(transaction, { onRequestSent: onRequestSent, signal: signal })
                 .then(result => onTransactionHandler(result))
                 .catch(reason => onErrorsHandler(reason));
 
-            abortSignal.addEventListener('abort', (): void => {
-                reject(new TonConnectUIError('Transaction was not sent'));
-            });
+            signal.addEventListener(
+                'abort',
+                (): void => {
+                    reject(new TonConnectUIError('Transaction was not sent'));
+                },
+                { once: true }
+            );
         });
     }
 
@@ -797,10 +805,10 @@ export class TonConnectUI {
 
 type WaitWalletConnectionOptions = {
     ignoreErrors?: boolean;
-    abortSignal?: AbortSignal | null;
+    signal?: AbortSignal | null;
 };
 
 type WaitSendTransactionOptions = {
     transaction: SendTransactionRequest;
-    abortSignal: AbortSignal;
+    signal: AbortSignal;
 };
