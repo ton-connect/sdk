@@ -6,6 +6,16 @@ import { IStorage } from 'src/storage/models/storage.interface';
 import { addPathToUrl } from 'src/utils/url';
 import '@tonconnect/isomorphic-eventsource';
 import '@tonconnect/isomorphic-fetch';
+import { callForSuccess } from 'src/utils/call-for-success';
+import { logDebug, logError } from 'src/utils/log';
+import { delay } from 'src/utils/delay';
+import { createResource } from 'src/utils/resource';
+import { createAbortController, defer } from 'src/utils/defer';
+
+type CreateEventSourceOptions = {
+    openingDeadlineMS?: number;
+    signal?: AbortSignal;
+};
 
 export class BridgeGateway {
     private readonly ssePath = 'events';
@@ -16,90 +26,112 @@ export class BridgeGateway {
 
     private readonly defaultTtl = 300;
 
-    private eventSource: EventSource | undefined;
+    private eventSource = createResource(
+        async (signal: AbortSignal, options?: CreateEventSourceOptions): Promise<EventSource> => {
+            const eventSourceConfig = {
+                bridgeUrl: this.bridgeUrl,
+                ssePath: this.ssePath,
+                sessionId: this.sessionId,
+                bridgeGatewayStorage: this.bridgeGatewayStorage,
+                errorHandler: this.errorsHandler.bind(this),
+                messageHandler: this.messagesHandler.bind(this),
+                signal: signal
+            };
+            return await createEventSource(eventSourceConfig, options);
+        },
+        async (resource: EventSource) => {
+            resource.close();
+        }
+    );
 
-    private isClosed = false;
+    private get isReady(): boolean {
+        const eventSource = this.eventSource.current();
+        return eventSource?.readyState === EventSource.OPEN;
+    }
+
+    private get isClosed(): boolean {
+        const eventSource = this.eventSource.current();
+        return eventSource?.readyState !== EventSource.OPEN;
+    }
+
+    private get isConnecting(): boolean {
+        const eventSource = this.eventSource.current();
+        return eventSource?.readyState === EventSource.CONNECTING;
+    }
 
     private readonly bridgeGatewayStorage: HttpBridgeGatewayStorage;
 
     constructor(
         storage: IStorage,
-        private readonly bridgeUrl: string,
+        public readonly bridgeUrl: string,
         public readonly sessionId: string,
         private listener: (msg: BridgeIncomingMessage) => void,
         private errorsListener: (err: Event) => void
     ) {
+        console.log(`Create new bridge gateway with url ${bridgeUrl}`);
         this.bridgeGatewayStorage = new HttpBridgeGatewayStorage(storage, bridgeUrl);
     }
 
-    public async registerSession(options?: { openingDeadlineMS?: number }): Promise<void> {
-        const url = new URL(addPathToUrl(this.bridgeUrl, this.ssePath));
-        url.searchParams.append('client_id', this.sessionId);
-
-        const lastEventId = await this.bridgeGatewayStorage.getLastEventId();
-
-        if (this.isClosed) {
-            return;
-        }
-
-        if (lastEventId) {
-            url.searchParams.append('last_event_id', lastEventId);
-        }
-
-        this.eventSource = new EventSource(url.toString());
-
-        return new Promise((resolve, reject) => {
-            const timeout = options?.openingDeadlineMS ? setTimeout(() => {
-                if (this.eventSource?.readyState !== EventSource.OPEN) {
-                    reject(new TonConnectError('Bridge connection timeout'))
-                    this.close();
-                }
-            }, options.openingDeadlineMS) : undefined;
-
-            this.eventSource!.onerror = () => reject;
-            this.eventSource!.onopen! = (): void => {
-                clearTimeout(timeout);
-                this.isClosed = false;
-                this.eventSource!.onerror = this.errorsHandler.bind(this);
-                this.eventSource!.onmessage = this.messagesHandler.bind(this);
-                resolve();
-            };
-        });
+    public async registerSession(options?: CreateEventSourceOptions): Promise<void> {
+        await this.eventSource.create(options);
     }
 
     public async send(
         message: Uint8Array,
         receiver: string,
         topic: RpcMethod,
+        options?: {
+            ttl?: number;
+            signal?: AbortSignal;
+        }
+    ): Promise<void>;
+    /** @deprecated use send(message, receiver, topic, options) instead */
+    public async send(
+        message: Uint8Array,
+        receiver: string,
+        topic: RpcMethod,
         ttl?: number
+    ): Promise<void>;
+    public async send(
+        message: Uint8Array,
+        receiver: string,
+        topic: RpcMethod,
+        ttlOrOptions?: number | { ttl?: number; signal?: AbortSignal }
     ): Promise<void> {
+        // TODO: remove deprecated method
+        const options: { ttl?: number; signal?: AbortSignal } = {};
+        if (typeof ttlOrOptions === 'number') {
+            options.ttl = ttlOrOptions;
+        } else {
+            options.ttl = ttlOrOptions?.ttl;
+            options.signal = ttlOrOptions?.signal;
+        }
+
         const url = new URL(addPathToUrl(this.bridgeUrl, this.postPath));
         url.searchParams.append('client_id', this.sessionId);
         url.searchParams.append('to', receiver);
-        url.searchParams.append('ttl', (ttl || this.defaultTtl).toString());
+        url.searchParams.append('ttl', (options?.ttl || this.defaultTtl).toString());
         url.searchParams.append('topic', topic);
+        const body = Base64.encode(message);
 
-        const response = await fetch(url, {
-            method: 'post',
-            body: Base64.encode(message)
-        });
-
-        if (!response.ok) {
-            throw new TonConnectError(`Bridge send failed, status ${response.status}`);
-        }
+        await callForSuccess(
+            async options => {
+                await this.post(url, body, options.signal);
+            },
+            { attempts: Number.MAX_SAFE_INTEGER, delayMs: 5_000, signal: options?.signal }
+        );
     }
 
     public pause(): void {
-        this.eventSource?.close();
+        this.eventSource?.dispose();
     }
 
-    public unPause(): Promise<void> {
-        return this.registerSession();
+    public async unPause(): Promise<void> {
+        await this.eventSource.recreate();
     }
 
-    public close(): void {
-        this.isClosed = true;
-        this.eventSource?.close();
+    public async close(): Promise<void> {
+        await this.eventSource.dispose();
     }
 
     public setListener(listener: (msg: BridgeIncomingMessage) => void): void {
@@ -110,20 +142,36 @@ export class BridgeGateway {
         this.errorsListener = errorsListener;
     }
 
-    private errorsHandler(e: Event): void {
-        if (!this.isClosed) {
-            if (this.eventSource?.readyState === EventSource.CLOSED) {
-                this.eventSource.close();
-                this.registerSession();
-                return;
-            }
+    private async post(url: URL, body: string, signal?: AbortSignal): Promise<Response> {
+        const response = await fetch(url, {
+            method: 'post',
+            body: body,
+            signal: signal
+        });
 
-            if (this.eventSource?.readyState === EventSource.CONNECTING) {
-                console.debug('[TON_CONNET_SDK_ERROR]: Bridge error', JSON.stringify(e));
-                return;
-            }
+        if (!response.ok) {
+            throw new TonConnectError(`Bridge send failed, status ${response.status}`);
+        }
 
+        return response;
+    }
+
+    private async errorsHandler(e: Event): Promise<void> {
+        if (this.isConnecting) {
+            logError('Bridge error', JSON.stringify(e));
+            return;
+        }
+
+        if (this.isReady) {
             this.errorsListener(e);
+            return;
+        }
+
+        if (this.isClosed) {
+            logDebug('Bridge reconnecting, 200ms delay');
+            await delay(200);
+            await this.eventSource.recreate();
+            return;
         }
     }
 
@@ -134,16 +182,96 @@ export class BridgeGateway {
 
         await this.bridgeGatewayStorage.storeLastEventId(e.lastEventId);
 
-        if (!this.isClosed) {
-            let bridgeIncomingMessage: BridgeIncomingMessage;
+        if (this.isClosed) {
+            return;
+        }
 
-            try {
-                bridgeIncomingMessage = JSON.parse(e.data);
-            } catch (e) {
-                throw new TonConnectError(`Bridge message parse failed, message ${e.data}`);
+        let bridgeIncomingMessage: BridgeIncomingMessage;
+        try {
+            bridgeIncomingMessage = JSON.parse(e.data);
+        } catch (e) {
+            throw new TonConnectError(`Bridge message parse failed, message ${e.data}`);
+        }
+        this.listener(bridgeIncomingMessage);
+    }
+}
+
+async function createEventSource(
+    config: {
+        bridgeUrl: string;
+        ssePath: string;
+        sessionId: string;
+        bridgeGatewayStorage: HttpBridgeGatewayStorage;
+        errorHandler: (e: Event) => void;
+        messageHandler: (e: MessageEvent<string>) => void;
+        signal: AbortSignal;
+    },
+    options?: CreateEventSourceOptions
+): Promise<EventSource> {
+    return await defer(
+        async (resolve, reject, deferOptions) => {
+            const abortController = createAbortController(deferOptions.signal);
+            const signal = abortController.signal;
+
+            if (signal.aborted) {
+                reject(new TonConnectError('Bridge connection aborted'));
+                return;
             }
 
-            this.listener(bridgeIncomingMessage);
-        }
-    }
+            const url = new URL(addPathToUrl(config.bridgeUrl, config.ssePath));
+            url.searchParams.append('client_id', config.sessionId);
+
+            const lastEventId = await config.bridgeGatewayStorage.getLastEventId();
+            if (lastEventId) {
+                url.searchParams.append('last_event_id', lastEventId);
+            }
+
+            if (signal.aborted) {
+                reject(new TonConnectError('Bridge connection aborted'));
+                return;
+            }
+
+            const eventSource = new EventSource(url.toString());
+
+            // eventSource.onerror = (event: Event): void => {
+            //     debugger;
+            //     if (signal.aborted) {
+            //         reject(new TonConnectError('Bridge connection aborted'));
+            //         return;
+            //     }
+            //
+            //     console.log(event);
+            //
+            //     // reject(reason);
+            // };
+            eventSource.onerror = (reason: Event): void => {
+                if (signal.aborted) {
+                    reject(new TonConnectError('Bridge connection aborted'));
+                    return;
+                }
+
+                config.errorHandler(reason);
+            };
+            eventSource.onopen = (): void => {
+                if (signal.aborted) {
+                    reject(new TonConnectError('Bridge connection aborted'));
+                    return;
+                }
+                // eventSource.onerror = (event: Event): void => {
+                //     config.errorHandler(event);
+                // };
+                resolve(eventSource);
+            };
+            eventSource.onmessage = (event: MessageEvent<string>): void => {
+                config.messageHandler(event);
+            };
+
+            config?.signal?.addEventListener('abort', () => {
+                console.log(`ABORTED EVENT SOURCE`);
+                eventSource.close();
+                reject(new TonConnectError('Bridge connection aborted'));
+            });
+        },
+        { timeout: options?.openingDeadlineMS, signal: config?.signal }
+    );
 }

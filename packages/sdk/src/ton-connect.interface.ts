@@ -51,7 +51,10 @@ export interface ITonConnect {
     /**
      * Try to restore existing session and reconnect to the corresponding wallet. Call it immediately when your app is loaded.
      */
-    restoreConnection(): Promise<void>;
+    restoreConnection(options?: {
+        openingDeadlineMS?: number;
+        signal?: AbortSignal;
+    }): Promise<void>;
 
     /**
      * Pause bridge HTTP connection. Might be helpful, if you want to pause connections while browser tab is unfocused,
@@ -67,15 +70,24 @@ export interface ITonConnect {
     /**
      * Disconnect form thw connected wallet and drop current session.
      */
-    disconnect(): Promise<void>;
+    disconnect(options?: { signal?: AbortSignal }): Promise<void>;
 
     /**
      * Asks connected wallet to sign and send the transaction.
      * @param transaction transaction to send.
-     * @param onRequestSent (optional) will be called after the transaction is sent to the wallet.
+     * @param options (optional) onRequestSent callback will be called after the transaction is sent and signal to abort the request.
      * @returns signed transaction boc that allows you to find the transaction in the blockchain.
      * If user rejects transaction, method will throw the corresponding error.
      */
+    sendTransaction(
+        transaction: SendTransactionRequest,
+        options?: {
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+        }
+    ): Promise<SendTransactionResponse>;
+
+    /** @deprecated use sendTransaction(transaction, options) instead */
     sendTransaction(
         transaction: SendTransactionRequest,
         onRequestSent?: () => void
