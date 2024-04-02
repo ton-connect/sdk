@@ -169,17 +169,41 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             (this.listeners = this.listeners.filter(listener => listener !== eventsCallback));
     }
 
-    public async sendRequest<T extends RpcMethod>(
+    public sendRequest<T extends RpcMethod>(
+        request: WithoutId<AppRequest<T>>,
+        options?: {
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+        }
+    ): Promise<WithoutId<WalletResponse<T>>>;
+    /** @deprecated use sendRequest(transaction, options) instead */
+    public sendRequest<T extends RpcMethod>(
         request: WithoutId<AppRequest<T>>,
         onRequestSent?: () => void
+    ): Promise<WithoutId<WalletResponse<T>>>;
+    public async sendRequest<T extends RpcMethod>(
+        request: WithoutId<AppRequest<T>>,
+        optionsOrOnRequestSent?: (() => void) | { onRequestSent?: () => void; signal?: AbortSignal }
     ): Promise<WithoutId<WalletResponse<T>>> {
+        // TODO: remove deprecated method
+        const options: {
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+        } = {};
+        if (typeof optionsOrOnRequestSent === 'function') {
+            options.onRequestSent = optionsOrOnRequestSent;
+        } else {
+            options.onRequestSent = optionsOrOnRequestSent?.onRequestSent;
+            options.signal = optionsOrOnRequestSent?.signal;
+        }
+
         const id = (await this.connectionStorage.getNextRpcRequestId()).toString();
         await this.connectionStorage.increaseNextRpcRequestId();
 
         logDebug('Send injected-bridge request:', { ...request, id });
         const result = this.injectedWallet.send<T>({ ...request, id } as AppRequest<T>);
         result.then(response => logDebug('Wallet message received:', response));
-        onRequestSent?.();
+        options?.onRequestSent?.();
 
         return result;
     }

@@ -1,15 +1,15 @@
 import {
-    Base64,
-    SessionCrypto,
     AppRequest,
-    ConnectRequest,
-    RpcMethod,
-    WalletEvent,
-    WalletResponse,
-    WalletMessage,
-    hexToByteArray,
+    Base64,
     ConnectEventSuccess,
-    TonAddressItemReply
+    ConnectRequest,
+    hexToByteArray,
+    RpcMethod,
+    SessionCrypto,
+    TonAddressItemReply,
+    WalletEvent,
+    WalletMessage,
+    WalletResponse
 } from '@tonconnect/protocol';
 import { TonConnectError } from 'src/errors/ton-connect.error';
 import { WalletConnectionSourceHTTP } from 'src/models/wallet/wallet-connection-source';
@@ -27,6 +27,8 @@ import { Optional, WithoutId, WithoutIdDistributive } from 'src/utils/types';
 import { PROTOCOL_VERSION } from 'src/resources/protocol';
 import { logDebug, logError } from 'src/utils/log';
 import { encodeTelegramUrlParameters, isTelegramUrl } from 'src/utils/url';
+import { createAbortController } from 'src/utils/defer';
+import { callForSuccess } from 'src/utils/call-for-success';
 
 export class BridgeProvider implements HTTPProvider {
     public static async fromStorage(storage: IStorage): Promise<BridgeProvider> {
@@ -58,6 +60,10 @@ export class BridgeProvider implements HTTPProvider {
 
     private listeners: Array<(e: WithoutIdDistributive<WalletEvent>) => void> = [];
 
+    private readonly defaultOpeningDeadlineMS = 5000;
+
+    private abortController?: AbortController;
+
     constructor(
         private readonly storage: IStorage,
         private readonly walletConnectionSource:
@@ -67,7 +73,13 @@ export class BridgeProvider implements HTTPProvider {
         this.connectionStorage = new BridgeConnectionStorage(storage);
     }
 
-    public connect(message: ConnectRequest): string {
+    public connect(
+        message: ConnectRequest,
+        options?: {
+            openingDeadlineMS?: number;
+            signal?: AbortSignal;
+        }
+    ): string {
         this.closeGateways();
 
         const sessionCrypto = new SessionCrypto();
@@ -86,7 +98,20 @@ export class BridgeProvider implements HTTPProvider {
                 connectionSource: this.walletConnectionSource,
                 sessionCrypto
             })
-            .then(() => this.openGateways(sessionCrypto));
+            .then(async () => {
+                await callForSuccess(
+                    _options =>
+                        this.openGateways(sessionCrypto, {
+                            openingDeadlineMS: options?.openingDeadlineMS,
+                            signal: _options?.signal
+                        }),
+                    {
+                        attempts: Number.MAX_SAFE_INTEGER,
+                        delayMs: 5_000,
+                        signal: options?.signal
+                    }
+                );
+            });
 
         const universalLink =
             'universalLink' in this.walletConnectionSource &&
@@ -97,12 +122,29 @@ export class BridgeProvider implements HTTPProvider {
         return this.generateUniversalLink(universalLink, message);
     }
 
-    public async restoreConnection(): Promise<void> {
+    public async restoreConnection(options?: {
+        openingDeadlineMS?: number;
+        signal?: AbortSignal;
+    }): Promise<void> {
+        const abortController = createAbortController(options?.signal);
+        this.abortController?.abort();
+        this.abortController = abortController;
+
+        if (abortController.signal.aborted) {
+            return;
+        }
+
         this.closeGateways();
         const storedConnection = await this.connectionStorage.getHttpConnection();
         if (!storedConnection) {
             return;
         }
+
+        if (abortController.signal.aborted) {
+            return;
+        }
+
+        const openingDeadlineMS = options?.openingDeadlineMS ?? this.defaultOpeningDeadlineMS;
 
         if (isPendingConnectionHttp(storedConnection)) {
             this.session = {
@@ -113,7 +155,11 @@ export class BridgeProvider implements HTTPProvider {
                         : ''
             };
 
-            return this.openGateways(storedConnection.sessionCrypto, { openingDeadlineMS: 5000 });
+            // TODO: нужно дожидаться одной попытки открыть коннект
+            return await this.openGateways(storedConnection.sessionCrypto, {
+                openingDeadlineMS: openingDeadlineMS,
+                signal: abortController?.signal
+            });
         }
 
         if (Array.isArray(this.walletConnectionSource)) {
@@ -124,6 +170,13 @@ export class BridgeProvider implements HTTPProvider {
 
         this.session = storedConnection.session;
 
+        // TODO: Remove debuggers after testing
+        if (this.gateway) {
+            debugger;
+            //     throw new TonConnectError('Gateway is already opened');
+            console.warn('Gateway is already opened');
+        }
+
         this.gateway = new BridgeGateway(
             this.storage,
             this.walletConnectionSource.bridgeUrl,
@@ -132,20 +185,61 @@ export class BridgeProvider implements HTTPProvider {
             this.gatewayErrorsListener.bind(this)
         );
 
-        try {
-            await this.gateway.registerSession({ openingDeadlineMS: 5000 });
-        } catch (e) {
-            await this.disconnect();
+        if (abortController.signal.aborted) {
             return;
         }
 
+        // notify listeners about stored connection
         this.listeners.forEach(listener => listener(storedConnection.connectEvent));
+
+        // wait for the connection to be opened
+        try {
+            await callForSuccess(
+                options =>
+                    this.gateway!.registerSession({
+                        openingDeadlineMS: openingDeadlineMS,
+                        signal: options.signal
+                    }),
+                {
+                    attempts: Number.MAX_SAFE_INTEGER,
+                    delayMs: 5_000,
+                    signal: abortController.signal
+                }
+            );
+        } catch (e) {
+            await this.disconnect({ signal: abortController.signal });
+            return;
+        }
     }
 
     public sendRequest<T extends RpcMethod>(
         request: WithoutId<AppRequest<T>>,
+        options?: {
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+        }
+    ): Promise<WithoutId<WalletResponse<T>>>;
+    /** @deprecated use sendRequest(transaction, options) instead */
+    public sendRequest<T extends RpcMethod>(
+        request: WithoutId<AppRequest<T>>,
         onRequestSent?: () => void
+    ): Promise<WithoutId<WalletResponse<T>>>;
+    public sendRequest<T extends RpcMethod>(
+        request: WithoutId<AppRequest<T>>,
+        optionsOrOnRequestSent?: (() => void) | { onRequestSent?: () => void; signal?: AbortSignal }
     ): Promise<WithoutId<WalletResponse<T>>> {
+        // TODO: remove deprecated method
+        const options: {
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+        } = {};
+        if (typeof optionsOrOnRequestSent === 'function') {
+            options.onRequestSent = optionsOrOnRequestSent;
+        } else {
+            options.onRequestSent = optionsOrOnRequestSent?.onRequestSent;
+            options.signal = optionsOrOnRequestSent?.signal;
+        }
+
         return new Promise(async (resolve, reject) => {
             if (!this.gateway || !this.session || !('walletPublicKey' in this.session)) {
                 throw new TonConnectError('Trying to send bridge request without session');
@@ -165,9 +259,10 @@ export class BridgeProvider implements HTTPProvider {
                 await this.gateway.send(
                     encodedRequest,
                     this.session.walletPublicKey,
-                    request.method
+                    request.method,
+                    { signal: options?.signal }
                 );
-                onRequestSent?.();
+                options?.onRequestSent?.();
                 this.pendingRequests.set(id.toString(), resolve);
             } catch (e) {
                 reject(e);
@@ -182,21 +277,30 @@ export class BridgeProvider implements HTTPProvider {
         this.gateway = null;
     }
 
-    public async disconnect(): Promise<void> {
+    public async disconnect(options?: { signal?: AbortSignal }): Promise<void> {
         return new Promise(async resolve => {
             let called = false;
             const onRequestSent = (): void => {
                 called = true;
                 this.removeBridgeAndSession().then(resolve);
+                // this.connectionStorage.removeConnection().then(resolve);
             };
 
             try {
-                await this.sendRequest({ method: 'disconnect', params: [] }, onRequestSent);
+                this.closeGateways();
+                await this.sendRequest(
+                    { method: 'disconnect', params: [] },
+                    {
+                        onRequestSent: onRequestSent,
+                        signal: options?.signal
+                    }
+                );
             } catch (e) {
                 console.debug(e);
 
                 if (!called) {
                     this.removeBridgeAndSession().then(resolve);
+                    // this.connectionStorage.removeConnection().then(resolve);
                 }
             }
         });
@@ -226,11 +330,19 @@ export class BridgeProvider implements HTTPProvider {
         bridgeIncomingMessage: BridgeIncomingMessage
     ): Promise<void> {
         if (!this.pendingGateways.includes(gateway)) {
-            gateway.close();
+            await gateway.close();
             return;
         }
 
         this.closeGateways({ except: gateway });
+
+        // TODO: Remove debuggers after testing
+        if (this.gateway) {
+            // debugger;
+            // throw new TonConnectError('Gateway is already opened');
+            await this.gateway.close();
+            console.warn('Gateway is already opened');
+        }
 
         this.session!.bridgeUrl = bridgeUrl;
         this.gateway = gateway;
@@ -285,6 +397,7 @@ export class BridgeProvider implements HTTPProvider {
         }
 
         if (walletMessage.event === 'disconnect') {
+            logDebug(`Removing bridge and session: received disconnect event`);
             await this.removeBridgeAndSession();
         }
 
@@ -372,8 +485,22 @@ export class BridgeProvider implements HTTPProvider {
         return url.toString();
     }
 
-    private async openGateways(sessionCrypto: SessionCrypto, options?: { openingDeadlineMS?: number }): Promise<void> {
+    private async openGateways(
+        sessionCrypto: SessionCrypto,
+        options?: {
+            openingDeadlineMS?: number;
+            signal?: AbortSignal;
+        }
+    ): Promise<void> {
+        const abortController = createAbortController(options?.signal);
+        this.abortController?.abort();
+        this.abortController = abortController;
+
         if (Array.isArray(this.walletConnectionSource)) {
+            // close all gateways before opening new ones
+            this.pendingGateways.map(bridge => bridge.close().catch(e => console.error(e)));
+
+            // open new gateways
             this.pendingGateways = this.walletConnectionSource.map(source => {
                 const gateway = new BridgeGateway(
                     this.storage,
@@ -392,9 +519,34 @@ export class BridgeProvider implements HTTPProvider {
                 return gateway;
             });
 
-            await Promise.allSettled(this.pendingGateways.map(bridge => bridge.registerSession(options)));
+            await Promise.allSettled(
+                this.pendingGateways.map(bridge =>
+                    callForSuccess(
+                        (_options): Promise<void> => {
+                            return bridge.registerSession({
+                                openingDeadlineMS: options?.openingDeadlineMS,
+                                signal: _options.signal
+                            });
+                        },
+                        {
+                            attempts: Number.MAX_SAFE_INTEGER,
+                            delayMs: 5_000,
+                            signal: abortController.signal
+                        }
+                    )
+                )
+            );
+
             return;
         } else {
+            // TODO: Remove debuggers after testing
+            if (this.gateway) {
+                // debugger;
+                await this.gateway.close();
+                // throw new TonConnectError('Gateway is already opened');
+                console.warn('Gateway is already opened');
+            }
+
             this.gateway = new BridgeGateway(
                 this.storage,
                 this.walletConnectionSource.bridgeUrl,
@@ -402,7 +554,10 @@ export class BridgeProvider implements HTTPProvider {
                 this.gatewayListener.bind(this),
                 this.gatewayErrorsListener.bind(this)
             );
-            return this.gateway.registerSession(options);
+            return await this.gateway.registerSession({
+                openingDeadlineMS: options?.openingDeadlineMS,
+                signal: abortController.signal
+            });
         }
     }
 

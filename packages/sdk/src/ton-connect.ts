@@ -1,12 +1,12 @@
 import {
     ConnectEventError,
     ConnectEventSuccess,
+    ConnectItem,
     ConnectRequest,
     SendTransactionRpcResponseSuccess,
     TonAddressItemReply,
-    WalletEvent,
     TonProofItemReply,
-    ConnectItem
+    WalletEvent
 } from '@tonconnect/protocol';
 import { DappMetadataError } from 'src/errors/dapp/dapp-metadata.error';
 import { ManifestContentErrorError } from 'src/errors/protocol/events/connect/manifest-content-error.error';
@@ -40,6 +40,8 @@ import { getDocument, getWebPageManifest } from 'src/utils/web-api';
 import { WalletsListManager } from 'src/wallets-list-manager';
 import { WithoutIdDistributive } from 'src/utils/types';
 import { checkSendTransactionSupport } from 'src/utils/feature-support';
+import { createAbortController } from 'src/utils/defer';
+import { callForSuccess } from 'src/utils/call-for-success';
 
 export class TonConnect implements ITonConnect {
     private static readonly walletsList = new WalletsListManager();
@@ -78,6 +80,8 @@ export class TonConnect implements ITonConnect {
     private statusChangeSubscriptions: ((walletInfo: Wallet | null) => void)[] = [];
 
     private statusChangeErrorSubscriptions: ((err: TonConnectError) => void)[] = [];
+
+    private abortController?: AbortController;
 
     /**
      * Shows if the wallet is connected right now.
@@ -167,73 +171,200 @@ export class TonConnect implements ITonConnect {
      * Generates universal link for an external wallet and subscribes to the wallet's bridge, or sends connect request to the injected wallet.
      * @param wallet wallet's bridge url and universal link for an external wallet or jsBridge key for the injected wallet.
      * @param request (optional) additional request to pass to the wallet while connect (currently only ton_proof is available).
+     * @param options (optional) openingDeadlineMS for the connection opening deadline and signal for the connection abort.
      * @returns universal link if external wallet was passed or void for the injected wallet.
      */
+
     public connect<
         T extends WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[]
     >(
         wallet: T,
-        request?: ConnectAdditionalRequest
+        options?: {
+            request?: ConnectAdditionalRequest;
+            openingDeadlineMS?: number;
+            signal?: AbortSignal;
+        }
+    ): T extends WalletConnectionSourceJS ? void : string;
+    /** @deprecated use connect(wallet, options) instead */
+    public connect<
+        T extends WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[]
+    >(
+        wallet: T,
+        request?: ConnectAdditionalRequest,
+        options?: {
+            openingDeadlineMS?: number;
+            signal?: AbortSignal;
+        }
     ): T extends WalletConnectionSourceJS ? void : string;
     public connect(
         wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
-        request?: ConnectAdditionalRequest
+        requestOrOptions?:
+            | ConnectAdditionalRequest
+            | {
+                  request?: ConnectAdditionalRequest;
+                  openingDeadlineMS?: number;
+                  signal?: AbortSignal;
+              }
     ): void | string {
+        // TODO: remove deprecated method
+        const options: {
+            request?: ConnectAdditionalRequest;
+            openingDeadlineMS?: number;
+            signal?: AbortSignal;
+        } = {};
+        if (typeof requestOrOptions === 'object' && 'tonProof' in requestOrOptions) {
+            options.request = requestOrOptions;
+        }
+        if (
+            typeof requestOrOptions === 'object' &&
+            ('openingDeadlineMS' in requestOrOptions ||
+                'signal' in requestOrOptions ||
+                'request' in requestOrOptions)
+        ) {
+            options.request = requestOrOptions?.request;
+            options.openingDeadlineMS = requestOrOptions?.openingDeadlineMS;
+            options.signal = requestOrOptions?.signal;
+        }
+
         if (this.connected) {
             throw new WalletAlreadyConnectedError();
+        }
+
+        const abortController = createAbortController(options?.signal);
+        this.abortController?.abort();
+        this.abortController = abortController;
+
+        if (abortController.signal.aborted) {
+            throw new TonConnectError('Connection was aborted');
         }
 
         this.provider?.closeConnection();
         this.provider = this.createProvider(wallet);
 
-        return this.provider.connect(this.createConnectRequest(request));
+        return this.provider.connect(this.createConnectRequest(options?.request), {
+            openingDeadlineMS: options?.openingDeadlineMS,
+            signal: abortController.signal
+        });
     }
 
     /**
      * Try to restore existing session and reconnect to the corresponding wallet. Call it immediately when your app is loaded.
      */
-    public async restoreConnection(): Promise<void> {
+    public async restoreConnection(options?: {
+        openingDeadlineMS?: number;
+        signal?: AbortSignal;
+    }): Promise<void> {
+        const abortController = createAbortController(options?.signal);
+        this.abortController?.abort();
+        this.abortController = abortController;
+
+        if (abortController.signal.aborted) {
+            return;
+        }
+
+        // TODO: potentially race condition here
         const [bridgeConnectionType, embeddedWallet] = await Promise.all([
             this.bridgeConnectionStorage.storedConnectionType(),
             this.walletsList.getEmbeddedWallet()
         ]);
 
+        if (abortController.signal.aborted) {
+            return;
+        }
+
+        let provider: Provider | null = null;
         try {
             switch (bridgeConnectionType) {
                 case 'http':
-                    this.provider = await BridgeProvider.fromStorage(this.dappSettings.storage);
+                    provider = await BridgeProvider.fromStorage(this.dappSettings.storage);
                     break;
                 case 'injected':
-                    this.provider = await InjectedProvider.fromStorage(this.dappSettings.storage);
+                    provider = await InjectedProvider.fromStorage(this.dappSettings.storage);
                     break;
                 default:
                     if (embeddedWallet) {
-                        this.provider = await this.createProvider(embeddedWallet);
+                        provider = this.createProvider(embeddedWallet);
                     } else {
                         return;
                     }
             }
         } catch {
             await this.bridgeConnectionStorage.removeConnection();
-            this.provider = null;
+            provider?.closeConnection();
+            provider = null;
             return;
         }
 
-        this.provider.listen(this.walletEventsListener.bind(this));
-        return this.provider.restoreConnection();
+        if (abortController.signal.aborted) {
+            provider?.closeConnection();
+            return;
+        }
+
+        if (provider) {
+            this.provider?.closeConnection();
+            this.provider = provider;
+        }
+
+        provider?.listen(this.walletEventsListener.bind(this));
+        return await callForSuccess(
+            async _options =>
+                provider?.restoreConnection({
+                    openingDeadlineMS: options?.openingDeadlineMS,
+                    signal: _options.signal
+                }),
+            {
+                attempts: Number.MAX_SAFE_INTEGER,
+                delayMs: 5_000,
+                signal: options?.signal
+            }
+        );
     }
 
     /**
      * Asks connected wallet to sign and send the transaction.
      * @param transaction transaction to send.
-     * @param onRequestSent (optional) will be called after the transaction is sent to the wallet.
+     * @param options (optional) onRequestSent will be called after the request was sent to the wallet and signal for the transaction abort.
      * @returns signed transaction boc that allows you to find the transaction in the blockchain.
      * If user rejects transaction, method will throw the corresponding error.
      */
-    public async sendTransaction(
+    public sendTransaction(
+        transaction: SendTransactionRequest,
+        options?: {
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+        }
+    ): Promise<SendTransactionResponse>;
+    /** @deprecated use sendTransaction(transaction, options) instead */
+    public sendTransaction(
         transaction: SendTransactionRequest,
         onRequestSent?: () => void
+    ): Promise<SendTransactionResponse>;
+    public async sendTransaction(
+        transaction: SendTransactionRequest,
+        optionsOrOnRequestSent?:
+            | {
+                  onRequestSent?: () => void;
+                  signal?: AbortSignal;
+              }
+            | (() => void)
     ): Promise<SendTransactionResponse> {
+        // TODO: remove deprecated method
+        const options: {
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+        } = {};
+        if (typeof optionsOrOnRequestSent === 'function') {
+            options.onRequestSent = optionsOrOnRequestSent;
+        } else {
+            options.onRequestSent = optionsOrOnRequestSent?.onRequestSent;
+            options.signal = optionsOrOnRequestSent?.signal;
+        }
+
+        const abortController = createAbortController(options?.signal);
+        if (abortController.signal.aborted) {
+            throw new TonConnectError('Transaction sending was aborted');
+        }
+
         this.checkConnection();
         checkSendTransactionSupport(this.wallet!.device.features, {
             requiredMessagesNumber: transaction.messages.length
@@ -250,7 +381,7 @@ export class TonConnect implements ITonConnect {
                 from,
                 network
             }),
-            onRequestSent
+            { onRequestSent: options.onRequestSent, signal: abortController.signal }
         );
 
         if (sendTransactionParser.isError(response)) {
@@ -265,12 +396,18 @@ export class TonConnect implements ITonConnect {
     /**
      * Disconnect form thw connected wallet and drop current session.
      */
-    public async disconnect(): Promise<void> {
+    public async disconnect(options?: { signal?: AbortSignal }): Promise<void> {
         if (!this.connected) {
             throw new WalletNotConnectedError();
         }
-        await this.provider!.disconnect();
+        const abortController = createAbortController(options?.signal);
+        this.abortController?.abort();
+        this.abortController = abortController;
+
         this.onWalletDisconnected();
+        await this.provider!.disconnect({
+            signal: abortController.signal
+        });
     }
 
     /**
