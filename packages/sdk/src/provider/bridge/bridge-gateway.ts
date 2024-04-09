@@ -116,7 +116,11 @@ export class BridgeGateway {
 
         await callForSuccess(
             async options => {
-                await this.post(url, body, options.signal);
+                const response = await this.post(url, body, options.signal);
+
+                if (!response.ok) {
+                    throw new TonConnectError(`Bridge send failed, status ${response.status}`);
+                }
             },
             { attempts: Number.MAX_SAFE_INTEGER, delayMs: 5_000, signal: options?.signal }
         );
