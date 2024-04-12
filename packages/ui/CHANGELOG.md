@@ -1,5 +1,19 @@
 # Changelog @tonconnect/ui 
 
+## [2.0.1-beta.5](https://github.com/ton-connect/sdk/compare/ui-2.0.1-beta.4...ui-2.0.1-beta.5) (2024-04-12)
+
+
+### Bug Fixes
+
+* **ui:** improve abort handling in connection and send methods ([57ff105](https://github.com/ton-connect/sdk/commit/57ff1050d35c0a5b7ce6aa78b185f4390e37a318))
+
+
+### Features
+
+* **ui:** implement transaction loader and remove restoring process ([d00eda1](https://github.com/ton-connect/sdk/commit/d00eda18d2533d86532a87d8907066ae334c0fab))
+
+
+
 ## [2.0.1-beta.4](https://github.com/ton-connect/sdk/compare/ui-2.0.1-beta.3...ui-2.0.1-beta.4) (2024-03-25)
 
 
