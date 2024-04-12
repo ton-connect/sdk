@@ -36,19 +36,6 @@ export const FALLBACK_WALLETS_LIST: WalletInfoDTO[] = [
         platforms: ['ios', 'android', 'chrome', 'firefox', 'macos']
     },
     {
-        app_name: 'openmask',
-        name: 'OpenMask',
-        image: 'https://raw.githubusercontent.com/OpenProduct/openmask-extension/main/public/openmask-logo-288.png',
-        about_url: 'https://www.openmask.app/',
-        bridge: [
-            {
-                type: 'js',
-                key: 'openmask'
-            }
-        ],
-        platforms: ['chrome']
-    },
-    {
         app_name: 'mytonwallet',
         name: 'MyTonWallet',
         image: 'https://mytonwallet.io/icon-256.png',
@@ -64,7 +51,20 @@ export const FALLBACK_WALLETS_LIST: WalletInfoDTO[] = [
                 url: 'https://tonconnectbridge.mytonwallet.org/bridge/'
             }
         ],
-        platforms: ['chrome', 'windows', 'macos', 'linux']
+        platforms: ['chrome', 'windows', 'macos', 'linux', 'ios', 'android', 'firefox']
+    },
+    {
+        app_name: 'openmask',
+        name: 'OpenMask',
+        image: 'https://raw.githubusercontent.com/OpenProduct/openmask-extension/main/public/openmask-logo-288.png',
+        about_url: 'https://www.openmask.app/',
+        bridge: [
+            {
+                type: 'js',
+                key: 'openmask'
+            }
+        ],
+        platforms: ['chrome']
     },
     {
         app_name: 'tonhub',
@@ -83,19 +83,6 @@ export const FALLBACK_WALLETS_LIST: WalletInfoDTO[] = [
             }
         ],
         platforms: ['ios', 'android']
-    },
-    {
-        app_name: 'tonflow',
-        name: 'TonFlow',
-        image: 'https://tonflow.net/assets/images/tonflow_ico_192.png',
-        about_url: 'https://tonflow.net',
-        bridge: [
-            {
-                type: 'js',
-                key: 'tonflow'
-            }
-        ],
-        platforms: ['chrome']
     },
     {
         app_name: 'dewallet',
