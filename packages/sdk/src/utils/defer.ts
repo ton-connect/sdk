@@ -36,9 +36,10 @@ export type Deferrable<T> = (
  */
 export function createAbortController(signal?: AbortSignal): AbortController {
     const abortController = new AbortController();
-    signal?.addEventListener('abort', () => abortController.abort(), { once: true });
     if (signal?.aborted) {
         abortController.abort();
+    } else {
+        signal?.addEventListener('abort', () => abortController.abort(), { once: true });
     }
     return abortController;
 }
