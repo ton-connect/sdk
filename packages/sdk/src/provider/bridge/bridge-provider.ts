@@ -155,7 +155,6 @@ export class BridgeProvider implements HTTPProvider {
                         : ''
             };
 
-            // TODO: нужно дожидаться одной попытки открыть коннект
             return await this.openGateways(storedConnection.sessionCrypto, {
                 openingDeadlineMS: openingDeadlineMS,
                 signal: abortController?.signal
@@ -170,11 +169,9 @@ export class BridgeProvider implements HTTPProvider {
 
         this.session = storedConnection.session;
 
-        // TODO: Remove debuggers after testing
         if (this.gateway) {
-            debugger;
-            //     throw new TonConnectError('Gateway is already opened');
-            console.warn('Gateway is already opened');
+            logDebug('Gateway is already opened, closing previous gateway');
+            await this.gateway.close();
         }
 
         this.gateway = new BridgeGateway(
