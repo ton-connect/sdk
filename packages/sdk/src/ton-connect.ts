@@ -413,7 +413,7 @@ export class TonConnect implements ITonConnect {
         }
 
         this.onWalletDisconnected();
-        await this.provider!.disconnect({
+        await this.provider?.disconnect({
             signal: abortController.signal
         });
     }
