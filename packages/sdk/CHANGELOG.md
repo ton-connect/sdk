@@ -1,5 +1,23 @@
 # Changelog @tonconnect/sdk 
 
+## [3.0.1-beta.0](https://github.com/ton-connect/sdk/compare/sdk-3.0.0...sdk-3.0.1-beta.0) (2024-04-12)
+
+
+### Bug Fixes
+
+* **sdk:** checks if the signal is already aborted ([fa18cb2](https://github.com/ton-connect/sdk/commit/fa18cb21e2ea542e5045f74af8b601086730628e))
+* **sdk:** ensure closure of previously opened gateway ([d4d1d50](https://github.com/ton-connect/sdk/commit/d4d1d50c8fe16fbe2624c2663cacea350974903c))
+* **sdk:** ensuring the disconnect is called only if the provider is defined ([9b2bd71](https://github.com/ton-connect/sdk/commit/9b2bd7124477d21053e0159ace82202e311dfc1a))
+* **sdk:** improve abort handling in connection and send methods ([dd87b04](https://github.com/ton-connect/sdk/commit/dd87b04e31614df01e6209a618b186c8b3d78d55))
+* **sdk:** improve error handling in bridge gateway ([ea2aa79](https://github.com/ton-connect/sdk/commit/ea2aa79ffa0f80a755a762fae2090729ac7c8606))
+
+
+### Features
+
+* **sdk:** update fallback wallets list ([de9520d](https://github.com/ton-connect/sdk/commit/de9520df606beb55e56d1f6af6bfec729c163530))
+
+
+
 # [3.0.0](https://github.com/ton-connect/sdk/compare/sdk-3.0.0-beta.6...sdk-3.0.0) (2023-12-26)
 
 
