@@ -19,6 +19,7 @@ export type ConfirmTransactionAction = BasicAction & {
     name: 'confirm-transaction';
     returnStrategy: ReturnStrategy;
     twaReturnUrl: `${string}://${string}`;
+    sent: boolean;
 };
 
 export const [walletsModalState, setWalletsModalState] = createSignal<WalletsModalState>({

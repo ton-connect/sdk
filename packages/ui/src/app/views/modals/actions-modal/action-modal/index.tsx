@@ -1,15 +1,21 @@
-import { Component, createSignal, JSXElement, Show, useContext } from 'solid-js';
+import { Component, createEffect, createSignal, JSXElement, Show, useContext } from 'solid-js';
 import { Translation } from 'src/app/components/typography/Translation';
-import { ActionModalStyled, ButtonStyled, H1Styled, TextStyled } from './style';
+import {
+    ActionModalStyled,
+    ButtonStyled,
+    H1Styled,
+    LoaderButtonStyled,
+    LoaderIconStyled,
+    TextStyled
+} from './style';
 import { WithDataAttributes } from 'src/app/models/with-data-attributes';
 import { useDataAttributes } from 'src/app/hooks/use-data-attributes';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
-import { openLinkBlank } from 'src/app/utils/web-api';
 import { isTelegramUrl } from '@tonconnect/sdk';
 import { appState } from 'src/app/state/app.state';
 import { action } from 'src/app/state/modals-state';
 import { isInTMA } from 'src/app/utils/tma-api';
-import { addReturnStrategy, redirectToTelegram, redirectToWallet } from 'src/app/utils/url-strategy-helpers';
+import { redirectToTelegram, redirectToWallet } from 'src/app/utils/url-strategy-helpers';
 
 interface ActionModalProps extends WithDataAttributes {
     headerTranslationKey: string;
@@ -25,6 +31,12 @@ export const ActionModal: Component<ActionModalProps> = props => {
     const dataAttrs = useDataAttributes(props);
     const tonConnectUI = useContext(TonConnectUiContext);
     const [firstClick, setFirstClick] = createSignal(true);
+    const [sent, setSent] = createSignal(false);
+
+    createEffect(() => {
+        const currentAction = action();
+        setSent(!!currentAction && 'sent' in currentAction && currentAction.sent);
+    });
 
     let universalLink: string | undefined;
     if (
@@ -89,15 +101,22 @@ export const ActionModal: Component<ActionModalProps> = props => {
                 translationKey={props.textTranslationKey}
                 translationValues={props.textTranslationValues}
             />
-            <Show when={props.showButton !== 'open-wallet'}>
-                <ButtonStyled onClick={() => props.onClose()}>
-                    <Translation translationKey="common.close">Close</Translation>
-                </ButtonStyled>
+            <Show when={!sent()}>
+                <LoaderButtonStyled disabled={true} data-tc-connect-button-loading="true">
+                    <LoaderIconStyled />
+                </LoaderButtonStyled>
             </Show>
-            <Show when={props.showButton === 'open-wallet' && universalLink}>
-                <ButtonStyled onClick={onOpenWallet}>
-                    <Translation translationKey="common.openWallet">Open wallet</Translation>
-                </ButtonStyled>
+            <Show when={sent()}>
+                <Show when={props.showButton !== 'open-wallet'}>
+                    <ButtonStyled onClick={() => props.onClose()}>
+                        <Translation translationKey="common.close">Close</Translation>
+                    </ButtonStyled>
+                </Show>
+                <Show when={props.showButton === 'open-wallet' && universalLink}>
+                    <ButtonStyled onClick={onOpenWallet}>
+                        <Translation translationKey="common.openWallet">Open wallet</Translation>
+                    </ButtonStyled>
+                </Show>
             </Show>
         </ActionModalStyled>
     );
