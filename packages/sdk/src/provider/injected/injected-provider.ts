@@ -224,7 +224,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             }
             this.listeners.forEach(listener => listener(connectEvent));
         } catch (e) {
-            logDebug(e);
+            logDebug('Injected Provider connect error:', e);
             const connectEventError: WithoutId<ConnectEventError> = {
                 event: 'connect_error',
                 payload: {

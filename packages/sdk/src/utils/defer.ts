@@ -1,3 +1,5 @@
+import { TonConnectError } from 'src/errors';
+
 /**
  * Represents the options for deferring a task.
  */
@@ -55,10 +57,15 @@ export function defer<T>(fn: Deferrable<T>, options?: DeferOptions): Promise<T> 
     const abortController = createAbortController(signal);
 
     return new Promise((resolve, reject) => {
+        if (abortController.signal.aborted) {
+            reject(new TonConnectError('Operation aborted'));
+            return;
+        }
+
         let timeoutId: ReturnType<typeof setTimeout> | undefined;
         if (typeof timeout !== 'undefined') {
             timeoutId = setTimeout(() => {
-                reject(new DeferTimeoutError(`Timeout after ${timeout}ms`));
+                reject(new TonConnectError(`Timeout after ${timeout}ms`));
                 abortController.abort();
             }, timeout);
         }
@@ -67,7 +74,7 @@ export function defer<T>(fn: Deferrable<T>, options?: DeferOptions): Promise<T> 
             'abort',
             () => {
                 clearTimeout(timeoutId);
-                reject(new DeferAbortError('Operation aborted'));
+                reject(new TonConnectError('Operation aborted'));
             },
             { once: true }
         );
@@ -75,28 +82,4 @@ export function defer<T>(fn: Deferrable<T>, options?: DeferOptions): Promise<T> 
         const deferOptions = { timeout, abort: abortController.signal };
         fn(resolve, reject, deferOptions).finally(() => clearTimeout(timeoutId));
     });
-}
-
-/**
- * Represents an error that is thrown when an operation is aborted.
- *
- * @param {string} message - The error message.
- */
-export class DeferAbortError extends Error {
-    constructor(message: string) {
-        super(message);
-        this.name = 'AbortError';
-    }
-}
-
-/**
- * Represents an error that occurs when a deferred operation times out.
- *
- * @param {string} message - The error message.
- */
-export class DeferTimeoutError extends Error {
-    constructor(message: string) {
-        super(message);
-        this.name = 'TimeoutError';
-    }
 }

@@ -283,7 +283,6 @@ export class BridgeProvider implements HTTPProvider {
             const onRequestSent = (): void => {
                 called = true;
                 this.removeBridgeAndSession().then(resolve);
-                // this.connectionStorage.removeConnection().then(resolve);
             };
 
             try {
@@ -296,11 +295,10 @@ export class BridgeProvider implements HTTPProvider {
                     }
                 );
             } catch (e) {
-                console.debug(e);
+                logDebug('Disconnect error:', e);
 
                 if (!called) {
                     this.removeBridgeAndSession().then(resolve);
-                    // this.connectionStorage.removeConnection().then(resolve);
                 }
             }
         });
@@ -336,12 +334,9 @@ export class BridgeProvider implements HTTPProvider {
 
         this.closeGateways({ except: gateway });
 
-        // TODO: Remove debuggers after testing
         if (this.gateway) {
-            // debugger;
-            // throw new TonConnectError('Gateway is already opened');
+            logDebug('Gateway is already opened, closing previous gateway');
             await this.gateway.close();
-            console.warn('Gateway is already opened');
         }
 
         this.session!.bridgeUrl = bridgeUrl;
@@ -539,12 +534,9 @@ export class BridgeProvider implements HTTPProvider {
 
             return;
         } else {
-            // TODO: Remove debuggers after testing
             if (this.gateway) {
-                // debugger;
+                logDebug(`Gateway is already opened, closing previous gateway`);
                 await this.gateway.close();
-                // throw new TonConnectError('Gateway is already opened');
-                console.warn('Gateway is already opened');
             }
 
             this.gateway = new BridgeGateway(

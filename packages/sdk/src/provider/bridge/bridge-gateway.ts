@@ -68,7 +68,6 @@ export class BridgeGateway {
         private listener: (msg: BridgeIncomingMessage) => void,
         private errorsListener: (err: Event) => void
     ) {
-        console.log(`Create new bridge gateway with url ${bridgeUrl}`);
         this.bridgeGatewayStorage = new HttpBridgeGatewayStorage(storage, bridgeUrl);
     }
 
@@ -237,17 +236,6 @@ async function createEventSource(
 
             const eventSource = new EventSource(url.toString());
 
-            // eventSource.onerror = (event: Event): void => {
-            //     debugger;
-            //     if (signal.aborted) {
-            //         reject(new TonConnectError('Bridge connection aborted'));
-            //         return;
-            //     }
-            //
-            //     console.log(event);
-            //
-            //     // reject(reason);
-            // };
             eventSource.onerror = (reason: Event): void => {
                 if (signal.aborted) {
                     reject(new TonConnectError('Bridge connection aborted'));
@@ -261,9 +249,6 @@ async function createEventSource(
                     reject(new TonConnectError('Bridge connection aborted'));
                     return;
                 }
-                // eventSource.onerror = (event: Event): void => {
-                //     config.errorHandler(event);
-                // };
                 resolve(eventSource);
             };
             eventSource.onmessage = (event: MessageEvent<string>): void => {
@@ -271,7 +256,7 @@ async function createEventSource(
             };
 
             config?.signal?.addEventListener('abort', () => {
-                console.log(`ABORTED EVENT SOURCE`);
+                logError('Bridge connection aborted');
                 eventSource.close();
                 reject(new TonConnectError('Bridge connection aborted'));
             });

@@ -42,6 +42,7 @@ import { WithoutIdDistributive } from 'src/utils/types';
 import { checkSendTransactionSupport } from 'src/utils/feature-support';
 import { createAbortController } from 'src/utils/defer';
 import { callForSuccess } from 'src/utils/call-for-success';
+import { logError } from 'src/utils/log';
 
 export class TonConnect implements ITonConnect {
     private static readonly walletsList = new WalletsListManager();
@@ -300,12 +301,15 @@ export class TonConnect implements ITonConnect {
             return;
         }
 
-        if (provider) {
-            this.provider?.closeConnection();
-            this.provider = provider;
+        if (!provider) {
+            logError('Provider is not restored');
+            return;
         }
 
-        provider?.listen(this.walletEventsListener.bind(this));
+        this.provider?.closeConnection();
+        this.provider = provider;
+        provider.listen(this.walletEventsListener.bind(this));
+
         return await callForSuccess(
             async _options =>
                 provider?.restoreConnection({
@@ -403,6 +407,10 @@ export class TonConnect implements ITonConnect {
         const abortController = createAbortController(options?.signal);
         this.abortController?.abort();
         this.abortController = abortController;
+
+        if (abortController.signal.aborted) {
+            throw new TonConnectError('Disconnect was aborted');
+        }
 
         this.onWalletDisconnected();
         await this.provider!.disconnect({
