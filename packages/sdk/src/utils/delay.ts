@@ -1,9 +1,10 @@
 import { defer } from 'src/utils/defer';
+import { TonConnectError } from 'src/errors';
 
 /**
  * Configuration options for the delay function.
  */
-export type DelayOptions = {
+export type DelayFnOptions = {
     /**
      * An 'AbortSignal' object that can be used to abort the delay.
      */
@@ -16,13 +17,18 @@ export type DelayOptions = {
  * @param {DelayOptions} [options] - Optional configuration options for the delay.
  * @return {Promise<void>} - A promise that resolves after the specified delay, or rejects if the delay is aborted.
  */
-export async function delay(timeout: number, options?: DelayOptions): Promise<void> {
+export async function delay(timeout: number, options?: DelayFnOptions): Promise<void> {
     return await defer(
         async (resolve, reject, options): Promise<void> => {
+            if (options.signal?.aborted) {
+                reject(new TonConnectError('Delay aborted'));
+                return;
+            }
+
             const timeoutId = setTimeout(() => resolve(), timeout);
             options.signal?.addEventListener('abort', () => {
                 clearTimeout(timeoutId);
-                reject(new Error('Aborted'));
+                reject(new TonConnectError('Delay aborted'));
             });
         },
         { signal: options?.signal }

@@ -1,6 +1,6 @@
 import { delay } from 'src/utils/delay';
-import { logError } from 'src/utils/log';
 import { createAbortController } from 'src/utils/defer';
+import { TonConnectError } from 'src/errors';
 
 /**
  * Configuration options for the callForSuccess function.
@@ -37,7 +37,7 @@ export async function callForSuccess<T extends (options: { signal?: AbortSignal 
     const abortController = createAbortController(options?.signal);
 
     if (typeof fn !== 'function') {
-        throw new Error(`Expected a function, got ${typeof fn}`);
+        throw new TonConnectError(`Expected a function, got ${typeof fn}`);
     }
 
     let i = 0;
@@ -45,8 +45,7 @@ export async function callForSuccess<T extends (options: { signal?: AbortSignal 
 
     while (i < attempts) {
         if (abortController.signal.aborted) {
-            logError('Aborted after attempts', i);
-            throw new Error(`Aborted after attempts ${i}`);
+            throw new TonConnectError(`Aborted after attempts ${i}`);
         }
 
         try {
@@ -58,6 +57,5 @@ export async function callForSuccess<T extends (options: { signal?: AbortSignal 
         }
     }
 
-    logError('Error after attempts', i);
     throw lastError;
 }

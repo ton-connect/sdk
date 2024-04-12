@@ -1,4 +1,5 @@
 import { createAbortController } from 'src/utils/defer';
+import { TonConnectError } from 'src/errors';
 
 /**
  * The resource interface.
@@ -52,13 +53,11 @@ export function createResource<T, Args extends any[]>(
 
         const promise = createFn(abortController.signal, ...args);
         currentPromise = promise;
-        console.log('[resource.ts]: CREATING RESOURCE');
         const resource = await promise;
-        console.log('[resource.ts]: RESOURCE CREATED');
 
         if (currentPromise !== promise) {
             await disposeFn(resource);
-            throw new Error('Request was cancelled');
+            throw new TonConnectError('Resource creation was aborted by a new resource creation');
         }
 
         currentResource = resource;
@@ -78,7 +77,6 @@ export function createResource<T, Args extends any[]>(
         const promise = currentPromise;
         currentPromise = null;
 
-        console.log('[resource.ts]: CALL ABORT CONTROLLER');
         abortController?.abort();
 
         await Promise.allSettled([
