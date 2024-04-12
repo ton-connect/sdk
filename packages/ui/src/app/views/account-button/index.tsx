@@ -26,7 +26,6 @@ export const AccountButton: Component<AccountButtonProps> = () => {
     const tonConnectUI = useContext(TonConnectUiContext)!;
     const [isOpened, setIsOpened] = createSignal(false);
     const [account, setAccount] = createSignal<Account | null>(connector.account);
-    const [restoringProcess, setRestoringProcess] = createSignal<boolean>(true);
 
     let dropDownRef: HTMLDivElement | undefined;
 
@@ -50,8 +49,6 @@ export const AccountButton: Component<AccountButtonProps> = () => {
 
         return '';
     };
-
-    tonConnectUI.connectionRestored.then(() => setRestoringProcess(false));
 
     const unsubscribe = connector.onStatusChange(wallet => {
         if (!wallet) {

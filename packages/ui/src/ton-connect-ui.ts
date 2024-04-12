@@ -400,10 +400,22 @@ export class TonConnectUI {
         widgetController.setAction({
             name: 'confirm-transaction',
             showNotification: notifications.includes('before'),
-            openModal: modals.includes('before')
+            openModal: modals.includes('before'),
+            sent: false
         });
 
         const onRequestSent = (): void => {
+            if (abortController.signal.aborted) {
+                return;
+            }
+
+            widgetController.setAction({
+                name: 'confirm-transaction',
+                showNotification: notifications.includes('before'),
+                openModal: modals.includes('before'),
+                sent: true
+            });
+
             const userOSIsIos = getUserAgent().os === 'ios';
             const shouldSkipRedirectToWallet =
                 (skipRedirectToWallet === 'ios' && userOSIsIos) ||
