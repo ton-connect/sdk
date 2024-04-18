@@ -53,7 +53,10 @@ export async function callForSuccess<T extends (options: { signal?: AbortSignal 
         } catch (err) {
             lastError = err;
             i++;
-            await delay(delayMs);
+
+            if (i < attempts) {
+                await delay(delayMs);
+            }
         }
     }
 

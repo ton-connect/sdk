@@ -220,6 +220,7 @@ export class BridgeProvider implements HTTPProvider {
     public sendRequest<T extends RpcMethod>(
         request: WithoutId<AppRequest<T>>,
         options?: {
+            attempts?: number;
             onRequestSent?: () => void;
             signal?: AbortSignal;
         }
@@ -231,18 +232,20 @@ export class BridgeProvider implements HTTPProvider {
     ): Promise<WithoutId<WalletResponse<T>>>;
     public sendRequest<T extends RpcMethod>(
         request: WithoutId<AppRequest<T>>,
-        optionsOrOnRequestSent?: (() => void) | { onRequestSent?: () => void; signal?: AbortSignal }
+        optionsOrOnRequestSent?: (() => void) | { attempts?: number; onRequestSent?: () => void; signal?: AbortSignal }
     ): Promise<WithoutId<WalletResponse<T>>> {
         // TODO: remove deprecated method
         const options: {
             onRequestSent?: () => void;
             signal?: AbortSignal;
+            attempts?: number;
         } = {};
         if (typeof optionsOrOnRequestSent === 'function') {
             options.onRequestSent = optionsOrOnRequestSent;
         } else {
             options.onRequestSent = optionsOrOnRequestSent?.onRequestSent;
             options.signal = optionsOrOnRequestSent?.signal;
+            options.attempts = optionsOrOnRequestSent?.attempts;
         }
 
         return new Promise(async (resolve, reject) => {
@@ -265,7 +268,7 @@ export class BridgeProvider implements HTTPProvider {
                     encodedRequest,
                     this.session.walletPublicKey,
                     request.method,
-                    { signal: options?.signal }
+                    { attempts: options?.attempts, signal: options?.signal }
                 );
                 options?.onRequestSent?.();
                 this.pendingRequests.set(id.toString(), resolve);
@@ -287,8 +290,10 @@ export class BridgeProvider implements HTTPProvider {
             let called = false;
             let timeoutId: ReturnType<typeof setTimeout> | null = null;
             const onRequestSent = (): void => {
-                called = true;
-                this.removeBridgeAndSession().then(resolve);
+                if (!called) {
+                    called = true;
+                    this.removeBridgeAndSession().then(resolve);
+                }
             };
 
             try {
@@ -303,7 +308,8 @@ export class BridgeProvider implements HTTPProvider {
                     { method: 'disconnect', params: [] },
                     {
                         onRequestSent: onRequestSent,
-                        signal: abortController.signal
+                        signal: abortController.signal,
+                        attempts: 1,
                     }
                 );
             } catch (e) {
@@ -316,6 +322,8 @@ export class BridgeProvider implements HTTPProvider {
                 if (timeoutId) {
                     clearTimeout(timeoutId);
                 }
+
+                onRequestSent();
             }
         });
     }

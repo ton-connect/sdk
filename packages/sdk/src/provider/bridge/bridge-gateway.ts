@@ -80,6 +80,7 @@ export class BridgeGateway {
         options?: {
             ttl?: number;
             signal?: AbortSignal;
+            attempts?: number;
         }
     ): Promise<void>;
     /** @deprecated use send(message, receiver, topic, options) instead */
@@ -93,15 +94,16 @@ export class BridgeGateway {
         message: Uint8Array,
         receiver: string,
         topic: RpcMethod,
-        ttlOrOptions?: number | { ttl?: number; signal?: AbortSignal }
+        ttlOrOptions?: number | { ttl?: number; signal?: AbortSignal; attempts?: number }
     ): Promise<void> {
         // TODO: remove deprecated method
-        const options: { ttl?: number; signal?: AbortSignal } = {};
+        const options: { ttl?: number; signal?: AbortSignal; attempts?: number } = {};
         if (typeof ttlOrOptions === 'number') {
             options.ttl = ttlOrOptions;
         } else {
             options.ttl = ttlOrOptions?.ttl;
             options.signal = ttlOrOptions?.signal;
+            options.attempts = ttlOrOptions?.attempts;
         }
 
         const url = new URL(addPathToUrl(this.bridgeUrl, this.postPath));
@@ -119,7 +121,11 @@ export class BridgeGateway {
                     throw new TonConnectError(`Bridge send failed, status ${response.status}`);
                 }
             },
-            { attempts: Number.MAX_SAFE_INTEGER, delayMs: 5_000, signal: options?.signal }
+            {
+                attempts: options?.attempts ?? Number.MAX_SAFE_INTEGER,
+                delayMs: 5_000,
+                signal: options?.signal
+            }
         );
     }
 
