@@ -1,4 +1,5 @@
 import { TonConnectError } from 'src/errors';
+import { createAbortController } from 'src/utils/create-abort-controller';
 
 /**
  * Represents the options for deferring a task.
@@ -29,29 +30,13 @@ export type Deferrable<T> = (
 ) => Promise<void>;
 
 /**
- * Creates an AbortController instance with an optional AbortSignal.
- *
- * @param {AbortSignal} [signal] - An optional AbortSignal to use for aborting the controller.
- * @returns {AbortController} - An instance of AbortController.
- */
-export function createAbortController(signal?: AbortSignal): AbortController {
-    const abortController = new AbortController();
-    if (signal?.aborted) {
-        abortController.abort();
-    } else {
-        signal?.addEventListener('abort', () => abortController.abort(), { once: true });
-    }
-    return abortController;
-}
-
-/**
  * Executes a function and provides deferred behavior, allowing for a timeout and abort functionality.
  *
  * @param {Deferrable<T>} fn - The function to execute. It should return a promise that resolves with the desired result.
  * @param {DeferOptions} options - Optional configuration options for the defer behavior.
  * @returns {Promise<T>} - A promise that resolves with the result of the executed function, or rejects with an error if it times out or is aborted.
  */
-export function defer<T>(fn: Deferrable<T>, options?: DeferOptions): Promise<T> {
+export function timeout<T>(fn: Deferrable<T>, options?: DeferOptions): Promise<T> {
     const timeout = options?.timeout;
     const signal = options?.signal;
 
@@ -66,8 +51,8 @@ export function defer<T>(fn: Deferrable<T>, options?: DeferOptions): Promise<T> 
         let timeoutId: ReturnType<typeof setTimeout> | undefined;
         if (typeof timeout !== 'undefined') {
             timeoutId = setTimeout(() => {
-                reject(new TonConnectError(`Timeout after ${timeout}ms`));
                 abortController.abort();
+                reject(new TonConnectError(`Timeout after ${timeout}ms`));
             }, timeout);
         }
 

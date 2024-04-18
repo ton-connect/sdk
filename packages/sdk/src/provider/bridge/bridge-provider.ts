@@ -27,8 +27,8 @@ import { Optional, WithoutId, WithoutIdDistributive } from 'src/utils/types';
 import { PROTOCOL_VERSION } from 'src/resources/protocol';
 import { logDebug, logError } from 'src/utils/log';
 import { encodeTelegramUrlParameters, isTelegramUrl } from 'src/utils/url';
-import { createAbortController } from 'src/utils/defer';
 import { callForSuccess } from 'src/utils/call-for-success';
+import { createAbortController } from 'src/utils/create-abort-controller';
 
 export class BridgeProvider implements HTTPProvider {
     public static async fromStorage(storage: IStorage): Promise<BridgeProvider> {
@@ -80,6 +80,10 @@ export class BridgeProvider implements HTTPProvider {
             signal?: AbortSignal;
         }
     ): string {
+        const abortController = createAbortController(options?.signal);
+        this.abortController?.abort();
+        this.abortController = abortController;
+
         this.closeGateways();
 
         const sessionCrypto = new SessionCrypto();
@@ -99,6 +103,10 @@ export class BridgeProvider implements HTTPProvider {
                 sessionCrypto
             })
             .then(async () => {
+                if (abortController.signal.aborted) {
+                    return;
+                }
+
                 await callForSuccess(
                     _options =>
                         this.openGateways(sessionCrypto, {
@@ -108,7 +116,7 @@ export class BridgeProvider implements HTTPProvider {
                     {
                         attempts: Number.MAX_SAFE_INTEGER,
                         delayMs: 5_000,
-                        signal: options?.signal
+                        signal: abortController.signal
                     }
                 );
             });
@@ -277,6 +285,7 @@ export class BridgeProvider implements HTTPProvider {
     public async disconnect(options?: { signal?: AbortSignal }): Promise<void> {
         return new Promise(async resolve => {
             let called = false;
+            let timeoutId: ReturnType<typeof setTimeout> | null = null;
             const onRequestSent = (): void => {
                 called = true;
                 this.removeBridgeAndSession().then(resolve);
@@ -284,11 +293,17 @@ export class BridgeProvider implements HTTPProvider {
 
             try {
                 this.closeGateways();
+
+                const abortController = createAbortController(options?.signal);
+                timeoutId = setTimeout(() => {
+                    abortController.abort();
+                }, this.defaultOpeningDeadlineMS);
+
                 await this.sendRequest(
                     { method: 'disconnect', params: [] },
                     {
                         onRequestSent: onRequestSent,
-                        signal: options?.signal
+                        signal: abortController.signal
                     }
                 );
             } catch (e) {
@@ -296,6 +311,10 @@ export class BridgeProvider implements HTTPProvider {
 
                 if (!called) {
                     this.removeBridgeAndSession().then(resolve);
+                }
+            } finally {
+                if (timeoutId) {
+                    clearTimeout(timeoutId);
                 }
             }
         });
@@ -484,10 +503,6 @@ export class BridgeProvider implements HTTPProvider {
             signal?: AbortSignal;
         }
     ): Promise<void> {
-        const abortController = createAbortController(options?.signal);
-        this.abortController?.abort();
-        this.abortController = abortController;
-
         if (Array.isArray(this.walletConnectionSource)) {
             // close all gateways before opening new ones
             this.pendingGateways.map(bridge => bridge.close().catch(e => console.error(e)));
@@ -515,6 +530,10 @@ export class BridgeProvider implements HTTPProvider {
                 this.pendingGateways.map(bridge =>
                     callForSuccess(
                         (_options): Promise<void> => {
+                            if (!this.pendingGateways.some(item => item === bridge)) {
+                                return bridge.close();
+                            }
+
                             return bridge.registerSession({
                                 openingDeadlineMS: options?.openingDeadlineMS,
                                 signal: _options.signal
@@ -523,7 +542,7 @@ export class BridgeProvider implements HTTPProvider {
                         {
                             attempts: Number.MAX_SAFE_INTEGER,
                             delayMs: 5_000,
-                            signal: abortController.signal
+                            signal: options?.signal
                         }
                     )
                 )
@@ -545,7 +564,7 @@ export class BridgeProvider implements HTTPProvider {
             );
             return await this.gateway.registerSession({
                 openingDeadlineMS: options?.openingDeadlineMS,
-                signal: abortController.signal
+                signal: options?.signal
             });
         }
     }

@@ -1,5 +1,7 @@
-import { createAbortController } from 'src/utils/defer';
 import { TonConnectError } from 'src/errors';
+import { logError } from 'src/utils/log';
+import { delay } from 'src/utils/delay';
+import { createAbortController } from 'src/utils/create-abort-controller';
 
 /**
  * The resource interface.
@@ -8,7 +10,7 @@ export type Resource<T, Args extends any[]> = {
     /**
      * Create a new resource.
      */
-    create: (...args: Args) => Promise<T>;
+    create: (abortSignal?: AbortSignal, ...args: Args) => Promise<T>;
 
     /**
      * Get the current resource.
@@ -23,7 +25,7 @@ export type Resource<T, Args extends any[]> = {
     /**
      * Recreate the current resource.
      */
-    recreate: () => Promise<T>;
+    recreate: (delayMs: number) => Promise<T>;
 };
 
 /**
@@ -35,23 +37,30 @@ export type Resource<T, Args extends any[]> = {
  * @param {(...args: Args) => Promise<T>} createFn - A function that creates the resource.
  * @param {(resource: T) => Promise<void>} [disposeFn] - An optional function that disposes the resource.
  */
-export function createResource<T, Args extends any[]>(
-    createFn: (signal: AbortSignal, ...args: Args) => Promise<T>,
+export function createResource<T extends EventSource, Args extends any[]>(
+    createFn: (signal?: AbortSignal, ...args: Args) => Promise<T>,
     disposeFn: (resource: T) => Promise<void>
 ): Resource<T, Args> {
     let currentResource: T | null = null;
     let currentArgs: Args | null = null;
     let currentPromise: Promise<T> | null = null;
+    let currentSignal: AbortSignal | null = null;
     let abortController: AbortController | null = null;
 
     // create a new resource
-    const create = async (...args: Args): Promise<T> => {
+    const create = async (signal?: AbortSignal, ...args: Args): Promise<T> => {
+        currentSignal = signal ?? null;
+
         abortController?.abort();
-        abortController = createAbortController();
+        abortController = createAbortController(signal);
 
-        currentArgs = args;
+        if (abortController.signal.aborted) {
+            throw new TonConnectError('Resource creation was aborted');
+        }
 
-        const promise = createFn(abortController.signal, ...args);
+        currentArgs = args ?? null;
+
+        const promise = createFn(signal, ...args);
         currentPromise = promise;
         const resource = await promise;
 
@@ -71,25 +80,43 @@ export function createResource<T, Args extends any[]>(
 
     // dispose the current resource
     const dispose = async (): Promise<void> => {
-        const resource = currentResource;
-        currentResource = null;
+        try {
+            const resource = currentResource;
+            currentResource = null;
 
-        const promise = currentPromise;
-        currentPromise = null;
+            const promise = currentPromise;
+            currentPromise = null;
 
-        abortController?.abort();
+            abortController?.abort();
 
-        await Promise.allSettled([
-            resource ? disposeFn(resource) : Promise.resolve(),
-            promise ? disposeFn(await promise) : Promise.resolve()
-        ]);
+            await Promise.allSettled([
+                resource ? disposeFn(resource) : Promise.resolve(),
+                promise ? disposeFn(await promise) : Promise.resolve()
+            ]);
+        } catch (e) {
+            logError('Failed to dispose the resource', e);
+        }
     };
 
     // recreate the current resource
-    const recreate = async (): Promise<T> => {
-        await dispose();
+    const recreate = async (delayMs: number): Promise<T> => {
+        const resource = currentResource;
+        const promise = currentPromise;
+        const args = currentArgs;
+        const signal = currentSignal;
 
-        return create(...(currentArgs ?? ([] as unknown as Args)));
+        await delay(delayMs);
+
+        if (
+            resource === currentResource &&
+            promise === currentPromise &&
+            args === currentArgs &&
+            signal === currentSignal
+        ) {
+            return create(currentSignal!, ...((args ?? []) as Args));
+        }
+
+        throw new TonConnectError('Resource recreation was aborted by a new resource creation');
     };
 
     return {

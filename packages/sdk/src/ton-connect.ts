@@ -40,9 +40,9 @@ import { getDocument, getWebPageManifest } from 'src/utils/web-api';
 import { WalletsListManager } from 'src/wallets-list-manager';
 import { WithoutIdDistributive } from 'src/utils/types';
 import { checkSendTransactionSupport } from 'src/utils/feature-support';
-import { createAbortController } from 'src/utils/defer';
 import { callForSuccess } from 'src/utils/call-for-success';
-import { logError } from 'src/utils/log';
+import { logDebug, logError } from 'src/utils/log';
+import { createAbortController } from 'src/utils/create-abort-controller';
 
 export class TonConnect implements ITonConnect {
     private static readonly walletsList = new WalletsListManager();
@@ -242,6 +242,11 @@ export class TonConnect implements ITonConnect {
         this.provider?.closeConnection();
         this.provider = this.createProvider(wallet);
 
+        abortController.signal.addEventListener('abort', () => {
+            this.provider?.closeConnection();
+            this.provider = null;
+        });
+
         return this.provider.connect(this.createConnectRequest(options?.request), {
             openingDeadlineMS: options?.openingDeadlineMS,
             signal: abortController.signal
@@ -309,6 +314,11 @@ export class TonConnect implements ITonConnect {
         this.provider?.closeConnection();
         this.provider = provider;
         provider.listen(this.walletEventsListener.bind(this));
+
+        abortController.signal.addEventListener('abort', () => {
+            provider?.closeConnection();
+            provider = null;
+        });
 
         return await callForSuccess(
             async _options =>
@@ -405,7 +415,7 @@ export class TonConnect implements ITonConnect {
             throw new WalletNotConnectedError();
         }
         const abortController = createAbortController(options?.signal);
-        this.abortController?.abort();
+        const prevAbortController = this.abortController;
         this.abortController = abortController;
 
         if (abortController.signal.aborted) {
@@ -416,6 +426,7 @@ export class TonConnect implements ITonConnect {
         await this.provider?.disconnect({
             signal: abortController.signal
         });
+        prevAbortController?.abort();
     }
 
     /**
@@ -452,11 +463,11 @@ export class TonConnect implements ITonConnect {
                 if (document.hidden) {
                     this.pauseConnection();
                 } else {
-                    this.unPauseConnection();
+                    this.unPauseConnection().catch(e => logError('Cannot unpause connection', e));
                 }
             });
         } catch (e) {
-            console.error('Cannot subscribe to the document.visibilitychange: ', e);
+            logError('Cannot subscribe to the document.visibilitychange: ', e);
         }
     }
 
