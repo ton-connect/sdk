@@ -8,6 +8,8 @@ import {
     DropdownButtonStyled,
     DropdownContainerStyled,
     DropdownStyled,
+    LoaderButtonStyled,
+    LoaderIconStyled,
     NotificationsStyled
 } from './style';
 import { Dynamic, Portal } from 'solid-js/web';
@@ -26,6 +28,7 @@ export const AccountButton: Component<AccountButtonProps> = () => {
     const tonConnectUI = useContext(TonConnectUiContext)!;
     const [isOpened, setIsOpened] = createSignal(false);
     const [account, setAccount] = createSignal<Account | null>(connector.account);
+    const [restoringProcess, setRestoringProcess] = createSignal<boolean>(true);
 
     let dropDownRef: HTMLDivElement | undefined;
 
@@ -50,14 +53,19 @@ export const AccountButton: Component<AccountButtonProps> = () => {
         return '';
     };
 
+    // TODO: implement restoring process
+    tonConnectUI.connectionRestored.then(() => setRestoringProcess(false));
+
     const unsubscribe = connector.onStatusChange(wallet => {
         if (!wallet) {
             setIsOpened(false);
             setAccount(null);
+            setRestoringProcess(false);
             return;
         }
 
         setAccount(wallet.account);
+        setRestoringProcess(false);
     });
 
     const onClick = (e: Event): void | boolean => {
@@ -83,87 +91,94 @@ export const AccountButton: Component<AccountButtonProps> = () => {
 
     return (
         <Dynamic component={globalStylesTag}>
-            <Show when={!account()}>
-                <AccountButtonStyled
-                    onClick={() => tonConnectUI.openModal()}
-                    data-tc-connect-button="true"
-                    scale="s"
-                >
-                    <TonIcon fill={theme.colors.connectButton.foreground} />
-                    <Text
-                        translationKey="button.connectWallet"
-                        fontSize="15px"
-                        lineHeight="18px"
-                        fontWeight="590"
-                        color={theme.colors.connectButton.foreground}
-                    >
-                        Connect wallet
-                    </Text>
-                </AccountButtonStyled>
+            <Show when={restoringProcess()}>
+                <LoaderButtonStyled disabled={true} data-tc-connect-button-loading="true">
+                    <LoaderIconStyled />
+                </LoaderButtonStyled>
             </Show>
-            <Show when={account()}>
-                <DropdownContainerStyled>
-                    <DropdownButtonStyled
-                        onClick={() => setIsOpened(v => !v)}
-                        ref={setAnchor}
-                        data-tc-dropdown-button="true"
+            <Show when={!restoringProcess()}>
+                <Show when={!account()}>
+                    <AccountButtonStyled
+                        onClick={() => tonConnectUI.openModal()}
+                        data-tc-connect-button="true"
                         scale="s"
                     >
-                        <Text fontSize="15px" fontWeight="590" lineHeight="18px">
-                            {normalizedAddress()}
-                        </Text>
-                        <ArrowIcon direction="bottom" />
-                    </DropdownButtonStyled>
-                    <Portal>
-                        <tc-root
-                            ref={setFloating}
-                            style={{
-                                position: position.strategy,
-                                top: `${position.y ?? 0}px`,
-                                left: `${position.x ?? 0}px`,
-                                'z-index': 999
-                            }}
-                            data-tc-dropdown-container="true"
+                        <TonIcon fill={theme.colors.connectButton.foreground} />
+                        <Text
+                            translationKey="button.connectWallet"
+                            fontSize="15px"
+                            lineHeight="18px"
+                            fontWeight="590"
+                            color={theme.colors.connectButton.foreground}
                         >
-                            <Transition
-                                onBeforeEnter={el => {
-                                    animate(
-                                        el,
-                                        [
-                                            { opacity: 0, transform: 'translateY(-8px)' },
-                                            { opacity: 1, transform: 'translateY(0)' }
-                                        ],
-                                        {
-                                            duration: 150
-                                        }
-                                    );
+                            Connect wallet
+                        </Text>
+                    </AccountButtonStyled>
+                </Show>
+                <Show when={account()}>
+                    <DropdownContainerStyled>
+                        <DropdownButtonStyled
+                            onClick={() => setIsOpened(v => !v)}
+                            ref={setAnchor}
+                            data-tc-dropdown-button="true"
+                            scale="s"
+                        >
+                            <Text fontSize="15px" fontWeight="590" lineHeight="18px">
+                                {normalizedAddress()}
+                            </Text>
+                            <ArrowIcon direction="bottom" />
+                        </DropdownButtonStyled>
+                        <Portal>
+                            <tc-root
+                                ref={setFloating}
+                                style={{
+                                    position: position.strategy,
+                                    top: `${position.y ?? 0}px`,
+                                    left: `${position.x ?? 0}px`,
+                                    'z-index': 999
                                 }}
-                                onExit={(el, done) => {
-                                    const a = animate(
-                                        el,
-                                        [
-                                            { opacity: 1, transform: 'translateY(0)' },
-                                            { opacity: 0, transform: 'translateY(-8px)' }
-                                        ],
-                                        {
-                                            duration: 150
-                                        }
-                                    );
-                                    a.finished.then(done);
-                                }}
+                                data-tc-dropdown-container="true"
                             >
-                                <Show when={isOpened()}>
-                                    <DropdownStyled
-                                        hidden={!isOpened()}
-                                        onClose={() => setIsOpened(false)}
-                                        ref={dropDownRef}
-                                    />
-                                </Show>
-                            </Transition>
-                            <NotificationsStyled />
-                        </tc-root>
-                    </Portal>
-                </DropdownContainerStyled>
+                                <Transition
+                                    onBeforeEnter={el => {
+                                        animate(
+                                            el,
+                                            [
+                                                { opacity: 0, transform: 'translateY(-8px)' },
+                                                { opacity: 1, transform: 'translateY(0)' }
+                                            ],
+                                            {
+                                                duration: 150
+                                            }
+                                        );
+                                    }}
+                                    onExit={(el, done) => {
+                                        const a = animate(
+                                            el,
+                                            [
+                                                { opacity: 1, transform: 'translateY(0)' },
+                                                { opacity: 0, transform: 'translateY(-8px)' }
+                                            ],
+                                            {
+                                                duration: 150
+                                            }
+                                        );
+                                        a.finished.then(done);
+                                    }}
+                                >
+                                    <Show when={isOpened()}>
+                                        <DropdownStyled
+                                            hidden={!isOpened()}
+                                            onClose={() => setIsOpened(false)}
+                                            ref={dropDownRef}
+                                        />
+                                    </Show>
+                                </Transition>
+                                <NotificationsStyled />
+                            </tc-root>
+                        </Portal>
+                    </DropdownContainerStyled>
+                </Show>
             </Show>
         </Dynamic>
     );

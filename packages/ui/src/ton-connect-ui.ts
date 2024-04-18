@@ -88,7 +88,8 @@ export class TonConnectUI {
     private readonly transactionModal: TransactionModalManager;
 
     /**
-     * Promise that resolves after end of th connection restoring process (promise will fire after `onStatusChange`, so you can get actual information about wallet and session after when promise resolved).
+     * Promise that resolves after end of th connection restoring process (promise will fire after `onStatusChange`,
+     * so you can get actual information about wallet and session after when promise resolved).
      * Resolved value `true`/`false` indicates if the session was restored successfully.
      */
     public readonly connectionRestored = Promise.resolve(false);
