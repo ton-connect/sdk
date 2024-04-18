@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui 
 
+## [2.0.1-beta.6](https://github.com/ton-connect/sdk/compare/ui-2.0.1-beta.5...ui-2.0.1-beta.6) (2024-04-18)
+
+
+### Bug Fixes
+
+* **ui:** show connection restoring process ([3297c6d](https://github.com/ton-connect/sdk/commit/3297c6d92be0f6f1a1151a618895ea73fb0bd102))
+
+
+
 ## [2.0.1-beta.5](https://github.com/ton-connect/sdk/compare/ui-2.0.1-beta.4...ui-2.0.1-beta.5) (2024-04-12)
 
 
