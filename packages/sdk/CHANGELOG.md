@@ -1,5 +1,15 @@
 # Changelog @tonconnect/sdk 
 
+## [3.0.1-beta.1](https://github.com/ton-connect/sdk/compare/sdk-3.0.1-beta.0...sdk-3.0.1-beta.1) (2024-04-18)
+
+
+### Bug Fixes
+
+* **sdk:** enhance gateway management for efficient closure ([70f24f9](https://github.com/ton-connect/sdk/commit/70f24f98e0ce447928edf8bf6a738a88d6c833ee))
+* **sdk:** remove sessions immediately if no bridge connection ([71f287c](https://github.com/ton-connect/sdk/commit/71f287c7328b4892ff80647638dfe0386cd43d2d))
+
+
+
 ## [3.0.1-beta.0](https://github.com/ton-connect/sdk/compare/sdk-3.0.0...sdk-3.0.1-beta.0) (2024-04-12)
 
 
