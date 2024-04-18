@@ -8,14 +8,9 @@ import '@tonconnect/isomorphic-eventsource';
 import '@tonconnect/isomorphic-fetch';
 import { callForSuccess } from 'src/utils/call-for-success';
 import { logDebug, logError } from 'src/utils/log';
-import { delay } from 'src/utils/delay';
 import { createResource } from 'src/utils/resource';
-import { createAbortController, defer } from 'src/utils/defer';
-
-type CreateEventSourceOptions = {
-    openingDeadlineMS?: number;
-    signal?: AbortSignal;
-};
+import { timeout } from 'src/utils/timeout';
+import { createAbortController } from 'src/utils/create-abort-controller';
 
 export class BridgeGateway {
     private readonly ssePath = 'events';
@@ -26,8 +21,10 @@ export class BridgeGateway {
 
     private readonly defaultTtl = 300;
 
+    private readonly defaultReconnectDelay = 5000;
+
     private eventSource = createResource(
-        async (signal: AbortSignal, options?: CreateEventSourceOptions): Promise<EventSource> => {
+        async (signal?: AbortSignal, openingDeadlineMS?: number): Promise<EventSource> => {
             const eventSourceConfig = {
                 bridgeUrl: this.bridgeUrl,
                 ssePath: this.ssePath,
@@ -35,9 +32,10 @@ export class BridgeGateway {
                 bridgeGatewayStorage: this.bridgeGatewayStorage,
                 errorHandler: this.errorsHandler.bind(this),
                 messageHandler: this.messagesHandler.bind(this),
-                signal: signal
+                signal: signal,
+                openingDeadlineMS: openingDeadlineMS
             };
-            return await createEventSource(eventSourceConfig, options);
+            return await createEventSource(eventSourceConfig);
         },
         async (resource: EventSource) => {
             resource.close();
@@ -71,8 +69,8 @@ export class BridgeGateway {
         this.bridgeGatewayStorage = new HttpBridgeGatewayStorage(storage, bridgeUrl);
     }
 
-    public async registerSession(options?: CreateEventSourceOptions): Promise<void> {
-        await this.eventSource.create(options);
+    public async registerSession(options?: RegisterSessionOptions): Promise<void> {
+        await this.eventSource.create(options?.signal, options?.openingDeadlineMS);
     }
 
     public async send(
@@ -126,15 +124,16 @@ export class BridgeGateway {
     }
 
     public pause(): void {
-        this.eventSource?.dispose();
+        this.eventSource.dispose().catch(e => logError(`Bridge pause failed, ${e}`));
     }
 
     public async unPause(): Promise<void> {
-        await this.eventSource.recreate();
+        const RECREATE_WITHOUT_DELAY = 0;
+        await this.eventSource.recreate(RECREATE_WITHOUT_DELAY);
     }
 
     public async close(): Promise<void> {
-        await this.eventSource.dispose();
+        await this.eventSource.dispose().catch(e => logError(`Bridge close failed, ${e}`));
     }
 
     public setListener(listener: (msg: BridgeIncomingMessage) => void): void {
@@ -160,22 +159,23 @@ export class BridgeGateway {
     }
 
     private async errorsHandler(e: Event): Promise<void> {
-        if (this.isConnecting) {
-            logError('Bridge error', JSON.stringify(e));
-            return;
-        }
+        try {
+            if (this.isConnecting) {
+                logError('Bridge error', JSON.stringify(e));
+                return;
+            }
 
-        if (this.isReady) {
-            this.errorsListener(e);
-            return;
-        }
+            if (this.isReady) {
+                this.errorsListener(e);
+                return;
+            }
 
-        if (this.isClosed) {
-            logDebug('Bridge reconnecting, 200ms delay');
-            await delay(200);
-            await this.eventSource.recreate();
-            return;
-        }
+            if (this.isClosed) {
+                logDebug(`Bridge reconnecting, ${this.defaultReconnectDelay}ms delay`);
+                await this.eventSource.recreate(this.defaultReconnectDelay);
+                return;
+            }
+        } catch (e) {}
     }
 
     private async messagesHandler(e: MessageEvent<string>): Promise<void> {
@@ -199,19 +199,65 @@ export class BridgeGateway {
     }
 }
 
-async function createEventSource(
-    config: {
-        bridgeUrl: string;
-        ssePath: string;
-        sessionId: string;
-        bridgeGatewayStorage: HttpBridgeGatewayStorage;
-        errorHandler: (e: Event) => void;
-        messageHandler: (e: MessageEvent<string>) => void;
-        signal: AbortSignal;
-    },
-    options?: CreateEventSourceOptions
-): Promise<EventSource> {
-    return await defer(
+/**
+ * Represents options for creating an event source.
+ */
+export type RegisterSessionOptions = {
+    /**
+     * Deadline for opening the event source.
+     */
+    openingDeadlineMS?: number;
+
+    /**
+     * Signal to abort the operation.
+     */
+    signal?: AbortSignal;
+};
+
+/**
+ * Configuration for creating an event source.
+ */
+export type CreateEventSourceConfig = {
+    /**
+     * URL of the bridge.
+     */
+    bridgeUrl: string;
+    /**
+     * Path to the SSE endpoint.
+     */
+    ssePath: string;
+    /**
+     * Session ID of the client.
+     */
+    sessionId: string;
+    /**
+     * Storage for the last event ID.
+     */
+    bridgeGatewayStorage: HttpBridgeGatewayStorage;
+    /**
+     * Error handler for the event source.
+     */
+    errorHandler: (e: Event) => void;
+    /**
+     * Message handler for the event source.
+     */
+    messageHandler: (e: MessageEvent<string>) => void;
+    /**
+     * Signal to abort opening the event source and destroy it.
+     */
+    signal?: AbortSignal;
+    /**
+     * Deadline for opening the event source.
+     */
+    openingDeadlineMS?: number;
+};
+
+/**
+ * Creates an event source.
+ * @param {CreateEventSourceConfig} config - Configuration for creating an event source.
+ */
+async function createEventSource(config: CreateEventSourceConfig): Promise<EventSource> {
+    return await timeout(
         async (resolve, reject, deferOptions) => {
             const abortController = createAbortController(deferOptions.signal);
             const signal = abortController.signal;
@@ -238,6 +284,7 @@ async function createEventSource(
 
             eventSource.onerror = (reason: Event): void => {
                 if (signal.aborted) {
+                    eventSource.close();
                     reject(new TonConnectError('Bridge connection aborted'));
                     return;
                 }
@@ -246,6 +293,7 @@ async function createEventSource(
             };
             eventSource.onopen = (): void => {
                 if (signal.aborted) {
+                    eventSource.close();
                     reject(new TonConnectError('Bridge connection aborted'));
                     return;
                 }
@@ -255,12 +303,11 @@ async function createEventSource(
                 config.messageHandler(event);
             };
 
-            config?.signal?.addEventListener('abort', () => {
-                logError('Bridge connection aborted');
+            config.signal?.addEventListener('abort', () => {
                 eventSource.close();
                 reject(new TonConnectError('Bridge connection aborted'));
             });
         },
-        { timeout: options?.openingDeadlineMS, signal: config?.signal }
+        { timeout: config.openingDeadlineMS, signal: config.signal }
     );
 }

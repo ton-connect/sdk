@@ -1,6 +1,6 @@
 import { delay } from 'src/utils/delay';
-import { createAbortController } from 'src/utils/defer';
 import { TonConnectError } from 'src/errors';
+import { createAbortController } from 'src/utils/create-abort-controller';
 
 /**
  * Configuration options for the callForSuccess function.
