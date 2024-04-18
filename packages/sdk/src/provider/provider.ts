@@ -46,6 +46,7 @@ interface BaseProvider {
         options?: {
             onRequestSent?: () => void;
             signal?: AbortSignal;
+            attempts?: number;
         }
     ): Promise<WithoutId<WalletResponse<T>>>;
 

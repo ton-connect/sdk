@@ -174,6 +174,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
         options?: {
             onRequestSent?: () => void;
             signal?: AbortSignal;
+            attempts?: number;
         }
     ): Promise<WithoutId<WalletResponse<T>>>;
     /** @deprecated use sendRequest(transaction, options) instead */
@@ -183,12 +184,13 @@ export class InjectedProvider<T extends string = string> implements InternalProv
     ): Promise<WithoutId<WalletResponse<T>>>;
     public async sendRequest<T extends RpcMethod>(
         request: WithoutId<AppRequest<T>>,
-        optionsOrOnRequestSent?: (() => void) | { onRequestSent?: () => void; signal?: AbortSignal }
+        optionsOrOnRequestSent?: (() => void) | { onRequestSent?: () => void; signal?: AbortSignal; attempts?: number }
     ): Promise<WithoutId<WalletResponse<T>>> {
         // TODO: remove deprecated method
         const options: {
             onRequestSent?: () => void;
             signal?: AbortSignal;
+            attempts?: number;
         } = {};
         if (typeof optionsOrOnRequestSent === 'function') {
             options.onRequestSent = optionsOrOnRequestSent;
