@@ -164,24 +164,26 @@ export class BridgeGateway {
         return response;
     }
 
-    private async errorsHandler(e: Event): Promise<void> {
-        try {
-            if (this.isConnecting) {
-                logError('Bridge error', JSON.stringify(e));
-                return;
-            }
+    private async errorsHandler(eventSource: EventSource, e: Event): Promise<EventSource | void> {
+        if (this.isConnecting) {
+            logError('Bridge error', JSON.stringify(e));
+            return;
+        }
 
-            if (this.isReady) {
+        if (this.isReady) {
+            try {
                 this.errorsListener(e);
-                return;
-            }
+            } catch (e) {}
+            return;
+        }
 
-            if (this.isClosed) {
-                logDebug(`Bridge reconnecting, ${this.defaultReconnectDelay}ms delay`);
-                await this.eventSource.recreate(this.defaultReconnectDelay);
-                return;
-            }
-        } catch (e) {}
+        if (this.isClosed) {
+            eventSource.close();
+            logDebug(`Bridge reconnecting, ${this.defaultReconnectDelay}ms delay`);
+            return await this.eventSource.recreate(this.defaultReconnectDelay);
+        }
+
+        throw new TonConnectError('Bridge error, unknown state');
     }
 
     private async messagesHandler(e: MessageEvent<string>): Promise<void> {
@@ -243,7 +245,7 @@ export type CreateEventSourceConfig = {
     /**
      * Error handler for the event source.
      */
-    errorHandler: (e: Event) => void;
+    errorHandler: (eventSource: EventSource, e: Event) => Promise<EventSource | void>;
     /**
      * Message handler for the event source.
      */
@@ -288,14 +290,21 @@ async function createEventSource(config: CreateEventSourceConfig): Promise<Event
 
             const eventSource = new EventSource(url.toString());
 
-            eventSource.onerror = (reason: Event): void => {
+            eventSource.onerror = async (reason: Event): Promise<void> => {
                 if (signal.aborted) {
                     eventSource.close();
                     reject(new TonConnectError('Bridge connection aborted'));
                     return;
                 }
 
-                config.errorHandler(reason);
+                try {
+                    const newInstance = await config.errorHandler(eventSource, reason);
+                    if (newInstance && newInstance !== eventSource) {
+                        resolve(newInstance);
+                    }
+                } catch (e) {
+                    reject(e);
+                }
             };
             eventSource.onopen = (): void => {
                 if (signal.aborted) {
