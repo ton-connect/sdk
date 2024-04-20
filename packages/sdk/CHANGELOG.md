@@ -1,5 +1,14 @@
 # Changelog @tonconnect/sdk 
 
+## [3.0.1-beta.2](https://github.com/ton-connect/sdk/compare/sdk-3.0.1-beta.1...sdk-3.0.1-beta.2) (2024-04-20)
+
+
+### Bug Fixes
+
+* **sdk:** ensure promise resolution when event source is recreated ([348ab1d](https://github.com/ton-connect/sdk/commit/348ab1d78e8f7253ded6463c5b52e748633f5948))
+
+
+
 ## [3.0.1-beta.1](https://github.com/ton-connect/sdk/compare/sdk-3.0.1-beta.0...sdk-3.0.1-beta.1) (2024-04-18)
 
 
