@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui 
 
+## [2.0.1-beta.8](https://github.com/ton-connect/sdk/compare/ui-2.0.1-beta.7...ui-2.0.1-beta.8) (2024-04-20)
+
+
+### Bug Fixes
+
+* **ui:** set default account button restoring processs based on connector.account ([3c94e91](https://github.com/ton-connect/sdk/commit/3c94e916f80ea68b2beefaf6a90a4d547e2a5733))
+
+
+
 ## [2.0.1-beta.7](https://github.com/ton-connect/sdk/compare/ui-2.0.1-beta.6...ui-2.0.1-beta.7) (2024-04-20)
 
 
