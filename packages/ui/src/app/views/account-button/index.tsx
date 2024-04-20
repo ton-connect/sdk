@@ -28,7 +28,7 @@ export const AccountButton: Component<AccountButtonProps> = () => {
     const tonConnectUI = useContext(TonConnectUiContext)!;
     const [isOpened, setIsOpened] = createSignal(false);
     const [account, setAccount] = createSignal<Account | null>(connector.account);
-    const [restoringProcess, setRestoringProcess] = createSignal<boolean>(true);
+    const [restoringProcess, setRestoringProcess] = createSignal<boolean>(!connector.account);
 
     let dropDownRef: HTMLDivElement | undefined;
 
