@@ -64,7 +64,7 @@ export function createResource<T extends EventSource, Args extends any[]>(
         currentPromise = promise;
         const resource = await promise;
 
-        if (currentPromise !== promise) {
+        if (currentPromise !== promise && resource !== currentResource) {
             await disposeFn(resource);
             throw new TonConnectError('Resource creation was aborted by a new resource creation');
         }
