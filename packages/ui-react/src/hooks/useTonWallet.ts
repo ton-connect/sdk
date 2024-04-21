@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { WalletInfoWithOpenMethod, Wallet, ConnectedWallet } from '@tonconnect/ui';
+import { ConnectedWallet, Wallet, WalletInfoWithOpenMethod } from '@tonconnect/ui';
 import { useTonConnectUI } from './useTonConnectUI';
 
 /**
@@ -13,6 +13,7 @@ export function useTonWallet(): Wallet | (Wallet & WalletInfoWithOpenMethod) | n
 
     useEffect(() => {
         if (tonConnectUI) {
+            setWallet(tonConnectUI.wallet);
             return tonConnectUI.onStatusChange((value: ConnectedWallet | null) => {
                 setWallet(value);
             });
