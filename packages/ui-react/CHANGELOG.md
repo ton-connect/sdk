@@ -1,5 +1,16 @@
 # Changelog @tonconnect/ui-react 
 
+## [2.0.1-beta.9](https://github.com/ton-connect/sdk/compare/ui-react-2.0.1-beta.8...ui-react-2.0.1-beta.9) (2024-04-21)
+
+
+### Bug Fixes
+
+* **ui-react:** prevent re-calculate friendly address on wallet unchanged in useTonAddress ([dfbe5ba](https://github.com/ton-connect/sdk/commit/dfbe5ba009bbfd97324e7b06ce5f08bbbd35f779))
+* **ui-react:** set current modal state on first call of use effect in useTonConnectModal ([a881c7f](https://github.com/ton-connect/sdk/commit/a881c7f739c54ef0f5dd9efb7c10f12ed659f90e))
+* **ui-react:** set current wallet on first call of use effect in useTonWallet ([3f2954a](https://github.com/ton-connect/sdk/commit/3f2954a1793c3b468170241605d0e78121a840db))
+
+
+
 ## [2.0.1-beta.8](https://github.com/ton-connect/sdk/compare/ui-react-2.0.1-beta.7...ui-react-2.0.1-beta.8) (2024-04-20)
 
 
