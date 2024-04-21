@@ -11,6 +11,7 @@ export function useTonConnectModal(): Omit<WalletsModal, 'onStateChange'> {
 
     useEffect(() => {
         if (tonConnectUI) {
+            setState(tonConnectUI.modal.state);
             return tonConnectUI.onModalStateChange((value: WalletsModalState) => {
                 setState(value);
             });
@@ -18,16 +19,8 @@ export function useTonConnectModal(): Omit<WalletsModal, 'onStateChange'> {
     }, [tonConnectUI]);
 
     return {
-        state,
-        open: () => {
-            if (tonConnectUI) {
-                return tonConnectUI.modal.open();
-            }
-        },
-        close: () => {
-            if (tonConnectUI) {
-                tonConnectUI.modal.close();
-            }
-        }
+        state: state,
+        open: () => tonConnectUI?.modal.open(),
+        close: () => tonConnectUI?.modal.close()
     };
 }
