@@ -299,10 +299,15 @@ async function createEventSource(config: CreateEventSourceConfig): Promise<Event
 
                 try {
                     const newInstance = await config.errorHandler(eventSource, reason);
+                    if (newInstance !== eventSource) {
+                        eventSource.close();
+                    }
+
                     if (newInstance && newInstance !== eventSource) {
                         resolve(newInstance);
                     }
                 } catch (e) {
+                    eventSource.close();
                     reject(e);
                 }
             };
@@ -315,6 +320,11 @@ async function createEventSource(config: CreateEventSourceConfig): Promise<Event
                 resolve(eventSource);
             };
             eventSource.onmessage = (event: MessageEvent<string>): void => {
+                if (signal.aborted) {
+                    eventSource.close();
+                    reject(new TonConnectError('Bridge connection aborted'));
+                    return;
+                }
                 config.messageHandler(event);
             };
 
