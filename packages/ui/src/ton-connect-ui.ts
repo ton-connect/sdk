@@ -18,13 +18,7 @@ import { widgetController } from 'src/app/widget-controller';
 import { TonConnectUIError } from 'src/errors/ton-connect-ui.error';
 import { TonConnectUiCreateOptions } from 'src/models/ton-connect-ui-create-options';
 import { PreferredWalletStorage, WalletInfoStorage } from 'src/storage';
-import {
-    getSystemTheme,
-    getUserAgent,
-    openLinkBlank,
-    preloadImages,
-    subscribeToThemeChange
-} from 'src/app/utils/web-api';
+import { getSystemTheme, preloadImages, subscribeToThemeChange } from 'src/app/utils/web-api';
 import { TonConnectUiOptions } from 'src/models/ton-connect-ui-options';
 import { setBorderRadius, setColors, setTheme } from 'src/app/state/theme-state';
 import { mergeOptions } from 'src/app/utils/options';
@@ -40,7 +34,7 @@ import { WalletsModalManager } from 'src/managers/wallets-modal-manager';
 import { TransactionModalManager } from 'src/managers/transaction-modal-manager';
 import { WalletsModal, WalletsModalState } from 'src/models/wallets-modal';
 import { isInTMA, sendExpand } from 'src/app/utils/tma-api';
-import { addReturnStrategy, redirectToTelegram } from 'src/app/utils/url-strategy-helpers';
+import { redirectToTelegram, redirectToWallet } from 'src/app/utils/url-strategy-helpers';
 import { SingleWalletModalManager } from 'src/managers/single-wallet-modal-manager';
 import { SingleWalletModal, SingleWalletModalState } from 'src/models/single-wallet-modal';
 
@@ -417,16 +411,11 @@ export class TonConnectUI {
                 sent: true
             });
 
-            const userOSIsIos = getUserAgent().os === 'ios';
-            const shouldSkipRedirectToWallet =
-                (skipRedirectToWallet === 'ios' && userOSIsIos) ||
-                skipRedirectToWallet === 'always';
-
             if (
                 this.walletInfo &&
                 'universalLink' in this.walletInfo &&
-                this.walletInfo.openMethod === 'universal-link' &&
-                !shouldSkipRedirectToWallet
+                (this.walletInfo.openMethod === 'universal-link' ||
+                    this.walletInfo.openMethod === 'custom-deeplink')
             ) {
                 if (isTelegramUrl(this.walletInfo.universalLink)) {
                     redirectToTelegram(this.walletInfo.universalLink, {
@@ -435,7 +424,15 @@ export class TonConnectUI {
                         forceRedirect: false
                     });
                 } else {
-                    openLinkBlank(addReturnStrategy(this.walletInfo.universalLink, returnStrategy));
+                    redirectToWallet(
+                        this.walletInfo.universalLink,
+                        this.walletInfo.deepLink,
+                        {
+                            returnStrategy,
+                            forceRedirect: false
+                        },
+                        () => {}
+                    );
                 }
             }
         };
