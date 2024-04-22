@@ -45,6 +45,12 @@ export function useOpenedNotifications(
             if (latestAction() === action) {
                 return;
             }
+            if (
+                latestAction()?.name === 'confirm-transaction' &&
+                action.name === 'confirm-transaction'
+            ) {
+                return;
+            }
 
             setLatestAction(action);
 
