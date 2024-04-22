@@ -60,7 +60,7 @@ export function createResource<T extends EventSource, Args extends any[]>(
 
         currentArgs = args ?? null;
 
-        const promise = createFn(signal, ...args);
+        const promise = createFn(abortController.signal, ...args);
         currentPromise = promise;
         const resource = await promise;
 
@@ -113,7 +113,7 @@ export function createResource<T extends EventSource, Args extends any[]>(
             args === currentArgs &&
             signal === currentSignal
         ) {
-            return create(currentSignal!, ...((args ?? []) as Args));
+            return await create(currentSignal!, ...((args ?? []) as Args));
         }
 
         throw new TonConnectError('Resource recreation was aborted by a new resource creation');
