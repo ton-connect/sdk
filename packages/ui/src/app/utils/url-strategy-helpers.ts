@@ -106,8 +106,22 @@ export function redirectToTelegram(
             // and return to the browser when the action is completed.
 
             // TODO: use back for all browsers
+            // return back to the browser
             if (options.returnStrategy === 'back') {
-                options.returnStrategy = location.href as ReturnStrategy;
+                if (isBrowser('safari')) {
+                    // safari does not have a deep link, so we use the `location.href`
+                    // ref: https://developer.apple.com/documentation/xcode/supporting-universal-links-in-your-app
+                    options.returnStrategy = 'back';
+                } else if (isBrowser('chrome')) {
+                    options.returnStrategy = 'googlechrome://';
+                } else if (isBrowser('firefox')) {
+                    options.returnStrategy = 'firefox://';
+                } else if (isBrowser('opera')) {
+                    options.returnStrategy = 'opera-http://';
+                } else {
+                    // fallback to the `location.href`
+                    options.returnStrategy = location.href as ReturnStrategy;
+                }
             }
 
             // In case if the browser is Chrome or Firefox, use the deep link with fallback to the direct link.
@@ -163,9 +177,22 @@ export function redirectToTelegram(
             // Use the `back` strategy, the user will transition to the other app
             // and return to the browser when the action is completed.
 
-            // TODO: use back for all browsers
+            // return back to the browser
             if (options.returnStrategy === 'back') {
-                options.returnStrategy = 'back';
+                if (isBrowser('safari')) {
+                    // safari does not have a deep link, so we use the `location.href`
+                    // ref: https://developer.apple.com/documentation/xcode/supporting-universal-links-in-your-app
+                    options.returnStrategy = 'back';
+                } else if (isBrowser('chrome')) {
+                    options.returnStrategy = 'googlechrome://';
+                } else if (isBrowser('firefox')) {
+                    options.returnStrategy = 'firefox://';
+                } else if (isBrowser('opera')) {
+                    options.returnStrategy = 'opera-http://';
+                } else {
+                    // fallback to the `location.href`
+                    options.returnStrategy = location.href as ReturnStrategy;
+                }
             }
 
             // In case if the browser is Chrome or Firefox, use the deep link with fallback to the direct link.
@@ -175,16 +202,16 @@ export function redirectToTelegram(
 
             if (useDeepLink) {
                 const linkWithStrategy = addReturnStrategy(
-                  directLinkUrl.toString(),
-                  options.returnStrategy
+                    directLinkUrl.toString(),
+                    options.returnStrategy
                 );
                 const deepLink = convertToTGDeepLink(linkWithStrategy);
 
                 openDeeplinkWithFallback(deepLink, () => openLinkBlank(linkWithStrategy));
             } else {
                 const linkWithStrategy = addReturnStrategy(
-                  directLinkUrl.toString(),
-                  options.returnStrategy
+                    directLinkUrl.toString(),
+                    options.returnStrategy
                 );
 
                 openLinkBlank(linkWithStrategy);
@@ -376,7 +403,7 @@ export function redirectToWallet(
                 if (isBrowser('safari')) {
                     // safari does not have a deep link, so we use the `location.href`
                     // ref: https://developer.apple.com/documentation/xcode/supporting-universal-links-in-your-app
-                    options.returnStrategy = location.href as ReturnStrategy;
+                    options.returnStrategy = 'none';
                 } else if (isBrowser('chrome')) {
                     options.returnStrategy = 'googlechrome://';
                 } else if (isBrowser('firefox')) {
@@ -425,7 +452,20 @@ export function redirectToWallet(
 
             // return back to the browser
             if (options.returnStrategy === 'back') {
-                options.returnStrategy = 'back';
+                if (isBrowser('safari')) {
+                    // safari does not have a deep link, so we use the `location.href`
+                    // ref: https://developer.apple.com/documentation/xcode/supporting-universal-links-in-your-app
+                    options.returnStrategy = 'none';
+                } else if (isBrowser('chrome')) {
+                    options.returnStrategy = 'googlechrome://';
+                } else if (isBrowser('firefox')) {
+                    options.returnStrategy = 'firefox://';
+                } else if (isBrowser('opera')) {
+                    options.returnStrategy = 'opera-http://';
+                } else {
+                    // fallback to the `location.href`
+                    options.returnStrategy = location.href as ReturnStrategy;
+                }
             }
 
             if (isBrowser('chrome')) {
