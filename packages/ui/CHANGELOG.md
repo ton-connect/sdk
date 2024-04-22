@@ -1,5 +1,17 @@
 # Changelog @tonconnect/ui 
 
+## [2.0.2-beta.0](https://github.com/ton-connect/sdk/compare/ui-2.0.1...ui-2.0.2-beta.0) (2024-04-22)
+
+
+### Bug Fixes
+
+* **ui:** enhancing wallet redirection strategy ([3425aab](https://github.com/ton-connect/sdk/commit/3425aab8b92a9a04818b58907c6f7ae8e0365a47))
+* **ui:** prevent redirect to safari for ios ([c086b82](https://github.com/ton-connect/sdk/commit/c086b82a7ec11f44bc653f4e92fa3269fb6d8afe))
+* **ui:** prevent redundant confirm-transaction actions ([bf18f68](https://github.com/ton-connect/sdk/commit/bf18f68ad8fedc43237c2d8b5c178c3e533a6773))
+* **ui:** refine conditions to show send transaction loading ([905803e](https://github.com/ton-connect/sdk/commit/905803e9553fd71a58cdd7d1e4e07280dd528d9f))
+
+
+
 ## [2.0.1](https://github.com/ton-connect/sdk/compare/ui-2.0.1-beta.8...ui-2.0.1) (2024-04-22)
 
 
