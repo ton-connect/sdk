@@ -101,7 +101,13 @@ export const ActionModal: Component<ActionModalProps> = props => {
                 translationKey={props.textTranslationKey}
                 translationValues={props.textTranslationValues}
             />
-            <Show when={!sent()}>
+            <Show
+                when={
+                    !sent() &&
+                    ((props.showButton === 'open-wallet' && universalLink) ||
+                        props.showButton !== 'open-wallet')
+                }
+            >
                 <LoaderButtonStyled disabled={true} data-tc-connect-button-loading="true">
                     <LoaderIconStyled />
                 </LoaderButtonStyled>
