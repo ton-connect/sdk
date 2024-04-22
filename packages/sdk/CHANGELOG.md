@@ -1,5 +1,14 @@
 # Changelog @tonconnect/sdk 
 
+## [3.0.2-beta.0](https://github.com/ton-connect/sdk/compare/sdk-3.0.1...sdk-3.0.2-beta.0) (2024-04-22)
+
+
+### Bug Fixes
+
+* **sdk:** ensures pausing the connection then attempts to unpause it ([346b13b](https://github.com/ton-connect/sdk/commit/346b13b303fbefe2cccab8851a8515469084872c))
+
+
+
 ## [3.0.1](https://github.com/ton-connect/sdk/compare/sdk-3.0.1-beta.2...sdk-3.0.1) (2024-04-22)
 
 
