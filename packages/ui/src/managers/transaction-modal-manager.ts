@@ -29,8 +29,8 @@ export class TransactionModalManager {
         this.connector = options.connector;
 
         createEffect(() => {
-            const _ = action();
-            this.consumers.forEach(consumer => consumer(_));
+            const currentAction = action();
+            this.consumers.forEach(consumer => consumer(currentAction));
         });
     }
 
