@@ -24,11 +24,11 @@ export function isDevice(device: keyof typeof maxWidth | 'desktop'): boolean {
     switch (device) {
         case 'desktop':
             return width > maxWidth.tablet;
-        case 'tablet':
-            return width > maxWidth.mobile;
-        default:
         case 'mobile':
             return width <= maxWidth.mobile || isOS('ios', 'android', 'ipad');
+        default:
+        case 'tablet':
+            return width > maxWidth.mobile;
     }
 }
 
