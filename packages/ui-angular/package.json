@@ -1,5 +1,5 @@
 {
-    "name": "tonconnect-ui-angular-fork",
+    "name": "@tonconnect/ui-angular",
     "version": "0.0.0",
     "scripts": {
         "build": "ng build ui-angular && rm lib/package.json"
@@ -47,7 +47,7 @@
         "typescript": "^4.9.3"
     },
     "dependencies": {
-        "@tonconnect/ui": "^2.0.1-beta.1",
+        "@tonconnect/ui": "2.0.2",
         "tslib": "^2.3.0"
     },
     "peerDependencies": {
