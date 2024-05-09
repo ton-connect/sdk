@@ -37,6 +37,7 @@ import { isInTMA, sendExpand } from 'src/app/utils/tma-api';
 import { redirectToTelegram, redirectToWallet } from 'src/app/utils/url-strategy-helpers';
 import { SingleWalletModalManager } from 'src/managers/single-wallet-modal-manager';
 import { SingleWalletModal, SingleWalletModalState } from 'src/models/single-wallet-modal';
+import { TonConnectTracker } from 'src/tracker/ton-connect-tracker';
 
 export class TonConnectUI {
     public static getWallets(): Promise<WalletInfo[]> {
@@ -46,6 +47,8 @@ export class TonConnectUI {
     private readonly walletInfoStorage = new WalletInfoStorage();
 
     private readonly preferredWalletStorage = new PreferredWalletStorage();
+
+    private readonly tracker = new TonConnectTracker();
 
     private walletInfo: WalletInfoWithOpenMethod | null = null;
 
@@ -218,11 +221,15 @@ export class TonConnectUI {
         this.subscribeToWalletChange();
 
         if (options?.restoreConnection !== false) {
+            this.tracker.trackConnectionRestoringStarted();
             this.connectionRestored = new Promise(async resolve => {
                 await this.connector.restoreConnection();
 
                 if (!this.connector.connected) {
+                    this.tracker.trackConnectionRestoringError('Connection was not restored');
                     this.walletInfoStorage.removeWalletInfo();
+                } else {
+                    this.tracker.trackConnectionRestoringCompleted(this.wallet);
                 }
 
                 resolve(this.connector.connected);
@@ -287,6 +294,7 @@ export class TonConnectUI {
      * Opens the modal window, returns a promise that resolves after the modal window is opened.
      */
     public async openModal(): Promise<void> {
+        this.tracker.trackConnectionStarted();
         return this.modal.open();
     }
 
@@ -294,6 +302,7 @@ export class TonConnectUI {
      * Closes the modal window.
      */
     public closeModal(): void {
+        this.tracker.trackConnectionError('Connection was cancelled');
         this.modal.close();
     }
 
@@ -316,6 +325,7 @@ export class TonConnectUI {
      * @experimental
      */
     public async openSingleWalletModal(wallet: string): Promise<void> {
+        this.tracker.trackConnectionStarted();
         return this.singleWalletModal.open(wallet);
     }
 
@@ -324,6 +334,7 @@ export class TonConnectUI {
      * @experimental
      */
     public closeSingleWalletModal(): void {
+        this.tracker.trackConnectionError('Connection was cancelled');
         this.singleWalletModal.close();
     }
 
@@ -366,6 +377,8 @@ export class TonConnectUI {
      * Disconnect wallet and clean localstorage.
      */
     public disconnect(): Promise<void> {
+        this.tracker.trackDisconnection(this.wallet, 'dapp');
+
         widgetController.clearAction();
         widgetController.removeSelectedWalletInfo();
         this.walletInfoStorage.removeWalletInfo();
@@ -381,7 +394,10 @@ export class TonConnectUI {
         tx: SendTransactionRequest,
         options?: ActionConfiguration
     ): Promise<SendTransactionResponse> {
+        this.tracker.trackTransactionSentForSignature(this.wallet, tx);
+
         if (!this.connected) {
+            this.tracker.trackTransactionSigningFailed(this.wallet, tx, 'Wallet was not connected');
             throw new TonConnectUIError('Connect wallet to send a transaction.');
         }
 
@@ -459,6 +475,8 @@ export class TonConnectUI {
                 onRequestSent
             );
 
+            this.tracker.trackTransactionSigned(this.wallet, tx, result);
+
             widgetController.setAction({
                 name: 'transaction-sent',
                 showNotification: notifications.includes('success'),
@@ -467,6 +485,8 @@ export class TonConnectUI {
 
             return result;
         } catch (e) {
+            this.tracker.trackTransactionSigningFailed(this.wallet, tx, e.message);
+
             widgetController.setAction({
                 name: 'transaction-canceled',
                 showNotification: notifications.includes('error'),
@@ -554,14 +574,18 @@ export class TonConnectUI {
         options: WaitWalletConnectionOptions
     ): Promise<ConnectedWallet> {
         return new Promise((resolve, reject) => {
+            this.tracker.trackConnectionStarted();
             const { ignoreErrors = false, signal = null } = options;
 
             if (signal && signal.aborted) {
+                this.tracker.trackConnectionError('Connection was cancelled');
                 return reject(new TonConnectUIError('Wallet was not connected'));
             }
 
             const onStatusChangeHandler = async (wallet: ConnectedWallet | null): Promise<void> => {
                 if (!wallet) {
+                    this.tracker.trackConnectionError('Connection was cancelled');
+
                     if (ignoreErrors) {
                         // skip empty wallet status changes to avoid aborting the process
                         return;
@@ -570,12 +594,16 @@ export class TonConnectUI {
                     unsubscribe();
                     reject(new TonConnectUIError('Wallet was not connected'));
                 } else {
+                    this.tracker.trackConnectionCompleted(wallet);
+
                     unsubscribe();
                     resolve(wallet);
                 }
             };
 
             const onErrorsHandler = (reason: TonConnectError): void => {
+                this.tracker.trackConnectionError(reason.message);
+
                 if (ignoreErrors) {
                     // skip errors to avoid aborting the process
                     return;
