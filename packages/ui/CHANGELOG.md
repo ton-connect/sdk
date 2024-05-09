@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui 
 
+## [2.0.3-beta.0](https://github.com/ton-connect/sdk/compare/ui-2.0.2...ui-2.0.3-beta.0) (2024-05-09)
+
+
+### Features
+
+* **ui:** added user event tracking ([a9d3461](https://github.com/ton-connect/sdk/commit/a9d34610241273cc9b00c39c51f2835d8315477c))
+
+
+
 ## [2.0.2](https://github.com/ton-connect/sdk/compare/ui-2.0.2-beta.1...ui-2.0.2) (2024-04-22)
 
 
