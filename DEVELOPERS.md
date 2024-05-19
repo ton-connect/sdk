@@ -29,6 +29,12 @@ npm ci
 
 # Setting Up Your Development Environment
 
+Install [nx build system command](https://nx.dev/getting-started/installation) if you do not have one installed
+
+```shell
+npm install -g nx
+```
+
 Before starting development, you need to build all packages:
 
 ```shell
