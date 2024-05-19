@@ -84,7 +84,10 @@ export function fixMobileSafariActiveTransition(): void {
 }
 
 export function defineStylesRoot(): void {
-    customElements.define(globalStylesTag, class TcRootElement extends HTMLElement {});
+    if(!customElements.get(globalStylesTag)) {
+        // A custom element with the same name can be only defined once,
+        customElements.define(globalStylesTag, class TcRootElement extends HTMLElement {});
+    } 
 }
 
 /**
