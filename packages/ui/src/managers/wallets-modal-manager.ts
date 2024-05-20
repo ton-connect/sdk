@@ -99,7 +99,7 @@ export class WalletsModalManager implements WalletsModal {
      */
     public close(reason: WalletsModalCloseReason = 'action-cancelled'): void {
         if (reason === 'action-cancelled') {
-            this.tracker.trackConnectionError('Connection cancelled by user.');
+            this.tracker.trackConnectionError('Connection was cancelled');
         }
         widgetController.closeWalletsModal(reason);
     }

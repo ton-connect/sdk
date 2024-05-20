@@ -15,6 +15,7 @@ import { isInTMA, sendExpand } from 'src/app/utils/tma-api';
 import { TonConnectUIError } from 'src/errors';
 import { applyWalletsListConfiguration, eqWalletName } from 'src/app/utils/wallets';
 import { TonConnectUITracker } from 'src/tracker/ton-connect-ui-tracker';
+import { WalletsModalCloseReason } from 'src/models';
 
 interface SingleWalletModalManagerCreateOptions {
     /**
@@ -119,8 +120,10 @@ export class SingleWalletModalManager implements SingleWalletModal {
     /**
      * Closes the modal window.
      */
-    public close(): void {
-        this.tracker.trackConnectionError('Connection was cancelled');
+    public close(reason: WalletsModalCloseReason = 'action-cancelled'): void {
+        if (reason === 'action-cancelled') {
+            this.tracker.trackConnectionError('Connection was cancelled');
+        }
         widgetController.closeSingleWalletModal('action-cancelled');
     }
 

@@ -341,8 +341,8 @@ export class TonConnectUI {
      * Close the single wallet modal window.
      * @experimental
      */
-    public closeSingleWalletModal(): void {
-        this.singleWalletModal.close();
+    public closeSingleWalletModal(closeReason?: WalletsModalCloseReason): void {
+        this.singleWalletModal.close(closeReason);
     }
 
     /**
