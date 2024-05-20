@@ -14,6 +14,7 @@ import { SingleWalletModal, SingleWalletModalState } from 'src/models/single-wal
 import { isInTMA, sendExpand } from 'src/app/utils/tma-api';
 import { TonConnectUIError } from 'src/errors';
 import { applyWalletsListConfiguration, eqWalletName } from 'src/app/utils/wallets';
+import { TonConnectUITracker } from 'src/tracker/ton-connect-ui-tracker';
 
 interface SingleWalletModalManagerCreateOptions {
     /**
@@ -27,6 +28,11 @@ interface SingleWalletModalManagerCreateOptions {
     setConnectRequestParametersCallback: (
         callback: (parameters?: ConnectAdditionalRequest) => void
     ) => void;
+
+    /**
+     * Emits user action event to the EventDispatcher. By default, it uses `window.dispatchEvent` for browser environment.
+     */
+    tracker: TonConnectUITracker;
 }
 
 /**
@@ -54,12 +60,19 @@ export class SingleWalletModalManager implements SingleWalletModal {
     private consumers: Array<(state: SingleWalletModalState) => void> = [];
 
     /**
+     * Emits user action event to the EventDispatcher. By default, it uses `window.dispatchEvent` for browser environment.
+     * @internal
+     */
+    private readonly tracker: TonConnectUITracker;
+
+    /**
      * Current modal window state.
      */
     public state: SingleWalletModalState = singleWalletModalState();
 
     constructor(options: SingleWalletModalManagerCreateOptions) {
         this.connector = options.connector;
+        this.tracker = options.tracker;
         this.setConnectRequestParametersCallback = options.setConnectRequestParametersCallback;
 
         createEffect(() => {
@@ -75,6 +88,8 @@ export class SingleWalletModalManager implements SingleWalletModal {
      * @throws TonConnectUIError if the specified wallet is not found.
      */
     public async open(wallet: string): Promise<void> {
+        this.tracker.trackConnectionStarted();
+
         const fetchedWalletsList = await this.connector.getWallets();
         const walletsList = applyWalletsListConfiguration(
             fetchedWalletsList,
@@ -96,13 +111,16 @@ export class SingleWalletModalManager implements SingleWalletModal {
             return this.openSingleWalletModal(externalWallet);
         }
 
-        throw new TonConnectUIError(`Trying to open modal window with unknown wallet "${wallet}".`);
+        const error = `Trying to open modal window with unknown wallet "${wallet}".`;
+        this.tracker.trackConnectionError(error);
+        throw new TonConnectUIError(error);
     }
 
     /**
      * Closes the modal window.
      */
     public close(): void {
+        this.tracker.trackConnectionError('Connection was cancelled');
         widgetController.closeSingleWalletModal('action-cancelled');
     }
 

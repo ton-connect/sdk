@@ -32,12 +32,12 @@ import { uniq } from 'src/app/utils/array';
 import { Loadable } from 'src/models/loadable';
 import { WalletsModalManager } from 'src/managers/wallets-modal-manager';
 import { TransactionModalManager } from 'src/managers/transaction-modal-manager';
-import { WalletsModal, WalletsModalState } from 'src/models/wallets-modal';
+import { WalletsModal, WalletsModalCloseReason, WalletsModalState } from 'src/models/wallets-modal';
 import { isInTMA, sendExpand } from 'src/app/utils/tma-api';
 import { redirectToTelegram, redirectToWallet } from 'src/app/utils/url-strategy-helpers';
 import { SingleWalletModalManager } from 'src/managers/single-wallet-modal-manager';
 import { SingleWalletModal, SingleWalletModalState } from 'src/models/single-wallet-modal';
-import { TonConnectTracker } from 'src/tracker/ton-connect-tracker';
+import { TonConnectUITracker } from 'src/tracker/ton-connect-ui-tracker';
 
 export class TonConnectUI {
     public static getWallets(): Promise<WalletInfo[]> {
@@ -48,7 +48,11 @@ export class TonConnectUI {
 
     private readonly preferredWalletStorage = new PreferredWalletStorage();
 
-    private readonly tracker = new TonConnectTracker();
+    /**
+     * Emits user action event to the EventDispatcher. By default, it uses `window.dispatchEvent` for browser environment.
+     * @private
+     */
+    private readonly tracker: TonConnectUITracker;
 
     private walletInfo: WalletInfoWithOpenMethod | null = null;
 
@@ -183,15 +187,21 @@ export class TonConnectUI {
         if (options && 'connector' in options && options.connector) {
             this.connector = options.connector;
         } else if (options && 'manifestUrl' in options && options.manifestUrl) {
-            this.connector = new TonConnect({ manifestUrl: options.manifestUrl });
+            this.connector = new TonConnect({
+                manifestUrl: options.manifestUrl,
+                eventDispatcher: options?.eventDispatcher
+            });
         } else {
             throw new TonConnectUIError(
                 'You have to specify a `manifestUrl` or a `connector` in the options.'
             );
         }
 
+        this.tracker = new TonConnectUITracker(options?.eventDispatcher);
+
         this.modal = new WalletsModalManager({
             connector: this.connector,
+            tracker: this.tracker,
             setConnectRequestParametersCallback: (
                 callback: (parameters?: ConnectAdditionalRequest) => void
             ) => {
@@ -201,6 +211,7 @@ export class TonConnectUI {
 
         this.singleWalletModal = new SingleWalletModalManager({
             connector: this.connector,
+            tracker: this.tracker,
             setConnectRequestParametersCallback: (
                 callback: (parameters?: ConnectAdditionalRequest) => void
             ) => {
@@ -294,16 +305,14 @@ export class TonConnectUI {
      * Opens the modal window, returns a promise that resolves after the modal window is opened.
      */
     public async openModal(): Promise<void> {
-        this.tracker.trackConnectionStarted();
         return this.modal.open();
     }
 
     /**
      * Closes the modal window.
      */
-    public closeModal(): void {
-        this.tracker.trackConnectionError('Connection was cancelled');
-        this.modal.close();
+    public closeModal(reason?: WalletsModalCloseReason): void {
+        this.modal.close(reason);
     }
 
     /**
@@ -325,7 +334,6 @@ export class TonConnectUI {
      * @experimental
      */
     public async openSingleWalletModal(wallet: string): Promise<void> {
-        this.tracker.trackConnectionStarted();
         return this.singleWalletModal.open(wallet);
     }
 
@@ -334,7 +342,6 @@ export class TonConnectUI {
      * @experimental
      */
     public closeSingleWalletModal(): void {
-        this.tracker.trackConnectionError('Connection was cancelled');
         this.singleWalletModal.close();
     }
 

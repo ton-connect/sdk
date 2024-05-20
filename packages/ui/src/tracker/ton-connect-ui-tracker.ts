@@ -11,30 +11,33 @@ import {
     createTransactionSigningFailedEvent,
     UserActionEvent
 } from './types';
-import { getWindow } from 'src/app/utils/web-api';
+import { BrowserEventDispatcher, EventDispatcher } from '@tonconnect/sdk';
 
 /**
  * Tracker for TonConnectUI user actions, such as transaction signing, connection, etc.
  *
  * List of events:
- * — `connection-started`: when a user starts connecting a wallet.
- * — `connection-completed`: when a user successfully connected a wallet.
- * — `connection-error`: when a user cancels a connection or there is an error during the connection process.
- * — `disconnection`: when a user starts disconnecting a wallet.
- * — `transaction-sent-for-signature`: when a user sends a transaction for signature.
- * — `transaction-signed`: when a user successfully signs a transaction.
- * — `transaction-signing-failed`: when a user cancels transaction signing or there is an error during the signing process.
+ *  * `connection-started`: when a user starts connecting a wallet.
+ *  * `connection-completed`: when a user successfully connected a wallet.
+ *  * `connection-error`: when a user cancels a connection or there is an error during the connection process.
+ *  * `connection-restoring-started`: when the dApp starts restoring a connection.
+ *  * `connection-restoring-completed`: when the dApp successfully restores a connection.
+ *  * `connection-restoring-error`: when the dApp fails to restore a connection.
+ *  * `disconnection`: when a user starts disconnecting a wallet.
+ *  * `transaction-sent-for-signature`: when a user sends a transaction for signature.
+ *  * `transaction-signed`: when a user successfully signs a transaction.
+ *  * `transaction-signing-failed`: when a user cancels transaction signing or there is an error during the signing process.
  *
  * If you want to track user actions, you can subscribe to the window events with prefix `ton-connect-ui-`:
- * ```typescript
+ *
+ * @example
  * window.addEventListener('ton-connect-ui-transaction-sent-for-signature', (event) => {
  *    console.log('Transaction init', event.detail);
  * });
- * ```
  *
  * @internal
  */
-export class TonConnectTracker {
+export class TonConnectUITracker {
     /**
      * Event prefix for user actions.
      * @private
@@ -42,10 +45,14 @@ export class TonConnectTracker {
     private readonly eventPrefix = 'ton-connect-ui-';
 
     /**
-     * Window object, possibly undefined in the server environment.
+     * Event dispatcher to track user actions. By default, it uses `window.dispatchEvent` for browser environment.
      * @private
      */
-    private readonly window: Window | undefined = getWindow();
+    private readonly eventDispatcher: EventDispatcher<UserActionEvent>;
+
+    constructor(eventDispatcher?: EventDispatcher<UserActionEvent> | null) {
+        this.eventDispatcher = eventDispatcher ?? new BrowserEventDispatcher();
+    }
 
     /**
      * Emit user action event to the window.
@@ -55,8 +62,7 @@ export class TonConnectTracker {
     private dispatchUserActionEvent(eventDetails: UserActionEvent): void {
         try {
             const eventName = `${this.eventPrefix}${eventDetails.type}`;
-            const event = new CustomEvent<UserActionEvent>(eventName, { detail: eventDetails });
-            this.window?.dispatchEvent(event);
+            this.eventDispatcher?.dispatchEvent(eventName, eventDetails).catch();
         } catch (e) {}
     }
 
