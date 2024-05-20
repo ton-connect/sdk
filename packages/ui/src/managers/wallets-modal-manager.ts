@@ -8,8 +8,9 @@ import {
 } from '@tonconnect/sdk';
 import { appState } from 'src/app/state/app.state';
 import { widgetController } from 'src/app/widget-controller';
-import { WalletsModal, WalletsModalState } from 'src/models/wallets-modal';
+import { WalletsModal, WalletsModalCloseReason, WalletsModalState } from 'src/models/wallets-modal';
 import { isInTMA, sendExpand } from 'src/app/utils/tma-api';
+import { TonConnectUITracker } from 'src/tracker/ton-connect-ui-tracker';
 
 interface WalletsModalManagerCreateOptions {
     /**
@@ -23,6 +24,11 @@ interface WalletsModalManagerCreateOptions {
     setConnectRequestParametersCallback: (
         callback: (parameters?: ConnectAdditionalRequest) => void
     ) => void;
+
+    /**
+     * Emits user action event to the EventDispatcher. By default, it uses `window.dispatchEvent` for browser environment.
+     */
+    tracker: TonConnectUITracker;
 }
 
 /**
@@ -50,12 +56,19 @@ export class WalletsModalManager implements WalletsModal {
     private consumers: Array<(state: WalletsModalState) => void> = [];
 
     /**
+     * Emits user action event to the EventDispatcher. By default, it uses `window.dispatchEvent` for browser environment.
+     * @internal
+     */
+    private readonly tracker: TonConnectUITracker;
+
+    /**
      * Current modal window state.
      */
     public state: WalletsModalState = walletsModalState();
 
     constructor(options: WalletsModalManagerCreateOptions) {
         this.connector = options.connector;
+        this.tracker = options.tracker;
         this.setConnectRequestParametersCallback = options.setConnectRequestParametersCallback;
 
         createEffect(() => {
@@ -69,6 +82,7 @@ export class WalletsModalManager implements WalletsModal {
      * Opens the modal window.
      */
     public async open(): Promise<void> {
+        this.tracker.trackConnectionStarted();
         const walletsList = await this.connector.getWallets();
         const embeddedWallet = walletsList.find(isWalletInfoCurrentlyEmbedded);
 
@@ -81,9 +95,13 @@ export class WalletsModalManager implements WalletsModal {
 
     /**
      * Closes the modal window.
+     * @default 'action-cancelled'
      */
-    public close(): void {
-        widgetController.closeWalletsModal('action-cancelled');
+    public close(reason: WalletsModalCloseReason = 'action-cancelled'): void {
+        if (reason === 'action-cancelled') {
+            this.tracker.trackConnectionError('Connection cancelled by user.');
+        }
+        widgetController.closeWalletsModal(reason);
     }
 
     /**

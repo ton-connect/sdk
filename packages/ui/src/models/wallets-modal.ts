@@ -6,8 +6,9 @@ export interface WalletsModal {
 
     /**
      * Close the modal.
+     * @default 'action-cancelled'
      */
-    close: () => void;
+    close: (reason?: WalletsModalCloseReason) => void;
 
     /**
      * Subscribe to the modal window status changes.
