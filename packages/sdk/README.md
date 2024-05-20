@@ -395,7 +395,7 @@ class CustomEventDispatcher implements EventDispatcher<SdkActionEvent> {
       eventName: string, 
       eventDetails: SdkActionEvent
     ): Promise<void> {
-        console.log(`Event: ${event}, data: ${data}`);
+        console.log(`Event: ${eventName}, details:`, eventDetails);
     }
 }
 
