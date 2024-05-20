@@ -492,8 +492,6 @@ export class TonConnectUI {
 
             return result;
         } catch (e) {
-            this.tracker.trackTransactionSigningFailed(this.wallet, tx, e.message);
-
             widgetController.setAction({
                 name: 'transaction-canceled',
                 showNotification: notifications.includes('error'),
@@ -656,6 +654,7 @@ export class TonConnectUI {
             const { transaction, signal } = options;
 
             if (signal.aborted) {
+                this.tracker.trackTransactionSigningFailed(this.wallet, transaction, 'Transaction was cancelled');
                 return reject(new TonConnectUIError('Transaction was not sent'));
             }
 
@@ -668,19 +667,24 @@ export class TonConnectUI {
             const onErrorsHandler = (reason: TonConnectError): void => {
                 reject(reason);
             };
+            
+            const onCanceledHandler = (): void => {
+                this.tracker.trackTransactionSigningFailed(this.wallet, transaction, 'Transaction was cancelled');
+                reject(new TonConnectUIError('Transaction was not sent'));
+            };
+
+            signal.addEventListener('abort', onCanceledHandler, { once: true });
 
             this.connector
                 .sendTransaction(transaction, { onRequestSent: onRequestSent, signal: signal })
-                .then(result => onTransactionHandler(result))
-                .catch(reason => onErrorsHandler(reason));
-
-            signal.addEventListener(
-                'abort',
-                (): void => {
-                    reject(new TonConnectUIError('Transaction was not sent'));
-                },
-                { once: true }
-            );
+                .then(result => {
+                    signal.removeEventListener('abort', onCanceledHandler);
+                    return onTransactionHandler(result)
+                })
+                .catch(reason => {
+                    signal.removeEventListener('abort', onCanceledHandler);
+                    return onErrorsHandler(reason)
+                });
         });
     }
 
