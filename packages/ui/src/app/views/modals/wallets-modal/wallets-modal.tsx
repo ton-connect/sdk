@@ -104,15 +104,34 @@ export const WalletsModal: Component = () => {
     });
 
     const onClose = (closeReason: WalletsModalCloseReason): void => {
-        setWalletsModalState({ status: 'closed', closeReason: closeReason });
-        setSelectedWalletInfo(null);
-        setInfoTab(false);
+        if (tonConnectUI) {
+            tonConnectUI.closeModal(closeReason);
+        } else {
+            setWalletsModalState({ status: 'closed', closeReason: closeReason });
+        }
     };
 
     const unsubscribe = connector.onStatusChange(wallet => {
         if (wallet) {
             onClose('wallet-selected');
         }
+    });
+
+    const onSelectAllWallets = (): void => {
+        setSelectedTab('all-wallets');
+    };
+
+    const onSelectUniversal = (): void => {
+        setSelectedTab('universal');
+    };
+
+    const clearSelectedWalletInfo = (): void => {
+        setSelectedWalletInfo(null);
+    };
+
+    onCleanup(() => {
+        setSelectedWalletInfo(null);
+        setInfoTab(false);
     });
 
     onCleanup(unsubscribe);
@@ -148,7 +167,7 @@ export const WalletsModal: Component = () => {
                                 }
                                 wallet={selectedWalletInfo()! as WalletInfoRemote}
                                 additionalRequest={additionalRequest()}
-                                onBackClick={() => setSelectedWalletInfo(null)}
+                                onBackClick={clearSelectedWalletInfo}
                             />
                         </Match>
                         <Match when={selectedTab() === 'universal'}>
@@ -159,13 +178,13 @@ export const WalletsModal: Component = () => {
                                 onSelect={setSelectedWalletInfo}
                                 walletsList={walletsList()!}
                                 additionalRequest={additionalRequest()!}
-                                onSelectAllWallets={() => setSelectedTab('all-wallets')}
+                                onSelectAllWallets={onSelectAllWallets}
                             />
                         </Match>
                         <Match when={selectedTab() === 'all-wallets'}>
                             <AllWalletsListModal
                                 walletsList={walletsList()!}
-                                onBack={() => setSelectedTab('universal')}
+                                onBack={onSelectUniversal}
                                 onSelect={setSelectedWalletInfo}
                             />
                         </Match>
