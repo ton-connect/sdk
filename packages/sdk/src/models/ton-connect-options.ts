@@ -1,4 +1,6 @@
 import { IStorage } from 'src/storage/models/storage.interface';
+import { EventDispatcher } from 'src/tracker/event-dispatcher';
+import { SdkActionEvent } from 'src/tracker/types';
 
 /**
  * TonConnect constructor options
@@ -14,6 +16,11 @@ export interface TonConnectOptions {
      * Storage to save protocol data. For browser default is `localStorage`. If you use SDK with nodeJS, you have to specify this field.
      */
     storage?: IStorage;
+
+    /**
+     * Event dispatcher to track user actions. By default, it uses `window.dispatchEvent` for browser environment.
+     */
+    eventDispatcher?: EventDispatcher<SdkActionEvent>;
 
     /**
      * Redefine wallets list source URL. Must be a link to a json file with [following structure]{@link https://github.com/ton-connect/wallets-list}
