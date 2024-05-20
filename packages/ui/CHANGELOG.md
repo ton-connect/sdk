@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui 
 
+## [2.0.3-beta.2](https://github.com/ton-connect/sdk/compare/ui-2.0.3-beta.1...ui-2.0.3-beta.2) (2024-05-20)
+
+
+### Bug Fixes
+
+* **ui:** improve error message for transaction was cancelled event ([91a4d43](https://github.com/ton-connect/sdk/commit/91a4d439b128fc0d7f7f64941983fd45d3812441))
+
+
+
 ## [2.0.3-beta.1](https://github.com/ton-connect/sdk/compare/ui-2.0.3-beta.0...ui-2.0.3-beta.1) (2024-05-20)
 
 
