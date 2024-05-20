@@ -1,5 +1,20 @@
 # Changelog @tonconnect/ui 
 
+## [2.0.3-beta.1](https://github.com/ton-connect/sdk/compare/ui-2.0.3-beta.0...ui-2.0.3-beta.1) (2024-05-20)
+
+
+### Bug Fixes
+
+* **ui:** resolve wallet already connected error ([a3429ee](https://github.com/ton-connect/sdk/commit/a3429ee3d5fc616505de0c392be6b2aa9465e6c3))
+
+
+### Features
+
+* **ui:** change modal close methods to include close reason ([e19139e](https://github.com/ton-connect/sdk/commit/e19139ef07edcc8d8b61bac870527b1c6d7e8962))
+* **ui:** refine user action tracking ([e28605b](https://github.com/ton-connect/sdk/commit/e28605b9bbd826d046b4e209abc1f1bfe771e87c))
+
+
+
 ## [2.0.3-beta.0](https://github.com/ton-connect/sdk/compare/ui-2.0.2...ui-2.0.3-beta.0) (2024-05-09)
 
 
