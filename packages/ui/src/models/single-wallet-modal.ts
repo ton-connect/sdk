@@ -1,4 +1,5 @@
 import { WalletInfoRemote } from '@tonconnect/sdk';
+import { WalletsModalCloseReason } from 'src/models/wallets-modal';
 
 export interface SingleWalletModal {
     /**
@@ -9,7 +10,7 @@ export interface SingleWalletModal {
     /**
      * Close the modal.
      */
-    close: () => void;
+    close: (closeReason?: WalletsModalCloseReason) => void;
 
     /**
      * Subscribe to the modal window status changes.

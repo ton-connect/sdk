@@ -25,6 +25,7 @@ import { InfoModal } from 'src/app/views/modals/wallets-modal/info-modal';
 import { MobileConnectionModal } from 'src/app/views/modals/wallets-modal/mobile-connection-modal';
 import { Dynamic } from 'solid-js/web';
 import { WalletsModalCloseReason } from 'src/models';
+import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 
 export const SingleWalletModal: Component = () => {
     const { locale } = useI18n()[1];
@@ -37,6 +38,7 @@ export const SingleWalletModal: Component = () => {
     });
 
     const connector = useContext(ConnectorContext)!;
+    const tonConnectUI = useContext(TonConnectUiContext)!;
     const [infoTab, setInfoTab] = createSignal(false);
 
     const additionalRequestLoading = (): boolean =>
@@ -52,8 +54,7 @@ export const SingleWalletModal: Component = () => {
     });
 
     const onClose = (closeReason: WalletsModalCloseReason): void => {
-        setSingleWalletModalState({ status: 'closed', closeReason: closeReason });
-        setInfoTab(false);
+        tonConnectUI.closeSingleWalletModal(closeReason);
     };
 
     const unsubscribe = connector.onStatusChange(wallet => {
@@ -63,6 +64,10 @@ export const SingleWalletModal: Component = () => {
     });
 
     onCleanup(unsubscribe);
+
+    onCleanup(() => {
+        setInfoTab(false);
+    });
 
     return (
         <StyledModal

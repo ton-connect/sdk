@@ -104,11 +104,7 @@ export const WalletsModal: Component = () => {
     });
 
     const onClose = (closeReason: WalletsModalCloseReason): void => {
-        if (tonConnectUI) {
-            tonConnectUI.closeModal(closeReason);
-        } else {
-            setWalletsModalState({ status: 'closed', closeReason: closeReason });
-        }
+        tonConnectUI!.closeModal(closeReason);
     };
 
     const unsubscribe = connector.onStatusChange(wallet => {
