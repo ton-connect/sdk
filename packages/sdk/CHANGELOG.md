@@ -1,5 +1,14 @@
 # Changelog @tonconnect/sdk 
 
+## [3.0.3-beta.0](https://github.com/ton-connect/sdk/compare/sdk-3.0.2...sdk-3.0.3-beta.0) (2024-05-20)
+
+
+### Features
+
+* **sdk:** integrate user action tracking ([e831385](https://github.com/ton-connect/sdk/commit/e831385e3ba8df40c86b18572713cabbb57e4ba4))
+
+
+
 ## [3.0.2](https://github.com/ton-connect/sdk/compare/sdk-3.0.2-beta.0...sdk-3.0.2) (2024-04-22)
 
 
