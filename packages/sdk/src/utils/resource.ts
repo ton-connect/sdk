@@ -87,7 +87,9 @@ export function createResource<T extends EventSource, Args extends any[]>(
             const promise = currentPromise;
             currentPromise = null;
 
-            abortController?.abort();
+            try {
+                abortController?.abort();
+            } catch (e) {}
 
             await Promise.allSettled([
                 resource ? disposeFn(resource) : Promise.resolve(),

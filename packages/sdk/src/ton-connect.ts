@@ -41,8 +41,9 @@ import { WalletsListManager } from 'src/wallets-list-manager';
 import { WithoutIdDistributive } from 'src/utils/types';
 import { checkSendTransactionSupport } from 'src/utils/feature-support';
 import { callForSuccess } from 'src/utils/call-for-success';
-import { logDebug, logError } from 'src/utils/log';
+import { logError } from 'src/utils/log';
 import { createAbortController } from 'src/utils/create-abort-controller';
+import { TonConnectTracker } from 'src/tracker/ton-connect-tracker';
 
 export class TonConnect implements ITonConnect {
     private static readonly walletsList = new WalletsListManager();
@@ -67,6 +68,12 @@ export class TonConnect implements ITonConnect {
     public static getWallets(): Promise<WalletInfo[]> {
         return this.walletsList.getWallets();
     }
+
+    /**
+     * Emits user action event to the EventDispatcher. By default, it uses `window.dispatchEvent` for browser environment.
+     * @private
+     */
+    private readonly tracker: TonConnectTracker;
 
     private readonly walletsList = new WalletsListManager();
 
@@ -120,6 +127,8 @@ export class TonConnect implements ITonConnect {
             walletsListSource: options?.walletsListSource,
             cacheTTLMs: options?.walletsListCacheTTLMs
         });
+
+        this.tracker = new TonConnectTracker(options?.eventDispatcher);
 
         if (!this.dappSettings.manifestUrl) {
             throw new DappMetadataError(
@@ -247,6 +256,8 @@ export class TonConnect implements ITonConnect {
             this.provider = null;
         });
 
+        this.tracker.trackConnectionStarted();
+
         return this.provider.connect(this.createConnectRequest(options?.request), {
             openingDeadlineMS: options?.openingDeadlineMS,
             signal: abortController.signal
@@ -260,11 +271,14 @@ export class TonConnect implements ITonConnect {
         openingDeadlineMS?: number;
         signal?: AbortSignal;
     }): Promise<void> {
+        this.tracker.trackConnectionRestoringStarted();
+
         const abortController = createAbortController(options?.signal);
         this.abortController?.abort();
         this.abortController = abortController;
 
         if (abortController.signal.aborted) {
+            this.tracker.trackConnectionRestoringError('Connection restoring was aborted');
             return;
         }
 
@@ -275,6 +289,7 @@ export class TonConnect implements ITonConnect {
         ]);
 
         if (abortController.signal.aborted) {
+            this.tracker.trackConnectionRestoringError('Connection restoring was aborted');
             return;
         }
 
@@ -295,6 +310,7 @@ export class TonConnect implements ITonConnect {
                     }
             }
         } catch {
+            this.tracker.trackConnectionRestoringError('Provider is not restored');
             await this.bridgeConnectionStorage.removeConnection();
             provider?.closeConnection();
             provider = null;
@@ -303,11 +319,13 @@ export class TonConnect implements ITonConnect {
 
         if (abortController.signal.aborted) {
             provider?.closeConnection();
+            this.tracker.trackConnectionRestoringError('Connection restoring was aborted');
             return;
         }
 
         if (!provider) {
             logError('Provider is not restored');
+            this.tracker.trackConnectionRestoringError('Provider is not restored');
             return;
         }
 
@@ -315,17 +333,27 @@ export class TonConnect implements ITonConnect {
         this.provider = provider;
         provider.listen(this.walletEventsListener.bind(this));
 
-        abortController.signal.addEventListener('abort', () => {
+        const onAbortRestore = () => {
+            this.tracker.trackConnectionRestoringError('Connection restoring was aborted');
             provider?.closeConnection();
             provider = null;
-        });
+        };
+        abortController.signal.addEventListener('abort', onAbortRestore);
 
         return await callForSuccess(
-            async _options =>
-                provider?.restoreConnection({
+            async _options => {
+                await provider?.restoreConnection({
                     openingDeadlineMS: options?.openingDeadlineMS,
                     signal: _options.signal
-                }),
+                })
+
+                abortController.signal.removeEventListener('abort', onAbortRestore);
+                if (this.connected) {
+                    this.tracker.trackConnectionRestoringCompleted(this.wallet);
+                } else {
+                    this.tracker.trackConnectionRestoringError('Connection restoring failed');
+                }
+            },
             {
                 attempts: Number.MAX_SAFE_INTEGER,
                 delayMs: 5_000,
@@ -384,6 +412,8 @@ export class TonConnect implements ITonConnect {
             requiredMessagesNumber: transaction.messages.length
         });
 
+        this.tracker.trackTransactionSentForSignature(this.wallet, transaction);
+
         const { validUntil, ...tx } = transaction;
         const from = transaction.from || this.account!.address;
         const network = transaction.network || this.account!.chain;
@@ -399,12 +429,15 @@ export class TonConnect implements ITonConnect {
         );
 
         if (sendTransactionParser.isError(response)) {
+            this.tracker.trackTransactionSigningFailed(this.wallet, transaction, response.error.message, response.error.code);
             return sendTransactionParser.parseAndThrowError(response);
         }
 
-        return sendTransactionParser.convertFromRpcResponse(
+        const result = sendTransactionParser.convertFromRpcResponse(
             response as SendTransactionRpcResponseSuccess
         );
+        this.tracker.trackTransactionSigned(this.wallet, transaction, result);
+        return result;
     }
 
     /**
@@ -422,7 +455,7 @@ export class TonConnect implements ITonConnect {
             throw new TonConnectError('Disconnect was aborted');
         }
 
-        this.onWalletDisconnected();
+        this.onWalletDisconnected('dapp');
         await this.provider?.disconnect({
             signal: abortController.signal
         });
@@ -495,7 +528,7 @@ export class TonConnect implements ITonConnect {
                 this.onWalletConnectError(e.payload);
                 break;
             case 'disconnect':
-                this.onWalletDisconnected();
+                this.onWalletDisconnected('wallet');
         }
     }
 
@@ -530,6 +563,8 @@ export class TonConnect implements ITonConnect {
         }
 
         this.wallet = wallet;
+
+        this.tracker.trackConnectionCompleted(wallet);
     }
 
     private onWalletConnectError(connectEventError: ConnectEventError['payload']): void {
@@ -537,6 +572,7 @@ export class TonConnect implements ITonConnect {
         this.statusChangeErrorSubscriptions.forEach(errorsHandler => errorsHandler(error));
 
         console.debug(error);
+        this.tracker.trackConnectionError(connectEventError.message, connectEventError.code)
 
         if (error instanceof ManifestNotFoundError || error instanceof ManifestContentErrorError) {
             console.error(error);
@@ -544,7 +580,8 @@ export class TonConnect implements ITonConnect {
         }
     }
 
-    private onWalletDisconnected(): void {
+    private onWalletDisconnected(scope: 'wallet' | 'dapp'): void {
+        this.tracker.trackDisconnection(this.wallet, scope);
         this.wallet = null;
     }
 

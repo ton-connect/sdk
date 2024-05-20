@@ -357,6 +357,54 @@ myTelegramBot.userIsOnline(user => {
 })
 ```
 
+# Tracking
+
+## Track events
+
+Tracker for TonConnect user actions, such as transaction signing, connection, etc.
+
+List of events:
+* `connection-started`: when a user starts connecting a wallet.
+* `connection-completed`: when a user successfully connected a wallet.
+* `connection-error`: when a user cancels a connection or there is an error during the connection process.
+* `connection-restoring-started`: when the dApp starts restoring a connection.
+* `connection-restoring-completed`: when the dApp successfully restores a connection.
+* `connection-restoring-error`: when the dApp fails to restore a connection.
+* `disconnection`: when a user starts disconnecting a wallet.
+* `transaction-sent-for-signature`: when a user sends a transaction for signature.
+* `transaction-signed`: when a user successfully signs a transaction.
+* `transaction-signing-failed`: when a user cancels transaction signing or there is an error during the signing process.
+
+If you want to track user actions, you can subscribe to the window events with prefix `ton-connect-`:
+
+```typescript
+window.addEventListener('ton-connect-transaction-sent-for-signature', (event) => {
+    console.log('Transaction init', event.detail);
+});
+```
+
+## Use custom event dispatcher
+
+You can use your custom event dispatcher to track user actions. To do this, you need to pass the `eventDispatcher` to the TonConnect constructor:
+
+```typescript
+import {TonConnect, EventDispatcher, SdkActionEvent} from '@tonconnect/sdk';
+
+class CustomEventDispatcher implements EventDispatcher<SdkActionEvent> {
+    public async dispatchEvent(
+      eventName: string, 
+      eventDetails: SdkActionEvent
+    ): Promise<void> {
+        console.log(`Event: ${event}, data: ${data}`);
+    }
+}
+
+const eventDispatcher = new CustomEventDispatcher();
+
+const connector = new TonConnect({ eventDispatcher });
+```
+
+
 # Troubleshooting
 
 ## Warning about 'encoding' module in Next.js

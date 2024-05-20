@@ -513,7 +513,7 @@ export class BridgeProvider implements HTTPProvider {
     ): Promise<void> {
         if (Array.isArray(this.walletConnectionSource)) {
             // close all gateways before opening new ones
-            this.pendingGateways.map(bridge => bridge.close().catch(e => console.error(e)));
+            this.pendingGateways.map(bridge => bridge.close().catch());
 
             // open new gateways
             this.pendingGateways = this.walletConnectionSource.map(source => {
@@ -522,9 +522,7 @@ export class BridgeProvider implements HTTPProvider {
                     source.bridgeUrl,
                     sessionCrypto.sessionId,
                     () => {},
-                    e => {
-                        console.error(e);
-                    }
+                  () => {}
                 );
 
                 gateway.setListener(message =>
