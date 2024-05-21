@@ -1,0 +1,12 @@
+{
+    "root": "packages/ui-angular/",
+    "targets": {
+      "version": {
+        "executor": "@jscutlery/semver:version",
+        "options": {
+          "changelogHeader": "# Changelog @tonconnect/ui-angular \n",
+          "push": false
+        }
+      }
+    }
+  }
