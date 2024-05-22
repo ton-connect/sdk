@@ -80,15 +80,18 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
     onCleanup(unsubscribe);
 
     const generateUniversalLink = (): void => {
-        setUniversalLink(
-            connector.connect(
+        // TODO: prevent double generation of universal link later and remove try-catch
+        try {
+            const universalLink = connector.connect(
                 {
                     universalLink: props.wallet.universalLink,
                     bridgeUrl: props.wallet.bridgeUrl
                 },
                 props.additionalRequest
-            )
-        );
+            );
+
+            setUniversalLink(universalLink);
+        } catch (e) {}
     };
 
     createEffect(() => {
@@ -187,7 +190,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                     translationKey="walletModal.desktopConnectionModal.scanQR"
                     translationValues={{ name: props.wallet.name }}
                 >
-                    Scan the QR code below with your phone’s or {props.wallet.name}’s camera
+                    Scan the QR code below with your phone’s or {props.wallet.name}’s camera
                 </H2Styled>
             </Show>
 
@@ -234,7 +237,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                                 translationKey="walletModal.desktopConnectionModal.dontHaveExtension"
                                 translationValues={{ name: props.wallet.name }}
                             >
-                                Seems you don't have installed {props.wallet.name} browser extension
+                                Seems you don't have installed {props.wallet.name} browser extension
                             </BodyTextStyled>
                             <ButtonsContainerStyled>
                                 <Link href={props.wallet.aboutUrl} blank>
