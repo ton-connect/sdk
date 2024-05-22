@@ -1,10 +1,10 @@
 import { Component, createMemo, createSignal, For } from 'solid-js';
 import {
+    DesktopUniversalModalStyled,
+    H2AvailableWalletsStyled,
     H2Styled,
     QRCodeStyled,
-    H2AvailableWalletsStyled,
-    WalletsContainerStyled,
-    DesktopUniversalModalStyled
+    WalletsContainerStyled
 } from './style';
 import { ConnectAdditionalRequest, isWalletInfoRemote, WalletInfo } from '@tonconnect/sdk';
 import { appState } from 'src/app/state/app.state';
@@ -14,6 +14,7 @@ import { PersonalizedWalletInfo } from 'src/app/models/personalized-wallet-info'
 import { IMG } from 'src/app/env/IMG';
 
 import { addReturnStrategy } from 'src/app/utils/url-strategy-helpers';
+import { bridgesIsEqual, getUniqueBridges } from 'src/app/utils/bridge';
 
 interface DesktopUniversalModalProps {
     additionalRequest: ConnectAdditionalRequest;
@@ -29,11 +30,9 @@ export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = prop
     const [popupOpened, setPopupOpened] = createSignal(false);
     const connector = appState.connector;
 
-    const walletsBridges = () => [...new Set(props.walletsList
-        .filter(isWalletInfoRemote)
-        .map(item => item.bridgeUrl ))
-        .values()]
-        .map(bridgeUrl => ({ bridgeUrl }));
+    const walletsBridges = createMemo(() => getUniqueBridges(props.walletsList), null, {
+        equals: bridgesIsEqual
+    });
 
     setLastSelectedWalletInfo({ openMethod: 'qrcode' });
     const request = createMemo(() => connector.connect(walletsBridges(), props.additionalRequest));

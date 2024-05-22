@@ -1,5 +1,5 @@
 import { ConnectAdditionalRequest, isWalletInfoRemote, WalletInfo } from '@tonconnect/sdk';
-import { Component, createSignal, For, Show } from 'solid-js';
+import { Component, createMemo, createSignal, For, Show } from 'solid-js';
 import {
     AtWalletIcon,
     CopyLightIcon,
@@ -31,7 +31,8 @@ import { copyToClipboard } from 'src/app/utils/copy-to-clipboard';
 import { TonConnectUIError } from 'src/errors';
 import { MobileUniversalQR } from './mobile-universal-qr';
 import { Translation } from 'src/app/components/typography/Translation';
-import { addReturnStrategy, redirectToTelegram, redirectToWallet } from 'src/app/utils/url-strategy-helpers';
+import { redirectToTelegram, redirectToWallet } from 'src/app/utils/url-strategy-helpers';
+import { bridgesIsEqual, getUniqueBridges } from 'src/app/utils/bridge';
 
 interface MobileUniversalModalProps {
     walletsList: WalletInfo[];
@@ -51,15 +52,13 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
         props.walletsList.filter(w => supportsMobile(w) && w.appName !== AT_WALLET_APP_NAME);
     const shouldShowMoreButton = (): boolean => walletsList().length > 7;
 
-    const walletsBridges = () =>
-        [
-            ...new Set(
-                props.walletsList.filter(isWalletInfoRemote).map(item => item.bridgeUrl)
-            ).values()
-        ].map(bridgeUrl => ({ bridgeUrl }));
+    const walletsBridges = createMemo(() => getUniqueBridges(props.walletsList), null, {
+        equals: bridgesIsEqual
+    });
 
-    const getUniversalLink = (): string =>
-        connector.connect(walletsBridges(), props.additionalRequest);
+    const getUniversalLink = createMemo((): string =>
+        connector.connect(walletsBridges(), props.additionalRequest)
+    );
 
     setLastSelectedWalletInfo({ openMethod: 'universal-link' });
 

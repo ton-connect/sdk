@@ -33,7 +33,7 @@ import { DesktopConnectionModal } from 'src/app/views/modals/wallets-modal/deskt
 import { InfoModal } from 'src/app/views/modals/wallets-modal/info-modal';
 import { MobileConnectionModal } from 'src/app/views/modals/wallets-modal/mobile-connection-modal';
 import { MobileUniversalModal } from 'src/app/views/modals/wallets-modal/mobile-universal-modal';
-import { DesktopUniversalModal } from 'src/app/views/modals/wallets-modal/desltop-universal-modal';
+import { DesktopUniversalModal } from 'src/app/views/modals/wallets-modal/desktop-universal-modal';
 import { Dynamic } from 'solid-js/web';
 import { WalletsModalCloseReason } from 'src/models';
 
