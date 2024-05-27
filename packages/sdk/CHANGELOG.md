@@ -1,5 +1,14 @@
 # Changelog @tonconnect/sdk 
 
+## [3.0.3-beta.1](https://github.com/ton-connect/sdk/compare/sdk-3.0.3-beta.0...sdk-3.0.3-beta.1) (2024-05-27)
+
+
+### Features
+
+* **sdk:** enhanced event tracking and version management ([cfc013d](https://github.com/ton-connect/sdk/commit/cfc013d6a6683352c95dfd5b48e5b005162c8ea5))
+
+
+
 ## [3.0.3-beta.0](https://github.com/ton-connect/sdk/compare/sdk-3.0.2...sdk-3.0.3-beta.0) (2024-05-20)
 
 
