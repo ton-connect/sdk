@@ -18,7 +18,12 @@ import { widgetController } from 'src/app/widget-controller';
 import { TonConnectUIError } from 'src/errors/ton-connect-ui.error';
 import { TonConnectUiCreateOptions } from 'src/models/ton-connect-ui-create-options';
 import { PreferredWalletStorage, WalletInfoStorage } from 'src/storage';
-import { getSystemTheme, preloadImages, subscribeToThemeChange } from 'src/app/utils/web-api';
+import {
+    createMacrotask, createMacrotaskAsync,
+    getSystemTheme,
+    preloadImages,
+    subscribeToThemeChange
+} from 'src/app/utils/web-api';
 import { TonConnectUiOptions } from 'src/models/ton-connect-ui-options';
 import { setBorderRadius, setColors, setTheme } from 'src/app/state/theme-state';
 import { mergeOptions } from 'src/app/utils/options';
@@ -38,6 +43,7 @@ import { redirectToTelegram, redirectToWallet } from 'src/app/utils/url-strategy
 import { SingleWalletModalManager } from 'src/managers/single-wallet-modal-manager';
 import { SingleWalletModal, SingleWalletModalState } from 'src/models/single-wallet-modal';
 import { TonConnectUITracker } from 'src/tracker/ton-connect-ui-tracker';
+import { tonConnectUiVersion } from 'src/constants/version';
 
 export class TonConnectUI {
     public static getWallets(): Promise<WalletInfo[]> {
@@ -197,7 +203,10 @@ export class TonConnectUI {
             );
         }
 
-        this.tracker = new TonConnectUITracker(options?.eventDispatcher);
+        this.tracker = new TonConnectUITracker({
+            eventDispatcher: options?.eventDispatcher,
+            tonConnectUiVersion: tonConnectUiVersion
+        });
 
         this.modal = new WalletsModalManager({
             connector: this.connector,
@@ -232,8 +241,8 @@ export class TonConnectUI {
         this.subscribeToWalletChange();
 
         if (options?.restoreConnection !== false) {
-            this.tracker.trackConnectionRestoringStarted();
-            this.connectionRestored = new Promise(async resolve => {
+            this.connectionRestored = createMacrotaskAsync(async () => {
+                this.tracker.trackConnectionRestoringStarted();
                 await this.connector.restoreConnection();
 
                 if (!this.connector.connected) {
@@ -243,7 +252,7 @@ export class TonConnectUI {
                     this.tracker.trackConnectionRestoringCompleted(this.wallet);
                 }
 
-                resolve(this.connector.connected);
+                return this.connector.connected;
             });
         }
 
@@ -654,7 +663,11 @@ export class TonConnectUI {
             const { transaction, signal } = options;
 
             if (signal.aborted) {
-                this.tracker.trackTransactionSigningFailed(this.wallet, transaction, 'Transaction was cancelled');
+                this.tracker.trackTransactionSigningFailed(
+                    this.wallet,
+                    transaction,
+                    'Transaction was cancelled'
+                );
                 return reject(new TonConnectUIError('Transaction was not sent'));
             }
 
@@ -667,9 +680,13 @@ export class TonConnectUI {
             const onErrorsHandler = (reason: TonConnectError): void => {
                 reject(reason);
             };
-            
+
             const onCanceledHandler = (): void => {
-                this.tracker.trackTransactionSigningFailed(this.wallet, transaction, 'Transaction was cancelled');
+                this.tracker.trackTransactionSigningFailed(
+                    this.wallet,
+                    transaction,
+                    'Transaction was cancelled'
+                );
                 reject(new TonConnectUIError('Transaction was not sent'));
             };
 
@@ -679,11 +696,11 @@ export class TonConnectUI {
                 .sendTransaction(transaction, { onRequestSent: onRequestSent, signal: signal })
                 .then(result => {
                     signal.removeEventListener('abort', onCanceledHandler);
-                    return onTransactionHandler(result)
+                    return onTransactionHandler(result);
                 })
                 .catch(reason => {
                     signal.removeEventListener('abort', onCanceledHandler);
-                    return onErrorsHandler(reason)
+                    return onErrorsHandler(reason);
                 });
         });
     }
