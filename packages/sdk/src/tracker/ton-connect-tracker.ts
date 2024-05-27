@@ -1,15 +1,39 @@
 import {
+    createConnectionCompletedEvent,
+    createConnectionErrorEvent,
     createConnectionRestoringCompletedEvent,
     createConnectionRestoringErrorEvent,
     createConnectionRestoringStartedEvent,
+    createConnectionStartedEvent,
     createDisconnectionEvent,
+    createRequestVersionEvent,
+    createResponseVersionEvent,
     createTransactionSentForSignatureEvent,
     createTransactionSignedEvent,
     createTransactionSigningFailedEvent,
-    SdkActionEvent, createConnectionStartedEvent, createConnectionErrorEvent, createConnectionCompletedEvent
+    createVersionInfo,
+    ResponseVersionEvent,
+    SdkActionEvent,
+    Version,
+    WithoutVersion
 } from './types';
 import { EventDispatcher } from 'src/tracker/event-dispatcher';
 import { BrowserEventDispatcher } from 'src/tracker/browser-event-dispatcher';
+
+/**
+ * Options for the TonConnect tracker.
+ */
+export type TonConnectTrackerOptions = {
+    /**
+     * Event dispatcher to track user actions.
+     * @default new BrowserEventDispatcher()
+     */
+    eventDispatcher?: EventDispatcher<SdkActionEvent> | null;
+    /**
+     * TonConnect SDK version.
+     */
+    tonConnectSdkVersion: string;
+};
 
 /**
  * Tracker for TonConnect user actions, such as transaction signing, connection, etc.
@@ -43,13 +67,84 @@ export class TonConnectTracker {
     private readonly eventPrefix = 'ton-connect-';
 
     /**
+     * TonConnect SDK version.
+     */
+    private readonly tonConnectSdkVersion: string;
+
+    /**
+     * TonConnect UI version.
+     */
+    private tonConnectUiVersion: string | null = null;
+
+    /**
+     * Version of the library.
+     */
+    get version(): Version {
+        return createVersionInfo({
+            ton_connect_sdk_lib: this.tonConnectSdkVersion,
+            ton_connect_ui_lib: this.tonConnectUiVersion
+        });
+    }
+
+    /**
      * Event dispatcher to track user actions. By default, it uses `window.dispatchEvent` for browser environment.
      * @private
      */
     private readonly eventDispatcher: EventDispatcher<SdkActionEvent>;
 
-    constructor(eventDispatcher?: EventDispatcher<SdkActionEvent> | null) {
-        this.eventDispatcher = eventDispatcher ?? new BrowserEventDispatcher();
+    constructor(options: TonConnectTrackerOptions) {
+        this.eventDispatcher = options?.eventDispatcher ?? new BrowserEventDispatcher();
+        this.tonConnectSdkVersion = options.tonConnectSdkVersion;
+
+        this.init().catch();
+    }
+
+    /**
+     * Called once when the tracker is created and request version other libraries.
+     */
+    private async init(): Promise<void> {
+        try {
+            await this.setRequestVersionHandler();
+            this.tonConnectUiVersion = await this.requestTonConnectUiVersion();
+        } catch (e) {}
+    }
+
+    /**
+     * Set request version handler.
+     * @private
+     */
+    private async setRequestVersionHandler(): Promise<void> {
+        await this.eventDispatcher.addEventListener('ton-connect-request-version', async () => {
+            await this.eventDispatcher.dispatchEvent(
+                'ton-connect-response-version',
+                createResponseVersionEvent(this.tonConnectSdkVersion)
+            );
+        });
+    }
+
+    /**
+     * Request TonConnect UI version.
+     * @private
+     */
+    private async requestTonConnectUiVersion(): Promise<string> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                await this.eventDispatcher.addEventListener(
+                    'ton-connect-ui-response-version',
+                    (event: CustomEvent<ResponseVersionEvent>) => {
+                        resolve(event.detail.version);
+                    },
+                    { once: true }
+                );
+
+                await this.eventDispatcher.dispatchEvent(
+                    'ton-connect-ui-request-version',
+                    createRequestVersionEvent()
+                );
+            } catch (e) {
+                reject(e);
+            }
+        });
     }
 
     /**
@@ -59,8 +154,9 @@ export class TonConnectTracker {
      */
     private dispatchUserActionEvent(eventDetails: SdkActionEvent): void {
         try {
-            const eventName = `${this.eventPrefix}${eventDetails.type}`;
-            this.eventDispatcher.dispatchEvent(eventName, eventDetails).catch();
+            this.eventDispatcher
+                .dispatchEvent(`${this.eventPrefix}${eventDetails.type}`, eventDetails)
+                .catch();
         } catch (e) {}
     }
 
@@ -68,9 +164,11 @@ export class TonConnectTracker {
      * Track connection init event.
      * @param args
      */
-    public trackConnectionStarted(...args: Parameters<typeof createConnectionStartedEvent>): void {
+    public trackConnectionStarted(
+        ...args: WithoutVersion<Parameters<typeof createConnectionStartedEvent>>
+    ): void {
         try {
-            const event = createConnectionStartedEvent(...args);
+            const event = createConnectionStartedEvent(this.version, ...args);
             this.dispatchUserActionEvent(event);
         } catch (e) {}
     }
@@ -80,10 +178,10 @@ export class TonConnectTracker {
      * @param args
      */
     public trackConnectionCompleted(
-        ...args: Parameters<typeof createConnectionCompletedEvent>
+        ...args: WithoutVersion<Parameters<typeof createConnectionCompletedEvent>>
     ): void {
         try {
-            const event = createConnectionCompletedEvent(...args);
+            const event = createConnectionCompletedEvent(this.version, ...args);
             this.dispatchUserActionEvent(event);
         } catch (e) {}
     }
@@ -92,9 +190,11 @@ export class TonConnectTracker {
      * Track connection error event.
      * @param args
      */
-    public trackConnectionError(...args: Parameters<typeof createConnectionErrorEvent>): void {
+    public trackConnectionError(
+        ...args: WithoutVersion<Parameters<typeof createConnectionErrorEvent>>
+    ): void {
         try {
-            const event = createConnectionErrorEvent(...args);
+            const event = createConnectionErrorEvent(this.version, ...args);
             this.dispatchUserActionEvent(event);
         } catch (e) {}
     }
@@ -104,10 +204,10 @@ export class TonConnectTracker {
      * @param args
      */
     public trackConnectionRestoringStarted(
-        ...args: Parameters<typeof createConnectionRestoringStartedEvent>
+        ...args: WithoutVersion<Parameters<typeof createConnectionRestoringStartedEvent>>
     ): void {
         try {
-            const event = createConnectionRestoringStartedEvent(...args);
+            const event = createConnectionRestoringStartedEvent(this.version, ...args);
             this.dispatchUserActionEvent(event);
         } catch (e) {}
     }
@@ -117,10 +217,10 @@ export class TonConnectTracker {
      * @param args
      */
     public trackConnectionRestoringCompleted(
-        ...args: Parameters<typeof createConnectionRestoringCompletedEvent>
+        ...args: WithoutVersion<Parameters<typeof createConnectionRestoringCompletedEvent>>
     ): void {
         try {
-            const event = createConnectionRestoringCompletedEvent(...args);
+            const event = createConnectionRestoringCompletedEvent(this.version, ...args);
             this.dispatchUserActionEvent(event);
         } catch (e) {}
     }
@@ -130,10 +230,10 @@ export class TonConnectTracker {
      * @param args
      */
     public trackConnectionRestoringError(
-        ...args: Parameters<typeof createConnectionRestoringErrorEvent>
+        ...args: WithoutVersion<Parameters<typeof createConnectionRestoringErrorEvent>>
     ): void {
         try {
-            const event = createConnectionRestoringErrorEvent(...args);
+            const event = createConnectionRestoringErrorEvent(this.version, ...args);
             this.dispatchUserActionEvent(event);
         } catch (e) {}
     }
@@ -142,9 +242,11 @@ export class TonConnectTracker {
      * Track disconnect event.
      * @param args
      */
-    public trackDisconnection(...args: Parameters<typeof createDisconnectionEvent>): void {
+    public trackDisconnection(
+        ...args: WithoutVersion<Parameters<typeof createDisconnectionEvent>>
+    ): void {
         try {
-            const event = createDisconnectionEvent(...args);
+            const event = createDisconnectionEvent(this.version, ...args);
             this.dispatchUserActionEvent(event);
         } catch (e) {}
     }
@@ -154,10 +256,10 @@ export class TonConnectTracker {
      * @param args
      */
     public trackTransactionSentForSignature(
-        ...args: Parameters<typeof createTransactionSentForSignatureEvent>
+        ...args: WithoutVersion<Parameters<typeof createTransactionSentForSignatureEvent>>
     ): void {
         try {
-            const event = createTransactionSentForSignatureEvent(...args);
+            const event = createTransactionSentForSignatureEvent(this.version, ...args);
             this.dispatchUserActionEvent(event);
         } catch (e) {}
     }
@@ -166,9 +268,11 @@ export class TonConnectTracker {
      * Track transaction signed event.
      * @param args
      */
-    public trackTransactionSigned(...args: Parameters<typeof createTransactionSignedEvent>): void {
+    public trackTransactionSigned(
+        ...args: WithoutVersion<Parameters<typeof createTransactionSignedEvent>>
+    ): void {
         try {
-            const event = createTransactionSignedEvent(...args);
+            const event = createTransactionSignedEvent(this.version, ...args);
             this.dispatchUserActionEvent(event);
         } catch (e) {}
     }
@@ -178,10 +282,10 @@ export class TonConnectTracker {
      * @param args
      */
     public trackTransactionSigningFailed(
-        ...args: Parameters<typeof createTransactionSigningFailedEvent>
+        ...args: WithoutVersion<Parameters<typeof createTransactionSigningFailedEvent>>
     ): void {
         try {
-            const event = createTransactionSigningFailedEvent(...args);
+            const event = createTransactionSigningFailedEvent(this.version, ...args);
             this.dispatchUserActionEvent(event);
         } catch (e) {}
     }
