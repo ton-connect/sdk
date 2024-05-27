@@ -1,5 +1,19 @@
 # Changelog @tonconnect/ui 
 
+## [2.0.3-beta.3](https://github.com/ton-connect/sdk/compare/ui-2.0.3-beta.2...ui-2.0.3-beta.3) (2024-05-27)
+
+
+### Bug Fixes
+
+* **ui:** prevent the error of an already connected wallet ([b41996e](https://github.com/ton-connect/sdk/commit/b41996e3cf691fe64da9ead57478b0507c7df8d3))
+
+
+### Features
+
+* **ui:** enhanced event tracking and version management ([5f1bb46](https://github.com/ton-connect/sdk/commit/5f1bb46dbc72aa09c5fdefa33fae93ee7281256e))
+
+
+
 ## [2.0.3-beta.2](https://github.com/ton-connect/sdk/compare/ui-2.0.3-beta.1...ui-2.0.3-beta.2) (2024-05-20)
 
 
