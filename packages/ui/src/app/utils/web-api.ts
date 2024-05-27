@@ -98,6 +98,16 @@ export async function createMacrotask(callback: () => void): Promise<void> {
 }
 
 /**
+ * Create a macrotask using `requestAnimationFrame()` to ensure that any pending microtasks,
+ * such as asynchronous operations from other developers and browser APIs, are executed before.
+ * @param callback
+ */
+export async function createMacrotaskAsync<T>(callback: () => Promise<T>): Promise<T> {
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    return callback();
+}
+
+/**
  * Preload images after page load to improve UX and Web Vitals metrics without affecting initial page load performance.
  */
 export function preloadImages(images: string[]): void {

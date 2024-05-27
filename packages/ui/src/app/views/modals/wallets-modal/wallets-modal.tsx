@@ -1,6 +1,7 @@
 import {
     ConnectAdditionalRequest,
     isWalletInfoCurrentlyInjected,
+    Wallet,
     WalletInfo,
     WalletInfoRemote
 } from '@tonconnect/sdk';
@@ -17,7 +18,7 @@ import {
     useContext
 } from 'solid-js';
 import { ConnectorContext } from 'src/app/state/connector.context';
-import { getWalletsModalIsOpened, setWalletsModalState } from 'src/app/state/modals-state';
+import { getWalletsModalIsOpened } from 'src/app/state/modals-state';
 import { H1Styled, LoaderContainerStyled, StyledModal } from './style';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { useI18n } from '@solid-primitives/i18n';
@@ -43,6 +44,9 @@ export const WalletsModal: Component = () => {
 
     createEffect(() => {
         if (getWalletsModalIsOpened()) {
+            setSelectedWalletInfo(null);
+            setSelectedTab('universal');
+            setInfoTab(false);
             updateIsMobile();
         }
     });
@@ -107,7 +111,7 @@ export const WalletsModal: Component = () => {
         tonConnectUI!.closeModal(closeReason);
     };
 
-    const unsubscribe = connector.onStatusChange(wallet => {
+    const unsubscribe = connector.onStatusChange((wallet: Wallet | null) => {
         if (wallet) {
             onClose('wallet-selected');
         }
