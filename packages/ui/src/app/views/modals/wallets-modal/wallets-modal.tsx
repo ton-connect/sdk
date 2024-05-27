@@ -44,10 +44,11 @@ export const WalletsModal: Component = () => {
 
     createEffect(() => {
         if (getWalletsModalIsOpened()) {
+            updateIsMobile();
+        } else {
             setSelectedWalletInfo(null);
             setSelectedTab('universal');
             setInfoTab(false);
-            updateIsMobile();
         }
     });
 
