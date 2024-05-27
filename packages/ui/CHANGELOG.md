@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui 
 
+## [2.0.3-beta.4](https://github.com/ton-connect/sdk/compare/ui-2.0.3-beta.3...ui-2.0.3-beta.4) (2024-05-27)
+
+
+### Bug Fixes
+
+* **ui:** prevent auto-opening of last selected wallet on connection started ([841393d](https://github.com/ton-connect/sdk/commit/841393d0fa9ee66f1d06058f56bf89517010e811))
+
+
+
 ## [2.0.3-beta.3](https://github.com/ton-connect/sdk/compare/ui-2.0.3-beta.2...ui-2.0.3-beta.3) (2024-05-27)
 
 
