@@ -41,9 +41,10 @@ import { WalletsListManager } from 'src/wallets-list-manager';
 import { WithoutIdDistributive } from 'src/utils/types';
 import { checkSendTransactionSupport } from 'src/utils/feature-support';
 import { callForSuccess } from 'src/utils/call-for-success';
-import { logError } from 'src/utils/log';
+import { logDebug, logError } from 'src/utils/log';
 import { createAbortController } from 'src/utils/create-abort-controller';
 import { TonConnectTracker } from 'src/tracker/ton-connect-tracker';
+import { tonConnectSdkVersion } from 'src/constants/version';
 
 export class TonConnect implements ITonConnect {
     private static readonly walletsList = new WalletsListManager();
@@ -128,7 +129,10 @@ export class TonConnect implements ITonConnect {
             cacheTTLMs: options?.walletsListCacheTTLMs
         });
 
-        this.tracker = new TonConnectTracker(options?.eventDispatcher);
+        this.tracker = new TonConnectTracker({
+            eventDispatcher: options?.eventDispatcher,
+            tonConnectSdkVersion: tonConnectSdkVersion
+        });
 
         if (!this.dappSettings.manifestUrl) {
             throw new DappMetadataError(
@@ -333,7 +337,7 @@ export class TonConnect implements ITonConnect {
         this.provider = provider;
         provider.listen(this.walletEventsListener.bind(this));
 
-        const onAbortRestore = () => {
+        const onAbortRestore = (): void => {
             this.tracker.trackConnectionRestoringError('Connection restoring was aborted');
             provider?.closeConnection();
             provider = null;
@@ -345,7 +349,7 @@ export class TonConnect implements ITonConnect {
                 await provider?.restoreConnection({
                     openingDeadlineMS: options?.openingDeadlineMS,
                     signal: _options.signal
-                })
+                });
 
                 abortController.signal.removeEventListener('abort', onAbortRestore);
                 if (this.connected) {
@@ -429,7 +433,12 @@ export class TonConnect implements ITonConnect {
         );
 
         if (sendTransactionParser.isError(response)) {
-            this.tracker.trackTransactionSigningFailed(this.wallet, transaction, response.error.message, response.error.code);
+            this.tracker.trackTransactionSigningFailed(
+                this.wallet,
+                transaction,
+                response.error.message,
+                response.error.code
+            );
             return sendTransactionParser.parseAndThrowError(response);
         }
 
@@ -496,7 +505,7 @@ export class TonConnect implements ITonConnect {
                 if (document.hidden) {
                     this.pauseConnection();
                 } else {
-                    this.unPauseConnection().catch(e => logError('Cannot unpause connection', e));
+                    this.unPauseConnection().catch();
                 }
             });
         } catch (e) {
@@ -571,11 +580,11 @@ export class TonConnect implements ITonConnect {
         const error = connectErrorsParser.parseError(connectEventError);
         this.statusChangeErrorSubscriptions.forEach(errorsHandler => errorsHandler(error));
 
-        console.debug(error);
-        this.tracker.trackConnectionError(connectEventError.message, connectEventError.code)
+        logDebug(error);
+        this.tracker.trackConnectionError(connectEventError.message, connectEventError.code);
 
         if (error instanceof ManifestNotFoundError || error instanceof ManifestContentErrorError) {
-            console.error(error);
+            logError(error);
             throw error;
         }
     }

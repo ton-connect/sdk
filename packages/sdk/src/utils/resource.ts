@@ -1,5 +1,4 @@
 import { TonConnectError } from 'src/errors';
-import { logError } from 'src/utils/log';
 import { delay } from 'src/utils/delay';
 import { createAbortController } from 'src/utils/create-abort-controller';
 
@@ -95,9 +94,7 @@ export function createResource<T extends EventSource, Args extends any[]>(
                 resource ? disposeFn(resource) : Promise.resolve(),
                 promise ? disposeFn(await promise) : Promise.resolve()
             ]);
-        } catch (e) {
-            logError('Failed to dispose the resource', e);
-        }
+        } catch (e) {}
     };
 
     // recreate the current resource

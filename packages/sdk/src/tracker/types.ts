@@ -2,6 +2,80 @@ import { CONNECT_EVENT_ERROR_CODES, ConnectItem, SEND_TRANSACTION_ERROR_CODES } 
 import { SendTransactionRequest, SendTransactionResponse, Wallet } from 'src/models';
 
 /**
+ * Request TON Connect UI version.
+ */
+export type RequestVersionEvent = {
+    /**
+     * Event type.
+     */
+    type: 'request-version';
+};
+
+/**
+ * Create a request version event.
+ */
+export function createRequestVersionEvent(): RequestVersionEvent {
+    return {
+        type: 'request-version'
+    };
+}
+
+/**
+ * Response TON Connect UI version.
+ */
+export type ResponseVersionEvent = {
+    /**
+     * Event type.
+     */
+    type: 'response-version';
+    /**
+     * TON Connect UI version.
+     */
+    version: string;
+};
+
+/**
+ * Create a response version event.
+ * @param version
+ */
+export function createResponseVersionEvent(version: string): ResponseVersionEvent {
+    return {
+        type: 'response-version',
+        version: version
+    };
+}
+
+/**
+ * Version events.
+ */
+export type VersionEvent = RequestVersionEvent | ResponseVersionEvent;
+
+/**
+ * Version of the TON Connect SDK and TON Connect UI.
+ */
+export type Version = {
+    /**
+     * TON Connect SDK version.
+     */
+    ton_connect_sdk_lib: string | null;
+    /**
+     * TON Connect UI version.
+     */
+    ton_connect_ui_lib: string | null;
+};
+
+/**
+ * Create a version info.
+ * @param version
+ */
+export function createVersionInfo(version: Version): Version {
+    return {
+        ton_connect_sdk_lib: version.ton_connect_sdk_lib,
+        ton_connect_ui_lib: version.ton_connect_ui_lib
+    };
+}
+
+/**
  * Requested authentication type: 'ton_addr' or 'ton_proof'.
  */
 export type AuthType = ConnectItem['name'];
@@ -38,10 +112,10 @@ export type ConnectionInfo = {
          * Wallet provider.
          */
         provider: 'http' | 'injected' | null;
-    };
+    } & Version;
 };
 
-function createConnectionInfo(wallet: Wallet | null): ConnectionInfo {
+function createConnectionInfo(version: Version, wallet: Wallet | null): ConnectionInfo {
     const isTonProof = wallet?.connectItems?.tonProof && 'proof' in wallet.connectItems.tonProof;
     const authType: AuthType = isTonProof ? 'ton_proof' : 'ton_addr';
 
@@ -52,7 +126,8 @@ function createConnectionInfo(wallet: Wallet | null): ConnectionInfo {
         auth_type: authType,
         custom_data: {
             chain_id: wallet?.account?.chain ?? null,
-            provider: wallet?.provider ?? null
+            provider: wallet?.provider ?? null,
+            ...createVersionInfo(version)
         }
     };
 }
@@ -65,14 +140,19 @@ export type ConnectionStartedEvent = {
      * Event type.
      */
     type: 'connection-started';
+    /**
+     * Custom data for the connection.
+     */
+    custom_data: Version;
 };
 
 /**
  * Create a connection init event.
  */
-export function createConnectionStartedEvent(): ConnectionStartedEvent {
+export function createConnectionStartedEvent(version: Version): ConnectionStartedEvent {
     return {
-        type: 'connection-started'
+        type: 'connection-started',
+        custom_data: createVersionInfo(version)
     };
 }
 
@@ -84,16 +164,25 @@ export type ConnectionCompletedEvent = {
      * Event type.
      */
     type: 'connection-completed';
+    /**
+     * Connection success flag.
+     */
+    is_success: true;
 } & ConnectionInfo;
 
 /**
  * Create a connection completed event.
+ * @param version
  * @param wallet
  */
-export function createConnectionCompletedEvent(wallet: Wallet | null): ConnectionCompletedEvent {
+export function createConnectionCompletedEvent(
+    version: Version,
+    wallet: Wallet | null
+): ConnectionCompletedEvent {
     return {
         type: 'connection-completed',
-        ...createConnectionInfo(wallet)
+        is_success: true,
+        ...createConnectionInfo(version, wallet)
     };
 }
 
@@ -106,6 +195,10 @@ export type ConnectionErrorEvent = {
      */
     type: 'connection-error';
     /**
+     * Connection success flag.
+     */
+    is_success: false;
+    /**
      * Reason for the error.
      */
     error_message: string;
@@ -113,21 +206,29 @@ export type ConnectionErrorEvent = {
      * Error code.
      */
     error_code: CONNECT_EVENT_ERROR_CODES | null;
+    /**
+     * Custom data for the connection.
+     */
+    custom_data: Version;
 };
 
 /**
  * Create a connection error event.
+ * @param version
  * @param error_message
  * @param errorCode
  */
 export function createConnectionErrorEvent(
+    version: Version,
     error_message: string,
     errorCode: CONNECT_EVENT_ERROR_CODES | void
 ): ConnectionErrorEvent {
     return {
         type: 'connection-error',
+        is_success: false,
         error_message: error_message,
-        error_code: errorCode ?? null
+        error_code: errorCode ?? null,
+        custom_data: createVersionInfo(version)
     };
 }
 
@@ -147,14 +248,21 @@ export type ConnectionRestoringStartedEvent = {
      * Event type.
      */
     type: 'connection-restoring-started';
+    /**
+     * Custom data for the connection.
+     */
+    custom_data: Version;
 };
 
 /**
  * Create a connection restoring started event.
  */
-export function createConnectionRestoringStartedEvent(): ConnectionRestoringStartedEvent {
+export function createConnectionRestoringStartedEvent(
+    version: Version
+): ConnectionRestoringStartedEvent {
     return {
-        type: 'connection-restoring-started'
+        type: 'connection-restoring-started',
+        custom_data: createVersionInfo(version)
     };
 }
 
@@ -166,18 +274,25 @@ export type ConnectionRestoringCompletedEvent = {
      * Event type.
      */
     type: 'connection-restoring-completed';
+    /**
+     * Connection success flag.
+     */
+    is_success: true;
 } & ConnectionInfo;
 
 /**
  * Create a connection restoring completed event.
+ * @param version
  * @param wallet
  */
 export function createConnectionRestoringCompletedEvent(
+    version: Version,
     wallet: Wallet | null
 ): ConnectionRestoringCompletedEvent {
     return {
         type: 'connection-restoring-completed',
-        ...createConnectionInfo(wallet)
+        is_success: true,
+        ...createConnectionInfo(version, wallet)
     };
 }
 
@@ -190,21 +305,33 @@ export type ConnectionRestoringErrorEvent = {
      */
     type: 'connection-restoring-error';
     /**
+     * Connection success flag.
+     */
+    is_success: false;
+    /**
      * Reason for the error.
      */
     error_message: string;
+    /**
+     * Custom data for the connection.
+     */
+    custom_data: Version;
 };
 
 /**
  * Create a connection restoring error event.
+ * @param version
  * @param errorMessage
  */
 export function createConnectionRestoringErrorEvent(
+    version: Version,
     errorMessage: string
 ): ConnectionRestoringErrorEvent {
     return {
         type: 'connection-restoring-error',
-        error_message: errorMessage
+        is_success: false,
+        error_message: errorMessage,
+        custom_data: createVersionInfo(version)
     };
 }
 
@@ -275,16 +402,18 @@ export type TransactionSentForSignatureEvent = {
 
 /**
  * Create a transaction init event.
+ * @param version
  * @param wallet
  * @param transaction
  */
 export function createTransactionSentForSignatureEvent(
+    version: Version,
     wallet: Wallet | null,
     transaction: SendTransactionRequest
 ): TransactionSentForSignatureEvent {
     return {
         type: 'transaction-sent-for-signature',
-        ...createConnectionInfo(wallet),
+        ...createConnectionInfo(version, wallet),
         ...createTransactionInfo(wallet, transaction)
     };
 }
@@ -298,6 +427,10 @@ export type TransactionSignedEvent = {
      */
     type: 'transaction-signed';
     /**
+     * Connection success flag.
+     */
+    is_success: true;
+    /**
      * Signed transaction.
      */
     signed_transaction: string;
@@ -306,19 +439,22 @@ export type TransactionSignedEvent = {
 
 /**
  * Create a transaction signed event.
+ * @param version
  * @param wallet
  * @param transaction
  * @param signedTransaction
  */
 export function createTransactionSignedEvent(
+    version: Version,
     wallet: Wallet | null,
     transaction: SendTransactionRequest,
     signedTransaction: SendTransactionResponse
 ): TransactionSignedEvent {
     return {
         type: 'transaction-signed',
+        is_success: true,
         signed_transaction: signedTransaction.boc,
-        ...createConnectionInfo(wallet),
+        ...createConnectionInfo(version, wallet),
         ...createTransactionInfo(wallet, transaction)
     };
 }
@@ -332,6 +468,10 @@ export type TransactionSigningFailedEvent = {
      */
     type: 'transaction-signing-failed';
     /**
+     * Connection success flag.
+     */
+    is_success: false;
+    /**
      * Reason for the error.
      */
     error_message: string;
@@ -344,12 +484,14 @@ export type TransactionSigningFailedEvent = {
 
 /**
  * Create a transaction error event.
+ * @param version
  * @param wallet
  * @param transaction
  * @param errorMessage
  * @param errorCode
  */
 export function createTransactionSigningFailedEvent(
+    version: Version,
     wallet: Wallet | null,
     transaction: SendTransactionRequest,
     errorMessage: string,
@@ -357,9 +499,10 @@ export function createTransactionSigningFailedEvent(
 ): TransactionSigningFailedEvent {
     return {
         type: 'transaction-signing-failed',
+        is_success: false,
         error_message: errorMessage,
         error_code: errorCode ?? null,
-        ...createConnectionInfo(wallet),
+        ...createConnectionInfo(version, wallet),
         ...createTransactionInfo(wallet, transaction)
     };
 }
@@ -388,18 +531,20 @@ export type DisconnectionEvent = {
 
 /**
  * Create a disconnect event.
+ * @param version
  * @param wallet
  * @param scope
  * @returns
  */
 export function createDisconnectionEvent(
+    version: Version,
     wallet: Wallet | null,
     scope: 'dapp' | 'wallet'
 ): DisconnectionEvent {
     return {
         type: 'disconnection',
         scope: scope,
-        ...createConnectionInfo(wallet)
+        ...createConnectionInfo(version, wallet)
     };
 }
 
@@ -407,7 +552,13 @@ export function createDisconnectionEvent(
  * User action events.
  */
 export type SdkActionEvent =
+    | VersionEvent
     | ConnectionEvent
     | ConnectionRestoringEvent
     | DisconnectionEvent
     | TransactionSigningEvent;
+
+/**
+ * Parameters without version field.
+ */
+export type WithoutVersion<T> = T extends [Version, ...infer Rest] ? [...Rest] : never;

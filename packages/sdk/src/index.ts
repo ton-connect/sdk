@@ -5,7 +5,11 @@ export { IStorage } from './storage/models/storage.interface';
 export { TonConnect as default } from './ton-connect';
 export { WalletsListManager } from './wallets-list-manager';
 export { ITonConnect } from './ton-connect.interface';
-export type { EventDispatcher } from './tracker/event-dispatcher';
+export type {
+    EventDispatcher,
+    RemoveTonConnectPrefix,
+    AddTonConnectPrefix
+} from './tracker/event-dispatcher';
 export {
     createConnectionStartedEvent,
     createConnectionErrorEvent,
@@ -16,7 +20,10 @@ export {
     createDisconnectionEvent,
     createTransactionSentForSignatureEvent,
     createTransactionSigningFailedEvent,
-    createTransactionSignedEvent
+    createTransactionSignedEvent,
+    createRequestVersionEvent,
+    createResponseVersionEvent,
+    createVersionInfo
 } from './tracker/types';
 export type {
     AuthType,
@@ -36,7 +43,12 @@ export type {
     TransactionSignedEvent,
     TransactionSentForSignatureEvent,
     TransactionSigningFailedEvent,
-    SdkActionEvent
+    SdkActionEvent,
+    RequestVersionEvent,
+    ResponseVersionEvent,
+    VersionEvent,
+    Version,
+    WithoutVersion
 } from './tracker/types';
 export { BrowserEventDispatcher } from './tracker/browser-event-dispatcher';
 export type { TonAddressItem, TonProofItem, ConnectItem } from '@tonconnect/protocol';
