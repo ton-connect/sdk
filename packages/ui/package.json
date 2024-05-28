@@ -47,7 +47,7 @@
     }
   },
   "dependencies": {
-    "@tonconnect/sdk": "3.0.3-beta.1",
+    "@tonconnect/sdk": "3.0.3",
     "classnames": "^2.3.2",
     "deepmerge": "^4.2.2",
     "ua-parser-js": "^1.0.35"
