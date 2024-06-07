@@ -65,7 +65,7 @@ export function redirectToTelegram(
     }
 
     if (isInTMA()) {
-        if (isTmaPlatform('ios', 'android')) {
+        if (isTmaPlatform('ios', 'android', 'macos')) {
             // Use the `back` strategy, the current TMA instance will keep open.
             // TON Space should automatically open in stack and should close
             // itself after the user action.
@@ -74,7 +74,7 @@ export function redirectToTelegram(
             options.twaReturnUrl = undefined;
 
             sendOpenTelegramLink(addReturnStrategy(directLinkUrl.toString(), options));
-        } else if (isTmaPlatform('macos', 'tdesktop')) {
+        } else if (isTmaPlatform('tdesktop')) {
             // Use a strategy involving a direct link to return to the app.
             // The current TMA instance will close, and TON Space should
             // automatically open, and reopen the application once the user
@@ -82,7 +82,7 @@ export function redirectToTelegram(
 
             sendOpenTelegramLink(addReturnStrategy(directLinkUrl.toString(), options));
         } else if (isTmaPlatform('weba')) {
-            // Similar to macos/tdesktop strategy, but opening another TMA occurs
+            // Similar to tdesktop strategy, but opening another TMA occurs
             // through sending `web_app_open_tg_link` event to `parent`.
 
             sendOpenTelegramLink(addReturnStrategy(directLinkUrl.toString(), options));
