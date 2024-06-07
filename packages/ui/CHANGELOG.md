@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui 
 
+## [2.0.4](https://github.com/ton-connect/sdk/compare/ui-2.0.3...ui-2.0.4) (2024-06-07)
+
+
+### Features
+
+* **ui:** tma on macos remains open during transitions to other tma ([c9dd6d6](https://github.com/ton-connect/sdk/commit/c9dd6d6bb9910062840f21c87171bee92a8739fe))
+
+
+
 ## [2.0.3](https://github.com/ton-connect/sdk/compare/ui-2.0.3-beta.4...ui-2.0.3) (2024-05-28)
 
 
