@@ -47,6 +47,7 @@ interface MobileUniversalModalProps {
 export const MobileUniversalModal: Component<MobileUniversalModalProps> = props => {
     const [showQR, setShowQR] = createSignal(false);
     const [firstClick, setFirstClick] = createSignal(true);
+    const [universalLink, setUniversalLink] = createSignal<string | null>(null);
     const connector = appState.connector;
     const walletsList = (): WalletInfo[] =>
         props.walletsList.filter(w => supportsMobile(w) && w.appName !== AT_WALLET_APP_NAME);
@@ -56,9 +57,12 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
         equals: bridgesIsEqual
     });
 
-    const getUniversalLink = createMemo((): string =>
-        connector.connect(walletsBridges(), props.additionalRequest)
-    );
+    const getUniversalLink = (): string => {
+        if (!universalLink()) {
+            setUniversalLink(connector.connect(walletsBridges(), props.additionalRequest));
+        }
+        return universalLink()!;
+    };
 
     setLastSelectedWalletInfo({ openMethod: 'universal-link' });
 
@@ -96,6 +100,8 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
     };
 
     const onSelectTelegram = (): void => {
+        setUniversalLink(null);
+
         const atWallet = props.walletsList.find(wallet => wallet.appName === AT_WALLET_APP_NAME);
         if (!atWallet || !isWalletInfoRemote(atWallet)) {
             throw new TonConnectUIError('@wallet bot not found in the wallets list');
