@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui 
 
+## [2.0.5](https://github.com/ton-connect/sdk/compare/ui-2.0.4...ui-2.0.5) (2024-06-08)
+
+
+### Bug Fixes
+
+* **ui:** prevent fetching universal link on mount for mobile connection ([b360857](https://github.com/ton-connect/sdk/commit/b3608570b6212e95a87de7d5a827c46f632e6774))
+
+
+
 ## [2.0.4](https://github.com/ton-connect/sdk/compare/ui-2.0.3...ui-2.0.4) (2024-06-07)
 
 
