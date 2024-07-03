@@ -1,1 +1,1 @@
-export type Locales = 'en' | 'ru';
+export type Locales = 'en' | 'ru' | 'zh';

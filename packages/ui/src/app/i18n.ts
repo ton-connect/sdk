@@ -1,10 +1,12 @@
 import en from 'src/app/assets/i18n/en.json';
 import ru from 'src/app/assets/i18n/ru.json';
+import zh from 'src/app/assets/i18n/zh.json';
 import { Locales } from 'src/models/locales';
 
 export const i18nDictionary: Record<Locales, object> = {
     en: parseDictionary(en),
-    ru: parseDictionary(ru)
+    ru: parseDictionary(ru),
+    zh: parseDictionary(zh),
 };
 
 // replace '$key1.key2.key3' with it's value
