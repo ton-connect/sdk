@@ -8,6 +8,8 @@ import {
     DisconnectRpcResponseError,
     DisconnectRpcResponseSuccess
 } from './disconnect-rpc-response';
+import { DecryptDataRpcResponseError, DecryptDataRpcResponseSuccess } from './decrypt-rpc-response';
+import { EncryptDataRpcResponseError, EncryptDataRpcResponseSuccess } from './encrypt-rpc-response';
 
 export type RpcResponses = {
     sendTransaction: {
@@ -23,6 +25,14 @@ export type RpcResponses = {
     disconnect: {
         error: DisconnectRpcResponseError;
         success: DisconnectRpcResponseSuccess;
+    };
+    decryptData: {
+        error: DecryptDataRpcResponseError;
+        success: DecryptDataRpcResponseSuccess;
+    };
+    encryptData: {
+        error: EncryptDataRpcResponseError;
+        success: EncryptDataRpcResponseSuccess;
     };
 };
 

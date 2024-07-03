@@ -1,5 +1,9 @@
 import {
     CONNECT_EVENT_ERROR_CODES,
+    DecryptDataRpcRequest,
+    DecryptDataRpcResponseSuccess,
+    EncryptDataRpcRequest,
+    EncryptDataRpcResponseSuccess,
     SEND_TRANSACTION_ERROR_CODES,
     SendTransactionRpcRequest,
     SendTransactionRpcResponseError,
@@ -7,7 +11,7 @@ import {
 } from '@tonconnect/protocol';
 import { BadRequestError, TonConnectError, UnknownAppError, UserRejectsError } from 'src/errors';
 import { UnknownError } from 'src/errors/unknown.error';
-import { SendTransactionRequest, SendTransactionResponse } from 'src/models/methods';
+import { DecryptDataRequest, DecryptDataResponse, EncryptDataRequest, EncryptDataResponse, SendTransactionRequest, SendTransactionResponse } from 'src/models/methods';
 import { RpcParser } from 'src/parsers/rpc-parser';
 import { WithoutId } from 'src/utils/types';
 
@@ -28,6 +32,24 @@ class SendTransactionParser extends RpcParser<'sendTransaction'> {
         };
     }
 
+    convertToRpcRequestEncrypt(
+        request: Omit<EncryptDataRequest, 'id'>
+    ): WithoutId<EncryptDataRpcRequest> {
+        return {
+            method: 'encryptData',
+            params: [JSON.stringify(request)]
+        };
+    }
+
+    convertToRpcRequestDecrypt(
+        request: Omit<DecryptDataRequest, 'id'>
+    ): WithoutId<DecryptDataRpcRequest> {
+        return {
+            method: 'decryptData',
+            params: [JSON.stringify(request)]
+        };
+    }
+
     parseAndThrowError(response: WithoutId<SendTransactionRpcResponseError>): never {
         let ErrorConstructor: typeof TonConnectError = UnknownError;
 
@@ -43,6 +65,23 @@ class SendTransactionParser extends RpcParser<'sendTransaction'> {
     ): SendTransactionResponse {
         return {
             boc: rpcResponse.result
+        };
+    }
+
+    convertFromRpcResponseEncrypt(
+        rpcResponse: WithoutId<EncryptDataRpcResponseSuccess>
+    ): EncryptDataResponse {
+        return {
+            // rpcResponse.result
+            boc: rpcResponse.result
+        };
+    }
+
+    convertFromRpcResponseDecrypt(
+        rpcResponse: WithoutId<DecryptDataRpcResponseSuccess>
+    ): DecryptDataResponse {
+        return {
+            result: rpcResponse.result
         };
     }
 }

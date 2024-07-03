@@ -11,10 +11,17 @@ import {
     createTransactionSentForSignatureEvent,
     createTransactionSignedEvent,
     createTransactionSigningFailedEvent,
+    createEncryptDataFailedEvent,
+    createEncryptDataSentEvent,
+    
     UserActionEvent
 } from './types';
 import {
     BrowserEventDispatcher,
+    createDecryptDataEvent,
+    createDecryptDataFailedEvent,
+    createDecryptDataSentEvent,
+    createEncryptDataEvent,
     createVersionInfo,
     EventDispatcher,
     ResponseVersionEvent,
@@ -262,6 +269,49 @@ export class TonConnectUITracker {
         } catch (e) {}
     }
 
+    public trackEncryptDataInit(
+        ...args: WithoutVersion<Parameters<typeof createEncryptDataSentEvent>>
+    ): void {
+        try {
+            const event = createEncryptDataSentEvent(this.version, ...args);
+            this.dispatchUserActionEvent(event);
+        } catch (e) {}
+    }
+
+    public trackDecryptDataInit(
+        ...args: WithoutVersion<Parameters<typeof createEncryptDataSentEvent>>
+    ): void {
+        try {
+            const event = createDecryptDataSentEvent(this.version, ...args);
+            this.dispatchUserActionEvent(event);
+        } catch (e) {}
+    }
+    /**
+     * Track encrypt message event.
+     * @param args
+     */
+    public trackEncryptData(
+        ...args: WithoutVersion<Parameters<typeof createEncryptDataEvent>>
+    ): void {
+        try {
+            const event = createEncryptDataEvent(this.version, ...args);
+            this.dispatchUserActionEvent(event);
+        } catch (e) {}
+    }
+
+        /**
+     * Track encrypt message event.
+     * @param args
+     */
+        public trackDecryptData(
+            ...args: WithoutVersion<Parameters<typeof createDecryptDataEvent>>
+        ): void {
+            try {
+                const event = createDecryptDataEvent(this.version, ...args);
+                this.dispatchUserActionEvent(event);
+            } catch (e) {}
+        }
+
     /**
      * Track transaction signed event.
      * @param args
@@ -275,6 +325,23 @@ export class TonConnectUITracker {
         } catch (e) {}
     }
 
+    public trackDataEncrypted(
+        ...args: WithoutVersion<Parameters<typeof createEncryptDataEvent>>
+    ): void {
+        try {
+            const event = createEncryptDataEvent(this.version, ...args);
+            this.dispatchUserActionEvent(event);
+        } catch (e) {}
+    }
+
+    public trackDataDecrypted(
+        ...args: WithoutVersion<Parameters<typeof createDecryptDataEvent>>
+    ): void {
+        try {
+            const event = createDecryptDataEvent(this.version, ...args);
+            this.dispatchUserActionEvent(event);
+        } catch (e) {}
+    }
     /**
      * Track transaction error event.
      * @param args
@@ -284,6 +351,24 @@ export class TonConnectUITracker {
     ): void {
         try {
             const event = createTransactionSigningFailedEvent(this.version, ...args);
+            this.dispatchUserActionEvent(event);
+        } catch (e) {}
+    }
+
+    public trackEncryptDataFailed(
+        ...args: WithoutVersion<Parameters<typeof createEncryptDataFailedEvent>>
+    ): void {
+        try {
+            const event = createEncryptDataFailedEvent(this.version, ...args);
+            this.dispatchUserActionEvent(event);
+        } catch (e) {}
+    }
+
+    public trackDecryptDataFailed(
+        ...args: WithoutVersion<Parameters<typeof createDecryptDataFailedEvent>>
+    ): void {
+        try {
+            const event = createDecryptDataFailedEvent(this.version, ...args);
             this.dispatchUserActionEvent(event);
         } catch (e) {}
     }

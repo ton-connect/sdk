@@ -5,7 +5,13 @@ import {
     createConnectionRestoringErrorEvent,
     createConnectionRestoringStartedEvent,
     createConnectionStartedEvent,
+    createDecryptDataSentEvent,
+    createDecryptDataEvent,
+    createDecryptDataFailedEvent,
     createDisconnectionEvent,
+    createEncryptDataEvent,
+    createEncryptDataFailedEvent,
+    createEncryptDataSentEvent,
     createRequestVersionEvent,
     createResponseVersionEvent,
     createTransactionSentForSignatureEvent,
@@ -264,6 +270,24 @@ export class TonConnectTracker {
         } catch (e) {}
     }
 
+    public trackEncryptDataSent(
+        ...args: WithoutVersion<Parameters<typeof createEncryptDataSentEvent>>
+    ): void {
+        try {
+            const event = createEncryptDataSentEvent(this.version, ...args);
+            this.dispatchUserActionEvent(event);
+        } catch (e) {}
+    }
+
+    public trackDecryptDataSent(
+        ...args: WithoutVersion<Parameters<typeof createDecryptDataSentEvent>>
+    ): void {
+        try {
+            const event = createDecryptDataSentEvent(this.version, ...args);
+            this.dispatchUserActionEvent(event);
+        } catch (e) {}
+    }
+
     /**
      * Track transaction signed event.
      * @param args
@@ -277,6 +301,24 @@ export class TonConnectTracker {
         } catch (e) {}
     }
 
+    public trackEncryptData(
+        ...args: WithoutVersion<Parameters<typeof createEncryptDataEvent>>
+    ): void {
+        try {
+            const event = createEncryptDataEvent(this.version, ...args);
+            this.dispatchUserActionEvent(event);
+        } catch (e) {}
+    }
+
+    public trackDecryptData(
+        ...args: WithoutVersion<Parameters<typeof createDecryptDataEvent>>
+    ): void {
+        try {
+            const event = createDecryptDataEvent(this.version, ...args);
+            this.dispatchUserActionEvent(event);
+        } catch (e) {}
+    }
+
     /**
      * Track transaction error event.
      * @param args
@@ -286,6 +328,24 @@ export class TonConnectTracker {
     ): void {
         try {
             const event = createTransactionSigningFailedEvent(this.version, ...args);
+            this.dispatchUserActionEvent(event);
+        } catch (e) {}
+    }
+
+    public trackEncryptDataFailed(
+        ...args: WithoutVersion<Parameters<typeof createEncryptDataFailedEvent>>
+    ): void {
+        try {
+            const event = createEncryptDataFailedEvent(this.version, ...args);
+            this.dispatchUserActionEvent(event);
+        } catch (e) {}
+    }
+
+    public trackDecryptDataFailed(
+        ...args: WithoutVersion<Parameters<typeof createDecryptDataFailedEvent>>
+    ): void {
+        try {
+            const event = createDecryptDataFailedEvent(this.version, ...args);
             this.dispatchUserActionEvent(event);
         } catch (e) {}
     }

@@ -26,3 +26,15 @@ export {
     WalletResponseTemplateError,
     WalletResponseTemplateSuccess
 } from './wallet-response-template';
+export {
+    EncryptDataRpcResponse,
+    EncryptDataRpcResponseSuccess,
+    EncryptDataRpcResponseError,
+    ENCRYPT_DATA_ERROR_CODES
+} from './encrypt-rpc-response';
+export {
+    DecryptDataRpcResponse,
+    DecryptDataRpcResponseSuccess,
+    DecryptDataRpcResponseError,
+    DECRYPT_DATA_ERROR_CODES
+} from './decrypt-rpc-response';

@@ -130,6 +130,25 @@ export class BridgeProvider implements HTTPProvider {
         return this.generateUniversalLink(universalLink, message);
     }
 
+    public decrypt(
+        message: Uint8Array, 
+        senderPublicKey: Uint8Array
+    ) {
+        this.session!.sessionCrypto.decrypt(
+            message, senderPublicKey,
+        );
+    }
+
+    public encrypt(
+        message: string, 
+        receiverPublicKey: Uint8Array
+
+    ) {
+        this.session!.sessionCrypto.encrypt(
+            message, receiverPublicKey
+        );
+    }
+
     public async restoreConnection(options?: {
         openingDeadlineMS?: number;
         signal?: AbortSignal;

@@ -1,0 +1,10 @@
+diff a/packages/ui-react/package.json b/packages/ui-react/package.json	(rejected hunks)
+@@ -52,7 +52,7 @@
+     "vite-plugin-dts": "^1.7.1"
+   },
+   "dependencies": {
+-    "@tonconnect/ui": "2.0.3"
++    "@tonconnect/ui": "file:../ui"
+   },
+   "peerDependencies": {
+     "react": ">=17.0.0",

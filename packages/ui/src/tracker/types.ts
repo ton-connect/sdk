@@ -3,7 +3,9 @@ import {
     ConnectionRestoringEvent,
     DisconnectionEvent,
     TransactionSigningEvent,
-    VersionEvent
+    VersionEvent,
+    EncryptDataEvent,
+    DecryptDataEvent,
 } from '@tonconnect/sdk';
 
 /**
@@ -14,7 +16,9 @@ export type UserActionEvent =
     | ConnectionEvent
     | ConnectionRestoringEvent
     | DisconnectionEvent
-    | TransactionSigningEvent;
+    | TransactionSigningEvent
+    | EncryptDataEvent
+    | DecryptDataEvent;
 
 export {
     createRequestVersionEvent,
@@ -28,5 +32,16 @@ export {
     createDisconnectionEvent,
     createTransactionSentForSignatureEvent,
     createTransactionSigningFailedEvent,
-    createTransactionSignedEvent
+    createTransactionSignedEvent,
+    createDecryptDataEvent,
+    createEncryptDataEvent,
+    createEncryptDataFailedEvent,
+    createEncryptDataSentEvent,
+    createDecryptDataSentEvent,
+    createDecryptDataFailedEvent,
 } from '@tonconnect/sdk';
+
+export interface DecryptData {
+    senderAddress: string;
+    data: string;
+    };
