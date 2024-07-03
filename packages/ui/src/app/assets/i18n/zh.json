@@ -1,0 +1,91 @@
+{
+  "common": {
+    "close": "关闭",
+    "openWallet": "打开钱包",
+    "copyLink": "复制链接",
+    "linkCopied": "链接已复制",
+    "copied": "已复制",
+    "yourWallet": "你的钱包",
+    "retry": "重试",
+    "get": "GET",
+    "mobile": "移动端",
+    "browserExtension": "浏览器插件",
+    "desktop": "桌面"
+  },
+  "button": {
+    "connectWallet": "连接钱包",
+    "dropdown": {
+      "copy": "复制地址",
+      "copied": "地址已复制!",
+      "disconnect": "断开连接"
+    }
+  },
+  "notifications": {
+    "confirm": {
+      "header": "打开 {{ name }} 以确认交易。"
+    },
+    "transactionSent": {
+      "header": "交易已发送",
+      "text": "你的交易将会在几秒内被处理。"
+    },
+    "transactionCanceled": {
+      "header": "交易已取消",
+      "text": "你的账号不会有任何变化。"
+    }
+  },
+  "walletItem": {
+    "walletOn": "钱包 在",
+    "recent": "最近",
+    "installed": "已安装",
+    "popular": "流行"
+  },
+  "walletModal": {
+    "loading": "加载钱包",
+    "wallets": "钱包",
+    "mobileUniversalModal": {
+      "connectYourWallet": "连接你的钱包",
+      "openWalletOnTelegramOrSelect": "在Telegram中打开钱包或选择你想要连接的钱包",
+      "openWalletOnTelegram": "在Telegram中打开钱包",
+      "openLink": "打开链接",
+      "scan": "用你的移动端钱包扫码"
+    },
+    "desktopUniversalModal": {
+      "connectYourWallet": "连接你的钱包",
+      "scan": "用你的移动端钱包扫码",
+      "availableWallets": "可用的钱包"
+    },
+    "mobileConnectionModal": {
+      "showQR": "显示二维码",
+      "scanQR": "用你手机或{{ name }}的相机扫描下面的二维码",
+      "continueIn": "在{{ name }}中继续…",
+      "connectionDeclined": "连接已拒绝"
+    },
+    "desktopConnectionModal": {
+      "scanQR": "用你手机或{{ name }}的相机扫描下面的二维码",
+      "continueInExtension": "在浏览器插件 {{ name }} 中继续…",
+      "dontHaveExtension": "你好像并没有安装 {{ name }} 浏览器插件",
+      "getWallet": "获取 {{ name }}",
+      "continueOnDesktop": "在桌面 {{ name }} 中继续…",
+      "openWalletOnTelegram": "在桌面Telegram中打开钱包",
+      "connectionDeclined": "连接已拒绝"
+    },
+    "infoModal": {
+      "whatIsAWallet": "什么是钱包",
+      "secureDigitalAssets": "安全的数字资产存储",
+      "walletProtects": "钱包保护和管理您的数字资产，包括TON、代币和收藏品。",
+      "controlIdentity": "控制您的Web3身份",
+      "manageIdentity": "轻松管理您的数字身份并访问去中心化应用程序。保持对数据的控制，并安全地参与区块链生态系统。",
+      "effortlessCryptoTransactions": "轻松的加密交易",
+      "easilySend": "轻松发送、接收和监控您的加密货币。简单的使用去中心化的应用程序。",
+      "getAWallet": "获取一个钱包"
+    }
+  },
+  "actionModal": {
+    "confirmTransaction": {
+      "header": "在 {{ name }} 中确认交易",
+      "text": "这只需要一点时间。"
+    },
+    "transactionSent": "$notifications.transactionSent",
+    "transactionCanceled": "$notifications.transactionCanceled"
+  }
+}
