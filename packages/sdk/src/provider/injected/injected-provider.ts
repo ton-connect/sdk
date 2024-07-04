@@ -53,8 +53,8 @@ export class InjectedProvider<T extends string = string> implements InternalProv
         }
 
         const windowKeys = tryGetWindowKeys();
-        const wallets = windowKeys.filter(([_, value]) =>
-            isJSBridgeWithMetadata(value)
+        const wallets = windowKeys.filter((key) =>
+            isJSBridgeWithMetadata(this.window[key])
         ) as unknown as [string, { tonconnect: InjectedWalletApi }][];
 
         return wallets.map(([jsBridgeKey, wallet]) => ({
