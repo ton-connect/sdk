@@ -26,6 +26,7 @@ export default defineConfig({
         exclude: ['csstype']
     },
     define: {
+        'process.env': {},
         TON_CONNECT_UI_VERSION: JSON.stringify(version)
     },
     build: {
