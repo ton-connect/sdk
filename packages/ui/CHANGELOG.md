@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui 
 
+## [2.0.6](https://github.com/ton-connect/sdk/compare/ui-2.0.5...ui-2.0.6) (2024-07-08)
+
+
+### Bug Fixes
+
+* **ui:** resolve environment issue in vite configs for solid-floating-ui ([7c6cefd](https://github.com/ton-connect/sdk/commit/7c6cefdbf414216fa4040b11e5ec2797caffbba3))
+
+
+
 ## [2.0.5](https://github.com/ton-connect/sdk/compare/ui-2.0.4...ui-2.0.5) (2024-06-08)
 
 
