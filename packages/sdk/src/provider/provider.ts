@@ -57,4 +57,7 @@ interface BaseProvider {
     ): Promise<WithoutId<WalletResponse<T>>>;
 
     listen(eventsCallback: (e: WithoutIdDistributive<WalletEvent>) => void): void;
+
+    // encrypt(): Promise<String>
+    // decrypt(): Promise<String>
 }

@@ -1,5 +1,5 @@
-import { CONNECT_EVENT_ERROR_CODES, ConnectItem, SEND_TRANSACTION_ERROR_CODES } from '@tonconnect/protocol';
-import { SendTransactionRequest, SendTransactionResponse, Wallet } from 'src/models';
+import { CONNECT_EVENT_ERROR_CODES, ConnectItem, DECRYPT_DATA_ERROR_CODES, ENCRYPT_DATA_ERROR_CODES, SEND_TRANSACTION_ERROR_CODES } from '@tonconnect/protocol';
+import { DecryptDataRequest, DecryptDataResponse, EncryptDataRequest, EncryptDataResponse, SendTransactionRequest, SendTransactionResponse, Wallet } from 'src/models';
 
 /**
  * Request TON Connect UI version.
@@ -375,6 +375,31 @@ export type TransactionInfo = {
     messages: TransactionMessage[];
 };
 
+export type EncryptDataInfo = {
+    receiverPublicKey: string,
+    data: string,
+}
+
+export type DecryptDataInfo = {
+    decryptData: string[],
+}
+
+export type EncryptDataSentEvent = {
+    /**
+     * Event type.
+     */
+    type: 'encrypt-data-sent';
+} & ConnectionInfo &
+    EncryptDataInfo;
+
+export type DecryptDataSentEvent = {
+    /**
+     * Event type.
+     */
+    type: 'decrypt-data-sent';
+} & ConnectionInfo &
+    DecryptDataInfo;
+
 function createTransactionInfo(
     wallet: Wallet | null,
     transaction: SendTransactionRequest
@@ -386,6 +411,25 @@ function createTransactionInfo(
             address: message.address ?? null,
             amount: message.amount ?? null
         }))
+    };
+}
+
+function createEncryptDataInfo(
+    // wallet: Wallet | null,
+    message: EncryptDataRequest
+): EncryptDataInfo {
+    return {
+        receiverPublicKey: message.data[0]!,
+        data: message.data[1]!
+    };
+}
+
+function createDecryptDataInfo(
+    // wallet: Wallet | null,
+    message: DecryptDataRequest
+): DecryptDataInfo {
+    return {
+        decryptData: message.data
     };
 }
 
@@ -418,6 +462,136 @@ export function createTransactionSentForSignatureEvent(
     };
 }
 
+export function createEncryptDataSentEvent(
+    version: Version,
+    wallet: Wallet | null,
+    message: EncryptDataRequest
+): EncryptDataSentEvent {
+    return {
+        type: 'encrypt-data-sent',
+        ...createConnectionInfo(version, wallet),
+        ...createEncryptDataInfo(message)//todo: add wallet with address of self
+    };
+}
+
+
+export function createDecryptDataSentEvent(
+    version: Version,
+    wallet: Wallet | null,
+    message: DecryptDataRequest
+): DecryptDataSentEvent {
+    return {
+        type: 'decrypt-data-sent',
+        ...createConnectionInfo(version, wallet),
+        ...createDecryptDataInfo(message)
+    };
+}
+
+export function createEncryptDataEvent(
+    version: Version,
+    wallet: Wallet | null,
+    data: EncryptDataRequest,
+    encryptedData: EncryptDataResponse
+): EncryptedDataEvent {
+    return {
+        type: 'data-encrypted',
+        is_success: true,
+        encrypted_data: encryptedData.boc,
+        ...createConnectionInfo(version, wallet),
+        ...createEncryptDataInfo(data),//TODO: add wallet with address of self
+        // data: data.data[1]!,
+    };
+}
+
+export function createDecryptDataEvent(
+    version: Version,
+    wallet: Wallet | null,
+    data: DecryptDataRequest,
+    decryptedData: DecryptDataResponse
+): DecryptedDataEvent {
+    return {
+        type: 'data-decrypted',
+        is_success: true,
+        // senderAddress: data.params[0]!,
+        // data: data.params[1]!,
+        decrypt_data: decryptedData.result,
+        ...createConnectionInfo(version, wallet),
+        ...createDecryptDataInfo(data)
+    };
+}
+
+export type EncryptedDataEvent = {
+    /**
+     * Event type.
+     */
+    type: 'data-encrypted';
+    /**
+     * Connection success flag.
+     */
+    is_success: true;
+    /**
+     * Data encrypted
+     */
+    encrypted_data: string;
+} & ConnectionInfo &
+    EncryptDataInfo;
+
+export type DecryptedDataEvent = {
+    /**
+     * Event type.
+     */
+    type: 'data-decrypted';
+    /**
+     * Connection success flag.
+     */
+    is_success: true;
+    /**
+     * Data decrypted
+     */
+    decrypt_data: string[];
+} & ConnectionInfo &
+    DecryptDataInfo;
+
+
+export type EncryptDataFailedEvent = {
+    /**
+     * Event type.
+     */
+    type: 'encrypt-data-failed';
+    /**
+     * Connection success flag.
+     */
+    is_success: false;
+    /**
+     * Reason for the error.
+     */
+    error_message: string;
+    /**
+     * Error code.
+     */
+    error_code: ENCRYPT_DATA_ERROR_CODES | null;
+} & ConnectionInfo &
+    EncryptDataInfo;
+
+export type DecryptDataFailedEvent = {
+    /**
+     * Event type.
+     */
+    type: 'decrypt-data-failed';
+    /**
+     * Connection success flag.
+     */
+    is_success: false;
+    /**
+     * Reason for the error.
+     */
+    error_message: string;
+    /**
+     * Error code.
+     */
+    error_code: DECRYPT_DATA_ERROR_CODES | null;
+} & ConnectionInfo &
+    DecryptDataInfo;
 /**
  * Transaction signed event when a user successfully signed a transaction.
  */
@@ -507,6 +681,40 @@ export function createTransactionSigningFailedEvent(
     };
 }
 
+export function createEncryptDataFailedEvent(
+    version: Version,
+    wallet: Wallet | null,
+    message: EncryptDataRequest,
+    errorMessage: string,
+    errorCode: ENCRYPT_DATA_ERROR_CODES | void
+): EncryptDataFailedEvent {
+    return {
+        type: 'encrypt-data-failed',
+        is_success: false,
+        error_message: errorMessage,
+        error_code: errorCode ?? null,
+        ...createConnectionInfo(version, wallet),
+        ...createEncryptDataInfo(message)
+    };
+}
+
+export function createDecryptDataFailedEvent(
+    version: Version,
+    wallet: Wallet | null,
+    message: DecryptDataRequest,
+    errorMessage: string,
+    errorCode: DECRYPT_DATA_ERROR_CODES | void
+): DecryptDataFailedEvent {
+    return {
+        type: 'decrypt-data-failed',
+        is_success: false,
+        error_message: errorMessage,
+        error_code: errorCode ?? null,
+        ...createConnectionInfo(version, wallet),
+        ...createDecryptDataInfo(message)
+    };
+}
+
 /**
  * Transaction events.
  */
@@ -514,6 +722,22 @@ export type TransactionSigningEvent =
     | TransactionSentForSignatureEvent
     | TransactionSignedEvent
     | TransactionSigningFailedEvent;
+
+/**
+ * Decrypt events.
+ */
+export type DecryptDataEvent =
+| DecryptDataSentEvent
+| DecryptedDataEvent
+| DecryptDataFailedEvent;
+
+/**
+ * Encrypt events.
+ */
+export type EncryptDataEvent =
+| EncryptDataSentEvent
+| EncryptedDataEvent
+| EncryptDataFailedEvent;
 
 /**
  * Disconnect event when a user initiates a disconnection.
@@ -556,7 +780,9 @@ export type SdkActionEvent =
     | ConnectionEvent
     | ConnectionRestoringEvent
     | DisconnectionEvent
-    | TransactionSigningEvent;
+    | TransactionSigningEvent
+    | EncryptDataEvent
+    | DecryptDataEvent
 
 /**
  * Parameters without version field.

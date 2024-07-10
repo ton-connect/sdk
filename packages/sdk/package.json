@@ -26,7 +26,7 @@
   "dependencies": {
     "@tonconnect/isomorphic-eventsource": "^0.0.2",
     "@tonconnect/isomorphic-fetch": "^0.0.3",
-    "@tonconnect/protocol": "^2.2.6"
+    "@tonconnect/protocol": "file:../protocol"
   },
   "files": [
     "lib",

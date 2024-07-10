@@ -1,6 +1,8 @@
 import type {
     Account,
     ConnectAdditionalRequest,
+    EncryptDataFeature,
+    DecryptDataFeature,
     WalletInfoCurrentlyEmbedded
 } from '@tonconnect/sdk';
 import {
@@ -9,6 +11,10 @@ import {
     ITonConnect,
     SendTransactionRequest,
     SendTransactionResponse,
+    EncryptDataRequest,
+    DecryptDataRequest,
+    EncryptDataResponse,
+    DecryptDataResponse,
     TonConnect,
     TonConnectError,
     Wallet,
@@ -44,6 +50,7 @@ import { SingleWalletModalManager } from 'src/managers/single-wallet-modal-manag
 import { SingleWalletModal, SingleWalletModalState } from 'src/models/single-wallet-modal';
 import { TonConnectUITracker } from 'src/tracker/ton-connect-ui-tracker';
 import { tonConnectUiVersion } from 'src/constants/version';
+import { DecryptData } from './tracker/types';
 
 export class TonConnectUI {
     public static getWallets(): Promise<WalletInfo[]> {
@@ -519,6 +526,254 @@ export class TonConnectUI {
     }
 
     /**
+     * Opens the modal window and handles the message encryption/decryption.
+     * @param message transaction to send.
+     * @param publicKey public key to encrypt the message.
+     * @param options modal and notifications behaviour settings. Default is show only 'before' modal and all notifications.
+     */
+    public async encryptData(    //TODO: encryptData as arbitrary data can be encrypted
+        publicKey: string,
+        message: string,
+        options?: ActionConfiguration
+    ): Promise<EncryptDataResponse> {
+        let request: string[] = [publicKey, message];
+        const encryptDataRequest: EncryptDataRequest = {data: request, id: "1"};
+
+        this.tracker.trackEncryptDataInit(this.wallet, encryptDataRequest);
+        // this.tracker.trackEncryptData(this.wallet, encryptDataRequest );
+
+        // if (!this.connected) {
+        //     this.tracker.trackEncryptData(this.wallet, encryptDataRequest, 'Wallet was not connected');
+        //     throw new TonConnectUIError('Connect wallet to send a transaction.');
+        // }
+
+        if (isInTMA()) {
+            sendExpand();
+        }
+
+        const { notifications, modals, returnStrategy, twaReturnUrl, skipRedirectToWallet } =
+            this.getModalsAndNotificationsConfiguration(options);
+
+            //TODO: introduce action
+        widgetController.setAction({
+            name: 'crypt-data',
+            showNotification: notifications.includes('before'),
+            openModal: modals.includes('before'),
+            sent: false
+        });
+
+        const onRequestSent = (): void => {
+            if (abortController.signal.aborted) {
+                return;
+            }
+            //TODO: correct action
+            widgetController.setAction({
+                name: 'crypt-data',
+                showNotification: notifications.includes('before'),
+                openModal: modals.includes('before'),
+                sent: true
+            });
+
+            if (
+                this.walletInfo &&
+                'universalLink' in this.walletInfo &&
+                (this.walletInfo.openMethod === 'universal-link' ||
+                    this.walletInfo.openMethod === 'custom-deeplink')
+            ) {
+                if (isTelegramUrl(this.walletInfo.universalLink)) {
+                    redirectToTelegram(this.walletInfo.universalLink, {
+                        returnStrategy,
+                        twaReturnUrl: twaReturnUrl || appState.twaReturnUrl,
+                        forceRedirect: false
+                    });
+                } else {
+                    redirectToWallet(
+                        this.walletInfo.universalLink,
+                        this.walletInfo.deepLink,
+                        {
+                            returnStrategy,
+                            forceRedirect: false
+                        },
+                        () => {}
+                    );
+                }
+            }
+        };
+
+        const abortController = new AbortController();
+
+        const unsubscribe = this.onTransactionModalStateChange(action => {
+            if (action?.openModal) {
+                return;
+            }
+
+            unsubscribe();
+            if (!action) {
+                abortController.abort();
+            }
+        });
+
+        //TODO: implement
+        try {
+            const result = await this.waitForEnryptData(
+                {
+                    data: encryptDataRequest,
+                    signal: abortController.signal
+                },
+                onRequestSent
+            );
+
+            this.tracker.trackDataEncrypted(this.wallet, encryptDataRequest, result);
+
+            widgetController.setAction({
+                name: 'transaction-sent',
+                showNotification: notifications.includes('success'),
+                openModal: modals.includes('success')
+            });
+
+            return result;
+        } catch (e) {
+            widgetController.setAction({
+                name: 'transaction-canceled',
+                showNotification: notifications.includes('error'),
+                openModal: modals.includes('error')
+            });
+
+            if (e instanceof TonConnectError) {
+                throw e;
+            } else {
+                console.error(e);
+                throw new TonConnectUIError('Unhandled error:' + e);
+            }
+        } finally {
+            unsubscribe();
+        }
+    }
+
+    public async decryptData(
+        data: string,
+        senderAddress: string,
+    options?: ActionConfiguration
+): Promise<DecryptDataResponse> {
+    // const flattened = data.reduce((acc, data) => {
+    //     acc.push(data.senderAddress, data.data);
+    //     return acc;
+    // }, [] as (string)[]);
+    let request: string[] = [data, senderAddress]
+    const decryptDataRequest: DecryptDataRequest = {data: request, id: "1"};
+
+    this.tracker.trackDecryptDataInit(this.wallet, decryptDataRequest);
+    // this.tracker.trackEncryptData(this.wallet, encryptDataRequest );
+
+    //TODO: check
+    // if (!this.connected) {
+    //     this.tracker.trackEncryptData(this.wallet, encryptDataRequest, 'Wallet was not connected');
+    //     throw new TonConnectUIError('Connect wallet to send a transaction.');
+    // }
+
+    if (isInTMA()) {
+        sendExpand();
+    }
+
+    const { notifications, modals, returnStrategy, twaReturnUrl, skipRedirectToWallet } =
+        this.getModalsAndNotificationsConfiguration(options);
+
+        //TODO: introduce action
+    widgetController.setAction({
+        name: 'crypt-data',
+        showNotification: notifications.includes('before'),
+        openModal: modals.includes('before'),
+        sent: false
+    });
+
+    const onRequestSent = (): void => {
+        if (abortController.signal.aborted) {
+            return;
+        }
+        //TODO: correct action
+        widgetController.setAction({
+            name: 'crypt-data',
+            showNotification: notifications.includes('before'),
+            openModal: modals.includes('before'),
+            sent: true
+        });
+
+        if (
+            this.walletInfo &&
+            'universalLink' in this.walletInfo &&
+            (this.walletInfo.openMethod === 'universal-link' ||
+                this.walletInfo.openMethod === 'custom-deeplink')
+        ) {
+            if (isTelegramUrl(this.walletInfo.universalLink)) {
+                redirectToTelegram(this.walletInfo.universalLink, {
+                    returnStrategy,
+                    twaReturnUrl: twaReturnUrl || appState.twaReturnUrl,
+                    forceRedirect: false
+                });
+            } else {
+                redirectToWallet(
+                    this.walletInfo.universalLink,
+                    this.walletInfo.deepLink,
+                    {
+                        returnStrategy,
+                        forceRedirect: false
+                    },
+                    () => {}
+                );
+            }
+        }
+    };
+
+    const abortController = new AbortController();
+
+    const unsubscribe = this.onTransactionModalStateChange(action => {
+        if (action?.openModal) {
+            return;
+        }
+
+        unsubscribe();
+        if (!action) {
+            abortController.abort();
+        }
+    });
+
+    try {
+        const result = await this.waitForDecryptData(
+            {
+                data: decryptDataRequest,
+                signal: abortController.signal
+            },
+            onRequestSent
+        );
+
+        this.tracker.trackDataDecrypted(this.wallet, decryptDataRequest, result);
+
+        widgetController.setAction({
+            name: 'transaction-sent',//TODO: change
+            showNotification: notifications.includes('success'),
+            openModal: modals.includes('success')
+        });
+
+        return result;
+    } catch (e) {
+        widgetController.setAction({
+            name: 'transaction-canceled',
+            showNotification: notifications.includes('error'),
+            openModal: modals.includes('error')
+        });
+
+        if (e instanceof TonConnectError) {
+            throw e;
+        } else {
+            console.error(e);
+            throw new TonConnectUIError('Unhandled error:' + e);
+        }
+    } finally {
+        unsubscribe();
+    }
+}
+
+    /**
      * TODO: remove in the next major version.
      * Initiates a connection with an embedded wallet, awaits its completion, and returns the connected wallet information.
      * @param embeddedWallet - Information about the embedded wallet to connect to.
@@ -705,6 +960,106 @@ export class TonConnectUI {
         });
     }
 
+    private async waitForEnryptData(
+        options: WaitEncryptDataOptions,
+        onRequestSent?: () => void
+    ): Promise<EncryptDataResponse> {
+        return new Promise((resolve, reject) => {
+            const { data, signal } = options;
+
+            // if (signal.aborted) {
+            //     this.tracker.trackTransactionSigningFailed(
+            //         this.wallet,
+            //         transaction,
+            //         'Transaction was cancelled'
+            //     );
+            //     return reject(new TonConnectUIError('Transaction was not sent'));
+            // }
+
+            const onTransactionHandler = async (
+                data: EncryptDataResponse
+            ): Promise<void> => {
+                resolve(data);
+            };
+
+            const onErrorsHandler = (reason: TonConnectError): void => {
+                reject(reason);
+            };
+
+            const onCanceledHandler = (): void => {
+                this.tracker.trackEncryptDataFailed(
+                    this.wallet,
+                    data,
+                    'EncryptData was cancelled'
+                );
+                reject(new TonConnectUIError('Message was not encrypted'));
+            };
+
+            signal.addEventListener('abort', onCanceledHandler, { once: true });
+
+            this.connector
+                .encryptData(data.data[0]!, data.data[1]!, { onRequestSent: onRequestSent, signal: signal })
+                .then(result => {
+                    signal.removeEventListener('abort', onCanceledHandler);
+                    return onTransactionHandler(result);
+                })
+                .catch(reason => {
+                    signal.removeEventListener('abort', onCanceledHandler);
+                    return onErrorsHandler(reason);
+                });
+        });
+    }
+
+    private async waitForDecryptData(
+        options: WaitDecryptDataOptions,
+        onRequestSent?: () => void
+    ): Promise<DecryptDataResponse> {
+        return new Promise((resolve, reject) => {
+            const { data, signal } = options;
+
+            // if (signal.aborted) {
+            //     this.tracker.trackTransactionSigningFailed(
+            //         this.wallet,
+            //         transaction,
+            //         'Transaction was cancelled'
+            //     );
+            //     return reject(new TonConnectUIError('Transaction was not sent'));
+            // }
+
+            const onTransactionHandler = async (
+                data: DecryptDataResponse
+            ): Promise<void> => {
+                resolve(data);
+            };
+
+            const onErrorsHandler = (reason: TonConnectError): void => {
+                reject(reason);
+            };
+
+            const onCanceledHandler = (): void => {
+                this.tracker.trackDecryptDataFailed(
+                    this.wallet,
+                    data,
+                    'DecryptData was cancelled'
+                );
+                reject(new TonConnectUIError('Message was not decrypted'));
+            };
+
+            signal.addEventListener('abort', onCanceledHandler, { once: true });
+
+            this.connector
+                .decryptData(data.data[0]!, data.data[1]!, { onRequestSent: onRequestSent, signal: signal })
+                .then(result => {
+                    signal.removeEventListener('abort', onCanceledHandler);
+                    return onTransactionHandler(result);
+                })
+                .catch(reason => {
+                    signal.removeEventListener('abort', onCanceledHandler);
+                    return onErrorsHandler(reason);
+                });
+        });
+    }
+
     /**
      * Subscribe to the transaction modal window state changes, returns a function which has to be called to unsubscribe.
      * @internal
@@ -876,5 +1231,15 @@ type WaitWalletConnectionOptions = {
 
 type WaitSendTransactionOptions = {
     transaction: SendTransactionRequest;
+    signal: AbortSignal;
+};
+
+type WaitEncryptDataOptions = {
+    data: EncryptDataRequest;
+    signal: AbortSignal;
+};
+
+type WaitDecryptDataOptions = {
+    data: DecryptDataRequest;
     signal: AbortSignal;
 };

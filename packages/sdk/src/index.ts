@@ -23,7 +23,13 @@ export {
     createTransactionSignedEvent,
     createRequestVersionEvent,
     createResponseVersionEvent,
-    createVersionInfo
+    createVersionInfo,
+    createEncryptDataEvent,
+    createDecryptDataEvent,
+    createEncryptDataFailedEvent,
+    createEncryptDataSentEvent,
+    createDecryptDataSentEvent,
+    createDecryptDataFailedEvent,
 } from './tracker/types';
 export type {
     AuthType,
@@ -48,7 +54,17 @@ export type {
     ResponseVersionEvent,
     VersionEvent,
     Version,
-    WithoutVersion
+    WithoutVersion,
+    EncryptDataSentEvent,
+    EncryptDataEvent,
+    EncryptDataFailedEvent,
+    EncryptedDataEvent,
+    EncryptDataInfo,
+    DecryptDataInfo,
+    DecryptDataSentEvent,
+    DecryptDataEvent,
+    DecryptDataFailedEvent,
+    DecryptedDataEvent,
 } from './tracker/types';
 export { BrowserEventDispatcher } from './tracker/browser-event-dispatcher';
 export type { TonAddressItem, TonProofItem, ConnectItem } from '@tonconnect/protocol';
@@ -58,6 +74,8 @@ export {
     Feature,
     SendTransactionFeature,
     SignDataFeature,
+    EncryptDataFeature,
+    DecryptDataFeature,
     SendTransactionFeatureDeprecated,
     TonProofItemReply,
     TonProofItemReplySuccess,
@@ -65,7 +83,9 @@ export {
     ConnectItemReplyError,
     CONNECT_ITEM_ERROR_CODES,
     CONNECT_EVENT_ERROR_CODES,
-    SEND_TRANSACTION_ERROR_CODES
+    SEND_TRANSACTION_ERROR_CODES,
+    ENCRYPT_DATA_ERROR_CODES,
+    DECRYPT_DATA_ERROR_CODES,
 } from '@tonconnect/protocol';
 export { toUserFriendlyAddress } from './utils/address';
 export { isTelegramUrl, encodeTelegramUrlParameters } from './utils/url';

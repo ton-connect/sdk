@@ -5,9 +5,9 @@ import { ReturnStrategy } from 'src/models';
 import { WalletsModalState } from 'src/models/wallets-modal';
 import { SingleWalletModalState } from 'src/models/single-wallet-modal';
 
-export type ActionName = 'confirm-transaction' | 'transaction-sent' | 'transaction-canceled';
+export type ActionName = 'confirm-transaction' | 'transaction-sent' | 'transaction-canceled' | 'crypt-data';
 
-export type Action = BasicAction | ConfirmTransactionAction;
+export type Action = BasicAction | ConfirmTransactionAction | CryptAction;
 
 type BasicAction = {
     name: ActionName;
@@ -21,6 +21,13 @@ export type ConfirmTransactionAction = BasicAction & {
     twaReturnUrl: `${string}://${string}`;
     sent: boolean;
 };
+
+export type CryptAction = BasicAction & {
+    name: 'crypt-data';
+    returnStrategy: ReturnStrategy;
+    twaReturnUrl: `${string}://${string}`;
+    sent: boolean;
+}
 
 export const [walletsModalState, setWalletsModalState] = createSignal<WalletsModalState>({
     status: 'closed',

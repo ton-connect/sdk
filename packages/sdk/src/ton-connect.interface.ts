@@ -1,6 +1,6 @@
 import { TonConnectError } from 'src/errors';
 import { Account, Wallet, WalletConnectionSource, WalletConnectionSourceHTTP } from 'src/models';
-import { SendTransactionRequest, SendTransactionResponse } from 'src/models/methods';
+import { SendTransactionRequest, SendTransactionResponse, EncryptDataRequest, DecryptDataRequest, EncryptDataResponse, DecryptDataResponse } from 'src/models/methods';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
 import { WalletInfo } from 'src/models/wallet/wallet-info';
 import { WalletConnectionSourceJS } from 'src/models/wallet/wallet-connection-source';
@@ -92,4 +92,30 @@ export interface ITonConnect {
         transaction: SendTransactionRequest,
         onRequestSent?: () => void
     ): Promise<SendTransactionResponse>;
+
+    /**
+     * Asks connected wallet to encrypt the message.
+     * @param receiverPublicKey 
+     * @param data message to encrypt.
+     * @returns encrypted message boc.
+     */
+    encryptData(receiverPublicKey: string, data: string,
+        options?: {
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+        }
+    ): Promise<EncryptDataResponse>;
+
+    /**
+     * Asks connected wallet to decrypt the message.
+     * @param data message to encrypt.
+     * @returns encrypted message boc.
+     * TODO: senderAddress and data is an array, so that decryption of everything is achievable in one step
+     */
+    decryptData(data: string, senderAddress: string,
+        options?: {
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+        }
+    ): Promise<DecryptDataResponse>;
 }

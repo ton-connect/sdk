@@ -6,7 +6,9 @@ import {
     SendTransactionRpcResponseSuccess,
     TonAddressItemReply,
     TonProofItemReply,
-    WalletEvent
+    WalletEvent,
+    EncryptDataRpcResponseSuccess,
+    DecryptDataRpcResponseSuccess,
 } from '@tonconnect/protocol';
 import { DappMetadataError } from 'src/errors/dapp/dapp-metadata.error';
 import { ManifestContentErrorError } from 'src/errors/protocol/events/connect/manifest-content-error.error';
@@ -21,7 +23,7 @@ import {
     WalletConnectionSourceHTTP,
     WalletInfo
 } from 'src/models';
-import { SendTransactionRequest, SendTransactionResponse } from 'src/models/methods';
+import { SendTransactionRequest, SendTransactionResponse, EncryptDataRequest, EncryptDataResponse, DecryptDataRequest, DecryptDataResponse } from 'src/models/methods';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
 import { TonConnectOptions } from 'src/models/ton-connect-options';
 import {
@@ -39,7 +41,7 @@ import { ITonConnect } from 'src/ton-connect.interface';
 import { getDocument, getWebPageManifest } from 'src/utils/web-api';
 import { WalletsListManager } from 'src/wallets-list-manager';
 import { WithoutIdDistributive } from 'src/utils/types';
-import { checkSendTransactionSupport } from 'src/utils/feature-support';
+import { checkDecryptDataSupport, checkEncryptDataSupport, checkSendTransactionSupport } from 'src/utils/feature-support';
 import { callForSuccess } from 'src/utils/call-for-success';
 import { logDebug, logError } from 'src/utils/log';
 import { createAbortController } from 'src/utils/create-abort-controller';
@@ -446,6 +448,105 @@ export class TonConnect implements ITonConnect {
             response as SendTransactionRpcResponseSuccess
         );
         this.tracker.trackTransactionSigned(this.wallet, transaction, result);
+        return result;
+    }
+
+    /**
+     * Encrypt and decrypt data
+     */
+
+    public async encryptData(
+        data: string,
+        receiverPublicKey: string,
+        options?: {
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+        }
+    ): Promise<EncryptDataResponse> {  
+        const abortController = createAbortController(options?.signal);
+        if (abortController.signal.aborted) {
+            throw new TonConnectError('Data encryption was aborted');
+        }
+
+        this.checkConnection();
+
+        checkEncryptDataSupport(this.wallet!.device.features);
+
+        this.tracker.trackEncryptDataSent(this.wallet, { data: [receiverPublicKey, data], id: "0" });
+
+        //TODO: check if wallet supports this method
+        // checkSendTransactionSupport(this.wallet!.device.features, {
+        //     requiredMessagesNumber: transaction.messages.length
+        // });
+
+        const response = await this.provider!.sendRequest(
+            sendTransactionParser.convertToRpcRequestEncrypt({
+            data: [receiverPublicKey, data],
+            }),
+            { onRequestSent: options?.onRequestSent, signal: abortController.signal }
+        );
+
+        if (sendTransactionParser.isError(response)) {
+            this.tracker.trackEncryptDataFailed(
+                this.wallet,
+                { data: [receiverPublicKey, data], id: "0" },
+                response.error.message,
+                // response.error.code
+            );
+            return sendTransactionParser.parseAndThrowError(response);
+        }
+
+        const result = sendTransactionParser.convertFromRpcResponseEncrypt(
+            response as EncryptDataRpcResponseSuccess
+        );
+
+        this.tracker.trackEncryptData(this.wallet, { data: [receiverPublicKey, data], id: "0" }, result)
+        return result;
+    }
+
+    public async decryptData(
+        data: string,
+        senderAddress: string,
+        options?: {
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+        }
+    ): Promise<DecryptDataResponse> {
+        const abortController = createAbortController(options?.signal);
+        if (abortController.signal.aborted) {
+            throw new TonConnectError('Data encryption was aborted');
+        }
+
+        this.checkConnection();
+
+        checkDecryptDataSupport(this.wallet!.device.features);
+
+        this.tracker.trackDecryptDataSent(this.wallet, { data: [senderAddress, data], id: "0" });
+
+        const response = await this.provider!.sendRequest(
+            sendTransactionParser.convertToRpcRequestDecrypt({
+            data: [senderAddress, data],
+            }),
+            { onRequestSent: options?.onRequestSent, signal: abortController.signal }
+        );
+
+        if (sendTransactionParser.isError(response)) {
+            this.tracker.trackEncryptDataFailed(
+                this.wallet,
+                { data: [senderAddress, data], id: "0" },
+                response.error.message,
+                // response.error.code
+            );
+            return sendTransactionParser.parseAndThrowError(response);
+        }
+
+
+
+        const result = sendTransactionParser.convertFromRpcResponseDecrypt(
+            response as DecryptDataRpcResponseSuccess
+        );
+
+        this.tracker.trackDecryptData(this.wallet, { data: [senderAddress, data], id: "0" }, result)
         return result;
     }
 
