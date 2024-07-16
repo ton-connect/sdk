@@ -1,0 +1,12 @@
+{
+  "root": "packages/ton-proof/",
+  "targets": {
+    "version": {
+      "executor": "@jscutlery/semver:version",
+      "options": {
+        "changelogHeader": "# Changelog @tonconnect/ton-proof \n",
+        "push": false
+      }
+    }
+  }
+}
