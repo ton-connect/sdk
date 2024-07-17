@@ -14,7 +14,8 @@
     "Wallet",
     "ton-connect",
     "Connect",
-    "Tonkeeper"
+    "Tonkeeper",
+    "ton proof"
   ],
   "author": "tonconnect",
   "license": "Apache-2.0",

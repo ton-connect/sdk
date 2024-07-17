@@ -29,6 +29,12 @@ describe('TonProofService', () => {
         expect(payload).toHaveLength(64);
     });
 
+    test('should generate different payloads', () => {
+        const payload1 = tonProofService.generatePayload();
+        const payload2 = tonProofService.generatePayload();
+        expect(payload1).not.toBe(payload2);
+    });
+
     test('should return false if publicKey is not obtained', async () => {
         const payload = {
             address: 'address',
@@ -62,6 +68,7 @@ describe('TonProofService', () => {
         const domain = 'example.com';
         const lengthBytes = domain.length;
 
+        // we are doing it manually here, but it is usually handled automatically by TonConnect
         const wc = Buffer.alloc(4);
         wc.writeUInt32BE(wallet.address.workChain, 0);
 
@@ -113,9 +120,8 @@ describe('TonProofService', () => {
                 timestamp
             }
         };
-        const getWalletPublicKey = jest.fn().mockResolvedValue(null);
 
-        const result = await tonProofService.checkProof(payload, getWalletPublicKey);
+        const result = await tonProofService.checkProof(payload);
         expect(result).toBe(true);
     });
 });

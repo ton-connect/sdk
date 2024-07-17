@@ -8,25 +8,29 @@ import { tryParsePublicKey } from './helpers';
 const defaultTonProofPrefix = 'ton-proof-item-v2/';
 const defaultTonConnectPrefix = 'ton-connect';
 const defaultAllowedDomains = ['ton-connect.github.io'];
-const validAuthTime = 15 * 60; // 15 minutes
+const defaultValidAuthTime = 15 * 60; // 15 minutes
 
 export class TonProofService {
     private allowedDomains: string[];
     private tonProofPrefix: string;
     private tonConnectPrefix: string;
+    private validAuthTime: number;
 
     constructor({
         allowedDomains,
         tonProofPrefix,
-        tonConnectPrefix
+        tonConnectPrefix,
+        validAuthTime
     }: {
         allowedDomains?: string[];
         tonProofPrefix?: string;
         tonConnectPrefix?: string;
+        validAuthTime?: number;
     }) {
         this.allowedDomains = allowedDomains ?? defaultAllowedDomains;
         this.tonProofPrefix = tonProofPrefix ?? defaultTonProofPrefix;
         this.tonConnectPrefix = tonConnectPrefix ?? defaultTonConnectPrefix;
+        this.validAuthTime = validAuthTime ?? defaultValidAuthTime;
     }
 
     /**
@@ -42,7 +46,7 @@ export class TonProofService {
      */
     public async checkProof(
         payload: CheckProofRequestDto,
-        getWalletPublicKey: (address: string) => Promise<Buffer | null>
+        getWalletPublicKey: (address: string) => Promise<Buffer | null> = () => Promise.resolve(null)
     ): Promise<boolean> {
         try {
             const stateInit = loadStateInit(Cell.fromBase64(payload.proof.state_init).beginParse());
@@ -75,7 +79,7 @@ export class TonProofService {
             }
 
             const now = Math.floor(Date.now() / 1000);
-            if (now - validAuthTime > payload.proof.timestamp) {
+            if (now - this.validAuthTime > payload.proof.timestamp) {
                 return false;
             }
 

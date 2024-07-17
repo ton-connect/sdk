@@ -8,8 +8,10 @@ export default [
             file: './lib/esm/index.mjs',
             sourcemap: true
         },
-        plugins: [typescript({ compilerOptions: { declaration: false, declarationDir: undefined } })],
-        external: ['tweetnacl', 'tweetnacl-util']
+        plugins: [
+            typescript({ compilerOptions: { declaration: false, declarationDir: undefined } })
+        ],
+        external: ['tweetnacl', 'tweetnacl-util', '@ton/ton', '@ton/crypto', 'buffer']
     },
     {
         input: 'src/index.ts',
@@ -18,7 +20,9 @@ export default [
             file: './lib/cjs/index.cjs',
             sourcemap: true
         },
-        plugins: [typescript({ compilerOptions: { declaration: false, declarationDir: undefined } })],
-        external: ['tweetnacl', 'tweetnacl-util']
+        plugins: [
+            typescript({ compilerOptions: { declaration: false, declarationDir: undefined } })
+        ],
+        external: ['tweetnacl', 'tweetnacl-util', '@ton/ton', '@ton/crypto', 'buffer']
     }
 ];

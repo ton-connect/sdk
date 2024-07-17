@@ -3,7 +3,7 @@
 
 ## Overview
 
-`TonProofService` is a service for verifying proofs in the TON blockchain ecosystem. It includes methods for generating payloads and validating proofs against specified criteria. This service is primarily used for authentication and validation purposes within TON-based applications.
+`TonProofService` is a service for verifying proofs in the TON blockchain ecosystem. It includes methods for generating payloads and validating proofs against specified criteria. This service helps ensure the validity of user addresses, which can be used for authentication and validation purposes within TON-based applications.
 
 ## Installation
 
@@ -41,12 +41,12 @@ console.log('Is proof valid:', isValid);
 #### Class: TonProofService
 Constructor
 - allowedDomains: An optional array of allowed domains for validation.
-- tonProofPrefix: An optional prefix for the proof.
-- tonConnectPrefix: An optional prefix for the connect.
+- tonProofPrefix: An optional prefix for the proof. (Using in message generation)
+- tonConnectPrefix: An optional prefix for the connect. (Using in message generation)
 
 #### Methods
 `generatePayload`
-Generates a random payload.
+Generates a random payload. (in `hex`)
 
 ```js
 const payload = tonProofService.generatePayload();
@@ -58,6 +58,17 @@ Parameters:
 
 - payload: An object containing the proof data.
 - getWalletPublicKey: A function that takes an address and returns a public key. (If wallet isn't compatible)
+
+Compatible wallets:
+- WalletContractV1R1,
+- WalletContractV1R2,
+- WalletContractV1R3,
+- WalletContractV2R1,
+- WalletContractV2R2,
+- WalletContractV3R1,
+- WalletContractV3R2,
+- WalletContractV4R2
+
 Example:
 
 ```js
