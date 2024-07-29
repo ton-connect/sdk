@@ -27,6 +27,16 @@ export interface TonConnectUiOptions {
     walletsListConfiguration?: WalletsListConfiguration;
 
     /**
+     * Url to the wallets list JSON file.
+     */
+    walletsListSource?: string;
+
+    /**
+     * Wallets list cache time to live.
+     */
+    walletsListCacheTTLMs?: number;
+
+    /**
      * Configuration for action-period (e.g. sendTransaction) UI elements: modals and notifications and wallet behaviour (return strategy).
      */
     actionsConfiguration?: ActionConfiguration;
