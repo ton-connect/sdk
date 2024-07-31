@@ -1,5 +1,14 @@
 # Changelog @tonconnect/sdk 
 
+## [3.0.4-beta.2](https://github.com/ton-connect/sdk/compare/sdk-3.0.4-beta.1...sdk-3.0.4-beta.2) (2024-07-31)
+
+
+### Bug Fixes
+
+* **sdk:** remove redundant `connectionEstablished` parameter ([dce8a6b](https://github.com/ton-connect/sdk/commit/dce8a6b8100dcdefe993028cee75b7d39a844238))
+
+
+
 ## [3.0.4-beta.1](https://github.com/ton-connect/sdk/compare/sdk-3.0.4-beta.0...sdk-3.0.4-beta.1) (2024-07-31)
 
 
