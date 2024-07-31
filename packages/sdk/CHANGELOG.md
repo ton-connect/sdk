@@ -1,5 +1,14 @@
 # Changelog @tonconnect/sdk 
 
+## [3.0.4-beta.0](https://github.com/ton-connect/sdk/compare/sdk-3.0.3...sdk-3.0.4-beta.0) (2024-07-31)
+
+
+### Bug Fixes
+
+* **sdk:** ensure reconnection to bridge during prolonged handshake interruptions ([6ff4761](https://github.com/ton-connect/sdk/commit/6ff4761431c91511e8430abee537ba353eecd950))
+
+
+
 ## [3.0.3](https://github.com/ton-connect/sdk/compare/sdk-3.0.3-beta.1...sdk-3.0.3) (2024-05-28)
 
 
