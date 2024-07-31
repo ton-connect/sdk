@@ -21,7 +21,9 @@ export class BridgeGateway {
 
     private readonly defaultTtl = 300;
 
-    private readonly defaultReconnectDelay = 5000;
+    private readonly defaultReconnectDelay = 2000;
+
+    private readonly defaultResendDelay = 5000;
 
     private eventSource = createResource(
         async (signal?: AbortSignal, openingDeadlineMS?: number): Promise<EventSource> => {
@@ -123,7 +125,7 @@ export class BridgeGateway {
             },
             {
                 attempts: options?.attempts ?? Number.MAX_SAFE_INTEGER,
-                delayMs: 5_000,
+                delayMs: this.defaultResendDelay,
                 signal: options?.signal
             }
         );
@@ -166,8 +168,9 @@ export class BridgeGateway {
 
     private async errorsHandler(eventSource: EventSource, e: Event): Promise<EventSource | void> {
         if (this.isConnecting) {
-            logError('Bridge error', JSON.stringify(e));
-            return;
+            eventSource.close();
+            logDebug(`Bridge reconnecting, ${this.defaultReconnectDelay}ms delay`);
+            return await this.eventSource.recreate(this.defaultReconnectDelay);
         }
 
         if (this.isReady) {

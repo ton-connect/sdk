@@ -60,7 +60,9 @@ export class BridgeProvider implements HTTPProvider {
 
     private listeners: Array<(e: WithoutIdDistributive<WalletEvent>) => void> = [];
 
-    private readonly defaultOpeningDeadlineMS = 5000;
+    private readonly defaultOpeningDeadlineMS = 12000;
+
+    private readonly defaultRetryTimeoutMS = 2000;
 
     private abortController?: AbortController;
 
@@ -110,12 +112,13 @@ export class BridgeProvider implements HTTPProvider {
                 await callForSuccess(
                     _options =>
                         this.openGateways(sessionCrypto, {
-                            openingDeadlineMS: options?.openingDeadlineMS,
+                            openingDeadlineMS:
+                                options?.openingDeadlineMS ?? this.defaultOpeningDeadlineMS,
                             signal: _options?.signal
                         }),
                     {
                         attempts: Number.MAX_SAFE_INTEGER,
-                        delayMs: 5_000,
+                        delayMs: this.defaultRetryTimeoutMS,
                         signal: abortController.signal
                     }
                 );
@@ -207,7 +210,7 @@ export class BridgeProvider implements HTTPProvider {
                     }),
                 {
                     attempts: Number.MAX_SAFE_INTEGER,
-                    delayMs: 5_000,
+                    delayMs: this.defaultRetryTimeoutMS,
                     signal: abortController.signal
                 }
             );
@@ -232,7 +235,9 @@ export class BridgeProvider implements HTTPProvider {
     ): Promise<WithoutId<WalletResponse<T>>>;
     public sendRequest<T extends RpcMethod>(
         request: WithoutId<AppRequest<T>>,
-        optionsOrOnRequestSent?: (() => void) | { attempts?: number; onRequestSent?: () => void; signal?: AbortSignal }
+        optionsOrOnRequestSent?:
+            | (() => void)
+            | { attempts?: number; onRequestSent?: () => void; signal?: AbortSignal }
     ): Promise<WithoutId<WalletResponse<T>>> {
         // TODO: remove deprecated method
         const options: {
@@ -309,7 +314,7 @@ export class BridgeProvider implements HTTPProvider {
                     {
                         onRequestSent: onRequestSent,
                         signal: abortController.signal,
-                        attempts: 1,
+                        attempts: 1
                     }
                 );
             } catch (e) {
@@ -522,7 +527,7 @@ export class BridgeProvider implements HTTPProvider {
                     source.bridgeUrl,
                     sessionCrypto.sessionId,
                     () => {},
-                  () => {}
+                    () => {}
                 );
 
                 gateway.setListener(message =>
@@ -547,7 +552,7 @@ export class BridgeProvider implements HTTPProvider {
                         },
                         {
                             attempts: Number.MAX_SAFE_INTEGER,
-                            delayMs: 5_000,
+                            delayMs: this.defaultRetryTimeoutMS,
                             signal: options?.signal
                         }
                     )
