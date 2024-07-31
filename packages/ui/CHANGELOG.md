@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui 
 
+## [2.0.7-beta.0](https://github.com/ton-connect/sdk/compare/ui-2.0.6...ui-2.0.7-beta.0) (2024-07-31)
+
+
+### Features
+
+* **ui:** adjust letter spacing for wallet's names and update text weight as per new design ([5b3a5cb](https://github.com/ton-connect/sdk/commit/5b3a5cbb8748c51f1c17c662b2ed162c143d1800))
+
+
+
 ## [2.0.6](https://github.com/ton-connect/sdk/compare/ui-2.0.5...ui-2.0.6) (2024-07-08)
 
 
