@@ -1,5 +1,14 @@
 # Changelog @tonconnect/sdk 
 
+## [3.0.4-beta.1](https://github.com/ton-connect/sdk/compare/sdk-3.0.4-beta.0...sdk-3.0.4-beta.1) (2024-07-31)
+
+
+### Bug Fixes
+
+* **sdk:** fine-tune timeouts and enhance error handling for bridge reconnection ([6538103](https://github.com/ton-connect/sdk/commit/6538103f85b80b3091a6284c5cb5bf4cd155e68a))
+
+
+
 ## [3.0.4-beta.0](https://github.com/ton-connect/sdk/compare/sdk-3.0.3...sdk-3.0.4-beta.0) (2024-07-31)
 
 
