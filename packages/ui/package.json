@@ -1,6 +1,6 @@
 {
   "name": "@tonconnect/ui",
-  "version": "2.0.7-beta.1",
+  "version": "2.0.7-beta.2",
   "scripts": {
     "start": "vite --host",
     "dev": "vite",
