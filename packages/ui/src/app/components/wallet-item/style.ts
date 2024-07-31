@@ -72,7 +72,7 @@ export const BadgeStyled = styled(Image)`
 
 export const StyledText = styled(Text)`
     max-width: 90px;
-    font-weight: 590;
+    font-weight: 510;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -83,7 +83,7 @@ export const StyledText = styled(Text)`
 `;
 
 export const StyledSecondLine = styled(Text)<{ colorPrimary: boolean }>`
-    font-weight: 510;
+    font-weight: ${props => (props.colorPrimary ? '510' : '400')};
     max-width: 90px;
     white-space: nowrap;
     text-overflow: ellipsis;
