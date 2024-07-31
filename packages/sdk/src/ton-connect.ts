@@ -344,7 +344,7 @@ export class TonConnect implements ITonConnect {
         };
         abortController.signal.addEventListener('abort', onAbortRestore);
 
-        return await callForSuccess(
+        const restoreConnectionTask = callForSuccess(
             async _options => {
                 await provider?.restoreConnection({
                     openingDeadlineMS: options?.openingDeadlineMS,
@@ -360,10 +360,14 @@ export class TonConnect implements ITonConnect {
             },
             {
                 attempts: Number.MAX_SAFE_INTEGER,
-                delayMs: 5_000,
+                delayMs: 2_000,
                 signal: options?.signal
             }
         );
+        const restoreConnectionTimeout = new Promise<void>(
+            resolve => setTimeout(() => resolve(), 12_000) // connection deadline
+        );
+        return Promise.race([restoreConnectionTask, restoreConnectionTimeout]);
     }
 
     /**
