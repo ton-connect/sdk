@@ -42,7 +42,7 @@ export function timeout<T>(fn: Deferrable<T>, options?: DeferOptions): Promise<T
 
     const abortController = createAbortController(signal);
 
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         if (abortController.signal.aborted) {
             reject(new TonConnectError('Operation aborted'));
             return;
@@ -66,6 +66,16 @@ export function timeout<T>(fn: Deferrable<T>, options?: DeferOptions): Promise<T
         );
 
         const deferOptions = { timeout, abort: abortController.signal };
-        fn(resolve, reject, deferOptions).finally(() => clearTimeout(timeoutId));
+        await fn(
+            (...args) => {
+                clearTimeout(timeoutId);
+                resolve(...args);
+            },
+            () => {
+                clearTimeout(timeoutId);
+                reject();
+            },
+            deferOptions
+        );
     });
 }

@@ -166,11 +166,14 @@ export class BridgeGateway {
         return response;
     }
 
-    private async errorsHandler(eventSource: EventSource, e: Event): Promise<EventSource | void> {
+    private async errorsHandler(
+        eventSource: EventSource,
+        e: Event,
+        connectionEstablished: boolean
+    ): Promise<EventSource | void> {
         if (this.isConnecting) {
             eventSource.close();
-            logDebug(`Bridge reconnecting, ${this.defaultReconnectDelay}ms delay`);
-            return await this.eventSource.recreate(this.defaultReconnectDelay);
+            throw new TonConnectError('Bridge error, failed to connect');
         }
 
         if (this.isReady) {
@@ -180,10 +183,15 @@ export class BridgeGateway {
             return;
         }
 
-        if (this.isClosed) {
+        if (this.isClosed && connectionEstablished) {
             eventSource.close();
             logDebug(`Bridge reconnecting, ${this.defaultReconnectDelay}ms delay`);
             return await this.eventSource.recreate(this.defaultReconnectDelay);
+        }
+
+        if (this.isClosed && !connectionEstablished) {
+            eventSource.close();
+            throw new TonConnectError('Bridge error, failed to connect');
         }
 
         throw new TonConnectError('Bridge error, unknown state');
@@ -248,7 +256,11 @@ export type CreateEventSourceConfig = {
     /**
      * Error handler for the event source.
      */
-    errorHandler: (eventSource: EventSource, e: Event) => Promise<EventSource | void>;
+    errorHandler: (
+        eventSource: EventSource,
+        e: Event,
+        connectionEstablished: boolean
+    ) => Promise<EventSource | void>;
     /**
      * Message handler for the event source.
      */
@@ -291,6 +303,8 @@ async function createEventSource(config: CreateEventSourceConfig): Promise<Event
                 return;
             }
 
+            let connectionEstablished = false;
+
             const eventSource = new EventSource(url.toString());
 
             eventSource.onerror = async (reason: Event): Promise<void> => {
@@ -301,7 +315,11 @@ async function createEventSource(config: CreateEventSourceConfig): Promise<Event
                 }
 
                 try {
-                    const newInstance = await config.errorHandler(eventSource, reason);
+                    const newInstance = await config.errorHandler(
+                        eventSource,
+                        reason,
+                        connectionEstablished
+                    );
                     if (newInstance !== eventSource) {
                         eventSource.close();
                     }
@@ -315,6 +333,7 @@ async function createEventSource(config: CreateEventSourceConfig): Promise<Event
                 }
             };
             eventSource.onopen = (): void => {
+                connectionEstablished = true;
                 if (signal.aborted) {
                     eventSource.close();
                     reject(new TonConnectError('Bridge connection aborted'));

@@ -546,7 +546,8 @@ export class BridgeProvider implements HTTPProvider {
                             }
 
                             return bridge.registerSession({
-                                openingDeadlineMS: options?.openingDeadlineMS,
+                                openingDeadlineMS:
+                                    options?.openingDeadlineMS ?? this.defaultOpeningDeadlineMS,
                                 signal: _options.signal
                             });
                         },
