@@ -43,7 +43,7 @@ export const ButtonStyled = styled.button<{
     cursor: ${props => (props.disabled ? 'not-allowed' : 'pointer')};
 
     font-size: 14px;
-    font-weight: 590;
+    font-weight: 510;
     line-height: 18px;
 
     transition: transform 0.125s ease-in-out;

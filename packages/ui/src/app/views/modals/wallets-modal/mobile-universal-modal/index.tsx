@@ -21,7 +21,6 @@ import {
     TGImageStyled,
     UlStyled
 } from './style';
-import { openLinkBlank } from 'src/app/utils/web-api';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { appState } from 'src/app/state/app.state';
 import { IMG } from 'src/app/env/IMG';
@@ -150,7 +149,10 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
                 <H1Styled translationKey="walletModal.mobileUniversalModal.connectYourWallet">
                     Connect your wallet
                 </H1Styled>
-                <H2Styled translationKey="walletModal.mobileUniversalModal.openWalletOnTelegramOrSelect">
+                <H2Styled
+                    translationKey="walletModal.mobileUniversalModal.openWalletOnTelegramOrSelect"
+                    maxWidth={342}
+                >
                     Open Wallet in Telegram or select your wallet to connect
                 </H2Styled>
                 <TelegramButtonStyled

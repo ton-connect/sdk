@@ -99,10 +99,13 @@ export const H1Styled = styled(H1)`
     padding: 0 24px;
 `;
 
-export const H2Styled = styled(H2)`
+export const H2Styled = styled(H2)<{ maxWidth?: number }>`
     margin-bottom: 24px;
     padding: 0 24px;
     min-height: 44px;
+    max-width: ${props => props.maxWidth}px;
+    margin-left: ${props => (props.maxWidth ? 'auto' : '0px')};
+    margin-right: ${props => (props.maxWidth ? 'auto' : '0px')};
 `;
 
 export const ButtonStyled = styled(Button)`
@@ -118,12 +121,13 @@ export const TelegramButtonStyled = styled(Button)`
     background-color: ${props => props.theme!.colors.telegramButton};
 
     color: ${props => props.theme!.colors.constant.white};
-    font-weight: 590;
+    font-weight: 510;
     font-size: 16px;
     line-height: 20px;
 `;
 
 export const TGImageStyled = styled(Image)`
+    background-color: transparent;
     border-radius: ${props => tgBorders[props.theme!.borderRadius]};
     width: 24px;
     height: 24px;
