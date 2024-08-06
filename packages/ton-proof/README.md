@@ -43,6 +43,7 @@ Constructor
 - allowedDomains: An optional array of allowed domains for validation.
 - tonProofPrefix: An optional prefix for the proof. (Using in message generation)
 - tonConnectPrefix: An optional prefix for the connect. (Using in message generation)
+- wallets: An optional list of custom wallets.
 
 #### Methods
 `generatePayload`
@@ -69,15 +70,40 @@ Compatible wallets:
 - WalletContractV3R2,
 - WalletContractV4R2
 
-Example:
+#### You can add your own custom wallet using `wallets` parameter:
 
 ```js
-const isValid = await tonProofService.checkProof(yourPayload, getWalletPublicKeyFunction);
-console.log('Is proof valid:', isValid);
+export class CustomContract {
+    static create(): InitContract {
+        const init = {
+            data: Cell.fromBase64('...your code'),
+            code: Cell.fromBase64('...your code')
+        };
+        return { init };
+    }
+}
+
+function loadCustomContractData(cs: Slice) {
+    const seqno = cs.loadUint(32);
+    const publicKey = cs.loadBuffer(32);
+    return { seqno, publicKey };
+}
+
+const customContractData: WalletOptions = {
+    contract: CustomContract,
+    loadData: loadCustomContractData
+};
+
+const tonProofService = new TonProofService({
+    wallets: [customContractData]
+});
+
 ```
+
 #### Default Values
 The TonProofService class has the following default values:
 
 - defaultTonProofPrefix: 'ton-proof-item-v2/'
 - defaultTonConnectPrefix: 'ton-connect'
 - defaultAllowedDomains: ['ton-connect.github.io']
+- wallets: DEFAULT_WALLETS
