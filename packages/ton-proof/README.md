@@ -76,7 +76,7 @@ Compatible wallets:
 export class CustomContract {
     static create(): InitContract {
         const init = {
-            data: Cell.fromBase64('...your code'),
+            data: Cell.fromBase64('...your data'),
             code: Cell.fromBase64('...your code')
         };
         return { init };
