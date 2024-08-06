@@ -12,22 +12,19 @@ import {
 } from '@ton/ton';
 import { Buffer } from 'buffer';
 import { WalletContractV4R1 } from './wrappers';
+import { WalletOptions } from './interfaces';
 
-const knownWallets = [
-    { contract: WalletContractV1R1, loadData: loadWalletV1Data },
-    { contract: WalletContractV1R2, loadData: loadWalletV1Data },
-    { contract: WalletContractV1R3, loadData: loadWalletV1Data },
-    { contract: WalletContractV2R1, loadData: loadWalletV2Data },
-    { contract: WalletContractV2R2, loadData: loadWalletV2Data },
-    { contract: WalletContractV3R1, loadData: loadWalletV3Data },
-    { contract: WalletContractV3R2, loadData: loadWalletV3Data },
+export const DEFAULT_WALLETS: WalletOptions[] = [
+    { contract: WalletContractV4R2, loadData: loadWalletV4Data },
     { contract: WalletContractV4R1, loadData: loadWalletV4Data },
-    { contract: WalletContractV4R2, loadData: loadWalletV4Data }
-].map(({ contract, loadData }) => ({
-    contract: contract,
-    loadData: loadData,
-    wallet: contract.create({ workchain: 0, publicKey: Buffer.alloc(32) })
-}));
+    { contract: WalletContractV3R2, loadData: loadWalletV3Data },
+    { contract: WalletContractV3R1, loadData: loadWalletV3Data },
+    { contract: WalletContractV2R2, loadData: loadWalletV2Data },
+    { contract: WalletContractV2R1, loadData: loadWalletV2Data },
+    { contract: WalletContractV1R3, loadData: loadWalletV1Data },
+    { contract: WalletContractV1R2, loadData: loadWalletV1Data },
+    { contract: WalletContractV1R1, loadData: loadWalletV1Data }
+];
 
 function loadWalletV1Data(cs: Slice) {
     const seqno = cs.loadUint(32);
@@ -56,12 +53,15 @@ function loadWalletV4Data(cs: Slice) {
     return { seqno, publicKey, walletId, plugins };
 }
 
-export function tryParsePublicKey(stateInit: StateInit): Buffer | null {
+export function tryParsePublicKey(
+    stateInit: StateInit,
+    wallets: Required<WalletOptions>[]
+): Buffer | null {
     if (!stateInit.code || !stateInit.data) {
         return null;
     }
 
-    for (const { wallet, loadData } of knownWallets) {
+    for (const { wallet, loadData } of wallets) {
         try {
             if (wallet.init.code.equals(stateInit.code)) {
                 return loadData(stateInit.data.beginParse()).publicKey;

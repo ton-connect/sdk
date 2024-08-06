@@ -1,8 +1,13 @@
-import { Cell, contractAddress, WalletContractV4 as WalletContractV4R2 } from '@ton/ton';
+import { Cell, Contract, contractAddress, WalletContractV4 as WalletContractV4R2 } from '@ton/ton';
 import { Buffer } from 'buffer';
+import { InitContract } from './interfaces';
 
 export class WalletContractV4R1 {
-    static create(args: { workchain: number; publicKey: Buffer; walletId?: number | null }) {
+    static create(args: {
+        workchain: number;
+        publicKey: Buffer;
+        walletId?: number | null;
+    }): InitContract {
         const wallet = WalletContractV4R2.create(args);
         const { data } = wallet.init;
         const code = Cell.fromBoc(

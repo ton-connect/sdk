@@ -2,8 +2,8 @@ import { sha256 } from '@ton/crypto';
 import { Address, Cell, contractAddress, loadStateInit } from '@ton/ton';
 import { Buffer } from 'buffer';
 import { randomBytes, sign } from 'tweetnacl';
-import { CheckProofRequestDto } from './interfaces';
-import { tryParsePublicKey } from './helpers';
+import { CheckProofRequestDto, WalletOptions } from './interfaces';
+import { DEFAULT_WALLETS, tryParsePublicKey } from './helpers';
 
 const defaultTonProofPrefix = 'ton-proof-item-v2/';
 const defaultTonConnectPrefix = 'ton-connect';
@@ -15,22 +15,34 @@ export class TonProofService {
     private tonProofPrefix: string;
     private tonConnectPrefix: string;
     private validAuthTime: number;
+    private wallets: Required<WalletOptions>[];
 
     constructor({
         allowedDomains,
         tonProofPrefix,
         tonConnectPrefix,
-        validAuthTime
+        validAuthTime,
+        wallets = []
     }: {
         allowedDomains?: string[];
         tonProofPrefix?: string;
         tonConnectPrefix?: string;
         validAuthTime?: number;
+        wallets?: WalletOptions[];
     }) {
         this.allowedDomains = allowedDomains ?? defaultAllowedDomains;
         this.tonProofPrefix = tonProofPrefix ?? defaultTonProofPrefix;
         this.tonConnectPrefix = tonConnectPrefix ?? defaultTonConnectPrefix;
         this.validAuthTime = validAuthTime ?? defaultValidAuthTime;
+        this.wallets = this.prepareWallets([...DEFAULT_WALLETS, ...wallets]);
+    }
+
+    private prepareWallets(options: WalletOptions[]): Required<WalletOptions>[] {
+        return options.map(({ contract, loadData, wallet }) => ({
+            contract: contract,
+            loadData: loadData,
+            wallet: wallet ?? contract.create({ workchain: 0, publicKey: Buffer.alloc(32) })
+        }));
     }
 
     /**
@@ -46,7 +58,8 @@ export class TonProofService {
      */
     public async checkProof(
         payload: CheckProofRequestDto,
-        getWalletPublicKey: (address: string) => Promise<Buffer | null> = () => Promise.resolve(null)
+        getWalletPublicKey: (address: string) => Promise<Buffer | null> = () =>
+            Promise.resolve(null)
     ): Promise<boolean> {
         try {
             const stateInit = loadStateInit(Cell.fromBase64(payload.proof.state_init).beginParse());
@@ -56,7 +69,8 @@ export class TonProofService {
             //  2.1. Parse TonAddressItemReply.walletStateInit and get public key from stateInit. You can compare the walletStateInit.code
             //  with the code of standard wallets contracts and parse the data according to the found wallet version.
             let publicKey =
-                tryParsePublicKey(stateInit) ?? (await getWalletPublicKey(payload.address));
+                tryParsePublicKey(stateInit, this.wallets) ??
+                (await getWalletPublicKey(payload.address));
             if (!publicKey) {
                 return false;
             }
