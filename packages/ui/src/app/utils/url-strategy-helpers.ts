@@ -1,6 +1,18 @@
 import { ReturnStrategy } from 'src/models/return-strategy';
-import { isInTMA, isTmaPlatform, sendOpenTelegramLink } from 'src/app/utils/tma-api';
-import { isBrowser, isOS, openDeeplinkWithFallback, openLink, openLinkBlank, toDeeplink } from 'src/app/utils/web-api';
+import {
+    isInTelegramBrowser,
+    isInTMA,
+    isTmaPlatform,
+    sendOpenTelegramLink
+} from 'src/app/utils/tma-api';
+import {
+    isBrowser,
+    isOS,
+    openDeeplinkWithFallback,
+    openLink,
+    openLinkBlank,
+    toDeeplink
+} from 'src/app/utils/web-api';
 import { encodeTelegramUrlParameters, isTelegramUrl } from '@tonconnect/sdk';
 
 /**
@@ -64,7 +76,14 @@ export function redirectToTelegram(
         directLinkUrl.searchParams.append('startapp', 'tonconnect');
     }
 
-    if (isInTMA()) {
+    if (isInTelegramBrowser()) {
+        // return back to the telegram browser
+        options.returnStrategy = 'back';
+        options.twaReturnUrl = undefined;
+        const linkWitStrategy = addReturnStrategy(directLinkUrl.toString(), options);
+
+        openLinkBlank(linkWitStrategy);
+    } else if (isInTMA()) {
         if (isTmaPlatform('ios', 'android', 'macos')) {
             // Use the `back` strategy, the current TMA instance will keep open.
             // TON Space should automatically open in stack and should close
@@ -264,7 +283,25 @@ export function redirectToWallet(
 ): void {
     options = { ...options };
 
-    if (isInTMA()) {
+    if (isInTelegramBrowser()) {
+        if (isOS('ios', 'android')) {
+            // return back to the telegram browser
+            if (options.returnStrategy === 'back') {
+                options.returnStrategy = 'tg://resolve';
+            }
+
+            setOpenMethod('universal-link');
+
+            openLink(addReturnStrategy(universalLink, options.returnStrategy), '_self');
+        } else {
+            // Fallback for unknown platforms. Should use desktop strategy.
+            setOpenMethod('universal-link');
+
+            const linkWitStrategy = addReturnStrategy(universalLink, options.returnStrategy);
+
+            openLinkBlank(linkWitStrategy);
+        }
+    } else if (isInTMA()) {
         if (isTmaPlatform('ios', 'android')) {
             // Use the `tg://resolve` strategy instead of `back`, the user will transition to the other app
             // and return to the Telegram app after the action is completed.
