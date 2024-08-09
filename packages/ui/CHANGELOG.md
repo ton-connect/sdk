@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui 
 
+## [2.0.9-beta.0](https://github.com/ton-connect/sdk/compare/ui-2.0.8...ui-2.0.9-beta.0) (2024-08-09)
+
+
+### Bug Fixes
+
+* **ui:** improve transitions in telegram browser ([1c8eb4f](https://github.com/ton-connect/sdk/commit/1c8eb4f99dc42a43b82bdc1c452ce068c33254d1))
+
+
+
 ## [2.0.8](https://github.com/ton-connect/sdk/compare/ui-2.0.7...ui-2.0.8) (2024-08-09)
 
 
