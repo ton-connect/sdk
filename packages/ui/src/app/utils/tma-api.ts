@@ -8,6 +8,8 @@ type TelegramWebviewProxy = {
     postEvent(eventType: string, eventData: string): void;
 };
 
+type TelegramWebview = unknown;
+
 declare global {
     interface External {
         notify: (message: string) => void;
@@ -15,6 +17,7 @@ declare global {
 
     interface Window {
         TelegramWebviewProxy?: TelegramWebviewProxy;
+        TelegramWebview?: TelegramWebview;
         Telegram?: {
             WebApp?: {
                 platform?: TmaPlatform;
@@ -60,10 +63,16 @@ export function isTmaPlatform(...platforms: TmaPlatform[]): boolean {
  * Returns true if the app is running in TMA.
  */
 export function isInTMA(): boolean {
-    return (
-        tmaPlatform !== 'unknown' ||
-        !!(getWindow() as { TelegramWebviewProxy: unknown } | undefined)?.TelegramWebviewProxy
-    );
+    return tmaPlatform !== 'unknown' || !!getWindow()?.TelegramWebviewProxy;
+}
+
+/**
+ * Returns true if the app is running in the Telegram browser.
+ */
+export function isInTelegramBrowser(): boolean {
+    const isTelegramWebview = !!getWindow()?.TelegramWebview;
+
+    return (isInTMA() || isTelegramWebview) && tmaPlatform === 'unknown';
 }
 
 /**
