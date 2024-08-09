@@ -10,7 +10,7 @@ export const FALLBACK_WALLETS_LIST: WalletInfoDTO[] = [
         bridge: [
             {
                 type: 'sse',
-                url: 'https://bridge.tonapi.io/bridge'
+                url: 'https://bridge.ton.space/bridge'
             }
         ],
         platforms: ['ios', 'android', 'macos', 'windows', 'linux']
@@ -38,7 +38,7 @@ export const FALLBACK_WALLETS_LIST: WalletInfoDTO[] = [
     {
         app_name: 'mytonwallet',
         name: 'MyTonWallet',
-        image: 'https://mytonwallet.io/icon-256.png',
+        image: 'https://static.mytonwallet.io/icon-256.png',
         about_url: 'https://mytonwallet.io',
         universal_url: 'https://connect.mytonwallet.org',
         bridge: [
@@ -87,15 +87,16 @@ export const FALLBACK_WALLETS_LIST: WalletInfoDTO[] = [
     {
         app_name: 'dewallet',
         name: 'DeWallet',
-        image: 'https://app.delabwallet.com/logo_black.png',
+        image: 'https://raw.githubusercontent.com/delab-team/manifests-images/main/WalletAvatar.png',
         about_url: 'https://delabwallet.com',
+        universal_url: 'https://t.me/dewallet?attach=wallet',
         bridge: [
             {
-                type: 'js',
-                key: 'dewallet'
+                type: 'sse',
+                url: 'https://sse-bridge.delab.team/bridge'
             }
         ],
-        platforms: ['chrome']
+        platforms: ['ios', 'android']
     },
     {
         app_name: 'xtonwallet',
@@ -123,5 +124,82 @@ export const FALLBACK_WALLETS_LIST: WalletInfoDTO[] = [
             }
         ],
         platforms: ['chrome']
+    },
+    {
+        app_name: 'bitgetTonWallet',
+        name: 'Bitget Wallet',
+        image: 'https://raw.githubusercontent.com/bitkeepwallet/download/main/logo/png/bitget_wallet_logo_0_gas_fee.png',
+        about_url: 'https://web3.bitget.com',
+        deepLink: 'bitkeep://',
+        bridge: [
+            {
+                type: 'js',
+                key: 'bitgetTonWallet'
+            },
+            {
+                type: 'sse',
+                url: 'https://bridge.tonapi.io/bridge'
+            }
+        ],
+        platforms: ['ios', 'android', 'chrome'],
+        universal_url: 'https://bkcode.vip/ton-connect'
+    },
+    {
+        app_name: 'safepalwallet',
+        name: 'SafePal',
+        image: 'https://s.pvcliping.com/web/public_image/SafePal_x288.png',
+        tondns: '',
+        about_url: 'https://www.safepal.com',
+        universal_url: 'https://link.safepal.io/ton-connect',
+        deepLink: 'safepal-tc://',
+        bridge: [
+            {
+                type: 'sse',
+                url: 'https://ton-bridge.safepal.com/tonbridge/v1/bridge'
+            },
+            {
+                type: 'js',
+                key: 'safepalwallet'
+            }
+        ],
+        platforms: ['ios', 'android', 'chrome', 'firefox']
+    },
+    {
+        app_name: 'okxTonWallet',
+        name: 'OKX Wallet',
+        image: 'https://static.okx.com/cdn/assets/imgs/247/58E63FEA47A2B7D7.png',
+        about_url: 'https://www.okx.com/web3',
+        universal_url:
+            'https://www.okx.com/download?appendQuery=true&deeplink=okx://web3/wallet/tonconnect',
+        bridge: [
+            {
+                type: 'js',
+                key: 'okxTonWallet'
+            },
+            {
+                type: 'sse',
+                url: 'https://www.okx.com/tonbridge/discover/rpc/bridge'
+            }
+        ],
+        platforms: ['chrome', 'safari', 'firefox', 'ios', 'android']
+    },
+    {
+        app_name: 'okxTonWalletTr',
+        name: 'OKX TR Wallet',
+        image: 'https://static.okx.com/cdn/assets/imgs/247/587A8296F0BB640F.png',
+        about_url: 'https://tr.okx.com/web3',
+        universal_url:
+            'https://tr.okx.com/download?appendQuery=true&deeplink=okxtr://web3/wallet/tonconnect',
+        bridge: [
+            {
+                type: 'js',
+                key: 'okxTonWallet'
+            },
+            {
+                type: 'sse',
+                url: 'https://www.okx.com/tonbridge/discover/rpc/bridge'
+            }
+        ],
+        platforms: ['chrome', 'safari', 'firefox', 'ios', 'android']
     }
 ];
