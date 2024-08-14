@@ -157,7 +157,7 @@ export function redirectToTelegram(
             // and return to the browser when the action is completed.
 
             // TODO: use back for all browsers
-            options.returnStrategy = 'none';
+            options.returnStrategy = 'back';
 
             // In case if the browser is Chrome or Firefox, use the deep link with fallback to the direct link.
             const isChrome = isBrowser('chrome');
@@ -227,7 +227,7 @@ export function redirectToTelegram(
             // Use the `none` strategy. The user will transition to the TON Space
             // and return to the TMA after the action is completed.
 
-            options.returnStrategy = 'none';
+            options.returnStrategy = 'back';
             options.twaReturnUrl = undefined;
 
             if (options.forceRedirect) {
