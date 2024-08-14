@@ -1,5 +1,9 @@
 # Changelog @tonconnect/ui-react 
 
+## [2.0.9-beta.1](https://github.com/ton-connect/sdk/compare/ui-react-2.0.9-beta.0...ui-react-2.0.9-beta.1) (2024-08-14)
+
+
+
 ## [2.0.9-beta.0](https://github.com/ton-connect/sdk/compare/ui-react-2.0.8...ui-react-2.0.9-beta.0) (2024-08-09)
 
 
