@@ -1,5 +1,19 @@
 # Changelog @tonconnect/ui 
 
+## [2.0.9-beta.1](https://github.com/ton-connect/sdk/compare/ui-2.0.9-beta.0...ui-2.0.9-beta.1) (2024-08-14)
+
+
+### Bug Fixes
+
+* **ui:** enhance transitions for android and macos ([d528f9c](https://github.com/ton-connect/sdk/commit/d528f9ca919b43e4d942492aaaf53d507e7e9bc0))
+
+
+### Features
+
+* **ui:** enable direct telegram opening for all wallets in telegram ([3855145](https://github.com/ton-connect/sdk/commit/3855145c4b3e9a7dc7c40ccd8eff7379f89d9b29))
+
+
+
 ## [2.0.9-beta.0](https://github.com/ton-connect/sdk/compare/ui-2.0.8...ui-2.0.9-beta.0) (2024-08-09)
 
 
