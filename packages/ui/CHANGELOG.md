@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui 
 
+## [2.0.9-beta.2](https://github.com/ton-connect/sdk/compare/ui-2.0.9-beta.1...ui-2.0.9-beta.2) (2024-08-14)
+
+
+### Bug Fixes
+
+* **ui:** refine transitions on desktop and android platforms ([e444a21](https://github.com/ton-connect/sdk/commit/e444a219d7a7fce98cc4dbac84b5df9391f8a7e7))
+
+
+
 ## [2.0.9-beta.1](https://github.com/ton-connect/sdk/compare/ui-2.0.9-beta.0...ui-2.0.9-beta.1) (2024-08-14)
 
 
