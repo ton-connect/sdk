@@ -1,5 +1,6 @@
 import {
     ConnectAdditionalRequest,
+    isTelegramUrl,
     isWalletInfoCurrentlyInjected,
     WalletInfoInjectable,
     WalletInfoRemote
@@ -124,23 +125,27 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
 
         setMode('desktop');
 
-        const forceRedirect = !firstClick();
-        setFirstClick(false);
+        if (isTelegramUrl(universalLink())) {
+            onClickTelegram();
+        } else {
+            const forceRedirect = !firstClick();
+            setFirstClick(false);
 
-        redirectToWallet(
-            universalLink()!,
-            props.wallet.deepLink,
-            {
-                returnStrategy: appState.returnStrategy,
-                forceRedirect: forceRedirect
-            },
-            (method: 'universal-link' | 'custom-deeplink'): void => {
-                setLastSelectedWalletInfo({
-                    ...props.wallet,
-                    openMethod: method
-                });
-            }
-        );
+            redirectToWallet(
+                universalLink()!,
+                props.wallet.deepLink,
+                {
+                    returnStrategy: appState.returnStrategy,
+                    forceRedirect: forceRedirect
+                },
+                (method: 'universal-link' | 'custom-deeplink'): void => {
+                    setLastSelectedWalletInfo({
+                        ...props.wallet,
+                        openMethod: method
+                    });
+                }
+            );
+        }
     };
 
     const onClickTelegram = (): void => {
