@@ -207,20 +207,16 @@ export function redirectToTelegram(
             const isFirefox = isBrowser('firefox');
             const useDeepLink = (isChrome || isFirefox) && !options.forceRedirect;
 
+            const linkWithStrategy = addReturnStrategy(
+                directLinkUrl.toString(),
+                options.returnStrategy
+            );
+
             if (useDeepLink) {
-                const linkWithStrategy = addReturnStrategy(
-                    directLinkUrl.toString(),
-                    options.returnStrategy
-                );
                 const deepLink = convertToTGDeepLink(linkWithStrategy);
 
                 openDeeplinkWithFallback(deepLink, () => openLinkBlank(linkWithStrategy));
             } else {
-                const linkWithStrategy = addReturnStrategy(
-                    directLinkUrl.toString(),
-                    options.returnStrategy
-                );
-
                 openLinkBlank(linkWithStrategy);
             }
         } else if (isOS('macos', 'windows', 'linux')) {
@@ -230,13 +226,17 @@ export function redirectToTelegram(
             options.returnStrategy = 'back';
             options.twaReturnUrl = undefined;
 
-            if (options.forceRedirect) {
-                openLinkBlank(addReturnStrategy(directLinkUrl.toString(), options));
-            } else {
-                const link = addReturnStrategy(directLinkUrl.toString(), options);
-                const deepLink = convertToTGDeepLink(link);
+            const linkWithStrategy = addReturnStrategy(
+                directLinkUrl.toString(),
+                options.returnStrategy
+            );
 
-                openDeeplinkWithFallback(deepLink, () => openLinkBlank(link));
+            if (options.forceRedirect) {
+                openLinkBlank(linkWithStrategy);
+            } else {
+                const deepLink = convertToTGDeepLink(linkWithStrategy);
+
+                openDeeplinkWithFallback(deepLink, () => openLinkBlank(linkWithStrategy));
             }
         } else {
             // Fallback for unknown platforms. Should use desktop strategy.
