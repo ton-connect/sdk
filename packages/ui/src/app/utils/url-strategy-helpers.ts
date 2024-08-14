@@ -79,38 +79,26 @@ export function redirectToTelegram(
     if (isInTelegramBrowser()) {
         // return back to the telegram browser
         options.returnStrategy = 'back';
-        options.twaReturnUrl = undefined;
-        const linkWitStrategy = addReturnStrategy(directLinkUrl.toString(), options);
+        const linkWitStrategy = addReturnStrategy(directLinkUrl.toString(), options.returnStrategy);
 
         openLinkBlank(linkWitStrategy);
     } else if (isInTMA()) {
-        if (isTmaPlatform('ios', 'android', 'macos')) {
+        if (isTmaPlatform('ios', 'android', 'macos', 'tdesktop', 'web')) {
             // Use the `back` strategy, the current TMA instance will keep open.
             // TON Space should automatically open in stack and should close
             // itself after the user action.
 
             options.returnStrategy = 'back';
-            options.twaReturnUrl = undefined;
+            const linkWitStrategy = addReturnStrategy(
+                directLinkUrl.toString(),
+                options.returnStrategy
+            );
 
-            sendOpenTelegramLink(addReturnStrategy(directLinkUrl.toString(), options));
-        } else if (isTmaPlatform('tdesktop')) {
-            // Use a strategy involving a direct link to return to the app.
-            // The current TMA instance will close, and TON Space should
-            // automatically open, and reopen the application once the user
-            // action is completed.
-
-            sendOpenTelegramLink(addReturnStrategy(directLinkUrl.toString(), options));
+            sendOpenTelegramLink(linkWitStrategy);
         } else if (isTmaPlatform('weba')) {
+            // TODO: move weba to the ios/android/macOS/tdesktop strategy
             // Similar to tdesktop strategy, but opening another TMA occurs
             // through sending `web_app_open_tg_link` event to `parent`.
-
-            sendOpenTelegramLink(addReturnStrategy(directLinkUrl.toString(), options));
-        } else if (isTmaPlatform('web')) {
-            // Similar to iOS/Android strategy, but opening another TMA occurs
-            // through sending `web_app_open_tg_link` event to `parent`.
-
-            options.returnStrategy = 'back';
-            options.twaReturnUrl = undefined;
 
             sendOpenTelegramLink(addReturnStrategy(directLinkUrl.toString(), options));
         } else {
