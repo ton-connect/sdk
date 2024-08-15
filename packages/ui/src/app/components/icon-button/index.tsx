@@ -1,4 +1,4 @@
-import { Property } from 'csstype';
+import type { Property } from 'csstype';
 import { Component, JSXElement, Match, Show, Switch } from 'solid-js';
 import { ArrowIcon } from 'src/app/components/icons/arrow-icon';
 import { CloseIcon } from 'src/app/components/icons/close-icon';
