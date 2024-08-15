@@ -50,7 +50,8 @@
     "@tonconnect/sdk": "3.0.5",
     "classnames": "^2.3.2",
     "deepmerge": "^4.2.2",
-    "ua-parser-js": "^1.0.35"
+    "ua-parser-js": "^1.0.35",
+    "csstype": "^3.1.1"
   },
   "devDependencies": {
     "@floating-ui/dom": "^1.0.12",
@@ -58,7 +59,6 @@
     "@solid-primitives/i18n": "^1.1.2",
     "@types/node": "^18.11.17",
     "@types/ua-parser-js": "^0.7.36",
-    "csstype": "^3.1.1",
     "eslint-plugin-solid": "^0.7.3",
     "is-plain-object": "^5.0.0",
     "qrcode-generator": "^1.4.4",
