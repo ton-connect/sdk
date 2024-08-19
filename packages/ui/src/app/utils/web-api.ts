@@ -84,7 +84,9 @@ export function fixMobileSafariActiveTransition(): void {
 }
 
 export function defineStylesRoot(): void {
-    customElements.define(globalStylesTag, class TcRootElement extends HTMLElement {});
+    if (!customElements.get(globalStylesTag)) {
+        customElements.define(globalStylesTag, class TcRootElement extends HTMLElement {});
+    }
 }
 
 /**
