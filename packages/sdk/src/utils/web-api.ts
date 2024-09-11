@@ -10,17 +10,17 @@ export function getWindow(): Window | undefined {
 }
 
 /**
- * The function try to get window keys, if it is not available it returns empty array.
+ * The function try to get window entries, if it is not available it returns empty array.
  * As an example, for Safari's private mode it returns empty array, because the browser does not allow to get window keys.
  */
-export function tryGetWindowKeys(): string[] {
+export function tryGetWindowKeys(): [string, any][] {
     const window = getWindow();
     if (!window) {
         return [];
     }
 
     try {
-        return Object.keys(window);
+        return Object.entries(window);
     } catch {
         return [];
     }
