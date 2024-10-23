@@ -31,6 +31,14 @@
     "transactionCanceled": {
       "header": "Транзакция отменена",
       "text": "Состояние вашего счёта не изменится."
+    },
+    "signDataSent": {
+      "header": "Sign Data sent",
+      "text": "Ваша транзакция будет обработана через несколько секунд."
+    },
+    "signDataCanceled": {
+      "header": "Sign Data canceled",
+      "text": "Состояние вашего счёта не изменится."
     }
   },
   "walletItem": {
@@ -86,6 +94,12 @@
       "text": "Это займет пару секунд."
     },
     "transactionSent": "$notifications.transactionSent",
-    "transactionCanceled": "$notifications.transactionCanceled"
+    "transactionCanceled": "$notifications.transactionCanceled",
+    "confirmSignData": {
+      "header": "Confirm data in {{ name }}",
+      "text": "It will only take a moment."
+    },
+    "signDataSent": "$notifications.signDataSent",
+    "signDataCanceled": "$notifications.signDataCanceled"
   }
 }

@@ -28,3 +28,21 @@ export function checkSendTransactionSupport(
         "Connected wallet didn't provide information about max allowed messages in the SendTransaction request. Request may be rejected by the wallet."
     );
 }
+
+
+export function checkSignDataSupport(
+    features: Feature[],
+): never | void {
+    const supportsDeprecatedSignDataFeature = features.includes('SignData');
+    const signDataFeature = features.find(
+        feature => feature && typeof feature === 'object' && feature.name === 'SendTransaction'
+    ) as SendTransactionFeature;
+
+    if (!supportsDeprecatedSignDataFeature && !signDataFeature) {
+        throw new WalletNotSupportFeatureError("Wallet doesn't support SignData feature.");
+    }
+
+    logWarning(
+        "Connected wallet didn't provide information about max allowed messages in the SignData request. Request may be rejected by the wallet."
+    );
+}

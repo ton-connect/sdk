@@ -1,6 +1,6 @@
 import { TonConnectError } from 'src/errors';
 import { Account, Wallet, WalletConnectionSource, WalletConnectionSourceHTTP } from 'src/models';
-import { SendTransactionRequest, SendTransactionResponse } from 'src/models/methods';
+import { SendTransactionRequest, SendTransactionResponse, SignDataRequest, SignDataResponse } from 'src/models/methods';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
 import { WalletInfo } from 'src/models/wallet/wallet-info';
 import { WalletConnectionSourceJS } from 'src/models/wallet/wallet-connection-source';
@@ -92,4 +92,19 @@ export interface ITonConnect {
         transaction: SendTransactionRequest,
         onRequestSent?: () => void
     ): Promise<SendTransactionResponse>;
+
+    /**
+     * Asks connected wallet to sign data
+     * @param data data to sign.
+     * @param options (optional) onRequestSent callback will be called after the data is signed and signal to abort the request.
+     * @returns signed data
+     * If user rejects sign, method will throw the corresponding error.
+     */
+    signData(
+        data: SignDataRequest, 
+        options?: { 
+            onRequestSent?: () => void, 
+            signal?: AbortSignal 
+        }
+    ): Promise<SignDataResponse>;
 }
