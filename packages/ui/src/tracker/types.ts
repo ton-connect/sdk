@@ -3,6 +3,7 @@ import {
     ConnectionRestoringEvent,
     DisconnectionEvent,
     TransactionSigningEvent,
+    DataSigningEvent,
     VersionEvent
 } from '@tonconnect/sdk';
 
@@ -14,7 +15,8 @@ export type UserActionEvent =
     | ConnectionEvent
     | ConnectionRestoringEvent
     | DisconnectionEvent
-    | TransactionSigningEvent;
+    | TransactionSigningEvent
+    | DataSigningEvent;
 
 export {
     createRequestVersionEvent,
@@ -28,5 +30,8 @@ export {
     createDisconnectionEvent,
     createTransactionSentForSignatureEvent,
     createTransactionSigningFailedEvent,
-    createTransactionSignedEvent
+    createTransactionSignedEvent,
+    createDataSentForSignatureEvent,
+    createDataSigningFailedEvent,
+    createDataSignedEvent
 } from '@tonconnect/sdk';
