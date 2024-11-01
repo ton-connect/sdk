@@ -184,25 +184,6 @@ export const FALLBACK_WALLETS_LIST: WalletInfoDTO[] = [
         platforms: ['chrome', 'safari', 'firefox', 'ios', 'android']
     },
     {
-        app_name: 'okxTonWalletTr',
-        name: 'OKX TR Wallet',
-        image: 'https://static.okx.com/cdn/assets/imgs/247/587A8296F0BB640F.png',
-        about_url: 'https://tr.okx.com/web3',
-        universal_url:
-            'https://tr.okx.com/download?appendQuery=true&deeplink=okxtr://web3/wallet/tonconnect',
-        bridge: [
-            {
-                type: 'js',
-                key: 'okxTonWallet'
-            },
-            {
-                type: 'sse',
-                url: 'https://www.okx.com/tonbridge/discover/rpc/bridge'
-            }
-        ],
-        platforms: ['chrome', 'safari', 'firefox', 'ios', 'android']
-    },
-    {
         app_name: 'okxMiniWallet',
         name: 'OKX Mini Wallet',
         image: 'https://static.okx.com/cdn/assets/imgs/2410/32F531EF53080285.png',
