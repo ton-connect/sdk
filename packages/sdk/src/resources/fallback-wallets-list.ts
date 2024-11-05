@@ -186,7 +186,7 @@ export const FALLBACK_WALLETS_LIST: WalletInfoDTO[] = [
     {
         app_name: 'okxMiniWallet',
         name: 'OKX Mini Wallet',
-        image: 'https://static.okx.com/cdn/assets/imgs/2410/32F531EF53080285.png',
+        image: 'https://static.okx.com/cdn/assets/imgs/2411/8BE1A4A434D8F58A.png',
         about_url: 'https://www.okx.com/web3',
         universal_url: 'https://t.me/OKX_WALLET_BOT?attach=wallet',
         bridge: [
