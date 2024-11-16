@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui 
 
+## [2.0.10-beta.1](https://github.com/ton-connect/sdk/compare/ui-2.0.10-beta.0...ui-2.0.10-beta.1) (2024-11-16)
+
+
+### Features
+
+* **ui:** add ability to customize wallets list order ([8890b02](https://github.com/ton-connect/sdk/commit/8890b026dcc11e915a97430aa6404450f21f6bbf))
+
+
+
 ## [2.0.10-beta.0](https://github.com/ton-connect/sdk/compare/ui-2.0.9...ui-2.0.10-beta.0) (2024-08-15)
 
 
