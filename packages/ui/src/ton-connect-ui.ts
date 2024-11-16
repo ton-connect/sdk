@@ -195,7 +195,11 @@ export class TonConnectUI {
         } else if (options && 'manifestUrl' in options && options.manifestUrl) {
             this.connector = new TonConnect({
                 manifestUrl: options.manifestUrl,
-                eventDispatcher: options?.eventDispatcher
+                eventDispatcher: options?.eventDispatcher,
+                ...(options.walletsListSource &&
+                    { walletsListSource: options.walletsListSource }),
+                ...(options.walletsListCacheTTLMs && options.walletsListCacheTTLMs > 0 &&
+                    {walletsListCacheTTLMs: options.walletsListCacheTTLMs}),
             });
         } else {
             throw new TonConnectUIError(
