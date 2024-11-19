@@ -1,5 +1,5 @@
 import { useI18n } from '@solid-primitives/i18n';
-import { Property } from 'csstype';
+import type { Property } from 'csstype';
 import { Component, createEffect, JSXElement, mergeProps } from 'solid-js';
 import { useTheme } from 'solid-styled-components';
 import { Styleable } from 'src/app/models/styleable';

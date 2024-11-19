@@ -31,6 +31,20 @@ export function applyWalletsListConfiguration(
         );
     }
 
+    if (configuration.customOrder?.length) {
+        const uniqueOrderedNames = [...new Set(configuration.customOrder)];
+
+        const customOrderedWallets = uniqueOrderedNames
+            .map(orderedName => walletsList.find(wallet => wallet.appName === orderedName))
+            .filter((wallet): wallet is WalletInfo => wallet !== undefined);
+
+        const remainingWallets = walletsList.filter(
+            wallet => !uniqueOrderedNames.includes(wallet.appName)
+        );
+
+        walletsList = [...customOrderedWallets, ...remainingWallets];
+    }
+
     return walletsList;
 }
 

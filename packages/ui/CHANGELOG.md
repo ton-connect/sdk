@@ -1,5 +1,24 @@
 # Changelog @tonconnect/ui 
 
+## [2.0.10-beta.1](https://github.com/ton-connect/sdk/compare/ui-2.0.10-beta.0...ui-2.0.10-beta.1) (2024-11-16)
+
+
+### Features
+
+* **ui:** add ability to customize wallets list order ([8890b02](https://github.com/ton-connect/sdk/commit/8890b026dcc11e915a97430aa6404450f21f6bbf))
+
+
+
+## [2.0.10-beta.0](https://github.com/ton-connect/sdk/compare/ui-2.0.9...ui-2.0.10-beta.0) (2024-08-15)
+
+
+### Bug Fixes
+
+* **ui:** change 'import' to 'import type' for property from 'csstype' ([4ad31c4](https://github.com/ton-connect/sdk/commit/4ad31c484aa4cbb746ad7673d84253f5ef235022))
+* **ui:** move `csstype` from devDependencies to dependencies ([baf0bc0](https://github.com/ton-connect/sdk/commit/baf0bc0115056492daca05667c9c60eed2567fb1))
+
+
+
 ## [2.0.9](https://github.com/ton-connect/sdk/compare/ui-2.0.9-beta.3...ui-2.0.9) (2024-08-14)
 
 

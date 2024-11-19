@@ -8,4 +8,10 @@ export type WalletsListConfiguration = {
      * Allows to include extra wallets to the wallets list in the modal.
      */
     includeWallets?: UIWallet[];
+
+    /**
+     * List of wallet IDs to be displayed first in the specified order.
+     * Other wallets will be shown below in their original order.
+     */
+    customOrder?: string[];
 };
