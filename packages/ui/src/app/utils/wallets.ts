@@ -26,8 +26,8 @@ export function applyWalletsListConfiguration(
     if (configuration.includeWallets?.length) {
         walletsList = mergeConcat(
             'name',
-            walletsList,
-            configuration.includeWallets.map(uiWalletToWalletInfo)
+            configuration.includeWallets.map(uiWalletToWalletInfo),
+            walletsList
         );
     }
 
