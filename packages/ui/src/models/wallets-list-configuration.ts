@@ -10,8 +10,9 @@ export type WalletsListConfiguration = {
     includeWallets?: UIWallet[];
 
     /**
-     * List of wallet IDs to be displayed first in the specified order.
-     * Other wallets will be shown below in their original order.
+     * Specifies a wallet to be featured in a special spot right after ecosystem wallets.
+     * Should use `app_name` from the official TON wallets list:
+     * https://raw.githubusercontent.com/ton-blockchain/wallets-list/main/wallets-v2.json
      */
-    customOrder?: string[];
+    featuredWallet?: string;
 };
