@@ -2,6 +2,7 @@ import { WalletInfo, TonConnect } from '@tonconnect/sdk';
 import { UIWallet } from 'src/models/ui-wallet';
 import { WalletsListConfiguration } from 'src/models';
 import { mergeConcat } from 'src/app/utils/array';
+import { ECOSYSTEM_WALLETS } from 'src/app/env/ECOSYSTEM_WALLETS';
 
 export function uiWalletToWalletInfo(uiWallet: UIWallet): WalletInfo {
     if ('jsBridgeKey' in uiWallet) {
@@ -20,7 +21,7 @@ export function applyWalletsListConfiguration(
     configuration?: WalletsListConfiguration
 ): WalletInfo[] {
     if (!configuration) {
-        return walletsList;
+        return arrangeWallets(walletsList);
     }
 
     if (configuration.includeWallets?.length) {
@@ -31,21 +32,28 @@ export function applyWalletsListConfiguration(
         );
     }
 
-    if (configuration.customOrder?.length) {
-        const uniqueOrderedNames = [...new Set(configuration.customOrder)];
+    return arrangeWallets(walletsList, configuration.featuredWallet);
+}
 
-        const customOrderedWallets = uniqueOrderedNames
-            .map(orderedName => walletsList.find(wallet => wallet.appName === orderedName))
-            .filter((wallet): wallet is WalletInfo => wallet !== undefined);
+function arrangeWallets(walletsList: WalletInfo[], featuredWallet?: string): WalletInfo[] {
+    const ecosystemWallets = walletsList.filter(wallet =>
+        ECOSYSTEM_WALLETS.includes(wallet.appName)
+    );
 
-        const remainingWallets = walletsList.filter(
-            wallet => !uniqueOrderedNames.includes(wallet.appName)
-        );
+    const featuredWalletInfo =
+        featuredWallet && !ECOSYSTEM_WALLETS.includes(featuredWallet)
+            ? walletsList.find(wallet => wallet.appName === featuredWallet)
+            : undefined;
 
-        walletsList = [...customOrderedWallets, ...remainingWallets];
-    }
+    const remainingWallets = walletsList.filter(
+        wallet => !ECOSYSTEM_WALLETS.includes(wallet.appName) && wallet.appName !== featuredWallet
+    );
 
-    return walletsList;
+    return [
+        ...ecosystemWallets,
+        ...(featuredWalletInfo ? [featuredWalletInfo] : []),
+        ...remainingWallets
+    ];
 }
 
 export function supportsDesktop(walletInfo: WalletInfo): boolean {

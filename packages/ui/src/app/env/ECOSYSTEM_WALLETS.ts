@@ -1,0 +1,1 @@
+export const ECOSYSTEM_WALLETS = ['telegram-wallet', 'tonkeeper', 'mytonwallet'];
