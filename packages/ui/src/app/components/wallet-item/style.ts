@@ -41,8 +41,8 @@ export const WalletItemStyled = styled.button`
     }
 
     ${media('mobile')} {
-        padding: 8px 4px;
-        width: 82px;
+        padding: 8px 0;
+        width: 78px;
     }
 
     ${mediaTouch} {

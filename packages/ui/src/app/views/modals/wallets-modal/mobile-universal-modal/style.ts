@@ -25,7 +25,7 @@ export const UlStyled = styled.ul`
     height: fit-content;
     overflow-x: auto;
     overflow-y: hidden;
-    padding: 0 13px 24px;
+    padding: 8px 19px 16px 19px;
 
     &&::-webkit-scrollbar {
         display: none;
@@ -99,10 +99,15 @@ export const H1Styled = styled(H1)`
     padding: 0 24px;
 `;
 
-export const H2Styled = styled(H2)<{ maxWidth?: number }>`
-    margin-bottom: 24px;
-    padding: 0 24px;
-    min-height: 44px;
+export const H2Styled = styled(H2)<{
+    maxWidth?: number;
+    minHeight?: string;
+    padding?: string;
+    margin?: string;
+}>`
+    margin: ${props => props.margin ?? '0 0 28px 0'};
+    padding: ${props => props.padding ?? '0 24px'};
+    min-height: ${props => props.padding ?? '44px'};
     max-width: ${props => props.maxWidth}px;
     margin-left: ${props => (props.maxWidth ? 'auto' : '0px')};
     margin-right: ${props => (props.maxWidth ? 'auto' : '0px')};
@@ -114,14 +119,14 @@ export const ButtonStyled = styled(Button)`
 `;
 
 export const TelegramButtonStyled = styled(Button)`
-    margin: 0 24px 24px;
-    width: calc(100% - 48px);
+    margin: 0 28px 24px;
+    width: calc(100% - 56px);
     border-radius: ${props => borders[props.theme!.borderRadius]};
     padding: 14px 16px 14px 14px;
     background-color: ${props => props.theme!.colors.telegramButton};
 
     color: ${props => props.theme!.colors.constant.white};
-    font-weight: 510;
+    font-weight: 500;
     font-size: 16px;
     line-height: 20px;
 `;

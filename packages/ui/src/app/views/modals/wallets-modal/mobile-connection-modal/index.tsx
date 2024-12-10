@@ -21,6 +21,7 @@ import { useTheme } from 'solid-styled-components';
 import { MobileConnectionQR } from 'src/app/views/modals/wallets-modal/mobile-connection-modal/mobile-connection-qr';
 import { Translation } from 'src/app/components/typography/Translation';
 import { redirectToTelegram, redirectToWallet } from 'src/app/utils/url-strategy-helpers';
+import { copyToClipboard } from 'src/app/utils/copy-to-clipboard';
 
 export interface MobileConnectionProps {
     additionalRequest?: ConnectAdditionalRequest;
@@ -93,6 +94,20 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
         );
     };
 
+    const [isCopiedShown, setIsCopiedShown] = createSignal<
+        ReturnType<typeof setTimeout> | undefined
+    >(undefined);
+
+    const onCopy = async (): Promise<void> => {
+        if (isCopiedShown() !== undefined) {
+            clearTimeout(isCopiedShown());
+        }
+
+        await copyToClipboard(universalLink());
+        const timeoutId = setTimeout(() => setIsCopiedShown(undefined), 1500);
+        setIsCopiedShown(timeoutId);
+    };
+
     const onOpenQR = (): void => {
         setConnectionErrored(false);
         setShowQR(true);
@@ -127,7 +142,13 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
                 <StyledIconButton icon="arrow" onClick={onBack} />
             </Show>
             <Show when={showQR()}>
-                <MobileConnectionQR universalLink={universalLink()} walletInfo={props.wallet} />
+                <MobileConnectionQR
+                    universalLink={universalLink()}
+                    walletInfo={props.wallet}
+                    onOpenLink={onRetry}
+                    onCopy={onCopy}
+                    isCopiedShown={isCopiedShown()}
+                />
             </Show>
             <Show when={!showQR()}>
                 <H1Styled>{props.wallet.name}</H1Styled>

@@ -1,13 +1,16 @@
 import { Component } from 'solid-js';
-import { H1Styled, H2Styled, QrCodeWrapper } from './style';
+import { H1Styled, H2Styled, QrCodeWrapper, ButtonsWrapper, ActionButton } from './style';
 import { QRCode } from 'src/app/components';
 import { WalletInfo } from '@tonconnect/sdk';
-
 import { addReturnStrategy } from 'src/app/utils/url-strategy-helpers';
+import { Translation } from 'src/app/components/typography/Translation';
 
 interface MobileConnectionQRProps {
     universalLink: string;
     walletInfo: Pick<WalletInfo, 'name' | 'imageUrl'>;
+    onOpenLink?: () => void;
+    onCopy?: () => void;
+    isCopiedShown?: ReturnType<typeof setTimeout> | void;
 }
 
 export const MobileConnectionQR: Component<MobileConnectionQRProps> = props => {
@@ -27,6 +30,22 @@ export const MobileConnectionQR: Component<MobileConnectionQRProps> = props => {
                     disableCopy
                 />
             </QrCodeWrapper>
+            <ButtonsWrapper>
+                <ActionButton appearance="secondary" onClick={() => props.onOpenLink?.()}>
+                    <Translation translationKey="walletModal.mobileUniversalModal.openLink">
+                        Open Link
+                    </Translation>
+                </ActionButton>
+                <ActionButton appearance="secondary" onClick={() => props.onCopy?.()}>
+                    <Translation
+                        translationKey={
+                            props.isCopiedShown !== undefined ? 'common.copied' : 'common.copyLink'
+                        }
+                    >
+                        {props.isCopiedShown !== undefined ? 'Copied' : 'Copy Link'}
+                    </Translation>
+                </ActionButton>
+            </ButtonsWrapper>
         </>
     );
 };
