@@ -2,20 +2,13 @@ import { ConnectAdditionalRequest, isWalletInfoRemote, WalletInfo } from '@tonco
 import { Component, createMemo, createSignal, For, Show } from 'solid-js';
 import {
     AtWalletIcon,
-    CopyLightIcon,
-    DoneIcon,
     FourWalletsItem,
-    LongArrowIcon,
     QRIcon,
-    Text,
     WalletItem
 } from 'src/app/components';
 import {
-    Divider,
     H1Styled,
     H2Styled,
-    IconContainer,
-    OtherOptionButton,
     StyledLeftActionButton,
     TelegramButtonStyled,
     TGImageStyled,
@@ -142,18 +135,23 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
         <div data-tc-wallets-modal-universal-mobile="true">
             <Show when={showQR()}>
                 <StyledLeftActionButton icon="arrow" onClick={onCloseQR} />
-                <MobileUniversalQR universalLink={getUniversalLink()} />
+                <MobileUniversalQR
+                    universalLink={getUniversalLink()}
+                    isCopiedShown={isCopiedShown()}
+                    onOpenLink={onSelectUniversal}
+                    onCopy={onCopy}
+                />
             </Show>
             <Show when={!showQR()}>
                 <StyledLeftActionButton icon={<QRIcon />} onClick={onOpenQR} />
                 <H1Styled translationKey="walletModal.mobileUniversalModal.connectYourWallet">
-                    Connect your wallet
+                    Connect your TON wallet
                 </H1Styled>
                 <H2Styled
                     translationKey="walletModal.mobileUniversalModal.openWalletOnTelegramOrSelect"
-                    maxWidth={342}
+                    maxWidth={320}
                 >
-                    Open Wallet in Telegram or select your wallet to connect
+                    Use Wallet in Telegram or choose other application
                 </H2Styled>
                 <TelegramButtonStyled
                     leftIcon={<AtWalletIcon />}
@@ -162,11 +160,19 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
                     scale="s"
                 >
                     <Translation translationKey="walletModal.mobileUniversalModal.openWalletOnTelegram">
-                        Open Wallet in Telegram
+                        Connect Wallet in Telegram
                     </Translation>
                 </TelegramButtonStyled>
+                <H2Styled
+                    translationKey="walletModal.mobileUniversalModal.chooseOtherApplication"
+                    maxWidth={342}
+                    padding={'0 24px 8px 24px'}
+                    margin={'0'}
+                >
+                    Choose other application
+                </H2Styled>
                 <UlStyled>
-                    <For each={shouldShowMoreButton() ? walletsList().slice(0, 4) : walletsList()}>
+                    <For each={shouldShowMoreButton() ? walletsList().slice(0, 3) : walletsList()}>
                         {wallet => (
                             <li>
                                 <WalletItem
@@ -189,31 +195,6 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
                             />
                         </li>
                     </Show>
-                    <Divider>&nbsp;</Divider>
-                    <OtherOptionButton onClick={onSelectUniversal}>
-                        <IconContainer>
-                            <LongArrowIcon />
-                        </IconContainer>
-                        <Text
-                            fontWeight={590}
-                            translationKey="walletModal.mobileUniversalModal.openLink"
-                        >
-                            Open Link
-                        </Text>
-                    </OtherOptionButton>
-                    <OtherOptionButton onClick={onCopy}>
-                        <IconContainer>
-                            {isCopiedShown() !== undefined ? <DoneIcon /> : <CopyLightIcon />}
-                        </IconContainer>
-                        <Text
-                            fontWeight={590}
-                            translationKey={
-                                isCopiedShown() !== undefined ? 'common.copied' : 'common.copyLink'
-                            }
-                        >
-                            {isCopiedShown() !== undefined ? 'Copied' : 'Copy Link'}
-                        </Text>
-                    </OtherOptionButton>
                 </UlStyled>
             </Show>
         </div>

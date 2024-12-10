@@ -40,6 +40,7 @@ export const CopyIconButton = styled.div`
 export const QrCodeBackground = styled.button`
     display: flex;
     align-items: center;
+    justify-content: center;
     position: relative;
     background-color: ${props => props.theme!.colors.background.qr};
     border-radius: ${props => backgroundBorders[props.theme!.borderRadius]};
@@ -76,8 +77,9 @@ export const QrCodeBackground = styled.button`
 
 export const QrCodeWrapper = styled.div`
     position: relative;
-
-    width: fit-content;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     margin: 0 auto;
 
     > div:first-child {

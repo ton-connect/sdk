@@ -2,9 +2,9 @@
   "common": {
     "close": "Закрыть",
     "openWallet": "Открыть кошелёк",
-    "copyLink": "Копировать ссылку",
+    "copyLink": "Копировать",
     "linkCopied": "Ссылка скопирована",
-    "copied": "Ссылка скопирована",
+    "copied": "Скопировано",
     "yourWallet": "Ваш кошелёк",
     "retry": "Повторить",
     "get": "Скачать",
@@ -40,17 +40,18 @@
     "popular": "Популярен"
   },
   "walletModal": {
-    "loading":  "Кошельки загружаются",
+    "loading": "Кошельки загружаются",
     "wallets": "Кошельки",
     "mobileUniversalModal": {
       "connectYourWallet": "Подключите кошелёк",
-      "openWalletOnTelegramOrSelect": "Подключите Wallet в Telegram или выберете кошелёк для подключения",
+      "openWalletOnTelegramOrSelect": "Подключите Wallet в Telegram или выберете другое приложение",
       "openWalletOnTelegram": "Открыть Wallet в Telegram",
-      "openLink": "Открыть ссылку",
+      "chooseOtherApplication": "Выберите другое приложение",
+      "openLink": "Открыть",
       "scan": "Отсканируйте камерой вашего телефона"
     },
     "desktopUniversalModal": {
-      "connectYourWallet": "Подключите кошелёк",
+      "connectYourWallet": "Подключите TON кошелёк",
       "scan": "Отсканируйте QR-код камерой вашего телефона",
       "availableWallets": "Доступные кошельки"
     },
