@@ -1,5 +1,20 @@
 # Changelog @tonconnect/ui 
 
+## [2.0.10-beta.2](https://github.com/ton-connect/sdk/compare/ui-2.0.10-beta.1...ui-2.0.10-beta.2) (2024-12-10)
+
+
+### Bug Fixes
+
+* **ui:** rename "Wallet On Telegram" to "Wallet in Telegram" ([17eb9f4](https://github.com/ton-connect/sdk/commit/17eb9f454105bb78569a69c8e2a8c56fceeb7bd3))
+
+
+### Features
+
+* **ui:** revert custom wallets list order functionality ([e15dd3b](https://github.com/ton-connect/sdk/commit/e15dd3be2c7260d2b9d2bc97be919585bf5d1b52))
+* **ui:** update mobile qr screens layout and wallet list view ([4c666d5](https://github.com/ton-connect/sdk/commit/4c666d5586b5258971ac7e95a9e29098deede2d8))
+
+
+
 ## [2.0.10-beta.1](https://github.com/ton-connect/sdk/compare/ui-2.0.10-beta.0...ui-2.0.10-beta.1) (2024-11-16)
 
 
