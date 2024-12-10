@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui 
 
+## [2.0.10-beta.3](https://github.com/ton-connect/sdk/compare/ui-2.0.10-beta.2...ui-2.0.10-beta.3) (2024-12-10)
+
+
+### Bug Fixes
+
+* **ui:** adjust mobile layout for wallet icons, text, and wallet button ([44e92dd](https://github.com/ton-connect/sdk/commit/44e92dd3d0dc8a0a5cd64d139703bbbba3d40c92))
+
+
+
 ## [2.0.10-beta.2](https://github.com/ton-connect/sdk/compare/ui-2.0.10-beta.1...ui-2.0.10-beta.2) (2024-12-10)
 
 
