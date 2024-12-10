@@ -15,30 +15,6 @@ const tgBorders: BorderRadiusConfig = {
     none: '0'
 };
 
-export const UlStyled = styled.ul`
-    display: flex;
-    justify-content: space-between;
-    margin: 0 auto;
-    width: fit-content;
-    max-width: 100%;
-    min-width: 100%;
-    height: fit-content;
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding: 8px 19px 16px 19px;
-
-    &&::-webkit-scrollbar {
-        display: none;
-    }
-
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-
-    > li {
-        height: fit-content;
-    }
-`;
-
 export const OtherOptionButton = styled.li`
     width: 82px;
     min-width: 82px;
@@ -68,29 +44,6 @@ export const OtherOptionButton = styled.li`
             transform: scale(0.92);
         }
     }
-`;
-
-export const Divider = styled.div`
-    width: 1px;
-    margin: 0 10px;
-    height: 24px;
-    position: relative;
-    top: 26px;
-
-    background-color: ${props => props.theme!.colors.icon.secondary};
-    opacity: 0.2;
-`;
-
-export const IconContainer = styled.div`
-    width: 60px;
-    height: 60px;
-    border-radius: ${props => borders[props.theme!.borderRadius]};
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    background-color: ${props => props.theme!.colors.background.tint};
-    margin-bottom: 8px;
 `;
 
 export const H1Styled = styled(H1)`
@@ -129,6 +82,11 @@ export const TelegramButtonStyled = styled(Button)`
     font-weight: 500;
     font-size: 16px;
     line-height: 20px;
+
+    @media (max-width: 375px) {
+        margin: 0 16px 24px;
+        width: calc(100% - 32px);
+    }
 `;
 
 export const TGImageStyled = styled(Image)`

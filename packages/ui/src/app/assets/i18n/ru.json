@@ -2,7 +2,7 @@
   "common": {
     "close": "Закрыть",
     "openWallet": "Открыть кошелёк",
-    "copyLink": "Копировать",
+    "copyLink": "Скопировать",
     "linkCopied": "Ссылка скопирована",
     "copied": "Скопировано",
     "yourWallet": "Ваш кошелёк",
@@ -43,7 +43,7 @@
     "loading": "Кошельки загружаются",
     "wallets": "Кошельки",
     "mobileUniversalModal": {
-      "connectYourWallet": "Подключите кошелёк",
+      "connectYourWallet": "Подключите TON кошелёк",
       "openWalletOnTelegramOrSelect": "Подключите Wallet в Telegram или выберете другое приложение",
       "openWalletOnTelegram": "Открыть Wallet в Telegram",
       "chooseOtherApplication": "Выберите другое приложение",
