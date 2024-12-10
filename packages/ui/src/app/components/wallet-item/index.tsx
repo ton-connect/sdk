@@ -47,8 +47,14 @@ export const WalletItem: Component<WalletItemProps> = props => {
             onClick={() => props.onClick()}
             data-tc-wallet-item="true"
         >
-            {typeof props.icon === 'string' ? <ImageStyled src={props.icon} /> : props.icon}
-            {props.badgeUrl && <BadgeStyled src={props.badgeUrl} />}
+            {typeof props.icon === 'string' ? (
+                <ImageStyled
+                    src={props.icon}
+                    badge={props.badgeUrl && <BadgeStyled src={props.badgeUrl} />}
+                />
+            ) : (
+                props.icon
+            )}
             <div ref={el => (ctxRef = el)}>
                 <StyledText>{props.name}</StyledText>
             </div>

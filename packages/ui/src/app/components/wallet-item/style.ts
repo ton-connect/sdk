@@ -17,13 +17,42 @@ const badgeBorders: BorderRadiusConfig = {
     none: '0'
 };
 
+export const WalletUlContainer = styled.ul`
+    display: flex;
+    gap: 0;
+    width: 100%;
+    overflow-x: auto;
+    padding: 8px 12px 16px 12px;
+    margin: 0;
+    list-style: none;
+    flex-wrap: nowrap;
+
+    &&::-webkit-scrollbar {
+        display: none;
+    }
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+
+    > li {
+        display: flex;
+        flex: 1;
+        min-width: 78px;
+        height: fit-content;
+    }
+
+    > li > button {
+        width: 100%;
+    }
+`;
+
 export const WalletItemStyled = styled.button`
     position: relative;
     cursor: pointer;
     border: none;
     background-color: unset;
     padding: 8px 4px;
-    width: 92px;
+    width: 100%;
+    min-width: 78px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -40,11 +69,6 @@ export const WalletItemStyled = styled.button`
         transform: scale(0.96);
     }
 
-    ${media('mobile')} {
-        padding: 8px 0;
-        width: 78px;
-    }
-
     ${mediaTouch} {
         &:active {
             transform: scale(0.92);
@@ -56,14 +80,14 @@ export const ImageStyled = styled(WalletImage)`
     width: 60px;
     height: 60px;
     border-radius: ${props => borders[props.theme!.borderRadius]};
-
     margin-bottom: 8px;
+    position: relative;
 `;
 
 export const BadgeStyled = styled(Image)`
     position: absolute;
-    right: 10px;
-    top: 50px;
+    right: -6px;
+    bottom: -6px;
     width: 24px;
     height: 24px;
     border-radius: ${props => badgeBorders[props.theme!.borderRadius]};
