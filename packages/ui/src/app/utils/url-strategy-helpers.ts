@@ -448,8 +448,8 @@ export function redirectToWallet(
                 openLink(addReturnStrategy(universalLink, options.returnStrategy), '_self');
             } else {
                 setOpenMethod('universal-link');
-
-                openLinkBlank(addReturnStrategy(universalLink, options.returnStrategy));
+                
+                openLink(addReturnStrategy(universalLink, options.returnStrategy), '_self');
             }
         } else if (isOS('android')) {
             // Use the `back` strategy, the user will transition to the other app
