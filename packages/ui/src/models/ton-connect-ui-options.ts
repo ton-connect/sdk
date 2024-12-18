@@ -27,6 +27,11 @@ export interface TonConnectUiOptions {
     walletsListConfiguration?: WalletsListConfiguration;
 
     /**
+     * ID of the wallet to display prominently in the wallets list.
+     */
+    primaryWalletId?: string;
+
+    /**
      * Configuration for action-period (e.g. sendTransaction) UI elements: modals and notifications and wallet behaviour (return strategy).
      */
     actionsConfiguration?: ActionConfiguration;

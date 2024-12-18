@@ -22,8 +22,10 @@ export class WalletsListManager {
 
     private readonly walletsListSource: string =
         'https://raw.githubusercontent.com/ton-blockchain/wallets-list/main/wallets-v2.json';
+    
+    private readonly primaryWalletId: string | undefined;
 
-    constructor(options?: { walletsListSource?: string; cacheTTLMs?: number }) {
+    constructor(options?: { walletsListSource?: string; cacheTTLMs?: number, primaryWalletId?: string }) {
         if (options?.walletsListSource) {
             this.walletsListSource = options.walletsListSource;
         }
@@ -31,6 +33,8 @@ export class WalletsListManager {
         if (options?.cacheTTLMs) {
             this.cacheTTLMs = options.cacheTTLMs;
         }
+
+        this.primaryWalletId = options?.primaryWalletId
     }
 
     public async getWallets(): Promise<WalletInfo[]> {
@@ -84,6 +88,7 @@ export class WalletsListManager {
             const wrongFormatWallets = walletsList.filter(
                 wallet => !this.isCorrectWalletConfigDTO(wallet)
             );
+
             if (wrongFormatWallets.length) {
                 logError(
                     `Wallet(s) ${wrongFormatWallets
@@ -99,6 +104,8 @@ export class WalletsListManager {
             logError(e);
             walletsList = FALLBACK_WALLETS_LIST;
         }
+
+        walletsList = walletsList.sort(wallet =>  wallet.app_name === this.primaryWalletId ? -1 : 1);
 
         let currentlyInjectedWallets: WalletInfoCurrentlyInjected[] = [];
         try {
@@ -205,7 +212,7 @@ export class WalletsListManager {
             return false;
         }
 
-        const sseBridge = bridge.find(item => (item as { type: string }).type === 'sse');
+        const sseBridge = bridge.find(item => (item as { type: string }).type === 'sse') as Object;
 
         if (sseBridge) {
             if (
