@@ -44,9 +44,12 @@
     "wallets": "Кошельки",
     "mobileUniversalModal": {
       "connectYourWallet": "Подключите TON кошелёк",
+      "openPrimaryWalletOrSelect": "Открыть {{ name }} или выберете ваш кошелек для соединения",
       "openWalletOnTelegramOrSelect": "Подключите Wallet в Telegram или выберете другое приложение",
       "openWalletOnTelegram": "Открыть Wallet в Telegram",
+      "openWallet": "Открыть {{ name }}",
       "chooseOtherApplication": "Выберите другое приложение",
+      "chooseOtherWallet": "Другие варианты",
       "openLink": "Открыть",
       "scan": "Отсканируйте камерой вашего телефона"
     },

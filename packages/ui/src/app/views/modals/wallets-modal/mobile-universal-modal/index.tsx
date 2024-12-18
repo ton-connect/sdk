@@ -1,6 +1,6 @@
 import { ConnectAdditionalRequest, isWalletInfoRemote, WalletInfo } from '@tonconnect/sdk';
 import { Component, createMemo, createSignal, For, Show } from 'solid-js';
-import { AtWalletIcon, FourWalletsItem, QRIcon, WalletItem } from 'src/app/components';
+import { AtWalletIcon, Button, FourWalletsItem, QRIcon, WalletItem } from 'src/app/components';
 import {
     H1Styled,
     H2Styled,
@@ -29,6 +29,8 @@ interface MobileUniversalModalProps {
     onSelect: (walletInfo: WalletInfo) => void;
 
     onSelectAllWallets: () => void;
+
+    primaryWalletId?: string;
 }
 
 export const MobileUniversalModal: Component<MobileUniversalModalProps> = props => {
@@ -36,8 +38,22 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
     const [firstClick, setFirstClick] = createSignal(true);
     const [universalLink, setUniversalLink] = createSignal<string | null>(null);
     const connector = appState.connector;
+
+    const primaryWallet = createMemo(() => {
+        const primaryWalletId = props.primaryWalletId ?? AT_WALLET_APP_NAME;
+        return props.walletsList.find(wallet => wallet.appName === primaryWalletId);
+    });
+    const primaryWalletValue = primaryWallet();
+
+    const [showSecondaryWallets, setShowSecondaryWallets] = createSignal(
+        primaryWalletValue === undefined
+    );
+
     const walletsList = (): WalletInfo[] =>
-        props.walletsList.filter(w => supportsMobile(w) && w.appName !== AT_WALLET_APP_NAME);
+        props.walletsList.filter(
+            w => supportsMobile(w) && w.appName !== (props.primaryWalletId ?? AT_WALLET_APP_NAME)
+        );
+
     const shouldShowMoreButton = (): boolean => walletsList().length > 7;
 
     const walletsBridges = createMemo(() => getUniqueBridges(props.walletsList), null, {
@@ -86,18 +102,20 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
         );
     };
 
-    const onSelectTelegram = (): void => {
+    const onPrimaryWallet = (): void => {
         setUniversalLink(null);
 
-        const atWallet = props.walletsList.find(wallet => wallet.appName === AT_WALLET_APP_NAME);
-        if (!atWallet || !isWalletInfoRemote(atWallet)) {
-            throw new TonConnectUIError('@wallet bot not found in the wallets list');
+        // const atWallet = props.walletsList.find(wallet => wallet.appName === AT_WALLET_APP_NAME);
+        if (!primaryWalletValue || !isWalletInfoRemote(primaryWalletValue)) {
+            throw new TonConnectUIError('Selected wallet not found in the wallets list');
         }
+
+        console.log('primaryWalletValue', primaryWalletValue);
 
         const walletLink = connector.connect(
             {
-                bridgeUrl: atWallet.bridgeUrl,
-                universalLink: atWallet.universalLink
+                bridgeUrl: primaryWalletValue.bridgeUrl,
+                universalLink: primaryWalletValue.universalLink
             },
             props.additionalRequest
         );
@@ -107,7 +125,10 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
 
         redirectToTelegram(walletLink, {
             returnStrategy: appState.returnStrategy,
-            twaReturnUrl: appState.twaReturnUrl,
+            twaReturnUrl:
+                primaryWalletValue.appName === AT_WALLET_APP_NAME
+                    ? appState.twaReturnUrl
+                    : undefined,
             forceRedirect: forceRedirect
         });
     };
@@ -142,55 +163,94 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
                 <H1Styled translationKey="walletModal.mobileUniversalModal.connectYourWallet">
                     Connect your TON wallet
                 </H1Styled>
-                <H2Styled
-                    translationKey="walletModal.mobileUniversalModal.openWalletOnTelegramOrSelect"
-                    maxWidth={320}
-                >
-                    Use Wallet in Telegram or choose other application
-                </H2Styled>
+                <Show when={primaryWallet()}>
+                    <H2Styled
+                        translationKey="walletModal.mobileUniversalModal.openPrimaryWalletOrSelect"
+                        translationValues={{ name: primaryWallet()!.name }}
+                        maxWidth={320}
+                    >
+                        Open {primaryWallet()!.name} or select your wallet to connect
+                    </H2Styled>
+                </Show>
+                <Show when={!primaryWallet()}>
+                    <H2Styled
+                        translationKey="walletModal.mobileUniversalModal.openPrimaryWalletOrSelect"
+                        translationValues={{ name: primaryWallet()!.name }}
+                        maxWidth={320}
+                    >
+                        Open {primaryWallet()!.name} or select your wallet to connect
+                    </H2Styled>
+                </Show>
                 <TelegramButtonStyled
-                    leftIcon={<AtWalletIcon />}
-                    rightIcon={<TGImageStyled src={IMG.TG} />}
-                    onClick={onSelectTelegram}
+                    leftIcon={primaryWallet() ? <div style="width: 24px" /> : <AtWalletIcon />}
+                    rightIcon={
+                        <TGImageStyled src={primaryWallet() ? primaryWallet()!.imageUrl : IMG.TG} />
+                    }
+                    onClick={onPrimaryWallet}
                     scale="s"
                 >
-                    <Translation translationKey="walletModal.mobileUniversalModal.openWalletOnTelegram">
-                        Connect Wallet in Telegram
-                    </Translation>
+                    <Show when={primaryWallet()}>
+                        <Translation
+                            translationKey="walletModal.mobileUniversalModal.openWallet"
+                            translationValues={{ name: primaryWallet()!.name }}
+                        >
+                            Open {primaryWallet()!.name}
+                        </Translation>
+                    </Show>
+                    <Show when={!primaryWallet()}>
+                        <Translation translationKey="walletModal.mobileUniversalModal.openWalletOnTelegram">
+                            Connect Wallet in Telegram
+                        </Translation>
+                    </Show>
                 </TelegramButtonStyled>
-                <H2Styled
-                    translationKey="walletModal.mobileUniversalModal.chooseOtherApplication"
-                    maxWidth={342}
-                    padding={'0 24px 8px 24px'}
-                    margin={'0'}
-                >
-                    Choose other application
-                </H2Styled>
-                <WalletUlContainer>
-                    <For each={shouldShowMoreButton() ? walletsList().slice(0, 3) : walletsList()}>
-                        {wallet => (
+                <Show when={primaryWallet() && !showSecondaryWallets()}>
+                    <div style="padding-bottom: 16px; display: flex; justify-content: center;">
+                        <Button appearance="flat" onClick={() => setShowSecondaryWallets(true)}>
+                            Other Options
+                        </Button>
+                    </div>
+                </Show>
+                <Show when={!primaryWallet()}>
+                    <H2Styled
+                        translationKey="walletModal.mobileUniversalModal.chooseOtherApplication"
+                        maxWidth={342}
+                        padding={'0 24px 8px 24px'}
+                        margin={'0'}
+                    >
+                        Choose other application
+                    </H2Styled>
+                </Show>
+                <Show when={showSecondaryWallets()}>
+                    <WalletUlContainer>
+                        <For
+                            each={
+                                shouldShowMoreButton() ? walletsList().slice(0, 3) : walletsList()
+                            }
+                        >
+                            {wallet => (
+                                <li>
+                                    <WalletItem
+                                        icon={wallet.imageUrl}
+                                        name={wallet.name}
+                                        onClick={() => props.onSelect(wallet)}
+                                    />
+                                </li>
+                            )}
+                        </For>
+                        <Show when={shouldShowMoreButton()}>
                             <li>
-                                <WalletItem
-                                    icon={wallet.imageUrl}
-                                    name={wallet.name}
-                                    onClick={() => props.onSelect(wallet)}
+                                <FourWalletsItem
+                                    labelLine1="View all"
+                                    labelLine2="wallets"
+                                    images={walletsList()
+                                        .slice(3, 7)
+                                        .map(i => i.imageUrl)}
+                                    onClick={() => props.onSelectAllWallets()}
                                 />
                             </li>
-                        )}
-                    </For>
-                    <Show when={shouldShowMoreButton()}>
-                        <li>
-                            <FourWalletsItem
-                                labelLine1="View all"
-                                labelLine2="wallets"
-                                images={walletsList()
-                                    .slice(3, 7)
-                                    .map(i => i.imageUrl)}
-                                onClick={() => props.onSelectAllWallets()}
-                            />
-                        </li>
-                    </Show>
-                </WalletUlContainer>
+                        </Show>
+                    </WalletUlContainer>
+                </Show>
             </Show>
         </div>
     );

@@ -91,7 +91,7 @@ const TonConnectUIProvider: FunctionComponent<TonConnectUIProviderProps> = ({
     ...options
 }) => {
     if (isClientSide() && !tonConnectUI) {
-        tonConnectUI = new TonConnectUI(options);
+        tonConnectUI = new TonConnectUI({ ...options, primaryWalletId: 'tonkeeper' });
     }
 
     return (

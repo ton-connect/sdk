@@ -44,9 +44,12 @@
     "wallets": "Wallets",
     "mobileUniversalModal": {
       "connectYourWallet": "Connect your TON wallet",
+      "openPrimaryWalletOrSelect": "Open {{ name }} or select your wallet to connect",
       "openWalletOnTelegramOrSelect": "Use Wallet in Telegram or choose other application",
       "openWalletOnTelegram": "Connect Wallet in Telegram",
+      "openWallet": "Open {{ name }}",
       "chooseOtherApplication": "Choose other application",
+      "chooseOtherWallet": "Other Options",
       "openLink": "Open Link",
       "scan": "Scan with your mobile wallet"
     },
