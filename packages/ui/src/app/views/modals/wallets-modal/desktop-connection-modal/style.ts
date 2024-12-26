@@ -1,5 +1,14 @@
 import { styled } from 'solid-styled-components';
-import {Button, ErrorIcon, H1, H2, IconButton, LoaderIcon, Image, QRCode} from 'src/app/components';
+import {
+    Button,
+    ErrorIcon,
+    H1,
+    H2,
+    IconButton,
+    LoaderIcon,
+    Image,
+    QRCode
+} from 'src/app/components';
 import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
 
 const tgButtonBorders: BorderRadiusConfig = {
@@ -31,6 +40,16 @@ export const BodyStyled = styled.div<{ qr: boolean }>`
 
 export const QRCodeStyled = styled(QRCode)`
     margin-bottom: 24px;
+`;
+
+export const AllWalletsButton = styled(Button)`
+    padding-bottom: 24px;
+    display: flex;
+    justify-content: center;
+    font-weight: 400;
+    font-size: 16px;
+    margin: 0 auto;
+    color: ${props => props.theme!.colors.text.secondary};
 `;
 
 export const H1Styled = styled(H1)`

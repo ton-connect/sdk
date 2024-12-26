@@ -17,6 +17,7 @@ import {
     useContext
 } from 'solid-js';
 import {
+    AllWalletsButton,
     BodyStyled,
     BodyTextStyled,
     BottomButtonsContainerStyled,
@@ -34,6 +35,7 @@ import {
 } from './style';
 import { ConnectorContext } from 'src/app/state/connector.context';
 import {
+    ArrowIcon,
     BrowserIcon,
     Button,
     DesktopIcon,
@@ -59,6 +61,7 @@ export interface DesktopConnectionProps {
     additionalRequest?: ConnectAdditionalRequest;
     wallet: WalletInfoRemote | (WalletInfoRemote & WalletInfoInjectable);
     onBackClick: () => void;
+    onAllWalletsClick?: () => void;
     backDisabled?: boolean;
 }
 
@@ -328,6 +331,17 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                         </FooterButton>
                     </Show>
                 </BottomButtonsContainerStyled>
+            </Show>
+            <Show when={props.onAllWalletsClick}>
+                <AllWalletsButton
+                    appearance="flat"
+                    onClick={() => props.onAllWalletsClick?.()}
+                    rightIcon={<ArrowIcon direction="right" />}
+                >
+                    <Translation translationKey="walletModal.desktopConnectionModal.chooseOtherWallet">
+                        Choose other Wallet
+                    </Translation>
+                </AllWalletsButton>
             </Show>
         </DesktopConnectionModalStyled>
     );

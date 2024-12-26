@@ -1,13 +1,13 @@
 import { Component } from 'solid-js';
 import { H1Styled, H2Styled, QrCodeWrapper, ButtonsWrapper, ActionButton } from './style';
 import { QRCode } from 'src/app/components';
-import { IMG } from 'src/app/env/IMG';
 
 import { addReturnStrategy } from 'src/app/utils/url-strategy-helpers';
 import { Translation } from 'src/app/components/typography/Translation';
 
 interface MobileUniversalQRProps {
     universalLink: string;
+    imageUrl: string;
     onOpenLink: () => void;
     onCopy: () => void;
     isCopiedShown: ReturnType<typeof setTimeout> | void;
@@ -24,7 +24,7 @@ export const MobileUniversalQR: Component<MobileUniversalQRProps> = props => {
             </H2Styled>
             <QrCodeWrapper>
                 <QRCode
-                    imageUrl={IMG.TON}
+                    imageUrl={props.imageUrl}
                     sourceUrl={addReturnStrategy(props.universalLink, 'none')}
                     disableCopy
                 />

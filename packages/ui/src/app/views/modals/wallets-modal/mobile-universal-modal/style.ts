@@ -46,6 +46,16 @@ export const OtherOptionButton = styled.li`
     }
 `;
 
+export const AllWalletsButton = styled(Button)`
+    padding-bottom: 24px;
+    display: flex;
+    justify-content: center;
+    font-weight: 400;
+    font-size: 16px;
+    margin: 0 auto;
+    color: ${props => props.theme!.colors.text.secondary};
+`;
+
 export const H1Styled = styled(H1)`
     margin-top: 38px;
     margin-bottom: 4px;
@@ -71,7 +81,7 @@ export const ButtonStyled = styled(Button)`
     margin: 0 auto;
 `;
 
-export const TelegramButtonStyled = styled(Button)`
+export const PrimaryButtonStyled = styled(Button)`
     margin: 0 28px 24px;
     width: calc(100% - 56px);
     border-radius: ${props => borders[props.theme!.borderRadius]};
@@ -100,4 +110,9 @@ export const StyledLeftActionButton = styled(IconButton)`
     position: absolute;
     top: 16px;
     left: 16px;
+`;
+
+export const PrimaryButtonIconPlaceholder = styled.div`
+    width: 28px;
+    height: 28px;
 `;

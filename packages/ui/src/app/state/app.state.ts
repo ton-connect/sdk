@@ -15,6 +15,7 @@ export type AppState = {
     twaReturnUrl: `${string}://${string}` | undefined;
     preferredWalletAppName: string | undefined;
     enableAndroidBackHandler: boolean;
+    primaryWalletAppName: string | undefined;
 };
 
 export const [appState, setAppState] = createStore<AppState>({

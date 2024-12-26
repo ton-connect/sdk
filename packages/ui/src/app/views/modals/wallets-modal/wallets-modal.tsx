@@ -46,8 +46,7 @@ export const WalletsModal: Component = () => {
         if (getWalletsModalIsOpened()) {
             updateIsMobile();
         } else {
-            setSelectedWalletInfo(null);
-            setSelectedTab('universal');
+            onSelectUniversal();
             setInfoTab(false);
         }
     });
@@ -57,7 +56,9 @@ export const WalletsModal: Component = () => {
     const [fetchedWalletsList] = createResource(() => tonConnectUI!.getWallets());
 
     const [selectedWalletInfo, setSelectedWalletInfo] = createSignal<WalletInfo | null>(null);
-    const [selectedTab, setSelectedTab] = createSignal<'universal' | 'all-wallets'>('universal');
+    const [selectedTab, setSelectedTab] = createSignal<'universal' | 'connection' | 'all-wallets'>(
+        'universal'
+    );
     const [infoTab, setInfoTab] = createSignal(false);
 
     const walletsList = createMemo<PersonalizedWalletInfo[] | null>(() => {
@@ -96,6 +97,16 @@ export const WalletsModal: Component = () => {
         return walletsList;
     });
 
+    const primaryWallet = createMemo(() =>
+        walletsList()?.find(wallet => wallet.appName === appState.primaryWalletAppName)
+    );
+
+    const visibleTab = createMemo(() =>
+        primaryWallet() && selectedTab() === 'universal' && !isMobile()
+            ? 'connection'
+            : selectedTab()
+    );
+
     const additionalRequestLoading = (): boolean =>
         appState.connectRequestParameters?.state === 'loading';
 
@@ -118,20 +129,22 @@ export const WalletsModal: Component = () => {
         }
     });
 
+    const onSelectWallet = (walletInfo: WalletInfo): void => {
+        setSelectedWalletInfo(walletInfo);
+        setSelectedTab('connection');
+    };
+
     const onSelectAllWallets = (): void => {
         setSelectedTab('all-wallets');
     };
 
     const onSelectUniversal = (): void => {
         setSelectedTab('universal');
-    };
-
-    const clearSelectedWalletInfo = (): void => {
-        setSelectedWalletInfo(null);
+        setSelectedWalletInfo(primaryWallet() ?? null);
     };
 
     onCleanup(() => {
-        setSelectedWalletInfo(null);
+        onSelectUniversal();
         setInfoTab(false);
     });
 
@@ -161,32 +174,37 @@ export const WalletsModal: Component = () => {
 
                 <Show when={!additionalRequestLoading() && walletsList()}>
                     <Switch>
-                        <Match when={selectedWalletInfo()}>
+                        <Match when={visibleTab() === 'all-wallets'}>
+                            <AllWalletsListModal
+                                walletsList={walletsList()!}
+                                onBack={onSelectUniversal}
+                                onSelect={onSelectWallet}
+                            />
+                        </Match>
+                        <Match when={visibleTab() === 'connection'}>
                             <Dynamic
                                 component={
                                     isMobile() ? MobileConnectionModal : DesktopConnectionModal
                                 }
                                 wallet={selectedWalletInfo()! as WalletInfoRemote}
                                 additionalRequest={additionalRequest()}
-                                onBackClick={clearSelectedWalletInfo}
+                                onBackClick={onSelectUniversal}
+                                onAllWalletsClick={primaryWallet() && onSelectAllWallets}
+                                backDisabled={
+                                    !isMobile() && selectedWalletInfo() === primaryWallet()
+                                }
                             />
                         </Match>
-                        <Match when={selectedTab() === 'universal'}>
+                        <Match when={visibleTab() === 'universal'}>
                             <Dynamic
                                 component={
                                     isMobile() ? MobileUniversalModal : DesktopUniversalModal
                                 }
-                                onSelect={setSelectedWalletInfo}
+                                onSelect={onSelectWallet}
                                 walletsList={walletsList()!}
                                 additionalRequest={additionalRequest()!}
                                 onSelectAllWallets={onSelectAllWallets}
-                            />
-                        </Match>
-                        <Match when={selectedTab() === 'all-wallets'}>
-                            <AllWalletsListModal
-                                walletsList={walletsList()!}
-                                onBack={onSelectUniversal}
-                                onSelect={setSelectedWalletInfo}
+                                primaryWalletAppName={appState.primaryWalletAppName}
                             />
                         </Match>
                     </Switch>

@@ -19,7 +19,7 @@ import { TonConnectUIError } from 'src/errors/ton-connect-ui.error';
 import { TonConnectUiCreateOptions } from 'src/models/ton-connect-ui-create-options';
 import { PreferredWalletStorage, WalletInfoStorage } from 'src/storage';
 import {
-    createMacrotask, createMacrotaskAsync,
+    createMacrotaskAsync,
     getSystemTheme,
     preloadImages,
     subscribeToThemeChange
@@ -67,6 +67,8 @@ export class TonConnectUI {
     private actionsConfiguration?: ActionConfiguration;
 
     private readonly walletsList: Promise<WalletInfo[]>;
+
+    public readonly primaryWalletAppName?: string;
 
     private connectRequestParametersCallback?: (
         parameters: ConnectAdditionalRequest | undefined
@@ -162,6 +164,12 @@ export class TonConnectUI {
         setAppState(state => {
             const merged = mergeOptions(
                 {
+                    ...(options.hasOwnProperty('primaryWalletAppName') && {
+                        primaryWalletAppName:
+                            options.primaryWalletAppName === null
+                                ? undefined
+                                : options.primaryWalletAppName
+                    }),
                     ...(options.language && { language: options.language }),
                     ...(!!options.actionsConfiguration?.returnStrategy && {
                         returnStrategy: options.actionsConfiguration.returnStrategy
@@ -234,6 +242,8 @@ export class TonConnectUI {
 
         this.walletsList = this.getWallets();
 
+        this.primaryWalletAppName = options.primaryWalletAppName;
+
         this.walletsList.then(list => preloadImages(uniq(list.map(item => item.imageUrl))));
 
         const rootId = this.normalizeWidgetRoot(options?.widgetRootId);
@@ -260,7 +270,8 @@ export class TonConnectUI {
         const preferredWalletName = this.preferredWalletStorage.getPreferredWalletAppName();
         setAppState({
             connector: this.connector,
-            preferredWalletAppName: preferredWalletName
+            preferredWalletAppName: preferredWalletName,
+            primaryWalletAppName: this.primaryWalletAppName
         });
 
         widgetController.renderApp(rootId, this);

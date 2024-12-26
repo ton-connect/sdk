@@ -40,20 +40,23 @@
     "popular": "Popular"
   },
   "walletModal": {
-    "loading": "Loading wallets",
+    "loading": "Loading Wallets",
     "wallets": "Wallets",
     "mobileUniversalModal": {
       "connectYourWallet": "Connect your TON wallet",
+      "openPrimaryWalletOrSelect": "Open {{ name }} or select your wallet to connect",
       "openWalletOnTelegramOrSelect": "Use Wallet in Telegram or choose other application",
       "openWalletOnTelegram": "Connect Wallet in Telegram",
+      "openWallet": "Open {{ name }}",
       "chooseOtherApplication": "Choose other application",
+      "chooseOtherWallet": "Choose other Wallet",
       "openLink": "Open Link",
       "scan": "Scan with your mobile wallet"
     },
     "desktopUniversalModal": {
       "connectYourWallet": "Connect your TON wallet",
       "scan": "Scan with your mobile wallet",
-      "availableWallets": "Available wallets"
+      "availableWallets": "Available Wallets"
     },
     "mobileConnectionModal": {
       "showQR": "Show QR Code",
@@ -62,6 +65,7 @@
       "connectionDeclined": "Connection declined"
     },
     "desktopConnectionModal": {
+      "chooseOtherWallet": "Choose other Wallet",
       "scanQR": "Scan the QR code below with your phone’s or {{ name }}’s camera",
       "continueInExtension": "Continue in {{ name }} browser extension…",
       "dontHaveExtension": "Seems you don't have installed {{ name }} browser extension",
