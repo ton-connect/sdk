@@ -44,16 +44,19 @@
     "wallets": "Кошельки",
     "mobileUniversalModal": {
       "connectYourWallet": "Подключите TON кошелёк",
+      "openPrimaryWalletOrSelect": "Открыть {{ name }} или выберете ваш кошелек для соединения",
       "openWalletOnTelegramOrSelect": "Подключите Wallet в Telegram или выберете другое приложение",
       "openWalletOnTelegram": "Открыть Wallet в Telegram",
+      "openWallet": "Открыть {{ name }}",
       "chooseOtherApplication": "Выберите другое приложение",
+      "chooseOtherWallet": "Выбрать другой Кошелёк",
       "openLink": "Открыть",
       "scan": "Отсканируйте камерой вашего телефона"
     },
     "desktopUniversalModal": {
       "connectYourWallet": "Подключите TON кошелёк",
       "scan": "Отсканируйте QR-код камерой вашего телефона",
-      "availableWallets": "Доступные кошельки"
+      "availableWallets": "Доступные Кошельки"
     },
     "mobileConnectionModal": {
       "showQR": "Показать QR-код",
@@ -62,6 +65,7 @@
       "connectionDeclined": "Подключение отклонено"
     },
     "desktopConnectionModal": {
+      "chooseOtherWallet": "Выбрать другой Кошелёк",
       "scanQR": "Отсканируйте QR-код ниже камерой в приложении {{ name }}, или камерой телефона",
       "continueInExtension": "Откройте браузерное расширение {{ name }}",
       "dontHaveExtension": "Похоже, у вас не установлено браузерное расширение {{ name }}",

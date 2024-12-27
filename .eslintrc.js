@@ -33,7 +33,11 @@ module.exports = {
                             },
                             {
                                 "sourceTag": "scope:ui",
-                                "onlyDependOnLibsWithTags": ["scope:core"]
+                                "onlyDependOnLibsWithTags": ["scope:sdk"]
+                            },
+                            {
+                                "sourceTag": "scope:ui-react",
+                                "onlyDependOnLibsWithTags": ["scope:ui"]
                             }
                         ]
                     }

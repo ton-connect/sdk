@@ -6,7 +6,7 @@ import {
     QRCodeStyled,
     WalletsContainerStyled
 } from './style';
-import { ConnectAdditionalRequest, isWalletInfoRemote, WalletInfo } from '@tonconnect/sdk';
+import { ConnectAdditionalRequest, WalletInfo } from '@tonconnect/sdk';
 import { appState } from 'src/app/state/app.state';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { FourWalletsItem, H1, WalletLabeledItem } from 'src/app/components';
@@ -24,6 +24,8 @@ interface DesktopUniversalModalProps {
     onSelect: (walletInfo: WalletInfo) => void;
 
     onSelectAllWallets: () => void;
+
+    primaryWalletAppName?: string;
 }
 
 export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = props => {
@@ -35,6 +37,7 @@ export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = prop
     });
 
     setLastSelectedWalletInfo({ openMethod: 'qrcode' });
+
     const request = createMemo(() => connector.connect(walletsBridges(), props.additionalRequest));
 
     return (
@@ -54,7 +57,7 @@ export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = prop
                 imageUrl={IMG.TON}
             />
             <H2AvailableWalletsStyled translationKey="walletModal.desktopUniversalModal.availableWallets">
-                Available wallets
+                Available Wallets
             </H2AvailableWalletsStyled>
             <WalletsContainerStyled>
                 <For each={props.walletsList.slice(0, 3)}>
