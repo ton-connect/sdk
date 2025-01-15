@@ -43,7 +43,7 @@ You can find `TonConnectUI` in global variable `TON_CONNECT_UI`, e.g.
 
 ## Create TonConnectUI instance
 ```ts
-import TonConnectUI from '@tonconnect/ui'
+import { TonConnectUI } from '@tonconnect/ui'
 
 const tonConnectUI = new TonConnectUI({
     manifestUrl: 'https://<YOUR_APP_URL>/tonconnect-manifest.json',
