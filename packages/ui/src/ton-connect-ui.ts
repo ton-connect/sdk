@@ -9,6 +9,8 @@ import {
     ITonConnect,
     SendTransactionRequest,
     SendTransactionResponse,
+    SignDataRequest,
+    SignDataResponse,
     TonConnect,
     TonConnectError,
     Wallet,
@@ -44,6 +46,7 @@ import { SingleWalletModalManager } from 'src/managers/single-wallet-modal-manag
 import { SingleWalletModal, SingleWalletModalState } from 'src/models/single-wallet-modal';
 import { TonConnectUITracker } from 'src/tracker/ton-connect-ui-tracker';
 import { tonConnectUiVersion } from 'src/constants/version';
+import { SignDataModalManager } from './managers/sign-data-modal-manager';
 
 export class TonConnectUI {
     public static getWallets(): Promise<WalletInfo[]> {
@@ -93,6 +96,12 @@ export class TonConnectUI {
      * TODO: make it public when interface will be ready for external usage.
      */
     private readonly transactionModal: TransactionModalManager;
+
+    /**
+     * Manages the transaction modal window state.
+     * TODO: make it public when interface will be ready for external usage.
+     */
+    private readonly signDataModal: SignDataModalManager;
 
     /**
      * Promise that resolves after end of th connection restoring process (promise will fire after `onStatusChange`,
@@ -231,6 +240,10 @@ export class TonConnectUI {
         this.transactionModal = new TransactionModalManager({
             connector: this.connector
         });
+
+        this.signDataModal = new SignDataModalManager({
+            connector: this.connector
+        })
 
         this.walletsList = this.getWallets();
 
@@ -518,6 +531,123 @@ export class TonConnectUI {
         }
     }
 
+
+     /**
+     * Opens the modal window and handles the transaction sending.
+     * @param data data to sign.
+     * @param options modal and notifications behaviour settings. Default is show only 'before' modal and all notifications.
+     */
+     public async signData(
+        data: SignDataRequest,
+        options?: ActionConfiguration
+    ): Promise<SignDataResponse> {
+        this.tracker.trackDataSentForSignature(this.wallet, data);
+
+        if (!this.connected) {
+            this.tracker.trackDataSigningFailed(this.wallet, data, 'Wallet was not connected');
+            throw new TonConnectUIError('Connect wallet to send a transaction.');
+        }
+
+        if (isInTMA()) {
+            sendExpand();
+        }
+
+        const { notifications, modals, returnStrategy, twaReturnUrl, skipRedirectToWallet } =
+            this.getModalsAndNotificationsConfiguration(options);
+
+        widgetController.setAction({
+            name: 'confirm-data',
+            showNotification: notifications.includes('before'),
+            openModal: modals.includes('before'),
+            signed: false
+        });
+
+        const onRequestSent = (): void => {
+            if (abortController.signal.aborted) {
+                return;
+            }
+
+            widgetController.setAction({
+                name: 'confirm-data',
+                showNotification: notifications.includes('before'),
+                openModal: modals.includes('before'),
+                signed: true
+            });
+
+            if (
+                this.walletInfo &&
+                'universalLink' in this.walletInfo &&
+                (this.walletInfo.openMethod === 'universal-link' ||
+                    this.walletInfo.openMethod === 'custom-deeplink')
+            ) {
+                if (isTelegramUrl(this.walletInfo.universalLink)) {
+                    redirectToTelegram(this.walletInfo.universalLink, {
+                        returnStrategy,
+                        twaReturnUrl: twaReturnUrl || appState.twaReturnUrl,
+                        forceRedirect: false
+                    });
+                } else {
+                    redirectToWallet(
+                        this.walletInfo.universalLink,
+                        this.walletInfo.deepLink,
+                        {
+                            returnStrategy,
+                            forceRedirect: false
+                        },
+                        () => {}
+                    );
+                }
+            }
+        };
+
+        const abortController = new AbortController();
+
+        const unsubscribe = this.onSignDataModalStateChange(action => {
+            if (action?.openModal) {
+                return;
+            }
+            unsubscribe();
+            if (!action) {
+                abortController.abort();
+            }
+        });
+
+        try {
+            const result = await this.waitForSignData(
+                {
+                    data: data,
+                    signal: abortController.signal
+                },
+                onRequestSent
+            );
+
+            this.tracker.trackDataSigned(this.wallet, data, result);
+
+            widgetController.setAction({
+                name: 'data-sent',
+                showNotification: notifications.includes('success'),
+                openModal: modals.includes('success')
+            });
+
+            return result;
+        } catch (e) {
+            widgetController.setAction({
+                name: 'data-canceled',
+                showNotification: notifications.includes('error'),
+                openModal: modals.includes('error')
+            });
+
+            if (e instanceof TonConnectError) {
+                throw e;
+            } else {
+                console.error(e);
+                throw new TonConnectUIError('Unhandled error:' + e);
+            }
+        } finally {
+            unsubscribe();
+        }
+    }
+
     /**
      * TODO: remove in the next major version.
      * Initiates a connection with an embedded wallet, awaits its completion, and returns the connected wallet information.
@@ -706,11 +836,75 @@ export class TonConnectUI {
     }
 
     /**
+     * Waits for a data to sign
+     * @param options - Configuration for transaction statuses and errors handling.
+     * @options.transaction - Transaction to send.
+     * @options.ignoreErrors - If true, ignores errors during waiting, waiting continues until a valid transaction is sent. Default is false.
+     * @options.abortSignal - Optional AbortSignal for external cancellation. Throws TonConnectUIError if aborted.
+     * @param onRequestSent (optional) will be called after the transaction is sent to the wallet.
+     * @throws TonConnectUIError if waiting is aborted or no valid transaction response is received and ignoreErrors is false.
+     * @internal
+     */
+    private async waitForSignData(
+        options: WaitSignDataOptions,
+        onRequestSent?: () => void
+    ): Promise<SignDataResponse> {
+        return new Promise((resolve, reject) => {
+            const { data, signal } = options;
+
+            if (signal.aborted) {
+                this.tracker.trackDataSigningFailed(
+                    this.wallet,
+                    data,
+                    'Sign data was cancelled'
+                );
+                return reject(new TonConnectUIError('data was not sent'));
+            }
+
+            const onDataHandler = async (
+                response: SignDataResponse
+            ): Promise<void> => {
+                resolve(response);
+            };
+
+            const onErrorsHandler = (reason: TonConnectError): void => {
+                reject(reason);
+            };
+
+            const onCanceledHandler = (): void => {
+                this.tracker.trackDataSigningFailed(
+                    this.wallet,
+                    data,
+                    'data was cancelled'
+                );
+                reject(new TonConnectUIError('data was not sent'));
+            };
+
+            signal.addEventListener('abort', onCanceledHandler, { once: true });
+
+            this.connector
+                .signData(data, { onRequestSent: onRequestSent, signal: signal })
+                .then(result => {
+                    signal.removeEventListener('abort', onCanceledHandler);
+                    return onDataHandler(result);
+                })
+                .catch(reason => {
+                    signal.removeEventListener('abort', onCanceledHandler);
+                    return onErrorsHandler(reason);
+                });
+        });
+    }
+
+    /**
      * Subscribe to the transaction modal window state changes, returns a function which has to be called to unsubscribe.
      * @internal
      */
     private onTransactionModalStateChange(onChange: (action: Action | null) => void): () => void {
         return this.transactionModal.onStateChange(onChange);
+    }
+
+    private onSignDataModalStateChange(onChange: (action: Action | null) => void): () => void {
+        return this.signDataModal.onStateChange(onChange);
     }
 
     private subscribeToWalletChange(): void {
@@ -876,5 +1070,11 @@ type WaitWalletConnectionOptions = {
 
 type WaitSendTransactionOptions = {
     transaction: SendTransactionRequest;
+    signal: AbortSignal;
+};
+
+
+type WaitSignDataOptions = {
+    data: SignDataRequest;
     signal: AbortSignal;
 };
