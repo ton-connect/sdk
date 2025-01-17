@@ -230,6 +230,8 @@ a URL: wallet will open this URL after completing the user&#39;s action. Note, t
   <h2>Use inside TMA (Telegram Mini Apps)</h2>
 </a>
 <p>TonConnect UI will work in TMA in the same way as in a regular website!
+Developers need to ensure that the Telegram Mini Apps environment is detected correctly by including the following script in the HTML header:</p>
+<pre><code class="language-html"><script src="https://telegram.org/js/telegram-web-app.js"></script></code></pre>
 Basically, no changes are required from the dApp&#39;s developers. The only thing you have to set is a dynamic return strategy.</p>
 <p>Currently, it is impossible for TMA-wallets to redirect back to previous opened TMA-dApp like native wallet-apps do.
 It means, that you need to specify the return strategy as a link to your TMA that will be only applied if the dApp is opened in TMA mode.</p>
