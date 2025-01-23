@@ -686,6 +686,18 @@ tonConnectUI.uiOptions = {
 }
 ```
 
+### Exclude wallets
+Pass wallet names to be excluded from the wallets list. Passed names will be used to filter out any wallet to be hidden.  
+
+Since the filtering with `excludeWallets` is processed last when applying wallet configuration, it should take precedence over `includeWallets`.  
+```ts
+tonConnectUI.uiOptions = {
+    walletsListConfiguration: {
+        excludeWallets: ['xtonwallet']
+    }
+}
+```
+
 ## Add connect request parameters (ton_proof)
 Use `tonConnectUI.setConnectRequestParameters` function to pass your connect request parameters.
 
