@@ -27,6 +27,8 @@ export interface WalletInfoBase {
      */
     aboutUrl: string;
 
+    features?: (WalletInfoSendTransactionFeatureDTO | WalletInfoSignDataFeatureDTO)[];
+
     /**
      * OS and browsers where the wallet could be installed
      */
@@ -119,6 +121,7 @@ export interface WalletInfoDTO {
     tondns?: string;
     about_url: string;
     universal_url?: string;
+    features?: (WalletInfoSendTransactionFeatureDTO | WalletInfoSignDataFeatureDTO)[];
     platforms: (
         | 'ios'
         | 'android'
@@ -133,6 +136,22 @@ export interface WalletInfoDTO {
     deepLink?: string;
     bridge: (WalletInfoBridgeRemoteDTO | WalletInfoBridgeInjectedDTO)[];
 }
+
+export interface WalletInfoFeatureDTO {
+    name: string;
+}
+
+export interface WalletInfoSendTransactionFeatureDTO extends WalletInfoFeatureDTO {
+    name: 'SendTransaction';
+    maxMessages: number;
+    supportsExtraCurrencies?: boolean;
+}
+
+export interface WalletInfoSignDataFeatureDTO extends WalletInfoFeatureDTO {
+    name: 'SignData';
+}
+
+
 
 export interface WalletInfoBridgeRemoteDTO {
     type: 'sse';

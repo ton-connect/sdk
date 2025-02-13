@@ -6,7 +6,7 @@ import {
     UIPreferences,
     WalletsListConfiguration
 } from '@tonconnect/ui';
-import type { ITonConnect } from '@tonconnect/ui';
+import type { FeatureWithName, ITonConnect } from '@tonconnect/ui';
 import { isClientSide } from '../utils/web';
 
 export const TonConnectUIContext = createContext<TonConnectUI | null>(null);
@@ -59,6 +59,8 @@ export interface TonConnectUIProviderPropsBase {
      * Configuration for the wallets list in the connect wallet modal.
      */
     walletsListConfiguration?: WalletsListConfiguration;
+
+    requiredFeatures?: FeatureWithName[];
 
     /**
      * App name of the wallet to display prominently in the wallets list.

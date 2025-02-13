@@ -12,6 +12,7 @@ import {
 import { InjectedProvider } from 'src/provider/injected/injected-provider';
 import { logError } from 'src/utils/log';
 import { FALLBACK_WALLETS_LIST } from 'src/resources/fallback-wallets-list';
+import { FeatureWithName } from '@tonconnect/protocol';
 
 export class WalletsListManager {
     private walletsListCache: Promise<WalletInfo[]> | null = null;
@@ -20,16 +21,26 @@ export class WalletsListManager {
 
     private readonly cacheTTLMs: number | undefined;
 
-    private readonly walletsListSource: string =
-        'https://raw.githubusercontent.com/ton-blockchain/wallets-list/main/wallets-v2.json';
+    private readonly requiredFeatures: FeatureWithName[] | ((wallet: WalletInfo) => boolean) = [];
 
-    constructor(options?: { walletsListSource?: string; cacheTTLMs?: number }) {
+    private readonly walletsListSource: string =
+        'https://gist.githubusercontent.com/mois-ilya/88a4585660b3f59b6adece791d6ddee5/raw/ddef994ee6504164e2be0c37e6665f0aba16cb67/wallets-v2.json';
+
+    constructor(options?: {
+        walletsListSource?: string;
+        cacheTTLMs?: number;
+        requiredFeatures?: FeatureWithName[] | ((v: WalletInfo) => boolean);
+    }) {
         if (options?.walletsListSource) {
             this.walletsListSource = options.walletsListSource;
         }
 
         if (options?.cacheTTLMs) {
             this.cacheTTLMs = options.cacheTTLMs;
+        }
+
+        if (options?.requiredFeatures) {
+            this.requiredFeatures = options.requiredFeatures;
         }
     }
 
@@ -54,7 +65,8 @@ export class WalletsListManager {
                 });
         }
 
-        return this.walletsListCache;
+        // console.log(this.walletsListCache.then(list => console.log(list)))
+        return this.walletsListCache.then(walletsList => walletsList.filter(wallet => this.checkRequiredFeatures(wallet)));
     }
 
     public async getEmbeddedWallet(): Promise<WalletInfoCurrentlyEmbedded | null> {
@@ -87,7 +99,7 @@ export class WalletsListManager {
             if (wrongFormatWallets.length) {
                 logError(
                     `Wallet(s) ${wrongFormatWallets
-                        .map(wallet => wallet.name)
+                        .map(wallet => (wallet as WalletInfoDTO)?.name || 'unknown')
                         .join(
                             ', '
                         )} config format is wrong. They were removed from the wallets list.`
@@ -113,6 +125,49 @@ export class WalletsListManager {
         );
     }
 
+    private checkRequiredFeatures(wallet: WalletInfo): boolean {
+        // if ("injected" in wallet) {
+        //     console.log(wallet.name)
+        //     return false;
+        // }
+
+        // const realWallet = wallet as WalletInfoDTO | WalletInfoRemote;
+
+        // console.log(wallet)
+
+        if (typeof this.requiredFeatures === 'function') {
+            return this.requiredFeatures(wallet);
+        }
+    
+        return this.requiredFeatures.every(requiredFeature =>
+            (wallet.features || []).some(feature => {
+
+                if (feature.name !== requiredFeature.name) {
+                    return false;
+                }
+
+                console.log(requiredFeature, feature, wallet);
+
+
+                if (requiredFeature.name === 'SendTransaction' && feature.name === 'SendTransaction') {
+                    const validMessagesCount = 
+                        requiredFeature.maxMessages <= feature.maxMessages;
+                    
+                    const validExtraCurrencies = 
+                        requiredFeature.supportsExtraCurrencies === true 
+                            ? feature.supportsExtraCurrencies === true 
+                            : true;
+
+                    console.log(validMessagesCount, validExtraCurrencies);
+    
+                    return validMessagesCount && validExtraCurrencies;
+                }
+                
+                return true;
+            })
+        );
+    }
+
     private walletConfigDTOListToWalletConfigList(walletConfigDTO: WalletInfoDTO[]): WalletInfo[] {
         return walletConfigDTO.map(walletConfigDTO => {
             const walletConfigBase: WalletInfoBase = {
@@ -121,6 +176,7 @@ export class WalletsListManager {
                 imageUrl: walletConfigDTO.image,
                 aboutUrl: walletConfigDTO.about_url,
                 tondns: walletConfigDTO.tondns,
+                features: walletConfigDTO.features,
                 platforms: walletConfigDTO.platforms
             };
 
@@ -209,9 +265,9 @@ export class WalletsListManager {
 
         if (sseBridge) {
             if (
-                !('url' in sseBridge) ||
+                !(sseBridge && typeof sseBridge === 'object' && 'url' in sseBridge) ||
                 !(sseBridge as { url: string }).url ||
-                !(value as { universal_url: string }).universal_url
+                !((value as unknown) as { universal_url: string }).universal_url
             ) {
                 return false;
             }
@@ -220,7 +276,7 @@ export class WalletsListManager {
         const jsBridge = bridge.find(item => (item as { type: string }).type === 'js');
 
         if (jsBridge) {
-            if (!('key' in jsBridge) || !(jsBridge as { key: string }).key) {
+            if (typeof jsBridge !== 'object' || !('key' in jsBridge) || !(jsBridge as { key: string }).key) {
                 return false;
             }
         }

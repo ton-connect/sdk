@@ -1,3 +1,4 @@
+import { FeatureWithName } from '@tonconnect/protocol';
 import { IStorage } from 'src/storage/models/storage.interface';
 import { EventDispatcher } from 'src/tracker/event-dispatcher';
 import { SdkActionEvent } from 'src/tracker/types';
@@ -34,6 +35,8 @@ export interface TonConnectOptions {
      * @default Infinity
      */
     walletsListCacheTTLMs?: number;
+
+    requiredFeatures?: FeatureWithName[];
 
     /**
      * Allows to disable auto pause/unpause SSE connection on 'document.visibilitychange' event. It is not recommended to change default behaviour.

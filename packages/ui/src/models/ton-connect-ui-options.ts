@@ -2,6 +2,7 @@ import { Locales } from 'src/models/locales';
 import { UIPreferences } from 'src/models/ui-preferences';
 import { WalletsListConfiguration } from 'src/models/wallets-list-configuration';
 import { ActionConfiguration } from 'src/models/action-configuration';
+import { FeatureWithName } from '@tonconnect/sdk';
 
 export interface TonConnectUiOptions {
     /**
@@ -30,6 +31,8 @@ export interface TonConnectUiOptions {
      * App name of the wallet to display prominently in the wallets list.
      */
     primaryWalletAppName?: string;
+
+    requiredFeatures?: FeatureWithName[];
 
     /**
      * Configuration for action-period (e.g. sendTransaction) UI elements: modals and notifications and wallet behaviour (return strategy).

@@ -70,12 +70,14 @@ export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = prop
                         </li>
                     )}
                 </For>
-                <FourWalletsItem
-                    labelLine1="View all"
-                    labelLine2="wallets"
-                    images={props.walletsList.slice(3, 7).map(i => i.imageUrl)}
-                    onClick={() => props.onSelectAllWallets()}
-                />
+                {props.walletsList.length > 3 && (
+                    <FourWalletsItem
+                        labelLine1="View all"
+                        labelLine2="wallets"
+                        images={props.walletsList.slice(3, 7).map(i => i.imageUrl)}
+                        onClick={() => props.onSelectAllWallets()}
+                    />
+                )}
             </WalletsContainerStyled>
         </DesktopUniversalModalStyled>
     );

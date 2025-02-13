@@ -31,6 +31,13 @@ export interface SendTransactionRequest {
         amount: string;
 
         /**
+         * Extra currencies to send.
+         */
+        extraCurrencies: {
+            [k: number] : string;
+        }
+
+        /**
          * Contract specific data to add to the transaction.
          */
         stateInit?: string;

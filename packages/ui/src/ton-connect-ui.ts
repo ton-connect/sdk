@@ -1,6 +1,8 @@
 import type {
     Account,
     ConnectAdditionalRequest,
+    EventDispatcher,
+    FeatureWithName,
     WalletInfoCurrentlyEmbedded
 } from '@tonconnect/sdk';
 import {
@@ -44,6 +46,7 @@ import { SingleWalletModalManager } from 'src/managers/single-wallet-modal-manag
 import { SingleWalletModal, SingleWalletModalState } from 'src/models/single-wallet-modal';
 import { TonConnectUITracker } from 'src/tracker/ton-connect-ui-tracker';
 import { tonConnectUiVersion } from 'src/constants/version';
+import { UserActionEvent } from './library';
 
 export class TonConnectUI {
     public static getWallets(): Promise<WalletInfo[]> {
@@ -67,6 +70,8 @@ export class TonConnectUI {
     private actionsConfiguration?: ActionConfiguration;
 
     private readonly walletsList: Promise<WalletInfo[]>;
+
+    public readonly requiredFeatures?: FeatureWithName[];
 
     public readonly primaryWalletAppName?: string;
 
@@ -203,7 +208,8 @@ export class TonConnectUI {
         } else if (options && 'manifestUrl' in options && options.manifestUrl) {
             this.connector = new TonConnect({
                 manifestUrl: options.manifestUrl,
-                eventDispatcher: options?.eventDispatcher
+                eventDispatcher: options.eventDispatcher,
+                requiredFeatures: options.requiredFeatures
             });
         } else {
             throw new TonConnectUIError(
@@ -212,7 +218,7 @@ export class TonConnectUI {
         }
 
         this.tracker = new TonConnectUITracker({
-            eventDispatcher: options?.eventDispatcher,
+            eventDispatcher: options?.eventDispatcher as EventDispatcher<UserActionEvent>,
             tonConnectUiVersion: tonConnectUiVersion
         });
 
@@ -240,9 +246,10 @@ export class TonConnectUI {
             connector: this.connector
         });
 
-        this.walletsList = this.getWallets();
-
+        this.requiredFeatures = options.requiredFeatures;
         this.primaryWalletAppName = options.primaryWalletAppName;
+
+        this.walletsList = this.getWallets();
 
         this.walletsList.then(list => preloadImages(uniq(list.map(item => item.imageUrl))));
 
@@ -432,7 +439,7 @@ export class TonConnectUI {
             sendExpand();
         }
 
-        const { notifications, modals, returnStrategy, twaReturnUrl, skipRedirectToWallet } =
+        const { notifications, modals, returnStrategy, twaReturnUrl } =
             this.getModalsAndNotificationsConfiguration(options);
 
         widgetController.setAction({

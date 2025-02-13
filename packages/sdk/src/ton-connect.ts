@@ -123,10 +123,12 @@ export class TonConnect implements ITonConnect {
             manifestUrl: options?.manifestUrl || getWebPageManifest(),
             storage: options?.storage || new DefaultStorage()
         };
+        // console.log("sdk", options?.requiredFeatures)
 
         this.walletsList = new WalletsListManager({
             walletsListSource: options?.walletsListSource,
-            cacheTTLMs: options?.walletsListCacheTTLMs
+            cacheTTLMs: options?.walletsListCacheTTLMs,
+            requiredFeatures: options?.requiredFeatures
         });
 
         this.tracker = new TonConnectTracker({
@@ -416,9 +418,7 @@ export class TonConnect implements ITonConnect {
         }
 
         this.checkConnection();
-        checkSendTransactionSupport(this.wallet!.device.features, {
-            requiredMessagesNumber: transaction.messages.length
-        });
+        checkSendTransactionSupport(this.wallet!.device.features, { transaction });
 
         this.tracker.trackTransactionSentForSignature(this.wallet, transaction);
 

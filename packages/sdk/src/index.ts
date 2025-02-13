@@ -56,6 +56,7 @@ export {
     CHAIN,
     DeviceInfo,
     Feature,
+    FeatureWithName,
     SendTransactionFeature,
     SignDataFeature,
     SendTransactionFeatureDeprecated,
