@@ -1,5 +1,14 @@
 # Changelog @tonconnect/sdk 
 
+## [3.0.7-alpha.0](https://github.com/ton-connect/sdk/compare/sdk-3.0.6...sdk-3.0.7-alpha.0) (2025-02-17)
+
+
+### Features
+
+* **sdk:** implement extra currencies support in send transaction ([01e658f](https://github.com/ton-connect/sdk/commit/01e658fc756266fde7d9fbc10a0021cba5444383))
+
+
+
 ## [3.0.6](https://github.com/ton-connect/sdk/compare/sdk-3.0.6-beta.0...sdk-3.0.6) (2025-01-13)
 
 
