@@ -1,6 +1,6 @@
 {
   "name": "@tonconnect/protocol",
-  "version": "2.2.6",
+  "version": "2.2.7-alpha.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ton-connect/sdk.git"
