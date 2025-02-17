@@ -416,22 +416,32 @@ export class TonConnect implements ITonConnect {
         }
 
         this.checkConnection();
+
+        const requiredMessagesNumber = transaction.messages.length;
+        const requireExtraCurrencies = transaction.messages.some(
+            m => m.extraCurrencies && Object.keys(m.extraCurrencies).length > 0
+        );
         checkSendTransactionSupport(this.wallet!.device.features, {
-            requiredMessagesNumber: transaction.messages.length
+            requiredMessagesNumber,
+            requireExtraCurrencies
         });
 
         this.tracker.trackTransactionSentForSignature(this.wallet, transaction);
 
-        const { validUntil, ...tx } = transaction;
+        const { validUntil, messages, ...tx } = transaction;
         const from = transaction.from || this.account!.address;
         const network = transaction.network || this.account!.chain;
 
         const response = await this.provider!.sendRequest(
             sendTransactionParser.convertToRpcRequest({
                 ...tx,
-                valid_until: validUntil,
                 from,
-                network
+                network,
+                valid_until: validUntil,
+                messages: messages.map(({ extraCurrencies, ...msg }) => ({
+                    ...msg,
+                    extra_currencies: extraCurrencies
+                }))
             }),
             { onRequestSent: options.onRequestSent, signal: abortController.signal }
         );

@@ -4,7 +4,7 @@ import { WalletNotSupportFeatureError } from 'src/errors/wallet/wallet-not-suppo
 
 export function checkSendTransactionSupport(
     features: Feature[],
-    options: { requiredMessagesNumber: number }
+    options: { requiredMessagesNumber: number; requireExtraCurrencies: boolean }
 ): never | void {
     const supportsDeprecatedSendTransactionFeature = features.includes('SendTransaction');
     const sendTransactionFeature = features.find(
@@ -13,6 +13,14 @@ export function checkSendTransactionSupport(
 
     if (!supportsDeprecatedSendTransactionFeature && !sendTransactionFeature) {
         throw new WalletNotSupportFeatureError("Wallet doesn't support SendTransaction feature.");
+    }
+
+    if (options.requireExtraCurrencies) {
+        if (!sendTransactionFeature || !sendTransactionFeature.extraCurrenciesSupported) {
+            throw new WalletNotSupportFeatureError(
+                `Wallet is not able to handle such SendTransaction request. Extra currencies support is required.`
+            );
+        }
     }
 
     if (sendTransactionFeature && sendTransactionFeature.maxMessages !== undefined) {
