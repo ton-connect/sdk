@@ -1,5 +1,9 @@
 # Changelog @tonconnect/ui-react 
 
+## [2.0.12-alpha.1](https://github.com/ton-connect/sdk/compare/ui-react-2.0.12-alpha.0...ui-react-2.0.12-alpha.1) (2025-02-18)
+
+
+
 ## [2.0.12-alpha.0](https://github.com/ton-connect/sdk/compare/ui-react-2.0.11...ui-react-2.0.12-alpha.0) (2025-02-17)
 
 
