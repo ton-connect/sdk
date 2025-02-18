@@ -1,5 +1,14 @@
 # Changelog @tonconnect/sdk 
 
+## [3.0.7-alpha.1](https://github.com/ton-connect/sdk/compare/sdk-3.0.7-alpha.0...sdk-3.0.7-alpha.1) (2025-02-18)
+
+
+### Features
+
+* **sdk:** rename `extraCurrencies` to `extraCurrency`, and change `extraCurrency` format to use object map ([312696f](https://github.com/ton-connect/sdk/commit/312696f75b1921d84e43a192eecee63e98f30e96))
+
+
+
 ## [3.0.7-alpha.0](https://github.com/ton-connect/sdk/compare/sdk-3.0.6...sdk-3.0.7-alpha.0) (2025-02-17)
 
 
