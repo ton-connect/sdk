@@ -25,7 +25,9 @@ class SendTransactionParser extends RpcParser<'sendTransaction'> {
     convertToRpcRequest(
         request: Omit<SendTransactionRequest, 'validUntil' | 'messages'> & {
             valid_until: number;
-            messages: Array<Message & { extra_currencies?: Message['extraCurrencies'] }>;
+            messages: Array<
+                Omit<Message, 'extraCurrency'> & { extra_currency?: Message['extraCurrency'] }
+            >;
         }
     ): WithoutId<SendTransactionRpcRequest> {
         return {

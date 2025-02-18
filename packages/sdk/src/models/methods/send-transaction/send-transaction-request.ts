@@ -43,6 +43,6 @@ export interface SendTransactionRequest {
         /**
          * Extra currencies to send.
          */
-        extraCurrencies?: { id: number; value: string }[];
+        extraCurrency?: { [k: number]: string };
     }[];
 }
