@@ -1,5 +1,14 @@
 # Changelog @tonconnect/protocol 
 
+## [2.2.7-alpha.1](https://github.com/ton-connect/sdk/compare/protocol-2.2.7-alpha.0...protocol-2.2.7-alpha.1) (2025-02-18)
+
+
+### Features
+
+* **protocol:** rename `extraCurrenciesSupported` to `extraCurrencySupported` ([41b6984](https://github.com/ton-connect/sdk/commit/41b6984820b4485b514ef2c3be14b5d6d93774c3))
+
+
+
 ## [2.2.7-alpha.0](https://github.com/ton-connect/sdk/compare/protocol-2.2.6...protocol-2.2.7-alpha.0) (2025-02-17)
 
 
