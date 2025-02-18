@@ -16,7 +16,7 @@ export function checkSendTransactionSupport(
     }
 
     if (options.requireExtraCurrencies) {
-        if (!sendTransactionFeature || !sendTransactionFeature.extraCurrenciesSupported) {
+        if (!sendTransactionFeature || !sendTransactionFeature.extraCurrencySupported) {
             throw new WalletNotSupportFeatureError(
                 `Wallet is not able to handle such SendTransaction request. Extra currencies support is required.`
             );
