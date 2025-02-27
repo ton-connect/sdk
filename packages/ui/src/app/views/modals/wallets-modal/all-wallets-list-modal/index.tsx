@@ -6,7 +6,8 @@ import {
     StyledIconButton,
     WalletLabeledItemStyled,
     WalletsNotSupportedNotifier,
-    ErrorBoxStyled
+    ErrorBoxStyled,
+    WalletsNotSupportedNotifierText
 } from './style';
 import { WalletInfo } from '@tonconnect/sdk';
 import { isMobile } from 'src/app/hooks/isMobile';
@@ -76,10 +77,10 @@ export const AllWalletsListModal: Component<DesktopSelectWalletModalProps> = pro
                 </WalletsUl>
                 <Show when={unsupportedWallets().length > 0}>
                     <WalletsNotSupportedNotifier>
-                        <Text translationKey="walletModal.allWallets.walletsBelowNotSupported">
+                        <WalletsNotSupportedNotifierText translationKey="walletModal.allWallets.walletsBelowNotSupported">
                             The wallets below don’t support all features of the connected service.
                             You can use your recovery phrase in one of the supported wallets above.
-                        </Text>
+                        </WalletsNotSupportedNotifierText>
                         <ExclamationIcon size="28" />
                     </WalletsNotSupportedNotifier>
                     <WalletsUl>

@@ -1,5 +1,5 @@
 import { styled } from 'solid-styled-components';
-import { Button, H1, IconButton, WalletLabeledItem } from 'src/app/components';
+import { Button, H1, H2, IconButton, WalletLabeledItem } from 'src/app/components';
 import { media } from 'src/app/styles/media';
 
 export const DesktopSelectWalletModalStyled = styled.div`
@@ -91,6 +91,12 @@ export const WalletsNotSupportedNotifier = styled.div`
         margin-left: 16px;
         margin-right: 16px;
     }
+`;
+
+export const WalletsNotSupportedNotifierText = styled(H2)`
+    color: ${props => props.theme!.colors.text.secondary};
+    text-align: left;
+    margin: 0;
 `;
 
 export const ErrorBoxStyled = styled.div`
