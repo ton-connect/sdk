@@ -40,6 +40,7 @@ export const WalletLabeledItem: Component<WalletLabeledItemProps> = props => {
                     secondLine="Telegram"
                     badgeUrl={IMG.TG}
                     onClick={() => props.onClick()}
+                    class={props.class}
                 />
             ) : (
                 <WalletItem
@@ -48,6 +49,7 @@ export const WalletLabeledItem: Component<WalletLabeledItemProps> = props => {
                     secondLine={walletsSecondLine()}
                     secondLineColorPrimary={false}
                     onClick={() => props.onClick()}
+                    class={props.class}
                 />
             )}
         </>

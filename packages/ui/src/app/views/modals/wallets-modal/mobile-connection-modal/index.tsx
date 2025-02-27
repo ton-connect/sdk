@@ -28,6 +28,7 @@ export interface MobileConnectionProps {
     wallet: WalletInfoRemote;
     onBackClick: () => void;
     backDisabled?: boolean;
+    defaultError?: 'missing-features' | 'connection-declined' | 'not-supported' | null;
 }
 
 export const MobileConnectionModal: Component<MobileConnectionProps> = props => {
