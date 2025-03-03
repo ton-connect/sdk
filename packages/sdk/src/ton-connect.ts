@@ -1,8 +1,10 @@
 import {
+    CONNECT_EVENT_ERROR_CODES,
     ConnectEventError,
     ConnectEventSuccess,
     ConnectItem,
     ConnectRequest,
+    Feature,
     SendTransactionRpcResponseSuccess,
     TonAddressItemReply,
     TonProofItemReply,
@@ -16,6 +18,7 @@ import { WalletAlreadyConnectedError } from 'src/errors/wallet/wallet-already-co
 import { WalletNotConnectedError } from 'src/errors/wallet/wallet-not-connected.error';
 import {
     Account,
+    RequireFeature,
     Wallet,
     WalletConnectionSource,
     WalletConnectionSourceHTTP,
@@ -39,7 +42,10 @@ import { ITonConnect } from 'src/ton-connect.interface';
 import { getDocument, getWebPageManifest } from 'src/utils/web-api';
 import { WalletsListManager } from 'src/wallets-list-manager';
 import { WithoutIdDistributive } from 'src/utils/types';
-import { checkSendTransactionSupport } from 'src/utils/feature-support';
+import {
+    checkSendTransactionSupport,
+    checkRequiredWalletFeatures
+} from 'src/utils/feature-support';
 import { callForSuccess } from 'src/utils/call-for-success';
 import { logDebug, logError } from 'src/utils/log';
 import { createAbortController } from 'src/utils/create-abort-controller';
@@ -90,6 +96,11 @@ export class TonConnect implements ITonConnect {
 
     private statusChangeErrorSubscriptions: ((err: TonConnectError) => void)[] = [];
 
+    private readonly walletsRequiredFeatures:
+        | RequireFeature[]
+        | ((features: Feature[]) => boolean)
+        | undefined;
+
     private abortController?: AbortController;
 
     /**
@@ -124,9 +135,12 @@ export class TonConnect implements ITonConnect {
             storage: options?.storage || new DefaultStorage()
         };
 
+        this.walletsRequiredFeatures = options?.walletsRequiredFeatures;
+
         this.walletsList = new WalletsListManager({
             walletsListSource: options?.walletsListSource,
-            cacheTTLMs: options?.walletsListCacheTTLMs
+            cacheTTLMs: options?.walletsListCacheTTLMs,
+            walletsRequiredFeatures: options?.walletsRequiredFeatures
         });
 
         this.tracker = new TonConnectTracker({
@@ -566,6 +580,21 @@ export class TonConnect implements ITonConnect {
 
         if (!tonAccountItem) {
             throw new TonConnectError('ton_addr connection item was not found');
+        }
+
+        const hasRequiredFeatures = checkRequiredWalletFeatures(
+            connectEvent.device.features,
+            this.walletsRequiredFeatures ?? []
+        );
+
+        if (!hasRequiredFeatures) {
+            this.provider?.disconnect();
+            this.walletEventsListener({ event: 'connect_error', payload: {
+                code: CONNECT_EVENT_ERROR_CODES.MISSING_REQUIRED_FEATURES,
+                message: 'Wallet does not support required features',
+                device: connectEvent.device
+            } });
+            return;
         }
 
         const wallet: Wallet = {

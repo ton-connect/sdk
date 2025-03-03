@@ -18,6 +18,7 @@ export interface ConnectEventError {
     payload: {
         code: CONNECT_EVENT_ERROR_CODES;
         message: string;
+        device?: DeviceInfo;
     };
 }
 
@@ -28,7 +29,8 @@ export enum CONNECT_EVENT_ERROR_CODES {
     MANIFEST_CONTENT_ERROR = 3,
     UNKNOWN_APP_ERROR = 100,
     USER_REJECTS_ERROR = 300,
-    METHOD_NOT_SUPPORTED = 400
+    METHOD_NOT_SUPPORTED = 400,
+    MISSING_REQUIRED_FEATURES = 430
 }
 
 export type ConnectItemReply = TonAddressItemReply | TonProofItemReply;

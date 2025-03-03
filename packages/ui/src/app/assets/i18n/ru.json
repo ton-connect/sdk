@@ -46,6 +46,7 @@
       "connectYourWallet": "Подключите TON кошелёк",
       "openWalletOnTelegramOrSelect": "Подключите Wallet в Telegram или выберете другое приложение",
       "openWalletOnTelegram": "Открыть Wallet в Telegram",
+      "chooseSupportedWallets": "Выберите кошелёк, поддерживающий функции подключённого сервиса",
       "chooseOtherApplication": "Выберите другое приложение",
       "openLink": "Открыть",
       "scan": "Отсканируйте камерой вашего телефона"
@@ -53,19 +54,28 @@
     "desktopUniversalModal": {
       "connectYourWallet": "Подключите TON кошелёк",
       "scan": "Отсканируйте QR-код камерой вашего телефона",
-      "availableWallets": "Доступные кошельки"
+      "availableWallets": "Доступные кошельки",
+      "chooseSupportedWallets": "Выберите кошелёк, поддерживающий функции подключённого сервиса"
     },
     "mobileConnectionModal": {
       "showQR": "Показать QR-код",
       "scanQR": "Отсканируйте QR-код ниже камерой в приложении {{ name }}, или камерой телефона",
+      "missingFeatures": "Обновите {{ name }}, ваша версия не поддерживает необходимые функции для этого dApp",
+      "notSupportedWallet": "{{ name }} не поддерживает запрошенное действие. Пожалуйста, подключите другой кошелёк, который поддерживает это",
       "continueIn": "Продолжите в {{ name }}…",
+      "updateWallet": "Обновить {{ name }}",
+      "chooseAnotherWallet": "Выбрать другой кошелёк",
       "connectionDeclined": "Подключение отклонено"
     },
     "desktopConnectionModal": {
       "scanQR": "Отсканируйте QR-код ниже камерой в приложении {{ name }}, или камерой телефона",
       "continueInExtension": "Откройте браузерное расширение {{ name }}",
       "dontHaveExtension": "Похоже, у вас не установлено браузерное расширение {{ name }}",
+      "missingFeatures": "Обновите {{ name }}, ваша версия не поддерживает необходимые функции для этого dApp",
+      "notSupportedWallet": "{{ name }} не поддерживает запрошенное действие. Пожалуйста, подключите другой кошелёк, который поддерживает это",
       "getWallet": "Скачать {{ name }}",
+      "updateWallet": "Обновить {{ name }}",
+      "chooseAnotherWallet": "Выбрать другой кошелёк",
       "continueOnDesktop": "Откройте {{ name }} на компьютере…",
       "openWalletOnTelegram": "Открыть Wallet в Telegram",
       "connectionDeclined": "Подключение отклонено"
@@ -79,6 +89,10 @@
       "effortlessCryptoTransactions": "Простые криптотранзакции",
       "easilySend": "Легко отправляйте, получайте и отслеживайте свои криптовалюты. Оптимизируйте свои операции с помощью децентрализованных приложений.",
       "getAWallet": "Скачать кошелёк"
+    },
+    "allWallets": {
+      "walletsBelowNotSupported": "Кошельки ниже не поддерживают все функции подключённого сервиса. Вы можете использовать свою фразу восстановления в одном из поддерживаемых выше кошельков.",
+      "walletNotSupportService": "{{ name }} не поддерживает подключённый сервис"
     }
   },
   "actionModal": {

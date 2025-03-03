@@ -1,4 +1,4 @@
-import { Component, createMemo, createSignal, For } from 'solid-js';
+import { Component, createMemo, createSignal, For, Show, Switch } from 'solid-js';
 import {
     DesktopUniversalModalStyled,
     H2AvailableWalletsStyled,
@@ -6,7 +6,7 @@ import {
     QRCodeStyled,
     WalletsContainerStyled
 } from './style';
-import { ConnectAdditionalRequest, isWalletInfoRemote, WalletInfo } from '@tonconnect/sdk';
+import { ConnectAdditionalRequest, WalletInfo } from '@tonconnect/sdk';
 import { appState } from 'src/app/state/app.state';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { FourWalletsItem, H1, WalletLabeledItem } from 'src/app/components';
@@ -37,6 +37,26 @@ export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = prop
     setLastSelectedWalletInfo({ openMethod: 'qrcode' });
     const request = createMemo(() => connector.connect(walletsBridges(), props.additionalRequest));
 
+    const supportedWallets = createMemo(
+        () => props.walletsList.filter(wallet => wallet.isSupportRequiredFeatures),
+        null
+    );
+
+    const visibleWallets = createMemo(() => supportedWallets().slice(0, 3), null);
+
+    const fourWalletsItem = createMemo(
+        () =>
+            props.walletsList
+                .filter(wallet => !visibleWallets().find(w => w.appName === wallet.appName))
+                .slice(0, 4),
+        null
+    );
+
+    const hasNoSupportedWallets = createMemo(
+        () => supportedWallets().length === props.walletsList.length,
+        null
+    );
+
     return (
         <DesktopUniversalModalStyled
             onClick={() => setPopupOpened(false)}
@@ -53,11 +73,18 @@ export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = prop
                 disableCopy={popupOpened()}
                 imageUrl={IMG.TON}
             />
-            <H2AvailableWalletsStyled translationKey="walletModal.desktopUniversalModal.availableWallets">
-                Available wallets
-            </H2AvailableWalletsStyled>
+            <Show when={!hasNoSupportedWallets()}>
+                <H2AvailableWalletsStyled translationKey="walletModal.desktopUniversalModal.chooseSupportedWallets">
+                    Choose a wallet that supports the features of the connected service
+                </H2AvailableWalletsStyled>
+            </Show>
+            <Show when={hasNoSupportedWallets()}>
+                <H2AvailableWalletsStyled translationKey="walletModal.desktopUniversalModal.availableWallets">
+                    Available wallets
+                </H2AvailableWalletsStyled>
+            </Show>
             <WalletsContainerStyled>
-                <For each={props.walletsList.slice(0, 3)}>
+                <For each={visibleWallets()}>
                     {wallet => (
                         <li>
                             <WalletLabeledItem
@@ -70,7 +97,7 @@ export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = prop
                 <FourWalletsItem
                     labelLine1="View all"
                     labelLine2="wallets"
-                    images={props.walletsList.slice(3, 7).map(i => i.imageUrl)}
+                    images={fourWalletsItem().map(i => i.imageUrl)}
                     onClick={() => props.onSelectAllWallets()}
                 />
             </WalletsContainerStyled>

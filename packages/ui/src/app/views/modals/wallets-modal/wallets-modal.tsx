@@ -1,6 +1,8 @@
 import {
     ConnectAdditionalRequest,
     isWalletInfoCurrentlyInjected,
+    MissingRequiredFeaturesError,
+    TonConnectError,
     Wallet,
     WalletInfo,
     WalletInfoRemote
@@ -57,6 +59,9 @@ export const WalletsModal: Component = () => {
     const [fetchedWalletsList] = createResource(() => tonConnectUI!.getWallets());
 
     const [selectedWalletInfo, setSelectedWalletInfo] = createSignal<WalletInfo | null>(null);
+    const [selectedWalletError, setSelectedWalletError] = createSignal<
+        'missing-features' | 'not-supported' | null
+    >(null);
     const [selectedTab, setSelectedTab] = createSignal<'universal' | 'all-wallets'>('universal');
     const [infoTab, setInfoTab] = createSignal(false);
 
@@ -112,11 +117,29 @@ export const WalletsModal: Component = () => {
         tonConnectUI!.closeModal(closeReason);
     };
 
-    const unsubscribe = connector.onStatusChange((wallet: Wallet | null) => {
-        if (wallet) {
-            onClose('wallet-selected');
+    const unsubscribe = connector.onStatusChange(
+        (wallet: Wallet | null) => {
+            if (wallet) {
+                onClose('wallet-selected');
+            }
+        },
+        err => {
+            if (err instanceof MissingRequiredFeaturesError) {
+                const wallet = walletsList()?.find(
+                    w => w.appName.toLowerCase() === err.cause.device.appName.toLowerCase()
+                );
+                if (!wallet) {
+                    throw new TonConnectError('Wallet not found');
+                }
+
+                const walletErrorType = wallet.isSupportRequiredFeatures
+                    ? 'missing-features'
+                    : 'not-supported';
+                setSelectedWalletError(walletErrorType);
+                setSelectedWalletInfo(wallet);
+            }
         }
-    });
+    );
 
     const onSelectAllWallets = (): void => {
         setSelectedTab('all-wallets');
@@ -128,10 +151,12 @@ export const WalletsModal: Component = () => {
 
     const clearSelectedWalletInfo = (): void => {
         setSelectedWalletInfo(null);
+        setSelectedWalletError(null);
     };
 
     onCleanup(() => {
         setSelectedWalletInfo(null);
+        setSelectedWalletError(null);
         setInfoTab(false);
     });
 
@@ -169,6 +194,7 @@ export const WalletsModal: Component = () => {
                                 wallet={selectedWalletInfo()! as WalletInfoRemote}
                                 additionalRequest={additionalRequest()}
                                 onBackClick={clearSelectedWalletInfo}
+                                defaultError={selectedWalletError()}
                             />
                         </Match>
                         <Match when={selectedTab() === 'universal'}>
