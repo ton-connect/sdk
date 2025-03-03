@@ -244,35 +244,41 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                             </Match>
                         </Switch>
                         <ButtonsContainerStyled>
-                            <Show when={connectionErrored() !== 'not-supported'}>
-                                <Button
-                                    leftIcon={<RetryIcon />}
-                                    onClick={
-                                        mode() === 'extension' ? onClickExtension : onClickDesktop
-                                    }
-                                >
-                                    <Translation translationKey="common.retry">Retry</Translation>
-                                </Button>
-                            </Show>
-                            <Show when={connectionErrored() === 'missing-features'}>
-                                <Link href={props.wallet.aboutUrl} blank>
-                                    <Button leftIcon={<LinkIcon />}>
-                                        <Translation
-                                            translationKey="walletModal.desktopConnectionModal.updateWallet"
-                                            translationValues={{ name: props.wallet.name }}
-                                        >
-                                            Update {props.wallet.name}
+                            <Switch>
+                                <Match when={connectionErrored() !== 'not-supported'}>
+                                    <Button
+                                        leftIcon={<RetryIcon />}
+                                        onClick={
+                                            mode() === 'extension'
+                                                ? onClickExtension
+                                                : onClickDesktop
+                                        }
+                                    >
+                                        <Translation translationKey="common.retry">
+                                            Retry
                                         </Translation>
                                     </Button>
-                                </Link>
-                            </Show>
-                            <Show when={connectionErrored() === 'not-supported'}>
-                                <Button onClick={() => props.onBackClick()}>
-                                    <Translation translationKey="walletModal.desktopConnectionModal.chooseAnotherWallet">
-                                        Choose Another Wallet
-                                    </Translation>
-                                </Button>
-                            </Show>
+                                </Match>
+                                <Match when={connectionErrored() === 'missing-features'}>
+                                    <Link href={props.wallet.aboutUrl} blank>
+                                        <Button leftIcon={<LinkIcon />}>
+                                            <Translation
+                                                translationKey="walletModal.desktopConnectionModal.updateWallet"
+                                                translationValues={{ name: props.wallet.name }}
+                                            >
+                                                Update {props.wallet.name}
+                                            </Translation>
+                                        </Button>
+                                    </Link>
+                                </Match>
+                                <Match when={connectionErrored() === 'not-supported'}>
+                                    <Button onClick={() => props.onBackClick()}>
+                                        <Translation translationKey="walletModal.desktopConnectionModal.chooseAnotherWallet">
+                                            Choose Another Wallet
+                                        </Translation>
+                                    </Button>
+                                </Match>
+                            </Switch>
                         </ButtonsContainerStyled>
                     </Match>
                     <Match when={mode() === 'mobile'}>

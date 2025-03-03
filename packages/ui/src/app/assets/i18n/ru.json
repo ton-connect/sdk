@@ -60,7 +60,11 @@
     "mobileConnectionModal": {
       "showQR": "Показать QR-код",
       "scanQR": "Отсканируйте QR-код ниже камерой в приложении {{ name }}, или камерой телефона",
+      "missingFeatures": "Обновите {{ name }}, ваша версия не поддерживает необходимые функции для этого dApp",
+      "notSupportedWallet": "{{ name }} не поддерживает запрошенное действие. Пожалуйста, подключите другой кошелёк, который поддерживает это",
       "continueIn": "Продолжите в {{ name }}…",
+      "updateWallet": "Обновить {{ name }}",
+      "chooseAnotherWallet": "Выбрать другой кошелёк",
       "connectionDeclined": "Подключение отклонено"
     },
     "desktopConnectionModal": {

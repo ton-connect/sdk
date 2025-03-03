@@ -60,7 +60,11 @@
     "mobileConnectionModal": {
       "showQR": "Show QR Code",
       "scanQR": "Scan the QR code below with your phone’s or {{ name }}’s camera",
+      "missingFeatures": "Please update {{ name }}, your version does not support required features for this dApp",
+      "notSupportedWallet": "{{ name }} doesn’t support the requested action. Please connect another wallet that supports it",
       "continueIn": "Continue in {{ name }}…",
+      "updateWallet": "Update {{ name }}",
+      "chooseAnotherWallet": "Choose Another Wallet",
       "connectionDeclined": "Connection declined"
     },
     "desktopConnectionModal": {
