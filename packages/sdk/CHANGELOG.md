@@ -1,5 +1,9 @@
 # Changelog @tonconnect/sdk 
 
+## [3.0.7](https://github.com/ton-connect/sdk/compare/sdk-3.0.7-alpha.1...sdk-3.0.7) (2025-03-06)
+
+
+
 ## [3.0.7-alpha.1](https://github.com/ton-connect/sdk/compare/sdk-3.0.7-alpha.0...sdk-3.0.7-alpha.1) (2025-02-18)
 
 
