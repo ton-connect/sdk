@@ -1,5 +1,9 @@
 # Changelog @tonconnect/protocol 
 
+## [2.2.7](https://github.com/ton-connect/sdk/compare/protocol-2.2.7-alpha.1...protocol-2.2.7) (2025-03-06)
+
+
+
 ## [2.2.7-alpha.1](https://github.com/ton-connect/sdk/compare/protocol-2.2.7-alpha.0...protocol-2.2.7-alpha.1) (2025-02-18)
 
 
