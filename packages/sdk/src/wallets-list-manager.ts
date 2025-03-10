@@ -60,12 +60,7 @@ export class WalletsListManager {
     public async getEmbeddedWallet(): Promise<WalletInfoCurrentlyEmbedded | null> {
         const walletsList = await this.getWallets();
         const embeddedWallets = walletsList.filter(isWalletInfoCurrentlyEmbedded);
-
-        if (embeddedWallets.length !== 1) {
-            return null;
-        }
-
-        return embeddedWallets[0]!;
+        return embeddedWallets.length === 1 ? embeddedWallets[0]! : null;
     }
 
     private async fetchWalletsList(): Promise<WalletInfo[]> {
@@ -87,7 +82,7 @@ export class WalletsListManager {
             if (wrongFormatWallets.length) {
                 logError(
                     `Wallet(s) ${wrongFormatWallets
-                        .map(wallet => wallet.name)
+                        .map(wallet => (wallet as WalletInfoDTO)?.name || 'unknown')
                         .join(
                             ', '
                         )} config format is wrong. They were removed from the wallets list.`
@@ -115,7 +110,7 @@ export class WalletsListManager {
 
     private walletConfigDTOListToWalletConfigList(walletConfigDTO: WalletInfoDTO[]): WalletInfo[] {
         return walletConfigDTO.map(walletConfigDTO => {
-            const walletConfigBase: WalletInfoBase = {
+            const walletConfig: WalletInfoBase = {
                 name: walletConfigDTO.name,
                 appName: walletConfigDTO.app_name,
                 imageUrl: walletConfigDTO.image,
@@ -124,8 +119,6 @@ export class WalletsListManager {
                 platforms: walletConfigDTO.platforms
             };
 
-            const walletConfig: WalletInfo = walletConfigBase as WalletInfo;
-
             walletConfigDTO.bridge.forEach(bridge => {
                 if (bridge.type === 'sse') {
                     (walletConfig as WalletInfoRemote).bridgeUrl = bridge.url;
@@ -133,7 +126,6 @@ export class WalletsListManager {
                         walletConfigDTO.universal_url!;
                     (walletConfig as WalletInfoRemote).deepLink = walletConfigDTO.deepLink;
                 }
-
                 if (bridge.type === 'js') {
                     const jsBridgeKey = bridge.key;
                     (walletConfig as WalletInfoInjectable).jsBridgeKey = jsBridgeKey;
@@ -143,8 +135,7 @@ export class WalletsListManager {
                         InjectedProvider.isInsideWalletBrowser(jsBridgeKey);
                 }
             });
-
-            return walletConfig;
+            return walletConfig as WalletInfo;
         });
     }
 
@@ -209,9 +200,9 @@ export class WalletsListManager {
 
         if (sseBridge) {
             if (
-                !('url' in sseBridge) ||
+                !(typeof sseBridge === 'object' && 'url' in sseBridge) ||
                 !(sseBridge as { url: string }).url ||
-                !(value as { universal_url: string }).universal_url
+                !(value as unknown as { universal_url: string }).universal_url
             ) {
                 return false;
             }
@@ -220,7 +211,7 @@ export class WalletsListManager {
         const jsBridge = bridge.find(item => (item as { type: string }).type === 'js');
 
         if (jsBridge) {
-            if (!('key' in jsBridge) || !(jsBridge as { key: string }).key) {
+            if (typeof jsBridge !== 'object' || !('key' in jsBridge) || !jsBridge.key) {
                 return false;
             }
         }

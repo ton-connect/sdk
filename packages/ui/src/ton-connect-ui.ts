@@ -421,7 +421,7 @@ export class TonConnectUI {
             sendExpand();
         }
 
-        const { notifications, modals, returnStrategy, twaReturnUrl, skipRedirectToWallet } =
+        const { notifications, modals, returnStrategy, twaReturnUrl } =
             this.getModalsAndNotificationsConfiguration(options);
 
         widgetController.setAction({
