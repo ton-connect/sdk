@@ -35,7 +35,7 @@ export default defineConfig({
       }
     },
     rollupOptions: {
-      external: ['react', 'react-dom', '@tonconnect/ui'],
+      external: ['react', 'react-dom', '@tonconnect/ui', 'react/jsx-runtime'],
       output: {
         globals: {
           react: 'React',
