@@ -40,15 +40,15 @@
     "popular": "Popular"
   },
   "walletModal": {
-    "loading":  "Loading wallets",
+    "loading": "Loading wallets",
     "wallets": "Wallets",
     "mobileUniversalModal": {
-      "connectYourWallet": "Connect your TON wallet",
+      "connectYourWallet": "Connect your TON wallet",
       "openWalletOnTelegramOrSelect": "Use Wallet in Telegram or choose other application",
       "openWalletOnTelegram": "Connect Wallet in Telegram",
       "chooseOtherApplication": "Choose other application",
       "openLink": "Open Link",
-      "scan": "Scan with your mobile wallet"
+      "scan": "Scan with your mobile wallet"
     },
     "desktopUniversalModal": {
       "connectYourWallet": "Connect your TON wallet",

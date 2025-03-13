@@ -37,6 +37,7 @@ export const WalletsUl = styled.ul`
     align-self: flex-start;
     max-width: 400px;
     margin: 0 auto;
+    list-style: none;
 
     > li {
         display: block;
@@ -44,7 +45,20 @@ export const WalletsUl = styled.ul`
     }
 
     ${media('mobile')} {
-        grid-template-columns: repeat(auto-fit, 82px);
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0;
+        padding: 8px 12px 16px;
+        max-width: none;
+
+        > li {
+            min-width: 78px;
+            display: flex;
+        }
+
+        > li > * {
+            width: 100%;
+        }
     }
 `;
 

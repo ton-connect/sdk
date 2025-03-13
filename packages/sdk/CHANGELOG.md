@@ -1,5 +1,14 @@
 # Changelog @tonconnect/sdk 
 
+## [3.0.6-beta.0](https://github.com/ton-connect/sdk/compare/sdk-3.0.5...sdk-3.0.6-beta.0) (2024-12-10)
+
+
+### Features
+
+* **sdk:** update fallback wallets list configuration ([283e5bf](https://github.com/ton-connect/sdk/commit/283e5bf3cf7f073bcee1bc868c321cc6fc55b500))
+
+
+
 ## [3.0.5](https://github.com/ton-connect/sdk/compare/sdk-3.0.4...sdk-3.0.5) (2024-08-09)
 
 

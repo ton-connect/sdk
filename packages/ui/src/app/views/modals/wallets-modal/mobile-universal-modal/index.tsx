@@ -1,18 +1,12 @@
 import { ConnectAdditionalRequest, isWalletInfoRemote, WalletInfo } from '@tonconnect/sdk';
 import { Component, createMemo, createSignal, For, Show } from 'solid-js';
-import {
-    AtWalletIcon,
-    FourWalletsItem,
-    QRIcon,
-    WalletItem
-} from 'src/app/components';
+import { AtWalletIcon, FourWalletsItem, QRIcon, WalletItem } from 'src/app/components';
 import {
     H1Styled,
     H2Styled,
     StyledLeftActionButton,
     TelegramButtonStyled,
-    TGImageStyled,
-    UlStyled
+    TGImageStyled
 } from './style';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { appState } from 'src/app/state/app.state';
@@ -25,6 +19,7 @@ import { MobileUniversalQR } from './mobile-universal-qr';
 import { Translation } from 'src/app/components/typography/Translation';
 import { redirectToTelegram, redirectToWallet } from 'src/app/utils/url-strategy-helpers';
 import { bridgesIsEqual, getUniqueBridges } from 'src/app/utils/bridge';
+import { WalletUlContainer } from 'src/app/components/wallet-item/style';
 
 interface MobileUniversalModalProps {
     walletsList: WalletInfo[];
@@ -171,7 +166,7 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
                 >
                     Choose other application
                 </H2Styled>
-                <UlStyled>
+                <WalletUlContainer>
                     <For each={shouldShowMoreButton() ? walletsList().slice(0, 3) : walletsList()}>
                         {wallet => (
                             <li>
@@ -195,7 +190,7 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
                             />
                         </li>
                     </Show>
-                </UlStyled>
+                </WalletUlContainer>
             </Show>
         </div>
     );
