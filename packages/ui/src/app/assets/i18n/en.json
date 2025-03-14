@@ -58,14 +58,22 @@
     "mobileConnectionModal": {
       "showQR": "Show QR Code",
       "scanQR": "Scan the QR code below with your phone’s or {{ name }}’s camera",
+      "missingFeatures": "Please update {{ name }}, your version does not support required features for this dApp",
+      "notSupportedWallet": "{{ name }} doesn’t support the requested action. Please connect another wallet that supports it",
       "continueIn": "Continue in {{ name }}…",
+      "updateWallet": "Update {{ name }}",
+      "chooseAnotherWallet": "Choose Another Wallet",
       "connectionDeclined": "Connection declined"
     },
     "desktopConnectionModal": {
       "scanQR": "Scan the QR code below with your phone’s or {{ name }}’s camera",
       "continueInExtension": "Continue in {{ name }} browser extension…",
       "dontHaveExtension": "Seems you don't have installed {{ name }} browser extension",
+      "missingFeatures": "Please update {{ name }}, your version does not support required features for this dApp",
+      "notSupportedWallet": "{{ name }} doesn’t support the requested action. Please connect another wallet that supports it",
       "getWallet": "Get {{ name }}",
+      "updateWallet": "Update {{ name }}",
+      "chooseAnotherWallet": "Choose Another Wallet",
       "continueOnDesktop": "Continue in {{ name }} on desktop…",
       "openWalletOnTelegram": "Connect Wallet in Telegram on desktop",
       "connectionDeclined": "Connection declined"
@@ -79,6 +87,10 @@
       "effortlessCryptoTransactions": "Effortless crypto transactions",
       "easilySend": "Easily send, receive, monitor your cryptocurrencies. Streamline your operations with decentralized applications.",
       "getAWallet": "Get a Wallet"
+    },
+    "allWallets": {
+      "walletsBelowNotSupported": "The wallets below don’t support all features of the connected service. You can use your recovery phrase in one of the supported wallets above.",
+      "walletNotSupportService": "{{ name }} doesn’t support connected service"
     }
   },
   "actionModal": {

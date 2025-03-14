@@ -1,6 +1,8 @@
 import type {
     Account,
     ConnectAdditionalRequest,
+    Feature,
+    RequireFeature,
     WalletInfoCurrentlyEmbedded
 } from '@tonconnect/sdk';
 import {
@@ -19,7 +21,7 @@ import { TonConnectUIError } from 'src/errors/ton-connect-ui.error';
 import { TonConnectUiCreateOptions } from 'src/models/ton-connect-ui-create-options';
 import { PreferredWalletStorage, WalletInfoStorage } from 'src/storage';
 import {
-    createMacrotask, createMacrotaskAsync,
+    createMacrotaskAsync,
     getSystemTheme,
     preloadImages,
     subscribeToThemeChange
@@ -67,6 +69,8 @@ export class TonConnectUI {
     private actionsConfiguration?: ActionConfiguration;
 
     private readonly walletsList: Promise<WalletInfo[]>;
+
+    public readonly walletsRequiredFeatures?: RequireFeature[] | ((features: Feature[]) => boolean);
 
     private connectRequestParametersCallback?: (
         parameters: ConnectAdditionalRequest | undefined
@@ -195,7 +199,8 @@ export class TonConnectUI {
         } else if (options && 'manifestUrl' in options && options.manifestUrl) {
             this.connector = new TonConnect({
                 manifestUrl: options.manifestUrl,
-                eventDispatcher: options?.eventDispatcher
+                eventDispatcher: options.eventDispatcher,
+                walletsRequiredFeatures: options.walletsRequiredFeatures
             });
         } else {
             throw new TonConnectUIError(
@@ -231,6 +236,8 @@ export class TonConnectUI {
         this.transactionModal = new TransactionModalManager({
             connector: this.connector
         });
+
+        this.walletsRequiredFeatures = options.walletsRequiredFeatures;
 
         this.walletsList = this.getWallets();
 

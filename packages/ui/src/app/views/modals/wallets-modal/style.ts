@@ -11,8 +11,6 @@ export const StyledModal = styled(Modal)`
     ${media('mobile')} {
         padding-left: 0;
         padding-right: 0;
-
-        min-height: 364px;
     }
 `;
 
