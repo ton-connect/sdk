@@ -1,13 +1,13 @@
 import { Component } from 'solid-js';
 import { H1Styled, H2Styled, QrCodeWrapper, ButtonsWrapper, ActionButton } from './style';
 import { QRCode } from 'src/app/components';
-import { WalletInfo } from '@tonconnect/sdk';
 import { addReturnStrategy } from 'src/app/utils/url-strategy-helpers';
 import { Translation } from 'src/app/components/typography/Translation';
+import { UIWalletInfo } from 'src/app/models/ui-wallet-info';
 
 interface MobileConnectionQRProps {
     universalLink: string;
-    walletInfo: Pick<WalletInfo, 'name' | 'imageUrl'>;
+    walletInfo: Pick<UIWalletInfo, 'name' | 'imageUrl'>;
     onOpenLink?: () => void;
     onCopy?: () => void;
     isCopiedShown?: ReturnType<typeof setTimeout> | void;

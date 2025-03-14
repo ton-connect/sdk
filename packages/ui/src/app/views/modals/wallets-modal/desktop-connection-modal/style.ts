@@ -1,5 +1,14 @@
 import { styled } from 'solid-styled-components';
-import {Button, ErrorIcon, H1, H2, IconButton, LoaderIcon, Image, QRCode} from 'src/app/components';
+import {
+    Button,
+    ErrorIcon,
+    H1,
+    H2,
+    IconButton,
+    LoaderIcon,
+    Image,
+    QRCode
+} from 'src/app/components';
 import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
 
 const tgButtonBorders: BorderRadiusConfig = {
