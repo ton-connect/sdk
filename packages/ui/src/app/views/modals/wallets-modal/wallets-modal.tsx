@@ -1,9 +1,12 @@
 import {
     ConnectAdditionalRequest,
     isWalletInfoCurrentlyInjected,
+    WalletMissingRequiredFeaturesError,
+    TonConnectError,
     Wallet,
-    WalletInfo,
-    WalletInfoRemote
+    WalletInfoRemote,
+    checkRequiredWalletFeatures,
+    WalletInfo
 } from '@tonconnect/sdk';
 import {
     Component,
@@ -28,7 +31,7 @@ import { isMobile, updateIsMobile } from 'src/app/hooks/isMobile';
 import { AllWalletsListModal } from 'src/app/views/modals/wallets-modal/all-wallets-list-modal';
 import { LoaderIcon } from 'src/app/components';
 import { LoadableReady } from 'src/models/loadable';
-import { PersonalizedWalletInfo } from 'src/app/models/personalized-wallet-info';
+import { UIWalletInfo } from 'src/app/models/ui-wallet-info';
 import { AT_WALLET_APP_NAME } from 'src/app/env/AT_WALLET_APP_NAME';
 import { DesktopConnectionModal } from 'src/app/views/modals/wallets-modal/desktop-connection-modal';
 import { InfoModal } from 'src/app/views/modals/wallets-modal/info-modal';
@@ -56,11 +59,14 @@ export const WalletsModal: Component = () => {
     const tonConnectUI = useContext(TonConnectUiContext);
     const [fetchedWalletsList] = createResource(() => tonConnectUI!.getWallets());
 
-    const [selectedWalletInfo, setSelectedWalletInfo] = createSignal<WalletInfo | null>(null);
+    const [selectedWalletInfo, setSelectedWalletInfo] = createSignal<UIWalletInfo | null>(null);
+    const [selectedWalletError, setSelectedWalletError] = createSignal<
+        'missing-features' | 'not-supported' | null
+    >(null);
     const [selectedTab, setSelectedTab] = createSignal<'universal' | 'all-wallets'>('universal');
     const [infoTab, setInfoTab] = createSignal(false);
 
-    const walletsList = createMemo<PersonalizedWalletInfo[] | null>(() => {
+    const walletsList = createMemo<UIWalletInfo[] | null>(() => {
         if (fetchedWalletsList.state !== 'ready') {
             return null;
         }
@@ -82,7 +88,9 @@ export const WalletsModal: Component = () => {
             walletsList.filter(item => eqWalletName(item, preferredWalletAppName)).length >= 2;
         if (preferredWalletAppName && preferredWallet && !someWalletsWithSameName) {
             walletsList = [
-                { ...preferredWallet, isPreferred: true } as PersonalizedWalletInfo
+                { ...preferredWallet, isPreferred: true } as WalletInfo & {
+                    isPreferred?: boolean;
+                }
             ].concat(walletsList.filter(item => !eqWalletName(item, preferredWalletAppName)));
         }
 
@@ -93,7 +101,17 @@ export const WalletsModal: Component = () => {
             );
         }
 
-        return walletsList;
+        const uiWallets = walletsList.map(wallet => ({
+            ...wallet,
+            isSupportRequiredFeatures: tonConnectUI?.walletsRequiredFeatures
+                ? checkRequiredWalletFeatures(
+                      wallet.features ?? [],
+                      tonConnectUI.walletsRequiredFeatures
+                  )
+                : true
+        }));
+
+        return uiWallets;
     });
 
     const additionalRequestLoading = (): boolean =>
@@ -112,11 +130,29 @@ export const WalletsModal: Component = () => {
         tonConnectUI!.closeModal(closeReason);
     };
 
-    const unsubscribe = connector.onStatusChange((wallet: Wallet | null) => {
-        if (wallet) {
-            onClose('wallet-selected');
+    const unsubscribe = connector.onStatusChange(
+        (wallet: Wallet | null) => {
+            if (wallet) {
+                onClose('wallet-selected');
+            }
+        },
+        err => {
+            if (err instanceof WalletMissingRequiredFeaturesError) {
+                const errorAppName = err.cause.connectEvent.device.appName.toLowerCase();
+                const wallet = walletsList()?.find(w => w.appName.toLowerCase() === errorAppName);
+
+                if (!wallet) {
+                    throw new TonConnectError('Wallet not found');
+                }
+
+                const walletErrorType = wallet.isSupportRequiredFeatures
+                    ? 'missing-features'
+                    : 'not-supported';
+                setSelectedWalletError(walletErrorType);
+                setSelectedWalletInfo(wallet);
+            }
         }
-    });
+    );
 
     const onSelectAllWallets = (): void => {
         setSelectedTab('all-wallets');
@@ -128,10 +164,12 @@ export const WalletsModal: Component = () => {
 
     const clearSelectedWalletInfo = (): void => {
         setSelectedWalletInfo(null);
+        setSelectedWalletError(null);
     };
 
     onCleanup(() => {
         setSelectedWalletInfo(null);
+        setSelectedWalletError(null);
         setInfoTab(false);
     });
 
@@ -169,6 +207,7 @@ export const WalletsModal: Component = () => {
                                 wallet={selectedWalletInfo()! as WalletInfoRemote}
                                 additionalRequest={additionalRequest()}
                                 onBackClick={clearSelectedWalletInfo}
+                                defaultError={selectedWalletError()}
                             />
                         </Match>
                         <Match when={selectedTab() === 'universal'}>

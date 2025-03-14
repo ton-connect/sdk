@@ -2,6 +2,7 @@ import {
     ConnectAdditionalRequest,
     isTelegramUrl,
     isWalletInfoCurrentlyInjected,
+    WalletMissingRequiredFeaturesError,
     WalletInfoInjectable,
     WalletInfoRemote
 } from '@tonconnect/sdk';
@@ -60,20 +61,34 @@ export interface DesktopConnectionProps {
     wallet: WalletInfoRemote | (WalletInfoRemote & WalletInfoInjectable);
     onBackClick: () => void;
     backDisabled?: boolean;
+    defaultError?: 'missing-features' | 'connection-declined' | 'not-supported' | null;
 }
 
 export const DesktopConnectionModal: Component<DesktopConnectionProps> = props => {
     const [mode, setMode] = createSignal<'mobile' | 'desktop' | 'extension'>('mobile');
-    const [connectionErrored, setConnectionErrored] = createSignal(false);
+
+    const [connectionErrored, setConnectionErrored] = createSignal<
+        'missing-features' | 'connection-declined' | 'not-supported' | null
+    >(null);
+
+    createEffect(() => {
+        setConnectionErrored(props.defaultError ?? null);
+    });
+
     const [universalLink, setUniversalLink] = createSignal<string | undefined>();
     const [firstClick, setFirstClick] = createSignal(true);
     const connector = useContext(ConnectorContext)!;
 
     const unsubscribe = connector.onStatusChange(
         () => {},
-        () => {
+        error => {
+            if (error instanceof WalletMissingRequiredFeaturesError) {
+                setConnectionErrored('missing-features');
+                return;
+            }
+
             if (props.wallet.appName !== AT_WALLET_APP_NAME) {
-                setConnectionErrored(true);
+                setConnectionErrored('connection-declined');
             }
         }
     );
@@ -105,7 +120,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
     });
 
     const onClickMobile = (): void => {
-        setConnectionErrored(false);
+        setConnectionErrored(null);
         if (mode() === 'extension') {
             generateUniversalLink();
         }
@@ -118,7 +133,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
     };
 
     const onClickDesktop = (): void => {
-        setConnectionErrored(false);
+        setConnectionErrored(null);
         if (mode() === 'extension') {
             generateUniversalLink();
         }
@@ -163,7 +178,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
     };
 
     const onClickExtension = (): void => {
-        setConnectionErrored(false);
+        setConnectionErrored(null);
         setMode('extension');
         if (isWalletInfoCurrentlyInjected(props.wallet)) {
             setLastSelectedWalletInfo(props.wallet);
@@ -190,7 +205,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                 <StyledIconButton icon="arrow" onClick={() => props.onBackClick()} />
             </Show>
             <H1Styled>{props.wallet.name}</H1Styled>
-            <Show when={mode() === 'mobile'}>
+            <Show when={mode() === 'mobile' && !connectionErrored()}>
                 <H2Styled
                     translationKey="walletModal.desktopConnectionModal.scanQR"
                     translationValues={{ name: props.wallet.name }}
@@ -201,26 +216,71 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
 
             <BodyStyled qr={mode() === 'mobile'}>
                 <Switch>
+                    <Match when={connectionErrored()}>
+                        <ErrorIconStyled size="s" />
+                        <Switch>
+                            <Match when={connectionErrored() === 'missing-features'}>
+                                <BodyTextStyled
+                                    translationKey="walletModal.desktopConnectionModal.missingFeatures"
+                                    translationValues={{ name: props.wallet.name }}
+                                >
+                                    Please update Wallet, your version does not support required
+                                    features for this dApp
+                                </BodyTextStyled>
+                            </Match>
+                            <Match when={connectionErrored() === 'connection-declined'}>
+                                <BodyTextStyled translationKey="walletModal.desktopConnectionModal.connectionDeclined">
+                                    Connection declined
+                                </BodyTextStyled>
+                            </Match>
+                            <Match when={connectionErrored() === 'not-supported'}>
+                                <BodyTextStyled
+                                    translationKey="walletModal.desktopConnectionModal.notSupportedWallet"
+                                    translationValues={{ name: props.wallet.name }}
+                                >
+                                    {props.wallet.name} doesn’t support the requested action. Please
+                                    connect another wallet that supports it.
+                                </BodyTextStyled>
+                            </Match>
+                        </Switch>
+                        <ButtonsContainerStyled>
+                            <Show when={connectionErrored() !== 'not-supported'}>
+                                <Button
+                                    leftIcon={<RetryIcon />}
+                                    onClick={
+                                        mode() === 'extension' ? onClickExtension : onClickDesktop
+                                    }
+                                >
+                                    <Translation translationKey="common.retry">Retry</Translation>
+                                </Button>
+                            </Show>
+                            <Show when={connectionErrored() === 'missing-features'}>
+                                <Link href={props.wallet.aboutUrl} blank>
+                                    <Button leftIcon={<LinkIcon />}>
+                                        <Translation
+                                            translationKey="walletModal.desktopConnectionModal.updateWallet"
+                                            translationValues={{ name: props.wallet.name }}
+                                        >
+                                            Update {props.wallet.name}
+                                        </Translation>
+                                    </Button>
+                                </Link>
+                            </Show>
+                            <Show when={connectionErrored() === 'not-supported'}>
+                                <Button onClick={() => props.onBackClick()}>
+                                    <Translation translationKey="walletModal.desktopConnectionModal.chooseAnotherWallet">
+                                        Choose Another Wallet
+                                    </Translation>
+                                </Button>
+                            </Show>
+                        </ButtonsContainerStyled>
+                    </Match>
                     <Match when={mode() === 'mobile'}>
                         <QRCodeStyled
                             disableCopy={false}
                             sourceUrl={addReturnStrategy(universalLink()!, 'none')}
                             imageUrl={props.wallet.imageUrl}
                         />
-                    </Match>
-                    <Match when={connectionErrored()}>
-                        <ErrorIconStyled size="s" />
-                        <BodyTextStyled translationKey="walletModal.desktopConnectionModal.connectionDeclined">
-                            Connection declined
-                        </BodyTextStyled>
-                        <ButtonsContainerStyled>
-                            <Button
-                                leftIcon={<RetryIcon />}
-                                onClick={mode() === 'extension' ? onClickExtension : onClickDesktop}
-                            >
-                                <Translation translationKey="common.retry">Retry</Translation>
-                            </Button>
-                        </ButtonsContainerStyled>
                     </Match>
                     <Match when={mode() === 'extension'}>
                         <Show when={isWalletInfoCurrentlyInjected(props.wallet)}>

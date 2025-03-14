@@ -19,3 +19,7 @@ export {
     isWalletInfoRemote,
     isWalletInfoInjected
 } from './wallet-info';
+export {
+    RequireFeature,
+    RequireSendTransactionFeature
+} from './require-feature';

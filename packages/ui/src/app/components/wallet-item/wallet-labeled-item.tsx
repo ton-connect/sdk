@@ -1,6 +1,6 @@
 import { Component } from 'solid-js';
 import { Styleable } from 'src/app/models/styleable';
-import { PersonalizedWalletInfo } from 'src/app/models/personalized-wallet-info';
+import { UIWalletInfo } from 'src/app/models/ui-wallet-info';
 import { AT_WALLET_APP_NAME } from 'src/app/env/AT_WALLET_APP_NAME';
 import { WalletItem } from 'src/app/components';
 import { isWalletInfoCurrentlyInjected } from '@tonconnect/sdk';
@@ -8,7 +8,7 @@ import { IMG } from 'src/app/env/IMG';
 import { useI18n } from '@solid-primitives/i18n';
 
 export interface WalletLabeledItemProps extends Styleable {
-    wallet: PersonalizedWalletInfo;
+    wallet: UIWalletInfo;
     onClick: () => void;
 }
 
@@ -40,6 +40,7 @@ export const WalletLabeledItem: Component<WalletLabeledItemProps> = props => {
                     secondLine="Telegram"
                     badgeUrl={IMG.TG}
                     onClick={() => props.onClick()}
+                    class={props.class}
                 />
             ) : (
                 <WalletItem
@@ -48,6 +49,7 @@ export const WalletLabeledItem: Component<WalletLabeledItemProps> = props => {
                     secondLine={walletsSecondLine()}
                     secondLineColorPrimary={false}
                     onClick={() => props.onClick()}
+                    class={props.class}
                 />
             )}
         </>

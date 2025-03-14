@@ -54,6 +54,9 @@ export { BrowserEventDispatcher } from './tracker/browser-event-dispatcher';
 export type { TonAddressItem, TonProofItem, ConnectItem } from '@tonconnect/protocol';
 export {
     CHAIN,
+    ConnectEventSuccess,
+    ConnectItemReply,
+    TonAddressItemReply,
     DeviceInfo,
     Feature,
     SendTransactionFeature,
@@ -68,4 +71,5 @@ export {
     SEND_TRANSACTION_ERROR_CODES
 } from '@tonconnect/protocol';
 export { toUserFriendlyAddress } from './utils/address';
+export { checkRequiredWalletFeatures }  from './utils/feature-support';
 export { isTelegramUrl, encodeTelegramUrlParameters } from './utils/url';

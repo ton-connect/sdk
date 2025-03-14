@@ -1,6 +1,8 @@
+import { Feature } from '@tonconnect/protocol';
 import { IStorage } from 'src/storage/models/storage.interface';
 import { EventDispatcher } from 'src/tracker/event-dispatcher';
 import { SdkActionEvent } from 'src/tracker/types';
+import { RequireFeature } from './wallet';
 
 /**
  * TonConnect constructor options
@@ -34,6 +36,11 @@ export interface TonConnectOptions {
      * @default Infinity
      */
     walletsListCacheTTLMs?: number;
+
+    /**
+     * Required features for wallets. If wallet doesn't support required features, it will be disabled.
+     */
+    walletsRequiredFeatures?: RequireFeature[] | ((features: Feature[]) => boolean);
 
     /**
      * Allows to disable auto pause/unpause SSE connection on 'document.visibilitychange' event. It is not recommended to change default behaviour.
