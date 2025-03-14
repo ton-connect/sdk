@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui-react 
 
+## [2.0.13-beta.0](https://github.com/ton-connect/sdk/compare/ui-react-2.0.12...ui-react-2.0.13-beta.0) (2025-03-14)
+
+
+### Features
+
+* **ui-react:** add support for react 19 and preact while maintaining backward compatibility ([cf7cc52](https://github.com/ton-connect/sdk/commit/cf7cc52c853437965c4255074af54381cafffa43))
+
+
+
 ## [2.0.12](https://github.com/ton-connect/sdk/compare/ui-react-2.0.12-alpha.1...ui-react-2.0.12) (2025-03-06)
 
 
