@@ -3,6 +3,7 @@ import {
     AppRequest,
     ConnectEventError,
     ConnectRequest,
+    Feature,
     RpcMethod,
     WalletEvent,
     WalletResponse
@@ -66,7 +67,8 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             jsBridgeKey,
             injected: true,
             embedded: wallet.tonconnect.isWalletBrowser,
-            platforms: wallet.tonconnect.walletInfo.platforms
+            platforms: wallet.tonconnect.walletInfo.platforms,
+            features: wallet.tonconnect.walletInfo.features
         }));
     }
 

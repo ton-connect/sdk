@@ -1,8 +1,8 @@
 import {
-    ConnectEventError,
     ConnectEventSuccess,
     ConnectItem,
     ConnectRequest,
+    Feature,
     SendTransactionRpcResponseSuccess,
     TonAddressItemReply,
     TonProofItemReply,
@@ -12,10 +12,14 @@ import { DappMetadataError } from 'src/errors/dapp/dapp-metadata.error';
 import { ManifestContentErrorError } from 'src/errors/protocol/events/connect/manifest-content-error.error';
 import { ManifestNotFoundError } from 'src/errors/protocol/events/connect/manifest-not-found.error';
 import { TonConnectError } from 'src/errors/ton-connect.error';
-import { WalletAlreadyConnectedError } from 'src/errors/wallet/wallet-already-connected.error';
-import { WalletNotConnectedError } from 'src/errors/wallet/wallet-not-connected.error';
+import {
+    WalletAlreadyConnectedError,
+    WalletNotConnectedError,
+    WalletMissingRequiredFeaturesError
+} from 'src/errors/wallet';
 import {
     Account,
+    RequireFeature,
     Wallet,
     WalletConnectionSource,
     WalletConnectionSourceHTTP,
@@ -39,7 +43,10 @@ import { ITonConnect } from 'src/ton-connect.interface';
 import { getDocument, getWebPageManifest } from 'src/utils/web-api';
 import { WalletsListManager } from 'src/wallets-list-manager';
 import { WithoutIdDistributive } from 'src/utils/types';
-import { checkSendTransactionSupport } from 'src/utils/feature-support';
+import {
+    checkSendTransactionSupport,
+    checkRequiredWalletFeatures
+} from 'src/utils/feature-support';
 import { callForSuccess } from 'src/utils/call-for-success';
 import { logDebug, logError } from 'src/utils/log';
 import { createAbortController } from 'src/utils/create-abort-controller';
@@ -90,6 +97,11 @@ export class TonConnect implements ITonConnect {
 
     private statusChangeErrorSubscriptions: ((err: TonConnectError) => void)[] = [];
 
+    private readonly walletsRequiredFeatures:
+        | RequireFeature[]
+        | ((features: Feature[]) => boolean)
+        | undefined;
+
     private abortController?: AbortController;
 
     /**
@@ -124,9 +136,12 @@ export class TonConnect implements ITonConnect {
             storage: options?.storage || new DefaultStorage()
         };
 
+        this.walletsRequiredFeatures = options?.walletsRequiredFeatures;
+
         this.walletsList = new WalletsListManager({
             walletsListSource: options?.walletsListSource,
-            cacheTTLMs: options?.walletsListCacheTTLMs
+            cacheTTLMs: options?.walletsListCacheTTLMs,
+            walletsRequiredFeatures: options?.walletsRequiredFeatures
         });
 
         this.tracker = new TonConnectTracker({
@@ -548,7 +563,9 @@ export class TonConnect implements ITonConnect {
                 this.onWalletConnected(e.payload);
                 break;
             case 'connect_error':
-                this.onWalletConnectError(e.payload);
+                this.tracker.trackConnectionError(e.payload.message, e.payload.code);
+                const walletError = connectErrorsParser.parseError(e.payload);
+                this.onWalletConnectError(walletError);
                 break;
             case 'disconnect':
                 this.onWalletDisconnected('wallet');
@@ -566,6 +583,22 @@ export class TonConnect implements ITonConnect {
 
         if (!tonAccountItem) {
             throw new TonConnectError('ton_addr connection item was not found');
+        }
+
+        const hasRequiredFeatures = checkRequiredWalletFeatures(
+            connectEvent.device.features,
+            this.walletsRequiredFeatures ?? []
+        );
+
+        if (!hasRequiredFeatures) {
+            this.provider?.disconnect();
+            this.onWalletConnectError(
+                new WalletMissingRequiredFeaturesError(
+                    'Wallet does not support required features',
+                    { cause: { connectEvent } }
+                )
+            );
+            return;
         }
 
         const wallet: Wallet = {
@@ -590,12 +623,10 @@ export class TonConnect implements ITonConnect {
         this.tracker.trackConnectionCompleted(wallet);
     }
 
-    private onWalletConnectError(connectEventError: ConnectEventError['payload']): void {
-        const error = connectErrorsParser.parseError(connectEventError);
+    private onWalletConnectError(error: TonConnectError): void {
         this.statusChangeErrorSubscriptions.forEach(errorsHandler => errorsHandler(error));
 
         logDebug(error);
-        this.tracker.trackConnectionError(connectEventError.message, connectEventError.code);
 
         if (error instanceof ManifestNotFoundError || error instanceof ManifestContentErrorError) {
             logError(error);

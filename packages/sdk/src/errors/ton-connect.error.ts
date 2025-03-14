@@ -1,7 +1,7 @@
 /**
  * Base class for TonConnect errors. You can check if the error was triggered by the @tonconnect/sdk using `err instanceof TonConnectError`.
  */
-export class TonConnectError extends Error {
+export class TonConnectError<T = unknown> extends Error {
     private static prefix = '[TON_CONNECT_SDK_ERROR]';
 
     protected get info(): string {
@@ -11,7 +11,7 @@ export class TonConnectError extends Error {
     constructor(
         message?: string,
         options?: {
-            cause?: unknown;
+            cause?: T;
         }
     ) {
         super(message, options);
