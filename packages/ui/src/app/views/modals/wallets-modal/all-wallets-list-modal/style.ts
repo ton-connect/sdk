@@ -1,5 +1,5 @@
 import { styled } from 'solid-styled-components';
-import { Button, H1, IconButton, WalletLabeledItem } from 'src/app/components';
+import { Button, H1, H2, IconButton, WalletLabeledItem } from 'src/app/components';
 import { media } from 'src/app/styles/media';
 
 export const DesktopSelectWalletModalStyled = styled.div`
@@ -30,7 +30,6 @@ export const WalletsUl = styled.ul`
     grid-template-columns: repeat(auto-fit, 92px);
     grid-template-rows: auto;
     align-content: flex-start;
-    justify-content: center;
     row-gap: 8px;
     width: 100%;
     padding: 0 0 16px;
@@ -74,6 +73,46 @@ export const StyledIconButton = styled(IconButton)`
     left: 16px;
 `;
 
-export const WalletLabeledItemStyled = styled(WalletLabeledItem)`
-    height: 100%;
+export const WalletLabeledItemStyled = styled(WalletLabeledItem)<{ withOpacity?: boolean }>`
+    opacity: ${props => (props.withOpacity ? '0.4' : '1')};
+`;
+
+export const WalletsNotSupportedNotifier = styled.div`
+    display: grid;
+    grid-template-columns: auto 28px;
+    gap: 16px;
+    padding: 16px;
+    margin-bottom: 16px;
+    border-radius: 16px;
+    color: ${props => props.theme!.colors.text.secondary};
+    background: ${props => props.theme!.colors.background.tint};
+
+    ${media('mobile')} {
+        margin-left: 16px;
+        margin-right: 16px;
+    }
+`;
+
+export const WalletsNotSupportedNotifierText = styled(H2)`
+    color: ${props => props.theme!.colors.text.secondary};
+    text-align: left;
+    margin: 0;
+`;
+
+export const ErrorBoxStyled = styled.div`
+    position: absolute;
+    bottom: 14px;
+    left: 50%;
+    transform: translate(-50%, 0);
+
+    text-wrap: nowrap;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    border-radius: 18px;
+    min-width: 126px;
+    padding: 9px 16px 9px 10px;
+
+    filter: drop-shadow(0px 2px 8px rgba(0, 0, 0, 0.08));
+    background-color: ${props => props.theme!.colors.background.segment};
 `;

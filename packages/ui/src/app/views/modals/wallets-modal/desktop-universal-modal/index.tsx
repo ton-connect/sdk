@@ -6,11 +6,11 @@ import {
     QRCodeStyled,
     WalletsContainerStyled
 } from './style';
-import { ConnectAdditionalRequest, isWalletInfoRemote, WalletInfo } from '@tonconnect/sdk';
+import { ConnectAdditionalRequest } from '@tonconnect/sdk';
 import { appState } from 'src/app/state/app.state';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { FourWalletsItem, H1, WalletLabeledItem } from 'src/app/components';
-import { PersonalizedWalletInfo } from 'src/app/models/personalized-wallet-info';
+import { UIWalletInfo } from 'src/app/models/ui-wallet-info';
 import { IMG } from 'src/app/env/IMG';
 
 import { addReturnStrategy } from 'src/app/utils/url-strategy-helpers';
@@ -19,9 +19,9 @@ import { bridgesIsEqual, getUniqueBridges } from 'src/app/utils/bridge';
 interface DesktopUniversalModalProps {
     additionalRequest: ConnectAdditionalRequest;
 
-    walletsList: PersonalizedWalletInfo[];
+    walletsList: UIWalletInfo[];
 
-    onSelect: (walletInfo: WalletInfo) => void;
+    onSelect: (walletInfo: UIWalletInfo) => void;
 
     onSelectAllWallets: () => void;
 }
@@ -36,6 +36,21 @@ export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = prop
 
     setLastSelectedWalletInfo({ openMethod: 'qrcode' });
     const request = createMemo(() => connector.connect(walletsBridges(), props.additionalRequest));
+
+    const supportedWallets = createMemo(
+        () => props.walletsList.filter(wallet => wallet.isSupportRequiredFeatures),
+        null
+    );
+
+    const visibleWallets = createMemo(() => supportedWallets().slice(0, 3), null);
+
+    const fourWalletsItem = createMemo(
+        () =>
+            props.walletsList
+                .filter(wallet => !visibleWallets().find(w => w.appName === wallet.appName))
+                .slice(0, 4),
+        null
+    );
 
     return (
         <DesktopUniversalModalStyled
@@ -57,7 +72,7 @@ export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = prop
                 Available wallets
             </H2AvailableWalletsStyled>
             <WalletsContainerStyled>
-                <For each={props.walletsList.slice(0, 3)}>
+                <For each={visibleWallets()}>
                     {wallet => (
                         <li>
                             <WalletLabeledItem
@@ -70,7 +85,7 @@ export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = prop
                 <FourWalletsItem
                     labelLine1="View all"
                     labelLine2="wallets"
-                    images={props.walletsList.slice(3, 7).map(i => i.imageUrl)}
+                    images={fourWalletsItem().map(i => i.imageUrl)}
                     onClick={() => props.onSelectAllWallets()}
                 />
             </WalletsContainerStyled>

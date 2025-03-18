@@ -11,8 +11,7 @@ import {
 import { ConnectorContext } from 'src/app/state/connector.context';
 import {
     getSingleWalletModalIsOpened,
-    getSingleWalletModalWalletInfo,
-    setSingleWalletModalState
+    getSingleWalletModalWalletInfo
 } from 'src/app/state/modals-state';
 import { H1Styled, LoaderContainerStyled, StyledModal } from './style';
 import { useI18n } from '@solid-primitives/i18n';

@@ -1,6 +1,7 @@
 import { Feature, SendTransactionFeature } from '@tonconnect/protocol';
 import { logWarning } from 'src/utils/log';
-import { WalletNotSupportFeatureError } from 'src/errors/wallet/wallet-not-support-feature.error';
+import { WalletNotSupportFeatureError } from 'src/errors/wallet';
+import { RequireFeature } from 'src/models';
 
 export function checkSendTransactionSupport(
     features: Feature[],
@@ -35,4 +36,39 @@ export function checkSendTransactionSupport(
     logWarning(
         "Connected wallet didn't provide information about max allowed messages in the SendTransaction request. Request may be rejected by the wallet."
     );
+}
+
+export function checkRequiredWalletFeatures(
+    features: Feature[],
+    walletsRequiredFeatures: RequireFeature[] | ((features: Feature[]) => boolean)
+): boolean {
+    if (typeof walletsRequiredFeatures === 'function') {
+        return walletsRequiredFeatures(features);
+    }
+
+    const res = walletsRequiredFeatures.every(requiredFeature => {
+        const feature = features.find(f => typeof f === 'object' && f.name === requiredFeature.name);
+
+        if (!feature) {
+            return false;
+        }
+
+        switch (requiredFeature.name) {
+            case 'SendTransaction': {
+                const sendTransactionFeature = feature as SendTransactionFeature;
+                const correctMessagesNumber =
+                    requiredFeature.minMessages === undefined ||
+                    requiredFeature.minMessages <= sendTransactionFeature.maxMessages;
+                const correctExtraCurrency =
+                    !requiredFeature.extraCurrencyRequired ||
+                    sendTransactionFeature.extraCurrencySupported;
+
+                return correctMessagesNumber && correctExtraCurrency;
+            }
+            default:
+                return false;
+        }
+    });
+
+    return res;
 }
