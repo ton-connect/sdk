@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui-react 
 
+## [2.0.13-beta.1](https://github.com/ton-connect/sdk/compare/ui-react-2.0.13-beta.0...ui-react-2.0.13-beta.1) (2025-03-18)
+
+
+### Features
+
+* **ui-react:** add support for required features ([d935402](https://github.com/ton-connect/sdk/commit/d935402b9d270ff20e59c1b45d7f9f558a4bb9ad))
+
+
+
 ## [2.0.13-beta.0](https://github.com/ton-connect/sdk/compare/ui-react-2.0.12...ui-react-2.0.13-beta.0) (2025-03-14)
 
 
