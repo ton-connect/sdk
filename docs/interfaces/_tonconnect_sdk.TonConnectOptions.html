@@ -24,7 +24,7 @@
 <ul class="tsd-hierarchy">
 <li><span class="target">TonConnectOptions</span></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/6335d83/packages/sdk/src/models/ton-connect-options.ts#L8">packages/sdk/src/models/ton-connect-options.ts:8</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/22bd7bd/packages/sdk/src/models/ton-connect-options.ts#L10">packages/sdk/src/models/ton-connect-options.ts:10</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -38,6 +38,7 @@
 <a href="_tonconnect_sdk.TonConnectOptions.html#storage" class="tsd-index-link tsd-kind-property tsd-parent-kind-interface"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>storage?</span></a>
 <a href="_tonconnect_sdk.TonConnectOptions.html#walletsListCacheTTLMs" class="tsd-index-link tsd-kind-property tsd-parent-kind-interface"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>wallets<wbr/>List<wbr/>CacheTTLMs?</span></a>
 <a href="_tonconnect_sdk.TonConnectOptions.html#walletsListSource" class="tsd-index-link tsd-kind-property tsd-parent-kind-interface"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>wallets<wbr/>List<wbr/>Source?</span></a>
+<a href="_tonconnect_sdk.TonConnectOptions.html#walletsRequiredFeatures" class="tsd-index-link tsd-kind-property tsd-parent-kind-interface"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>wallets<wbr/>Required<wbr/>Features?</span></a>
 </div></section></div></details></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Properties</h2>
@@ -47,14 +48,14 @@
 <div class="tsd-comment tsd-typography"><p>Allows to disable auto pause/unpause SSE connection on &#39;document.visibilitychange&#39; event. It is not recommended to change default behaviour.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/6335d83/packages/sdk/src/models/ton-connect-options.ts#L41">packages/sdk/src/models/ton-connect-options.ts:41</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/22bd7bd/packages/sdk/src/models/ton-connect-options.ts#L48">packages/sdk/src/models/ton-connect-options.ts:48</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="eventDispatcher" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>event<wbr/>Dispatcher</span><a href="#eventDispatcher" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">event<wbr/>Dispatcher<span class="tsd-signature-symbol">?:</span> <a href="_tonconnect_sdk.EventDispatcher.html" class="tsd-signature-type" data-tsd-kind="Interface">EventDispatcher</a><span class="tsd-signature-symbol">&lt;</span><a href="../types/_tonconnect_sdk.SdkActionEvent.html" class="tsd-signature-type" data-tsd-kind="Type alias">SdkActionEvent</a><span class="tsd-signature-symbol">&gt;</span></div>
 <div class="tsd-comment tsd-typography"><p>Event dispatcher to track user actions. By default, it uses <code>window.dispatchEvent</code> for browser environment.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/6335d83/packages/sdk/src/models/ton-connect-options.ts#L23">packages/sdk/src/models/ton-connect-options.ts:23</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/22bd7bd/packages/sdk/src/models/ton-connect-options.ts#L25">packages/sdk/src/models/ton-connect-options.ts:25</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="manifestUrl" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>manifest<wbr/>Url</span><a href="#manifestUrl" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">manifest<wbr/>Url<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
@@ -62,14 +63,14 @@
 If not passed, manifest from <code>${window.location.origin}/tonconnect-manifest.json</code> will be taken.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/6335d83/packages/sdk/src/models/ton-connect-options.ts#L13">packages/sdk/src/models/ton-connect-options.ts:13</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/22bd7bd/packages/sdk/src/models/ton-connect-options.ts#L15">packages/sdk/src/models/ton-connect-options.ts:15</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="storage" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>storage</span><a href="#storage" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">storage<span class="tsd-signature-symbol">?:</span> <a href="_tonconnect_sdk.IStorage.html" class="tsd-signature-type" data-tsd-kind="Interface">IStorage</a></div>
 <div class="tsd-comment tsd-typography"><p>Storage to save protocol data. For browser default is <code>localStorage</code>. If you use SDK with nodeJS, you have to specify this field.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/6335d83/packages/sdk/src/models/ton-connect-options.ts#L18">packages/sdk/src/models/ton-connect-options.ts:18</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/22bd7bd/packages/sdk/src/models/ton-connect-options.ts#L20">packages/sdk/src/models/ton-connect-options.ts:20</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="walletsListCacheTTLMs" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>wallets<wbr/>List<wbr/>CacheTTLMs</span><a href="#walletsListCacheTTLMs" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">wallets<wbr/>List<wbr/>CacheTTLMs<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div>
@@ -78,7 +79,7 @@ If not passed, manifest from <code>${window.location.origin}/tonconnect-manifest
 <h3>Default</h3><p>Infinity</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/6335d83/packages/sdk/src/models/ton-connect-options.ts#L36">packages/sdk/src/models/ton-connect-options.ts:36</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/22bd7bd/packages/sdk/src/models/ton-connect-options.ts#L38">packages/sdk/src/models/ton-connect-options.ts:38</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="walletsListSource" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>wallets<wbr/>List<wbr/>Source</span><a href="#walletsListSource" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">wallets<wbr/>List<wbr/>Source<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
@@ -88,7 +89,14 @@ If not passed, manifest from <code>${window.location.origin}/tonconnect-manifest
 @</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/6335d83/packages/sdk/src/models/ton-connect-options.ts#L30">packages/sdk/src/models/ton-connect-options.ts:30</a></li></ul></aside></section></section></div>
+<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/22bd7bd/packages/sdk/src/models/ton-connect-options.ts#L32">packages/sdk/src/models/ton-connect-options.ts:32</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="walletsRequiredFeatures" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>wallets<wbr/>Required<wbr/>Features</span><a href="#walletsRequiredFeatures" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<div class="tsd-signature">wallets<wbr/>Required<wbr/>Features<span class="tsd-signature-symbol">?:</span> <a href="../types/_tonconnect_sdk.RequireSendTransactionFeature.html" class="tsd-signature-type" data-tsd-kind="Type alias">RequireSendTransactionFeature</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">(</span>features<span class="tsd-signature-symbol">: </span><a href="../types/_tonconnect_sdk.Feature.html" class="tsd-signature-type" data-tsd-kind="Type alias">Feature</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span></div>
+<div class="tsd-comment tsd-typography"><p>Required features for wallets. If wallet doesn&#39;t support required features, it will be disabled.</p>
+</div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/22bd7bd/packages/sdk/src/models/ton-connect-options.ts#L43">packages/sdk/src/models/ton-connect-options.ts:43</a></li></ul></aside></section></section></div>
 <div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 <div class="tsd-navigation settings">
 <details class="tsd-index-accordion"><summary class="tsd-accordion-summary">
@@ -121,7 +129,8 @@ If not passed, manifest from <code>${window.location.origin}/tonconnect-manifest
 <li class="tsd-kind-property tsd-parent-kind-interface"><a href="_tonconnect_sdk.TonConnectOptions.html#manifestUrl" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg>manifest<wbr/>Url?</a></li>
 <li class="tsd-kind-property tsd-parent-kind-interface"><a href="_tonconnect_sdk.TonConnectOptions.html#storage" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg>storage?</a></li>
 <li class="tsd-kind-property tsd-parent-kind-interface"><a href="_tonconnect_sdk.TonConnectOptions.html#walletsListCacheTTLMs" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg>wallets<wbr/>List<wbr/>CacheTTLMs?</a></li>
-<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_tonconnect_sdk.TonConnectOptions.html#walletsListSource" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg>wallets<wbr/>List<wbr/>Source?</a></li></ul></li></ul></nav></div></div>
+<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_tonconnect_sdk.TonConnectOptions.html#walletsListSource" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg>wallets<wbr/>List<wbr/>Source?</a></li>
+<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_tonconnect_sdk.TonConnectOptions.html#walletsRequiredFeatures" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg>wallets<wbr/>Required<wbr/>Features?</a></li></ul></li></ul></nav></div></div>
 <div class="container tsd-generator">
 <p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></div>
 <div class="overlay"></div><script src="../assets/main.js"></script></body></html>
