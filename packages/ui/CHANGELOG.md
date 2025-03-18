@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui 
 
+## [2.0.13-beta.0](https://github.com/ton-connect/sdk/compare/ui-2.0.12...ui-2.0.13-beta.0) (2025-03-18)
+
+
+### Features
+
+* **ui:** add support for required features ([6d9d78a](https://github.com/ton-connect/sdk/commit/6d9d78abc8a7d590ea07152117ef21fbb06331c7))
+
+
+
 ## [2.0.12](https://github.com/ton-connect/sdk/compare/ui-2.0.12-alpha.1...ui-2.0.12) (2025-03-06)
 
 
