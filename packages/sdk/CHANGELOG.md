@@ -1,5 +1,19 @@
 # Changelog @tonconnect/sdk 
 
+## [3.0.8-beta.0](https://github.com/ton-connect/sdk/compare/sdk-3.0.7...sdk-3.0.8-beta.0) (2025-03-18)
+
+
+### Bug Fixes
+
+* eslint source tags ([4aaca93](https://github.com/ton-connect/sdk/commit/4aaca93fe7b53e317a0ffa4b0d78b61026dd0948))
+
+
+### Features
+
+* **sdk:** add support for required features ([a33480f](https://github.com/ton-connect/sdk/commit/a33480f64fdfe9ef36eb4359cbc31ca5cc9c7d58))
+
+
+
 ## [3.0.7](https://github.com/ton-connect/sdk/compare/sdk-3.0.7-alpha.1...sdk-3.0.7) (2025-03-06)
 
 
