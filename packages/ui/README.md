@@ -51,6 +51,25 @@ const tonConnectUI = new TonConnectUI({
 });
 ```
 
+You can also specify required wallet features to filter wallets that will be shown in the connect wallet modal:
+
+```ts
+import { TonConnectUI } from '@tonconnect/ui'
+
+const tonConnectUI = new TonConnectUI({
+    manifestUrl: 'https://<YOUR_APP_URL>/tonconnect-manifest.json',
+    buttonRootId: '<YOUR_CONNECT_BUTTON_ANCHOR_ID>',
+    walletsRequiredFeatures: {
+        sendTransaction: {
+            minMessages: 2, // Wallet must support at least 2 messages
+            extraCurrencyRequired: true // Wallet must support extra currency
+        }
+    }
+});
+```
+
+This will filter out wallets that don't support sending multiple messages or don't support extra currencies.
+
 See all available options:
 
 [TonConnectUiOptionsWithManifest](https://ton-connect.github.io/sdk/interfaces/_tonconnect_ui.TonConnectUiOptionsWithManifest.html)
@@ -236,7 +255,6 @@ await tonConnectUI.disconnect();
 ## Send transaction
 Wallet must be connected when you call `sendTransaction`. Otherwise, an error will be thrown.
 
-
 ```ts
 const transaction = {
     validUntil: Math.floor(Date.now() / 1000) + 60, // 60 sec
@@ -252,7 +270,21 @@ const transaction = {
          // payload: "base64bocblahblahblah==" // just for instance. Replace with your transaction payload or remove
         }
     ]
-}
+};
+
+// you can also include extra currencies in your transaction
+const transactionWithExtraCurrency = {
+    validUntil: Math.floor(Date.now() / 1000) + 60,
+    messages: [
+        {
+            address: "EQBBJBB3HagsujBqVfqeDUPJ0kXjgTPLWPFFffuNXNiJL0aA",
+            // Specify the extra currency
+            extraCurrency: {
+                100: "10000000"
+            }
+        }
+    ]
+};
 
 try {
     const result = await tonConnectUI.sendTransaction(transaction);
