@@ -40,6 +40,24 @@ export function App() {
 
 ```
 
+You can also specify required wallet features to filter wallets that will be displayed in the connect wallet modal:
+
+```tsx
+<TonConnectUIProvider
+    manifestUrl="https://<YOUR_APP_URL>/tonconnect-manifest.json"
+    walletsRequiredFeatures={{
+        sendTransaction: {
+            minMessages: 2, // Wallet must support at least 2 messages
+            extraCurrencyRequired: true // Wallet must support extra currency
+        }
+    }}
+>
+    { /* Your app */ }
+</TonConnectUIProvider>
+```
+
+This will only display wallets that support sending at least 2 messages and support extra currencies in transactions.
+
 ## Add TonConnect Button
 TonConnect Button is universal UI component for initializing connection. After wallet is connected it transforms to a wallet menu.
 It is recommended to place it in the top right corner of your app.
@@ -157,6 +175,20 @@ export const Settings = () => {
                 address: "EQDmnxDMhId6v1Ofg_h5KR5coWlFG6e86Ro3pc7Tq4CA0-Jn",
                 amount: "60000000",
                 // payload: "base64bocblahblahblah==" // just for instance. Replace with your transaction payload or remove
+            }
+        ]
+    }
+
+    // Example with extra currency support
+    const transactionWithExtraCurrency = {
+        validUntil: Math.floor(Date.now() / 1000) + 60,
+        messages: [
+            {
+                address: "EQBBJBB3HagsujBqVfqeDUPJ0kXjgTPLWPFFffuNXNiJL0aA",
+                // Specify the extra currency
+                extraCurrency: {
+                    100: "10000000"
+                }
             }
         ]
     }
