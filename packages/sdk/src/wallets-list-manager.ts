@@ -12,9 +12,6 @@ import {
 import { InjectedProvider } from 'src/provider/injected/injected-provider';
 import { logError } from 'src/utils/log';
 import { FALLBACK_WALLETS_LIST } from 'src/resources/fallback-wallets-list';
-import { Feature } from '@tonconnect/protocol';
-import { RequireFeature } from './models';
-import { checkRequiredWalletFeatures } from './utils/feature-support';
 
 export class WalletsListManager {
     private walletsListCache: Promise<WalletInfo[]> | null = null;
@@ -25,23 +22,15 @@ export class WalletsListManager {
 
     private readonly walletsListSource: string;
 
-    private readonly checkRequiredFeatures: (features: Feature[] | undefined) => boolean;
-
     constructor(options?: {
         walletsListSource?: string;
         cacheTTLMs?: number;
-        walletsRequiredFeatures?: RequireFeature[] | ((features: Feature[]) => boolean);
     }) {
         this.walletsListSource =
             options?.walletsListSource ??
             'https://raw.githubusercontent.com/ton-blockchain/wallets-list/main/wallets-v2.json';
 
         this.cacheTTLMs = options?.cacheTTLMs;
-
-        this.checkRequiredFeatures = options?.walletsRequiredFeatures
-            ? features =>
-                  checkRequiredWalletFeatures(features ?? [], options.walletsRequiredFeatures!)
-            : () => true;
     }
 
     public async getWallets(): Promise<WalletInfo[]> {

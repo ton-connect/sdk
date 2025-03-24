@@ -1,16 +1,14 @@
 import { Feature, SendTransactionFeature } from '@tonconnect/protocol';
 import { logWarning } from 'src/utils/log';
 import { WalletNotSupportFeatureError } from 'src/errors/wallet';
-import { RequireFeature } from 'src/models';
+import { RequiredFeatures, RequiredSendTransactionFeature } from 'src/models';
 
 export function checkSendTransactionSupport(
     features: Feature[],
     options: { requiredMessagesNumber: number; requireExtraCurrencies: boolean }
 ): never | void {
     const supportsDeprecatedSendTransactionFeature = features.includes('SendTransaction');
-    const sendTransactionFeature = features.find(
-        feature => feature && typeof feature === 'object' && feature.name === 'SendTransaction'
-    ) as SendTransactionFeature;
+    const sendTransactionFeature = findFeature(features, 'SendTransaction');
 
     if (!supportsDeprecatedSendTransactionFeature && !sendTransactionFeature) {
         throw new WalletNotSupportFeatureError("Wallet doesn't support SendTransaction feature.");
@@ -40,35 +38,49 @@ export function checkSendTransactionSupport(
 
 export function checkRequiredWalletFeatures(
     features: Feature[],
-    walletsRequiredFeatures: RequireFeature[] | ((features: Feature[]) => boolean)
+    walletsRequiredFeatures?: RequiredFeatures
 ): boolean {
-    if (typeof walletsRequiredFeatures === 'function') {
-        return walletsRequiredFeatures(features);
+    if (typeof walletsRequiredFeatures !== 'object') {
+        return true;
     }
 
-    const res = walletsRequiredFeatures.every(requiredFeature => {
-        const feature = features.find(f => typeof f === 'object' && f.name === requiredFeature.name);
+    const { sendTransaction } = walletsRequiredFeatures;
 
+    if (sendTransaction) {
+        const feature = findFeature(features, 'SendTransaction');
         if (!feature) {
             return false;
         }
 
-        switch (requiredFeature.name) {
-            case 'SendTransaction': {
-                const sendTransactionFeature = feature as SendTransactionFeature;
-                const correctMessagesNumber =
-                    requiredFeature.minMessages === undefined ||
-                    requiredFeature.minMessages <= sendTransactionFeature.maxMessages;
-                const correctExtraCurrency =
-                    !requiredFeature.extraCurrencyRequired ||
-                    sendTransactionFeature.extraCurrencySupported;
-
-                return correctMessagesNumber && correctExtraCurrency;
-            }
-            default:
-                return false;
+        if (!checkSendTransaction(feature, sendTransaction)) {
+            return false;
         }
-    });
+    }
 
-    return res;
+    return true;
+}
+
+function findFeature<T extends Exclude<Feature, 'SendTransaction'>, P extends T['name']>(
+    features: Feature[],
+    requiredFeatureName: P
+): (T & { name: P }) | undefined {
+    return features.find(f => f && typeof f === 'object' && f.name === requiredFeatureName) as
+        | (T & {
+              name: P;
+          })
+        | undefined;
+}
+
+function checkSendTransaction(
+    feature: SendTransactionFeature,
+    requiredFeature: RequiredSendTransactionFeature
+): boolean {
+    const correctMessagesNumber =
+        requiredFeature.minMessages === undefined ||
+        requiredFeature.minMessages <= feature.maxMessages;
+
+    const correctExtraCurrency =
+        !requiredFeature.extraCurrencyRequired || feature.extraCurrencySupported;
+
+    return !!(correctMessagesNumber && correctExtraCurrency);
 }
