@@ -1,4 +1,4 @@
-import { ConnectAdditionalRequest, RequireFeature, Feature, ITonConnect } from '@tonconnect/sdk';
+import { ConnectAdditionalRequest, RequiredFeatures, ITonConnect } from '@tonconnect/sdk';
 import { createStore } from 'solid-js/store';
 import { Locales } from 'src/models/locales';
 import { WalletsListConfiguration } from 'src/models/wallets-list-configuration';
@@ -15,7 +15,7 @@ export type AppState = {
     twaReturnUrl: `${string}://${string}` | undefined;
     preferredWalletAppName: string | undefined;
     enableAndroidBackHandler: boolean;
-    walletsRequiredFeatures: RequireFeature[] | ((features: Feature[]) => boolean) | undefined;
+    walletsRequiredFeatures: RequiredFeatures | undefined;
 };
 
 export const [appState, setAppState] = createStore<AppState>({
