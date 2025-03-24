@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui 
 
+# [2.1.0](https://github.com/ton-connect/sdk/compare/ui-2.0.13-beta.0...ui-2.1.0) (2025-03-24)
+
+
+### Features
+
+* **ui:** refactor wallet required features from array to object structure ([cac7983](https://github.com/ton-connect/sdk/commit/cac79838a63d103c77d3ce50e3cc7d37756335ad))
+
+
+
 ## [2.0.13-beta.0](https://github.com/ton-connect/sdk/compare/ui-2.0.12...ui-2.0.13-beta.0) (2025-03-18)
 
 
