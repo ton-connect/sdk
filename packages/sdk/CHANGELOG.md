@@ -1,5 +1,14 @@
 # Changelog @tonconnect/sdk 
 
+# [3.1.0](https://github.com/ton-connect/sdk/compare/sdk-3.0.8-beta.0...sdk-3.1.0) (2025-03-24)
+
+
+### Features
+
+* **sdk:** refactor wallet required features from array to object structure ([b21c062](https://github.com/ton-connect/sdk/commit/b21c062283655bc00affcdda42b04a6a7fbdcf2f))
+
+
+
 ## [3.0.8-beta.0](https://github.com/ton-connect/sdk/compare/sdk-3.0.7...sdk-3.0.8-beta.0) (2025-03-18)
 
 
