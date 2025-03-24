@@ -1,8 +1,7 @@
 import type {
     Account,
     ConnectAdditionalRequest,
-    Feature,
-    RequireFeature,
+    RequiredFeatures,
     WalletInfoCurrentlyEmbedded
 } from '@tonconnect/sdk';
 import {
@@ -70,7 +69,7 @@ export class TonConnectUI {
 
     private readonly walletsList: Promise<WalletInfo[]>;
 
-    public readonly walletsRequiredFeatures?: RequireFeature[] | ((features: Feature[]) => boolean);
+    public readonly walletsRequiredFeatures?: RequiredFeatures;
 
     private connectRequestParametersCallback?: (
         parameters: ConnectAdditionalRequest | undefined
