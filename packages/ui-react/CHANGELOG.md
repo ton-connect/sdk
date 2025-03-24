@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui-react 
 
+# [2.1.0](https://github.com/ton-connect/sdk/compare/ui-react-2.0.13-beta.1...ui-react-2.1.0) (2025-03-24)
+
+
+### Features
+
+* **ui-react:** refactor wallet required features from array to object structure ([083af0c](https://github.com/ton-connect/sdk/commit/083af0c136acea37f08616c3a1ab71b208d95e2f))
+
+
+
 ## [2.0.13-beta.1](https://github.com/ton-connect/sdk/compare/ui-react-2.0.13-beta.0...ui-react-2.0.13-beta.1) (2025-03-18)
 
 
