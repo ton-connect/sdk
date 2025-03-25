@@ -7,6 +7,8 @@ import { NotificationClass } from './style';
 import { Styleable } from 'src/app/models/styleable';
 import { useOpenedNotifications } from 'src/app/hooks/use-notifications';
 import { animate } from 'src/app/utils/animate';
+import { ErrorSignDataNotification } from './error-sign-data-notification';
+import { SuccessSignDataNotification } from './success-sign-data-notification';
 
 export interface NotificationsProps extends Styleable {}
 
@@ -51,7 +53,18 @@ export const Notifications: Component<NotificationsProps> = props => {
                             <Match when={openedNotification.action === 'transaction-canceled'}>
                                 <ErrorTransactionNotification class={NotificationClass} />
                             </Match>
-                            <Match when={openedNotification.action === 'confirm-transaction'}>
+                            <Match when={openedNotification.action === 'data-signed'}>
+                                <SuccessSignDataNotification class={NotificationClass} />
+                            </Match>
+                            <Match when={openedNotification.action === 'sign-data-canceled'}>
+                                <ErrorSignDataNotification class={NotificationClass} />
+                            </Match>
+                            <Match
+                                when={
+                                    openedNotification.action in
+                                    ['confirm-transaction', 'confirm-sign-data']
+                                }
+                            >
                                 <ConfirmOperationNotification class={NotificationClass} />
                             </Match>
                         </Switch>

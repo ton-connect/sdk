@@ -1,7 +1,11 @@
 import { Feature, SendTransactionFeature, SignDataFeature } from '@tonconnect/protocol';
 import { logWarning } from 'src/utils/log';
 import { WalletNotSupportFeatureError } from 'src/errors/wallet';
-import { RequiredFeatures, RequiredSendTransactionFeature, RequiredSignDataFeature } from 'src/models';
+import {
+    RequiredFeatures,
+    RequiredSendTransactionFeature,
+    RequiredSignDataFeature
+} from 'src/models';
 
 export function checkSendTransactionSupport(
     features: Feature[],
@@ -9,7 +13,7 @@ export function checkSendTransactionSupport(
 ): never | void {
     const supportsDeprecatedSendTransactionFeature = features.includes('SendTransaction');
     const sendTransactionFeature = findFeature(features, 'SendTransaction');
-    
+
     const requiredFeature: RequiredSendTransactionFeature = {
         minMessages: options.requiredMessagesNumber,
         extraCurrencyRequired: options.requireExtraCurrencies
@@ -26,7 +30,9 @@ export function checkSendTransactionSupport(
             throw new WalletNotSupportFeatureError(
                 `Wallet is not able to handle such SendTransaction request. Extra currencies support is required.`,
                 {
-                    cause: { requiredFeature: { featureName: 'SendTransaction', value: requiredFeature } }
+                    cause: {
+                        requiredFeature: { featureName: 'SendTransaction', value: requiredFeature }
+                    }
                 }
             );
         }
@@ -37,7 +43,9 @@ export function checkSendTransactionSupport(
             throw new WalletNotSupportFeatureError(
                 `Wallet is not able to handle such SendTransaction request. Max support messages number is ${sendTransactionFeature.maxMessages}, but ${options.requiredMessagesNumber} is required.`,
                 {
-                    cause: { requiredFeature: { featureName: 'SendTransaction', value: requiredFeature } }
+                    cause: {
+                        requiredFeature: { featureName: 'SendTransaction', value: requiredFeature }
+                    }
                 }
             );
         }
@@ -58,7 +66,14 @@ export function checkSignDataSupport(
     ) as SignDataFeature;
 
     if (!signDataFeature) {
-        throw new WalletNotSupportFeatureError("Wallet doesn't support SignData feature.");
+        throw new WalletNotSupportFeatureError("Wallet doesn't support SignData feature.", {
+            cause: {
+                requiredFeature: {
+                    featureName: 'SignData',
+                    value: { types: options.requiredTypes }
+                }
+            }
+        });
     }
 
     const unsupportedTypes = options.requiredTypes.filter(
@@ -67,7 +82,12 @@ export function checkSignDataSupport(
 
     if (unsupportedTypes.length) {
         throw new WalletNotSupportFeatureError(
-            `Wallet doesn't support required SignData types: ${unsupportedTypes.join(', ')}.`
+            `Wallet doesn't support required SignData types: ${unsupportedTypes.join(', ')}.`,
+            {
+                cause: {
+                    requiredFeature: { featureName: 'SignData', value: { types: unsupportedTypes } }
+                }
+            }
         );
     }
 }

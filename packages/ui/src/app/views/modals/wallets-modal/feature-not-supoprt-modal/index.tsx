@@ -57,13 +57,19 @@ export const DesktopFeatureNotSupportModal: Component<
 
     const currentWalletVersionNotSupported = createMemo(() => {
         const currentWalletUIVar = currentWalletUI();
+        console.log('currentWalletUI', currentWalletUIVar);
         if (!currentWalletUIVar?.features) {
             return false;
         }
 
+        const featureNameKeyMap = {
+            SendTransaction: 'sendTransaction',
+            SignData: 'signData'
+        };
+
         const requiredFeature = props.walletsModalState.requiredFeature;
         const requiredFeatures = requiredFeature
-            ? { [requiredFeature.featureName]: requiredFeature.value }
+            ? { [featureNameKeyMap[requiredFeature.featureName]]: requiredFeature.value } // TODO: fix unreadable code
             : {};
 
         const validInList = checkRequiredWalletFeatures(
@@ -74,6 +80,15 @@ export const DesktopFeatureNotSupportModal: Component<
         const validCurrentWallet = checkRequiredWalletFeatures(
             props.currentWallet.device.features,
             requiredFeatures
+        );
+
+        console.log(
+            'currentWalletVersionNotSupported',
+            validInList,
+            validCurrentWallet,
+            currentWalletUIVar.features,
+            requiredFeatures,
+            props.currentWallet
         );
 
         return validInList && !validCurrentWallet;
