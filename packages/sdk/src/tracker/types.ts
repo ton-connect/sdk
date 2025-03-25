@@ -1,5 +1,11 @@
-import { CONNECT_EVENT_ERROR_CODES, ConnectItem, SEND_TRANSACTION_ERROR_CODES } from '@tonconnect/protocol';
-import { SendTransactionRequest, SendTransactionResponse, Wallet } from 'src/models';
+import {
+    CONNECT_EVENT_ERROR_CODES,
+    ConnectItem,
+    SEND_TRANSACTION_ERROR_CODES,
+    SIGN_DATA_ERROR_CODES,
+    SignDataPayload
+} from '@tonconnect/protocol';
+import { SendTransactionRequest, SendTransactionResponse, SignDataResponse, Wallet } from 'src/models';
 
 /**
  * Request TON Connect UI version.
@@ -515,6 +521,75 @@ export type TransactionSigningEvent =
     | TransactionSignedEvent
     | TransactionSigningFailedEvent;
 
+export type DataSentForSignatureEvent = {
+    type: 'sign-data-request-initiated';
+    data: SignDataPayload;
+} & ConnectionInfo;
+
+export function createDataSentForSignatureEvent(
+    version: Version,
+    wallet: Wallet | null,
+    data: SignDataPayload
+): DataSentForSignatureEvent {
+    return {
+        type: 'sign-data-request-initiated',
+        data,
+        ...createConnectionInfo(version, wallet)
+    };
+}
+
+export type DataSignedEvent = {
+    type: 'sign-data-request-completed';
+    is_success: true;
+    data: SignDataPayload;
+    signed_data: SignDataResponse;
+} & ConnectionInfo;
+
+export function createDataSignedEvent(
+    version: Version,
+    wallet: Wallet | null,
+    data: SignDataPayload,
+    signedData: SignDataResponse
+): DataSignedEvent {
+    return {
+        type: 'sign-data-request-completed',
+        is_success: true,
+        data,
+        signed_data: signedData,
+        ...createConnectionInfo(version, wallet)
+    };
+}
+
+export type DataSigningFailedEvent = {
+    type: 'sign-data-request-failed';
+    is_success: false;
+    error_message: string;
+    error_code: SIGN_DATA_ERROR_CODES | null;
+    data: SignDataPayload;
+} & ConnectionInfo;
+
+export function createDataSigningFailedEvent(
+    version: Version,
+    wallet: Wallet | null,
+    data: SignDataPayload,
+    errorMessage: string,
+    errorCode: SIGN_DATA_ERROR_CODES | void
+): DataSigningFailedEvent {
+    return {
+        type: 'sign-data-request-failed',
+        is_success: false,
+        data,
+        error_message: errorMessage,
+        error_code: errorCode ?? null,
+        ...createConnectionInfo(version, wallet)
+    };
+}
+
+export type DataSigningEvent =
+    | DataSentForSignatureEvent
+    | DataSignedEvent
+    | DataSigningFailedEvent;
+
 /**
  * Disconnect event when a user initiates a disconnection.
  */
@@ -556,7 +631,8 @@ export type SdkActionEvent =
     | ConnectionEvent
     | ConnectionRestoringEvent
     | DisconnectionEvent
-    | TransactionSigningEvent;
+    | TransactionSigningEvent
+    | DataSigningEvent;
 
 /**
  * Parameters without version field.

@@ -1,7 +1,7 @@
-import { Feature, SendTransactionFeature } from '@tonconnect/protocol';
+import { Feature, SendTransactionFeature, SignDataFeature } from '@tonconnect/protocol';
 import { logWarning } from 'src/utils/log';
 import { WalletNotSupportFeatureError } from 'src/errors/wallet';
-import { RequiredFeatures, RequiredSendTransactionFeature } from 'src/models';
+import { RequiredFeatures, RequiredSendTransactionFeature, RequiredSignDataFeature } from 'src/models';
 
 export function checkSendTransactionSupport(
     features: Feature[],
@@ -49,6 +49,29 @@ export function checkSendTransactionSupport(
     );
 }
 
+export function checkSignDataSupport(
+    features: Feature[],
+    options: { requiredTypes: SignDataFeature['types'] }
+): never | void {
+    const signDataFeature = features.find(
+        feature => feature && typeof feature === 'object' && feature.name === 'SignData'
+    ) as SignDataFeature;
+
+    if (!signDataFeature) {
+        throw new WalletNotSupportFeatureError("Wallet doesn't support SignData feature.");
+    }
+
+    const unsupportedTypes = options.requiredTypes.filter(
+        requiredType => !signDataFeature.types.includes(requiredType)
+    );
+
+    if (unsupportedTypes.length) {
+        throw new WalletNotSupportFeatureError(
+            `Wallet doesn't support required SignData types: ${unsupportedTypes.join(', ')}.`
+        );
+    }
+}
+
 export function checkRequiredWalletFeatures(
     features: Feature[],
     walletsRequiredFeatures?: RequiredFeatures
@@ -57,7 +80,7 @@ export function checkRequiredWalletFeatures(
         return true;
     }
 
-    const { sendTransaction } = walletsRequiredFeatures;
+    const { sendTransaction, signData } = walletsRequiredFeatures;
 
     if (sendTransaction) {
         const feature = findFeature(features, 'SendTransaction');
@@ -66,6 +89,17 @@ export function checkRequiredWalletFeatures(
         }
 
         if (!checkSendTransaction(feature, sendTransaction)) {
+            return false;
+        }
+    }
+
+    if (signData) {
+        const feature = findFeature(features, 'SignData');
+        if (!feature) {
+            return false;
+        }
+
+        if (!checkSignData(feature, signData)) {
             return false;
         }
     }
@@ -96,4 +130,11 @@ function checkSendTransaction(
         !requiredFeature.extraCurrencyRequired || feature.extraCurrencySupported;
 
     return !!(correctMessagesNumber && correctExtraCurrency);
+}
+
+function checkSignData(
+    feature: SignDataFeature,
+    requiredFeature: RequiredSignDataFeature
+): boolean {
+    return requiredFeature.types.every(requiredType => feature.types.includes(requiredType));
 }
