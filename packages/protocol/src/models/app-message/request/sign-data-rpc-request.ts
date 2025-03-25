@@ -1,10 +1,7 @@
+import { SignDataPayload } from '../../sign-data-payload';
+
 export interface SignDataRpcRequest {
-    method: 'signData';
-    params: [
-        {
-            schema_crc: number;
-            cell: string;
-        }
-    ];
     id: string;
+    params: SignDataPayload;
+    method: 'signData';
 }

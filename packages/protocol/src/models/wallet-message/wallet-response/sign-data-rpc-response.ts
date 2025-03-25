@@ -1,17 +1,21 @@
+import { SignDataPayload } from '../../sign-data-payload';
 import { WalletResponseTemplateError } from './wallet-response-template';
 
 export type SignDataRpcResponse = SignDataRpcResponseSuccess | SignDataRpcResponseError;
 
 export interface SignDataRpcResponseSuccess {
-    id: string;
     result: {
         signature: string;
-        timestamp: string;
+        address: string;
+        timestamp: number;
+        domain: string;
+        payload: SignDataPayload;
     };
+    id: string;
 }
 
 export interface SignDataRpcResponseError extends WalletResponseTemplateError {
-    error: { code: SIGN_DATA_ERROR_CODES; message: string; data?: unknown };
+    error: { code: SIGN_DATA_ERROR_CODES; message: string };
     id: string;
 }
 
