@@ -1,5 +1,14 @@
 # Changelog @tonconnect/sdk 
 
+## [3.1.1-beta.0](https://github.com/ton-connect/sdk/compare/sdk-3.1.0...sdk-3.1.1-beta.0) (2025-03-27)
+
+
+### Features
+
+* **sdk:** add pending connection expiration ([1e3a1a9](https://github.com/ton-connect/sdk/commit/1e3a1a9fd4e981d3cee0403e9131728dba66b287))
+
+
+
 # [3.1.0](https://github.com/ton-connect/sdk/compare/sdk-3.0.8-beta.0...sdk-3.1.0) (2025-03-24)
 
 
