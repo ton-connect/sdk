@@ -9,7 +9,9 @@ import {
     BridgeConnectionRaw,
     BridgePendingConnectionHttp,
     BridgePendingConnectionHttpRaw,
-    isPendingConnectionHttp
+    isExpiredPendingConnectionHttpRaw,
+    isPendingConnectionHttp,
+    isPendingConnectionHttpRaw,
 } from 'src/provider/bridge/models/bridge-connection';
 import { IStorage } from 'src/storage/models/storage.interface';
 
@@ -43,7 +45,8 @@ export class BridgeConnectionStorage {
         const rawConnection: BridgePendingConnectionHttpRaw = {
             type: 'http',
             connectionSource: connection.connectionSource,
-            sessionCrypto: connection.sessionCrypto.stringifyKeypair()
+            sessionCrypto: connection.sessionCrypto.stringifyKeypair(),
+            createdAt: Date.now()
         };
 
         return this.storage.setItem(this.storeKey, JSON.stringify(rawConnection));
@@ -65,7 +68,7 @@ export class BridgeConnectionStorage {
             return connection;
         }
 
-        if ('connectEvent' in connection) {
+        if (!isPendingConnectionHttpRaw(connection)) {
             const sessionCrypto = new SessionCrypto(connection.session.sessionKeyPair);
             return {
                 type: 'http',
@@ -78,6 +81,11 @@ export class BridgeConnectionStorage {
                     walletPublicKey: connection.session.walletPublicKey
                 }
             };
+        }
+
+        if (isExpiredPendingConnectionHttpRaw(connection)) {
+            await this.removeConnection();
+            return null;
         }
 
         return {
