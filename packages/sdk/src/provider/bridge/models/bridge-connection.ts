@@ -4,6 +4,8 @@ import { BridgeSession } from './bridge-session';
 import { WalletConnectionSourceHTTP } from 'src/models';
 import { Optional } from 'src/utils/types';
 
+export const CONNECTION_HTTP_EXPIRATION_TIME = 5 * 60 * 1000;
+
 export type BridgeConnection =
     | BridgeConnectionHttp
     | BridgePendingConnectionHttp
@@ -43,12 +45,25 @@ export function isPendingConnectionHttp(
     return !('connectEvent' in connection);
 }
 
+export function isPendingConnectionHttpRaw(
+  connection: BridgePendingConnectionHttpRaw | BridgeConnectionHttpRaw
+): connection is BridgePendingConnectionHttpRaw {
+    return !('connectEvent' in connection);
+}
+
+export function isExpiredPendingConnectionHttpRaw(
+  connection: BridgePendingConnectionHttpRaw
+): boolean {
+    return Date.now() - (connection.createdAt ?? 0) > CONNECTION_HTTP_EXPIRATION_TIME;
+}
+
 export type BridgeConnectionHttpRaw = Omit<BridgeConnectionHttp, 'session'> & {
     session: BridgeSessionRaw;
 };
 
 export type BridgePendingConnectionHttpRaw = Omit<BridgePendingConnectionHttp, 'sessionCrypto'> & {
     sessionCrypto: KeyPair;
+    createdAt?: number;
 };
 
 export type BridgeConnectionRaw =
