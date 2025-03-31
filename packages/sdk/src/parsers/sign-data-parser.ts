@@ -23,7 +23,7 @@ class SignDataParser extends RpcParser<'signData'> {
     convertToRpcRequest(payload: SignDataPayload): WithoutId<SignDataRpcRequest> {
         return {
             method: 'signData',
-            params: payload
+            params: [JSON.stringify(payload)]
         };
     }
 

@@ -1,4 +1,3 @@
-import { SignDataPayload } from '../../sign-data-payload';
 import { WalletResponseTemplateError } from './wallet-response-template';
 
 export type SignDataRpcResponse = SignDataRpcResponseSuccess | SignDataRpcResponseError;
@@ -13,6 +12,22 @@ export interface SignDataRpcResponseSuccess {
     };
     id: string;
 }
+
+export type SignDataPayload = SignDataPayloadText | SignDataPayloadBinary | SignDataPayloadCell;
+
+export type SignDataPayloadText = {
+    type: 'text';
+    text: string;
+};
+export type SignDataPayloadBinary = {
+    type: 'binary';
+    bytes: string;
+};
+export type SignDataPayloadCell = {
+    type: 'cell';
+    schema: string;
+    cell: string;
+};
 
 export interface SignDataRpcResponseError extends WalletResponseTemplateError {
     error: { code: SIGN_DATA_ERROR_CODES; message: string };
