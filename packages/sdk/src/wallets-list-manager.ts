@@ -22,13 +22,9 @@ export class WalletsListManager {
 
     private readonly walletsListSource: string;
 
-    constructor(options?: {
-        walletsListSource?: string;
-        cacheTTLMs?: number;
-    }) {
+    constructor(options?: { walletsListSource?: string; cacheTTLMs?: number }) {
         this.walletsListSource =
-            options?.walletsListSource ??
-            'https://raw.githubusercontent.com/ton-blockchain/wallets-list/main/wallets-v2.json';
+            options?.walletsListSource ?? 'https://tonconnect.tonkeeper.com/wallets-v2.json';
 
         this.cacheTTLMs = options?.cacheTTLMs;
     }

@@ -1,6 +1,6 @@
 {
-  "name": "@tonconnect/ui",
-  "version": "2.1.1-beta.0",
+  "name": "@tonkeeper/tonconnect-ui",
+  "version": "2.2.0-beta.2",
   "scripts": {
     "start": "vite --host",
     "dev": "vite",
@@ -29,7 +29,7 @@
     "sdk",
     "UI"
   ],
-  "author": "tonconnect",
+  "author": "Tonkeeper",
   "license": "Apache-2.0",
   "files": [
     "lib",
@@ -47,7 +47,7 @@
     }
   },
   "dependencies": {
-    "@tonconnect/sdk": "3.1.1-beta.0",
+    "@tonconnect/sdk": "npm:@tonkeeper/tonconnect-sdk@3.2.0-beta.2",
     "classnames": "^2.3.2",
     "deepmerge": "^4.2.2",
     "ua-parser-js": "^1.0.35",

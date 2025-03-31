@@ -1,3 +1,8 @@
+> ℹ️ This is a Tonkeeper-maintained fork of the official [`@tonconnect/ui`](https://github.com/ton-connect/sdk)  
+> It includes additional features and improvements while maintaining compatibility with the core TonConnect protocol.
+
+---
+
 # TON Connect UI
 
 TonConnect UI is a UI kit for TonConnect SDK. Use it to connect your app to TON wallets via TonConnect protocol.
@@ -10,31 +15,23 @@ You can find more details and the protocol specification in the [docs](https://d
 
 ---
 
+# Using this fork as a drop-in replacement
+
+You can easily use this fork as a drop-in replacement for the original `@tonconnect/ui` package by aliasing it in your `package.json`:
+
+```json
+"dependencies": {
+  "@tonconnect/ui": "npm:@tonkeeper/tonconnect-ui@<version>"
+}
+```
+
+This allows you to import the library exactly as before, without changing any import paths in your existing code.
+
+---
+
 [Latest API documentation](https://ton-connect.github.io/sdk/modules/_tonconnect_ui.html)
 
 # Getting started
-
-## Installation with cdn
-Add the script to your HTML file:
-```html
-<script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
-```
-
-ℹ️ If you don't want auto-update the library, pass concrete version instead of `latest`, e.g.
-```html
-<script src="https://unpkg.com/@tonconnect/ui@0.0.9/dist/tonconnect-ui.min.js"></script>
-```
-
-You can find `TonConnectUI` in global variable `TON_CONNECT_UI`, e.g.
-```html
-<script>
-    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-        manifestUrl: 'https://<YOUR_APP_URL>/tonconnect-manifest.json',
-        buttonRootId: '<YOUR_CONNECT_BUTTON_ANCHOR_ID>'
-    });
-</script>
-```
-
 
 ## Installation with npm
 `npm i @tonconnect/ui`

@@ -1,3 +1,8 @@
+> ℹ️ This is a Tonkeeper-maintained fork of the official [`@tonconnect/ui-react`](https://github.com/ton-connect/sdk)  
+> It includes additional features and improvements while maintaining compatibility with the core TonConnect protocol.
+
+---
+
 # TON Connect UI React
 
 TonConnect UI React is a React UI kit for TonConnect SDK. Use it to connect your app to TON wallets via TonConnect protocol in React apps.
@@ -7,6 +12,22 @@ If you don't use React for your app, take a look at [TonConnect UI](https://gith
 If you want to use TonConnect on the server side, you should use the [TonConnect SDK](https://github.com/ton-connect/sdk/tree/main/packages/sdk).
 
 You can find more details and the protocol specification in the [docs](https://docs.ton.org/develop/dapps/ton-connect/overview).
+
+---
+
+# Using this fork as a drop-in replacement
+
+You can easily use this fork as a drop-in replacement for the original `@tonconnect/ui-react` package by aliasing it in your `package.json`:
+
+```json
+"dependencies": {
+  "@tonconnect/ui-react": "npm:@tonkeeper/tonconnect-react@<version>"
+}
+```
+
+Replace `<version>` with the actual version you wish to install.
+
+This allows you to import the library exactly as before, without changing any import paths in your existing code.
 
 ---
 

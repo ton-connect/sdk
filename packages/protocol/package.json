@@ -1,6 +1,6 @@
 {
-  "name": "@tonconnect/protocol",
-  "version": "2.2.7",
+  "name": "@tonkeeper/tonconnect-protocol",
+  "version": "2.3.0-beta.2",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ton-connect/sdk.git"
@@ -16,7 +16,7 @@
     "Connect",
     "Tonkeeper"
   ],
-  "author": "tonconnect",
+  "author": "Tonkeeper",
   "license": "Apache-2.0",
   "scripts": {
     "build": "npx rimraf types-dist && npx rimraf lib && npx rollup -c rollup.config.mjs && tsc && api-extractor run && npx rimraf types-dist",

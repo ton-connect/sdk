@@ -1,6 +1,6 @@
 {
-  "name": "@tonconnect/ui-react",
-  "version": "2.1.1-beta.0",
+  "name": "@tonkeeper/tonconnect-react",
+  "version": "2.2.0-beta.2",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build"
@@ -24,7 +24,7 @@
     "UI",
     "React"
   ],
-  "author": "tonconnect",
+  "author": "Tonkeeper",
   "license": "Apache-2.0",
   "files": [
     "lib"
@@ -52,7 +52,7 @@
     "vite-plugin-dts": "^1.7.1"
   },
   "dependencies": {
-    "@tonconnect/ui": "2.1.1-beta.0"
+    "@tonconnect/ui": "npm:@tonkeeper/tonconnect-ui@2.2.0-beta.2"
   },
   "peerDependencies": {
     "react": ">=17.0.0",

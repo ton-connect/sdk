@@ -1,3 +1,8 @@
+> ℹ️ This is a Tonkeeper-maintained fork of the official [`@tonconnect/sdk`](https://github.com/ton-connect/sdk)  
+> It includes additional features and improvements while maintaining compatibility with the core TonConnect protocol.
+
+---
+
 # TON Connect SDK
 
 Use it to connect your app to TON wallets via TonConnect protocol. 
