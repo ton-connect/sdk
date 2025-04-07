@@ -38,6 +38,11 @@ export function useOpenedNotifications(
         on(action, (action: Action | null): void => {
             // do nothing if action is null or should not show notification
             if (!action || !action.showNotification) {
+                // clearAction not work without that code
+                setOpenedNotifications(openedNotifications =>
+                    openedNotifications.filter(n => n.action !== 'confirm-transaction')
+                );
+
                 return;
             }
 

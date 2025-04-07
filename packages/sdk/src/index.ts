@@ -59,6 +59,7 @@ export {
     TonAddressItemReply,
     DeviceInfo,
     Feature,
+    FeatureName,
     SendTransactionFeature,
     SignDataFeature,
     SendTransactionFeatureDeprecated,

@@ -9,15 +9,25 @@ export function checkSendTransactionSupport(
 ): never | void {
     const supportsDeprecatedSendTransactionFeature = features.includes('SendTransaction');
     const sendTransactionFeature = findFeature(features, 'SendTransaction');
+    
+    const requiredFeature: RequiredSendTransactionFeature = {
+        minMessages: options.requiredMessagesNumber,
+        extraCurrencyRequired: options.requireExtraCurrencies
+    };
 
     if (!supportsDeprecatedSendTransactionFeature && !sendTransactionFeature) {
-        throw new WalletNotSupportFeatureError("Wallet doesn't support SendTransaction feature.");
+        throw new WalletNotSupportFeatureError("Wallet doesn't support SendTransaction feature.", {
+            cause: { requiredFeature: { featureName: 'SendTransaction', value: requiredFeature } }
+        });
     }
 
     if (options.requireExtraCurrencies) {
         if (!sendTransactionFeature || !sendTransactionFeature.extraCurrencySupported) {
             throw new WalletNotSupportFeatureError(
-                `Wallet is not able to handle such SendTransaction request. Extra currencies support is required.`
+                `Wallet is not able to handle such SendTransaction request. Extra currencies support is required.`,
+                {
+                    cause: { requiredFeature: { featureName: 'SendTransaction', value: requiredFeature } }
+                }
             );
         }
     }
@@ -25,7 +35,10 @@ export function checkSendTransactionSupport(
     if (sendTransactionFeature && sendTransactionFeature.maxMessages !== undefined) {
         if (sendTransactionFeature.maxMessages < options.requiredMessagesNumber) {
             throw new WalletNotSupportFeatureError(
-                `Wallet is not able to handle such SendTransaction request. Max support messages number is ${sendTransactionFeature.maxMessages}, but ${options.requiredMessagesNumber} is required.`
+                `Wallet is not able to handle such SendTransaction request. Max support messages number is ${sendTransactionFeature.maxMessages}, but ${options.requiredMessagesNumber} is required.`,
+                {
+                    cause: { requiredFeature: { featureName: 'SendTransaction', value: requiredFeature } }
+                }
             );
         }
         return;

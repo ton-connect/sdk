@@ -1,104 +1,121 @@
 {
-  "common": {
-    "close": "Close",
-    "openWallet": "Open wallet",
-    "copyLink": "Copy Link",
-    "linkCopied": "Link Copied",
-    "copied": "Copied",
-    "yourWallet": "Your Wallet",
-    "retry": "Retry",
-    "get": "GET",
-    "mobile": "Mobile",
-    "browserExtension": "Browser Extension",
-    "desktop": "Desktop"
-  },
-  "button": {
-    "connectWallet": "Connect Wallet",
-    "dropdown": {
-      "copy": "Copy address",
-      "copied": "Address copied!",
-      "disconnect": "Disconnect"
+    "common": {
+        "close": "Close",
+        "openWallet": "Open wallet",
+        "copyLink": "Copy Link",
+        "linkCopied": "Link Copied",
+        "copied": "Copied",
+        "yourWallet": "Your Wallet",
+        "retry": "Retry",
+        "get": "GET",
+        "mobile": "Mobile",
+        "browserExtension": "Browser Extension",
+        "desktop": "Desktop"
+    },
+    "button": {
+        "connectWallet": "Connect Wallet",
+        "dropdown": {
+            "copy": "Copy address",
+            "copied": "Address copied!",
+            "disconnect": "Disconnect"
+        }
+    },
+    "notifications": {
+        "confirm": {
+            "header": "Open {{ name }} to confirm the transaction."
+        },
+        "transactionSent": {
+            "header": "Transaction sent",
+            "text": "Your transaction will be processed in a few seconds."
+        },
+        "transactionCanceled": {
+            "header": "Transaction canceled",
+            "text": "There will be no changes to your account."
+        }
+    },
+    "walletItem": {
+        "walletOn": "Wallet in",
+        "recent": "Recent",
+        "installed": "Installed",
+        "popular": "Popular"
+    },
+    "walletModal": {
+        "loading": "Loading wallets",
+        "wallets": "Wallets",
+        "mobileUniversalModal": {
+            "connectYourWallet": "Connect your TON wallet",
+            "openWalletOnTelegramOrSelect": "Use Wallet in Telegram or choose other application",
+            "openWalletOnTelegram": "Connect Wallet in Telegram",
+            "chooseOtherApplication": "Choose other application",
+            "openLink": "Open Link",
+            "scan": "Scan with your mobile wallet"
+        },
+        "desktopUniversalModal": {
+            "connectYourWallet": "Connect your TON wallet",
+            "scan": "Scan with your mobile wallet",
+            "availableWallets": "Available wallets"
+        },
+        "mobileConnectionModal": {
+            "showQR": "Show QR Code",
+            "scanQR": "Scan the QR code below with your phone’s or {{ name }}’s camera",
+            "missingFeatures": "Please update {{ name }}, your version does not support required features for this dApp",
+            "notSupportedWallet": "{{ name }} doesn’t support the requested action. Please connect another wallet that supports it",
+            "continueIn": "Continue in {{ name }}…",
+            "updateWallet": "Update {{ name }}",
+            "chooseAnotherWallet": "Choose Another Wallet",
+            "connectionDeclined": "Connection declined"
+        },
+        "desktopConnectionModal": {
+            "scanQR": "Scan the QR code below with your phone’s or {{ name }}’s camera",
+            "continueInExtension": "Continue in {{ name }} browser extension…",
+            "dontHaveExtension": "Seems you don't have installed {{ name }} browser extension",
+            "missingFeatures": "Please update {{ name }}, your version does not support required features for this dApp",
+            "notSupportedWallet": "{{ name }} doesn’t support the requested action. Please connect another wallet that supports it",
+            "getWallet": "Get {{ name }}",
+            "updateWallet": "Update {{ name }}",
+            "chooseAnotherWallet": "Choose Another Wallet",
+            "continueOnDesktop": "Continue in {{ name }} on desktop…",
+            "openWalletOnTelegram": "Connect Wallet in Telegram on desktop",
+            "connectionDeclined": "Connection declined"
+        },
+        "infoModal": {
+            "whatIsAWallet": "What is a wallet",
+            "secureDigitalAssets": "Secure digital assets storage",
+            "walletProtects": "A wallet protects and manages your digital assets including TON, tokens and collectables.",
+            "controlIdentity": "Control your Web3 identity",
+            "manageIdentity": "Manage your digital identity and access decentralized applications with ease. Maintain control over your data and engage securely in the blockchain ecosystem.",
+            "effortlessCryptoTransactions": "Effortless crypto transactions",
+            "easilySend": "Easily send, receive, monitor your cryptocurrencies. Streamline your operations with decentralized applications.",
+            "getAWallet": "Get a Wallet"
+        },
+        "allWallets": {
+            "walletsBelowNotSupported": "The wallets below don’t support all features of the connected service. You can use your recovery phrase in one of the supported wallets above.",
+            "walletNotSupportService": "{{ name }} doesn’t support connected service"
+        },
+        "featureNotSupported": {
+            "wallet": {
+                "title": "{{ name }} doesn’t support the requested\u00A0action",
+                "description": "Install a supported wallet from the list below, restore it with your recovery phrase, then connect it and try again.",
+                "info": "Learn how to restore your wallet"
+            },
+            "version": {
+                "description": "Your current version of {{ name }} or wallet contract type doesn't support the required features. Please update it to continue.",
+                "updateButton": "Update {{ name }}",
+                "aboutW5": "About W5"
+            },
+            "disconnect": {
+                "title": "Confirm Disconnect",
+                "description": "You will be disconnected from your current wallet and redirected to connect {{ name }}.",
+                "button": "Disconnect"
+            }
+        }
+    },
+    "actionModal": {
+        "confirmTransaction": {
+            "header": "Confirm the transaction in {{ name }}",
+            "text": "It will only take a moment."
+        },
+        "transactionSent": "$notifications.transactionSent",
+        "transactionCanceled": "$notifications.transactionCanceled"
     }
-  },
-  "notifications": {
-    "confirm": {
-      "header": "Open {{ name }} to confirm the transaction."
-    },
-    "transactionSent": {
-      "header": "Transaction sent",
-      "text": "Your transaction will be processed in a few seconds."
-    },
-    "transactionCanceled": {
-      "header": "Transaction canceled",
-      "text": "There will be no changes to your account."
-    }
-  },
-  "walletItem": {
-    "walletOn": "Wallet in",
-    "recent": "Recent",
-    "installed": "Installed",
-    "popular": "Popular"
-  },
-  "walletModal": {
-    "loading": "Loading wallets",
-    "wallets": "Wallets",
-    "mobileUniversalModal": {
-      "connectYourWallet": "Connect your TON wallet",
-      "openWalletOnTelegramOrSelect": "Use Wallet in Telegram or choose other application",
-      "openWalletOnTelegram": "Connect Wallet in Telegram",
-      "chooseOtherApplication": "Choose other application",
-      "openLink": "Open Link",
-      "scan": "Scan with your mobile wallet"
-    },
-    "desktopUniversalModal": {
-      "connectYourWallet": "Connect your TON wallet",
-      "scan": "Scan with your mobile wallet",
-      "availableWallets": "Available wallets"
-    },
-    "mobileConnectionModal": {
-      "showQR": "Show QR Code",
-      "scanQR": "Scan the QR code below with your phone’s or {{ name }}’s camera",
-      "missingFeatures": "Please update {{ name }}, your version does not support required features for this dApp",
-      "notSupportedWallet": "{{ name }} doesn’t support the requested action. Please connect another wallet that supports it",
-      "continueIn": "Continue in {{ name }}…",
-      "updateWallet": "Update {{ name }}",
-      "chooseAnotherWallet": "Choose Another Wallet",
-      "connectionDeclined": "Connection declined"
-    },
-    "desktopConnectionModal": {
-      "scanQR": "Scan the QR code below with your phone’s or {{ name }}’s camera",
-      "continueInExtension": "Continue in {{ name }} browser extension…",
-      "dontHaveExtension": "Seems you don't have installed {{ name }} browser extension",
-      "missingFeatures": "Please update {{ name }}, your version does not support required features for this dApp",
-      "notSupportedWallet": "{{ name }} doesn’t support the requested action. Please connect another wallet that supports it",
-      "getWallet": "Get {{ name }}",
-      "updateWallet": "Update {{ name }}",
-      "chooseAnotherWallet": "Choose Another Wallet",
-      "continueOnDesktop": "Continue in {{ name }} on desktop…",
-      "openWalletOnTelegram": "Connect Wallet in Telegram on desktop",
-      "connectionDeclined": "Connection declined"
-    },
-    "infoModal": {
-      "whatIsAWallet": "What is a wallet",
-      "secureDigitalAssets": "Secure digital assets storage",
-      "walletProtects": "A wallet protects and manages your digital assets including TON, tokens and collectables.",
-      "controlIdentity": "Control your Web3 identity",
-      "manageIdentity": "Manage your digital identity and access decentralized applications with ease. Maintain control over your data and engage securely in the blockchain ecosystem.",
-      "effortlessCryptoTransactions": "Effortless crypto transactions",
-      "easilySend": "Easily send, receive, monitor your cryptocurrencies. Streamline your operations with decentralized applications.",
-      "getAWallet": "Get a Wallet"
-    },
-    "allWallets": {
-      "walletsBelowNotSupported": "The wallets below don’t support all features of the connected service. You can use your recovery phrase in one of the supported wallets above.",
-      "walletNotSupportService": "{{ name }} doesn’t support connected service"
-    }
-  },
-  "actionModal": {
-    "confirmTransaction": {
-      "header": "Confirm the transaction in {{ name }}",
-      "text": "It will only take a moment."
-    },
-    "transactionSent": "$notifications.transactionSent",
-    "transactionCanceled": "$notifications.transactionCanceled"
-  }
 }
