@@ -72,6 +72,8 @@ export class TonConnectUI {
 
     public readonly walletsRequiredFeatures?: RequiredFeatures;
 
+    public readonly walletsPreferredFeatures?: RequiredFeatures;
+
     private connectRequestParametersCallback?: (
         parameters: ConnectAdditionalRequest | undefined
     ) => void;
@@ -238,6 +240,8 @@ export class TonConnectUI {
         });
 
         this.walletsRequiredFeatures = options.walletsRequiredFeatures;
+
+        this.walletsPreferredFeatures = options.walletsPreferredFeatures;
 
         this.walletsList = this.getWallets();
 

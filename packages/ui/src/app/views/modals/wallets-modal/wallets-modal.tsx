@@ -109,13 +109,13 @@ export const WalletsModal: Component = () => {
             );
         }
 
+        const walletsFeaturesRequested =
+            tonConnectUI?.walletsRequiredFeatures ?? tonConnectUI?.walletsPreferredFeatures;
+
         const uiWallets = walletsList.map(wallet => ({
             ...wallet,
-            isSupportRequiredFeatures: tonConnectUI?.walletsRequiredFeatures
-                ? checkRequiredWalletFeatures(
-                      wallet.features ?? [],
-                      tonConnectUI.walletsRequiredFeatures
-                  )
+            isSupportRequiredFeatures: walletsFeaturesRequested
+                ? checkRequiredWalletFeatures(wallet.features ?? [], walletsFeaturesRequested)
                 : true
         }));
 
@@ -250,6 +250,9 @@ export const WalletsModal: Component = () => {
                         <Match when={selectedTab() === 'all-wallets'}>
                             <AllWalletsListModal
                                 walletsList={walletsList()!}
+                                featureCheckMode={
+                                    tonConnectUI?.walletsRequiredFeatures ? 'strict' : 'soft'
+                                }
                                 onBack={onSelectUniversal}
                                 onSelect={setSelectedWalletInfo}
                             />

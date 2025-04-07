@@ -70,6 +70,26 @@ const tonConnectUI = new TonConnectUI({
 
 This will filter out wallets that don't support sending multiple messages or don't support extra currencies.
 
+You can also specify preferred wallet features to prioritize wallets that support them in the connect wallet modal. These wallets will be shown first in the list, but others will still be available:
+
+```ts
+import { TonConnectUI } from '@tonconnect/ui'
+
+const tonConnectUI = new TonConnectUI({
+    manifestUrl: 'https://<YOUR_APP_URL>/tonconnect-manifest.json',
+    buttonRootId: '<YOUR_CONNECT_BUTTON_ANCHOR_ID>',
+    walletsPreferredFeatures: {
+        sendTransaction: {
+            minMessages: 2,
+            extraCurrencyRequired: true
+        }
+    }
+});
+```
+
+This will highlight wallets that support sending multiple messages and extra currencies, but won’t hide those that don’t. Use this to gently recommend more feature-rich wallets without excluding others.
+
+
 See all available options:
 
 [TonConnectUiOptionsWithManifest](https://ton-connect.github.io/sdk/interfaces/_tonconnect_ui.TonConnectUiOptionsWithManifest.html)
