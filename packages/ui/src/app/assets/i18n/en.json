@@ -88,9 +88,41 @@
       "easilySend": "Easily send, receive, monitor your cryptocurrencies. Streamline your operations with decentralized applications.",
       "getAWallet": "Get a Wallet"
     },
+    "restoreModal": {
+      "title": "Restore",
+      "step1": {
+        "title": "Find your current recovery phrase",
+        "text": "Open your wallet settings and locate the recovery phrase"
+      },
+      "step2": {
+        "title": "Copy your recovery phrase",
+        "text": "Write it down or copy it to a safe place"
+      },
+      "step3": {
+        "title": "Restore in a supported wallet",
+        "text": "Enter the recovery phrase to access your wallet"
+      }
+    },
     "allWallets": {
       "walletsBelowNotSupported": "The wallets below don’t support all features of the connected service. You can use your recovery phrase in one of the supported wallets above.",
       "walletNotSupportService": "{{ name }} doesn’t support connected service"
+    },
+    "featureNotSupported": {
+      "wallet": {
+        "title": "{{ name }} doesn’t support the requested\u00A0action",
+        "description": "Install a supported wallet from the list below, restore it with your recovery phrase, then connect it and try again.",
+        "info": "Learn how to restore your wallet"
+      },
+      "version": {
+        "description": "Your current version of {{ name }} or wallet contract type doesn't support the required features. Please update it to continue.",
+        "updateButton": "Update {{ name }}",
+        "aboutW5": "About W5"
+      },
+      "disconnect": {
+        "title": "Confirm Disconnect",
+        "description": "You will be disconnected from your current wallet and redirected to connect {{ name }}.",
+        "button": "Disconnect"
+      }
     }
   },
   "actionModal": {

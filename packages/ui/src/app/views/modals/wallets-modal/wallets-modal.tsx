@@ -21,7 +21,7 @@ import {
     useContext
 } from 'solid-js';
 import { ConnectorContext } from 'src/app/state/connector.context';
-import { getWalletsModalIsOpened } from 'src/app/state/modals-state';
+import { getWalletsModalIsOpened, walletsModalState } from 'src/app/state/modals-state';
 import { H1Styled, LoaderContainerStyled, StyledModal } from './style';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { useI18n } from '@solid-primitives/i18n';
@@ -40,6 +40,9 @@ import { MobileUniversalModal } from 'src/app/views/modals/wallets-modal/mobile-
 import { DesktopUniversalModal } from 'src/app/views/modals/wallets-modal/desktop-universal-modal';
 import { Dynamic } from 'solid-js/web';
 import { WalletsModalCloseReason } from 'src/models';
+import { DesktopFeatureNotSupportModal } from './feature-not-supoprt-modal';
+import { widgetController } from 'src/app/widget-controller';
+import { ChooseSupportedFeatureWalletsModal } from 'src/models/wallets-modal';
 
 export const WalletsModal: Component = () => {
     const { locale } = useI18n()[1];
@@ -65,6 +68,11 @@ export const WalletsModal: Component = () => {
     >(null);
     const [selectedTab, setSelectedTab] = createSignal<'universal' | 'all-wallets'>('universal');
     const [infoTab, setInfoTab] = createSignal(false);
+
+    const walletsModalIsWalletNotSupportFeature = createMemo(() => {
+        const state = walletsModalState();
+        return 'type' in state && state.type === 'wallet-not-support-feature';
+    });
 
     const walletsList = createMemo<UIWalletInfo[] | null>(() => {
         if (fetchedWalletsList.state !== 'ready') {
@@ -101,13 +109,13 @@ export const WalletsModal: Component = () => {
             );
         }
 
+        const walletsFeaturesRequested =
+            tonConnectUI?.walletsRequiredFeatures ?? tonConnectUI?.walletsPreferredFeatures;
+
         const uiWallets = walletsList.map(wallet => ({
             ...wallet,
-            isSupportRequiredFeatures: tonConnectUI?.walletsRequiredFeatures
-                ? checkRequiredWalletFeatures(
-                      wallet.features ?? [],
-                      tonConnectUI.walletsRequiredFeatures
-                  )
+            isSupportRequiredFeatures: walletsFeaturesRequested
+                ? checkRequiredWalletFeatures(wallet.features ?? [], walletsFeaturesRequested)
                 : true
         }));
 
@@ -162,6 +170,11 @@ export const WalletsModal: Component = () => {
         setSelectedTab('universal');
     };
 
+    const onSelectWallet = (wallet: UIWalletInfo): void => {
+        setSelectedWalletInfo(wallet);
+        widgetController.openWalletsModal();
+    };
+
     const clearSelectedWalletInfo = (): void => {
         setSelectedWalletInfo(null);
         setSelectedWalletError(null);
@@ -199,6 +212,19 @@ export const WalletsModal: Component = () => {
 
                 <Show when={!additionalRequestLoading() && walletsList()}>
                     <Switch>
+                        <Match when={walletsModalIsWalletNotSupportFeature()}>
+                            <DesktopFeatureNotSupportModal
+                                walletsList={walletsList()!}
+                                currentWallet={tonConnectUI?.wallet as Wallet}
+                                onSelect={onSelectWallet}
+                                onSelectAllWallets={onSelectAllWallets}
+                                onDisconnect={() => connector.disconnect()}
+                                walletsModalState={
+                                    walletsModalState() as ChooseSupportedFeatureWalletsModal
+                                }
+                                onClose={() => onClose('action-cancelled')}
+                            />
+                        </Match>
                         <Match when={selectedWalletInfo()}>
                             <Dynamic
                                 component={
@@ -224,6 +250,9 @@ export const WalletsModal: Component = () => {
                         <Match when={selectedTab() === 'all-wallets'}>
                             <AllWalletsListModal
                                 walletsList={walletsList()!}
+                                featureCheckMode={
+                                    tonConnectUI?.walletsRequiredFeatures ? 'strict' : 'soft'
+                                }
                                 onBack={onSelectUniversal}
                                 onSelect={setSelectedWalletInfo}
                             />

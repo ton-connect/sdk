@@ -21,6 +21,8 @@ import { UIWalletInfo } from 'src/app/models/ui-wallet-info';
 export interface DesktopSelectWalletModalProps {
     walletsList: UIWalletInfo[];
 
+    featureCheckMode?: 'strict' | 'soft' | 'hide';
+
     onBack: () => void;
 
     onSelect: (walletInfo: UIWalletInfo) => void;
@@ -42,7 +44,7 @@ export const AllWalletsListModal: Component<DesktopSelectWalletModalProps> = pro
     };
 
     const handleSelectWallet = (wallet: UIWalletInfo): void => {
-        if (!wallet.isSupportRequiredFeatures) {
+        if (!wallet.isSupportRequiredFeatures && props.featureCheckMode === 'strict') {
             onErrorClick(wallet);
             return;
         }
@@ -75,7 +77,7 @@ export const AllWalletsListModal: Component<DesktopSelectWalletModalProps> = pro
                         )}
                     </For>
                 </WalletsUl>
-                <Show when={unsupportedWallets().length > 0}>
+                <Show when={unsupportedWallets().length > 0 && props.featureCheckMode !== 'hide'}>
                     <WalletsNotSupportedNotifier>
                         <WalletsNotSupportedNotifierText translationKey="walletModal.allWallets.walletsBelowNotSupported">
                             The wallets below don’t support all features of the connected service.
@@ -90,7 +92,7 @@ export const AllWalletsListModal: Component<DesktopSelectWalletModalProps> = pro
                                     <WalletLabeledItemStyled
                                         wallet={wallet}
                                         onClick={() => handleSelectWallet(wallet)}
-                                        withOpacity
+                                        withOpacity={props.featureCheckMode === 'strict'}
                                     />
                                 </li>
                             )}

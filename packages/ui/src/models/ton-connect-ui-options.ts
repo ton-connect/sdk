@@ -33,6 +33,11 @@ export interface TonConnectUiOptions {
     walletsRequiredFeatures?: RequiredFeatures;
 
     /**
+     * Preferred features for wallets. If wallet doesn't support preferred features, it will be moved to the end of the list.
+     */
+    walletsPreferredFeatures?: RequiredFeatures;
+
+    /**
      * Configuration for action-period (e.g. sendTransaction) UI elements: modals and notifications and wallet behaviour (return strategy).
      */
     actionsConfiguration?: ActionConfiguration;

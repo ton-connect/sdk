@@ -9,5 +9,13 @@
   "singleQuote": true,
   "tabWidth": 4,
   "trailingComma": "none",
-  "useTabs": false
+  "useTabs": false,
+  "overrides": [
+    {
+      "files": "*.json",
+      "options": {
+        "tabWidth": 2
+      }
+    }
+  ]
 }

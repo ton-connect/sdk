@@ -13,7 +13,8 @@ import {
     TonConnect,
     TonConnectError,
     Wallet,
-    WalletInfo
+    WalletInfo,
+    WalletNotSupportFeatureError
 } from '@tonconnect/sdk';
 import { widgetController } from 'src/app/widget-controller';
 import { TonConnectUIError } from 'src/errors/ton-connect-ui.error';
@@ -70,6 +71,8 @@ export class TonConnectUI {
     private readonly walletsList: Promise<WalletInfo[]>;
 
     public readonly walletsRequiredFeatures?: RequiredFeatures;
+
+    public readonly walletsPreferredFeatures?: RequiredFeatures;
 
     private connectRequestParametersCallback?: (
         parameters: ConnectAdditionalRequest | undefined
@@ -237,6 +240,8 @@ export class TonConnectUI {
         });
 
         this.walletsRequiredFeatures = options.walletsRequiredFeatures;
+
+        this.walletsPreferredFeatures = options.walletsPreferredFeatures;
 
         this.walletsList = this.getWallets();
 
@@ -507,6 +512,13 @@ export class TonConnectUI {
 
             return result;
         } catch (e) {
+            if (e instanceof WalletNotSupportFeatureError) {
+                widgetController.clearAction();
+                widgetController.openWalletNotSupportFeatureModal(e.cause);
+
+                throw e;
+            }
+
             widgetController.setAction({
                 name: 'transaction-canceled',
                 showNotification: notifications.includes('error'),

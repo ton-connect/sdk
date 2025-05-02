@@ -1,3 +1,5 @@
+import { FeatureName, RequiredFeatures } from '@tonconnect/sdk';
+
 export interface WalletsModal {
     /**
      * Open the modal.
@@ -51,10 +53,30 @@ export type WalletModalClosed = {
     closeReason: WalletsModalCloseReason | null;
 };
 
+export type ChooseSupportedFeatureWalletsModal = {
+    /**
+     * Modal window status.
+     */
+    status: 'opened';
+
+    /**
+     * Always `null` for choose supported feature wallet modal.
+     */
+    closeReason: null;
+    type: 'wallet-not-support-feature';
+    requiredFeature: {
+        featureName: FeatureName;
+        value?: RequiredFeatures['sendTransaction'];
+    };
+};
+
 /**
  * Modal window state.
  */
-export type WalletsModalState = WalletModalOpened | WalletModalClosed;
+export type WalletsModalState =
+    | WalletModalOpened
+    | WalletModalClosed
+    | ChooseSupportedFeatureWalletsModal;
 
 /**
  * Modal window close reason.

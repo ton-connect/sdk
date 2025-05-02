@@ -12,7 +12,7 @@ import { TonConnectUI } from 'src/ton-connect-ui';
 import App from './App';
 import { WalletInfoWithOpenMethod, WalletOpenMethod } from 'src/models/connected-wallet';
 import { WalletsModalCloseReason } from 'src/models';
-import { WalletInfoRemote } from '@tonconnect/sdk';
+import { WalletInfoRemote, WalletNotSupportFeatureError } from '@tonconnect/sdk';
 
 export const widgetController = {
     openWalletsModal: (): void =>
@@ -43,6 +43,15 @@ export const widgetController = {
             setSingleWalletModalState({
                 status: 'closed',
                 closeReason: reason
+            })
+        ),
+    openWalletNotSupportFeatureModal: (cause: WalletNotSupportFeatureError['cause']): void =>
+        void setTimeout(() =>
+            setWalletsModalState({
+                status: 'opened',
+                closeReason: null,
+                type: 'wallet-not-support-feature',
+                requiredFeature: cause.requiredFeature
             })
         ),
     setAction: (action: Action): void => void setTimeout(() => setAction(action)),
