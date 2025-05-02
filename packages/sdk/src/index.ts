@@ -59,6 +59,7 @@ export {
     TonAddressItemReply,
     DeviceInfo,
     Feature,
+    FeatureName,
     SendTransactionFeature,
     SignDataFeature,
     SendTransactionFeatureDeprecated,
@@ -71,5 +72,5 @@ export {
     SEND_TRANSACTION_ERROR_CODES
 } from '@tonconnect/protocol';
 export { toUserFriendlyAddress } from './utils/address';
-export { checkRequiredWalletFeatures }  from './utils/feature-support';
+export { checkRequiredWalletFeatures } from './utils/feature-support';
 export { isTelegramUrl, encodeTelegramUrlParameters } from './utils/url';
