@@ -58,6 +58,24 @@ You can also specify required wallet features to filter wallets that will be dis
 
 This will only display wallets that support sending at least 2 messages and support extra currencies in transactions.
 
+You can also specify preferred wallet features to prioritize wallets that will be displayed first in the connect wallet modal, without excluding others:
+
+```tsx
+<TonConnectUIProvider
+    manifestUrl="https://<YOUR_APP_URL>/tonconnect-manifest.json"
+    walletsPreferredFeatures={{
+        sendTransaction: {
+            minMessages: 2, // Wallets supporting at least 2 messages are prioritized
+            extraCurrencyRequired: true // Wallets supporting extra currency are prioritized
+        }
+    }}
+>
+    { /* Your app */ }
+</TonConnectUIProvider>
+```
+
+This will gently recommend wallets with richer functionality by placing them higher in the list, but all wallets remain available for selection.
+
 ## Add TonConnect Button
 TonConnect Button is universal UI component for initializing connection. After wallet is connected it transforms to a wallet menu.
 It is recommended to place it in the top right corner of your app.

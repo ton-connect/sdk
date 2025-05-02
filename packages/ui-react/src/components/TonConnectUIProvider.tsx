@@ -66,6 +66,11 @@ export interface TonConnectUIProviderPropsBase {
     walletsRequiredFeatures?: RequiredFeatures;
 
     /**
+     * Preferred features for wallets to be displayed in the connect wallet modal.
+     */
+    walletsPreferredFeatures?: RequiredFeatures;
+
+    /**
      * Configuration for action-period (e.g. sendTransaction) UI elements: modals and notifications and wallet behaviour (return strategy).
      */
     actionsConfiguration?: ActionConfiguration;
