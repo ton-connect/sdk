@@ -1,4 +1,5 @@
 export type Feature = SendTransactionFeatureDeprecated | SendTransactionFeature | SignDataFeature;
+export type FeatureName = Exclude<Feature, 'SendTransaction'>['name'];
 
 export type SendTransactionFeatureDeprecated = 'SendTransaction';
 export type SendTransactionFeature = {
