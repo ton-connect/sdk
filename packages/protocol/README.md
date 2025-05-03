@@ -1,3 +1,10 @@
+> ℹ️ This is a Tonkeeper-maintained fork of the official
+> [`@tonconnect/protocol`](https://github.com/ton-connect/sdk)  
+> It includes additional features and improvements while maintaining compatibility with the core
+> TonConnect protocol.
+
+---
+
 # TON Connect protocol models
 
 ℹ️ If you want to integrate TonConnect to your dApp, you should use [@tonconnect/sdk](https://www.npmjs.com/package/@tonconnect/sdk)

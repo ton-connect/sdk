@@ -2,7 +2,7 @@ import { Component, createSignal, onCleanup, onMount, Show, useContext } from 's
 import { ArrowIcon, Text, TonIcon } from 'src/app/components';
 import { ConnectorContext } from 'src/app/state/connector.context';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
-import { Account, toUserFriendlyAddress } from '@tonconnect/sdk';
+import { Account, CHAIN, toUserFriendlyAddress } from '@tonconnect/sdk';
 import {
     AccountButtonStyled,
     DropdownButtonStyled,
@@ -17,8 +17,8 @@ import { useFloating } from 'solid-floating-ui';
 import { autoUpdate } from '@floating-ui/dom';
 import { Transition } from 'solid-transition-group';
 import { useTheme } from 'solid-styled-components';
-import { CHAIN } from '@tonconnect/sdk';
 import { globalStylesTag } from 'src/app/styles/global-styles';
+import { animate } from 'src/app/utils/animate';
 
 interface AccountButtonProps {}
 
@@ -28,7 +28,7 @@ export const AccountButton: Component<AccountButtonProps> = () => {
     const tonConnectUI = useContext(TonConnectUiContext)!;
     const [isOpened, setIsOpened] = createSignal(false);
     const [account, setAccount] = createSignal<Account | null>(connector.account);
-    const [restoringProcess, setRestoringProcess] = createSignal<boolean>(true);
+    const [restoringProcess, setRestoringProcess] = createSignal<boolean>(!connector.account);
 
     let dropDownRef: HTMLDivElement | undefined;
 
@@ -53,16 +53,19 @@ export const AccountButton: Component<AccountButtonProps> = () => {
         return '';
     };
 
+    // TODO: implement restoring process
     tonConnectUI.connectionRestored.then(() => setRestoringProcess(false));
 
     const unsubscribe = connector.onStatusChange(wallet => {
         if (!wallet) {
             setIsOpened(false);
             setAccount(null);
+            setRestoringProcess(false);
             return;
         }
 
         setAccount(wallet.account);
+        setRestoringProcess(false);
     });
 
     const onClick = (e: Event): void | boolean => {
@@ -96,8 +99,9 @@ export const AccountButton: Component<AccountButtonProps> = () => {
             <Show when={!restoringProcess()}>
                 <Show when={!account()}>
                     <AccountButtonStyled
-                        onClick={() => tonConnectUI.connectWallet()}
+                        onClick={() => tonConnectUI.openModal()}
                         data-tc-connect-button="true"
+                        scale="s"
                     >
                         <TonIcon fill={theme.colors.connectButton.foreground} />
                         <Text
@@ -117,6 +121,7 @@ export const AccountButton: Component<AccountButtonProps> = () => {
                             onClick={() => setIsOpened(v => !v)}
                             ref={setAnchor}
                             data-tc-dropdown-button="true"
+                            scale="s"
                         >
                             <Text fontSize="15px" fontWeight="590" lineHeight="18px">
                                 {normalizedAddress()}
@@ -136,7 +141,8 @@ export const AccountButton: Component<AccountButtonProps> = () => {
                             >
                                 <Transition
                                     onBeforeEnter={el => {
-                                        el.animate(
+                                        animate(
+                                            el,
                                             [
                                                 { opacity: 0, transform: 'translateY(-8px)' },
                                                 { opacity: 1, transform: 'translateY(0)' }
@@ -147,7 +153,8 @@ export const AccountButton: Component<AccountButtonProps> = () => {
                                         );
                                     }}
                                     onExit={(el, done) => {
-                                        const a = el.animate(
+                                        const a = animate(
+                                            el,
                                             [
                                                 { opacity: 1, transform: 'translateY(0)' },
                                                 { opacity: 0, transform: 'translateY(-8px)' }

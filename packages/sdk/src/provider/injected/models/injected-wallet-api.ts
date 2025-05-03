@@ -12,7 +12,10 @@ import { hasProperties, hasProperty } from 'src/utils/types';
 
 export interface InjectedWalletApi {
     deviceInfo: DeviceInfo;
-    walletInfo: Pick<WalletInfoDTO, 'name' | 'tondns' | 'image' | 'about_url'>;
+    walletInfo: Pick<
+        WalletInfoDTO,
+        'name' | 'app_name' | 'tondns' | 'image' | 'about_url' | 'platforms' | 'features'
+    >;
     protocolVersion: number;
     isWalletBrowser: boolean;
     connect(protocolVersion: number, message: ConnectRequest): Promise<ConnectEvent>;
@@ -32,7 +35,13 @@ export function isJSBridgeWithMetadata(value: unknown): value is { tonconnect: I
             return false;
         }
 
-        return hasProperties(value.tonconnect.walletInfo, ['name', 'image', 'about_url']);
+        return hasProperties(value.tonconnect.walletInfo, [
+            'name',
+            'app_name',
+            'image',
+            'about_url',
+            'platforms'
+        ]);
     } catch {
         return false;
     }

@@ -6,7 +6,8 @@ import {
     WalletInfoDTO,
     isWalletInfoCurrentlyEmbedded,
     WalletInfoCurrentlyEmbedded,
-    WalletInfoCurrentlyInjected
+    WalletInfoCurrentlyInjected,
+    WalletInfoBase
 } from 'src/models/wallet/wallet-info';
 import { InjectedProvider } from 'src/provider/injected/injected-provider';
 import { logError } from 'src/utils/log';
@@ -19,17 +20,13 @@ export class WalletsListManager {
 
     private readonly cacheTTLMs: number | undefined;
 
-    private readonly walletsListSource: string =
-        'https://raw.githubusercontent.com/ton-blockchain/wallets-list/main/wallets.json';
+    private readonly walletsListSource: string;
 
     constructor(options?: { walletsListSource?: string; cacheTTLMs?: number }) {
-        if (options?.walletsListSource) {
-            this.walletsListSource = options.walletsListSource;
-        }
+        this.walletsListSource =
+            options?.walletsListSource ?? 'https://tonconnect.tonkeeper.com/wallets-v2.json';
 
-        if (options?.cacheTTLMs) {
-            this.cacheTTLMs = options.cacheTTLMs;
-        }
+        this.cacheTTLMs = options?.cacheTTLMs;
     }
 
     public async getWallets(): Promise<WalletInfo[]> {
@@ -59,12 +56,7 @@ export class WalletsListManager {
     public async getEmbeddedWallet(): Promise<WalletInfoCurrentlyEmbedded | null> {
         const walletsList = await this.getWallets();
         const embeddedWallets = walletsList.filter(isWalletInfoCurrentlyEmbedded);
-
-        if (embeddedWallets.length !== 1) {
-            return null;
-        }
-
-        return embeddedWallets[0]!;
+        return embeddedWallets.length === 1 ? embeddedWallets[0]! : null;
     }
 
     private async fetchWalletsList(): Promise<WalletInfo[]> {
@@ -86,7 +78,7 @@ export class WalletsListManager {
             if (wrongFormatWallets.length) {
                 logError(
                     `Wallet(s) ${wrongFormatWallets
-                        .map(wallet => wallet.name)
+                        .map(wallet => (wallet as WalletInfoDTO)?.name || 'unknown')
                         .join(
                             ', '
                         )} config format is wrong. They were removed from the wallets list.`
@@ -114,12 +106,15 @@ export class WalletsListManager {
 
     private walletConfigDTOListToWalletConfigList(walletConfigDTO: WalletInfoDTO[]): WalletInfo[] {
         return walletConfigDTO.map(walletConfigDTO => {
-            const walletConfig: WalletInfo = {
+            const walletConfig: WalletInfoBase = {
                 name: walletConfigDTO.name,
+                appName: walletConfigDTO.app_name,
                 imageUrl: walletConfigDTO.image,
                 aboutUrl: walletConfigDTO.about_url,
-                tondns: walletConfigDTO.tondns
-            } as WalletInfo;
+                tondns: walletConfigDTO.tondns,
+                platforms: walletConfigDTO.platforms,
+                features: walletConfigDTO.features
+            };
 
             walletConfigDTO.bridge.forEach(bridge => {
                 if (bridge.type === 'sse') {
@@ -128,7 +123,6 @@ export class WalletsListManager {
                         walletConfigDTO.universal_url!;
                     (walletConfig as WalletInfoRemote).deepLink = walletConfigDTO.deepLink;
                 }
-
                 if (bridge.type === 'js') {
                     const jsBridgeKey = bridge.key;
                     (walletConfig as WalletInfoInjectable).jsBridgeKey = jsBridgeKey;
@@ -138,8 +132,7 @@ export class WalletsListManager {
                         InjectedProvider.isInsideWalletBrowser(jsBridgeKey);
                 }
             });
-
-            return walletConfig;
+            return walletConfig as WalletInfo;
         });
     }
 
@@ -157,19 +150,35 @@ export class WalletsListManager {
         });
     }
 
+    // eslint-disable-next-line complexity
     private isCorrectWalletConfigDTO(value: unknown): value is WalletInfoDTO {
         if (!value || !(typeof value === 'object')) {
             return false;
         }
 
         const containsName = 'name' in value;
+        const containsAppName = 'app_name' in value;
         const containsImage = 'image' in value;
         const containsAbout = 'about_url' in value;
+        const containsPlatforms = 'platforms' in value;
 
-        if (!containsName || !containsImage || !containsAbout) {
+        if (
+            !containsName ||
+            !containsImage ||
+            !containsAbout ||
+            !containsPlatforms ||
+            !containsAppName
+        ) {
             return false;
         }
 
+        if (
+            !(value as { platforms: unknown }).platforms ||
+            !Array.isArray((value as { platforms: unknown }).platforms) ||
+            !(value as { platforms: string[] }).platforms.length
+        ) {
+            return false;
+        }
         if (
             !('bridge' in value) ||
             !Array.isArray((value as { bridge: unknown }).bridge) ||
@@ -188,9 +197,9 @@ export class WalletsListManager {
 
         if (sseBridge) {
             if (
-                !('url' in sseBridge) ||
+                !(typeof sseBridge === 'object' && 'url' in sseBridge) ||
                 !(sseBridge as { url: string }).url ||
-                !(value as { universal_url: string }).universal_url
+                !(value as unknown as { universal_url: string }).universal_url
             ) {
                 return false;
             }
@@ -199,7 +208,11 @@ export class WalletsListManager {
         const jsBridge = bridge.find(item => (item as { type: string }).type === 'js');
 
         if (jsBridge) {
-            if (!('key' in jsBridge) || !(jsBridge as { key: string }).key) {
+            if (
+                typeof jsBridge !== 'object' ||
+                !('key' in jsBridge) ||
+                !(jsBridge as { key: string }).key
+            ) {
                 return false;
             }
         }

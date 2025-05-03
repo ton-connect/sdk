@@ -1,5 +1,302 @@
 # Changelog @tonconnect/ui-react 
 
+## [2.1.1-beta.0](https://github.com/ton-connect/sdk/compare/ui-react-2.1.0...ui-react-2.1.1-beta.0) (2025-03-27)
+
+
+
+# [2.1.0](https://github.com/ton-connect/sdk/compare/ui-react-2.0.13-beta.1...ui-react-2.1.0) (2025-03-24)
+
+
+### Features
+
+* **ui-react:** refactor wallet required features from array to object structure ([083af0c](https://github.com/ton-connect/sdk/commit/083af0c136acea37f08616c3a1ab71b208d95e2f))
+
+
+
+## [2.0.13-beta.1](https://github.com/ton-connect/sdk/compare/ui-react-2.0.13-beta.0...ui-react-2.0.13-beta.1) (2025-03-18)
+
+
+### Features
+
+* **ui-react:** add support for required features ([d935402](https://github.com/ton-connect/sdk/commit/d935402b9d270ff20e59c1b45d7f9f558a4bb9ad))
+
+
+
+## [2.0.13-beta.0](https://github.com/ton-connect/sdk/compare/ui-react-2.0.12...ui-react-2.0.13-beta.0) (2025-03-14)
+
+
+### Features
+
+* **ui-react:** add support for react 19 and preact while maintaining backward compatibility ([cf7cc52](https://github.com/ton-connect/sdk/commit/cf7cc52c853437965c4255074af54381cafffa43))
+
+
+
+## [2.0.12](https://github.com/ton-connect/sdk/compare/ui-react-2.0.12-alpha.1...ui-react-2.0.12) (2025-03-06)
+
+
+
+## [2.0.12-alpha.1](https://github.com/ton-connect/sdk/compare/ui-react-2.0.12-alpha.0...ui-react-2.0.12-alpha.1) (2025-02-18)
+
+
+
+## [2.0.12-alpha.0](https://github.com/ton-connect/sdk/compare/ui-react-2.0.11...ui-react-2.0.12-alpha.0) (2025-02-17)
+
+
+
+## [2.0.11](https://github.com/ton-connect/sdk/compare/ui-react-2.0.10...ui-react-2.0.11) (2025-01-13)
+
+
+### Bug Fixes
+
+* **ui-react:** update @tonconnect/ui dependency to 2.0.11 ([9f26590](https://github.com/ton-connect/sdk/commit/9f26590b8e807f0be6d0b4d9ee8ef735bb54e892))
+
+
+
+## [2.0.10](https://github.com/ton-connect/sdk/compare/ui-react-2.0.10-beta.3...ui-react-2.0.10) (2025-01-13)
+
+
+
+## [2.0.10-beta.3](https://github.com/ton-connect/sdk/compare/ui-react-2.0.10-beta.2...ui-react-2.0.10-beta.3) (2024-12-10)
+
+
+
+## [2.0.10-beta.2](https://github.com/ton-connect/sdk/compare/ui-react-2.0.10-beta.1...ui-react-2.0.10-beta.2) (2024-12-10)
+
+
+
+## [2.0.10-beta.1](https://github.com/ton-connect/sdk/compare/ui-react-2.0.10-beta.0...ui-react-2.0.10-beta.1) (2024-11-16)
+
+
+
+## [2.0.10-beta.0](https://github.com/ton-connect/sdk/compare/ui-react-2.0.9...ui-react-2.0.10-beta.0) (2024-08-15)
+
+
+
+## [2.0.9](https://github.com/ton-connect/sdk/compare/ui-react-2.0.9-beta.3...ui-react-2.0.9) (2024-08-14)
+
+
+
+## [2.0.9-beta.3](https://github.com/ton-connect/sdk/compare/ui-react-2.0.9-beta.2...ui-react-2.0.9-beta.3) (2024-08-14)
+
+
+
+## [2.0.9-beta.2](https://github.com/ton-connect/sdk/compare/ui-react-2.0.9-beta.1...ui-react-2.0.9-beta.2) (2024-08-14)
+
+
+
+## [2.0.9-beta.1](https://github.com/ton-connect/sdk/compare/ui-react-2.0.9-beta.0...ui-react-2.0.9-beta.1) (2024-08-14)
+
+
+
+## [2.0.9-beta.0](https://github.com/ton-connect/sdk/compare/ui-react-2.0.8...ui-react-2.0.9-beta.0) (2024-08-09)
+
+
+
+## [2.0.8](https://github.com/ton-connect/sdk/compare/ui-react-2.0.7...ui-react-2.0.8) (2024-08-09)
+
+
+
+## [2.0.7](https://github.com/ton-connect/sdk/compare/ui-react-2.0.7-beta.2...ui-react-2.0.7) (2024-08-09)
+
+
+
+## [2.0.7-beta.2](https://github.com/ton-connect/sdk/compare/ui-react-2.0.7-beta.1...ui-react-2.0.7-beta.2) (2024-07-31)
+
+
+
+## [2.0.7-beta.1](https://github.com/ton-connect/sdk/compare/ui-react-2.0.7-beta.0...ui-react-2.0.7-beta.1) (2024-07-31)
+
+
+
+## [2.0.7-beta.0](https://github.com/ton-connect/sdk/compare/ui-react-2.0.6...ui-react-2.0.7-beta.0) (2024-07-31)
+
+
+
+## [2.0.6](https://github.com/ton-connect/sdk/compare/ui-react-2.0.5...ui-react-2.0.6) (2024-07-08)
+
+
+
+## [2.0.5](https://github.com/ton-connect/sdk/compare/ui-react-2.0.4...ui-react-2.0.5) (2024-06-08)
+
+
+
+## [2.0.4](https://github.com/ton-connect/sdk/compare/ui-react-2.0.3...ui-react-2.0.4) (2024-06-07)
+
+
+
+## [2.0.3](https://github.com/ton-connect/sdk/compare/ui-react-2.0.3-beta.4...ui-react-2.0.3) (2024-05-28)
+
+
+
+## [2.0.3-beta.4](https://github.com/ton-connect/sdk/compare/ui-react-2.0.3-beta.3...ui-react-2.0.3-beta.4) (2024-05-28)
+
+
+
+## [2.0.3-beta.3](https://github.com/ton-connect/sdk/compare/ui-react-2.0.3-beta.2...ui-react-2.0.3-beta.3) (2024-05-27)
+
+
+
+## [2.0.3-beta.2](https://github.com/ton-connect/sdk/compare/ui-react-2.0.3-beta.1...ui-react-2.0.3-beta.2) (2024-05-20)
+
+
+
+## [2.0.3-beta.1](https://github.com/ton-connect/sdk/compare/ui-react-2.0.3-beta.0...ui-react-2.0.3-beta.1) (2024-05-20)
+
+
+
+## [2.0.3-beta.0](https://github.com/ton-connect/sdk/compare/ui-react-2.0.2...ui-react-2.0.3-beta.0) (2024-05-09)
+
+
+
+## [2.0.2](https://github.com/ton-connect/sdk/compare/ui-react-2.0.2-beta.1...ui-react-2.0.2) (2024-04-22)
+
+
+
+## [2.0.2-beta.1](https://github.com/ton-connect/sdk/compare/ui-react-2.0.2-beta.0...ui-react-2.0.2-beta.1) (2024-04-22)
+
+
+
+## [2.0.2-beta.0](https://github.com/ton-connect/sdk/compare/ui-react-2.0.1...ui-react-2.0.2-beta.0) (2024-04-22)
+
+
+
+## [2.0.1](https://github.com/ton-connect/sdk/compare/ui-react-2.0.1-beta.9...ui-react-2.0.1) (2024-04-22)
+
+
+
+## [2.0.1-beta.9](https://github.com/ton-connect/sdk/compare/ui-react-2.0.1-beta.8...ui-react-2.0.1-beta.9) (2024-04-21)
+
+
+### Bug Fixes
+
+* **ui-react:** prevent re-calculate friendly address on wallet unchanged in useTonAddress ([dfbe5ba](https://github.com/ton-connect/sdk/commit/dfbe5ba009bbfd97324e7b06ce5f08bbbd35f779))
+* **ui-react:** set current modal state on first call of use effect in useTonConnectModal ([a881c7f](https://github.com/ton-connect/sdk/commit/a881c7f739c54ef0f5dd9efb7c10f12ed659f90e))
+* **ui-react:** set current wallet on first call of use effect in useTonWallet ([3f2954a](https://github.com/ton-connect/sdk/commit/3f2954a1793c3b468170241605d0e78121a840db))
+
+
+
+## [2.0.1-beta.8](https://github.com/ton-connect/sdk/compare/ui-react-2.0.1-beta.7...ui-react-2.0.1-beta.8) (2024-04-20)
+
+
+
+## [2.0.1-beta.7](https://github.com/ton-connect/sdk/compare/ui-react-2.0.1-beta.6...ui-react-2.0.1-beta.7) (2024-04-20)
+
+
+
+## [2.0.1-beta.6](https://github.com/ton-connect/sdk/compare/ui-react-2.0.1-beta.5...ui-react-2.0.1-beta.6) (2024-04-18)
+
+
+
+## [2.0.1-beta.5](https://github.com/ton-connect/sdk/compare/ui-react-2.0.1-beta.4...ui-react-2.0.1-beta.5) (2024-04-12)
+
+
+
+## [2.0.1-beta.4](https://github.com/ton-connect/sdk/compare/ui-react-2.0.1-beta.3...ui-react-2.0.1-beta.4) (2024-03-25)
+
+
+
+## [2.0.1-beta.3](https://github.com/ton-connect/sdk/compare/ui-react-2.0.1-beta.2...ui-react-2.0.1-beta.3) (2024-03-08)
+
+
+
+## [2.0.1-beta.2](https://github.com/ton-connect/sdk/compare/ui-react-2.0.1-beta.1...ui-react-2.0.1-beta.2) (2024-03-08)
+
+
+
+## [2.0.1-beta.1](https://github.com/ton-connect/sdk/compare/ui-react-2.0.1-beta.0...ui-react-2.0.1-beta.1) (2024-02-29)
+
+
+
+## [2.0.1-beta.0](https://github.com/ton-connect/sdk/compare/ui-react-2.0.0...ui-react-2.0.1-beta.0) (2024-01-08)
+
+
+
+# [2.0.0](https://github.com/ton-connect/sdk/compare/ui-react-2.0.0-beta.10...ui-react-2.0.0) (2023-12-26)
+
+
+
+# [2.0.0-beta.10](https://github.com/ton-connect/sdk/compare/ui-react-2.0.0-beta.9...ui-react-2.0.0-beta.10) (2023-12-19)
+
+
+
+# [2.0.0-beta.9](https://github.com/ton-connect/sdk/compare/ui-react-2.0.0-beta.8...ui-react-2.0.0-beta.9) (2023-12-15)
+
+
+
+# [2.0.0-beta.8](https://github.com/ton-connect/sdk/compare/ui-react-2.0.0-beta.7...ui-react-2.0.0-beta.8) (2023-12-02)
+
+
+
+# [2.0.0-beta.7](https://github.com/ton-connect/sdk/compare/ui-react-2.0.0-beta.6...ui-react-2.0.0-beta.7) (2023-12-01)
+
+
+
+# [2.0.0-beta.6](https://github.com/ton-connect/sdk/compare/ui-react-2.0.0-beta.5...ui-react-2.0.0-beta.6) (2023-11-06)
+
+
+
+# [2.0.0-beta.5](https://github.com/ton-connect/sdk/compare/ui-react-2.0.0-beta.4...ui-react-2.0.0-beta.5) (2023-11-02)
+
+
+### Bug Fixes
+
+* **ui-react:** add CommonJS support and update build process ([46642f6](https://github.com/ton-connect/sdk/commit/46642f649d11d10245f0e45a2eb27a3e4984769c))
+
+
+### Features
+
+* **ui-react:** add enableAndroidBackHandler config option for android back button handling ([519e7e3](https://github.com/ton-connect/sdk/commit/519e7e305b3d3d8cd4a6e31656ad1b2fe0309b73))
+
+
+
+# [2.0.0-beta.4](https://github.com/ton-connect/sdk/compare/ui-react-2.0.0-beta.3...ui-react-2.0.0-beta.4) (2023-10-25)
+
+
+
+# [2.0.0-beta.3](https://github.com/ton-connect/sdk/compare/ui-react-2.0.0-beta.2...ui-react-2.0.0-beta.3) (2023-10-20)
+
+
+### Features
+
+* **ui-react:** add useTonConnectModal() hook for modal management ([d1e2381](https://github.com/ton-connect/sdk/commit/d1e238154694d142bae67b21bfc81deb30647d49))
+
+
+
+# [2.0.0-beta.2](https://github.com/ton-connect/sdk/compare/ui-react-2.0.0-beta.1...ui-react-2.0.0-beta.2) (2023-09-15)
+
+
+### Bug Fixes
+
+* **ui-react:** next js compatibility ([a746046](https://github.com/ton-connect/sdk/commit/a74604643d65b010b2043b7edf642370c976324b))
+
+
+
+# [2.0.0-beta.1](https://github.com/ton-connect/sdk/compare/ui-react-2.0.0-beta.0...ui-react-2.0.0-beta.1) (2023-09-12)
+
+
+
+# [2.0.0-beta.0](https://github.com/ton-connect/sdk/compare/ui-react-1.0.0-beta.9...ui-react-2.0.0-beta.0) (2023-09-08)
+
+
+### Bug Fixes
+
+* **ui-react:** useTonWallet hook types changed ([456f5eb](https://github.com/ton-connect/sdk/commit/456f5ebdc061b35aa131c0f2a892dc49ebdcf2ba))
+
+
+### BREAKING CHANGES
+
+* **ui-react:** `useTonWallet` now returns `Wallet | (Wallet & WalletInfoWithOpenMethod) | null` instead of `(Wallet & WalletInfoWithOpenMethod) | null`
+
+
+
+# [1.0.0-beta.9](https://github.com/ton-connect/sdk/compare/ui-react-1.0.0-beta.8...ui-react-1.0.0-beta.9) (2023-08-18)
+
+
+
+# [1.0.0-beta.8](https://github.com/ton-connect/sdk/compare/ui-react-1.0.0-beta.7...ui-react-1.0.0-beta.8) (2023-08-18)
+
+
+
 # [1.0.0-beta.7](https://github.com/ton-connect/sdk/compare/ui-react-1.0.0-beta.6...ui-react-1.0.0-beta.7) (2023-08-11)
 
 

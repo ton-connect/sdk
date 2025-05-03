@@ -1,57 +1,26 @@
-import { Component, createEffect, createSignal, For, Match, on, onCleanup, Switch } from 'solid-js';
+import { Component, For, Match, Switch } from 'solid-js';
 import { TransitionGroup } from 'solid-transition-group';
-import { ActionName, action } from 'src/app/state/modals-state';
 import { ConfirmOperationNotification } from './confirm-operation-notification';
 import { ErrorTransactionNotification } from './error-transaction-notification';
 import { SuccessTransactionNotification } from './success-transaction-notification';
 import { NotificationClass } from './style';
 import { Styleable } from 'src/app/models/styleable';
+import { useOpenedNotifications } from 'src/app/hooks/use-notifications';
+import { animate } from 'src/app/utils/animate';
+import { ErrorSignDataNotification } from './error-sign-data-notification';
+import { SuccessSignDataNotification } from './success-sign-data-notification';
 
 export interface NotificationsProps extends Styleable {}
 
 export const Notifications: Component<NotificationsProps> = props => {
-    const timeouts: ReturnType<typeof setTimeout>[] = [];
-
-    const [openedNotifications, setOpenedNotifications] = createSignal<
-        { id: number; action: ActionName }[]
-    >([]);
-
-    let lastId = -1;
-    const liveTimeoutMs = 4500;
-
-    createEffect(
-        on(action, action => {
-            if (action && action.showNotification) {
-                lastId++;
-                const id = lastId;
-
-                setOpenedNotifications(notifications =>
-                    notifications
-                        .filter(notification => notification.action !== 'confirm-transaction')
-                        .concat({ id, action: action.name })
-                );
-                timeouts.push(
-                    setTimeout(
-                        () =>
-                            setOpenedNotifications(notifications =>
-                                notifications.filter(notification => notification.id !== id)
-                            ),
-                        liveTimeoutMs
-                    )
-                );
-            }
-        })
-    );
-
-    onCleanup(() => {
-        timeouts.forEach(clearTimeout);
-    });
+    const openedNotifications = useOpenedNotifications();
 
     return (
         <div class={props.class} data-tc-list-notifications="true">
             <TransitionGroup
                 onBeforeEnter={el => {
-                    el.animate(
+                    animate(
+                        el,
                         [
                             { opacity: 0, transform: 'translateY(0)' },
                             { opacity: 1, transform: 'translateY(-8px)' }
@@ -62,7 +31,8 @@ export const Notifications: Component<NotificationsProps> = props => {
                     );
                 }}
                 onExit={(el, done) => {
-                    const a = el.animate(
+                    const a = animate(
+                        el,
                         [
                             { opacity: 1, transform: 'translateY(-8px)' },
                             { opacity: 0, transform: 'translateY(-30px)' }
@@ -83,7 +53,18 @@ export const Notifications: Component<NotificationsProps> = props => {
                             <Match when={openedNotification.action === 'transaction-canceled'}>
                                 <ErrorTransactionNotification class={NotificationClass} />
                             </Match>
-                            <Match when={openedNotification.action === 'confirm-transaction'}>
+                            <Match when={openedNotification.action === 'data-signed'}>
+                                <SuccessSignDataNotification class={NotificationClass} />
+                            </Match>
+                            <Match when={openedNotification.action === 'sign-data-canceled'}>
+                                <ErrorSignDataNotification class={NotificationClass} />
+                            </Match>
+                            <Match
+                                when={
+                                    openedNotification.action in
+                                    ['confirm-transaction', 'confirm-sign-data']
+                                }
+                            >
                                 <ConfirmOperationNotification class={NotificationClass} />
                             </Match>
                         </Switch>

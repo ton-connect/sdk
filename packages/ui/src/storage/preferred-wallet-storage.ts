@@ -1,4 +1,4 @@
-import { checkLocalStorageExists } from 'src/app/utils/web-api';
+import { tryGetLocalStorage } from 'src/app/utils/web-api';
 
 export class PreferredWalletStorage {
     private readonly localStorage: Storage;
@@ -6,16 +6,14 @@ export class PreferredWalletStorage {
     private readonly storageKey = 'ton-connect-ui_preferred-wallet';
 
     constructor() {
-        checkLocalStorageExists();
-
-        this.localStorage = localStorage;
+        this.localStorage = tryGetLocalStorage();
     }
 
-    public setPreferredWalletName(name: string): void {
+    public setPreferredWalletAppName(name: string): void {
         this.localStorage.setItem(this.storageKey, name);
     }
 
-    public getPreferredWalletName(): string | undefined {
+    public getPreferredWalletAppName(): string | undefined {
         return this.localStorage.getItem(this.storageKey) || undefined;
     }
 }

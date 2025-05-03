@@ -1,41 +1,46 @@
 /* @refresh reload */
 import { TonConnectUI } from 'src/ton-connect-ui';
 import { THEME } from 'src/models';
-import { SendTransactionRequest } from '@tonconnect/sdk';
+import { SendTransactionRequest, TonConnect } from '@tonconnect/sdk';
 
 async function dev(): Promise<void> {
+    const connector = new TonConnect({
+        manifestUrl: 'https://demo-dapp.walletbot.net/demo-dapp/tonconnect-manifest.json'
+    });
     const tonConnectUI = new TonConnectUI({
+        connector,
         buttonRootId: 'button-root',
-        manifestUrl: 'https://ton-connect.github.io/demo-dapp/tonconnect-manifest.json',
         actionsConfiguration: {
             modals: ['error'],
-            notifications: ['before']
+            notifications: ['before'],
+            twaReturnUrl: 'https://google.com'
         },
         uiPreferences: {
-            theme: THEME.LIGHT,
+            theme: THEME.DARK,
             borderRadius: 'm'
         },
-        language: 'en',
+        language: 'ru',
         restoreConnection: true,
-        walletsListConfiguration: {
-            /* includeWallets: [...new Array(11)].map((_, index) => ({
-                name: `tonkeeper${index}`,
-                bridgeUrl: `https://bridge${
-                    index < 9 ? `0${index + 1}` : index + 1
-                }.subgroup.org/bridge`,
-                universalLink: 'https://app.tonkeeper.com/ton-connect',
-                aboutUrl: '',
-                imageUrl: 'https://tonkeeper.com/assets/tonconnect-icon.png'
-            })),*/
-        }
+        /*walletsListConfiguration: {
+            includeWallets: [
+                {
+                    name: 'Wallet',
+                    bridgeUrl: `https://bridge.tonapi.io/bridge`,
+                    universalLink: 'https://t.me/wallet',
+                    aboutUrl: '',
+                    imageUrl: 'https://tonkeeper.com/assets/tonconnect-icon.png',
+                    platforms: ['ios']
+                }
+            ]
+        }*/
     });
 
-    /* tonConnectUI.setConnectRequestParameters({ state: 'loading' });
+    /*tonConnectUI.setConnectRequestParameters({ state: 'loading' });
 
-    setTimeout(() => {
+    setInterval(() => {
         tonConnectUI.setConnectRequestParameters({
             state: 'ready',
-            value: { tonProof: 'tonProofPayload' }
+            value: { tonProof: 'tonProofPayload' + Math.random().toString() }
         });
     }, 3000);*/
 
@@ -79,11 +84,7 @@ async function dev(): Promise<void> {
             validUntil: Math.round(Date.now() / 1000) + 1000,
             messages: [
                 {
-                    address: '-1:4d5c0210b35daddaa219fac459dba0fdefb1fae4e97a0d0797739fe050d694ca',
-                    amount: '1000000'
-                },
-                {
-                    address: '-1:4d5c0210b35daddaa219fac459dba0fdefb1fae4e97a0d0797739fe050d694ca',
+                    address: '0:4d5c0210b35daddaa219fac459dba0fdefb1fae4e97a0d0797739fe050d694ca',
                     amount: '1000000'
                 }
             ]

@@ -1,5 +1,5 @@
 import { WalletInfoWithOpenMethod } from 'src/models/connected-wallet';
-import { checkLocalStorageExists } from 'src/app/utils/web-api';
+import { tryGetLocalStorage } from 'src/app/utils/web-api';
 
 export class WalletInfoStorage {
     private readonly localStorage: Storage;
@@ -7,9 +7,7 @@ export class WalletInfoStorage {
     private readonly storageKey = 'ton-connect-ui_wallet-info';
 
     constructor() {
-        checkLocalStorageExists();
-
-        this.localStorage = localStorage;
+        this.localStorage = tryGetLocalStorage();
     }
 
     public setWalletInfo(walletInfo: WalletInfoWithOpenMethod): void {

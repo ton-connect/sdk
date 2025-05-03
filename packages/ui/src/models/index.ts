@@ -21,7 +21,14 @@ export type {
     WalletInfoRemoteWithOpenMethod
 } from './connected-wallet';
 export type { ReturnStrategy } from './return-strategy';
-import { Property } from 'csstype';
+import type { Property } from 'csstype';
 type Color = Property.Color;
 export type { Color };
 export type { Loadable, LoadableReady, LoadableLoading } from './loadable';
+export type {
+    WalletsModal,
+    WalletsModalState,
+    WalletModalOpened,
+    WalletModalClosed,
+    WalletsModalCloseReason
+} from './wallets-modal';

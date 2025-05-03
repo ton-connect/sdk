@@ -1,5 +1,35 @@
 # Changelog @tonconnect/protocol 
 
+## [2.2.7](https://github.com/ton-connect/sdk/compare/protocol-2.2.7-alpha.1...protocol-2.2.7) (2025-03-06)
+
+
+
+## [2.2.7-alpha.1](https://github.com/ton-connect/sdk/compare/protocol-2.2.7-alpha.0...protocol-2.2.7-alpha.1) (2025-02-18)
+
+
+### Features
+
+* **protocol:** rename `extraCurrenciesSupported` to `extraCurrencySupported` ([41b6984](https://github.com/ton-connect/sdk/commit/41b6984820b4485b514ef2c3be14b5d6d93774c3))
+
+
+
+## [2.2.7-alpha.0](https://github.com/ton-connect/sdk/compare/protocol-2.2.6...protocol-2.2.7-alpha.0) (2025-02-17)
+
+
+### Features
+
+* **protocol:** add `extraCurrenciesSupported` flag to `SendTransaction` feature ([99a2e74](https://github.com/ton-connect/sdk/commit/99a2e74ec7315f72ce2abe450123ca9ea57a3414))
+
+
+
+## [2.2.6](https://github.com/ton-connect/sdk/compare/protocol-2.2.6-beta.0...protocol-2.2.6) (2023-11-06)
+
+
+
+## [2.2.6-beta.0](https://github.com/ton-connect/sdk/compare/protocol-2.2.5...protocol-2.2.6-beta.0) (2023-11-02)
+
+
+
 ## [2.2.5](https://github.com/ton-connect/sdk/compare/protocol-2.2.4...protocol-2.2.5) (2023-03-09)
 
 

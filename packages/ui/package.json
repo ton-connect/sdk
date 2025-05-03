@@ -1,10 +1,10 @@
 {
-  "name": "@tonconnect/ui",
-  "version": "1.0.0-beta.6",
+  "name": "@tonkeeper/tonconnect-ui",
+  "version": "2.2.0-beta.2",
   "scripts": {
     "start": "vite --host",
     "dev": "vite",
-    "build": "vite build && rollup -c rollup.config.mjs && vite build -c vite.cdn-config.ts && node ./scripts/patch-build_ssr-fix.js"
+    "build": "tsc --noEmit --emitDeclarationOnly false && vite build && rollup -c rollup.config.mjs && vite build -c vite.cdn-config.ts && node ./scripts/patch-build_ssr-fix.js"
   },
   "nx": {
     "tags": [
@@ -29,48 +29,49 @@
     "sdk",
     "UI"
   ],
-  "author": "tonconnect",
+  "author": "Tonkeeper",
   "license": "Apache-2.0",
   "files": [
     "lib",
     "dist"
   ],
-  "main": "./lib/index.umd.cjs",
-  "module": "./lib/index.js",
+  "main": "./lib/index.cjs",
+  "module": "./lib/index.mjs",
   "types": "./lib/index.d.ts",
   "exports": {
     ".": {
       "types": "./lib/index.d.ts",
-      "require": "./lib/index.umd.cjs",
-      "import": "./lib/index.js",
-      "default": "./lib/index.umd.cjs"
+      "require": "./lib/index.cjs",
+      "import": "./lib/index.mjs",
+      "default": "./lib/index.cjs"
     }
   },
   "dependencies": {
+    "@tonconnect/sdk": "npm:@tonkeeper/tonconnect-sdk@3.2.0-beta.2",
     "classnames": "^2.3.2",
     "deepmerge": "^4.2.2",
-    "@tonconnect/sdk": "^2.1.3",
-    "ua-parser-js": "^1.0.35"
+    "ua-parser-js": "^1.0.35",
+    "csstype": "^3.1.1"
   },
   "devDependencies": {
+    "@floating-ui/dom": "^1.0.12",
+    "@rollup/plugin-replace": "5.0.5",
+    "@solid-primitives/i18n": "^1.1.2",
+    "@types/node": "^18.11.17",
+    "@types/ua-parser-js": "^0.7.36",
+    "eslint-plugin-solid": "^0.7.3",
+    "is-plain-object": "^5.0.0",
+    "qrcode-generator": "^1.4.4",
+    "rollup": "^3.8.0",
+    "rollup-plugin-dts": "^5.0.0",
+    "solid-devtools": "^0.24.7",
+    "solid-floating-ui": "^0.2.0",
     "solid-js": "^1.5.1",
     "solid-styled-components": "^0.28.5",
     "solid-transition-group": "^0.0.12",
-    "@solid-primitives/i18n": "^1.1.2",
-    "@floating-ui/dom": "^1.0.12",
-    "solid-floating-ui": "^0.2.0",
-    "is-plain-object": "^5.0.0",
-    "qrcode-generator": "^1.4.4",
     "typescript": "^4.8.2",
-    "eslint-plugin-solid": "^0.7.3",
     "vite": "^3.0.9",
-    "vite-plugin-solid": "^2.3.0",
-    "csstype": "^3.1.1",
-    "@types/node": "^18.11.17",
-    "rollup-plugin-dts": "^5.0.0",
-    "rollup": "^3.8.0",
-    "solid-devtools": "^0.24.7",
-    "@types/ua-parser-js": "^0.7.36"
+    "vite-plugin-solid": "^2.3.0"
   },
   "typedoc": {
     "entryPoint": "./src/library.ts"

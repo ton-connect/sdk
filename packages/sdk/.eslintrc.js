@@ -1,5 +1,5 @@
 module.exports = {
-    extends: ["../../.eslintrc.js"],
+    extends: ['../../.eslintrc.js'],
     overrides: [
         {
             files: './vite.config.ts',
@@ -9,6 +9,12 @@ module.exports = {
                 tsconfigRootDir: __dirname,
                 createDefaultProgram: true
             },
+            '@nx/enforce-module-boundaries': [
+                'error',
+                {
+                    allow: ['scope:protocol']
+                }
+            ]
         }
     ]
 };

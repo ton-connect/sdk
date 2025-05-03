@@ -5,18 +5,48 @@ import { useTheme } from 'solid-styled-components';
 
 export interface SuccessIconProps extends Styleable {
     fill?: Property.Color;
-    size?: 's' | 'm';
+    size?: 'xs' | 's' | 'm';
 }
 
 export const SuccessIcon: Component<SuccessIconProps> = props => {
     const theme = useTheme();
 
-    const size = (): 's' | 'm' => props.size || 's';
+    const size = (): 'xs' | 's' | 'm' => props.size || 's';
     const fill = (): string => props.fill || theme.colors.icon.success;
 
     return (
         <>
-            {size() === 's' ? (
+            {size() === 'xs' ? (
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    class={props.class}
+                >
+                    <g clip-path="url(#clip0_3783_2045)">
+                        <circle cx="8" cy="8.00098" r="8" fill={fill()} />
+                        <path
+                            d="M4.75 8.50098L7 10.751L11.75 6.00098"
+                            stroke={theme.colors.constant.white}
+                            stroke-width="1.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        />
+                    </g>
+                    <defs>
+                        <clipPath id="clip0_3783_2045">
+                            <rect
+                                width="16"
+                                height="16"
+                                fill="white"
+                                transform="translate(0 0.000976562)"
+                            />
+                        </clipPath>
+                    </defs>
+                </svg>
+            ) : size() === 's' ? (
                 <svg
                     width="24"
                     height="24"

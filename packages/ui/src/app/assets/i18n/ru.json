@@ -1,67 +1,133 @@
 {
-  "common": {
-    "close": "Закрыть",
-    "openWallet": "Открыть кошелек",
-    "get": "Скачать",
-    "learnMore": "Подробнее",
-    "openExtension": "Расширение",
-    "copyLink": "Копировать ссылку",
-    "copied": "Скопировано!",
-    "yourWallet": "вашем кошельке"
-  },
-  "button": {
-    "connectWallet": "Подключить кошелёк",
-    "dropdown": {
-      "copy": "Скопировать адрес",
-      "copied": "Адрес скопирован!",
-      "disconnect": "Отключить кошелёк"
+    "common": {
+        "close": "Закрыть",
+        "openWallet": "Открыть кошелёк",
+        "copyLink": "Скопировать",
+        "linkCopied": "Ссылка скопирована",
+        "copied": "Скопировано",
+        "yourWallet": "Ваш кошелёк",
+        "retry": "Повторить",
+        "get": "Скачать",
+        "mobile": "Мобильный",
+        "browserExtension": "Расширение",
+        "desktop": "Десктоп"
+    },
+    "button": {
+        "connectWallet": "Подключить кошелёк",
+        "dropdown": {
+            "copy": "Скопировать адрес",
+            "copied": "Адрес скопирован!",
+            "disconnect": "Отключить кошелёк"
+        }
+    },
+    "notifications": {
+        "confirm": {
+            "header": "Откройте {{ name }}, чтобы подтвердить транзакцию."
+        },
+        "transactionSent": {
+            "header": "Транзакция отправлена",
+            "text": "Ваша транзакция будет обработана через несколько секунд."
+        },
+        "transactionCanceled": {
+            "header": "Транзакция отменена",
+            "text": "Состояние вашего счёта не изменится."
+        },
+        "dataSigned": {
+            "header": "Данные подписаны"
+        },
+        "signDataCanceled": {
+            "header": "Подпись данных отменена"
+        }
+    },
+    "walletItem": {
+        "walletOn": "Wallet в",
+        "recent": "Недавний",
+        "installed": "Установлен",
+        "popular": "Популярен"
+    },
+    "walletModal": {
+        "loading": "Кошельки загружаются",
+        "wallets": "Кошельки",
+        "mobileUniversalModal": {
+            "connectYourWallet": "Подключите TON кошелёк",
+            "openWalletOnTelegramOrSelect": "Подключите Wallet в Telegram или выберете другое приложение",
+            "openWalletOnTelegram": "Открыть Wallet в Telegram",
+            "chooseOtherApplication": "Выберите другое приложение",
+            "openLink": "Открыть",
+            "scan": "Отсканируйте камерой вашего телефона"
+        },
+        "desktopUniversalModal": {
+            "connectYourWallet": "Подключите TON кошелёк",
+            "scan": "Отсканируйте QR-код камерой вашего телефона",
+            "availableWallets": "Доступные кошельки"
+        },
+        "mobileConnectionModal": {
+            "showQR": "Показать QR-код",
+            "scanQR": "Отсканируйте QR-код ниже камерой в приложении {{ name }}, или камерой телефона",
+            "missingFeatures": "Обновите {{ name }}, ваша версия не поддерживает необходимые функции для этого dApp",
+            "notSupportedWallet": "{{ name }} не поддерживает запрошенное действие. Пожалуйста, подключите другой кошелёк, который поддерживает это",
+            "continueIn": "Продолжите в {{ name }}…",
+            "updateWallet": "Обновить {{ name }}",
+            "chooseAnotherWallet": "Выбрать другой кошелёк",
+            "connectionDeclined": "Подключение отклонено"
+        },
+        "desktopConnectionModal": {
+            "scanQR": "Отсканируйте QR-код ниже камерой в приложении {{ name }}, или камерой телефона",
+            "continueInExtension": "Откройте браузерное расширение {{ name }}",
+            "dontHaveExtension": "Похоже, у вас не установлено браузерное расширение {{ name }}",
+            "missingFeatures": "Обновите {{ name }}, ваша версия не поддерживает необходимые функции для этого dApp",
+            "notSupportedWallet": "{{ name }} не поддерживает запрошенное действие. Пожалуйста, подключите другой кошелёк, который поддерживает это",
+            "getWallet": "Скачать {{ name }}",
+            "updateWallet": "Обновить {{ name }}",
+            "chooseAnotherWallet": "Выбрать другой кошелёк",
+            "continueOnDesktop": "Откройте {{ name }} на компьютере…",
+            "openWalletOnTelegram": "Открыть Wallet в Telegram",
+            "connectionDeclined": "Подключение отклонено"
+        },
+        "infoModal": {
+            "whatIsAWallet": "Что такое кошелёк?",
+            "secureDigitalAssets": "Надежное хранилище цифровых активов",
+            "walletProtects": "Кошелёк защищает ваши цифровые активы, включая TON, токены и предметы коллекционирования, и управляет ими.",
+            "controlIdentity": "Контроль своей личности Web3",
+            "manageIdentity": "Управляйте своей цифровой идентификацией и с легкостью получайте доступ к децентрализованным приложениям. Сохраняйте контроль над своими данными и безопасно участвуйте в экосистеме блокчейна.",
+            "effortlessCryptoTransactions": "Простые криптотранзакции",
+            "easilySend": "Легко отправляйте, получайте и отслеживайте свои криптовалюты. Оптимизируйте свои операции с помощью децентрализованных приложений.",
+            "getAWallet": "Скачать кошелёк"
+        },
+        "allWallets": {
+            "walletsBelowNotSupported": "Кошельки ниже не поддерживают все функции подключённого сервиса. Вы можете использовать свою фразу восстановления в одном из поддерживаемых выше кошельков.",
+            "walletNotSupportService": "{{ name }} не поддерживает подключённый сервис"
+        },
+        "featureNotSupported": {
+            "wallet": {
+                "title": "{{ name }} не поддерживает запрошенное\u00A0действие",
+                "description": "Установите поддерживаемый кошелёк из списка ниже, восстановите его с помощью фразы восстановления, затем подключитесь и попробуйте снова.",
+                "info": "Узнать, как восстановить кошелёк"
+            },
+            "version": {
+                "description": "Текущая версия {{ name }} или тип контракта кошелька не поддерживает необходимые функции. Обновите кошелёк, чтобы продолжить.",
+                "updateButton": "Обновить {{ name }}",
+                "aboutW5": "Про W5"
+            },
+            "disconnect": {
+                "title": "Подтвердите отключение",
+                "description": "Вы будете отключены от текущего кошелька и перенаправлены на подключение {{ name }}.",
+                "button": "Отключиться"
+            }
+        }
+    },
+    "actionModal": {
+        "confirmTransaction": {
+            "header": "Подтвердите действие в {{ name }}",
+            "text": "Это займет пару секунд."
+        },
+        "transactionSent": "$notifications.transactionSent",
+        "transactionCanceled": "$notifications.transactionCanceled",
+        "signData": {
+            "header": "Подпишите данные в {{ name }}",
+            "text": "Это займет пару секунд."
+        },
+        "dataSigned": "$notifications.dataSigned",
+        "signDataCanceled": "$notifications.signDataCanceled"
     }
-  },
-  "notifications": {
-    "confirm": {
-      "header": "Откройте {{ name }}, чтобы подтвердить транзакцию."
-    },
-    "transactionSent": {
-      "header": "Транзакция отправлена",
-      "text": "Ваша транзакция будет обработана через несколько секунд."
-    },
-    "transactionCanceled": {
-      "header": "Транзакция отменена",
-      "text": "Состояние вашего счёта не изменится."
-    }
-  },
-  "walletModal": {
-    "loading":  "Список кошельков загружается",
-    "qrCode": "QR-код",
-    "wallets": "Кошельки",
-    "universalQRModal": {
-      "scanQR": "Отсканируйте код ниже с помощью камеры в вашем TON-кошельке.",
-      "openWallet": "Открыть кошелёк",
-      "openInstalledWallet": "Открыть кошелёк",
-      "dontHave": "Подробнее о TON кошельках"
-    },
-    "desktopSelectWalletModal": {
-      "selectWallet": "Выберите кошелёк для подключения."
-    },
-    "mobileSelectWalletModal": {
-      "connectWallet": "Подключите кошелёк",
-      "selectWallet": "$walletModal.desktopSelectWalletModal.selectWallet",
-      "installedWallet": "Открыть кошелёк"
-    },
-    "qrCodeModal": {
-      "connectWith": "Подключиться через {{ name }}",
-      "scan": "Отсканируйте код ниже.",
-      "openWallet": "Открыть {{ name }}",
-      "openExtension": "Расширение",
-      "dontHave": "У вас нет {{ name }}?"
-    }
-  },
-  "actionModal": {
-    "confirmTransaction": {
-      "header": "Подтвердите действие в {{ name }}",
-      "text": "Это займет пару секунд."
-    },
-    "transactionSent": "$notifications.transactionSent",
-    "transactionCanceled": "$notifications.transactionCanceled"
-  }
 }

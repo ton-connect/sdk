@@ -4,8 +4,10 @@ export { RpcMethod } from './rpc-method';
 export { DeviceInfo } from './device-info';
 export {
     Feature,
+    FeatureName,
     SendTransactionFeatureDeprecated,
     SendTransactionFeature,
+    SignDataType,
     SignDataFeature
 } from './feature';
 export { CHAIN } from './CHAIN';

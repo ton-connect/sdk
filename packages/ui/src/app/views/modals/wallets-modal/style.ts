@@ -5,12 +5,12 @@ import { media } from 'src/app/styles/media';
 export const StyledModal = styled(Modal)`
     padding-left: 24px;
     padding-right: 24px;
+    padding-top: 18px;
+    padding-bottom: 0;
 
     ${media('mobile')} {
         padding-left: 0;
         padding-right: 0;
-
-        min-height: 364px;
     }
 `;
 

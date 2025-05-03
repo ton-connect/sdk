@@ -7,3 +7,7 @@ export { QRCode } from './qr-code';
 export { WalletItem } from './wallet-item';
 export * from './typography';
 export * from './icons';
+export { FourWalletsItem } from './wallet-item/four-wallets';
+export { WalletLabeledItem } from './wallet-item/wallet-labeled-item';
+export { ScrollContainer } from './scroll-container';
+export { Link } from './link';

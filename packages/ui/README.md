@@ -1,3 +1,8 @@
+> ℹ️ This is a Tonkeeper-maintained fork of the official [`@tonconnect/ui`](https://github.com/ton-connect/sdk)  
+> It includes additional features and improvements while maintaining compatibility with the core TonConnect protocol.
+
+---
+
 # TON Connect UI
 
 TonConnect UI is a UI kit for TonConnect SDK. Use it to connect your app to TON wallets via TonConnect protocol.
@@ -6,35 +11,27 @@ If you use React for your dapp, take a look at [TonConnect UI React kit](https:/
 
 If you want to use TonConnect on the server side, you should use the [TonConnect SDK](https://github.com/ton-connect/sdk/tree/main/packages/sdk).
 
-You can find more details and the protocol specification in the [docs](https://github.com/ton-connect/docs).
+You can find more details and the protocol specification in the [docs](https://docs.ton.org/develop/dapps/ton-connect/overview).
+
+---
+
+# Using this fork as a drop-in replacement
+
+You can easily use this fork as a drop-in replacement for the original `@tonconnect/ui` package by aliasing it in your `package.json`:
+
+```json
+"dependencies": {
+  "@tonconnect/ui": "npm:@tonkeeper/tonconnect-ui@<version>"
+}
+```
+
+This allows you to import the library exactly as before, without changing any import paths in your existing code.
 
 ---
 
 [Latest API documentation](https://ton-connect.github.io/sdk/modules/_tonconnect_ui.html)
 
 # Getting started
-
-## Installation with cdn
-Add the script to your HTML file:
-```html
-<script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
-```
-
-ℹ️ If you don't want auto-update the library, pass concrete version instead of `latest`, e.g.
-```html
-<script src="https://unpkg.com/@tonconnect/ui@0.0.9/dist/tonconnect-ui.min.js"></script>
-```
-
-You can find `TonConnectUI` in global variable `TON_CONNECT_UI`, e.g.
-```html
-<script>
-    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-        manifestUrl: 'https://<YOUR_APP_URL>/tonconnect-manifest.json',
-        buttonRootId: '<YOUR_CONNECT_BUTTON_ANCHOR_ID>'
-    });
-</script>
-```
-
 
 ## Installation with npm
 `npm i @tonconnect/ui`
@@ -43,13 +40,52 @@ You can find `TonConnectUI` in global variable `TON_CONNECT_UI`, e.g.
 
 ## Create TonConnectUI instance
 ```ts
-import TonConnectUI from '@tonconnect/ui'
+import { TonConnectUI } from '@tonconnect/ui'
 
 const tonConnectUI = new TonConnectUI({
     manifestUrl: 'https://<YOUR_APP_URL>/tonconnect-manifest.json',
     buttonRootId: '<YOUR_CONNECT_BUTTON_ANCHOR_ID>'
 });
 ```
+
+You can also specify required wallet features to filter wallets that will be shown in the connect wallet modal:
+
+```ts
+import { TonConnectUI } from '@tonconnect/ui'
+
+const tonConnectUI = new TonConnectUI({
+    manifestUrl: 'https://<YOUR_APP_URL>/tonconnect-manifest.json',
+    buttonRootId: '<YOUR_CONNECT_BUTTON_ANCHOR_ID>',
+    walletsRequiredFeatures: {
+        sendTransaction: {
+            minMessages: 2, // Wallet must support at least 2 messages
+            extraCurrencyRequired: true // Wallet must support extra currency
+        }
+    }
+});
+```
+
+This will filter out wallets that don't support sending multiple messages or don't support extra currencies.
+
+You can also specify preferred wallet features to prioritize wallets that support them in the connect wallet modal. These wallets will be shown first in the list, but others will still be available:
+
+```ts
+import { TonConnectUI } from '@tonconnect/ui'
+
+const tonConnectUI = new TonConnectUI({
+    manifestUrl: 'https://<YOUR_APP_URL>/tonconnect-manifest.json',
+    buttonRootId: '<YOUR_CONNECT_BUTTON_ANCHOR_ID>',
+    walletsPreferredFeatures: {
+        sendTransaction: {
+            minMessages: 2,
+            extraCurrencyRequired: true
+        }
+    }
+});
+```
+
+This will highlight wallets that support sending multiple messages and extra currencies, but won’t hide those that don’t. Use this to gently recommend more feature-rich wallets without excluding others.
+
 
 See all available options:
 
@@ -103,37 +139,128 @@ or
 const walletsList = await TonConnectUI.getWallets();
 ```
 
-## Call connect
+## Open connect modal
 "TonConnect UI connect button" (which is added at `buttonRootId`) automatically handles clicks and calls connect.
 But you are still able to open "connect modal" programmatically, e.g. after click on your custom connect button.
 
 ```ts
-const connectedWallet = await tonConnectUI.connectWallet();
+await tonConnectUI.openModal();
 ```
 
-If there is an error while wallet connecting, `TonConnectUIError` or `TonConnectError` will be thrown depends on situation.
+This method opens the modal window and returns a promise that resolves after the modal window is opened.
+
+If there is an error while modal opening, `TonConnectUIError` or `TonConnectError` will be thrown depends on situation.
+
+## Close connect modal
+
+```ts
+tonConnectUI.closeModal();
+```
+
+This method closes the modal window.
+
+## Get current modal state
+
+This getter returns the current state of the modal window. The state will be an object with `status` and `closeReason` properties. The `status` can be either 'opened' or 'closed'. If the modal is closed, you can check the `closeReason` to find out the reason of closing.
+
+```ts
+const currentModalState = tonConnectUI.modalState;
+```
+
+## Subscribe to the modal window state changes
+To subscribe to the changes of the modal window state, you can use the `onModalStateChange` method. It returns a function which has to be called to unsubscribe.
+
+```js
+const unsubscribeModal = tonConnectUI.onModalStateChange(
+    (state: WalletsModalState) => {
+        // update state/reactive variables to show updates in the ui
+        // state.status will be 'opened' or 'closed'
+        // if state.status is 'closed', you can check state.closeReason to find out the reason
+    }
+);
+```
+
+Call `unsubscribeModal()` later to save resources when you don't need to listen for updates anymore.
+
+## Wallets Modal Control
+
+The `tonConnectUI` provides methods for managing the modal window, such as `openModal()`, `closeModal()` and other, which are designed for ease of use and cover most use cases.
+
+```typescript
+const { modal } = tonConnectUI;
+
+// Open and close the modal
+await modal.open();
+modal.close();
+
+// Get the current modal state
+const currentState = modal.state;
+
+// Subscribe and unsubscribe to modal state changes
+const unsubscribe = modal.onStateChange(state => { /* ... */ });
+unsubscribe();
+```
+
+While `tonConnectUI` internally delegates these calls to the `modal`, it is recommended to use the `tonConnectUI` methods for a more straightforward and consistent experience. The `modal` is exposed in case you need direct access to the modal window's state and behavior, but this should generally be avoided unless necessary.
+
+## Open specific wallet
+
+> The methods described in this section are marked as experimental and are subject to change in future releases.
+
+To open a modal window for a specific wallet, use the `openSingleWalletModal()` method. This method accepts the wallet `app_name` as a parameter (please refer to the [wallets-list.json](https://github.com/ton-blockchain/wallets-list/blob/main/wallets-v2.json)) and opens the corresponding wallet modal. It returns a promise that resolves after the modal window is successfully opened.
+
+```typescript
+await tonConnectUI.openSingleWalletModal('wallet_identifier');
+````
+
+To close the currently open specific wallet modal, use the `closeSingleWalletModal()` method:
+
+```typescript
+tonConnectUI.closeSingleWalletModal();
+```
+
+To subscribe to the state changes of the specific wallet modal, use the `onSingleWalletModalStateChange((state) => {})` method. It accepts a callback function that will be called with the current modal state.
+
+```typescript
+const unsubscribe = tonConnectUI.onSingleWalletModalStateChange((state) => {
+    console.log('Modal state changed:', state);
+});
+
+// Call `unsubscribe` when you want to stop listening to the state changes
+unsubscribe();
+````
+
+To get the current state of the specific wallet modal window, use the `singleWalletModalState` property:
+
+```typescript
+const currentState = tonConnectUI.singleWalletModalState;
+console.log('Current modal state:', currentState);
+```
 
 ## Get current connected Wallet and WalletInfo
 You can use special getters to read current connection state. Note that this getter only represents current value, so they are not reactive. 
-To react and handle wallet changes use `onStatusChange` mathod.
+To react and handle wallet changes use `onStatusChange` method.
 
 ```ts
-    const currentWallet = tonConnectUI.wallet;
-    const currentWalletInfo = tonConnectUI.walletInfo;
-    const currentAccount = tonConnectUI.account;
-    const currentIsConnectedStatus = tonConnectUI.connected;
+const currentWallet = tonConnectUI.wallet;
+const currentWalletInfo = tonConnectUI.walletInfo;
+const currentAccount = tonConnectUI.account;
+const currentIsConnectedStatus = tonConnectUI.connected;
 ```
 
 ## Subscribe to the connection status changes
-```js
+
+To subscribe to the changes of the connection status, you can use the `onStatusChange` method. It returns a function which has to be called to unsubscribe.
+
+```ts
 const unsubscribe = tonConnectUI.onStatusChange(
     walletAndwalletInfo => {
         // update state/reactive variables to show updates in the ui
     } 
 );
-
-// call `unsubscribe()` later to save resources when you don't need to listen for updates anymore.
 ```
+
+Call `unsubscribe()` later to save resources when you don't need to listen for updates anymore.
 
 ## Disconnect wallet
 Call to disconnect the wallet.
@@ -145,23 +272,36 @@ await tonConnectUI.disconnect();
 ## Send transaction
 Wallet must be connected when you call `sendTransaction`. Otherwise, an error will be thrown.
 
-
 ```ts
 const transaction = {
-    validUntil: Date.now() + 1000000,
+    validUntil: Math.floor(Date.now() / 1000) + 60, // 60 sec
     messages: [
         {
-            address: "0:412410771DA82CBA306A55FA9E0D43C9D245E38133CB58F1457DFB8D5CD8892F",
+            address: "EQBBJBB3HagsujBqVfqeDUPJ0kXjgTPLWPFFffuNXNiJL0aA",
             amount: "20000000",
-            stateInit: "base64bocblahblahblah==" // just for instance. Replace with your transaction initState or remove
+         // stateInit: "base64bocblahblahblah==" // just for instance. Replace with your transaction initState or remove
         },
         {
-            address: "0:E69F10CC84877ABF539F83F879291E5CA169451BA7BCE91A37A5CED3AB8080D3",
+            address: "EQDmnxDMhId6v1Ofg_h5KR5coWlFG6e86Ro3pc7Tq4CA0-Jn",
             amount: "60000000",
-            payload: "base64bocblahblahblah==" // just for instance. Replace with your transaction payload or remove
+         // payload: "base64bocblahblahblah==" // just for instance. Replace with your transaction payload or remove
         }
     ]
-}
+};
+
+// you can also include extra currencies in your transaction
+const transactionWithExtraCurrency = {
+    validUntil: Math.floor(Date.now() / 1000) + 60,
+    messages: [
+        {
+            address: "EQBBJBB3HagsujBqVfqeDUPJ0kXjgTPLWPFFffuNXNiJL0aA",
+            // Specify the extra currency
+            extraCurrency: {
+                100: "10000000"
+            }
+        }
+    ]
+};
 
 try {
     const result = await tonConnectUI.sendTransaction(transaction);
@@ -282,6 +422,53 @@ const result = await tonConnectUI.sendTransaction(defaultTx, {
     returnStrategy: '<protocol>://<your_return_url>' // Note, that you shouldn't pass your app's URL if it is a webpage.
      // This option should be used for native apps to work around possible OS-specific issues with 'back' option.
 });
+```
+
+## Use inside TMA (Telegram Mini Apps)
+TonConnect UI will work in TMA in the same way as in a regular website!
+Basically, no changes are required from the dApp's developers. The only thing you have to set is a dynamic return strategy.
+
+Currently, it is impossible for TMA-wallets to redirect back to previous opened TMA-dApp like native wallet-apps do.
+It means, that you need to specify the return strategy as a link to your TMA that will be only applied if the dApp is opened in TMA mode.
+
+```ts
+tonConnectUI.uiOptions = {
+    twaReturnUrl: 'https://t.me/durov'
+};
+```
+
+In other words, TonConnect UI will automatically handle the return strategy based on the environment. **The following pseudo-code demonstrates the internal logic of TonConnect UI**:
+
+> Please note that you **don't need to add this code to your dApp**. It's just an example of how TonConnect UI processes the return strategy internally.
+
+```ts
+let finalReturnStrategy;
+
+// Determine if the provided link opens Telegram (using protocols tg:// or domain t.me).
+if (isLinkToTelegram('https://example.com')) {
+    // In the Telegram Mini Apps environment,
+    if (isInTWA()) {
+        // preference is given to 'twaReturnUrl',
+        finalReturnStrategy = actionsConfiguration.twaReturnUrl;
+
+        // but if it's not set, fallback to 'returnStrategy'.
+        if (!finalReturnStrategy) {
+            finalReturnStrategy = actionsConfiguration.returnStrategy;
+        }
+    }
+    // If not in a TMA environment,
+    else {
+        // the return strategy is set to 'none'.
+        finalReturnStrategy = 'none';
+    }
+}
+// When the link does not open Telegram,
+else {
+    // use the predefined 'returnStrategy'.
+    finalReturnStrategy = actionsConfiguration.returnStrategy;
+}
+
+// Now, 'finalReturnStrategy' contains the correct strategy based on the link's destination and the dApp's environment.
 ```
 
 ## Detect end of the connection restoring process
@@ -480,27 +667,31 @@ However, it is possible if needed. You can add css styles to the specified selec
 
 UI components:
 
-| Element                               | Selector                                      | Element description                                                                                                   |
-|---------------------------------------|-----------------------------------------------|-----------------------------------------------------------------------------------------------------------------------|
-| Connect wallet modal container        | `[data-tc-wallets-modal-container="true"]`    | Container of the modal window that opens when you click on the "connect wallet" button.                               |
-| Select wallet mobile modal content    | `[data-tc-wallets-modal-mobile="true"]`       | Content of the mobile modal window with wallet selection.                                                             |
-| Select wallet desktop modal content   | `[data-tc-wallets-modal-desktop="true"]`      | Content of the desktop window with wallet selection.                                                                  |
-| Desktop Universal QR content          | `[data-tc-universal-qr-desktop="true"]`       | Universal QR page content under the tab bar in the desktop wallets selection modal window.                            |
-| Desktop wallets list content          | `[data-tc-select-wallet-desktop="true"]`      | Wallets list page content under the tab bar in the desktop wallets selection modal window.                            |
-| Concrete wallet QR-code modal content | `[data-tc-wallet-qr-modal-desktop="true"]`    | Content of the modal window with the concrete wallet QR-code.                                                         |
-| Action modal container                | `[data-tc-actions-modal-container="true"]`    | Container of the modal window that opens when you call `sendTransaction` or other action.                             |
-| Confirm action modal content          | `[data-tc-confirm-modal="true"]`              | Content of the modal window asking for confirmation of the action in the wallet.                                      |
-| "Transaction sent" modal content      | `[data-tc-transaction-sent-modal="true"]`     | Content of the modal window informing that the transaction was successfully sent.                                     |
-| "Transaction canceled" modal content  | `[data-tc-transaction-canceled-modal="true"]` | Content of the modal window informing that the transaction was not sent.                                              |
-| "Connect Wallet" button               | `[data-tc-connect-button="true"]`             | "Connect Wallet" button element.                                                                                      |
-| Wallet menu loading button            | `[data-tc-connect-button-loading="true"]`     | Button element which appears instead of "Connect Wallet" and dropdown menu buttons while restoring connection process |
-| Wallet menu dropdown button           | `[data-tc-dropdown-button="true"]`            | Wallet menu button -- host of the dropdown wallet menu (copy address/disconnect).                                     |
-| Wallet menu dropdown container        | `[data-tc-dropdown-container="true"]`         | Container of the dropdown that opens when you click on the "wallet menu" button with ton address.                     |
-| Wallet menu dropdown content          | `[data-tc-dropdown="true"]`                   | Content of the dropdown that opens when you click on the "wallet menu" button with ton address.                       |
-| Notifications container               | `[data-tc-list-notifications="true"]`         | Container of the actions notifications.                                                                               |
-| Notification confirm                  | `[data-tc-notification-confirm="true"]`       | Confirmation notification element.                                                                                    |
-| Notification tx sent                  | `[data-tc-notification-tx-sent="true"]`       | Transaction sent notification element.                                                                                |
-| Notification cancelled tx             | `[data-tc-notification-tx-cancelled="true"]`  | Cancelled transaction notification element.                                                                           |
+| Element                              | Selector                                            | Element description                                                                                                   |
+|--------------------------------------|-----------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------|
+| Connect wallet modal container       | `[data-tc-wallets-modal-container="true"]`          | Container of the modal window that opens when you click on the "connect wallet" button.                               |
+| Mobile universal modal page content  | `[data-tc-wallets-modal-universal-mobile="true"]`   | Content of the general mobile modal page with horizontal list.                                                        |
+| Desktop universal modal page content | `[data-tc-wallets-modal-universal-desktop="true"]`  | Content of the universal desktop modal page with QR.                                                                  |
+| Mobile selected wallet's modal page  | `[data-tc-wallets-modal-connection-mobile="true"]`  | Content of the selected wallet's modal page on mobile.                                                                |
+| Desktop selected wallet's modal page | `[data-tc-wallets-modal-connection-desktop="true"]` | Content of the selected wallet's modal page on desktop.                                                               |
+| Wallets list modal page              | `[data-tc-wallets-modal-list="true"]`               | Content of the modal page with all available wallets list (desktop and mobile).                                       |
+| Info modal page                      | `[data-tc-wallets-modal-info="true"]`               | Content of the modal page with "What is a wallet information".                                                        |
+| Action modal container               | `[data-tc-actions-modal-container="true"]`          | Container of the modal window that opens when you call `sendTransaction` or other action.                             |
+| Confirm transaction modal content    | `[data-tc-confirm-modal="true"]`                    | Content of the modal window asking for confirmation of the action in the wallet.                                      |
+| "Transaction sent" modal content     | `[data-tc-transaction-sent-modal="true"]`           | Content of the modal window informing that the transaction was successfully sent.                                     |
+| "Transaction canceled" modal content | `[data-tc-transaction-canceled-modal="true"]`       | Content of the modal window informing that the transaction was not sent.                                              |
+| Confirm sign data modal              | `[data-tc-sign-data-confirm-modal="true"]`          | Content of the modal window asking for confirmation of the signing data in the wallet.                                |
+| "Sign data canceled" moda l          | `[data-tc-notification-sign-data-cancelled="true"]` | Content of the modal window informing that the signing data was not confirmed.                                        |
+| "Sign data error" modal              | `[data-tc-notification-sign-data-error="true"]`     | Content of the modal window informing that the signing data was not confirmed due to an error.                        |
+| "Connect Wallet" button              | `[data-tc-connect-button="true"]`                   | "Connect Wallet" button element.                                                                                      |
+| Wallet menu loading button           | `[data-tc-connect-button-loading="true"]`           | Button element which appears instead of "Connect Wallet" and dropdown menu buttons while restoring connection process |
+| Wallet menu dropdown button          | `[data-tc-dropdown-button="true"]`                  | Wallet menu button -- host of the dropdown wallet menu (copy address/disconnect).                                     |
+| Wallet menu dropdown container       | `[data-tc-dropdown-container="true"]`               | Container of the dropdown that opens when you click on the "wallet menu" button with ton address.                     |
+| Wallet menu dropdown content         | `[data-tc-dropdown="true"]`                         | Content of the dropdown that opens when you click on the "wallet menu" button with ton address.                       |
+| Notifications container              | `[data-tc-list-notifications="true"]`               | Container of the actions notifications.                                                                               |
+| Notification confirm                 | `[data-tc-notification-confirm="true"]`             | Confirmation notification element.                                                                                    |
+| Notification tx sent                 | `[data-tc-notification-tx-sent="true"]`             | Transaction sent notification element.                                                                                |
+| Notification cancelled tx            | `[data-tc-notification-tx-cancelled="true"]`        | Cancelled transaction notification element.                                                                           |
 
 ---
 
@@ -610,4 +801,124 @@ tonConnectUI.onStatusChange(wallet => {
             checkProofInYourBackend(wallet.connectItems.tonProof.proof);
         }
     });
+```
+
+
+# Tracking
+
+## Track events
+
+Tracker for TonConnect user actions, such as transaction signing, connection, etc.
+
+List of events:
+* `connection-started`: when a user starts connecting a wallet.
+* `connection-completed`: when a user successfully connected a wallet.
+* `connection-error`: when a user cancels a connection or there is an error during the connection process.
+* `connection-restoring-started`: when the dApp starts restoring a connection.
+* `connection-restoring-completed`: when the dApp successfully restores a connection.
+* `connection-restoring-error`: when the dApp fails to restore a connection.
+* `disconnection`: when a user starts disconnecting a wallet.
+* `transaction-sent-for-signature`: when a user sends a transaction for signature.
+* `transaction-signed`: when a user successfully signs a transaction.
+* `transaction-signing-failed`: when a user cancels transaction signing or there is an error during the signing process.
+* `sign-data-request-initiated`: when a user sends data for signing.
+* `sign-data-request-completed` when a user successfully signs data.
+* `sign-data-request-failed`: when a user cancels data signing or there is an error during the signing process.
+
+If you want to track user actions, you can subscribe to the window events with prefix `ton-connect-ui-`:
+
+```typescript
+window.addEventListener('ton-connect-ui-transaction-sent-for-signature', (event) => {
+    console.log('Transaction init', event.detail);
+});
+```
+
+## Use custom event dispatcher
+
+You can use your custom event dispatcher to track user actions. To do this, you need to pass the `eventDispatcher` to the TonConnect constructor:
+
+```typescript
+import { TonConnectUI, EventDispatcher, SdkActionEvent, UserActionEvent } from '@tonconnect/ui';
+
+class CustomEventDispatcher implements EventDispatcher<UserActionEvent | SdkActionEvent> {
+    public async dispatchEvent(
+      eventName: string,
+      eventDetails: UserActionEvent | SdkActionEvent
+    ): Promise<void> {
+        console.log(`Event: ${eventName}, details:`, eventDetails);
+    }
+}
+
+const eventDispatcher = new CustomEventDispatcher();
+
+const connector = new TonConnectUI({ eventDispatcher });
+```
+
+# Troubleshooting
+
+## Android Back Handler
+
+If you encounter any issues with the Android back handler, such as modals not closing properly when the back button is pressed, or conflicts with `history.pushState()` if you are manually handling browser history in your application, you can disable the back handler by setting `enableAndroidBackHandler` to `false`:
+
+```ts
+const tonConnectUI = new TonConnectUI({
+    // ...
+    enableAndroidBackHandler: false
+});
+```
+
+This will disable the custom back button behavior on Android, and you can then handle the back button press manually in your application.
+
+While we do not foresee any problems arising with the Android back handler, but if you find yourself needing to disable it due to an issue, please describe the problem in on [GitHub Issues](https://github.com/ton-connect/sdk/issues), so we can assist you further.
+
+## Animations not working
+
+If you are experiencing issues with animations not working in your environment, it might be due to a lack of support for the Web Animations API. To resolve this issue, you can use the `web-animations-js` polyfill.
+
+### Using npm
+
+To install the polyfill, run the following command:
+
+```shell
+npm install web-animations-js
+```
+
+Then, import the polyfill in your project:
+
+```typescript
+import 'web-animations-js';
+```
+
+### Using CDN
+
+Alternatively, you can include the polyfill via CDN by adding the following script tag to your HTML:
+
+```html
+<script src="https://www.unpkg.com/web-animations-js@latest/web-animations.min.js"></script>
+```
+
+Both methods will provide a fallback implementation of the Web Animations API and should resolve the animation issues you are facing.
+
+## Warning about 'encoding' module in Next.js
+
+If you are using Next.js and see a warning similar to the following:
+
+```
+ ⚠ ./node_modules/node-fetch/lib/index.js
+Module not found: Can't resolve 'encoding' in '.../node_modules/node-fetch/lib'
+
+Import trace for requested module:
+./node_modules/node-fetch/lib/index.js
+./node_modules/@tonconnect/isomorphic-fetch/index.mjs
+./node_modules/@tonconnect/sdk/lib/esm/index.mjs
+./node_modules/@tonconnect/ui/lib/esm/index.mjs
+```
+
+Please note that this is just a warning and should not affect the functionality of your application. If you wish to suppress the warning, you have two options:
+
+1. (Recommended) Wait for us to remove the dependency on `@tonconnect/isomorphic-fetch` in future releases. This dependency will be removed when we drop support for Node.js versions below 18.
+
+2. (Optional) Install the `encoding` package, to resolve the warning:
+```shell
+npm install encoding
 ```

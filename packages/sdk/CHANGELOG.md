@@ -1,5 +1,292 @@
 # Changelog @tonconnect/sdk 
 
+## [3.1.1-beta.0](https://github.com/ton-connect/sdk/compare/sdk-3.1.0...sdk-3.1.1-beta.0) (2025-03-27)
+
+
+### Features
+
+* **sdk:** add pending connection expiration ([1e3a1a9](https://github.com/ton-connect/sdk/commit/1e3a1a9fd4e981d3cee0403e9131728dba66b287))
+
+
+
+# [3.1.0](https://github.com/ton-connect/sdk/compare/sdk-3.0.8-beta.0...sdk-3.1.0) (2025-03-24)
+
+
+### Features
+
+* **sdk:** refactor wallet required features from array to object structure ([b21c062](https://github.com/ton-connect/sdk/commit/b21c062283655bc00affcdda42b04a6a7fbdcf2f))
+
+
+
+## [3.0.8-beta.0](https://github.com/ton-connect/sdk/compare/sdk-3.0.7...sdk-3.0.8-beta.0) (2025-03-18)
+
+
+### Bug Fixes
+
+* eslint source tags ([4aaca93](https://github.com/ton-connect/sdk/commit/4aaca93fe7b53e317a0ffa4b0d78b61026dd0948))
+
+
+### Features
+
+* **sdk:** add support for required features ([a33480f](https://github.com/ton-connect/sdk/commit/a33480f64fdfe9ef36eb4359cbc31ca5cc9c7d58))
+
+
+
+## [3.0.7](https://github.com/ton-connect/sdk/compare/sdk-3.0.7-alpha.1...sdk-3.0.7) (2025-03-06)
+
+
+
+## [3.0.7-alpha.1](https://github.com/ton-connect/sdk/compare/sdk-3.0.7-alpha.0...sdk-3.0.7-alpha.1) (2025-02-18)
+
+
+### Features
+
+* **sdk:** rename `extraCurrencies` to `extraCurrency`, and change `extraCurrency` format to use object map ([312696f](https://github.com/ton-connect/sdk/commit/312696f75b1921d84e43a192eecee63e98f30e96))
+
+
+
+## [3.0.7-alpha.0](https://github.com/ton-connect/sdk/compare/sdk-3.0.6...sdk-3.0.7-alpha.0) (2025-02-17)
+
+
+### Features
+
+* **sdk:** implement extra currencies support in send transaction ([01e658f](https://github.com/ton-connect/sdk/commit/01e658fc756266fde7d9fbc10a0021cba5444383))
+
+
+
+## [3.0.6](https://github.com/ton-connect/sdk/compare/sdk-3.0.6-beta.0...sdk-3.0.6) (2025-01-13)
+
+
+
+## [3.0.6-beta.0](https://github.com/ton-connect/sdk/compare/sdk-3.0.5...sdk-3.0.6-beta.0) (2024-12-10)
+
+
+### Features
+
+* **sdk:** update fallback wallets list configuration ([283e5bf](https://github.com/ton-connect/sdk/commit/283e5bf3cf7f073bcee1bc868c321cc6fc55b500))
+
+
+
+## [3.0.5](https://github.com/ton-connect/sdk/compare/sdk-3.0.4...sdk-3.0.5) (2024-08-09)
+
+
+### Features
+
+* **sdk:** update fallback wallets list ([ec3fdd3](https://github.com/ton-connect/sdk/commit/ec3fdd30f1583951461737c21c45153b866925d8))
+
+
+
+## [3.0.4](https://github.com/ton-connect/sdk/compare/sdk-3.0.4-beta.2...sdk-3.0.4) (2024-08-09)
+
+
+
+## [3.0.4-beta.2](https://github.com/ton-connect/sdk/compare/sdk-3.0.4-beta.1...sdk-3.0.4-beta.2) (2024-07-31)
+
+
+### Bug Fixes
+
+* **sdk:** remove redundant `connectionEstablished` parameter ([dce8a6b](https://github.com/ton-connect/sdk/commit/dce8a6b8100dcdefe993028cee75b7d39a844238))
+
+
+
+## [3.0.4-beta.1](https://github.com/ton-connect/sdk/compare/sdk-3.0.4-beta.0...sdk-3.0.4-beta.1) (2024-07-31)
+
+
+### Bug Fixes
+
+* **sdk:** fine-tune timeouts and enhance error handling for bridge reconnection ([6538103](https://github.com/ton-connect/sdk/commit/6538103f85b80b3091a6284c5cb5bf4cd155e68a))
+
+
+
+## [3.0.4-beta.0](https://github.com/ton-connect/sdk/compare/sdk-3.0.3...sdk-3.0.4-beta.0) (2024-07-31)
+
+
+### Bug Fixes
+
+* **sdk:** ensure reconnection to bridge during prolonged handshake interruptions ([6ff4761](https://github.com/ton-connect/sdk/commit/6ff4761431c91511e8430abee537ba353eecd950))
+
+
+
+## [3.0.3](https://github.com/ton-connect/sdk/compare/sdk-3.0.3-beta.1...sdk-3.0.3) (2024-05-28)
+
+
+
+## [3.0.3-beta.1](https://github.com/ton-connect/sdk/compare/sdk-3.0.3-beta.0...sdk-3.0.3-beta.1) (2024-05-27)
+
+
+### Features
+
+* **sdk:** enhanced event tracking and version management ([cfc013d](https://github.com/ton-connect/sdk/commit/cfc013d6a6683352c95dfd5b48e5b005162c8ea5))
+
+
+
+## [3.0.3-beta.0](https://github.com/ton-connect/sdk/compare/sdk-3.0.2...sdk-3.0.3-beta.0) (2024-05-20)
+
+
+### Features
+
+* **sdk:** integrate user action tracking ([e831385](https://github.com/ton-connect/sdk/commit/e831385e3ba8df40c86b18572713cabbb57e4ba4))
+
+
+
+## [3.0.2](https://github.com/ton-connect/sdk/compare/sdk-3.0.2-beta.0...sdk-3.0.2) (2024-04-22)
+
+
+
+## [3.0.2-beta.0](https://github.com/ton-connect/sdk/compare/sdk-3.0.1...sdk-3.0.2-beta.0) (2024-04-22)
+
+
+### Bug Fixes
+
+* **sdk:** ensures pausing the connection then attempts to unpause it ([346b13b](https://github.com/ton-connect/sdk/commit/346b13b303fbefe2cccab8851a8515469084872c))
+
+
+
+## [3.0.1](https://github.com/ton-connect/sdk/compare/sdk-3.0.1-beta.2...sdk-3.0.1) (2024-04-22)
+
+
+
+## [3.0.1-beta.2](https://github.com/ton-connect/sdk/compare/sdk-3.0.1-beta.1...sdk-3.0.1-beta.2) (2024-04-20)
+
+
+### Bug Fixes
+
+* **sdk:** ensure promise resolution when event source is recreated ([348ab1d](https://github.com/ton-connect/sdk/commit/348ab1d78e8f7253ded6463c5b52e748633f5948))
+
+
+
+## [3.0.1-beta.1](https://github.com/ton-connect/sdk/compare/sdk-3.0.1-beta.0...sdk-3.0.1-beta.1) (2024-04-18)
+
+
+### Bug Fixes
+
+* **sdk:** enhance gateway management for efficient closure ([70f24f9](https://github.com/ton-connect/sdk/commit/70f24f98e0ce447928edf8bf6a738a88d6c833ee))
+* **sdk:** remove sessions immediately if no bridge connection ([71f287c](https://github.com/ton-connect/sdk/commit/71f287c7328b4892ff80647638dfe0386cd43d2d))
+
+
+
+## [3.0.1-beta.0](https://github.com/ton-connect/sdk/compare/sdk-3.0.0...sdk-3.0.1-beta.0) (2024-04-12)
+
+
+### Bug Fixes
+
+* **sdk:** checks if the signal is already aborted ([fa18cb2](https://github.com/ton-connect/sdk/commit/fa18cb21e2ea542e5045f74af8b601086730628e))
+* **sdk:** ensure closure of previously opened gateway ([d4d1d50](https://github.com/ton-connect/sdk/commit/d4d1d50c8fe16fbe2624c2663cacea350974903c))
+* **sdk:** ensuring the disconnect is called only if the provider is defined ([9b2bd71](https://github.com/ton-connect/sdk/commit/9b2bd7124477d21053e0159ace82202e311dfc1a))
+* **sdk:** improve abort handling in connection and send methods ([dd87b04](https://github.com/ton-connect/sdk/commit/dd87b04e31614df01e6209a618b186c8b3d78d55))
+* **sdk:** improve error handling in bridge gateway ([ea2aa79](https://github.com/ton-connect/sdk/commit/ea2aa79ffa0f80a755a762fae2090729ac7c8606))
+
+
+### Features
+
+* **sdk:** update fallback wallets list ([de9520d](https://github.com/ton-connect/sdk/commit/de9520df606beb55e56d1f6af6bfec729c163530))
+
+
+
+# [3.0.0](https://github.com/ton-connect/sdk/compare/sdk-3.0.0-beta.6...sdk-3.0.0) (2023-12-26)
+
+
+
+# [3.0.0-beta.6](https://github.com/ton-connect/sdk/compare/sdk-3.0.0-beta.5...sdk-3.0.0-beta.6) (2023-12-19)
+
+
+### Bug Fixes
+
+* **sdk:** added tonkeeper deeplink to the fallback wallets list ([6aa3ec4](https://github.com/ton-connect/sdk/commit/6aa3ec46283d9e962f8be7e28c2ab6529828a1f2))
+* **sdk:** tonkeeper desktop platform added ([c9b1bcd](https://github.com/ton-connect/sdk/commit/c9b1bcddc71a29926368ce2079fb7c4b602d27f6))
+
+
+
+# [3.0.0-beta.5](https://github.com/ton-connect/sdk/compare/sdk-3.0.0-beta.4...sdk-3.0.0-beta.5) (2023-12-02)
+
+
+### Bug Fixes
+
+* **sdk:** added waiting for bridge response before calling onRequestSent ([cf85057](https://github.com/ton-connect/sdk/commit/cf850572feef8d9720aba062fd6b1d76037ceb93))
+
+
+
+# [3.0.0-beta.4](https://github.com/ton-connect/sdk/compare/sdk-3.0.0-beta.3...sdk-3.0.0-beta.4) (2023-12-01)
+
+
+### Bug Fixes
+
+* **sdk:** throw TonConnectError for non-2xx bridge responses ([97710a6](https://github.com/ton-connect/sdk/commit/97710a6d38e347c13799c9973f26ec10d48337f4))
+
+
+### Features
+
+* **sdk:** add onRequestSent callback to sendTransaction ([86f6bed](https://github.com/ton-connect/sdk/commit/86f6bed7dc03c7c156862cccdad1218cef5b33c9))
+* **sdk:** migrate Telegram links to direct links ([0d975d1](https://github.com/ton-connect/sdk/commit/0d975d1bfe0a5ffb6996f8c4dc31cf0cf90aa5f7))
+
+
+
+# [3.0.0-beta.3](https://github.com/ton-connect/sdk/compare/sdk-3.0.0-beta.2...sdk-3.0.0-beta.3) (2023-11-06)
+
+
+
+# [3.0.0-beta.2](https://github.com/ton-connect/sdk/compare/sdk-3.0.0-beta.1...sdk-3.0.0-beta.2) (2023-11-02)
+
+
+### Bug Fixes
+
+* **sdk:** mock localStorage in Safari private mode ([0d30b83](https://github.com/ton-connect/sdk/commit/0d30b8399a188de6ae9dc9dbd952639a761d3c06)), closes [#93](https://github.com/ton-connect/sdk/issues/93)
+
+
+### Features
+
+* **sdk:** change address format from bounceable to no-bounceable ([a000d6e](https://github.com/ton-connect/sdk/commit/a000d6ed6974babdbb335b47e0221c852890cb26))
+
+
+
+# [3.0.0-beta.1](https://github.com/ton-connect/sdk/compare/sdk-3.0.0-beta.0...sdk-3.0.0-beta.1) (2023-09-12)
+
+
+### Bug Fixes
+
+* **sdk:** bridge unavailability handled, max timeout added ([c0056d5](https://github.com/ton-connect/sdk/commit/c0056d5df16c15fc17bdd6e6bf119ff6c8cd60dc))
+
+
+
+# [3.0.0-beta.0](https://github.com/ton-connect/sdk/compare/sdk-2.2.0...sdk-3.0.0-beta.0) (2023-09-08)
+
+
+### Bug Fixes
+
+* **sdk:** storing pending connection ([260653c](https://github.com/ton-connect/sdk/commit/260653c4ccb9acef09d1c983a1207d5957b6de80))
+* **sdk:** telegram parameters encoding function exported ([95fc07b](https://github.com/ton-connect/sdk/commit/95fc07b399d808ab99b07804ecf7bbc9963730f8))
+
+
+### Features
+
+* **sdk:** new wallets-list source added ([07f25de](https://github.com/ton-connect/sdk/commit/07f25de8910d8efb9d972a2f64c4375aaf579c99))
+
+
+
+# [2.2.0](https://github.com/ton-connect/sdk/compare/sdk-2.1.4...sdk-2.2.0) (2023-08-18)
+
+
+### Bug Fixes
+
+* **sdk:** `app_name` added to WalletInfo ([a0fa12e](https://github.com/ton-connect/sdk/commit/a0fa12ebb976f385a3f870a3b551fb74fc591136))
+
+
+### Features
+
+* **sdk:** [@wallet](https://github.com/wallet) universal links supported ([05f7000](https://github.com/ton-connect/sdk/commit/05f70005523808694bcb985584f49b6eb039b1b3))
+
+
+
+## [2.1.4](https://github.com/ton-connect/sdk/compare/sdk-2.1.3...sdk-2.1.4) (2023-08-15)
+
+
+### Bug Fixes
+
+* 'platform' field added to WalletInfo ([40e0332](https://github.com/ton-connect/sdk/commit/40e0332a37886baef6aaa9942a8fad7a2e29d78b))
+* **sdk:** README updated ([900c115](https://github.com/ton-connect/sdk/commit/900c115bd71aa631026f60e55632e03d7b185784))
+
+
+
 ## [2.1.3](https://github.com/ton-connect/sdk/compare/sdk-2.1.2...sdk-2.1.3) (2023-04-03)
 
 
