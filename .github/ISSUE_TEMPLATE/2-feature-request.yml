@@ -1,0 +1,31 @@
+name: "Feature request"
+title: "[<SDK or UI or UI-REACT or PROTOCOL>]: <brief description>"
+description: "Suggest an idea or improvement for this project"
+labels: ["enhancement"]
+
+body:
+  - type: textarea
+    attributes:
+      label: "Is your feature request related to a problem?"
+      description: "Please provide a clear and concise description of what the problem is."
+      placeholder: "I'm frustrated when..."
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "Describe the solution you'd like"
+      description: "What would you like to see happen? Please provide a clear and concise description of your ideal solution."
+      placeholder: "Ideally, I would like..."
+
+  - type: textarea
+    attributes:
+      label: "Describe alternatives you've considered"
+      description: "Have you considered any alternative solutions or features? Please provide a clear and concise description."
+      placeholder: "An alternative solution might be..."
+
+  - type: textarea
+    attributes:
+      label: "Additional context"
+      description: "Add any other context, details, or screenshots about the feature request here."
+      placeholder: "Additional details..."

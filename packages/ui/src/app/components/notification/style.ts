@@ -20,6 +20,10 @@ export const NotificationStyled = styled.div`
 
 export const NotificationContentStyled = styled.div`
     width: 192px;
+
+    > h3 {
+        font-size: 15px;
+    }
 `;
 
 export const TextStyled = styled(Text)`

@@ -1,11 +1,12 @@
 import { WalletNotInjectedError } from 'src/errors/wallet/wallet-not-injected.error';
 import {
     AppRequest,
-    RpcMethod,
-    WalletResponse,
+    ConnectEventError,
     ConnectRequest,
+    Feature,
+    RpcMethod,
     WalletEvent,
-    ConnectEventError
+    WalletResponse
 } from '@tonconnect/protocol';
 import {
     InjectedWalletApi,
@@ -15,7 +16,7 @@ import { InternalProvider } from 'src/provider/provider';
 import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { IStorage } from 'src/storage/models/storage.interface';
 import { WithoutId, WithoutIdDistributive } from 'src/utils/types';
-import { getWindow } from 'src/utils/web-api';
+import { getWindow, tryGetWindowKeys } from 'src/utils/web-api';
 import { PROTOCOL_VERSION } from 'src/resources/protocol';
 import { WalletInfoCurrentlyInjected } from 'src/models';
 import { logDebug } from 'src/utils/log';
@@ -52,18 +53,22 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             return [];
         }
 
-        const wallets = Object.entries(this.window).filter(([_, value]) =>
+        const windowKeys = tryGetWindowKeys();
+        const wallets = windowKeys.filter(([_, value]) =>
             isJSBridgeWithMetadata(value)
         ) as unknown as [string, { tonconnect: InjectedWalletApi }][];
 
         return wallets.map(([jsBridgeKey, wallet]) => ({
             name: wallet.tonconnect.walletInfo.name,
+            appName: wallet.tonconnect.walletInfo.app_name,
             aboutUrl: wallet.tonconnect.walletInfo.about_url,
             imageUrl: wallet.tonconnect.walletInfo.image,
             tondns: wallet.tonconnect.walletInfo.tondns,
             jsBridgeKey,
             injected: true,
-            embedded: wallet.tonconnect.isWalletBrowser
+            embedded: wallet.tonconnect.isWalletBrowser,
+            platforms: wallet.tonconnect.walletInfo.platforms,
+            features: wallet.tonconnect.walletInfo.features
         }));
     }
 
@@ -166,17 +171,45 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             (this.listeners = this.listeners.filter(listener => listener !== eventsCallback));
     }
 
-    public async sendRequest<T extends RpcMethod>(
+    public sendRequest<T extends RpcMethod>(
+        request: WithoutId<AppRequest<T>>,
+        options?: {
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+            attempts?: number;
+        }
+    ): Promise<WithoutId<WalletResponse<T>>>;
+    /** @deprecated use sendRequest(transaction, options) instead */
+    public sendRequest<T extends RpcMethod>(
         request: WithoutId<AppRequest<T>>,
         onRequestSent?: () => void
+    ): Promise<WithoutId<WalletResponse<T>>>;
+    public async sendRequest<T extends RpcMethod>(
+        request: WithoutId<AppRequest<T>>,
+        optionsOrOnRequestSent?:
+            | (() => void)
+            | { onRequestSent?: () => void; signal?: AbortSignal; attempts?: number }
     ): Promise<WithoutId<WalletResponse<T>>> {
+        // TODO: remove deprecated method
+        const options: {
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+            attempts?: number;
+        } = {};
+        if (typeof optionsOrOnRequestSent === 'function') {
+            options.onRequestSent = optionsOrOnRequestSent;
+        } else {
+            options.onRequestSent = optionsOrOnRequestSent?.onRequestSent;
+            options.signal = optionsOrOnRequestSent?.signal;
+        }
+
         const id = (await this.connectionStorage.getNextRpcRequestId()).toString();
         await this.connectionStorage.increaseNextRpcRequestId();
 
         logDebug('Send injected-bridge request:', { ...request, id });
         const result = this.injectedWallet.send<T>({ ...request, id } as AppRequest<T>);
         result.then(response => logDebug('Wallet message received:', response));
-        onRequestSent?.();
+        options?.onRequestSent?.();
 
         return result;
     }
@@ -197,7 +230,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             }
             this.listeners.forEach(listener => listener(connectEvent));
         } catch (e) {
-            logDebug(e);
+            logDebug('Injected Provider connect error:', e);
             const connectEventError: WithoutId<ConnectEventError> = {
                 event: 'connect_error',
                 payload: {

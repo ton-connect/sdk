@@ -39,5 +39,10 @@ export interface SendTransactionRequest {
          * Contract specific data to add to the transaction.
          */
         payload?: string;
+
+        /**
+         * Extra currencies to send.
+         */
+        extraCurrency?: { [k: number]: string };
     }[];
 }

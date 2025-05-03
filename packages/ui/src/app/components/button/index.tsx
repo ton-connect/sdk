@@ -5,8 +5,11 @@ import { WithDataAttributes } from 'src/app/models/with-data-attributes';
 import { useDataAttributes } from 'src/app/hooks/use-data-attributes';
 
 export interface ButtonProps extends Styleable, WithDataAttributes {
-    appearance?: 'primary' | 'flat';
+    appearance?: 'primary' | 'flat' | 'secondary';
     scale?: 's' | 'm';
+    leftIcon?: JSXElement;
+    rightIcon?: JSXElement;
+    iconFloatRight?: boolean;
     children: JSXElement;
     onClick?: (e: MouseEvent & { currentTarget: HTMLButtonElement; target: Element }) => void;
     onMouseEnter?: (e: MouseEvent & { currentTarget: HTMLButtonElement; target: Element }) => void;
@@ -28,10 +31,14 @@ export const Button: Component<ButtonProps> = props => {
             ref={props.ref}
             disabled={props.disabled}
             scale={props.scale || 'm'}
+            leftIcon={!!props.leftIcon}
+            rightIcon={!!props.rightIcon}
             data-tc-button="true"
             {...dataAttrs}
         >
+            {props.leftIcon}
             {props.children}
+            {props.rightIcon}
         </ButtonStyled>
     );
 };

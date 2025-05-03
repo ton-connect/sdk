@@ -6,7 +6,7 @@ import {
     UIPreferences,
     WalletsListConfiguration
 } from '@tonconnect/ui';
-import type { ITonConnect } from '@tonconnect/ui';
+import type { ITonConnect, RequiredFeatures } from '@tonconnect/ui';
 import { isClientSide } from '../utils/web';
 
 export const TonConnectUIContext = createContext<TonConnectUI | null>(null);
@@ -61,9 +61,25 @@ export interface TonConnectUIProviderPropsBase {
     walletsListConfiguration?: WalletsListConfiguration;
 
     /**
+     * Required features for wallets to be displayed in the connect wallet modal.
+     */
+    walletsRequiredFeatures?: RequiredFeatures;
+
+    /**
+     * Preferred features for wallets to be displayed in the connect wallet modal.
+     */
+    walletsPreferredFeatures?: RequiredFeatures;
+
+    /**
      * Configuration for action-period (e.g. sendTransaction) UI elements: modals and notifications and wallet behaviour (return strategy).
      */
     actionsConfiguration?: ActionConfiguration;
+
+    /**
+     * Specifies whether the Android back button should be used to close modals and notifications on Android devices.
+     * @default true
+     */
+    enableAndroidBackHandler?: boolean;
 }
 
 let tonConnectUI: TonConnectUI | null = null;

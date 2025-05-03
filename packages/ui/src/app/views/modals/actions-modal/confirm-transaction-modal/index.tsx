@@ -11,12 +11,15 @@ interface ConfirmTransactionModalProps {
 export const ConfirmTransactionModal: Component<ConfirmTransactionModalProps> = props => {
     const tonConnectUI = useContext(TonConnectUiContext);
     const [t] = useI18n();
-    const name = tonConnectUI!.wallet?.name || t('common.yourWallet', {}, 'your wallet');
+    const name = (): string =>
+        tonConnectUI!.wallet && 'name' in tonConnectUI!.wallet
+            ? tonConnectUI!.wallet.name
+            : t('common.yourWallet', {}, 'Your wallet');
 
     return (
         <ActionModal
             headerTranslationKey="actionModal.confirmTransaction.header"
-            headerTranslationValues={{ name }}
+            headerTranslationValues={{ name: name() }}
             textTranslationKey="actionModal.confirmTransaction.text"
             icon={<LoaderIcon size="m" />}
             onClose={() => props.onClose()}

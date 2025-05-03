@@ -1,7 +1,12 @@
+> ℹ️ This is a Tonkeeper-maintained fork of the official [`@tonconnect/sdk`](https://github.com/ton-connect/sdk)  
+> It includes additional features and improvements while maintaining compatibility with the core TonConnect protocol.
+
+---
+
 # TON Connect SDK
 
 Use it to connect your app to TON wallets via TonConnect protocol. 
-You can find more details and the protocol specification in the [docs](https://github.com/ton-connect/docs).
+You can find more details and the protocol specification in the [docs](https://docs.ton.org/develop/dapps/ton-connect/overview).
 See the example of sdk usage [here](https://github.com/ton-connect/demo-dapp).
 
 [Latest API documentation](https://ton-connect.github.io/sdk/modules/_tonconnect_sdk.html)
@@ -55,11 +60,13 @@ App needs to have its manifest to pass meta information to the wallet. Manifest 
 Best practice is to place the manifest in the root of your app, e.g. `https://myapp.com/tonconnect-manifest.json`. It allows the wallet to handle your app better and improve the UX connected to your app.
 Make sure that manifest is available to GET by its URL.
 
-[See details](https://github.com/ton-connect/docs/blob/main/requests-responses.md#app-manifest)
+[See details](https://docs.ton.org/develop/dapps/ton-connect/protocol/requests-responses#app-manifest)
 
 If your manifest placed not in the root of your app, you can specify its path:
 ```ts
-    const connector = new TonConnect({ manifestUrl: 'https://myApp.com/assets/tonconnect-manifest.json' });
+const connector = new TonConnect({
+    manifestUrl: 'https://myApp.com/assets/tonconnect-manifest.json'
+});
 ```
 
 ## Subscribe to the connection status changes
@@ -215,17 +222,17 @@ if (!connector.connected) {
 }
 
 const transaction = {
-    validUntil: 1658253458,
+    validUntil: Math.floor(Date.now() / 1000) + 60, // 60 sec
     messages: [
         {
-            address: "0:412410771DA82CBA306A55FA9E0D43C9D245E38133CB58F1457DFB8D5CD8892F",
+            address: "EQBBJBB3HagsujBqVfqeDUPJ0kXjgTPLWPFFffuNXNiJL0aA",
             amount: "20000000",
-         /* stateInit: "base64_YOUR_STATE_INIT" */ // just for instance. Replace with your transaction stateInit or remove
+         // stateInit: "base64bocblahblahblah==" // just for instance. Replace with your transaction initState or remove
         },
         {
-            address: "0:E69F10CC84877ABF539F83F879291E5CA169451BA7BCE91A37A5CED3AB8080D3",
-            amount: "60000000", 
-         /* payload: "base64_YOUR_PAYLOAD" */ // just for instance. Replace with your transaction payload or remove
+            address: "EQDmnxDMhId6v1Ofg_h5KR5coWlFG6e86Ro3pc7Tq4CA0-Jn",
+            amount: "60000000",
+         // payload: "base64bocblahblahblah==" // just for instance. Replace with your transaction payload or remove
         }
     ]
 }
@@ -273,29 +280,32 @@ To authorize user in your backend with TonConnect you can use following schema:
 1. Fetch auth payload from your backend. It might be any random value. Backend must save information that this payload was sent to the client to check payload correctness later.
 2. Connect to the wallet when user clicks to the connection button:
 ```ts
-    connector.connect(walletConnectionSource, { tonProof: "<your-fetched-payload>" });
+connector.connect(
+  walletConnectionSource, 
+  { tonProof: "<your-fetched-payload>" }
+);
 ```
 Note that you can use `tonProof` only with `connector.connect()` method. This feature is not available in `connector.restoreConnection()`.
 
 3. Read a signed result after user approves connection:
 ```ts
 connector.onStatusChange(wallet => {
-			if (!wallet) {
-				return;
-			}
+    if (!wallet) {
+        return;
+    }
 
-			const tonProof = wallet.connectItems?.tonProof;
+    const tonProof = wallet.connectItems?.tonProof;
 
-			if (tonProof) {
-				if ('proof' in tonProof) {
-                    // send proof to your backend
-					// e.g. myBackendCheckProof(tonProof.proof, wallet.account);
-					return;
-				}
+    if (tonProof) {
+        if ('proof' in tonProof) {
+            // send proof to your backend
+            // e.g. myBackendCheckProof(tonProof.proof, wallet.account);
+            return;
+        }
 
-				console.error(tonProof.error);
-			}
-		});
+        console.error(tonProof.error);
+    }
+});
 ```
 4. Send proof and user's account data to your backend. Backend should check the proof correctness and check that payload inside the proof was generated before. After all checks backend should return an auth token to the client. Notice that `Account` contains the `walletStateInit` property which can be helpful for your backend to get user's public key if user's wallet contract doesn't support corresponding get method.
 5. Client saves the auth token in the `localStorage` and use it to access to auth-required endpoints. Client should delete the token when user disconnects the wallet.
@@ -350,4 +360,80 @@ myTelegramBot.userIsOnline(user => {
     const connector = myFunctionGetConnectorByUser(user);
     connector.unPauseConnection();
 })
+```
+
+# Tracking
+
+## Track events
+
+Tracker for TonConnect user actions, such as transaction signing, connection, etc.
+
+List of events:
+* `connection-started`: when a user starts connecting a wallet.
+* `connection-completed`: when a user successfully connected a wallet.
+* `connection-error`: when a user cancels a connection or there is an error during the connection process.
+* `connection-restoring-started`: when the dApp starts restoring a connection.
+* `connection-restoring-completed`: when the dApp successfully restores a connection.
+* `connection-restoring-error`: when the dApp fails to restore a connection.
+* `disconnection`: when a user starts disconnecting a wallet.
+* `transaction-sent-for-signature`: when a user sends a transaction for signature.
+* `transaction-signed`: when a user successfully signs a transaction.
+* `transaction-signing-failed`: when a user cancels transaction signing or there is an error during the signing process.
+* `sign-data-request-initiated`: when a user initiates a request to sign data.
+* `sign-data-request-completed`: when a user successfully signs data.
+* `sign-data-request-failed`: when a user cancels data signing or there is an error during the signing process.
+
+If you want to track user actions, you can subscribe to the window events with prefix `ton-connect-`:
+
+```typescript
+window.addEventListener('ton-connect-transaction-sent-for-signature', (event) => {
+    console.log('Transaction init', event.detail);
+});
+```
+
+## Use custom event dispatcher
+
+You can use your custom event dispatcher to track user actions. To do this, you need to pass the `eventDispatcher` to the TonConnect constructor:
+
+```typescript
+import {TonConnect, EventDispatcher, SdkActionEvent} from '@tonconnect/sdk';
+
+class CustomEventDispatcher implements EventDispatcher<SdkActionEvent> {
+    public async dispatchEvent(
+      eventName: string, 
+      eventDetails: SdkActionEvent
+    ): Promise<void> {
+        console.log(`Event: ${eventName}, details:`, eventDetails);
+    }
+}
+
+const eventDispatcher = new CustomEventDispatcher();
+
+const connector = new TonConnect({ eventDispatcher });
+```
+
+
+# Troubleshooting
+
+## Warning about 'encoding' module in Next.js
+
+If you are using Next.js and see a warning similar to the following:
+
+```
+ ⚠ ./node_modules/node-fetch/lib/index.js
+Module not found: Can't resolve 'encoding' in '.../node_modules/node-fetch/lib'
+
+Import trace for requested module:
+./node_modules/node-fetch/lib/index.js
+./node_modules/@tonconnect/isomorphic-fetch/index.mjs
+./node_modules/@tonconnect/sdk/lib/esm/index.mjs
+```
+
+Please note that this is just a warning and should not affect the functionality of your application. If you wish to suppress the warning, you have two options:
+
+1. (Recommended) Wait for us to remove the dependency on `@tonconnect/isomorphic-fetch` in future releases. This dependency will be removed when we drop support for Node.js versions below 18.
+
+2. (Optional) Install the `encoding` package, to resolve the warning:
+```shell
+npm install encoding
 ```

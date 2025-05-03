@@ -1,17 +1,49 @@
 import { THEME } from 'src/models/THEME';
-import { ReturnStrategy } from 'src/models/return-strategy';
 import { disableScrollClass, globalStylesTag } from 'src/app/styles/global-styles';
 import { toPx } from 'src/app/utils/css';
-import { TonConnectUIError } from 'src/errors';
 import { UserAgent } from 'src/models/user-agent';
 import UAParser from 'ua-parser-js';
+import { InMemoryStorage } from 'src/app/models/in-memory-storage';
+import { TonConnectUIError } from 'src/errors';
+import { logDebug } from 'src/app/utils/log';
 
-export function openLink(href: string, target = '_self'): ReturnType<typeof window.open> {
-    return window.open(href, target, 'noreferrer noopener');
+/**
+ * Opens a link in a new tab.
+ * @param href
+ * @param target
+ */
+export function openLink(href: string, target = '_self'): void {
+    logDebug('openLink', href, target);
+    window.open(href, target, 'noopener noreferrer');
 }
 
+/**
+ * Opens a link in a new tab.
+ * @param href
+ */
 export function openLinkBlank(href: string): void {
     openLink(href, '_blank');
+}
+
+/**
+ * Open a deeplink in the same tab and fallback to a direct link after 200 ms.
+ * In Safari, the fallback will not work.
+ * @param href
+ * @param fallback
+ */
+export function openDeeplinkWithFallback(href: string, fallback: () => void): void {
+    const doFallback = (): void => {
+        if (isBrowser('safari') || (isOS('android') && isBrowser('firefox'))) {
+            // Safari does not support fallback to direct link.
+            return;
+        }
+
+        fallback();
+    };
+    const fallbackTimeout = setTimeout(() => doFallback(), 200);
+    window.addEventListener('blur', () => clearTimeout(fallbackTimeout), { once: true });
+
+    openLink(href, '_self');
 }
 
 export function getSystemTheme(): THEME {
@@ -28,16 +60,6 @@ export function subscribeToThemeChange(callback: (theme: THEME) => void): () => 
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', handler);
     return () =>
         window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', handler);
-}
-
-export function addQueryParameter(url: string, key: string, value: string): string {
-    const parsed = new URL(url);
-    parsed.searchParams.append(key, value);
-    return parsed.toString();
-}
-
-export function addReturnStrategy(url: string, returnStrategy: ReturnStrategy): string {
-    return addQueryParameter(url, 'ret', returnStrategy);
 }
 
 export function disableScroll(): void {
@@ -62,23 +84,42 @@ export function fixMobileSafariActiveTransition(): void {
 }
 
 export function defineStylesRoot(): void {
-    customElements.define(globalStylesTag, class TcRootElement extends HTMLDivElement {}, {
-        extends: 'div'
-    });
+    customElements.define(globalStylesTag, class TcRootElement extends HTMLElement {});
 }
 
+/**
+ * Create a macrotask using `requestAnimationFrame()` to ensure that any pending microtasks,
+ * such as asynchronous operations from other developers and browser APIs, are executed before.
+ * @param callback
+ */
+export async function createMacrotask(callback: () => void): Promise<void> {
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    callback();
+}
+
+/**
+ * Create a macrotask using `requestAnimationFrame()` to ensure that any pending microtasks,
+ * such as asynchronous operations from other developers and browser APIs, are executed before.
+ * @param callback
+ */
+export async function createMacrotaskAsync<T>(callback: () => Promise<T>): Promise<T> {
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    return callback();
+}
+
+/**
+ * Preload images after page load to improve UX and Web Vitals metrics without affecting initial page load performance.
+ */
 export function preloadImages(images: string[]): void {
-    images.forEach(img => {
-        const node = new window.Image();
-        node.src = img;
-    });
-}
-
-export function checkLocalStorageExists(): never | void {
-    if (typeof localStorage === 'undefined') {
-        throw new TonConnectUIError(
-            'window.localStorage is undefined. localStorage is required for TonConnectUI'
-        );
+    if (document.readyState !== 'complete') {
+        window.addEventListener('load', () => createMacrotask(() => preloadImages(images)), {
+            once: true
+        });
+    } else {
+        images.forEach(img => {
+            const node = new window.Image();
+            node.src = img;
+        });
     }
 }
 
@@ -88,6 +129,44 @@ export function getWindow(): Window | undefined {
     }
 
     return undefined;
+}
+
+/**
+ * Returns `localStorage` if it is available. In Safari's private mode, it returns `InMemoryStorage`. In Node.js, it throws an error.
+ */
+export function tryGetLocalStorage(): Storage {
+    if (isLocalStorageAvailable()) {
+        return localStorage;
+    }
+
+    if (isNodeJs()) {
+        throw new TonConnectUIError(
+            '`localStorage` is unavailable, but it is required for TonConnect. For more details, see https://github.com/ton-connect/sdk/tree/main/packages/sdk#init-connector'
+        );
+    }
+
+    return InMemoryStorage.getInstance();
+}
+
+/**
+ * Checks if `localStorage` is available.
+ */
+function isLocalStorageAvailable(): boolean {
+    // We use a try/catch block because Safari's private mode throws an error when attempting to access localStorage.
+    try {
+        return typeof localStorage !== 'undefined';
+    } catch {
+        return false;
+    }
+}
+
+/**
+ * Checks if the environment is Node.js.
+ */
+function isNodeJs(): boolean {
+    return (
+        typeof process !== 'undefined' && process.versions != null && process.versions.node != null
+    );
 }
 
 export function isMobileUserAgent(): boolean {
@@ -102,15 +181,27 @@ export function isMobileUserAgent(): boolean {
             )
         )
             check = true;
-    })(navigator.userAgent || navigator.vendor || (window as unknown as { opera: string }).opera);
+    })(
+        navigator.userAgent ||
+            navigator.vendor ||
+            (
+                window as unknown as {
+                    opera: string;
+                }
+            ).opera
+    );
     return check;
 }
 
 export function getUserAgent(): UserAgent {
     const results = new UAParser().getResult();
     const osName = results.os.name?.toLowerCase();
+    const deviceModel = results.device.model?.toLowerCase();
     let os: UserAgent['os'];
     switch (true) {
+        case deviceModel === 'ipad':
+            os = 'ipad';
+            break;
         case osName === 'ios':
             os = 'ios';
             break;
@@ -140,10 +231,31 @@ export function getUserAgent(): UserAgent {
         case browserName?.includes('safari'):
             browser = 'safari';
             break;
+        case browserName?.includes('opera'):
+            browser = 'opera';
+            break;
     }
 
     return {
         os,
         browser
     };
+}
+
+export function isOS(...os: UserAgent['os'][]): boolean {
+    return os.includes(getUserAgent().os);
+}
+
+export function isBrowser(...browser: UserAgent['browser'][]): boolean {
+    return browser.includes(getUserAgent().browser);
+}
+
+/**
+ * Convert universal link to the given deeplink: replace protocol and path, but keep query params
+ * @param universalLink
+ * @param deeplink
+ */
+export function toDeeplink(universalLink: string, deeplink: string): string {
+    const url = new URL(universalLink);
+    return deeplink + url.search;
 }

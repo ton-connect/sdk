@@ -1,6 +1,6 @@
 {
-  "name": "@tonconnect/ui-react",
-  "version": "1.0.0-beta.7",
+  "name": "@tonkeeper/tonconnect-react",
+  "version": "2.2.0-beta.2",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build"
@@ -24,35 +24,35 @@
     "UI",
     "React"
   ],
-  "author": "tonconnect",
+  "author": "Tonkeeper",
   "license": "Apache-2.0",
   "files": [
     "lib"
   ],
-  "main": "./lib/index.umd.cjs",
-  "module": "./lib/index.js",
+  "main": "./lib/index.cjs",
+  "module": "./lib/index.mjs",
   "types": "./lib/index.d.ts",
   "exports": {
     ".": {
       "types": "./lib/index.d.ts",
-      "require": "./lib/index.umd.cjs",
-      "import": "./lib/index.js",
-      "default": "./lib/index.umd.cjs"
+      "require": "./lib/index.cjs",
+      "import": "./lib/index.mjs",
+      "default": "./lib/index.cjs"
     }
   },
   "devDependencies": {
-    "@types/react": "^18.0.26",
-    "@types/react-dom": "^18.0.9",
-    "@vitejs/plugin-react": "^3.0.0",
-    "typescript": "^4.9.3",
-    "vite": "^4.0.0",
-    "eslint-plugin-react": "^7.31.11",
-    "eslint-plugin-react-hooks": "^4.6.0",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "@vitejs/plugin-react": "^4.3.4",
     "csstype": "^3.1.1",
+    "eslint-plugin-react": "^7.37.4",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "typescript": "^4.9.3",
+    "vite": "^6.2.2",
     "vite-plugin-dts": "^1.7.1"
   },
   "dependencies": {
-    "@tonconnect/ui": "^1.0.0-beta.6"
+    "@tonconnect/ui": "npm:@tonkeeper/tonconnect-ui@2.2.0-beta.2"
   },
   "peerDependencies": {
     "react": ">=17.0.0",

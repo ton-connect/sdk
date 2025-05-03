@@ -1,4 +1,4 @@
-import { Property } from 'csstype';
+import type { Property } from 'csstype';
 import { styled } from 'solid-styled-components';
 
 export const TextStyled = styled.div<{

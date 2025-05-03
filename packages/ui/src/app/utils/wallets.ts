@@ -33,3 +33,26 @@ export function applyWalletsListConfiguration(
 
     return walletsList;
 }
+
+export function supportsDesktop(walletInfo: WalletInfo): boolean {
+    return walletInfo.platforms.some(w => ['macos', 'linux', 'windows'].includes(w));
+}
+
+export function supportsMobile(walletInfo: WalletInfo): boolean {
+    return walletInfo.platforms.some(w => ['ios', 'android'].includes(w));
+}
+
+export function supportsExtension(walletInfo: WalletInfo): boolean {
+    return walletInfo.platforms.some(w => ['chrome', 'firefox', 'safari'].includes(w));
+}
+
+export function eqWalletName(wallet1: { name: string; appName: string }, name?: string): boolean {
+    if (!name) {
+        return false;
+    }
+
+    return (
+        wallet1.name.toLowerCase() === name.toLowerCase() ||
+        wallet1.appName.toLowerCase() === name.toLowerCase()
+    );
+}

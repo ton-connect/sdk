@@ -1,5 +1,5 @@
 import { styled } from 'solid-styled-components';
-import { Button, H1, Text } from 'src/app/components';
+import { Button, H1, LoaderIcon, Text } from 'src/app/components';
 
 export const ActionModalStyled = styled.div`
     display: flex;
@@ -20,6 +20,15 @@ export const TextStyled = styled(Text)`
     max-width: 250px;
 
     color: ${props => props.theme!.colors.text.secondary};
+`;
+
+export const LoaderButtonStyled = styled(Button)`
+    min-width: 112px;
+    margin-top: 32px;
+`;
+export const LoaderIconStyled = styled(LoaderIcon)`
+    height: 16px;
+    width: 16px;
 `;
 
 export const ButtonStyled = styled(Button)`

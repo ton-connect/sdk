@@ -3,27 +3,35 @@ import { Component, createEffect, JSXElement, Show } from 'solid-js';
 import { Transition } from 'solid-transition-group';
 import clickOutsideDirective from 'src/app/directives/click-outside';
 import keyPressedDirective from 'src/app/directives/key-pressed';
+import androidBackHandlerDirective from 'src/app/directives/android-back-handler';
 import { Styleable } from 'src/app/models/styleable';
 import { isDevice, media } from 'src/app/styles/media';
-import { CloseButtonStyled, ModalBackgroundStyled, ModalWrapperClass } from './style';
+import {
+    borders,
+    CloseButtonStyled,
+    ModalBackgroundStyled,
+    ModalBodyStyled,
+    ModalFooterStyled,
+    ModalWrapperClass,
+    QuestionButtonStyled
+} from './style';
 import { css, useTheme } from 'solid-styled-components';
-import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
 import { disableScroll, enableScroll } from 'src/app/utils/web-api';
 import { WithDataAttributes } from 'src/app/models/with-data-attributes';
 import { useDataAttributes } from 'src/app/hooks/use-data-attributes';
+import { TonConnectBrand } from 'src/app/components';
+import { animate } from 'src/app/utils/animate';
+
 const clickOutside = clickOutsideDirective;
 const keyPressed = keyPressedDirective;
-
-const borders: BorderRadiusConfig = {
-    m: '24px',
-    s: '16px',
-    none: '0'
-};
+const androidBackHandler = androidBackHandlerDirective;
 
 export interface ModalProps extends Styleable, WithDataAttributes {
     children: JSXElement;
     opened: boolean;
+    enableAndroidBackHandler: boolean;
     onClose: () => void;
+    onClickQuestion?: () => void;
 }
 
 export const Modal: Component<ModalProps> = props => {
@@ -43,12 +51,13 @@ export const Modal: Component<ModalProps> = props => {
             onBeforeEnter={el => {
                 const duration = isDevice('mobile') ? 200 : 100;
 
-                el.animate([{ opacity: 0 }, { opacity: 1 }], {
+                animate(el, [{ opacity: 0 }, { opacity: 1 }], {
                     duration
                 });
 
                 if (isDevice('mobile')) {
-                    el.firstElementChild!.animate(
+                    animate(
+                        el.firstElementChild!,
                         [{ transform: 'translateY(390px)' }, { transform: 'translateY(0)' }],
                         {
                             duration
@@ -59,12 +68,13 @@ export const Modal: Component<ModalProps> = props => {
             onExit={(el, done) => {
                 const duration = isDevice('mobile') ? 200 : 100;
 
-                const backgroundAnimation = el.animate([{ opacity: 1 }, { opacity: 0 }], {
+                const backgroundAnimation = animate(el, [{ opacity: 1 }, { opacity: 0 }], {
                     duration
                 });
 
                 if (isDevice('mobile')) {
-                    const contentAnimation = el.firstElementChild!.animate(
+                    const contentAnimation = animate(
+                        el.firstElementChild!,
                         [{ transform: 'translateY(0)' }, { transform: 'translateY(390px)' }],
                         {
                             duration
@@ -84,22 +94,36 @@ export const Modal: Component<ModalProps> = props => {
                     <div
                         class={cn(
                             ModalWrapperClass,
-                            props.class,
                             css`
-                                background-color: ${theme.colors.background.primary};
-                                border-radius: ${borders[theme.borderRadius]};
+                                border-radius: ${borders[theme!.borderRadius]};
+                                background-color: ${theme.colors.background.tint};
 
                                 ${media('mobile')} {
-                                    border-radius: ${borders[theme.borderRadius]}
-                                        ${borders[theme.borderRadius]} 0 0;
+                                    border-radius: ${borders[theme!.borderRadius]}
+                                        ${borders[theme!.borderRadius]} 0 0;
                                 }
                             `
                         )}
                         use:clickOutside={() => props.onClose()}
                         use:keyPressed={() => props.onClose()}
+                        use:androidBackHandler={{
+                            isEnabled: props.enableAndroidBackHandler,
+                            onClose: () => props.onClose()
+                        }}
                     >
-                        <CloseButtonStyled icon="close" onClick={() => props.onClose()} />
-                        {props.children}
+                        <ModalBodyStyled class={props.class}>
+                            <CloseButtonStyled icon="close" onClick={() => props.onClose()} />
+                            {props.children}
+                        </ModalBodyStyled>
+                        <Show when={props.onClickQuestion}>
+                            <ModalFooterStyled>
+                                <TonConnectBrand />
+                                <QuestionButtonStyled
+                                    onClick={props.onClickQuestion!}
+                                    icon="question"
+                                />
+                            </ModalFooterStyled>
+                        </Show>
                     </div>
                 </ModalBackgroundStyled>
             </Show>

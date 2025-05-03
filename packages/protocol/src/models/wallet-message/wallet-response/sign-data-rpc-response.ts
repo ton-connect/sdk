@@ -3,15 +3,34 @@ import { WalletResponseTemplateError } from './wallet-response-template';
 export type SignDataRpcResponse = SignDataRpcResponseSuccess | SignDataRpcResponseError;
 
 export interface SignDataRpcResponseSuccess {
-    id: string;
     result: {
         signature: string;
-        timestamp: string;
+        address: string;
+        timestamp: number;
+        domain: string;
+        payload: SignDataPayload;
     };
+    id: string;
 }
 
+export type SignDataPayload = SignDataPayloadText | SignDataPayloadBinary | SignDataPayloadCell;
+
+export type SignDataPayloadText = {
+    type: 'text';
+    text: string;
+};
+export type SignDataPayloadBinary = {
+    type: 'binary';
+    bytes: string;
+};
+export type SignDataPayloadCell = {
+    type: 'cell';
+    schema: string;
+    cell: string;
+};
+
 export interface SignDataRpcResponseError extends WalletResponseTemplateError {
-    error: { code: SIGN_DATA_ERROR_CODES; message: string; data?: unknown };
+    error: { code: SIGN_DATA_ERROR_CODES; message: string };
     id: string;
 }
 

@@ -33,33 +33,33 @@ const esm_template$1_target = `function template$1(html, check, isSVG) {
   return node;
 }`;
 
-const umd_template$1 = `  function template$1(html, check, isSVG) {
-    const t2 = document.createElement("template");
-    t2.innerHTML = html;
-    let node = t2.content.firstChild;
-    if (isSVG)
-      node = node.firstChild;
-    return node;
-  }`;
+const cjs_template$1 = `function template$1(html, check, isSVG) {
+  const t2 = document.createElement("template");
+  t2.innerHTML = html;
+  let node = t2.content.firstChild;
+  if (isSVG)
+    node = node.firstChild;
+  return node;
+}`;
 
-const umd_template$1_target = `  function template$1(html, check, isSVG) {
-    if (typeof window === 'undefined') {
-      return null;
-    }
-    
-    const t2 = document.createElement("template");
-    t2.innerHTML = html;
-    let node = t2.content.firstChild;
-    if (isSVG)
-      node = node.firstChild;
-    return node;
-  }`;
+const cjs_template$1_target = `function template$1(html, check, isSVG) {
+  if (typeof window === 'undefined') {
+    return null;
+  }
 
-const esm_path = path.resolve(process.cwd(), './lib/index.js');
-const umd_path = path.resolve(process.cwd(), './lib/index.umd.js');
+  const t2 = document.createElement("template");
+  t2.innerHTML = html;
+  let node = t2.content.firstChild;
+  if (isSVG)
+    node = node.firstChild;
+  return node;
+}`;
+
+const esm_path = path.resolve(process.cwd(), './lib/index.mjs');
+const cjs_path = path.resolve(process.cwd(), './lib/index.cjs');
 
 patchBuild(esm_path, esm_template$1, esm_template$1_target);
-patchBuild(umd_path, umd_template$1, umd_template$1_target);
+patchBuild(cjs_path, cjs_template$1, cjs_template$1_target);
 
 console.log('\nPatching build for ssr completed');
 

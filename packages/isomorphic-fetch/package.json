@@ -1,6 +1,6 @@
 {
   "name": "@tonconnect/isomorphic-fetch",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ton-connect/sdk.git"
@@ -17,16 +17,20 @@
   ],
   "author": "tonconnect",
   "license": "Apache-2.0",
-  "scripts": { },
-  "files": ["browser.js", "index.js", "index.mjs", "index.d.ts"],
+  "scripts": {},
+  "files": [
+    "browser.js",
+    "index.js",
+    "index.mjs",
+    "index.d.ts"
+  ],
   "main": "./index.js",
   "module": "./index.mjs",
   "browser": "./browser.js",
   "types": "./index.d.ts",
-  "typings": "./index.d.ts",
   "exports": {
     ".": {
-      "types": "./lib/types/index.d.ts",
+      "types": "./index.d.ts",
       "browser": "./browser.js",
       "require": "./index.js",
       "import": "./index.mjs",
@@ -36,7 +40,7 @@
   "dependencies": {
     "node-fetch": "^2.6.9"
   },
-  "devDependencies": { },
+  "devDependencies": {},
   "nx": {
     "tags": [
       "scope:isomorphic-fetch"

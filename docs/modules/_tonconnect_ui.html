@@ -16,7 +16,7 @@
 <li><a href="_tonconnect_ui.html">@tonconnect/ui</a></li></ul>
 <h1>Module @tonconnect/ui</h1></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/cf57e8f/packages/ui/src/library.ts#L1">packages/ui/src/library.ts:1</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/5f9799b/packages/ui/src/library.ts#L1">packages/ui/src/library.ts:1</a></li></ul></aside>
 <section class="tsd-panel-group">
 <section class="tsd-panel tsd-typography">
 <a href="#ton-connect-ui" id="ton-connect-ui" style="color: inherit; text-decoration: none;">
@@ -25,7 +25,7 @@
 <p>TonConnect UI is a UI kit for TonConnect SDK. Use it to connect your app to TON wallets via TonConnect protocol.</p>
 <p>If you use React for your dapp, take a look at <a href="https://github.com/ton-connect/sdk/tree/main/packages/ui-react">TonConnect UI React kit</a>.</p>
 <p>If you want to use TonConnect on the server side, you should use the <a href="https://github.com/ton-connect/sdk/tree/main/packages/sdk">TonConnect SDK</a>.</p>
-<p>You can find more details and the protocol specification in the <a href="https://github.com/ton-connect/docs">docs</a>.</p>
+<p>You can find more details and the protocol specification in the <a href="https://docs.ton.org/develop/dapps/ton-connect/overview">docs</a>.</p>
 <hr>
 <p><a href="https://ton-connect.github.io/sdk/modules/_tonconnect_ui.html">Latest API documentation</a></p>
 
@@ -58,8 +58,12 @@
 <a href="#create-tonconnectui-instance" id="create-tonconnectui-instance" style="color: inherit; text-decoration: none;">
   <h2>Create TonConnectUI instance</h2>
 </a>
-<pre><code class="language-ts"><span class="hl-0">import</span><span class="hl-1"> </span><span class="hl-2">TonConnectUI</span><span class="hl-1"> </span><span class="hl-0">from</span><span class="hl-1"> </span><span class="hl-3">&#39;@tonconnect/ui&#39;</span><br/><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">tonConnectUI</span><span class="hl-1"> = </span><span class="hl-4">new</span><span class="hl-1"> </span><span class="hl-5">TonConnectUI</span><span class="hl-1">({</span><br/><span class="hl-1">    </span><span class="hl-2">manifestUrl:</span><span class="hl-1"> </span><span class="hl-3">&#39;https://&lt;YOUR_APP_URL&gt;/tonconnect-manifest.json&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-2">buttonRootId:</span><span class="hl-1"> </span><span class="hl-3">&#39;&lt;YOUR_CONNECT_BUTTON_ANCHOR_ID&gt;&#39;</span><br/><span class="hl-1">});</span>
+<pre><code class="language-ts"><span class="hl-0">import</span><span class="hl-1"> { </span><span class="hl-2">TonConnectUI</span><span class="hl-1"> } </span><span class="hl-0">from</span><span class="hl-1"> </span><span class="hl-3">&#39;@tonconnect/ui&#39;</span><br/><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">tonConnectUI</span><span class="hl-1"> = </span><span class="hl-4">new</span><span class="hl-1"> </span><span class="hl-5">TonConnectUI</span><span class="hl-1">({</span><br/><span class="hl-1">    </span><span class="hl-2">manifestUrl:</span><span class="hl-1"> </span><span class="hl-3">&#39;https://&lt;YOUR_APP_URL&gt;/tonconnect-manifest.json&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-2">buttonRootId:</span><span class="hl-1"> </span><span class="hl-3">&#39;&lt;YOUR_CONNECT_BUTTON_ANCHOR_ID&gt;&#39;</span><br/><span class="hl-1">});</span>
 </code></pre>
+<p>You can also specify required wallet features to filter wallets that will be shown in the connect wallet modal:</p>
+<pre><code class="language-ts"><span class="hl-0">import</span><span class="hl-1"> { </span><span class="hl-2">TonConnectUI</span><span class="hl-1"> } </span><span class="hl-0">from</span><span class="hl-1"> </span><span class="hl-3">&#39;@tonconnect/ui&#39;</span><br/><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">tonConnectUI</span><span class="hl-1"> = </span><span class="hl-4">new</span><span class="hl-1"> </span><span class="hl-5">TonConnectUI</span><span class="hl-1">({</span><br/><span class="hl-1">    </span><span class="hl-2">manifestUrl:</span><span class="hl-1"> </span><span class="hl-3">&#39;https://&lt;YOUR_APP_URL&gt;/tonconnect-manifest.json&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-2">buttonRootId:</span><span class="hl-1"> </span><span class="hl-3">&#39;&lt;YOUR_CONNECT_BUTTON_ANCHOR_ID&gt;&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-2">walletsRequiredFeatures:</span><span class="hl-1"> {</span><br/><span class="hl-1">        </span><span class="hl-2">sendTransaction:</span><span class="hl-1"> {</span><br/><span class="hl-1">            </span><span class="hl-2">minMessages:</span><span class="hl-1"> </span><span class="hl-15">2</span><span class="hl-1">, </span><span class="hl-7">// Wallet must support at least 2 messages</span><br/><span class="hl-1">            </span><span class="hl-2">extraCurrencyRequired:</span><span class="hl-1"> </span><span class="hl-4">true</span><span class="hl-1"> </span><span class="hl-7">// Wallet must support extra currency</span><br/><span class="hl-1">        }</span><br/><span class="hl-1">    }</span><br/><span class="hl-1">});</span>
+</code></pre>
+<p>This will filter out wallets that don&#39;t support sending multiple messages or don&#39;t support extra currencies.</p>
 <p>See all available options:</p>
 <p><a href="https://ton-connect.github.io/sdk/interfaces/_tonconnect_ui.TonConnectUiOptionsWithManifest.html">TonConnectUiOptionsWithManifest</a></p>
 <p><a href="https://ton-connect.github.io/sdk/interfaces/_tonconnect_ui.TonConnectUiOptionsWithConnector.html">TonConnectUiOptionsWithConnector</a></p>
@@ -85,28 +89,80 @@ Passed options will be merged with current UI options. Note, that you have to pa
 <pre><code class="language-ts"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">walletsList</span><span class="hl-1"> = </span><span class="hl-0">await</span><span class="hl-1"> </span><span class="hl-2">TonConnectUI</span><span class="hl-1">.</span><span class="hl-5">getWallets</span><span class="hl-1">();</span>
 </code></pre>
 
-<a href="#call-connect" id="call-connect" style="color: inherit; text-decoration: none;">
-  <h2>Call connect</h2>
+<a href="#open-connect-modal" id="open-connect-modal" style="color: inherit; text-decoration: none;">
+  <h2>Open connect modal</h2>
 </a>
 <p>&quot;TonConnect UI connect button&quot; (which is added at <code>buttonRootId</code>) automatically handles clicks and calls connect.
 But you are still able to open &quot;connect modal&quot; programmatically, e.g. after click on your custom connect button.</p>
-<pre><code class="language-ts"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">connectedWallet</span><span class="hl-1"> = </span><span class="hl-0">await</span><span class="hl-1"> </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-5">connectWallet</span><span class="hl-1">();</span>
+<pre><code class="language-ts"><span class="hl-0">await</span><span class="hl-1"> </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-5">openModal</span><span class="hl-1">();</span>
 </code></pre>
-<p>If there is an error while wallet connecting, <code>TonConnectUIError</code> or <code>TonConnectError</code> will be thrown depends on situation.</p>
+<p>This method opens the modal window and returns a promise that resolves after the modal window is opened.</p>
+<p>If there is an error while modal opening, <code>TonConnectUIError</code> or <code>TonConnectError</code> will be thrown depends on situation.</p>
+
+<a href="#close-connect-modal" id="close-connect-modal" style="color: inherit; text-decoration: none;">
+  <h2>Close connect modal</h2>
+</a>
+<pre><code class="language-ts"><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-5">closeModal</span><span class="hl-1">();</span>
+</code></pre>
+<p>This method closes the modal window.</p>
+
+<a href="#get-current-modal-state" id="get-current-modal-state" style="color: inherit; text-decoration: none;">
+  <h2>Get current modal state</h2>
+</a>
+<p>This getter returns the current state of the modal window. The state will be an object with <code>status</code> and <code>closeReason</code> properties. The <code>status</code> can be either &#39;opened&#39; or &#39;closed&#39;. If the modal is closed, you can check the <code>closeReason</code> to find out the reason of closing.</p>
+<pre><code class="language-ts"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">currentModalState</span><span class="hl-1"> = </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-2">modalState</span><span class="hl-1">;</span>
+</code></pre>
+
+<a href="#subscribe-to-the-modal-window-state-changes" id="subscribe-to-the-modal-window-state-changes" style="color: inherit; text-decoration: none;">
+  <h2>Subscribe to the modal window state changes</h2>
+</a>
+<p>To subscribe to the changes of the modal window state, you can use the <code>onModalStateChange</code> method. It returns a function which has to be called to unsubscribe.</p>
+<pre><code class="language-js"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">unsubscribeModal</span><span class="hl-1"> = </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-5">onModalStateChange</span><span class="hl-1">(</span><br/><span class="hl-1">    (</span><span class="hl-2">state</span><span class="hl-1">: </span><span class="hl-6">WalletsModalState</span><span class="hl-1">) </span><span class="hl-4">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">        </span><span class="hl-7">// update state/reactive variables to show updates in the ui</span><br/><span class="hl-1">        </span><span class="hl-7">// state.status will be &#39;opened&#39; or &#39;closed&#39;</span><br/><span class="hl-1">        </span><span class="hl-7">// if state.status is &#39;closed&#39;, you can check state.closeReason to find out the reason</span><br/><span class="hl-1">    }</span><br/><span class="hl-1">);</span>
+</code></pre>
+<p>Call <code>unsubscribeModal()</code> later to save resources when you don&#39;t need to listen for updates anymore.</p>
+
+<a href="#wallets-modal-control" id="wallets-modal-control" style="color: inherit; text-decoration: none;">
+  <h2>Wallets Modal Control</h2>
+</a>
+<p>The <code>tonConnectUI</code> provides methods for managing the modal window, such as <code>openModal()</code>, <code>closeModal()</code> and other, which are designed for ease of use and cover most use cases.</p>
+<pre><code class="language-typescript"><span class="hl-4">const</span><span class="hl-1"> { </span><span class="hl-8">modal</span><span class="hl-1"> } = </span><span class="hl-2">tonConnectUI</span><span class="hl-1">;</span><br/><br/><span class="hl-7">// Open and close the modal</span><br/><span class="hl-0">await</span><span class="hl-1"> </span><span class="hl-2">modal</span><span class="hl-1">.</span><span class="hl-5">open</span><span class="hl-1">();</span><br/><span class="hl-2">modal</span><span class="hl-1">.</span><span class="hl-5">close</span><span class="hl-1">();</span><br/><br/><span class="hl-7">// Get the current modal state</span><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">currentState</span><span class="hl-1"> = </span><span class="hl-2">modal</span><span class="hl-1">.</span><span class="hl-2">state</span><span class="hl-1">;</span><br/><br/><span class="hl-7">// Subscribe and unsubscribe to modal state changes</span><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">unsubscribe</span><span class="hl-1"> = </span><span class="hl-2">modal</span><span class="hl-1">.</span><span class="hl-5">onStateChange</span><span class="hl-1">(</span><span class="hl-2">state</span><span class="hl-1"> </span><span class="hl-4">=&gt;</span><span class="hl-1"> { </span><span class="hl-7">/* ... */</span><span class="hl-1"> });</span><br/><span class="hl-5">unsubscribe</span><span class="hl-1">();</span>
+</code></pre>
+<p>While <code>tonConnectUI</code> internally delegates these calls to the <code>modal</code>, it is recommended to use the <code>tonConnectUI</code> methods for a more straightforward and consistent experience. The <code>modal</code> is exposed in case you need direct access to the modal window&#39;s state and behavior, but this should generally be avoided unless necessary.</p>
+
+<a href="#open-specific-wallet" id="open-specific-wallet" style="color: inherit; text-decoration: none;">
+  <h2>Open specific wallet</h2>
+</a>
+<blockquote>
+<p>The methods described in this section are marked as experimental and are subject to change in future releases.</p>
+</blockquote>
+<p>To open a modal window for a specific wallet, use the <code>openSingleWalletModal()</code> method. This method accepts the wallet <code>app_name</code> as a parameter (please refer to the <a href="https://github.com/ton-blockchain/wallets-list/blob/main/wallets-v2.json">wallets-list.json</a>) and opens the corresponding wallet modal. It returns a promise that resolves after the modal window is successfully opened.</p>
+<pre><code class="language-typescript"><span class="hl-0">await</span><span class="hl-1"> </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-5">openSingleWalletModal</span><span class="hl-1">(</span><span class="hl-3">&#39;wallet_identifier&#39;</span><span class="hl-1">);</span>
+</code></pre>
+<p>To close the currently open specific wallet modal, use the <code>closeSingleWalletModal()</code> method:</p>
+<pre><code class="language-typescript"><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-5">closeSingleWalletModal</span><span class="hl-1">();</span>
+</code></pre>
+<p>To subscribe to the state changes of the specific wallet modal, use the <code>onSingleWalletModalStateChange((state) =&gt; {})</code> method. It accepts a callback function that will be called with the current modal state.</p>
+<pre><code class="language-typescript"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">unsubscribe</span><span class="hl-1"> = </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-5">onSingleWalletModalStateChange</span><span class="hl-1">((</span><span class="hl-2">state</span><span class="hl-1">) </span><span class="hl-4">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">    </span><span class="hl-2">console</span><span class="hl-1">.</span><span class="hl-5">log</span><span class="hl-1">(</span><span class="hl-3">&#39;Modal state changed:&#39;</span><span class="hl-1">, </span><span class="hl-2">state</span><span class="hl-1">);</span><br/><span class="hl-1">});</span><br/><br/><span class="hl-7">// Call `unsubscribe` when you want to stop listening to the state changes</span><br/><span class="hl-5">unsubscribe</span><span class="hl-1">();</span>
+</code></pre>
+<p>To get the current state of the specific wallet modal window, use the <code>singleWalletModalState</code> property:</p>
+<pre><code class="language-typescript"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">currentState</span><span class="hl-1"> = </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-2">singleWalletModalState</span><span class="hl-1">;</span><br/><span class="hl-2">console</span><span class="hl-1">.</span><span class="hl-5">log</span><span class="hl-1">(</span><span class="hl-3">&#39;Current modal state:&#39;</span><span class="hl-1">, </span><span class="hl-2">currentState</span><span class="hl-1">);</span>
+</code></pre>
 
 <a href="#get-current-connected-wallet-and-walletinfo" id="get-current-connected-wallet-and-walletinfo" style="color: inherit; text-decoration: none;">
   <h2>Get current connected Wallet and WalletInfo</h2>
 </a>
 <p>You can use special getters to read current connection state. Note that this getter only represents current value, so they are not reactive. 
-To react and handle wallet changes use <code>onStatusChange</code> mathod.</p>
-<pre><code class="language-ts"><span class="hl-1">    </span><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">currentWallet</span><span class="hl-1"> = </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-2">wallet</span><span class="hl-1">;</span><br/><span class="hl-1">    </span><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">currentWalletInfo</span><span class="hl-1"> = </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-2">walletInfo</span><span class="hl-1">;</span><br/><span class="hl-1">    </span><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">currentAccount</span><span class="hl-1"> = </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-2">account</span><span class="hl-1">;</span><br/><span class="hl-1">    </span><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">currentIsConnectedStatus</span><span class="hl-1"> = </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-2">connected</span><span class="hl-1">;</span>
+To react and handle wallet changes use <code>onStatusChange</code> method.</p>
+<pre><code class="language-ts"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">currentWallet</span><span class="hl-1"> = </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-2">wallet</span><span class="hl-1">;</span><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">currentWalletInfo</span><span class="hl-1"> = </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-2">walletInfo</span><span class="hl-1">;</span><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">currentAccount</span><span class="hl-1"> = </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-2">account</span><span class="hl-1">;</span><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">currentIsConnectedStatus</span><span class="hl-1"> = </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-2">connected</span><span class="hl-1">;</span>
 </code></pre>
 
 <a href="#subscribe-to-the-connection-status-changes" id="subscribe-to-the-connection-status-changes" style="color: inherit; text-decoration: none;">
   <h2>Subscribe to the connection status changes</h2>
 </a>
-<pre><code class="language-js"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">unsubscribe</span><span class="hl-1"> = </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-5">onStatusChange</span><span class="hl-1">(</span><br/><span class="hl-1">    </span><span class="hl-2">walletAndwalletInfo</span><span class="hl-1"> </span><span class="hl-4">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">        </span><span class="hl-7">// update state/reactive variables to show updates in the ui</span><br/><span class="hl-1">    } </span><br/><span class="hl-1">);</span><br/><br/><span class="hl-7">// call `unsubscribe()` later to save resources when you don&#39;t need to listen for updates anymore.</span>
+<p>To subscribe to the changes of the connection status, you can use the <code>onStatusChange</code> method. It returns a function which has to be called to unsubscribe.</p>
+<pre><code class="language-ts"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">unsubscribe</span><span class="hl-1"> = </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-5">onStatusChange</span><span class="hl-1">(</span><br/><span class="hl-1">    </span><span class="hl-2">walletAndwalletInfo</span><span class="hl-1"> </span><span class="hl-4">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">        </span><span class="hl-7">// update state/reactive variables to show updates in the ui</span><br/><span class="hl-1">    } </span><br/><span class="hl-1">);</span>
 </code></pre>
+<p>Call <code>unsubscribe()</code> later to save resources when you don&#39;t need to listen for updates anymore.</p>
 
 <a href="#disconnect-wallet" id="disconnect-wallet" style="color: inherit; text-decoration: none;">
   <h2>Disconnect wallet</h2>
@@ -119,7 +175,7 @@ To react and handle wallet changes use <code>onStatusChange</code> mathod.</p>
   <h2>Send transaction</h2>
 </a>
 <p>Wallet must be connected when you call <code>sendTransaction</code>. Otherwise, an error will be thrown.</p>
-<pre><code class="language-ts"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">transaction</span><span class="hl-1"> = {</span><br/><span class="hl-1">    </span><span class="hl-2">validUntil:</span><span class="hl-1"> </span><span class="hl-2">Date</span><span class="hl-1">.</span><span class="hl-5">now</span><span class="hl-1">() + </span><span class="hl-15">1000000</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-2">messages:</span><span class="hl-1"> [</span><br/><span class="hl-1">        {</span><br/><span class="hl-1">            </span><span class="hl-2">address:</span><span class="hl-1"> </span><span class="hl-3">&quot;0:412410771DA82CBA306A55FA9E0D43C9D245E38133CB58F1457DFB8D5CD8892F&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">            </span><span class="hl-2">amount:</span><span class="hl-1"> </span><span class="hl-3">&quot;20000000&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">            </span><span class="hl-2">stateInit:</span><span class="hl-1"> </span><span class="hl-3">&quot;base64bocblahblahblah==&quot;</span><span class="hl-1"> </span><span class="hl-7">// just for instance. Replace with your transaction initState or remove</span><br/><span class="hl-1">        },</span><br/><span class="hl-1">        {</span><br/><span class="hl-1">            </span><span class="hl-2">address:</span><span class="hl-1"> </span><span class="hl-3">&quot;0:E69F10CC84877ABF539F83F879291E5CA169451BA7BCE91A37A5CED3AB8080D3&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">            </span><span class="hl-2">amount:</span><span class="hl-1"> </span><span class="hl-3">&quot;60000000&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">            </span><span class="hl-2">payload:</span><span class="hl-1"> </span><span class="hl-3">&quot;base64bocblahblahblah==&quot;</span><span class="hl-1"> </span><span class="hl-7">// just for instance. Replace with your transaction payload or remove</span><br/><span class="hl-1">        }</span><br/><span class="hl-1">    ]</span><br/><span class="hl-1">}</span><br/><br/><span class="hl-0">try</span><span class="hl-1"> {</span><br/><span class="hl-1">    </span><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">result</span><span class="hl-1"> = </span><span class="hl-0">await</span><span class="hl-1"> </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-5">sendTransaction</span><span class="hl-1">(</span><span class="hl-2">transaction</span><span class="hl-1">);</span><br/><br/><span class="hl-1">    </span><span class="hl-7">// you can use signed boc to find the transaction </span><br/><span class="hl-1">    </span><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">someTxData</span><span class="hl-1"> = </span><span class="hl-0">await</span><span class="hl-1"> </span><span class="hl-2">myAppExplorerService</span><span class="hl-1">.</span><span class="hl-5">getTransaction</span><span class="hl-1">(</span><span class="hl-2">result</span><span class="hl-1">.</span><span class="hl-2">boc</span><span class="hl-1">);</span><br/><span class="hl-1">    </span><span class="hl-5">alert</span><span class="hl-1">(</span><span class="hl-3">&#39;Transaction was sent successfully&#39;</span><span class="hl-1">, </span><span class="hl-2">someTxData</span><span class="hl-1">);</span><br/><span class="hl-1">} </span><span class="hl-0">catch</span><span class="hl-1"> (</span><span class="hl-2">e</span><span class="hl-1">) {</span><br/><span class="hl-1">    </span><span class="hl-2">console</span><span class="hl-1">.</span><span class="hl-5">error</span><span class="hl-1">(</span><span class="hl-2">e</span><span class="hl-1">);</span><br/><span class="hl-1">}</span>
+<pre><code class="language-ts"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">transaction</span><span class="hl-1"> = {</span><br/><span class="hl-1">    </span><span class="hl-2">validUntil:</span><span class="hl-1"> </span><span class="hl-2">Math</span><span class="hl-1">.</span><span class="hl-5">floor</span><span class="hl-1">(</span><span class="hl-2">Date</span><span class="hl-1">.</span><span class="hl-5">now</span><span class="hl-1">() / </span><span class="hl-15">1000</span><span class="hl-1">) + </span><span class="hl-15">60</span><span class="hl-1">, </span><span class="hl-7">// 60 sec</span><br/><span class="hl-1">    </span><span class="hl-2">messages:</span><span class="hl-1"> [</span><br/><span class="hl-1">        {</span><br/><span class="hl-1">            </span><span class="hl-2">address:</span><span class="hl-1"> </span><span class="hl-3">&quot;EQBBJBB3HagsujBqVfqeDUPJ0kXjgTPLWPFFffuNXNiJL0aA&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">            </span><span class="hl-2">amount:</span><span class="hl-1"> </span><span class="hl-3">&quot;20000000&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">         </span><span class="hl-7">// stateInit: &quot;base64bocblahblahblah==&quot; // just for instance. Replace with your transaction initState or remove</span><br/><span class="hl-1">        },</span><br/><span class="hl-1">        {</span><br/><span class="hl-1">            </span><span class="hl-2">address:</span><span class="hl-1"> </span><span class="hl-3">&quot;EQDmnxDMhId6v1Ofg_h5KR5coWlFG6e86Ro3pc7Tq4CA0-Jn&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">            </span><span class="hl-2">amount:</span><span class="hl-1"> </span><span class="hl-3">&quot;60000000&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">         </span><span class="hl-7">// payload: &quot;base64bocblahblahblah==&quot; // just for instance. Replace with your transaction payload or remove</span><br/><span class="hl-1">        }</span><br/><span class="hl-1">    ]</span><br/><span class="hl-1">};</span><br/><br/><span class="hl-7">// you can also include extra currencies in your transaction</span><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">transactionWithExtraCurrency</span><span class="hl-1"> = {</span><br/><span class="hl-1">    </span><span class="hl-2">validUntil:</span><span class="hl-1"> </span><span class="hl-2">Math</span><span class="hl-1">.</span><span class="hl-5">floor</span><span class="hl-1">(</span><span class="hl-2">Date</span><span class="hl-1">.</span><span class="hl-5">now</span><span class="hl-1">() / </span><span class="hl-15">1000</span><span class="hl-1">) + </span><span class="hl-15">60</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-2">messages:</span><span class="hl-1"> [</span><br/><span class="hl-1">        {</span><br/><span class="hl-1">            </span><span class="hl-2">address:</span><span class="hl-1"> </span><span class="hl-3">&quot;EQBBJBB3HagsujBqVfqeDUPJ0kXjgTPLWPFFffuNXNiJL0aA&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">            </span><span class="hl-7">// Specify the extra currency</span><br/><span class="hl-1">            </span><span class="hl-2">extraCurrency:</span><span class="hl-1"> {</span><br/><span class="hl-1">                </span><span class="hl-15">100</span><span class="hl-2">:</span><span class="hl-1"> </span><span class="hl-3">&quot;10000000&quot;</span><br/><span class="hl-1">            }</span><br/><span class="hl-1">        }</span><br/><span class="hl-1">    ]</span><br/><span class="hl-1">};</span><br/><br/><span class="hl-0">try</span><span class="hl-1"> {</span><br/><span class="hl-1">    </span><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">result</span><span class="hl-1"> = </span><span class="hl-0">await</span><span class="hl-1"> </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-5">sendTransaction</span><span class="hl-1">(</span><span class="hl-2">transaction</span><span class="hl-1">);</span><br/><br/><span class="hl-1">    </span><span class="hl-7">// you can use signed boc to find the transaction </span><br/><span class="hl-1">    </span><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">someTxData</span><span class="hl-1"> = </span><span class="hl-0">await</span><span class="hl-1"> </span><span class="hl-2">myAppExplorerService</span><span class="hl-1">.</span><span class="hl-5">getTransaction</span><span class="hl-1">(</span><span class="hl-2">result</span><span class="hl-1">.</span><span class="hl-2">boc</span><span class="hl-1">);</span><br/><span class="hl-1">    </span><span class="hl-5">alert</span><span class="hl-1">(</span><span class="hl-3">&#39;Transaction was sent successfully&#39;</span><span class="hl-1">, </span><span class="hl-2">someTxData</span><span class="hl-1">);</span><br/><span class="hl-1">} </span><span class="hl-0">catch</span><span class="hl-1"> (</span><span class="hl-2">e</span><span class="hl-1">) {</span><br/><span class="hl-1">    </span><span class="hl-2">console</span><span class="hl-1">.</span><span class="hl-5">error</span><span class="hl-1">(</span><span class="hl-2">e</span><span class="hl-1">);</span><br/><span class="hl-1">}</span>
 </code></pre>
 <p><code>sendTransaction</code> will automatically render informational modals and notifications. You can change its behaviour:</p>
 <pre><code class="language-ts"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">result</span><span class="hl-1"> = </span><span class="hl-0">await</span><span class="hl-1"> </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-5">sendTransaction</span><span class="hl-1">(</span><span class="hl-2">defaultTx</span><span class="hl-1">, {</span><br/><span class="hl-1">    </span><span class="hl-2">modals:</span><span class="hl-1"> [</span><span class="hl-3">&#39;before&#39;</span><span class="hl-1">, </span><span class="hl-3">&#39;success&#39;</span><span class="hl-1">, </span><span class="hl-3">&#39;error&#39;</span><span class="hl-1">],</span><br/><span class="hl-1">    </span><span class="hl-2">notifications:</span><span class="hl-1"> [</span><span class="hl-3">&#39;before&#39;</span><span class="hl-1">, </span><span class="hl-3">&#39;success&#39;</span><span class="hl-1">, </span><span class="hl-3">&#39;error&#39;</span><span class="hl-1">]</span><br/><span class="hl-1">});</span>
@@ -130,6 +186,35 @@ To react and handle wallet changes use <code>onStatusChange</code> mathod.</p>
 <p>You can also modify this behaviour for all actions calls using <code>uiOptions</code> setter:</p>
 <pre><code class="language-ts"><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-2">uiOptions</span><span class="hl-1"> = {</span><br/><span class="hl-1">        </span><span class="hl-2">actionsConfiguration:</span><span class="hl-1"> {</span><br/><span class="hl-1">            </span><span class="hl-2">modals:</span><span class="hl-1"> [</span><span class="hl-3">&#39;before&#39;</span><span class="hl-1">, </span><span class="hl-3">&#39;success&#39;</span><span class="hl-1">, </span><span class="hl-3">&#39;error&#39;</span><span class="hl-1">],</span><br/><span class="hl-1">            </span><span class="hl-2">notifications:</span><span class="hl-1"> [</span><span class="hl-3">&#39;before&#39;</span><span class="hl-1">, </span><span class="hl-3">&#39;success&#39;</span><span class="hl-1">, </span><span class="hl-3">&#39;error&#39;</span><span class="hl-1">]</span><br/><span class="hl-1">        }</span><br/><span class="hl-1">    };</span>
 </code></pre>
+
+<a href="#universal-links-redirecting-issues-ios" id="universal-links-redirecting-issues-ios" style="color: inherit; text-decoration: none;">
+  <h2>Universal links redirecting issues (IOS)</h2>
+</a>
+<p>Some operating systems, and especially iOS, have restrictions related to universal link usage. 
+For instance, if you try to open a universal link on an iOS device via <code>window.open</code>, you can face the following problem:
+the mobile browser won&#39;t redirect the user to the wallet app and will open the fallback tab instead. 
+That&#39;s because universal links can only be opened synchronously after a user&#39;s action in the browser (button click/...). 
+This means that you either can&#39;t perform any asynchronous requests after the user clicks an action button in your dapp, either you can&#39;t redirect the user to the connected wallet on some devices.</p>
+<p>So, by default, if the user&#39;s operating system is iOS, they won&#39;t be automatically redirected to the wallet after the dapp calls <code>tonConnectUI.sendTransaction</code>. 
+You can change this behavior using the skipRedirectToWallet option:</p>
+<pre><code class="language-ts"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">result</span><span class="hl-1"> = </span><span class="hl-0">await</span><span class="hl-1"> </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-5">sendTransaction</span><span class="hl-1">(</span><span class="hl-2">defaultTx</span><span class="hl-1">, {</span><br/><span class="hl-1">    </span><span class="hl-2">modals:</span><span class="hl-1"> [</span><span class="hl-3">&#39;before&#39;</span><span class="hl-1">, </span><span class="hl-3">&#39;success&#39;</span><span class="hl-1">, </span><span class="hl-3">&#39;error&#39;</span><span class="hl-1">],</span><br/><span class="hl-1">    </span><span class="hl-2">notifications:</span><span class="hl-1"> [</span><span class="hl-3">&#39;before&#39;</span><span class="hl-1">, </span><span class="hl-3">&#39;success&#39;</span><span class="hl-1">, </span><span class="hl-3">&#39;error&#39;</span><span class="hl-1">],</span><br/><span class="hl-1">    </span><span class="hl-2">skipRedirectToWallet:</span><span class="hl-1"> </span><span class="hl-3">&#39;ios&#39;</span><span class="hl-1"> </span><span class="hl-7">//&#39;ios&#39; (default), or &#39;never&#39;, or &#39;always&#39;</span><br/><span class="hl-1">});</span>
+</code></pre>
+<details>
+<summary>You can set it globally with `uiOptions` setter, and it will be applied for all actions (send transaction/...).</summary>
+
+<pre><code class="language-ts"><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-2">uiOptions</span><span class="hl-1"> = {</span><br/><span class="hl-1">        </span><span class="hl-2">actionsConfiguration:</span><span class="hl-1"> {</span><br/><span class="hl-1">            </span><span class="hl-2">skipRedirectToWallet:</span><span class="hl-1"> </span><span class="hl-3">&#39;ios&#39;</span><br/><span class="hl-1">        }</span><br/><span class="hl-1">    };</span>
+</code></pre>
+</details>
+
+<details>
+<summary>You should use the option `'never'` if there are no any async calls in the action button's click handler before `tonConnectUI.sendTransaction` call</summary>
+
+<pre><code class="language-ts"><span class="hl-7">// use skipRedirectToWallet: &#39;never&#39; for better UX</span><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-5">onClick</span><span class="hl-1"> = </span><span class="hl-4">async</span><span class="hl-1"> ()  </span><span class="hl-4">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">    </span><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">txBody</span><span class="hl-1"> = </span><span class="hl-5">packTxBodySynchrone</span><span class="hl-1">();</span><br/><span class="hl-1">    </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-5">sendTransaction</span><span class="hl-1">(</span><span class="hl-2">txBody</span><span class="hl-1">, { </span><span class="hl-2">skipRedirectToWallet:</span><span class="hl-1"> </span><span class="hl-3">&#39;never&#39;</span><span class="hl-1"> });</span><br/><br/><span class="hl-1">    </span><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">myApiResponse</span><span class="hl-1"> = </span><span class="hl-0">await</span><span class="hl-1"> </span><span class="hl-5">notifyBackend</span><span class="hl-1">();</span><br/><span class="hl-1">    </span><span class="hl-7">//...</span><br/><span class="hl-1">}</span>
+</code></pre>
+<pre><code class="language-ts"><span class="hl-7">// DON&#39;T use skipRedirectToWallet: &#39;never&#39;, you should use skipRedirectToWallet: &#39;ios&#39; </span><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-5">onClick</span><span class="hl-1"> = </span><span class="hl-4">async</span><span class="hl-1"> ()  </span><span class="hl-4">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">    </span><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">myApiResponse</span><span class="hl-1"> = </span><span class="hl-0">await</span><span class="hl-1"> </span><span class="hl-5">notifyBackend</span><span class="hl-1">();</span><br/><span class="hl-1">    </span><br/><span class="hl-1">    </span><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">txBody</span><span class="hl-1"> = </span><span class="hl-5">packTxBodySynchrone</span><span class="hl-1">();</span><br/><span class="hl-1">    </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-5">sendTransaction</span><span class="hl-1">(</span><span class="hl-2">txBody</span><span class="hl-1">, { </span><span class="hl-2">skipRedirectToWallet:</span><span class="hl-1"> </span><span class="hl-3">&#39;ios&#39;</span><span class="hl-1"> });</span><br/><span class="hl-1">    </span><span class="hl-7">//...</span><br/><span class="hl-1">}</span>
+</code></pre>
+</details>
+
 
 <a href="#add-the-return-strategy" id="add-the-return-strategy" style="color: inherit; text-decoration: none;">
   <h2>Add the return strategy</h2>
@@ -143,6 +228,22 @@ a URL: wallet will open this URL after completing the user&#39;s action. Note, t
 </code></pre>
 <p>Or you can set it directly when you send a transaction (will be applied only for this transaction request)</p>
 <pre><code class="language-ts"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">result</span><span class="hl-1"> = </span><span class="hl-0">await</span><span class="hl-1"> </span><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-5">sendTransaction</span><span class="hl-1">(</span><span class="hl-2">defaultTx</span><span class="hl-1">, {</span><br/><span class="hl-1">    </span><span class="hl-2">returnStrategy:</span><span class="hl-1"> </span><span class="hl-3">&#39;&lt;protocol&gt;://&lt;your_return_url&gt;&#39;</span><span class="hl-1"> </span><span class="hl-7">// Note, that you shouldn&#39;t pass your app&#39;s URL if it is a webpage.</span><br/><span class="hl-1">     </span><span class="hl-7">// This option should be used for native apps to work around possible OS-specific issues with &#39;back&#39; option.</span><br/><span class="hl-1">});</span>
+</code></pre>
+
+<a href="#use-inside-tma-telegram-mini-apps" id="use-inside-tma-telegram-mini-apps" style="color: inherit; text-decoration: none;">
+  <h2>Use inside TMA (Telegram Mini Apps)</h2>
+</a>
+<p>TonConnect UI will work in TMA in the same way as in a regular website!
+Basically, no changes are required from the dApp&#39;s developers. The only thing you have to set is a dynamic return strategy.</p>
+<p>Currently, it is impossible for TMA-wallets to redirect back to previous opened TMA-dApp like native wallet-apps do.
+It means, that you need to specify the return strategy as a link to your TMA that will be only applied if the dApp is opened in TMA mode.</p>
+<pre><code class="language-ts"><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-2">uiOptions</span><span class="hl-1"> = {</span><br/><span class="hl-1">    </span><span class="hl-2">twaReturnUrl:</span><span class="hl-1"> </span><span class="hl-3">&#39;https://t.me/durov&#39;</span><br/><span class="hl-1">};</span>
+</code></pre>
+<p>In other words, TonConnect UI will automatically handle the return strategy based on the environment. <strong>The following pseudo-code demonstrates the internal logic of TonConnect UI</strong>:</p>
+<blockquote>
+<p>Please note that you <strong>don&#39;t need to add this code to your dApp</strong>. It&#39;s just an example of how TonConnect UI processes the return strategy internally.</p>
+</blockquote>
+<pre><code class="language-ts"><span class="hl-4">let</span><span class="hl-1"> </span><span class="hl-2">finalReturnStrategy</span><span class="hl-1">;</span><br/><br/><span class="hl-7">// Determine if the provided link opens Telegram (using protocols tg:// or domain t.me).</span><br/><span class="hl-0">if</span><span class="hl-1"> (</span><span class="hl-5">isLinkToTelegram</span><span class="hl-1">(</span><span class="hl-3">&#39;https://example.com&#39;</span><span class="hl-1">)) {</span><br/><span class="hl-1">    </span><span class="hl-7">// In the Telegram Mini Apps environment,</span><br/><span class="hl-1">    </span><span class="hl-0">if</span><span class="hl-1"> (</span><span class="hl-5">isInTWA</span><span class="hl-1">()) {</span><br/><span class="hl-1">        </span><span class="hl-7">// preference is given to &#39;twaReturnUrl&#39;,</span><br/><span class="hl-1">        </span><span class="hl-2">finalReturnStrategy</span><span class="hl-1"> = </span><span class="hl-2">actionsConfiguration</span><span class="hl-1">.</span><span class="hl-2">twaReturnUrl</span><span class="hl-1">;</span><br/><br/><span class="hl-1">        </span><span class="hl-7">// but if it&#39;s not set, fallback to &#39;returnStrategy&#39;.</span><br/><span class="hl-1">        </span><span class="hl-0">if</span><span class="hl-1"> (!</span><span class="hl-2">finalReturnStrategy</span><span class="hl-1">) {</span><br/><span class="hl-1">            </span><span class="hl-2">finalReturnStrategy</span><span class="hl-1"> = </span><span class="hl-2">actionsConfiguration</span><span class="hl-1">.</span><span class="hl-2">returnStrategy</span><span class="hl-1">;</span><br/><span class="hl-1">        }</span><br/><span class="hl-1">    }</span><br/><span class="hl-1">    </span><span class="hl-7">// If not in a TMA environment,</span><br/><span class="hl-1">    </span><span class="hl-0">else</span><span class="hl-1"> {</span><br/><span class="hl-1">        </span><span class="hl-7">// the return strategy is set to &#39;none&#39;.</span><br/><span class="hl-1">        </span><span class="hl-2">finalReturnStrategy</span><span class="hl-1"> = </span><span class="hl-3">&#39;none&#39;</span><span class="hl-1">;</span><br/><span class="hl-1">    }</span><br/><span class="hl-1">}</span><br/><span class="hl-7">// When the link does not open Telegram,</span><br/><span class="hl-0">else</span><span class="hl-1"> {</span><br/><span class="hl-1">    </span><span class="hl-7">// use the predefined &#39;returnStrategy&#39;.</span><br/><span class="hl-1">    </span><span class="hl-2">finalReturnStrategy</span><span class="hl-1"> = </span><span class="hl-2">actionsConfiguration</span><span class="hl-1">.</span><span class="hl-2">returnStrategy</span><span class="hl-1">;</span><br/><span class="hl-1">}</span><br/><br/><span class="hl-7">// Now, &#39;finalReturnStrategy&#39; contains the correct strategy based on the link&#39;s destination and the dApp&#39;s environment.</span>
 </code></pre>
 
 <a href="#detect-end-of-the-connection-restoring-process" id="detect-end-of-the-connection-restoring-process" style="color: inherit; text-decoration: none;">
@@ -231,29 +332,34 @@ However, it is possible if needed. You can add css styles to the specified selec
 <td>Container of the modal window that opens when you click on the &quot;connect wallet&quot; button.</td>
 </tr>
 <tr>
-<td>Select wallet mobile modal content</td>
-<td><code>[data-tc-wallets-modal-mobile=&quot;true&quot;]</code></td>
-<td>Content of the mobile modal window with wallet selection.</td>
+<td>Mobile universal modal page content</td>
+<td><code>[data-tc-wallets-modal-universal-mobile=&quot;true&quot;]</code></td>
+<td>Content of the general mobile modal page with horizontal list.</td>
 </tr>
 <tr>
-<td>Select wallet desktop modal content</td>
-<td><code>[data-tc-wallets-modal-desktop=&quot;true&quot;]</code></td>
-<td>Content of the desktop window with wallet selection.</td>
+<td>Desktop universal modal page content</td>
+<td><code>[data-tc-wallets-modal-universal-desktop=&quot;true&quot;]</code></td>
+<td>Content of the universal desktop modal page with QR.</td>
 </tr>
 <tr>
-<td>Desktop Universal QR content</td>
-<td><code>[data-tc-universal-qr-desktop=&quot;true&quot;]</code></td>
-<td>Universal QR page content under the tab bar in the desktop wallets selection modal window.</td>
+<td>Mobile selected wallet&#39;s modal page</td>
+<td><code>[data-tc-wallets-modal-connection-mobile=&quot;true&quot;]</code></td>
+<td>Content of the selected wallet&#39;s modal page on mobile.</td>
 </tr>
 <tr>
-<td>Desktop wallets list content</td>
-<td><code>[data-tc-select-wallet-desktop=&quot;true&quot;]</code></td>
-<td>Wallets list page content under the tab bar in the desktop wallets selection modal window.</td>
+<td>Desktop selected wallet&#39;s modal page</td>
+<td><code>[data-tc-wallets-modal-connection-desktop=&quot;true&quot;]</code></td>
+<td>Content of the selected wallet&#39;s modal page on desktop.</td>
 </tr>
 <tr>
-<td>Concrete wallet QR-code modal content</td>
-<td><code>[data-tc-wallet-qr-modal-desktop=&quot;true&quot;]</code></td>
-<td>Content of the modal window with the concrete wallet QR-code.</td>
+<td>Wallets list modal page</td>
+<td><code>[data-tc-wallets-modal-list=&quot;true&quot;]</code></td>
+<td>Content of the modal page with all available wallets list (desktop and mobile).</td>
+</tr>
+<tr>
+<td>Info modal page</td>
+<td><code>[data-tc-wallets-modal-info=&quot;true&quot;]</code></td>
+<td>Content of the modal page with &quot;What is a wallet information&quot;.</td>
 </tr>
 <tr>
 <td>Action modal container</td>
@@ -407,6 +513,90 @@ However, it is possible if needed. You can add css styles to the specified selec
 <p>You can find <code>ton_proof</code> result in the <code>wallet</code> object when wallet will be connected:</p>
 <pre><code class="language-ts"><span class="hl-2">tonConnectUI</span><span class="hl-1">.</span><span class="hl-5">onStatusChange</span><span class="hl-1">(</span><span class="hl-2">wallet</span><span class="hl-1"> </span><span class="hl-4">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">        </span><span class="hl-0">if</span><span class="hl-1"> (</span><span class="hl-2">wallet</span><span class="hl-1"> &amp;&amp; </span><span class="hl-2">wallet</span><span class="hl-1">.</span><span class="hl-2">connectItems</span><span class="hl-1">?.</span><span class="hl-2">tonProof</span><span class="hl-1"> &amp;&amp; </span><span class="hl-3">&#39;proof&#39;</span><span class="hl-1"> </span><span class="hl-4">in</span><span class="hl-1"> </span><span class="hl-2">wallet</span><span class="hl-1">.</span><span class="hl-2">connectItems</span><span class="hl-1">.</span><span class="hl-2">tonProof</span><span class="hl-1">) {</span><br/><span class="hl-1">            </span><span class="hl-5">checkProofInYourBackend</span><span class="hl-1">(</span><span class="hl-2">wallet</span><span class="hl-1">.</span><span class="hl-2">connectItems</span><span class="hl-1">.</span><span class="hl-2">tonProof</span><span class="hl-1">.</span><span class="hl-2">proof</span><span class="hl-1">);</span><br/><span class="hl-1">        }</span><br/><span class="hl-1">    });</span>
 </code></pre>
+
+<a href="#tracking" id="tracking" style="color: inherit; text-decoration: none;">
+  <h1>Tracking</h1>
+</a>
+
+<a href="#track-events" id="track-events" style="color: inherit; text-decoration: none;">
+  <h2>Track events</h2>
+</a>
+<p>Tracker for TonConnect user actions, such as transaction signing, connection, etc.</p>
+<p>List of events:</p>
+<ul>
+<li><code>connection-started</code>: when a user starts connecting a wallet.</li>
+<li><code>connection-completed</code>: when a user successfully connected a wallet.</li>
+<li><code>connection-error</code>: when a user cancels a connection or there is an error during the connection process.</li>
+<li><code>connection-restoring-started</code>: when the dApp starts restoring a connection.</li>
+<li><code>connection-restoring-completed</code>: when the dApp successfully restores a connection.</li>
+<li><code>connection-restoring-error</code>: when the dApp fails to restore a connection.</li>
+<li><code>disconnection</code>: when a user starts disconnecting a wallet.</li>
+<li><code>transaction-sent-for-signature</code>: when a user sends a transaction for signature.</li>
+<li><code>transaction-signed</code>: when a user successfully signs a transaction.</li>
+<li><code>transaction-signing-failed</code>: when a user cancels transaction signing or there is an error during the signing process.</li>
+</ul>
+<p>If you want to track user actions, you can subscribe to the window events with prefix <code>ton-connect-ui-</code>:</p>
+<pre><code class="language-typescript"><span class="hl-2">window</span><span class="hl-1">.</span><span class="hl-5">addEventListener</span><span class="hl-1">(</span><span class="hl-3">&#39;ton-connect-ui-transaction-sent-for-signature&#39;</span><span class="hl-1">, (</span><span class="hl-2">event</span><span class="hl-1">) </span><span class="hl-4">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">    </span><span class="hl-2">console</span><span class="hl-1">.</span><span class="hl-5">log</span><span class="hl-1">(</span><span class="hl-3">&#39;Transaction init&#39;</span><span class="hl-1">, </span><span class="hl-2">event</span><span class="hl-1">.</span><span class="hl-2">detail</span><span class="hl-1">);</span><br/><span class="hl-1">});</span>
+</code></pre>
+
+<a href="#use-custom-event-dispatcher" id="use-custom-event-dispatcher" style="color: inherit; text-decoration: none;">
+  <h2>Use custom event dispatcher</h2>
+</a>
+<p>You can use your custom event dispatcher to track user actions. To do this, you need to pass the <code>eventDispatcher</code> to the TonConnect constructor:</p>
+<pre><code class="language-typescript"><span class="hl-0">import</span><span class="hl-1"> { </span><span class="hl-2">TonConnectUI</span><span class="hl-1">, </span><span class="hl-2">EventDispatcher</span><span class="hl-1">, </span><span class="hl-2">SdkActionEvent</span><span class="hl-1">, </span><span class="hl-2">UserActionEvent</span><span class="hl-1"> } </span><span class="hl-0">from</span><span class="hl-1"> </span><span class="hl-3">&#39;@tonconnect/ui&#39;</span><span class="hl-1">;</span><br/><br/><span class="hl-4">class</span><span class="hl-1"> </span><span class="hl-6">CustomEventDispatcher</span><span class="hl-1"> </span><span class="hl-4">implements</span><span class="hl-1"> </span><span class="hl-6">EventDispatcher</span><span class="hl-1">&lt;</span><span class="hl-6">UserActionEvent</span><span class="hl-1"> | </span><span class="hl-6">SdkActionEvent</span><span class="hl-1">&gt; {</span><br/><span class="hl-1">    </span><span class="hl-4">public</span><span class="hl-1"> </span><span class="hl-4">async</span><span class="hl-1"> </span><span class="hl-5">dispatchEvent</span><span class="hl-1">(</span><br/><span class="hl-1">      </span><span class="hl-2">eventName</span><span class="hl-1">: </span><span class="hl-6">string</span><span class="hl-1">,</span><br/><span class="hl-1">      </span><span class="hl-2">eventDetails</span><span class="hl-1">: </span><span class="hl-6">UserActionEvent</span><span class="hl-1"> | </span><span class="hl-6">SdkActionEvent</span><br/><span class="hl-1">    ): </span><span class="hl-6">Promise</span><span class="hl-1">&lt;</span><span class="hl-6">void</span><span class="hl-1">&gt; {</span><br/><span class="hl-1">        </span><span class="hl-2">console</span><span class="hl-1">.</span><span class="hl-5">log</span><span class="hl-1">(</span><span class="hl-3">`Event: </span><span class="hl-4">${</span><span class="hl-2">eventName</span><span class="hl-4">}</span><span class="hl-3">, details:`</span><span class="hl-1">, </span><span class="hl-2">eventDetails</span><span class="hl-1">);</span><br/><span class="hl-1">    }</span><br/><span class="hl-1">}</span><br/><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">eventDispatcher</span><span class="hl-1"> = </span><span class="hl-4">new</span><span class="hl-1"> </span><span class="hl-5">CustomEventDispatcher</span><span class="hl-1">();</span><br/><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">connector</span><span class="hl-1"> = </span><span class="hl-4">new</span><span class="hl-1"> </span><span class="hl-5">TonConnectUI</span><span class="hl-1">({ </span><span class="hl-2">eventDispatcher</span><span class="hl-1"> });</span>
+</code></pre>
+
+<a href="#troubleshooting" id="troubleshooting" style="color: inherit; text-decoration: none;">
+  <h1>Troubleshooting</h1>
+</a>
+
+<a href="#android-back-handler" id="android-back-handler" style="color: inherit; text-decoration: none;">
+  <h2>Android Back Handler</h2>
+</a>
+<p>If you encounter any issues with the Android back handler, such as modals not closing properly when the back button is pressed, or conflicts with <code>history.pushState()</code> if you are manually handling browser history in your application, you can disable the back handler by setting <code>enableAndroidBackHandler</code> to <code>false</code>:</p>
+<pre><code class="language-ts"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">tonConnectUI</span><span class="hl-1"> = </span><span class="hl-4">new</span><span class="hl-1"> </span><span class="hl-5">TonConnectUI</span><span class="hl-1">({</span><br/><span class="hl-1">    </span><span class="hl-7">// ...</span><br/><span class="hl-1">    </span><span class="hl-2">enableAndroidBackHandler:</span><span class="hl-1"> </span><span class="hl-4">false</span><br/><span class="hl-1">});</span>
+</code></pre>
+<p>This will disable the custom back button behavior on Android, and you can then handle the back button press manually in your application.</p>
+<p>While we do not foresee any problems arising with the Android back handler, but if you find yourself needing to disable it due to an issue, please describe the problem in on <a href="https://github.com/ton-connect/sdk/issues">GitHub Issues</a>, so we can assist you further.</p>
+
+<a href="#animations-not-working" id="animations-not-working" style="color: inherit; text-decoration: none;">
+  <h2>Animations not working</h2>
+</a>
+<p>If you are experiencing issues with animations not working in your environment, it might be due to a lack of support for the Web Animations API. To resolve this issue, you can use the <code>web-animations-js</code> polyfill.</p>
+
+<a href="#using-npm" id="using-npm" style="color: inherit; text-decoration: none;">
+  <h3>Using npm</h3>
+</a>
+<p>To install the polyfill, run the following command:</p>
+<pre><code class="language-shell"><span class="hl-1">npm install web-animations-js</span>
+</code></pre>
+<p>Then, import the polyfill in your project:</p>
+<pre><code class="language-typescript"><span class="hl-0">import</span><span class="hl-1"> </span><span class="hl-3">&#39;web-animations-js&#39;</span><span class="hl-1">;</span>
+</code></pre>
+
+<a href="#using-cdn" id="using-cdn" style="color: inherit; text-decoration: none;">
+  <h3>Using CDN</h3>
+</a>
+<p>Alternatively, you can include the polyfill via CDN by adding the following script tag to your HTML:</p>
+<pre><code class="language-html"><span class="hl-9">&lt;</span><span class="hl-10">script</span><span class="hl-11"> </span><span class="hl-12">src</span><span class="hl-11">=</span><span class="hl-13">&quot;https://www.unpkg.com/web-animations-js@latest/web-animations.min.js&quot;</span><span class="hl-9">&gt;&lt;/</span><span class="hl-10">script</span><span class="hl-9">&gt;</span>
+</code></pre>
+<p>Both methods will provide a fallback implementation of the Web Animations API and should resolve the animation issues you are facing.</p>
+
+<a href="#warning-about-39encoding39-module-in-nextjs" id="warning-about-39encoding39-module-in-nextjs" style="color: inherit; text-decoration: none;">
+  <h2>Warning about &#39;encoding&#39; module in Next.js</h2>
+</a>
+<p>If you are using Next.js and see a warning similar to the following:</p>
+<pre><code><span class="hl-1"> ⚠ ./</span><span class="hl-2">node_modules</span><span class="hl-1">/</span><span class="hl-2">node</span><span class="hl-1">-</span><span class="hl-2">fetch</span><span class="hl-1">/</span><span class="hl-2">lib</span><span class="hl-1">/</span><span class="hl-2">index</span><span class="hl-1">.</span><span class="hl-2">js</span><br/><span class="hl-2">Module</span><span class="hl-1"> </span><span class="hl-2">not</span><span class="hl-1"> </span><span class="hl-16">found</span><span class="hl-1">: </span><span class="hl-2">Can</span><span class="hl-3">&#39;t resolve &#39;</span><span class="hl-2">encoding</span><span class="hl-3">&#39; in &#39;</span><span class="hl-1">.../</span><span class="hl-2">node_modules</span><span class="hl-1">/</span><span class="hl-2">node</span><span class="hl-1">-</span><span class="hl-2">fetch</span><span class="hl-1">/</span><span class="hl-2">lib</span><span class="hl-3">&#39;</span><br/><br/><span class="hl-3">Import trace for requested module</span><span class="hl-17">:</span><br/><span class="hl-1">./</span><span class="hl-2">node_modules</span><span class="hl-1">/</span><span class="hl-2">node</span><span class="hl-1">-</span><span class="hl-2">fetch</span><span class="hl-1">/</span><span class="hl-2">lib</span><span class="hl-1">/</span><span class="hl-2">index</span><span class="hl-1">.</span><span class="hl-2">js</span><br/><span class="hl-1">.</span><span class="hl-18">/node_modules/</span><span class="hl-1">@</span><span class="hl-2">tonconnect</span><span class="hl-1">/</span><span class="hl-2">isomorphic</span><span class="hl-1">-</span><span class="hl-2">fetch</span><span class="hl-1">/</span><span class="hl-2">index</span><span class="hl-1">.</span><span class="hl-2">mjs</span><br/><span class="hl-1">.</span><span class="hl-18">/node_modules/</span><span class="hl-1">@</span><span class="hl-2">tonconnect</span><span class="hl-1">/</span><span class="hl-2">sdk</span><span class="hl-1">/</span><span class="hl-2">lib</span><span class="hl-1">/</span><span class="hl-2">esm</span><span class="hl-1">/</span><span class="hl-2">index</span><span class="hl-1">.</span><span class="hl-2">mjs</span><br/><span class="hl-1">.</span><span class="hl-18">/node_modules/</span><span class="hl-1">@</span><span class="hl-2">tonconnect</span><span class="hl-1">/</span><span class="hl-2">ui</span><span class="hl-1">/</span><span class="hl-2">lib</span><span class="hl-1">/</span><span class="hl-2">esm</span><span class="hl-1">/</span><span class="hl-2">index</span><span class="hl-1">.</span><span class="hl-2">mjs</span>
+</code></pre>
+<p>Please note that this is just a warning and should not affect the functionality of your application. If you wish to suppress the warning, you have two options:</p>
+<ol>
+<li><p>(Recommended) Wait for us to remove the dependency on <code>@tonconnect/isomorphic-fetch</code> in future releases. This dependency will be removed when we drop support for Node.js versions below 18.</p>
+</li>
+<li><p>(Optional) Install the <code>encoding</code> package, to resolve the warning:</p>
+</li>
+</ol>
+<pre><code class="language-shell"><span class="hl-1">npm install encoding</span>
+</code></pre>
 </section></section>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
@@ -434,6 +624,7 @@ However, it is possible if needed. You can add css styles to the specified selec
 <a href="../interfaces/_tonconnect_ui.TonConnectUiOptionsWithConnector.html" class="tsd-index-link tsd-kind-interface tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Ton<wbr/>Connect<wbr/>Ui<wbr/>Options<wbr/>With<wbr/>Connector</span></a>
 <a href="../interfaces/_tonconnect_ui.TonConnectUiOptionsWithManifest.html" class="tsd-index-link tsd-kind-interface tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Ton<wbr/>Connect<wbr/>Ui<wbr/>Options<wbr/>With<wbr/>Manifest</span></a>
 <a href="../interfaces/_tonconnect_ui.UIPreferences.html" class="tsd-index-link tsd-kind-interface tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>UIPreferences</span></a>
+<a href="../interfaces/_tonconnect_ui.WalletsModal.html" class="tsd-index-link tsd-kind-interface tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Wallets<wbr/>Modal</span></a>
 </div></section>
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading">Type Aliases</h3>
@@ -450,10 +641,15 @@ However, it is possible if needed. You can add css styles to the specified selec
 <a href="../types/_tonconnect_ui.Theme-1.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Theme</span></a>
 <a href="../types/_tonconnect_ui.TonConnectUiCreateOptions.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Ton<wbr/>Connect<wbr/>Ui<wbr/>Create<wbr/>Options</span></a>
 <a href="../types/_tonconnect_ui.UIWallet.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>UIWallet</span></a>
+<a href="../types/_tonconnect_ui.UserActionEvent.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>User<wbr/>Action<wbr/>Event</span></a>
 <a href="../types/_tonconnect_ui.WalletInfoRemoteWithOpenMethod.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Wallet<wbr/>Info<wbr/>Remote<wbr/>With<wbr/>Open<wbr/>Method</span></a>
 <a href="../types/_tonconnect_ui.WalletInfoWithOpenMethod.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Wallet<wbr/>Info<wbr/>With<wbr/>Open<wbr/>Method</span></a>
+<a href="../types/_tonconnect_ui.WalletModalClosed.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Wallet<wbr/>Modal<wbr/>Closed</span></a>
+<a href="../types/_tonconnect_ui.WalletModalOpened.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Wallet<wbr/>Modal<wbr/>Opened</span></a>
 <a href="../types/_tonconnect_ui.WalletOpenMethod.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Wallet<wbr/>Open<wbr/>Method</span></a>
 <a href="../types/_tonconnect_ui.WalletsListConfiguration.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Wallets<wbr/>List<wbr/>Configuration</span></a>
+<a href="../types/_tonconnect_ui.WalletsModalCloseReason.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Wallets<wbr/>Modal<wbr/>Close<wbr/>Reason</span></a>
+<a href="../types/_tonconnect_ui.WalletsModalState.html" class="tsd-index-link tsd-kind-type-alias tsd-parent-kind-module"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Wallets<wbr/>Modal<wbr/>State</span></a>
 </div></section></div></details></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>References</h2>
@@ -494,6 +690,7 @@ However, it is possible if needed. You can add css styles to the specified selec
 <li class="tsd-kind-interface tsd-parent-kind-module"><a href="../interfaces/_tonconnect_ui.TonConnectUiOptionsWithConnector.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg>Ton<wbr/>Connect<wbr/>Ui<wbr/>Options<wbr/>With<wbr/>Connector</a></li>
 <li class="tsd-kind-interface tsd-parent-kind-module"><a href="../interfaces/_tonconnect_ui.TonConnectUiOptionsWithManifest.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg>Ton<wbr/>Connect<wbr/>Ui<wbr/>Options<wbr/>With<wbr/>Manifest</a></li>
 <li class="tsd-kind-interface tsd-parent-kind-module"><a href="../interfaces/_tonconnect_ui.UIPreferences.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg>UIPreferences</a></li>
+<li class="tsd-kind-interface tsd-parent-kind-module"><a href="../interfaces/_tonconnect_ui.WalletsModal.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg>Wallets<wbr/>Modal</a></li>
 <li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.BorderRadius.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Border<wbr/>Radius</a></li>
 <li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.Color.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Color</a></li>
 <li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.ColorsSet.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Colors<wbr/>Set</a></li>
@@ -507,10 +704,15 @@ However, it is possible if needed. You can add css styles to the specified selec
 <li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.Theme-1.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Theme</a></li>
 <li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.TonConnectUiCreateOptions.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Ton<wbr/>Connect<wbr/>Ui<wbr/>Create<wbr/>Options</a></li>
 <li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.UIWallet.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>UIWallet</a></li>
+<li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.UserActionEvent.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>User<wbr/>Action<wbr/>Event</a></li>
 <li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.WalletInfoRemoteWithOpenMethod.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Wallet<wbr/>Info<wbr/>Remote<wbr/>With<wbr/>Open<wbr/>Method</a></li>
 <li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.WalletInfoWithOpenMethod.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Wallet<wbr/>Info<wbr/>With<wbr/>Open<wbr/>Method</a></li>
+<li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.WalletModalClosed.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Wallet<wbr/>Modal<wbr/>Closed</a></li>
+<li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.WalletModalOpened.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Wallet<wbr/>Modal<wbr/>Opened</a></li>
 <li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.WalletOpenMethod.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Wallet<wbr/>Open<wbr/>Method</a></li>
-<li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.WalletsListConfiguration.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Wallets<wbr/>List<wbr/>Configuration</a></li></ul></nav></div></div>
+<li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.WalletsListConfiguration.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Wallets<wbr/>List<wbr/>Configuration</a></li>
+<li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.WalletsModalCloseReason.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Wallets<wbr/>Modal<wbr/>Close<wbr/>Reason</a></li>
+<li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="../types/_tonconnect_ui.WalletsModalState.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg>Wallets<wbr/>Modal<wbr/>State</a></li></ul></nav></div></div>
 <div class="container tsd-generator">
 <p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></div>
 <div class="overlay"></div><script src="../assets/main.js"></script></body></html>

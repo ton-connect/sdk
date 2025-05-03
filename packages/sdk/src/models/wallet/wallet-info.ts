@@ -1,11 +1,18 @@
+import { Feature } from "@tonconnect/protocol";
+
 /**
  * Common information for injectable and http-compatible wallets.
  */
 export interface WalletInfoBase {
     /**
-     * Name of the wallet.
+     * Human-readable name of the wallet.
      */
     name: string;
+
+    /**
+     * ID of the wallet, equals to the `appName` property into {@link Wallet.device}.
+     */
+    appName: string;
 
     /**
      * Url to the icon of the wallet. Resolution 288×288px. On non-transparent background, without rounded corners. PNG format.
@@ -21,6 +28,25 @@ export interface WalletInfoBase {
      * Info or landing page of your wallet. May be useful for TON newcomers.
      */
     aboutUrl: string;
+
+    /**
+     * List of features supported by the wallet.
+     */
+    features?: Feature[];
+
+    /**
+     * OS and browsers where the wallet could be installed
+     */
+    platforms: (
+        | 'ios'
+        | 'android'
+        | 'macos'
+        | 'windows'
+        | 'linux'
+        | 'chrome'
+        | 'firefox'
+        | 'safari'
+    )[];
 }
 
 /**
@@ -95,10 +121,22 @@ export type WalletInfo =
 
 export interface WalletInfoDTO {
     name: string;
+    app_name: string;
     image: string;
     tondns?: string;
     about_url: string;
     universal_url?: string;
+    features?: Feature[];
+    platforms: (
+        | 'ios'
+        | 'android'
+        | 'macos'
+        | 'windows'
+        | 'linux'
+        | 'chrome'
+        | 'firefox'
+        | 'safari'
+    )[];
 
     deepLink?: string;
     bridge: (WalletInfoBridgeRemoteDTO | WalletInfoBridgeInjectedDTO)[];

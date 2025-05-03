@@ -1,8 +1,9 @@
 import type { Property } from 'csstype';
 import { Component } from 'solid-js';
 import { useTheme } from 'solid-styled-components';
+import { Styleable } from 'src/app/models/styleable';
 
-interface CopyIconProps {
+export interface CopyIconProps extends Styleable {
     fill?: Property.Color;
 }
 
@@ -17,6 +18,7 @@ export const CopyIcon: Component<CopyIconProps> = props => {
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
+            class={props.class}
         >
             <path
                 fill-rule="evenodd"

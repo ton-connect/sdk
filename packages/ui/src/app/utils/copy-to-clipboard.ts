@@ -1,10 +1,15 @@
-export function copyToClipboard(text: string): Promise<void> {
-    if (navigator?.clipboard) {
-        return navigator.clipboard.writeText(text);
-    }
+import { TonConnectUIError } from 'src/errors';
+
+export async function copyToClipboard(text: string): Promise<void> {
+    try {
+        if (!navigator?.clipboard) {
+            throw new TonConnectUIError('Clipboard API not available');
+        }
+
+        return await navigator.clipboard.writeText(text);
+    } catch (e) {}
 
     fallbackCopyTextToClipboard(text);
-    return Promise.resolve();
 }
 
 function fallbackCopyTextToClipboard(text: string): void {

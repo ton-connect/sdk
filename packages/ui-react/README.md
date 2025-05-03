@@ -1,3 +1,8 @@
+> ℹ️ This is a Tonkeeper-maintained fork of the official [`@tonconnect/ui-react`](https://github.com/ton-connect/sdk)  
+> It includes additional features and improvements while maintaining compatibility with the core TonConnect protocol.
+
+---
+
 # TON Connect UI React
 
 TonConnect UI React is a React UI kit for TonConnect SDK. Use it to connect your app to TON wallets via TonConnect protocol in React apps.
@@ -6,7 +11,23 @@ If you don't use React for your app, take a look at [TonConnect UI](https://gith
 
 If you want to use TonConnect on the server side, you should use the [TonConnect SDK](https://github.com/ton-connect/sdk/tree/main/packages/sdk).
 
-You can find more details and the protocol specification in the [docs](https://github.com/ton-connect/docs).
+You can find more details and the protocol specification in the [docs](https://docs.ton.org/develop/dapps/ton-connect/overview).
+
+---
+
+# Using this fork as a drop-in replacement
+
+You can easily use this fork as a drop-in replacement for the original `@tonconnect/ui-react` package by aliasing it in your `package.json`:
+
+```json
+"dependencies": {
+  "@tonconnect/ui-react": "npm:@tonkeeper/tonconnect-react@<version>"
+}
+```
+
+Replace `<version>` with the actual version you wish to install.
+
+This allows you to import the library exactly as before, without changing any import paths in your existing code.
 
 ---
 
@@ -39,6 +60,46 @@ export function App() {
 }
 
 ```
+
+You can also specify required wallet features to filter wallets that will be displayed in the connect wallet modal:
+
+```tsx
+<TonConnectUIProvider
+    manifestUrl="https://<YOUR_APP_URL>/tonconnect-manifest.json"
+    walletsRequiredFeatures={{
+        sendTransaction: {
+            minMessages: 2, // Wallet must support at least 2 messages
+            extraCurrencyRequired: true // Wallet must support extra currency
+        }
+    }}
+>
+    { /* Your app */ }
+</TonConnectUIProvider>
+```
+
+This will only display wallets that support sending at least 2 messages and support extra currencies in transactions.
+
+Вот дополнение в том же стиле для `walletsPreferredFeatures`:
+
+---
+
+You can also specify preferred wallet features to prioritize wallets that will be displayed first in the connect wallet modal, without excluding others:
+
+```tsx
+<TonConnectUIProvider
+    manifestUrl="https://<YOUR_APP_URL>/tonconnect-manifest.json"
+    walletsPreferredFeatures={{
+        sendTransaction: {
+            minMessages: 2, // Wallets supporting at least 2 messages are prioritized
+            extraCurrencyRequired: true // Wallets supporting extra currency are prioritized
+        }
+    }}
+>
+    { /* Your app */ }
+</TonConnectUIProvider>
+```
+
+This will gently recommend wallets with richer functionality by placing them higher in the list, but all wallets remain available for selection.
 
 ## Add TonConnect Button
 TonConnect Button is universal UI component for initializing connection. After wallet is connected it transforms to a wallet menu.
@@ -107,6 +168,26 @@ export const Wallet = () => {
 };
 ```
 
+### useTonConnectModal
+
+Use this hook to access the functions for opening and closing the modal window. The hook returns an object with the current modal state and methods to open and close the modal.
+
+```tsx
+import { useTonConnectModal } from '@tonconnect/ui-react';
+
+export const ModalControl = () => {
+    const { state, open, close } = useTonConnectModal();
+
+    return (
+      <div>
+          <div>Modal state: {state?.status}</div>
+          <button onClick={open}>Open modal</button>
+          <button onClick={close}>Close modal</button>
+      </div>
+    );
+};
+```
+
 ### useTonConnectUI
 Use it to get access to the `TonConnectUI` instance and UI options updating function.
 
@@ -124,6 +205,36 @@ export const Settings = () => {
     const onLanguageChange = (lang: string) => {
         setOptions({ language: lang as Locales });
     };
+
+    const myTransaction = {
+        validUntil: Math.floor(Date.now() / 1000) + 60, // 60 sec
+        messages: [
+            {
+                address: "EQBBJBB3HagsujBqVfqeDUPJ0kXjgTPLWPFFffuNXNiJL0aA",
+                amount: "20000000",
+                // stateInit: "base64bocblahblahblah==" // just for instance. Replace with your transaction initState or remove
+            },
+            {
+                address: "EQDmnxDMhId6v1Ofg_h5KR5coWlFG6e86Ro3pc7Tq4CA0-Jn",
+                amount: "60000000",
+                // payload: "base64bocblahblahblah==" // just for instance. Replace with your transaction payload or remove
+            }
+        ]
+    }
+
+    // Example with extra currency support
+    const transactionWithExtraCurrency = {
+        validUntil: Math.floor(Date.now() / 1000) + 60,
+        messages: [
+            {
+                address: "EQBBJBB3HagsujBqVfqeDUPJ0kXjgTPLWPFFffuNXNiJL0aA",
+                // Specify the extra currency
+                extraCurrency: {
+                    100: "10000000"
+                }
+            }
+        ]
+    }
 
     return (
         <div>
@@ -240,3 +351,80 @@ useEffect(() =>
     }), []);
 ```
 
+# Troubleshooting
+
+## Android Back Handler
+
+If you encounter any issues with the Android back handler, such as modals not closing properly when the back button is pressed, or conflicts with `history.pushState()` if you are manually handling browser history in your application, you can disable the back handler by setting `enableAndroidBackHandler` to `false`:
+
+```tsx
+import { TonConnectUIProvider } from '@tonconnect/ui-react';
+
+export function App() {
+    return (
+        <TonConnectUIProvider 
+          manifestUrl="https://<YOUR_APP_URL>/tonconnect-manifest.json"
+          enableAndroidBackHandler={false}
+        >
+            { /* Your app */ }
+        </TonConnectUIProvider>
+    );
+}
+```
+
+This will disable the custom back button behavior on Android, and you can then handle the back button press manually in your application.
+
+While we do not foresee any problems arising with the Android back handler, but if you find yourself needing to disable it due to an issue, please describe the problem in on [GitHub Issues](https://github.com/ton-connect/sdk/issues), so we can assist you further.
+
+## Animations not working
+
+If you are experiencing issues with animations not working in your environment, it might be due to a lack of support for the Web Animations API. To resolve this issue, you can use the `web-animations-js` polyfill.
+
+### Using npm
+
+To install the polyfill, run the following command:
+
+```shell
+npm install web-animations-js
+```
+
+Then, import the polyfill in your project:
+
+```typescript
+import 'web-animations-js';
+```
+
+### Using CDN
+
+Alternatively, you can include the polyfill via CDN by adding the following script tag to your HTML:
+
+```html
+<script src="https://www.unpkg.com/web-animations-js@latest/web-animations.min.js"></script>
+```
+
+Both methods will provide a fallback implementation of the Web Animations API and should resolve the animation issues you are facing.
+
+## Warning about 'encoding' module in Next.js
+
+If you are using Next.js and see a warning similar to the following:
+
+```
+ ⚠ ./node_modules/node-fetch/lib/index.js
+Module not found: Can't resolve 'encoding' in '.../node_modules/node-fetch/lib'
+
+Import trace for requested module:
+./node_modules/node-fetch/lib/index.js
+./node_modules/@tonconnect/isomorphic-fetch/index.mjs
+./node_modules/@tonconnect/sdk/lib/esm/index.mjs
+./node_modules/@tonconnect/ui/lib/esm/index.mjs
+./node_modules/@tonconnect/ui-react/lib/esm/index.js
+```
+
+Please note that this is just a warning and should not affect the functionality of your application. If you wish to suppress the warning, you have two options:
+
+1. (Recommended) Wait for us to remove the dependency on `@tonconnect/isomorphic-fetch` in future releases. This dependency will be removed when we drop support for Node.js versions below 18.
+
+2. (Optional) Install the `encoding` package, to resolve the warning:
+```shell
+npm install encoding
+```

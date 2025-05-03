@@ -15,6 +15,7 @@ import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { createI18nContext, I18nContext } from '@solid-primitives/i18n';
 import { appState } from 'src/app/state/app.state';
 import { defineStylesRoot, fixMobileSafariActiveTransition } from 'src/app/utils/web-api';
+import { SingleWalletModal } from 'src/app/views/modals/wallets-modal/single-wallet-modal';
 
 export type AppProps = {
     tonConnectUI: TonConnectUI;
@@ -39,6 +40,7 @@ const App: Component<AppProps> = props => {
                         </Show>
                         <Dynamic component={globalStylesTag}>
                             <WalletsModal />
+                            <SingleWalletModal />
                             <ActionsModal />
                         </Dynamic>
                     </ThemeProvider>

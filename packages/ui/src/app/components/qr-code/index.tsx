@@ -1,6 +1,7 @@
 import { Component, createEffect, createSignal, Show } from 'solid-js';
 import {
-    CopyButtonStyled,
+    CopiedBoxStyled,
+    CopyIconButton,
     ImageBackground,
     ImageStyled,
     imgSizeDefault,
@@ -12,9 +13,10 @@ import {
 import qrcode from 'qrcode-generator';
 import { Transition } from 'solid-transition-group';
 import { copyToClipboard } from 'src/app/utils/copy-to-clipboard';
-import { Translation } from 'src/app/components/typography/Translation';
 import { Styleable } from 'src/app/models/styleable';
 import { toPx } from 'src/app/utils/css';
+import { CopyLightIcon, SuccessIcon, Text } from 'src/app/components';
+import { animate } from 'src/app/utils/animate';
 
 export interface QRCodeProps extends Styleable {
     sourceUrl: string;
@@ -22,36 +24,14 @@ export interface QRCodeProps extends Styleable {
     disableCopy?: boolean;
 }
 
-type CopyButtonText = {
-    translationKey: string;
-    text: string;
-};
-
-const copyText: CopyButtonText = {
-    translationKey: 'common.copyLink',
-    text: 'Copy Link'
-};
-
-const copiedText: CopyButtonText = {
-    translationKey: 'common.copied',
-    text: 'Copied!'
-};
-
 export const QRCode: Component<QRCodeProps> = props => {
     let qrCodeCanvasRef: HTMLDivElement | undefined;
     let qrCodeWrapperRef: HTMLDivElement | undefined;
     let imageRef: HTMLDivElement | undefined;
 
     const [copyButtonOpened, setCopyButtonOpened] = createSignal(false);
-    const [copyButtonHovered, setCopyButtonHovered] = createSignal(false);
-    const [qrHovered, setQrHovered] = createSignal(false);
-    const [copyButtonText, setCopyButtonText] = createSignal<CopyButtonText>(copyText);
 
     const [picSize, setPicSize] = createSignal(picSizeDefault);
-
-    createEffect(() => setCopyButtonOpened(copyButtonHovered() || qrHovered()));
-
-    createEffect(() => !copyButtonOpened() && setCopyButtonText(copyText));
 
     createEffect(() => {
         const errorCorrectionLevel = 'L';
@@ -80,23 +60,19 @@ export const QRCode: Component<QRCodeProps> = props => {
 
     let timeoutId: null | ReturnType<typeof setTimeout> = null;
     const onCopyClick = (): void => {
+        setCopyButtonOpened(true);
         copyToClipboard(props.sourceUrl);
-        setCopyButtonText(copiedText);
 
         if (timeoutId != null) {
             clearTimeout(timeoutId);
         }
 
-        timeoutId = setTimeout(() => setCopyButtonText(copyText), 3000);
+        timeoutId = setTimeout(() => setCopyButtonOpened(false), 1500);
     };
 
     return (
-        <QrCodeBackground class={props.class}>
-            <QrCodeWrapper
-                ref={qrCodeWrapperRef}
-                onMouseEnter={() => setQrHovered(true)}
-                onMouseLeave={() => setTimeout(() => setQrHovered(false))}
-            >
+        <QrCodeBackground class={props.class} onClick={onCopyClick}>
+            <QrCodeWrapper ref={qrCodeWrapperRef}>
                 <div ref={qrCodeCanvasRef} />
                 <Show when={props.imageUrl}>
                     <ImageBackground ref={imageRef}>
@@ -106,24 +82,28 @@ export const QRCode: Component<QRCodeProps> = props => {
             </QrCodeWrapper>
             <Transition
                 onBeforeEnter={el => {
-                    el.animate(
+                    animate(
+                        el,
                         [
                             { opacity: 0, transform: 'translate(-50%, 44px)' },
                             { opacity: 1, transform: 'translate(-50%, 0)' }
                         ],
                         {
-                            duration: 200
+                            duration: 150,
+                            easing: 'ease-out'
                         }
                     );
                 }}
                 onExit={(el, done) => {
-                    el.animate(
+                    animate(
+                        el,
                         [
                             { opacity: 1, transform: 'translate(-50%, 0)' },
                             { opacity: 0, transform: 'translate(-50%, 44px)' }
                         ],
                         {
-                            duration: 200
+                            duration: 150,
+                            easing: 'ease-out'
                         }
                     ).finished.then(() => {
                         done();
@@ -131,17 +111,17 @@ export const QRCode: Component<QRCodeProps> = props => {
                 }}
             >
                 <Show when={copyButtonOpened() && !props.disableCopy}>
-                    <CopyButtonStyled
-                        onClick={onCopyClick}
-                        onMouseEnter={() => copyButtonOpened() && setCopyButtonHovered(true)}
-                        onMouseLeave={() => setTimeout(() => setCopyButtonHovered(false))}
-                    >
-                        <Translation translationKey={copyButtonText().translationKey}>
-                            {copyButtonText().text}
-                        </Translation>
-                    </CopyButtonStyled>
+                    <CopiedBoxStyled>
+                        <SuccessIcon size="xs" />
+                        <Text translationKey="common.linkCopied">Link Copied</Text>
+                    </CopiedBoxStyled>
                 </Show>
             </Transition>
+            <Show when={!props.disableCopy}>
+                <CopyIconButton>
+                    <CopyLightIcon />
+                </CopyIconButton>
+            </Show>
         </QrCodeBackground>
     );
 };

@@ -1,0 +1,63 @@
+name: "Bug report"
+title: "[<SDK or UI or UI-REACT or PROTOCOL>]: <description>"
+description: "Please describe the bug in detail. Include the area (SDK, UI, UI-REACT, PROTOCOL) in the title."
+labels: ["bug"]
+assignees: ["thekiba"]
+
+body:
+  - type: textarea
+    attributes:
+      label: "Describe the bug"
+      description: |
+        **Please provide the following details:**
+        - The specific error or exception encountered.
+        - Stack trace, if available.
+        - Steps or code snippet to reproduce the bug.
+        - Screenshot or video demonstrating the issue, if possible.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "Expected behavior"
+      description: "Describe what you expected to happen."
+      placeholder: "I expected that..."
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "Current behavior"
+      description: "Describe what is actually happening."
+      placeholder: "Instead, I observed..."
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "Steps to Reproduce"
+      description: "Please outline the steps to reproduce the bug."
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. Scroll down to '...'
+        4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "Environment"
+      description: |
+        **Please provide the following environment details:**
+        - Output of `npm ls @tonconnect/{ui-react,ui,sdk,protocol,isomorphic-fetch,isomorphic-eventsource}`.
+        - Operating System (e.g., iOS, Android, Windows, MacOS, Linux) and version (e.g., 10.15.7).
+        - Browser (e.g., Chrome, Safari, Firefox) and version (e.g., 86.0.4240.111).
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "Additional context"
+      description: "Add any other context or information about the problem here."
+      placeholder: "Additional details..."

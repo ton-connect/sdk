@@ -1,5 +1,6 @@
-import { ITonConnect } from '@tonconnect/sdk';
+import { EventDispatcher, ITonConnect, SdkActionEvent } from '@tonconnect/sdk';
 import { TonConnectUiOptions } from 'src/models/ton-connect-ui-options';
+import { UserActionEvent } from 'src/tracker/types';
 
 export type TonConnectUiCreateOptions =
     | TonConnectUiOptionsWithConnector
@@ -32,4 +33,10 @@ export interface TonConnectUiCreateOptionsBase extends TonConnectUiOptions {
      * @default `div#tc-widget-root`.
      */
     widgetRootId?: string;
+
+    /**
+     * Event dispatcher to track user actions. By default, it uses `window.dispatchEvent` for browser environment.
+     * @default BrowserEventDispatcher.
+     */
+    eventDispatcher?: EventDispatcher<UserActionEvent | SdkActionEvent>;
 }

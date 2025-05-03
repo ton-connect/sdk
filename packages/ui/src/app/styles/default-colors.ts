@@ -6,10 +6,11 @@ export const defaultLightColorsSet: ColorsSet = {
         white: '#FFFFFF'
     },
     connectButton: {
-        background: '#31A6F5',
+        background: '#0098EA',
         foreground: '#FFFFFF'
     },
-    accent: '#31A6F5',
+    accent: '#0098EA',
+    telegramButton: '#0098EA',
     icon: {
         primary: '#0F0F0F',
         secondary: '#7A8999',
@@ -20,7 +21,9 @@ export const defaultLightColorsSet: ColorsSet = {
     background: {
         primary: '#FFFFFF',
         secondary: '#F1F3F5',
-        segment: '#FFFFFF'
+        segment: '#FFFFFF',
+        tint: '#F1F3F5',
+        qr: '#F1F3F5'
     },
     text: {
         primary: '#0F0F0F',
@@ -34,10 +37,11 @@ export const defaultDarkColorsSet: ColorsSet = {
         white: '#FFFFFF'
     },
     connectButton: {
-        background: '#31A6F5',
+        background: '#0098EA',
         foreground: '#FFFFFF'
     },
     accent: '#E5E5EA',
+    telegramButton: '#31A6F5',
     icon: {
         primary: '#E5E5EA',
         secondary: '#909099',
@@ -48,7 +52,9 @@ export const defaultDarkColorsSet: ColorsSet = {
     background: {
         primary: '#121214',
         secondary: '#18181A',
-        segment: '#262629'
+        segment: '#262629',
+        tint: '#222224',
+        qr: '#FFFFFF'
     },
     text: {
         primary: '#E5E5EA',

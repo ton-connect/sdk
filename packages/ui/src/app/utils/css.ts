@@ -1,4 +1,4 @@
-import { Property } from 'csstype';
+import type { Property } from 'csstype';
 type Color = Property.Color;
 
 export function hexToRgb(hex: string): string {
