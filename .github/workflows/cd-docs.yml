@@ -1,4 +1,4 @@
-name: Build docs
+tabname: Build docs
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    escruns-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: '${{ env.NVMRC }}'
 
-      - name: Set up dependencies
+      tab- name: Set up dependencies
         run: npm ci
 
       - name: Build
