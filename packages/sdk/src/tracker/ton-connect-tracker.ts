@@ -8,6 +8,9 @@ import {
     createDisconnectionEvent,
     createRequestVersionEvent,
     createResponseVersionEvent,
+    createDataSentForSignatureEvent,
+    createDataSignedEvent,
+    createDataSigningFailedEvent,
     createTransactionSentForSignatureEvent,
     createTransactionSignedEvent,
     createTransactionSigningFailedEvent,
@@ -49,6 +52,9 @@ export type TonConnectTrackerOptions = {
  *  * `transaction-sent-for-signature`: when a user sends a transaction for signature.
  *  * `transaction-signed`: when a user successfully signs a transaction.
  *  * `transaction-signing-failed`: when a user cancels transaction signing or there is an error during the signing process.
+ *  * `sign-data-request-initiated`: when a user sends data for signature.
+ *  * `sign-data-request-completed`: when a user successfully signs data.
+ *  * `sign-data-request-failed`: when a user cancels data signing or there is an error during the signing process.
  *
  * If you want to track user actions, you can subscribe to the window events with prefix `ton-connect-`:
  *
@@ -286,6 +292,45 @@ export class TonConnectTracker {
     ): void {
         try {
             const event = createTransactionSigningFailedEvent(this.version, ...args);
+            this.dispatchUserActionEvent(event);
+        } catch (e) {}
+    }
+
+    /**
+     * Track sign data init event.
+     * @param args
+     */
+    public trackDataSentForSignature(
+        ...args: WithoutVersion<Parameters<typeof createDataSentForSignatureEvent>>
+    ): void {
+        try {
+            const event = createDataSentForSignatureEvent(this.version, ...args);
+            this.dispatchUserActionEvent(event);
+        } catch (e) {}
+    }
+
+    /**
+     * Track sign data success event.
+     * @param args
+     */
+    public trackDataSigned(
+        ...args: WithoutVersion<Parameters<typeof createDataSignedEvent>>
+    ): void {
+        try {
+            const event = createDataSignedEvent(this.version, ...args);
+            this.dispatchUserActionEvent(event);
+        } catch (e) {}
+    }
+
+    /**
+     * Track sign data error event.
+     * @param args
+     */
+    public trackDataSigningFailed(
+        ...args: WithoutVersion<Parameters<typeof createDataSigningFailedEvent>>
+    ): void {
+        try {
+            const event = createDataSigningFailedEvent(this.version, ...args);
             this.dispatchUserActionEvent(event);
         } catch (e) {}
     }
