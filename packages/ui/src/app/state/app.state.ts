@@ -16,6 +16,7 @@ export type AppState = {
     preferredWalletAppName: string | undefined;
     enableAndroidBackHandler: boolean;
     walletsRequiredFeatures: RequiredFeatures | undefined;
+    walletsPreferredFeatures: RequiredFeatures | undefined;
 };
 
 export const [appState, setAppState] = createStore<AppState>({
