@@ -374,6 +374,9 @@ List of events:
 * `transaction-sent-for-signature`: when a user sends a transaction for signature.
 * `transaction-signed`: when a user successfully signs a transaction.
 * `transaction-signing-failed`: when a user cancels transaction signing or there is an error during the signing process.
+* `sign-data-request-initiated`: when a user initiates a request to sign data.
+* `sign-data-request-completed`: when a user successfully signs data.
+* `sign-data-request-failed`: when a user cancels data signing or there is an error during the signing process.
 
 If you want to track user actions, you can subscribe to the window events with prefix `ton-connect-`:
 
