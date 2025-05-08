@@ -1,5 +1,15 @@
 # Changelog @tonconnect/sdk 
 
+# [3.2.0-beta.0](https://github.com/ton-connect/sdk/compare/sdk-3.1.1-beta.0...sdk-3.2.0-beta.0) (2025-05-08)
+
+
+### Features
+
+* **sdk:** implement SignData feature ([c5f2ac8](https://github.com/ton-connect/sdk/commit/c5f2ac8c7af260075b1717b16748bfa2fd12ef8f))
+* **sdk:** include cause info in WalletNotSupportFeatureError ([11a645c](https://github.com/ton-connect/sdk/commit/11a645c99780577887ddaab271b086d5a329f2d3))
+
+
+
 ## [3.1.1-beta.0](https://github.com/ton-connect/sdk/compare/sdk-3.1.0...sdk-3.1.1-beta.0) (2025-03-27)
 
 
