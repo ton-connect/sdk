@@ -1,9 +1,10 @@
 import { TonConnectError } from 'src/errors';
 import { Account, Wallet, WalletConnectionSource, WalletConnectionSourceHTTP } from 'src/models';
-import { SendTransactionRequest, SendTransactionResponse } from 'src/models/methods';
+import { SendTransactionRequest, SendTransactionResponse, SignDataResponse } from 'src/models/methods';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
 import { WalletInfo } from 'src/models/wallet/wallet-info';
 import { WalletConnectionSourceJS } from 'src/models/wallet/wallet-connection-source';
+import { SignDataPayload } from '@tonconnect/protocol';
 
 export interface ITonConnect {
     /**
@@ -92,4 +93,12 @@ export interface ITonConnect {
         transaction: SendTransactionRequest,
         onRequestSent?: () => void
     ): Promise<SendTransactionResponse>;
+
+    signData(
+        data: SignDataPayload,
+        options?: {
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+        }
+    ): Promise<SignDataResponse> 
 }

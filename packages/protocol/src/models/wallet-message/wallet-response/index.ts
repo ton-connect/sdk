@@ -11,6 +11,10 @@ export {
     SEND_TRANSACTION_ERROR_CODES
 } from './send-transaction-rpc-response';
 export {
+    SignDataPayload,
+    SignDataPayloadText,
+    SignDataPayloadBinary,
+    SignDataPayloadCell,
     SignDataRpcResponse,
     SignDataRpcResponseSuccess,
     SignDataRpcResponseError,

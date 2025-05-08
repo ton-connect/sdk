@@ -4,6 +4,8 @@ import {
     ConnectRequest,
     Feature,
     SendTransactionRpcResponseSuccess,
+    SignDataPayload,
+    SignDataRpcResponseSuccess,
     TonAddressItemReply,
     TonProofItemReply,
     WalletEvent
@@ -25,7 +27,11 @@ import {
     WalletConnectionSourceHTTP,
     WalletInfo
 } from 'src/models';
-import { SendTransactionRequest, SendTransactionResponse } from 'src/models/methods';
+import {
+    SendTransactionRequest,
+    SendTransactionResponse,
+    SignDataResponse
+} from 'src/models/methods';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
 import { TonConnectOptions } from 'src/models/ton-connect-options';
 import {
@@ -34,6 +40,7 @@ import {
 } from 'src/models/wallet/wallet-connection-source';
 import { connectErrorsParser } from 'src/parsers/connect-errors-parser';
 import { sendTransactionParser } from 'src/parsers/send-transaction-parser';
+import { signDataParser } from 'src/parsers/sign-data-parser';
 import { BridgeProvider } from 'src/provider/bridge/bridge-provider';
 import { InjectedProvider } from 'src/provider/injected/injected-provider';
 import { Provider } from 'src/provider/provider';
@@ -45,7 +52,8 @@ import { WalletsListManager } from 'src/wallets-list-manager';
 import { WithoutIdDistributive } from 'src/utils/types';
 import {
     checkSendTransactionSupport,
-    checkRequiredWalletFeatures
+    checkRequiredWalletFeatures,
+    checkSignDataSupport
 } from 'src/utils/feature-support';
 import { callForSuccess } from 'src/utils/call-for-success';
 import { logDebug, logError } from 'src/utils/log';
@@ -471,6 +479,44 @@ export class TonConnect implements ITonConnect {
             response as SendTransactionRpcResponseSuccess
         );
         this.tracker.trackTransactionSigned(this.wallet, transaction, result);
+        return result;
+    }
+
+    public async signData(
+        data: SignDataPayload,
+        options?: {
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+        }
+    ): Promise<SignDataResponse> {
+        const abortController = createAbortController(options?.signal);
+        if (abortController.signal.aborted) {
+            throw new TonConnectError('Data sending was aborted');
+        }
+
+        this.checkConnection();
+        checkSignDataSupport(this.wallet!.device.features, { requiredTypes: [data.type] });
+
+        this.tracker.trackDataSentForSignature(this.wallet, data);
+
+        const response = await this.provider!.sendRequest(signDataParser.convertToRpcRequest(data));
+
+        if (signDataParser.isError(response)) {
+            this.tracker.trackDataSigningFailed(
+                this.wallet,
+                data,
+                response.error.message,
+                response.error.code
+            );
+            return signDataParser.parseAndThrowError(response);
+        }
+
+        const result = signDataParser.convertFromRpcResponse(
+            response as SignDataRpcResponseSuccess
+        );
+
+        this.tracker.trackDataSigned(this.wallet, data, result);
+
         return result;
     }
 

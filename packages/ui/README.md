@@ -660,9 +660,12 @@ UI components:
 | Wallets list modal page              | `[data-tc-wallets-modal-list="true"]`               | Content of the modal page with all available wallets list (desktop and mobile).                                       |
 | Info modal page                      | `[data-tc-wallets-modal-info="true"]`               | Content of the modal page with "What is a wallet information".                                                        |
 | Action modal container               | `[data-tc-actions-modal-container="true"]`          | Container of the modal window that opens when you call `sendTransaction` or other action.                             |
-| Confirm action modal content         | `[data-tc-confirm-modal="true"]`                    | Content of the modal window asking for confirmation of the action in the wallet.                                      |
+| Confirm transaction modal content    | `[data-tc-confirm-modal="true"]`                    | Content of the modal window asking for confirmation of the action in the wallet.                                      |
 | "Transaction sent" modal content     | `[data-tc-transaction-sent-modal="true"]`           | Content of the modal window informing that the transaction was successfully sent.                                     |
 | "Transaction canceled" modal content | `[data-tc-transaction-canceled-modal="true"]`       | Content of the modal window informing that the transaction was not sent.                                              |
+| Confirm sign data modal              | `[data-tc-sign-data-confirm-modal="true"]`          | Content of the modal window asking for confirmation of the signing data in the wallet.                                |
+| "Sign data canceled" moda l          | `[data-tc-notification-sign-data-cancelled="true"]` | Content of the modal window informing that the signing data was not confirmed.                                        |
+| "Sign data error" modal              | `[data-tc-notification-sign-data-error="true"]`     | Content of the modal window informing that the signing data was not confirmed due to an error.                        |
 | "Connect Wallet" button              | `[data-tc-connect-button="true"]`                   | "Connect Wallet" button element.                                                                                      |
 | Wallet menu loading button           | `[data-tc-connect-button-loading="true"]`           | Button element which appears instead of "Connect Wallet" and dropdown menu buttons while restoring connection process |
 | Wallet menu dropdown button          | `[data-tc-dropdown-button="true"]`                  | Wallet menu button -- host of the dropdown wallet menu (copy address/disconnect).                                     |
@@ -801,6 +804,9 @@ List of events:
 * `transaction-sent-for-signature`: when a user sends a transaction for signature.
 * `transaction-signed`: when a user successfully signs a transaction.
 * `transaction-signing-failed`: when a user cancels transaction signing or there is an error during the signing process.
+* `sign-data-request-initiated`: when a user sends data for signing.
+* `sign-data-request-completed` when a user successfully signs data.
+* `sign-data-request-failed`: when a user cancels data signing or there is an error during the signing process.
 
 If you want to track user actions, you can subscribe to the window events with prefix `ton-connect-ui-`:
 
