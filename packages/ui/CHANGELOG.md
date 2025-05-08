@@ -1,5 +1,17 @@
 # Changelog @tonconnect/ui 
 
+# [2.2.0-beta.0](https://github.com/ton-connect/sdk/compare/ui-2.1.1-beta.0...ui-2.2.0-beta.0) (2025-05-08)
+
+
+### Features
+
+* **ui:** add walletsRequestedFeatures to `set uiOptions` ([efd3d79](https://github.com/ton-connect/sdk/commit/efd3d792024982da32e645e9ca02a2cd7552aee0))
+* **ui:** implement SignData feature ([432ca85](https://github.com/ton-connect/sdk/commit/432ca85d0d970681c8a8dbee8e12a4dd5cbf1f82))
+* **ui:** support preferred wallet features and show fallback for unsupported ones ([9f7a7c5](https://github.com/ton-connect/sdk/commit/9f7a7c5526365ce175a1b731cc4f9e218e0ecd14))
+* **ui:** temporary disabled wallets selection when called feature is not available ([b5f6445](https://github.com/ton-connect/sdk/commit/b5f6445bfa67e24b2a27a698d211bd80624cddb2))
+
+
+
 ## [2.1.1-beta.0](https://github.com/ton-connect/sdk/compare/ui-2.1.0...ui-2.1.1-beta.0) (2025-03-27)
 
 
