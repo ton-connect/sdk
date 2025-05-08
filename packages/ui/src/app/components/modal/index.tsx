@@ -32,6 +32,7 @@ export interface ModalProps extends Styleable, WithDataAttributes {
     enableAndroidBackHandler: boolean;
     onClose: () => void;
     onClickQuestion?: () => void;
+    showFooter: boolean;
 }
 
 export const Modal: Component<ModalProps> = props => {
@@ -115,7 +116,7 @@ export const Modal: Component<ModalProps> = props => {
                             <CloseButtonStyled icon="close" onClick={() => props.onClose()} />
                             {props.children}
                         </ModalBodyStyled>
-                        <Show when={props.onClickQuestion}>
+                        <Show when={props.onClickQuestion && props.showFooter}>
                             <ModalFooterStyled>
                                 <TonConnectBrand />
                                 <QuestionButtonStyled
