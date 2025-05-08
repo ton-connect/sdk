@@ -13,7 +13,8 @@ import {
     TonConnect,
     TonConnectError,
     Wallet,
-    WalletInfo
+    WalletInfo,
+    WalletNotSupportFeatureError
 } from '@tonconnect/sdk';
 import { widgetController } from 'src/app/widget-controller';
 import { TonConnectUIError } from 'src/errors/ton-connect-ui.error';
@@ -69,7 +70,17 @@ export class TonConnectUI {
 
     private readonly walletsList: Promise<WalletInfo[]>;
 
-    public readonly walletsRequiredFeatures?: RequiredFeatures;
+    private _walletsRequiredFeatures?: RequiredFeatures;
+
+    public get walletsRequiredFeatures(): RequiredFeatures | undefined {
+        return this._walletsRequiredFeatures;
+    }
+
+    private _walletsPreferredFeatures?: RequiredFeatures;
+
+    public get walletsPreferredFeatures(): RequiredFeatures | undefined {
+        return this._walletsPreferredFeatures;
+    }
 
     private connectRequestParametersCallback?: (
         parameters: ConnectAdditionalRequest | undefined
@@ -140,6 +151,14 @@ export class TonConnectUI {
         this.checkButtonRootExist(options.buttonRootId);
 
         this.actionsConfiguration = options.actionsConfiguration;
+
+        if ('walletsRequiredFeatures' in options) {
+            this._walletsRequiredFeatures = options.walletsRequiredFeatures;
+        }
+
+        if ('walletsPreferredFeatures' in options) {
+            this._walletsPreferredFeatures = options.walletsPreferredFeatures;
+        }
 
         if (options.uiPreferences?.theme) {
             if (options.uiPreferences?.theme !== 'SYSTEM') {
@@ -236,7 +255,9 @@ export class TonConnectUI {
             connector: this.connector
         });
 
-        this.walletsRequiredFeatures = options.walletsRequiredFeatures;
+        this._walletsRequiredFeatures = options.walletsRequiredFeatures;
+
+        this._walletsPreferredFeatures = options.walletsPreferredFeatures;
 
         this.walletsList = this.getWallets();
 
@@ -507,6 +528,13 @@ export class TonConnectUI {
 
             return result;
         } catch (e) {
+            if (e instanceof WalletNotSupportFeatureError) {
+                widgetController.clearAction();
+                widgetController.openWalletNotSupportFeatureModal(e.cause);
+
+                throw e;
+            }
+
             widgetController.setAction({
                 name: 'transaction-canceled',
                 showNotification: notifications.includes('error'),

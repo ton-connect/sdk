@@ -1,7 +1,9 @@
-import { css, styled } from 'solid-styled-components';
+import { styled } from 'solid-styled-components';
 import { H1, H3, IconButton, Text } from 'src/app/components';
 
-export const InfoModalStyled = styled.div``;
+export const RestoreInfoModalStyled = styled.div`
+    margin: 0 8px 16px 8px;
+`;
 
 export const StyledIconButton = styled(IconButton)`
     position: absolute;
@@ -11,16 +13,17 @@ export const StyledIconButton = styled(IconButton)`
 
 export const H1Styled = styled(H1)`
     margin-bottom: 18px;
+    text-align: center;
 `;
 
-export const InfoBlock = styled.div`
+export const StepBlock = styled.div`
     padding: 16px 0;
     display: flex;
     flex-direction: column;
     align-items: center;
 `;
 
-export const InfoBlockIconClass = css`
+export const IconWrapper = styled.div`
     margin-bottom: 12px;
 `;
 
@@ -35,10 +38,16 @@ export const TextStyled = styled(Text)`
     color: ${props => props.theme!.colors.text.secondary};
 `;
 
-export const ButtonsBlock = styled.div`
-    padding: 16px 24px 24px;
+export const CircleNumber = styled.div`
+    width: 44px;
+    height: 44px;
+    border-radius: 20px;
+    background-color: ${props => props.theme?.colors.icon.secondary};
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    margin-bottom: 12px;
+    font-weight: 700;
+    font-size: 22px;
+    color: ${props => props.theme?.colors.text.primary};
 `;
