@@ -21,6 +21,9 @@ export {
     createTransactionSentForSignatureEvent,
     createTransactionSigningFailedEvent,
     createTransactionSignedEvent,
+    createDataSentForSignatureEvent,
+    createDataSigningFailedEvent,
+    createDataSignedEvent,
     createRequestVersionEvent,
     createResponseVersionEvent,
     createVersionInfo
@@ -43,6 +46,10 @@ export type {
     TransactionSignedEvent,
     TransactionSentForSignatureEvent,
     TransactionSigningFailedEvent,
+    DataSigningEvent,
+    DataSignedEvent,
+    DataSentForSignatureEvent,
+    DataSigningFailedEvent,
     SdkActionEvent,
     RequestVersionEvent,
     ResponseVersionEvent,
@@ -60,15 +67,21 @@ export {
     DeviceInfo,
     Feature,
     SendTransactionFeature,
-    SignDataFeature,
     SendTransactionFeatureDeprecated,
+    SignDataFeature,
+    SignDataType,
+    SignDataPayload,
+    SignDataPayloadText,
+    SignDataPayloadBinary,
+    SignDataPayloadCell,
     TonProofItemReply,
     TonProofItemReplySuccess,
     TonProofItemReplyError,
     ConnectItemReplyError,
     CONNECT_ITEM_ERROR_CODES,
     CONNECT_EVENT_ERROR_CODES,
-    SEND_TRANSACTION_ERROR_CODES
+    SEND_TRANSACTION_ERROR_CODES,
+    SIGN_DATA_ERROR_CODES
 } from '@tonconnect/protocol';
 export { toUserFriendlyAddress } from './utils/address';
 export { checkRequiredWalletFeatures }  from './utils/feature-support';
