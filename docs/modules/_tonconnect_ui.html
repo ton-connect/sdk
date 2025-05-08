@@ -16,7 +16,7 @@
 <li><a href="_tonconnect_ui.html">@tonconnect/ui</a></li></ul>
 <h1>Module @tonconnect/ui</h1></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/5f9799b/packages/ui/src/library.ts#L1">packages/ui/src/library.ts:1</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/ton-connect/sdk/blob/3c87b79/packages/ui/src/library.ts#L1">packages/ui/src/library.ts:1</a></li></ul></aside>
 <section class="tsd-panel-group">
 <section class="tsd-panel tsd-typography">
 <a href="#ton-connect-ui" id="ton-connect-ui" style="color: inherit; text-decoration: none;">
@@ -64,6 +64,10 @@
 <pre><code class="language-ts"><span class="hl-0">import</span><span class="hl-1"> { </span><span class="hl-2">TonConnectUI</span><span class="hl-1"> } </span><span class="hl-0">from</span><span class="hl-1"> </span><span class="hl-3">&#39;@tonconnect/ui&#39;</span><br/><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">tonConnectUI</span><span class="hl-1"> = </span><span class="hl-4">new</span><span class="hl-1"> </span><span class="hl-5">TonConnectUI</span><span class="hl-1">({</span><br/><span class="hl-1">    </span><span class="hl-2">manifestUrl:</span><span class="hl-1"> </span><span class="hl-3">&#39;https://&lt;YOUR_APP_URL&gt;/tonconnect-manifest.json&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-2">buttonRootId:</span><span class="hl-1"> </span><span class="hl-3">&#39;&lt;YOUR_CONNECT_BUTTON_ANCHOR_ID&gt;&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-2">walletsRequiredFeatures:</span><span class="hl-1"> {</span><br/><span class="hl-1">        </span><span class="hl-2">sendTransaction:</span><span class="hl-1"> {</span><br/><span class="hl-1">            </span><span class="hl-2">minMessages:</span><span class="hl-1"> </span><span class="hl-15">2</span><span class="hl-1">, </span><span class="hl-7">// Wallet must support at least 2 messages</span><br/><span class="hl-1">            </span><span class="hl-2">extraCurrencyRequired:</span><span class="hl-1"> </span><span class="hl-4">true</span><span class="hl-1"> </span><span class="hl-7">// Wallet must support extra currency</span><br/><span class="hl-1">        }</span><br/><span class="hl-1">    }</span><br/><span class="hl-1">});</span>
 </code></pre>
 <p>This will filter out wallets that don&#39;t support sending multiple messages or don&#39;t support extra currencies.</p>
+<p>You can also specify preferred wallet features to prioritize wallets that support them in the connect wallet modal. These wallets will be shown first in the list, but others will still be available:</p>
+<pre><code class="language-ts"><span class="hl-0">import</span><span class="hl-1"> { </span><span class="hl-2">TonConnectUI</span><span class="hl-1"> } </span><span class="hl-0">from</span><span class="hl-1"> </span><span class="hl-3">&#39;@tonconnect/ui&#39;</span><br/><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-8">tonConnectUI</span><span class="hl-1"> = </span><span class="hl-4">new</span><span class="hl-1"> </span><span class="hl-5">TonConnectUI</span><span class="hl-1">({</span><br/><span class="hl-1">    </span><span class="hl-2">manifestUrl:</span><span class="hl-1"> </span><span class="hl-3">&#39;https://&lt;YOUR_APP_URL&gt;/tonconnect-manifest.json&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-2">buttonRootId:</span><span class="hl-1"> </span><span class="hl-3">&#39;&lt;YOUR_CONNECT_BUTTON_ANCHOR_ID&gt;&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-2">walletsPreferredFeatures:</span><span class="hl-1"> {</span><br/><span class="hl-1">        </span><span class="hl-2">sendTransaction:</span><span class="hl-1"> {</span><br/><span class="hl-1">            </span><span class="hl-2">minMessages:</span><span class="hl-1"> </span><span class="hl-15">2</span><span class="hl-1">,</span><br/><span class="hl-1">            </span><span class="hl-2">extraCurrencyRequired:</span><span class="hl-1"> </span><span class="hl-4">true</span><br/><span class="hl-1">        }</span><br/><span class="hl-1">    }</span><br/><span class="hl-1">});</span>
+</code></pre>
+<p>This will highlight wallets that support sending multiple messages and extra currencies, but won’t hide those that don’t. Use this to gently recommend more feature-rich wallets without excluding others.</p>
 <p>See all available options:</p>
 <p><a href="https://ton-connect.github.io/sdk/interfaces/_tonconnect_ui.TonConnectUiOptionsWithManifest.html">TonConnectUiOptionsWithManifest</a></p>
 <p><a href="https://ton-connect.github.io/sdk/interfaces/_tonconnect_ui.TonConnectUiOptionsWithConnector.html">TonConnectUiOptionsWithConnector</a></p>
@@ -367,7 +371,7 @@ However, it is possible if needed. You can add css styles to the specified selec
 <td>Container of the modal window that opens when you call <code>sendTransaction</code> or other action.</td>
 </tr>
 <tr>
-<td>Confirm action modal content</td>
+<td>Confirm transaction modal content</td>
 <td><code>[data-tc-confirm-modal=&quot;true&quot;]</code></td>
 <td>Content of the modal window asking for confirmation of the action in the wallet.</td>
 </tr>
@@ -380,6 +384,21 @@ However, it is possible if needed. You can add css styles to the specified selec
 <td>&quot;Transaction canceled&quot; modal content</td>
 <td><code>[data-tc-transaction-canceled-modal=&quot;true&quot;]</code></td>
 <td>Content of the modal window informing that the transaction was not sent.</td>
+</tr>
+<tr>
+<td>Confirm sign data modal</td>
+<td><code>[data-tc-sign-data-confirm-modal=&quot;true&quot;]</code></td>
+<td>Content of the modal window asking for confirmation of the signing data in the wallet.</td>
+</tr>
+<tr>
+<td>&quot;Sign data canceled&quot; moda l</td>
+<td><code>[data-tc-notification-sign-data-cancelled=&quot;true&quot;]</code></td>
+<td>Content of the modal window informing that the signing data was not confirmed.</td>
+</tr>
+<tr>
+<td>&quot;Sign data error&quot; modal</td>
+<td><code>[data-tc-notification-sign-data-error=&quot;true&quot;]</code></td>
+<td>Content of the modal window informing that the signing data was not confirmed due to an error.</td>
 </tr>
 <tr>
 <td>&quot;Connect Wallet&quot; button</td>
@@ -534,6 +553,9 @@ However, it is possible if needed. You can add css styles to the specified selec
 <li><code>transaction-sent-for-signature</code>: when a user sends a transaction for signature.</li>
 <li><code>transaction-signed</code>: when a user successfully signs a transaction.</li>
 <li><code>transaction-signing-failed</code>: when a user cancels transaction signing or there is an error during the signing process.</li>
+<li><code>sign-data-request-initiated</code>: when a user sends data for signing.</li>
+<li><code>sign-data-request-completed</code> when a user successfully signs data.</li>
+<li><code>sign-data-request-failed</code>: when a user cancels data signing or there is an error during the signing process.</li>
 </ul>
 <p>If you want to track user actions, you can subscribe to the window events with prefix <code>ton-connect-ui-</code>:</p>
 <pre><code class="language-typescript"><span class="hl-2">window</span><span class="hl-1">.</span><span class="hl-5">addEventListener</span><span class="hl-1">(</span><span class="hl-3">&#39;ton-connect-ui-transaction-sent-for-signature&#39;</span><span class="hl-1">, (</span><span class="hl-2">event</span><span class="hl-1">) </span><span class="hl-4">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">    </span><span class="hl-2">console</span><span class="hl-1">.</span><span class="hl-5">log</span><span class="hl-1">(</span><span class="hl-3">&#39;Transaction init&#39;</span><span class="hl-1">, </span><span class="hl-2">event</span><span class="hl-1">.</span><span class="hl-2">detail</span><span class="hl-1">);</span><br/><span class="hl-1">});</span>
