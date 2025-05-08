@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui-react 
 
+# [2.2.0-beta.0](https://github.com/ton-connect/sdk/compare/ui-react-2.1.1-beta.0...ui-react-2.2.0-beta.0) (2025-05-08)
+
+
+### Features
+
+* **ui-react:** add support for preferred wallet features in TonConnectUIProvider ([34ffde3](https://github.com/ton-connect/sdk/commit/34ffde335ecaba7d725d56732bd3b5ec3228e386))
+
+
+
 ## [2.1.1-beta.0](https://github.com/ton-connect/sdk/compare/ui-react-2.1.0...ui-react-2.1.1-beta.0) (2025-03-27)
 
 
