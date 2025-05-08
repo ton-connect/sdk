@@ -1,5 +1,15 @@
 # Changelog @tonconnect/protocol 
 
+# [2.3.0-beta.0](https://github.com/ton-connect/sdk/compare/protocol-2.2.7...protocol-2.3.0-beta.0) (2025-05-08)
+
+
+### Features
+
+* **protocol:** add FeatureName type ([997f49c](https://github.com/ton-connect/sdk/commit/997f49ceb97586626107068ea96adc41eae53240))
+* **protocol:** implement SignData feature ([0b64e1c](https://github.com/ton-connect/sdk/commit/0b64e1cf57bfd6dbd86ebd98d6042748a9865421))
+
+
+
 ## [2.2.7](https://github.com/ton-connect/sdk/compare/protocol-2.2.7-alpha.1...protocol-2.2.7) (2025-03-06)
 
 
