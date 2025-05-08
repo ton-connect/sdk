@@ -1,12 +1,20 @@
-import { Component, createMemo, createSignal, For, Match, Show, Switch } from 'solid-js';
+import {
+    Component,
+    createMemo,
+    createSignal,
+    // For,
+    Match,
+    // Show,
+    Switch
+} from 'solid-js';
 import {
     DesktopFeatureNotSupportModalStyled,
     TitleStyled,
     DescriptionStyled,
-    WalletsContainerStyled,
+    // WalletsContainerStyled,
     ErrorIconStyled,
     DisconnectButtonStyled,
-    RestoreWalletLinkStyled,
+    // RestoreWalletLinkStyled,
     StyledIconButton,
     BodyTextStyled,
     Spacer,
@@ -15,11 +23,18 @@ import {
 } from './style';
 
 import { UIWalletInfo } from 'src/app/models/ui-wallet-info';
-import { FourWalletsItem, WalletLabeledItem, Button, Link, LinkIcon } from 'src/app/components';
+import {
+    // FourWalletsItem,
+    // WalletLabeledItem,
+    Button,
+    Link,
+    LinkIcon
+} from 'src/app/components';
 import { checkRequiredWalletFeatures, Wallet } from '@tonconnect/sdk';
 import { RestoreInfoModal } from './restore-info-modal';
 import { ChooseSupportedFeatureWalletsModal } from 'src/models/wallets-modal';
 import { Translation } from 'src/app/components/typography/Translation';
+import { AT_WALLET_APP_NAME } from 'src/app/env/AT_WALLET_APP_NAME';
 
 interface DesktopFeatureNotSupportModalProps {
     walletsList: UIWalletInfo[];
@@ -37,23 +52,36 @@ export const DesktopFeatureNotSupportModal: Component<
     const [selectedWallet, setSelectedWallet] = createSignal<UIWalletInfo | null>(null);
     const [infoModalOpen, setInfoModalOpen] = createSignal(false);
 
-    const supportedWallets = createMemo(() => {
-        const requiredFeature = props.walletsModalState.requiredFeature;
-        const requiredFeatures = requiredFeature
-            ? { [requiredFeature.featureName]: requiredFeature.value }
-            : {};
-
-        return props.walletsList.filter(
-            wallet =>
-                wallet.isSupportRequiredFeatures &&
-                wallet.features &&
-                checkRequiredWalletFeatures(wallet.features, requiredFeatures)
-        );
-    });
+    // const supportedWallets = createMemo(() => {
+    //     const requiredFeature = props.walletsModalState.requiredFeature;
+    //     const requiredFeatures = requiredFeature
+    //         ? { [requiredFeature.featureName]: requiredFeature.value }
+    //         : {};
+    //
+    //     return props.walletsList.filter(
+    //         wallet =>
+    //             wallet.isSupportRequiredFeatures &&
+    //             wallet.features &&
+    //             checkRequiredWalletFeatures(wallet.features, requiredFeatures)
+    //     );
+    // });
 
     const currentWalletUI = createMemo(() =>
-        props.walletsList.find(wallet => wallet.name === props.currentWallet.device.appName)
+        props.walletsList.find(
+            wallet =>
+                wallet.appName === props.currentWallet.device.appName ||
+                wallet.name === props.currentWallet.device.appName
+        )
     );
+
+    const currentWalletName = createMemo(() => {
+        const appName = currentWalletUI()?.appName ?? props.currentWallet.device.appName;
+        if (appName === AT_WALLET_APP_NAME) {
+            return 'Wallet in Telegram';
+        }
+
+        return currentWalletUI()?.name ?? props.currentWallet.device.appName;
+    });
 
     const currentWalletVersionNotSupported = createMemo(() => {
         const currentWalletUIVar = currentWalletUI();
@@ -79,19 +107,19 @@ export const DesktopFeatureNotSupportModal: Component<
         return validInList && !validCurrentWallet;
     });
 
-    const visibleWallets = createMemo(() => supportedWallets().slice(0, 3), null);
+    // const visibleWallets = createMemo(() => supportedWallets().slice(0, 3), null);
 
-    const fourWalletsItem = createMemo(
-        () =>
-            supportedWallets()
-                .filter(wallet => !visibleWallets().find(w => w.appName === wallet.appName))
-                .slice(0, 4),
-        null
-    );
-
-    const handleSelect = (wallet: UIWalletInfo): void => {
-        setSelectedWallet(wallet);
-    };
+    // const fourWalletsItem = createMemo(
+    //     () =>
+    //         supportedWallets()
+    //             .filter(wallet => !visibleWallets().find(w => w.appName === wallet.appName))
+    //             .slice(0, 4),
+    //     null
+    // );
+    //
+    // const handleSelect = (wallet: UIWalletInfo): void => {
+    //     setSelectedWallet(wallet);
+    // };
 
     const handleDisconnect = async (): Promise<void> => {
         await props.onDisconnect();
@@ -128,15 +156,14 @@ export const DesktopFeatureNotSupportModal: Component<
                     </DesktopFeatureNotSupportModalStyled>
                 </Match>
                 <Match when={currentWalletVersionNotSupported()}>
-                    <H1Styled>{props.currentWallet.device.appName}</H1Styled>
+                    <H1Styled>{currentWalletName()}</H1Styled>
                     <ErrorIconStyled size="s" />
                     <BodyTextStyled
                         translationKey="walletModal.featureNotSupported.version.description"
-                        translationValues={{ name: props.currentWallet.device.appName }}
+                        translationValues={{ name: currentWalletName() }}
                     >
-                        Your current version of {props.currentWallet.device.appName} or wallet
-                        contract type doesn't support the required features. Please update it to
-                        continue.
+                        Your current version of {currentWalletName()} or wallet contract type
+                        doesn't support the required features. Please update it to continue.
                     </BodyTextStyled>
 
                     <ButtonsContainerStyled>
@@ -144,9 +171,9 @@ export const DesktopFeatureNotSupportModal: Component<
                             <Button leftIcon={<LinkIcon />}>
                                 <Translation
                                     translationKey="walletModal.featureNotSupported.version.updateButton"
-                                    translationValues={{ name: currentWalletUI()!.name }}
+                                    translationValues={{ name: currentWalletName() }}
                                 >
-                                    Update {currentWalletUI()!.name}
+                                    Update {currentWalletName()}
                                 </Translation>
                             </Button>
                         </Link>
@@ -166,45 +193,45 @@ export const DesktopFeatureNotSupportModal: Component<
 
                     <TitleStyled
                         translationKey="walletModal.featureNotSupported.wallet.title"
-                        translationValues={{ name: props.currentWallet.device.appName }}
+                        translationValues={{ name: currentWalletName() }}
                     >
-                        {props.currentWallet.device.appName} doesn’t support the
-                        requested&nbsp;action
+                        {currentWalletName()} doesn’t support the requested&nbsp;action
                     </TitleStyled>
 
-                    <DescriptionStyled>
-                        <Translation translationKey="walletModal.featureNotSupported.wallet.description">
-                            Install a supported wallet from the list below, restore it with your
-                            recovery phrase, then connect it and try again.
-                        </Translation>
-                        &nbsp;
-                        <RestoreWalletLinkStyled onClick={() => setInfoModalOpen(true)}>
-                            <Translation translationKey="walletModal.featureNotSupported.wallet.info">
-                                Learn how to restore your wallet
-                            </Translation>
-                        </RestoreWalletLinkStyled>
-                    </DescriptionStyled>
+                    <Spacer />
+                    {/*<DescriptionStyled>*/}
+                    {/*    <Translation translationKey="walletModal.featureNotSupported.wallet.description">*/}
+                    {/*        Install a supported wallet from the list below, restore it with your*/}
+                    {/*        recovery phrase, then connect it and try again.*/}
+                    {/*    </Translation>*/}
+                    {/*    &nbsp;*/}
+                    {/*    <RestoreWalletLinkStyled onClick={() => setInfoModalOpen(true)}>*/}
+                    {/*        <Translation translationKey="walletModal.featureNotSupported.wallet.info">*/}
+                    {/*            Learn how to restore your wallet*/}
+                    {/*        </Translation>*/}
+                    {/*    </RestoreWalletLinkStyled>*/}
+                    {/*</DescriptionStyled>*/}
 
-                    <WalletsContainerStyled>
-                        <For each={visibleWallets()}>
-                            {wallet => (
-                                <li>
-                                    <WalletLabeledItem
-                                        wallet={wallet}
-                                        onClick={() => handleSelect(wallet)}
-                                    />
-                                </li>
-                            )}
-                        </For>
-                        <Show when={fourWalletsItem().length > 0}>
-                            <FourWalletsItem
-                                labelLine1="View all"
-                                labelLine2="wallets"
-                                images={fourWalletsItem().map(i => i.imageUrl)}
-                                onClick={() => props.onSelectAllWallets()}
-                            />
-                        </Show>
-                    </WalletsContainerStyled>
+                    {/*<WalletsContainerStyled>*/}
+                    {/*    <For each={visibleWallets()}>*/}
+                    {/*        {wallet => (*/}
+                    {/*            <li>*/}
+                    {/*                <WalletLabeledItem*/}
+                    {/*                    wallet={wallet}*/}
+                    {/*                    onClick={() => handleSelect(wallet)}*/}
+                    {/*                />*/}
+                    {/*            </li>*/}
+                    {/*        )}*/}
+                    {/*    </For>*/}
+                    {/*    <Show when={fourWalletsItem().length > 0}>*/}
+                    {/*        <FourWalletsItem*/}
+                    {/*            labelLine1="View all"*/}
+                    {/*            labelLine2="wallets"*/}
+                    {/*            images={fourWalletsItem().map(i => i.imageUrl)}*/}
+                    {/*            onClick={() => props.onSelectAllWallets()}*/}
+                    {/*        />*/}
+                    {/*    </Show>*/}
+                    {/*</WalletsContainerStyled>*/}
                 </Match>
             </Switch>
         </DesktopFeatureNotSupportModalStyled>

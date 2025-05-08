@@ -194,6 +194,7 @@ export const WalletsModal: Component = () => {
             enableAndroidBackHandler={appState.enableAndroidBackHandler}
             onClose={() => onClose('action-cancelled')}
             onClickQuestion={() => setInfoTab(v => !v)}
+            showFooter={!walletsModalIsWalletNotSupportFeature()}
             data-tc-wallets-modal-container="true"
         >
             <Show when={infoTab()}>

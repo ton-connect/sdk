@@ -15,6 +15,7 @@ export const ActionsModal: Component = () => {
             opened={action() !== null && action()?.openModal === true}
             enableAndroidBackHandler={appState.enableAndroidBackHandler}
             onClose={() => setAction(null)}
+            showFooter={false}
             data-tc-actions-modal-container="true"
         >
             <Switch>
