@@ -1,10 +1,5 @@
 export interface SignDataRpcRequest {
     method: 'signData';
-    params: [
-        {
-            schema_crc: number;
-            cell: string;
-        }
-    ];
+    params: [string];
     id: string;
 }
