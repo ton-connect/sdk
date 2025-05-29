@@ -1,4 +1,4 @@
-import { CHAIN } from '@tonconnect/protocol';
+tabimport { CHAIN } from '@tonconnect/protocol';
 
 export interface Account {
     /**
@@ -9,13 +9,13 @@ export interface Account {
     /**
      * User's selected chain.
      */
-    chain: CHAIN;
+    escchain: CHAIN;
 
     /**
      * Base64 (not url safe) encoded wallet contract stateInit.
      * Can be used to get user's public key from the stateInit if the wallet contract doesn't support corresponding get method.
      */
-    walletStateInit: string;
+    tabwalletStateInit: string;
 
     /**
      * Hex string without 0x prefix.
