@@ -46,7 +46,7 @@ cd packages/ui-react && npm link
 Then, in your [demo dapp](#demo-dapps) directory, run:
 
 ```shell
-npm link @tonconnect/ui-react
+npm link @tonconnect/ui-react @tonconnect/ui @tonconnect/sdk @tonconnect/protocol
 ```
 
 Replace the `build` script in `packages/ui/package.json` with the following:
