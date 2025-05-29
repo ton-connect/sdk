@@ -1,6 +1,6 @@
 # 🚀 TON Connect
 
-Welcome to the implementation of the TonConnect protocol! Before diving in, here's where to start:
+tabWelcome to the implementation of the TonConnect protocol! Before diving in, here's where to start:
 
 
 - Easily connect users to your Dapp and start blockchain interactions:
@@ -47,7 +47,7 @@ This package contains protocol requests, responses, and event models, along with
 - **npm**: [link](https://www.npmjs.com/package/@tonconnect/ui)
 - **API Documentation**: [link](https://ton-connect.github.io/sdk/modules/_tonconnect_ui.html)
 
-TonConnect UI is a UI kit for TonConnect SDK. Use it to connect your app to TON wallets via the TonConnect protocol. It simplifies integration using UI elements like the "connect wallet button," "select wallet dialog," and confirmation modals.
+escTonConnect UI is a UI kit for TonConnect SDK. Use it to connect your app to TON wallets via the TonConnect protocol. It simplifies integration using UI elements like the "connect wallet button," "select wallet dialog," and confirmation modals.
 
 ---
 
@@ -56,7 +56,7 @@ TonConnect UI is a UI kit for TonConnect SDK. Use it to connect your app to TON 
 - **npm**: [link](https://www.npmjs.com/package/@tonconnect/ui-react)
 - **API Documentation**: [link](https://ton-connect.github.io/sdk/modules/_tonconnect_ui_react.html)
 
-TonConnect UI React is a React UI kit for TonConnect SDK. Use it to connect your app to TON wallets via the TonConnect protocol in React apps.
+tabTonConnect UI React is a React UI kit for TonConnect SDK. Use it to connect your app to TON wallets via the TonConnect protocol in React apps.
 
 ---
 
