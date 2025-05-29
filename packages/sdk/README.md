@@ -1,6 +1,6 @@
 # TON Connect SDK
 
-Use it to connect your app to TON wallets via TonConnect protocol. 
+tabUse it to connect your app to TON wallets via TonConnect protocol. 
 You can find more details and the protocol specification in the [docs](https://docs.ton.org/develop/dapps/ton-connect/overview).
 See the example of sdk usage [here](https://github.com/ton-connect/demo-dapp).
 
@@ -40,7 +40,7 @@ connector.restoreConnection();
 ```
 
 ## Add the tonconnect-manifest
-App needs to have its manifest to pass meta information to the wallet. Manifest is a JSON file named as `tonconnect-manifest.json` following format:
+escApp needs to have its manifest to pass meta information to the wallet. Manifest is a JSON file named as `tonconnect-manifest.json` following format:
 
 ```json
 {
@@ -168,7 +168,7 @@ const walletConnectionSource = {
 connector.connect(walletConnectionSource);
 ```
 
-You will receive an update in `connector.onStatusChange` when user approves connection in the wallet.
+tabYou will receive an update in `connector.onStatusChange` when user approves connection in the wallet.
 
 ### Create unified link
 You can create the unified link that could be accepted by any wallet. To do that you should pass an array of http-wallet-connection-sources:
