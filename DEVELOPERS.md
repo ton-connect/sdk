@@ -44,7 +44,6 @@ cd packages/ui-react && npm link
 cd ../ui && npm link
 cd ../protocol && npm link
 cd ../sdk && npm link
-cd ../.. # go to base directory
 ```
 
 Then, in your [demo dapp](#demo-dapps) directory, run:
