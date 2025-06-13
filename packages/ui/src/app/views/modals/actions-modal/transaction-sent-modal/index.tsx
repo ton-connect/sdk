@@ -12,6 +12,7 @@ export const TransactionSentModal: Component<TransactionSentModalProps> = props 
             headerTranslationKey="actionModal.transactionSent.header"
             textTranslationKey="actionModal.transactionSent.text"
             icon={<SuccessIcon size="m" />}
+            showButton="open-wallet"
             onClose={() => props.onClose()}
             data-tc-transaction-sent-modal="true"
         />
