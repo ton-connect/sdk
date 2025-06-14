@@ -499,7 +499,10 @@ export class TonConnect implements ITonConnect {
 
         this.tracker.trackDataSentForSignature(this.wallet, data);
 
-        const response = await this.provider!.sendRequest(signDataParser.convertToRpcRequest(data));
+        const response = await this.provider!.sendRequest(
+            signDataParser.convertToRpcRequest(data),
+            { onRequestSent: options?.onRequestSent, signal: abortController.signal }
+        );
 
         if (signDataParser.isError(response)) {
             this.tracker.trackDataSigningFailed(
@@ -655,8 +658,19 @@ export class TonConnect implements ITonConnect {
         };
 
         if (tonProofItem) {
+            const originalProof = 'proof' in tonProofItem ? tonProofItem.proof : undefined;
+
+            const filteredProof = originalProof ? { 
+                proof: {
+                    timestamp: originalProof.timestamp,
+                    domain: originalProof.domain,
+                    payload: originalProof.payload,
+                    signature: originalProof.signature,
+                }
+            } : {};
+
             wallet.connectItems = {
-                tonProof: tonProofItem
+                tonProof: { ...tonProofItem, ...filteredProof },
             };
         }
 
