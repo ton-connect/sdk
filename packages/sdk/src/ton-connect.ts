@@ -655,8 +655,19 @@ export class TonConnect implements ITonConnect {
         };
 
         if (tonProofItem) {
+            const originalProof = 'proof' in tonProofItem ? tonProofItem.proof : undefined;
+
+            const filteredProof = originalProof ? { 
+                proof: {
+                    timestamp: originalProof.timestamp,
+                    domain: originalProof.domain,
+                    payload: originalProof.payload,
+                    signature: originalProof.signature,
+                }
+            } : {};
+
             wallet.connectItems = {
-                tonProof: tonProofItem
+                tonProof: { ...tonProofItem, ...filteredProof },
             };
         }
 
