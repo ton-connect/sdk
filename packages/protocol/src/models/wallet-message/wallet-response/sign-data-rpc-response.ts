@@ -1,3 +1,4 @@
+import { CHAIN } from '../../CHAIN';
 import { WalletResponseTemplateError } from './wallet-response-template';
 
 export type SignDataRpcResponse = SignDataRpcResponseSuccess | SignDataRpcResponseError;
@@ -13,16 +14,21 @@ export interface SignDataRpcResponseSuccess {
     id: string;
 }
 
-export type SignDataPayload = SignDataPayloadText | SignDataPayloadBinary | SignDataPayloadCell;
+export type SignDataPayload = {
+    network?: CHAIN;
+    from?: string;
+} & (SignDataPayloadText | SignDataPayloadBinary | SignDataPayloadCell);
 
 export type SignDataPayloadText = {
     type: 'text';
     text: string;
 };
+
 export type SignDataPayloadBinary = {
     type: 'binary';
     bytes: string;
 };
+
 export type SignDataPayloadCell = {
     type: 'cell';
     schema: string;
