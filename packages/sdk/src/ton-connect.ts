@@ -499,7 +499,15 @@ export class TonConnect implements ITonConnect {
 
         this.tracker.trackDataSentForSignature(this.wallet, data);
 
-        const response = await this.provider!.sendRequest(signDataParser.convertToRpcRequest(data));
+        const from = data.from || this.account!.address;
+        const network = data.network || this.account!.chain;
+
+        const response = await this.provider!.sendRequest(signDataParser.convertToRpcRequest({
+            ...data,
+            from,
+            network,
+        }));
+
 
         if (signDataParser.isError(response)) {
             this.tracker.trackDataSigningFailed(
