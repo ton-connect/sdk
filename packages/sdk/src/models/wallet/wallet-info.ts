@@ -136,6 +136,9 @@ export interface WalletInfoDTO {
         | 'chrome'
         | 'firefox'
         | 'safari'
+        | 'chrome'
+        | 'firefox'
+        | 'safari'
     )[];
 
     deepLink?: string;
