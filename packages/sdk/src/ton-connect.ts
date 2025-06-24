@@ -507,8 +507,7 @@ export class TonConnect implements ITonConnect {
             ...data,
             from,
             network,
-        }));
-
+        }), { onRequestSent: options?.onRequestSent, signal: abortController.signal });
 
         if (signDataParser.isError(response)) {
             this.tracker.trackDataSigningFailed(
