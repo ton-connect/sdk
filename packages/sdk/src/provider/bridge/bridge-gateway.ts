@@ -202,7 +202,7 @@ export class BridgeGateway {
         let bridgeIncomingMessage: BridgeIncomingMessage;
         try {
             bridgeIncomingMessage = JSON.parse(e.data);
-        } catch (e) {
+        } catch (_) {
             throw new TonConnectError(`Bridge message parse failed, message ${e.data}`);
         }
         this.listener(bridgeIncomingMessage);
