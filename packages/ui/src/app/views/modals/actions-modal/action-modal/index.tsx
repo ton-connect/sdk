@@ -33,11 +33,26 @@ export const ActionModal: Component<ActionModalProps> = props => {
     const [firstClick, setFirstClick] = createSignal(true);
     const [sent, setSent] = createSignal(false);
     const [signed, setSigned] = createSignal(false);
+    const [canceled, setCanceled] = createSignal(false);
 
     createEffect(() => {
         const currentAction = action();
-        setSent(!!currentAction && 'sent' in currentAction && currentAction.sent);
-        setSigned(!!currentAction && 'signed' in currentAction && currentAction.signed);
+
+        setSent(
+            !!currentAction &&
+                (('sent' in currentAction && currentAction.sent) ||
+                    currentAction.name === 'transaction-sent')
+        );
+        setSigned(
+            !!currentAction &&
+                (('signed' in currentAction && currentAction.signed) ||
+                    currentAction.name === 'data-signed')
+        );
+        setCanceled(
+            !!currentAction &&
+                (currentAction.name === 'transaction-canceled' ||
+                    currentAction.name === 'sign-data-canceled')
+        );
     });
 
     let universalLink: string | undefined;
@@ -105,7 +120,9 @@ export const ActionModal: Component<ActionModalProps> = props => {
             />
             <Show
                 when={
-                    !sent() && !signed() &&
+                    !sent() &&
+                    !signed() &&
+                    !canceled() &&
                     ((props.showButton === 'open-wallet' && universalLink) ||
                         props.showButton !== 'open-wallet')
                 }
