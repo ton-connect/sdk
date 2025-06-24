@@ -41,6 +41,9 @@ Next, link the `@tonconnect/ui-react` package to your project:
 
 ```shell
 cd packages/ui-react && npm link
+cd ../ui && npm link
+cd ../protocol && npm link
+cd ../sdk && npm link
 ```
 
 Then, in your [demo dapp](#demo-dapps) directory, run:
