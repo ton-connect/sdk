@@ -1,5 +1,14 @@
 # Changelog @tonconnect/protocol 
 
+# [2.3.0](https://github.com/ton-connect/sdk/compare/protocol-2.3.0-beta.0...protocol-2.3.0) (2025-06-25)
+
+
+### Features
+
+* **protocol:** add network and from fields support to signData ([df3ce43](https://github.com/ton-connect/sdk/commit/df3ce43c2162201de4ccddf1ede2cd00d59e4eff))
+
+
+
 # [2.3.0-beta.0](https://github.com/ton-connect/sdk/compare/protocol-2.2.7...protocol-2.3.0-beta.0) (2025-05-08)
 
 
