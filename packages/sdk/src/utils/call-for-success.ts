@@ -17,7 +17,7 @@ export type CallForSuccessOptions = {
     attempts?: number;
 
     /**
-     * The delay in milliseconds between each attempt. Default is 100ms.
+     * The delay in milliseconds between each attempt. Default is 200ms.
      */
     delayMs?: number;
 };
