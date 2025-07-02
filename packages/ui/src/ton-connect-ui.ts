@@ -268,6 +268,8 @@ export class TonConnectUI {
 
         const rootId = this.normalizeWidgetRoot(options?.widgetRootId);
 
+        this.observeWidgetRoot(rootId);
+
         this.subscribeToWalletChange();
 
         if (options?.restoreConnection !== false) {
@@ -1066,6 +1068,19 @@ export class TonConnectUI {
             twaReturnUrl,
             skipRedirectToWallet
         };
+    }
+
+    private observeWidgetRoot(rootId: string) {
+        const rootElement = document.getElementById(rootId);
+        if (!rootElement) return;
+        const observer = new MutationObserver(() => {
+            if (!document.getElementById(rootId)) {
+                // eslint-disable-next-line no-console
+                console.error(`[TON Connect UI] <div id="${rootId}"> was removed from the DOM after initialization.\nTON Connect UI will not be able to display modal windows.\nPlease ensure that third-party scripts do not remove this element.`);
+                observer.disconnect();
+            }
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
     }
 }
 
