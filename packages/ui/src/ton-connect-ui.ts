@@ -1078,7 +1078,6 @@ export class TonConnectUI {
         const rootElement = document.getElementById(rootId);
         if (!rootElement) return;
         const observer = new MutationObserver(() => {
-            console.log('observe');
             if (!document.getElementById(rootId)) {
                 console.error(`[TON Connect UI] <div id="${rootId}"> was removed from the DOM after initialization.\nTON Connect UI will not be able to display modal windows.\nPlease ensure that third-party scripts do not remove this element.`);
                 observer.disconnect();
