@@ -1075,7 +1075,6 @@ export class TonConnectUI {
         if (!rootElement) return;
         const observer = new MutationObserver(() => {
             if (!document.getElementById(rootId)) {
-                // eslint-disable-next-line no-console
                 console.error(`[TON Connect UI] <div id="${rootId}"> was removed from the DOM after initialization.\nTON Connect UI will not be able to display modal windows.\nPlease ensure that third-party scripts do not remove this element.`);
                 observer.disconnect();
             }
