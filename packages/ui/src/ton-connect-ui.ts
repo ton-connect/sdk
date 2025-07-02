@@ -990,6 +990,10 @@ export class TonConnectUI {
             const rootElement = document.createElement('div');
             rootElement.id = rootId;
             document.body.appendChild(rootElement);
+
+            if (!document.getElementById(rootId)) {
+                console.error(`[TON Connect UI] Failed to find or create <div id="${rootId}"> in the DOM.\nA third-party script may be removing this element immediately after creation.\nTON Connect UI will not be able to display modal windows.\nPlease ensure <div id="${rootId}"> is present in <body> and not removed by other libraries.`);
+            }
         }
 
         return rootId;
@@ -1074,6 +1078,7 @@ export class TonConnectUI {
         const rootElement = document.getElementById(rootId);
         if (!rootElement) return;
         const observer = new MutationObserver(() => {
+            console.log('observe');
             if (!document.getElementById(rootId)) {
                 console.error(`[TON Connect UI] <div id="${rootId}"> was removed from the DOM after initialization.\nTON Connect UI will not be able to display modal windows.\nPlease ensure that third-party scripts do not remove this element.`);
                 observer.disconnect();
