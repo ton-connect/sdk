@@ -14,7 +14,7 @@ import {
 } from './style';
 import { Dynamic, Portal } from 'solid-js/web';
 import { useFloating } from 'solid-floating-ui';
-import { autoUpdate } from '@floating-ui/dom';
+import { autoUpdate, flip, shift } from '@floating-ui/dom';
 import { Transition } from 'solid-transition-group';
 import { useTheme } from 'solid-styled-components';
 import { globalStylesTag } from 'src/app/styles/global-styles';
@@ -37,7 +37,8 @@ export const AccountButton: Component<AccountButtonProps> = () => {
 
     const position = useFloating(anchor, floating, {
         whileElementsMounted: autoUpdate,
-        placement: 'bottom-end'
+        placement: 'bottom-end',
+        middleware: [flip(), shift()]
     });
 
     const normalizedAddress = (): string => {
