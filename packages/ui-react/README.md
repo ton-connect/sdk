@@ -39,6 +39,48 @@ export function App() {
 }
 
 ```
+### Using with Next.js
+
+`TonConnectUIProvider` relies on browser APIs and should be rendered only on the client side. In a Next.js application mark the component that wraps the provider with `"use client"` or dynamically import the provider to disable server side rendering.
+
+Example for the `app` router:
+
+```tsx
+// app/providers.tsx
+'use client';
+
+import { TonConnectUIProvider } from '@tonconnect/ui-react';
+
+export function Providers({ children }: { children: React.ReactNode }) {
+    return (
+        <TonConnectUIProvider manifestUrl="https://<YOUR_APP_URL>/tonconnect-manifest.json">
+            {children}
+        </TonConnectUIProvider>
+    );
+}
+```
+
+For the `pages` router you can dynamically import the provider:
+
+```tsx
+import dynamic from 'next/dynamic';
+
+const TonConnectUIProvider = dynamic(
+    () => import('@tonconnect/ui-react').then(m => m.TonConnectUIProvider),
+    { ssr: false }
+);
+
+function MyApp({ Component, pageProps }) {
+    return (
+        <TonConnectUIProvider manifestUrl="https://<YOUR_APP_URL>/tonconnect-manifest.json"> 
+            <Component {...pageProps} />
+        </TonConnectUIProvider>
+    );
+}
+```
+
+With both approaches the provider is executed only in the browser and works correctly.
+
 
 You can also specify required wallet features to filter wallets that will be displayed in the connect wallet modal:
 
