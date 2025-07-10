@@ -1041,3 +1041,9 @@ Please note that this is just a warning and should not affect the functionality 
 ```shell
 npm install encoding
 ```
+
+## How to find a sent transaction on the blockchain
+
+See the detailed guide: [Transaction-by-external-message](../../guidelines/Transaction-by-external-message.md)
+
+This guide explains how to find the corresponding transaction on the TON blockchain by the BOC of an external-in message.
