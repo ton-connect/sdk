@@ -268,8 +268,6 @@ export class TonConnectUI {
 
         const rootId = this.normalizeWidgetRoot(options?.widgetRootId);
 
-        this.observeWidgetRoot(rootId);
-
         this.subscribeToWalletChange();
 
         if (options?.restoreConnection !== false) {
@@ -664,7 +662,7 @@ export class TonConnectUI {
                         returnStrategy,
                         forceRedirect: false
                     },
-                    () => {}
+                    () => { }
                 );
             }
         }
@@ -990,12 +988,12 @@ export class TonConnectUI {
             const rootElement = document.createElement('div');
             rootElement.id = rootId;
             document.body.appendChild(rootElement);
-
-            if (!document.getElementById(rootId)) {
-                console.error(`[TON Connect UI] Failed to find or create <div id="${rootId}"> in the DOM.\nA third-party script may be removing this element immediately after creation.\nTON Connect UI will not be able to display modal windows.\nPlease ensure <div id="${rootId}"> is present in <body> and not removed by other libraries.`);
-            }
+            // Проверяем наличие root после создания
+            ensureRootExists(rootId);
+        } else {
+            // Проверяем наличие root, если он был передан
+            ensureRootExists(rootId);
         }
-
         return rootId;
     }
 
@@ -1073,18 +1071,6 @@ export class TonConnectUI {
             skipRedirectToWallet
         };
     }
-
-    private observeWidgetRoot(rootId: string) {
-        const rootElement = document.getElementById(rootId);
-        if (!rootElement) return;
-        const observer = new MutationObserver(() => {
-            if (!document.getElementById(rootId)) {
-                console.error(`[TON Connect UI] <div id="${rootId}"> was removed from the DOM after initialization.\nTON Connect UI will not be able to display modal windows.\nPlease ensure that third-party scripts do not remove this element.`);
-                observer.disconnect();
-            }
-        });
-        observer.observe(document.body, { childList: true, subtree: true });
-    }
 }
 
 type WaitWalletConnectionOptions = {
@@ -1101,3 +1087,13 @@ type WaitSignDataOptions = {
     data: SignDataPayload;
     signal: AbortSignal;
 };
+
+let rootMissingLogged = false;
+function ensureRootExists(rootId: string): boolean {
+    const exists = !!document.getElementById(rootId);
+    if (!exists && !rootMissingLogged) {
+        console.error(`[TON Connect UI] <div id="${rootId}"> not found in the DOM. Modal windows will not be displayed. Please ensure this element is present and not removed by other scripts.`);
+        rootMissingLogged = true;
+    }
+    return exists;
+}

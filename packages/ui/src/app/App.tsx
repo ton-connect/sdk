@@ -14,7 +14,7 @@ import { TonConnectUI } from 'src/ton-connect-ui';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { createI18nContext, I18nContext } from '@solid-primitives/i18n';
 import { appState } from 'src/app/state/app.state';
-import { defineStylesRoot, fixMobileSafariActiveTransition } from 'src/app/utils/web-api';
+import { defineStylesRoot, fixMobileSafariActiveTransition, ensureRootExists } from 'src/app/utils/web-api';
 import { SingleWalletModal } from 'src/app/views/modals/wallets-modal/single-wallet-modal';
 
 export type AppProps = {
@@ -33,7 +33,7 @@ const App: Component<AppProps> = props => {
                 <ConnectorContext.Provider value={appState.connector}>
                     <GlobalStyles />
                     <ThemeProvider theme={themeState}>
-                        <Show when={appState.buttonRootId}>
+                        <Show when={appState.buttonRootId && ensureRootExists(appState.buttonRootId)}>
                             <Portal mount={document.getElementById(appState.buttonRootId!)!}>
                                 <AccountButton />
                             </Portal>
