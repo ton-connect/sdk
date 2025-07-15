@@ -1,4 +1,4 @@
-# 🔍 Tracking External-In Messages in TON
+# 🔍 Transaction Lookup Using External Message from TON Connect
 
 This guide shows how to find the transaction associated with an `external-in` message on the TON blockchain.  
 
@@ -23,7 +23,11 @@ export function getNormalizedExtMessageHash(message: Message) {
         throw new Error(`Message must be "external-in", got ${message.info.type}`);
     }
 
-    const info = { ...message.info, src: undefined, importFee: 0n };
+    const info = {
+         ...message.info,
+         src: undefined,
+         importFee: 0n
+    };
 
     const normalizedMessage = {
         ...message,
