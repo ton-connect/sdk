@@ -662,7 +662,7 @@ export class TonConnectUI {
                         returnStrategy,
                         forceRedirect: false
                     },
-                    () => {}
+                    () => { }
                 );
             }
         }
@@ -988,8 +988,12 @@ export class TonConnectUI {
             const rootElement = document.createElement('div');
             rootElement.id = rootId;
             document.body.appendChild(rootElement);
+            // Проверяем наличие root после создания
+            ensureRootExists(rootId);
+        } else {
+            // Проверяем наличие root, если он был передан
+            ensureRootExists(rootId);
         }
-
         return rootId;
     }
 
@@ -1083,3 +1087,13 @@ type WaitSignDataOptions = {
     data: SignDataPayload;
     signal: AbortSignal;
 };
+
+let rootMissingLogged = false;
+function ensureRootExists(rootId: string): boolean {
+    const exists = !!document.getElementById(rootId);
+    if (!exists && !rootMissingLogged) {
+        console.error(`[TON Connect UI] <div id="${rootId}"> not found in the DOM. Modal windows will not be displayed. Please ensure this element is present and not removed by other scripts.`);
+        rootMissingLogged = true;
+    }
+    return exists;
+}

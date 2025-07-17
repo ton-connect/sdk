@@ -13,6 +13,7 @@ import App from './App';
 import { WalletInfoWithOpenMethod, WalletOpenMethod } from 'src/models/connected-wallet';
 import { WalletsModalCloseReason } from 'src/models';
 import { WalletInfoRemote, WalletNotSupportFeatureError } from '@tonconnect/sdk';
+import { ensureRootExists } from 'src/app/utils/web-api';
 
 export const widgetController = {
     openWalletsModal: (): void =>
@@ -59,13 +60,17 @@ export const widgetController = {
     getSelectedWalletInfo: ():
         | WalletInfoWithOpenMethod
         | {
-              openMethod: WalletOpenMethod;
-          }
+            openMethod: WalletOpenMethod;
+        }
         | null => lastSelectedWalletInfo(),
     removeSelectedWalletInfo: (): void => setLastSelectedWalletInfo(null),
-    renderApp: (root: string, tonConnectUI: TonConnectUI): (() => void) =>
-        render(
+    renderApp: (root: string, tonConnectUI: TonConnectUI): (() => void) => {
+        if (!ensureRootExists(root)) {
+            return () => { };
+        }
+        return render(
             () => <App tonConnectUI={tonConnectUI} />,
             document.getElementById(root) as HTMLElement
-        )
+        );
+    }
 };
