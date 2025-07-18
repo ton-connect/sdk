@@ -584,7 +584,7 @@ export class TonConnect implements ITonConnect {
                 if (document.hidden) {
                     this.pauseConnection();
                 } else {
-                    this.unPauseConnection().catch();
+                    this.unPauseConnection().catch(() => {});
                 }
             });
         } catch (e) {
