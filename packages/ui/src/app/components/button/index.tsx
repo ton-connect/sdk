@@ -23,6 +23,7 @@ export const Button: Component<ButtonProps> = props => {
 
     return (
         <ButtonStyled
+            type={'button'}
             appearance={props.appearance || 'primary'}
             class={props.class}
             onClick={e => props.onClick?.(e)}
