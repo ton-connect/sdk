@@ -480,14 +480,14 @@ export class TonConnectUI {
                 twaReturnUrl
             });
 
-            let firstClick = false;
+            let firstClick = true;
             const redirectToWallet = () => {
                 if (abortController.signal.aborted) {
                     return;
                 }
 
                 const forceRedirect = !firstClick;
-                firstClick = true;
+                firstClick = false;
 
                 this.redirectAfterRequestSent({
                     returnStrategy,
@@ -601,14 +601,14 @@ export class TonConnectUI {
                 twaReturnUrl
             });
 
-            let firstClick = false;
+            let firstClick = true;
             const redirectToWallet = () => {
                 if (abortController.signal.aborted) {
                     return;
                 }
 
                 const forceRedirect = !firstClick;
-                firstClick = true;
+                firstClick = false;
 
                 this.redirectAfterRequestSent({
                     returnStrategy,
