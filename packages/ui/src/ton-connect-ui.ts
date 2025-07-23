@@ -438,7 +438,7 @@ export class TonConnectUI {
      */
     public async sendTransaction(
         tx: SendTransactionRequest,
-        options?: ActionConfiguration
+        options?: ActionConfiguration & { onRequestSent?: (redirectToWallet: () => void) => void }
     ): Promise<SendTransactionResponse> {
         this.tracker.trackTransactionSentForSignature(this.wallet, tx);
 
@@ -479,6 +479,24 @@ export class TonConnectUI {
                 returnStrategy,
                 twaReturnUrl
             });
+
+            let firstClick = false;
+            const redirectToWallet = () => {
+                if (abortController.signal.aborted) {
+                    return;
+                }
+
+                const forceRedirect = !firstClick;
+                firstClick = true;
+
+                this.redirectAfterRequestSent({
+                    returnStrategy,
+                    twaReturnUrl,
+                    forceRedirect,
+                });
+            }
+
+            options?.onRequestSent?.(redirectToWallet);
         };
 
         const unsubscribe = this.onTransactionModalStateChange(action => {
@@ -539,7 +557,10 @@ export class TonConnectUI {
      * Signs the data and returns the signature.
      * @param data data to sign.
      */
-    public async signData(data: SignDataPayload): Promise<SignDataResponse> {
+    public async signData(
+        data: SignDataPayload,
+        options?: { onRequestSent?: (redirectToWallet: () => void) => void } 
+    ): Promise<SignDataResponse> {
         this.tracker.trackDataSentForSignature(this.wallet, data);
 
         if (!this.connected) {
@@ -579,6 +600,24 @@ export class TonConnectUI {
                 returnStrategy,
                 twaReturnUrl
             });
+
+            let firstClick = false;
+            const redirectToWallet = () => {
+                if (abortController.signal.aborted) {
+                    return;
+                }
+
+                const forceRedirect = !firstClick;
+                firstClick = true;
+
+                this.redirectAfterRequestSent({
+                    returnStrategy,
+                    twaReturnUrl,
+                    forceRedirect,
+                });
+            }
+
+            options?.onRequestSent?.(redirectToWallet);
         };
 
         const unsubscribe = this.onTransactionModalStateChange(action => {
@@ -637,10 +676,12 @@ export class TonConnectUI {
 
     private redirectAfterRequestSent({
         returnStrategy,
-        twaReturnUrl
+        twaReturnUrl,
+        forceRedirect, 
     }: {
         returnStrategy: ReturnStrategy;
         twaReturnUrl?: `${string}://${string}`;
+        forceRedirect?: boolean;
     }): void {
         if (
             this.walletInfo &&
@@ -652,7 +693,7 @@ export class TonConnectUI {
                 redirectToTelegram(this.walletInfo.universalLink, {
                     returnStrategy,
                     twaReturnUrl: twaReturnUrl || appState.twaReturnUrl,
-                    forceRedirect: false
+                    forceRedirect: forceRedirect || false
                 });
             } else {
                 redirectToWallet(
@@ -660,7 +701,7 @@ export class TonConnectUI {
                     this.walletInfo.deepLink,
                     {
                         returnStrategy,
-                        forceRedirect: false
+                        forceRedirect: forceRedirect || false
                     },
                     () => {}
                 );
