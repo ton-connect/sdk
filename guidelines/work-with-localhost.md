@@ -78,7 +78,7 @@ const connector = new TonConnectUI({
 
 ## ⚙️ Special Case: Using Telegram Mini App
 
-If you're developing for Telegram Mini App (TMA), using **`ngrok` is allowed** as a workaround to expose `localhost`. This is necessary because TMA must resolve the full public URL, including manifests and APIs.
+If you're developing for Telegram Mini App, using **`ngrok` is allowed** as a workaround to expose `localhost`. This is necessary because Telegram Mini App must resolve the full public URL, including manifests and APIs.
 
 **Steps:**
 1. Run `ngrok` or similar tunnel:
@@ -89,7 +89,7 @@ If you're developing for Telegram Mini App (TMA), using **`ngrok` is allowed** a
 
 ---
 
-## 🧩 Alternative Localhost Setup Using Local HTTPS
+## 🧩 Special Case: Browser Extensions Wallets
 
 If you want to test locally with full wallet compatibility(include browser extensions), here is a working solution:
 
@@ -127,13 +127,13 @@ If you want to test locally with full wallet compatibility(include browser exten
 
 5. **Host the manifest JSON publicly** (example):
    ```
-   https://app.stage.stormtrade.dev/ton-connect.local-dev.json
+   https://app.stage.demo-dapp.dev/ton-connect.local-dev.json
    ```
 
 6. **Use the public manifest in the connector**:
    ```ts
    const connector = new TonConnectUI({
-     manifestUrl: "https://app.stage.stormtrade.dev/ton-connect.local-dev.json"
+     manifestUrl: "https://app.stage.demo-dapp.dev/ton-connect.local-dev.json"
    });
    ```
 
