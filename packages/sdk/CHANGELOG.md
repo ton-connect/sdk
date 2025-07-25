@@ -1,5 +1,14 @@
 # Changelog @tonconnect/sdk 
 
+# [3.3.0-beta.0](https://github.com/ton-connect/sdk/compare/sdk-3.2.0...sdk-3.3.0-beta.0) (2025-07-25)
+
+
+### Bug Fixes
+
+* **sdk:** catch operation aborted error ([1e3d042](https://github.com/ton-connect/sdk/commit/1e3d04270973ddef284584a457d27a340f75565c))
+
+
+
 # [3.2.0](https://github.com/ton-connect/sdk/compare/sdk-3.2.0-beta.0...sdk-3.2.0) (2025-06-25)
 
 
