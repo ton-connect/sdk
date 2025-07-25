@@ -1,5 +1,22 @@
 # Changelog @tonconnect/ui 
 
+# [2.3.0-beta.0](https://github.com/ton-connect/sdk/compare/ui-2.2.0...ui-2.3.0-beta.0) (2025-07-25)
+
+
+### Bug Fixes
+
+* **ui:** add check for custom elements ([5ca10c0](https://github.com/ton-connect/sdk/commit/5ca10c0a0b792e977bd4fc40e99d6cb5d97dccce))
+* **ui:** first click handler ([c973b8b](https://github.com/ton-connect/sdk/commit/c973b8b8ecfe917ee7d26d322718d1d8435e7e8a))
+* **ui:** update button type ([b3d1cab](https://github.com/ton-connect/sdk/commit/b3d1caba7d29e9291a84aa6f6a33c90db87541b5))
+
+
+### Features
+
+* **ui:** add autoupdate for account button ([b9dae70](https://github.com/ton-connect/sdk/commit/b9dae70fa99aa1bf5d3706162560601a6a90cd3e))
+* **ui:** Add callback for manual redirect onRequestSent ([f9a3dbd](https://github.com/ton-connect/sdk/commit/f9a3dbd5c07378ffc98ae6b78b02230b00287eee))
+
+
+
 # [2.2.0](https://github.com/ton-connect/sdk/compare/ui-2.2.0-beta.0...ui-2.2.0) (2025-06-25)
 
 
