@@ -76,7 +76,7 @@ const connector = new TonConnectUI({
 
 ---
 
-## ⚙️ Special Case: Using TMA (TON Mobile App)
+## ⚙️ Special Case: Using Telegram Mini App
 
 If you're developing for Telegram Mini App (TMA), using **`ngrok` is allowed** as a workaround to expose `localhost`. This is necessary because TMA must resolve the full public URL, including manifests and APIs.
 
