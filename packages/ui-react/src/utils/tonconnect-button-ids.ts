@@ -1,19 +1,19 @@
 export const DEFAULT_BUTTON_ID = 'ton-connect-button';
 
-let ids: string[] = [];
+const ids: Set<string> = new Set<string>();
 
-export function getButtonIds() {
-    return [...ids];
+export function getButtonIds(): string[] {
+    return Array.from(ids);
 }
 
-export function addButtonId(id: string) {
-    if (!ids.includes(id)) {
-        ids.push(id);
+export function addButtonId(id: string): string[] {
+    if (!ids.has(id)) {
+        ids.add(id);
     }
     return getButtonIds();
 }
 
-export function removeButtonId(id: string) {
-    ids = ids.filter(existingId => existingId !== id);
+export function removeButtonId(id: string): string[] {
+    ids.delete(id);
     return getButtonIds();
-} 
+}
