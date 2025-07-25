@@ -67,11 +67,11 @@ While your app may be running on `localhost`, you still need a public manifest:
 2. **Hardcode the public manifest URL** when initializing `TonConnectUI`.
 
 ```ts
-const connector = new TonConnectUI({
+const tonConnnectUi = new TonConnectUI({
   manifestUrl: "https://my-ton-app.dev/tonconnect-manifest.json"
 });
 ```
-
+You can check an example in [demo-dapp-with-react-ui](https://github.com/ton-connect/demo-dapp-with-react-ui/blob/master/src/App.tsx)
 > ✅ Your `localhost` app will still function if the manifest is accessible and the wallet supports it.
 
 ---
@@ -130,9 +130,9 @@ If you want to test locally with browser extensions wallets, here is a working s
    https://app.stage.demo-dapp.dev/ton-connect.local-dev.json
    ```
 
-6. **Use the public manifest in the connector**:
+6. **Use the public manifest in the TonConnnectUI**:
    ```ts
-   const connector = new TonConnectUI({
+   const tonConnectUi = new TonConnectUI({
      manifestUrl: "https://app.stage.demo-dapp.dev/ton-connect.local-dev.json"
    });
    ```
