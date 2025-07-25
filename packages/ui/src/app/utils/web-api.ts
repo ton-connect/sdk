@@ -84,7 +84,7 @@ export function fixMobileSafariActiveTransition(): void {
 }
 
 export function defineStylesRoot(): void {
-    customElements.define(globalStylesTag, class TcRootElement extends HTMLElement {});
+    customElements.define(globalStylesTag, class TcRootElement extends HTMLElement { });
 }
 
 /**
@@ -183,12 +183,12 @@ export function isMobileUserAgent(): boolean {
             check = true;
     })(
         navigator.userAgent ||
-            navigator.vendor ||
-            (
-                window as unknown as {
-                    opera: string;
-                }
-            ).opera
+        navigator.vendor ||
+        (
+            window as unknown as {
+                opera: string;
+            }
+        ).opera
     );
     return check;
 }
@@ -258,4 +258,14 @@ export function isBrowser(...browser: UserAgent['browser'][]): boolean {
 export function toDeeplink(universalLink: string, deeplink: string): string {
     const url = new URL(universalLink);
     return deeplink + url.search;
+}
+
+export let rootMissingLogged = false;
+export function ensureRootExists(rootId: string): boolean {
+    const exists = !!document.getElementById(rootId);
+    if (!exists && !rootMissingLogged) {
+        console.error(`[TON Connect UI] <div id="${rootId}"> not found in the DOM. Modal windows will not be displayed. Please ensure this element is present and not removed by other scripts.`);
+        rootMissingLogged = true;
+    }
+    return exists;
 }
