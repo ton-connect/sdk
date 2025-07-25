@@ -85,13 +85,13 @@ If you're developing for Telegram Mini App, using **`ngrok` is allowed** as a wo
    ```bash
    ngrok http 3000
    ```
-2. Replace local URLs in the manifest and app code with the ngrok URL.
+2. Set the ngrok URL in your Telegram Mini App's settings.
 
 ---
 
-## 🧩 Special Case: Browser Extensions Wallets
+## ⚙️ Special Case: Browser Extensions Wallets
 
-If you want to test locally with full wallet compatibility(include browser extensions), here is a working solution:
+If you want to test locally with browser extensions wallets, here is a working solution:
 
 ### 🔐 Step-by-step:
 
