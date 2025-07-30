@@ -32,10 +32,27 @@ export const ActionModal: Component<ActionModalProps> = props => {
     const tonConnectUI = useContext(TonConnectUiContext);
     const [firstClick, setFirstClick] = createSignal(true);
     const [sent, setSent] = createSignal(false);
+    const [signed, setSigned] = createSignal(false);
+    const [canceled, setCanceled] = createSignal(false);
 
     createEffect(() => {
         const currentAction = action();
-        setSent(!!currentAction && 'sent' in currentAction && currentAction.sent);
+
+        setSent(
+            !!currentAction &&
+                (('sent' in currentAction && currentAction.sent) ||
+                    currentAction.name === 'transaction-sent')
+        );
+        setSigned(
+            !!currentAction &&
+                (('signed' in currentAction && currentAction.signed) ||
+                    currentAction.name === 'data-signed')
+        );
+        setCanceled(
+            !!currentAction &&
+                (currentAction.name === 'transaction-canceled' ||
+                    currentAction.name === 'sign-data-canceled')
+        );
     });
 
     let universalLink: string | undefined;
@@ -104,6 +121,8 @@ export const ActionModal: Component<ActionModalProps> = props => {
             <Show
                 when={
                     !sent() &&
+                    !signed() &&
+                    !canceled() &&
                     ((props.showButton === 'open-wallet' && universalLink) ||
                         props.showButton !== 'open-wallet')
                 }
@@ -112,7 +131,7 @@ export const ActionModal: Component<ActionModalProps> = props => {
                     <LoaderIconStyled />
                 </LoaderButtonStyled>
             </Show>
-            <Show when={sent()}>
+            <Show when={sent() || signed()}>
                 <Show when={props.showButton !== 'open-wallet'}>
                     <ButtonStyled onClick={() => props.onClose()}>
                         <Translation translationKey="common.close">Close</Translation>

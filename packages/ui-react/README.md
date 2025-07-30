@@ -12,7 +12,7 @@ You can find more details and the protocol specification in the [docs](https://d
 
 # Getting started
 
-[Latest API documentation](https://ton-connect.github.io/sdk/modules/_tonconnect_ui-react.html)
+[Latest API documentation](https://ton-connect.github.io/sdk/modules/_tonconnect_ui_react.html)
 
 # Getting started
 
@@ -39,6 +39,48 @@ export function App() {
 }
 
 ```
+### Using with Next.js
+
+`TonConnectUIProvider` relies on browser APIs and should be rendered only on the client side. In a Next.js application mark the component that wraps the provider with `"use client"` or dynamically import the provider to disable server side rendering.
+
+Example for the `app` router:
+
+```tsx
+// app/providers.tsx
+'use client';
+
+import { TonConnectUIProvider } from '@tonconnect/ui-react';
+
+export function Providers({ children }: { children: React.ReactNode }) {
+    return (
+        <TonConnectUIProvider manifestUrl="https://<YOUR_APP_URL>/tonconnect-manifest.json">
+            {children}
+        </TonConnectUIProvider>
+    );
+}
+```
+
+For the `pages` router you can dynamically import the provider:
+
+```tsx
+import dynamic from 'next/dynamic';
+
+const TonConnectUIProvider = dynamic(
+    () => import('@tonconnect/ui-react').then(m => m.TonConnectUIProvider),
+    { ssr: false }
+);
+
+function MyApp({ Component, pageProps }) {
+    return (
+        <TonConnectUIProvider manifestUrl="https://<YOUR_APP_URL>/tonconnect-manifest.json"> 
+            <Component {...pageProps} />
+        </TonConnectUIProvider>
+    );
+}
+```
+
+With both approaches the provider is executed only in the browser and works correctly.
+
 
 You can also specify required wallet features to filter wallets that will be displayed in the connect wallet modal:
 
@@ -229,6 +271,152 @@ export const Settings = () => {
 };
 ```
 
+## Sign data
+
+Sign arbitrary data with the user's wallet. The wallet will display the data to the user for confirmation before signing. Wallet must be connected when you call `signData`, otherwise an error will be thrown.
+
+### Data Types
+
+You can sign three types of data. Choose the right format based on your use case:
+
+- **Text** - Use for human-readable text that users should see and understand
+- **Cell** - Use for TON Blockchain data that should be used in smart contracts (wallet may show unknown content warning)  
+- **Binary** - For other arbitrary data (least preferred due to security warnings)
+
+#### Text Format
+
+Use when you need to sign human-readable text. The wallet displays the text to the user.
+
+**Parameters:**
+- `type` (string, required): Must be `"text"`
+- `text` (string, required): UTF-8 text to sign
+- `network` (string, optional): `"-239"` for mainnet, `"-3"` for testnet
+- `from` (string, optional): Signer address in raw format `"0:<hex>"`
+
+```tsx
+import { useTonConnectUI } from '@tonconnect/ui-react';
+
+export const SignTextData = () => {
+    const [tonConnectUI] = useTonConnectUI();
+
+    const handleSignText = async () => {
+        const textData = {
+            type: "text",
+            text: "Confirm new 2fa number:\n+1 234 567 8901",
+            network: "-239", // MAINNET = '-239', TESTNET = '-3'
+            from: "0:348bcf827469c5fc38541c77fdd91d4e347eac200f6f2d9fd62dc08885f0415f"
+        };
+
+        try {
+            const result = await tonConnectUI.signData(textData);
+            console.log('Signed:', result);
+        } catch (e) {
+            console.error('Error:', e);
+        }
+    };
+
+    return <button onClick={handleSignText}>Sign Text Data</button>;
+};
+```
+
+#### Binary Format
+
+Use for arbitrary binary data. The wallet shows a warning about unknown content.
+
+**Parameters:**
+- `type` (string, required): Must be `"binary"`
+- `bytes` (string, required): Base64 encoded binary data (not url-safe)
+- `network` (string, optional): `"-239"` for mainnet, `"-3"` for testnet
+- `from` (string, optional): Signer address in raw format `"0:<hex>"`
+
+```tsx
+import { useTonConnectUI } from '@tonconnect/ui-react';
+
+export const SignBinaryData = () => {
+    const [tonConnectUI] = useTonConnectUI();
+
+    const handleSignBinary = async () => {
+        const binaryData = {
+            type: "binary",
+            bytes: "1Z/SGh+3HFMKlVHSkN91DpcCzT4C5jzHT3sA/24C5A==",
+            network: "-239", // MAINNET = '-239', TESTNET = '-3'
+            from: "0:348bcf827469c5fc38541c77fdd91d4e347eac200f6f2d9fd62dc08885f0415f"
+        };
+
+        try {
+            const result = await tonConnectUI.signData(binaryData);
+            console.log('Signed:', result);
+        } catch (e) {
+            console.error('Error:', e);
+        }
+    };
+
+    return <button onClick={handleSignBinary}>Sign Binary Data</button>;
+};
+```
+
+#### Cell Format
+
+Use for TON Blockchain data with TL-B schema. The wallet can parse and display the content if the schema is valid.
+
+**Parameters:**
+- `type` (string, required): Must be `"cell"`
+- `schema` (string, required): TL-B schema of the cell payload
+- `cell` (string, required): Base64 encoded BoC (not url-safe) with single-root cell
+- `network` (string, optional): `"-239"` for mainnet, `"-3"` for testnet
+- `from` (string, optional): Signer address in raw format `"0:<hex>"`
+
+```tsx
+import { useTonConnectUI } from '@tonconnect/ui-react';
+
+export const SignCellData = () => {
+    const [tonConnectUI] = useTonConnectUI();
+
+    const handleSignCell = async () => {
+        const cellData = {
+            type: "cell",
+            schema: "transfer#0f8a7ea5 query_id:uint64 amount:(VarUInteger 16) destination:MsgAddress response_destination:MsgAddress custom_payload:(Maybe ^Cell) forward_ton_amount:(VarUInteger 16) forward_payload:(Either Cell ^Cell) = InternalMsgBody;",
+            cell: "te6ccgEBAQEAVwAAqg+KfqVUbeTvKqB4h0AcnDgIAZucsOi6TLrfP6FcuPKEeTI6oB3fF/NBjyqtdov/KtutACCLqvfmyV9kH+Pyo5lcsrJzJDzjBJK6fd+ZnbFQe4+XggI=",
+            network: "-239", // MAINNET = '-239', TESTNET = '-3'
+            from: "0:348bcf827469c5fc38541c77fdd91d4e347eac200f6f2d9fd62dc08885f0415f"
+        };
+
+        try {
+            const result = await tonConnectUI.signData(cellData);
+            console.log('Signed:', result);
+        } catch (e) {
+            console.error('Error:', e);
+        }
+    };
+
+    return <button onClick={handleSignCell}>Sign Cell Data</button>;
+};
+```
+
+### Response
+
+All signData calls return the same response structure:
+
+```ts
+interface SignDataResult {
+    signature: string; // Base64 encoded signature
+    address: string;   // Wallet address in raw format
+    timestamp: number; // UNIX timestamp in seconds (UTC)
+    domain: string;    // App domain name 
+    payload: object;   // Original payload from the request
+}
+```
+
+### Signature Verification
+
+After receiving the signed data, you need to verify the signature to ensure it's authentic and was signed by the claimed wallet address.
+
+**For backend verification:** See [TypeScript verification example](https://github.com/ton-connect/demo-dapp-with-react-ui/blob/master/src/server/services/sign-data-service.ts#L32-L109) showing how to verify signatures on your server.
+
+**For smart contract verification:** See [FunC verification example](https://github.com/p0lunin/sign-data-contract-verify-example/blob/master/contracts/sign_data_example.fc) showing how to verify signatures in TON smart contracts.
+
+**For complete technical details:** See the [Sign Data specification](https://github.com/ton-blockchain/ton-connect/blob/main/requests-responses.md#sign-data) for full signature verification requirements.
+
 ### useIsConnectionRestored
 Indicates current status of the connection restoring process.
 You can use it to detect when connection restoring process if finished.
@@ -403,3 +591,10 @@ Please note that this is just a warning and should not affect the functionality 
 ```shell
 npm install encoding
 ```
+
+## How to find a sent transaction on the blockchain
+
+See the detailed guide: [Transaction-by-external-message](../../guidelines/transaction-by-external-message.md)
+
+This guide explains how to find the corresponding transaction on the TON blockchain by the BOC of an external-in message.
+

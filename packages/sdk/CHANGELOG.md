@@ -1,5 +1,21 @@
 # Changelog @tonconnect/sdk 
 
+# [3.2.0](https://github.com/ton-connect/sdk/compare/sdk-3.2.0-beta.0...sdk-3.2.0) (2025-06-25)
+
+
+### Bug Fixes
+
+* fix error message bug ([8b8da60](https://github.com/ton-connect/sdk/commit/8b8da60bea89e6c48d9f26418e4b2986a952d82e))
+* **sdk:** filter fields in proof object ([067a328](https://github.com/ton-connect/sdk/commit/067a328be52bd787a337f3b32eb03657a82c51c0))
+* **sdk:** fix infinity loading button in sign data modal ([4e74403](https://github.com/ton-connect/sdk/commit/4e74403b7eb0a91ee07349537952e02864590d14))
+
+
+### Features
+
+* **sdk:** add network and protocol fields to signData request ([fcfc8b3](https://github.com/ton-connect/sdk/commit/fcfc8b353b9775784b6f0c7b1e59c0321f0d2d32))
+
+
+
 # [3.2.0-beta.0](https://github.com/ton-connect/sdk/compare/sdk-3.1.1-beta.0...sdk-3.2.0-beta.0) (2025-05-08)
 
 

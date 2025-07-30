@@ -1,5 +1,16 @@
 # Changelog @tonconnect/ui 
 
+# [2.2.0](https://github.com/ton-connect/sdk/compare/ui-2.2.0-beta.0...ui-2.2.0) (2025-06-25)
+
+
+### Bug Fixes
+
+* **ui:** fix infinity loading button in sign data modal ([e23d841](https://github.com/ton-connect/sdk/commit/e23d841671e99933ffee24bd2f24ff977c3f361f))
+* **ui:** infinity success modal button loading ([#378](https://github.com/ton-connect/sdk/issues/378)) ([d32e351](https://github.com/ton-connect/sdk/commit/d32e3514641f101e69b864eff2d51bd6ba5eaee4))
+* **ui:** success modal closing ([c5eaff3](https://github.com/ton-connect/sdk/commit/c5eaff39d5428884a69a43a9b3ac7afe16734da9))
+
+
+
 # [2.2.0-beta.0](https://github.com/ton-connect/sdk/compare/ui-2.1.1-beta.0...ui-2.2.0-beta.0) (2025-05-08)
 
 
