@@ -19,6 +19,7 @@ type BasicAction = {
     name: ActionName;
     openModal: boolean;
     showNotification: boolean;
+    sessionId?: string;
 };
 
 export type ConfirmTransactionAction = BasicAction & {
@@ -66,8 +67,8 @@ let lastSelectedWalletInfoStorage =
 export const [lastSelectedWalletInfo, _setLastSelectedWalletInfo] = createSignal<
     | WalletInfoWithOpenMethod
     | {
-          openMethod: WalletOpenMethod;
-      }
+        openMethod: WalletOpenMethod;
+    }
     | null
 >(lastSelectedWalletInfoStorage?.getLastSelectedWalletInfo() || null);
 
@@ -75,8 +76,8 @@ export const setLastSelectedWalletInfo = (
     walletInfo:
         | WalletInfoWithOpenMethod
         | {
-              openMethod: WalletOpenMethod;
-          }
+            openMethod: WalletOpenMethod;
+        }
         | null
 ): void => {
     if (!lastSelectedWalletInfoStorage) {

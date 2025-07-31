@@ -454,11 +454,15 @@ export class TonConnectUI {
         const { notifications, modals, returnStrategy, twaReturnUrl } =
             this.getModalsAndNotificationsConfiguration(options);
 
+        const sessionId = await this.getSessionId();
+        console.log('[TonConnect][DEBUG] sendTransaction: sessionId:', sessionId);
+
         widgetController.setAction({
             name: 'confirm-transaction',
             showNotification: notifications.includes('before'),
             openModal: modals.includes('before'),
-            sent: false
+            sent: false,
+            sessionId: sessionId || undefined
         });
 
         const abortController = new AbortController();
@@ -472,7 +476,8 @@ export class TonConnectUI {
                 name: 'confirm-transaction',
                 showNotification: notifications.includes('before'),
                 openModal: modals.includes('before'),
-                sent: true
+                sent: true,
+                sessionId: sessionId || undefined
             });
 
             this.redirectAfterRequestSent({
@@ -481,7 +486,7 @@ export class TonConnectUI {
             });
 
             let firstClick = true;
-            const redirectToWallet = () => {
+            const redirectToWallet = async () => {
                 if (abortController.signal.aborted) {
                     return;
                 }
@@ -489,7 +494,7 @@ export class TonConnectUI {
                 const forceRedirect = !firstClick;
                 firstClick = false;
 
-                this.redirectAfterRequestSent({
+                await this.redirectAfterRequestSent({
                     returnStrategy,
                     twaReturnUrl,
                     forceRedirect
@@ -560,6 +565,7 @@ export class TonConnectUI {
     public async signData(
         data: SignDataPayload,
         options?: { onRequestSent?: (redirectToWallet: () => void) => void }
+        options?: { onRequestSent?: (redirectToWallet: () => void) => void }
     ): Promise<SignDataResponse> {
         this.tracker.trackDataSentForSignature(this.wallet, data);
 
@@ -575,11 +581,15 @@ export class TonConnectUI {
         const { notifications, modals, returnStrategy, twaReturnUrl } =
             this.getModalsAndNotificationsConfiguration();
 
+        const sessionId = await this.getSessionId();
+        console.log('[TonConnect][DEBUG] signData: sessionId:', sessionId);
+
         widgetController.setAction({
             name: 'confirm-sign-data',
             showNotification: notifications.includes('before'),
             openModal: modals.includes('before'),
-            signed: false
+            signed: false,
+            sessionId: sessionId || undefined
         });
 
         const abortController = new AbortController();
@@ -593,7 +603,8 @@ export class TonConnectUI {
                 name: 'confirm-sign-data',
                 showNotification: notifications.includes('before'),
                 openModal: modals.includes('before'),
-                signed: true
+                signed: true,
+                sessionId: sessionId || undefined
             });
 
             this.redirectAfterRequestSent({
@@ -602,7 +613,7 @@ export class TonConnectUI {
             });
 
             let firstClick = true;
-            const redirectToWallet = () => {
+            const redirectToWallet = async () => {
                 if (abortController.signal.aborted) {
                     return;
                 }
@@ -610,7 +621,7 @@ export class TonConnectUI {
                 const forceRedirect = !firstClick;
                 firstClick = false;
 
-                this.redirectAfterRequestSent({
+                await this.redirectAfterRequestSent({
                     returnStrategy,
                     twaReturnUrl,
                     forceRedirect
@@ -674,26 +685,73 @@ export class TonConnectUI {
         }
     }
 
-    private redirectAfterRequestSent({
+    /**
+     * Gets the current session ID if available.
+     * @returns session ID string or null if not available.
+     */
+    private async getSessionId(): Promise<string | null> {
+        if (!this.connected) {
+            console.log('[TonConnect][DEBUG] getSessionId: not connected, returning null');
+            return null;
+        }
+
+        try {
+            // Try to get session ID from storage as a fallback
+            const storage = (this.connector as any).dappSettings?.storage;
+            if (storage) {
+                const stored = await storage.getItem('ton-connect-storage_bridge-connection');
+                if (stored) {
+                    const connection = JSON.parse(stored);
+                    if (connection.type === 'http' && connection.sessionCrypto) {
+                        // For pending connections
+                        const { SessionCrypto } = await import('@tonconnect/protocol');
+                        const sessionCrypto = new SessionCrypto(connection.sessionCrypto);
+                        const sessionId = sessionCrypto.sessionId;
+                        console.log('[TonConnect][DEBUG] getSessionId: found pending connection sessionId:', sessionId);
+                        return sessionId;
+                    } else if (connection.type === 'http' && connection.session?.sessionKeyPair) {
+                        // For established connections
+                        const { SessionCrypto } = await import('@tonconnect/protocol');
+                        const sessionCrypto = new SessionCrypto(connection.session.sessionKeyPair);
+                        const sessionId = sessionCrypto.sessionId;
+                        console.log('[TonConnect][DEBUG] getSessionId: found established connection sessionId:', sessionId);
+                        return sessionId;
+                    }
+                }
+            }
+            console.log('[TonConnect][DEBUG] getSessionId: no session found in storage');
+        } catch (e) {
+            console.log('[TonConnect][DEBUG] getSessionId: error retrieving session:', e);
+            // Ignore errors, sessionId will remain null
+        }
+        return null;
+    }
+
+    private async redirectAfterRequestSent({
         returnStrategy,
         twaReturnUrl,
-        forceRedirect
+        forceRedirect,
     }: {
         returnStrategy: ReturnStrategy;
         twaReturnUrl?: `${string}://${string}`;
         forceRedirect?: boolean;
-    }): void {
+    }): Promise<void> {
         if (
             this.walletInfo &&
             'universalLink' in this.walletInfo &&
             (this.walletInfo.openMethod === 'universal-link' ||
                 this.walletInfo.openMethod === 'custom-deeplink')
         ) {
+            // Get session ID for transaction/signData confirmation
+            const sessionId = await this.getSessionId();
+            console.log('[TonConnect][DEBUG] redirectAfterRequestSent: sessionId for redirect:', sessionId);
+
             if (isTelegramUrl(this.walletInfo.universalLink)) {
                 redirectToTelegram(this.walletInfo.universalLink, {
                     returnStrategy,
                     twaReturnUrl: twaReturnUrl || appState.twaReturnUrl,
-                    forceRedirect: forceRedirect || false
+                    forceRedirect: forceRedirect || false,
+                    sessionId: sessionId || undefined
                 });
             } else {
                 redirectToWallet(
@@ -701,9 +759,10 @@ export class TonConnectUI {
                     this.walletInfo.deepLink,
                     {
                         returnStrategy,
-                        forceRedirect: forceRedirect || false
+                        forceRedirect: forceRedirect || false,
+                        sessionId: sessionId || undefined
                     },
-                    () => {}
+                    () => { }
                 );
             }
         }

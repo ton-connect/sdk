@@ -40,18 +40,18 @@ export const ActionModal: Component<ActionModalProps> = props => {
 
         setSent(
             !!currentAction &&
-                (('sent' in currentAction && currentAction.sent) ||
-                    currentAction.name === 'transaction-sent')
+            (('sent' in currentAction && currentAction.sent) ||
+                currentAction.name === 'transaction-sent')
         );
         setSigned(
             !!currentAction &&
-                (('signed' in currentAction && currentAction.signed) ||
-                    currentAction.name === 'data-signed')
+            (('signed' in currentAction && currentAction.signed) ||
+                currentAction.name === 'data-signed')
         );
         setCanceled(
             !!currentAction &&
-                (currentAction.name === 'transaction-canceled' ||
-                    currentAction.name === 'sign-data-canceled')
+            (currentAction.name === 'transaction-canceled' ||
+                currentAction.name === 'sign-data-canceled')
         );
     });
 
@@ -92,7 +92,8 @@ export const ActionModal: Component<ActionModalProps> = props => {
                     'twaReturnUrl' in currentAction
                         ? currentAction.twaReturnUrl
                         : appState.twaReturnUrl,
-                forceRedirect: forceRedirect
+                forceRedirect: forceRedirect,
+                sessionId: currentAction.sessionId
             });
         } else {
             redirectToWallet(
@@ -100,9 +101,10 @@ export const ActionModal: Component<ActionModalProps> = props => {
                 deepLink,
                 {
                     returnStrategy: returnStrategy,
-                    forceRedirect: forceRedirect
+                    forceRedirect: forceRedirect,
+                    sessionId: currentAction.sessionId
                 },
-                () => {}
+                () => { }
             );
         }
     };
