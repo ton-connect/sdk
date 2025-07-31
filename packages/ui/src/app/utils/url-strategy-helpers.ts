@@ -91,11 +91,14 @@ export function redirectToTelegram(
         // similar to how BridgeProvider.generateTGUniversalLink works
         if (options.sessionId) {
             console.log('[TonConnect][DEBUG] Adding sessionId to Telegram link:', options.sessionId);
-            // For transaction/signData confirmation, use a simple approach
-            // Just append session ID to the startapp parameter
-            // Note: This might cause issues with some wallets that expect specific startapp formats
-            // If this causes manifest errors, we may need to disable session ID for Telegram links
-            const startapp = `tonconnect-id-${options.sessionId}`;
+            // Create a temporary URL with session ID parameters
+            const tempUrl = new URL('about:blank');
+            tempUrl.searchParams.append('v', '2'); // PROTOCOL_VERSION
+            tempUrl.searchParams.append('id', options.sessionId);
+            tempUrl.searchParams.append('r', '{}'); // Empty request for now
+
+            const linkParams = tempUrl.toString().split('?')[1]!;
+            const startapp = 'tonconnect-' + encodeTelegramUrlParameters(linkParams);
             directLinkUrl.searchParams.append('startapp', startapp);
             console.log('[TonConnect][DEBUG] Telegram link with sessionId startapp:', startapp);
             console.log('[TonConnect][DEBUG] Final Telegram link with sessionId:', directLinkUrl.toString());
@@ -108,11 +111,14 @@ export function redirectToTelegram(
         // If sessionId is provided and startapp already exists, replace it with session ID version
         if (options.sessionId) {
             console.log('[TonConnect][DEBUG] Replacing existing startapp with sessionId version:', options.sessionId);
-            // For transaction/signData confirmation, use a simple approach
-            // Just append session ID to the startapp parameter
-            // Note: This might cause issues with some wallets that expect specific startapp formats
-            // If this causes manifest errors, we may need to disable session ID for Telegram links
-            const startapp = `tonconnect-id-${options.sessionId}`;
+            // Create a temporary URL with session ID parameters
+            const tempUrl = new URL('about:blank');
+            tempUrl.searchParams.append('v', '2'); // PROTOCOL_VERSION
+            tempUrl.searchParams.append('id', options.sessionId);
+            tempUrl.searchParams.append('r', '{}'); // Empty request for now
+
+            const linkParams = tempUrl.toString().split('?')[1]!;
+            const startapp = 'tonconnect-' + encodeTelegramUrlParameters(linkParams);
             directLinkUrl.searchParams.set('startapp', startapp);
             console.log('[TonConnect][DEBUG] Telegram link with sessionId startapp (replaced):', startapp);
             console.log('[TonConnect][DEBUG] Final Telegram link with sessionId (replaced):', directLinkUrl.toString());
@@ -306,7 +312,6 @@ export function redirectToWallet(
         : universalLink;
 
     console.log('[TonConnect][DEBUG] redirectToWallet: linkWithSessionId:', linkWithSessionId, 'deepLink:', deepLink, 'options:', options);
-    console.log('[TonConnect][DEBUG] redirectToWallet: sessionId provided:', !!options.sessionId, 'sessionId value:', options.sessionId);
 
     if (isInTelegramBrowser()) {
         if (isOS('ios', 'android')) {
@@ -594,16 +599,7 @@ export function redirectToWallet(
  */
 export function addSessionIdToUniversalLink(universalLink: string, sessionId: string): string {
     console.log('[TonConnect][DEBUG] Adding sessionId to universal link:', { sessionId, universalLink });
-
-    // Check if this looks like a connection link or transaction/signData link
     const url = new URL(universalLink);
-    const hasV = url.searchParams.has('v');
-    const hasR = url.searchParams.has('r');
-    const hasId = url.searchParams.has('id');
-
-    console.log('[TonConnect][DEBUG] URL analysis - has v:', hasV, 'has r:', hasR, 'has id:', hasId);
-    console.log('[TonConnect][DEBUG] URL search params:', Object.fromEntries(url.searchParams.entries()));
-
     url.searchParams.append('id', sessionId);
     const result = url.toString();
     console.log('[TonConnect][DEBUG] Universal link with sessionId:', result);
