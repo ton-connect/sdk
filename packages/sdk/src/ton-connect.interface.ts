@@ -100,5 +100,11 @@ export interface ITonConnect {
             onRequestSent?: () => void;
             signal?: AbortSignal;
         }
-    ): Promise<SignDataResponse> 
+    ): Promise<SignDataResponse>;
+
+    /**
+     * Gets the current session ID if available.
+     * @returns session ID string or null if not available.
+     */
+    getSessionId(): Promise<string | null>;
 }
