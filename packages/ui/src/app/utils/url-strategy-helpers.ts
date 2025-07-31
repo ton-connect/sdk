@@ -26,9 +26,9 @@ export function addReturnStrategy(
     strategy:
         | ReturnStrategy
         | {
-              returnStrategy: ReturnStrategy;
-              twaReturnUrl: `${string}://${string}` | undefined;
-          }
+            returnStrategy: ReturnStrategy;
+            twaReturnUrl: `${string}://${string}` | undefined;
+        }
 ): string {
     let returnStrategy;
     if (typeof strategy === 'string') {
@@ -55,6 +55,7 @@ export function addReturnStrategy(
  *   - returnStrategy: An enum `ReturnStrategy` dictating the method for returning to the app after the action is completed.
  *   - twaReturnUrl: A URL template string for TMA return, or `undefined` if not applicable.
  *   - forceRedirect: A boolean flag to force redirection, bypassing deep link fallback mechanisms.
+ *   - sessionId: Optional session ID to add to the link for transaction/signData confirmation.
  *
  * The function adapts its behavior based on the execution context, such as the TMA or browser environment, and the operating system.
  * Different strategies involve manipulating URL parameters and utilizing platform-specific features for optimal user experience.
@@ -65,15 +66,56 @@ export function redirectToTelegram(
         returnStrategy: ReturnStrategy;
         twaReturnUrl: `${string}://${string}` | undefined;
         forceRedirect: boolean;
+        sessionId?: string;
     }
 ): void {
     options = { ...options };
+
+    console.log('[TonConnect][DEBUG] redirectToTelegram: universalLink:', universalLink, 'options:', options);
+    console.log('[TonConnect][DEBUG] redirectToTelegram: sessionId provided:', !!options.sessionId, 'sessionId value:', options.sessionId);
+
+    // Check if the original URL already has startapp
+    const originalUrl = new URL(universalLink);
+    console.log('[TonConnect][DEBUG] redirectToTelegram: original URL has startapp:', originalUrl.searchParams.has('startapp'), 'startapp value:', originalUrl.searchParams.get('startapp'));
+
     // TODO: Remove this line after all dApps and the wallets-list.json have been updated
     const directLink = convertToTGDirectLink(universalLink);
     const directLinkUrl = new URL(directLink);
 
+    console.log('[TonConnect][DEBUG] redirectToTelegram: directLink:', directLink);
+    console.log('[TonConnect][DEBUG] redirectToTelegram: has startapp:', directLinkUrl.searchParams.has('startapp'));
+
     if (!directLinkUrl.searchParams.has('startapp')) {
-        directLinkUrl.searchParams.append('startapp', 'tonconnect');
+        // If sessionId is provided, we need to create a startapp parameter with session ID
+        // similar to how BridgeProvider.generateTGUniversalLink works
+        if (options.sessionId) {
+            console.log('[TonConnect][DEBUG] Adding sessionId to Telegram link:', options.sessionId);
+            // For transaction/signData confirmation, use a simple approach
+            // Just append session ID to the startapp parameter
+            // Note: This might cause issues with some wallets that expect specific startapp formats
+            // If this causes manifest errors, we may need to disable session ID for Telegram links
+            const startapp = `tonconnect-id-${options.sessionId}`;
+            directLinkUrl.searchParams.append('startapp', startapp);
+            console.log('[TonConnect][DEBUG] Telegram link with sessionId startapp:', startapp);
+            console.log('[TonConnect][DEBUG] Final Telegram link with sessionId:', directLinkUrl.toString());
+        } else {
+            console.log('[TonConnect][DEBUG] No sessionId provided, using default tonconnect startapp');
+            directLinkUrl.searchParams.append('startapp', 'tonconnect');
+        }
+    } else {
+        console.log('[TonConnect][DEBUG] startapp already exists in URL, not adding sessionId');
+        // If sessionId is provided and startapp already exists, replace it with session ID version
+        if (options.sessionId) {
+            console.log('[TonConnect][DEBUG] Replacing existing startapp with sessionId version:', options.sessionId);
+            // For transaction/signData confirmation, use a simple approach
+            // Just append session ID to the startapp parameter
+            // Note: This might cause issues with some wallets that expect specific startapp formats
+            // If this causes manifest errors, we may need to disable session ID for Telegram links
+            const startapp = `tonconnect-id-${options.sessionId}`;
+            directLinkUrl.searchParams.set('startapp', startapp);
+            console.log('[TonConnect][DEBUG] Telegram link with sessionId startapp (replaced):', startapp);
+            console.log('[TonConnect][DEBUG] Final Telegram link with sessionId (replaced):', directLinkUrl.toString());
+        }
     }
 
     if (isInTelegramBrowser()) {
@@ -137,58 +179,37 @@ export function redirectToTelegram(
             const useDeepLink = (isChrome || isFirefox) && !options.forceRedirect;
 
             if (useDeepLink) {
-                const linkWithStrategy = addReturnStrategy(
-                    directLinkUrl.toString(),
-                    options.returnStrategy
-                );
-                const deepLink = convertToTGDeepLink(linkWithStrategy);
-
-                openDeeplinkWithFallback(deepLink, () => openLinkBlank(linkWithStrategy));
+                const deepLink = convertToTGDeepLink(directLinkUrl.toString());
+                openDeeplinkWithFallback(deepLink, () => {
+                    openLinkBlank(addReturnStrategy(directLinkUrl.toString(), options));
+                });
             } else {
-                const linkWithStrategy = addReturnStrategy(
-                    directLinkUrl.toString(),
-                    options.returnStrategy
-                );
-
-                openLinkBlank(linkWithStrategy);
+                openLinkBlank(addReturnStrategy(directLinkUrl.toString(), options));
             }
         } else if (isOS('android')) {
-            // Use the `none` strategy, the user will transition to the other app
+            // Use the `back` strategy, the user will transition to the other app
             // and return to the browser when the action is completed.
 
-            // TODO: use back for all browsers
-            options.returnStrategy = 'back';
-
-            // In case if the browser is Chrome or Firefox, use the deep link with fallback to the direct link.
-            const isChrome = isBrowser('chrome');
-            const isFirefox = isBrowser('firefox');
-            const useDeepLink = (isChrome || isFirefox) && !options.forceRedirect;
-
-            if (useDeepLink) {
-                const linkWithStrategy = addReturnStrategy(
-                    directLinkUrl.toString(),
-                    options.returnStrategy
-                );
-                const deepLink = convertToTGDeepLink(linkWithStrategy);
-
-                openDeeplinkWithFallback(deepLink, () => openLinkBlank(linkWithStrategy));
-            } else {
-                const linkWithStrategy = addReturnStrategy(
-                    directLinkUrl.toString(),
-                    options.returnStrategy
-                );
-
-                openLinkBlank(linkWithStrategy);
+            if (options.returnStrategy === 'back') {
+                if (isBrowser('chrome')) {
+                    options.returnStrategy = 'googlechrome://';
+                } else if (isBrowser('firefox')) {
+                    options.returnStrategy = 'firefox://';
+                } else if (isBrowser('opera')) {
+                    options.returnStrategy = 'opera-http://';
+                } else {
+                    // fallback to the `location.href`
+                    options.returnStrategy = location.href as ReturnStrategy;
+                }
             }
+
+            openLinkBlank(addReturnStrategy(directLinkUrl.toString(), options));
         } else if (isOS('ipad')) {
             // Use the `back` strategy, the user will transition to the other app
             // and return to the browser when the action is completed.
 
-            // return back to the browser
             if (options.returnStrategy === 'back') {
                 if (isBrowser('safari')) {
-                    // safari does not have a deep link, so we use the `location.href`
-                    // ref: https://developer.apple.com/documentation/xcode/supporting-universal-links-in-your-app
                     options.returnStrategy = 'back';
                 } else if (isBrowser('chrome')) {
                     options.returnStrategy = 'googlechrome://';
@@ -207,40 +228,44 @@ export function redirectToTelegram(
             const isFirefox = isBrowser('firefox');
             const useDeepLink = (isChrome || isFirefox) && !options.forceRedirect;
 
-            const linkWithStrategy = addReturnStrategy(
-                directLinkUrl.toString(),
-                options.returnStrategy
-            );
-
             if (useDeepLink) {
-                const deepLink = convertToTGDeepLink(linkWithStrategy);
-
-                openDeeplinkWithFallback(deepLink, () => openLinkBlank(linkWithStrategy));
+                const deepLink = convertToTGDeepLink(directLinkUrl.toString());
+                openDeeplinkWithFallback(deepLink, () => {
+                    openLinkBlank(addReturnStrategy(directLinkUrl.toString(), options));
+                });
             } else {
-                openLinkBlank(linkWithStrategy);
+                openLinkBlank(addReturnStrategy(directLinkUrl.toString(), options));
             }
         } else if (isOS('macos', 'windows', 'linux')) {
-            // Use the `none` strategy. The user will transition to the TON Space
-            // and return to the TMA after the action is completed.
+            // Use the `back` strategy, the user will transition to the other app
+            // and return to the browser when the action is completed.
 
-            options.returnStrategy = 'back';
-            options.twaReturnUrl = undefined;
+            if (options.returnStrategy === 'back') {
+                if (isBrowser('safari')) {
+                    options.returnStrategy = 'back';
+                } else if (isBrowser('chrome')) {
+                    options.returnStrategy = 'googlechrome://';
+                } else if (isBrowser('firefox')) {
+                    options.returnStrategy = 'firefox://';
+                } else if (isBrowser('opera')) {
+                    options.returnStrategy = 'opera-http://';
+                } else {
+                    options.returnStrategy = 'back';
+                }
+            }
 
-            const linkWithStrategy = addReturnStrategy(
-                directLinkUrl.toString(),
-                options.returnStrategy
-            );
+            const linkWitStrategy = addReturnStrategy(directLinkUrl.toString(), options);
+            const deepLink = convertToTGDeepLink(linkWitStrategy);
+            const useDeepLink = !options.forceRedirect;
 
-            if (options.forceRedirect) {
-                openLinkBlank(linkWithStrategy);
+            if (useDeepLink) {
+                openDeeplinkWithFallback(deepLink, () => {
+                    openLinkBlank(linkWitStrategy);
+                });
             } else {
-                const deepLink = convertToTGDeepLink(linkWithStrategy);
-
-                openDeeplinkWithFallback(deepLink, () => openLinkBlank(linkWithStrategy));
+                openLinkBlank(linkWitStrategy);
             }
         } else {
-            // Fallback for unknown platforms. Should use desktop strategy.
-
             openLinkBlank(addReturnStrategy(directLinkUrl.toString(), options));
         }
     }
@@ -255,6 +280,7 @@ export function redirectToTelegram(
  * @param options An object containing specific properties to customize the redirect behavior:
  *  - returnStrategy: An enum `ReturnStrategy` dictating the method for returning to the app after the action is completed.
  *  - forceRedirect: A boolean flag to force redirection, bypassing deep link fallback mechanisms.
+ *  - sessionId: An optional session ID to add to the universal link for transaction/signData confirmation.
  * @param setOpenMethod A function to set the method of opening the wallet.
  *
  * The function adapts its behavior based on the execution context, such as the TMA or browser environment, and the operating system.
@@ -266,10 +292,19 @@ export function redirectToWallet(
     options: {
         returnStrategy: ReturnStrategy;
         forceRedirect: boolean;
+        sessionId?: string;
     },
     setOpenMethod: (method: 'universal-link' | 'custom-deeplink') => void
 ): void {
     options = { ...options };
+
+    // Add session ID to universal link if provided
+    const linkWithSessionId = options.sessionId
+        ? addSessionIdToUniversalLink(universalLink, options.sessionId)
+        : universalLink;
+
+    console.log('[TonConnect][DEBUG] redirectToWallet: linkWithSessionId:', linkWithSessionId, 'deepLink:', deepLink, 'options:', options);
+    console.log('[TonConnect][DEBUG] redirectToWallet: sessionId provided:', !!options.sessionId, 'sessionId value:', options.sessionId);
 
     if (isInTelegramBrowser()) {
         if (isOS('ios', 'android')) {
@@ -280,12 +315,12 @@ export function redirectToWallet(
 
             setOpenMethod('universal-link');
 
-            openLink(addReturnStrategy(universalLink, options.returnStrategy), '_self');
+            openLink(addReturnStrategy(linkWithSessionId, options.returnStrategy), '_self');
         } else {
             // Fallback for unknown platforms. Should use desktop strategy.
             setOpenMethod('universal-link');
 
-            const linkWitStrategy = addReturnStrategy(universalLink, options.returnStrategy);
+            const linkWitStrategy = addReturnStrategy(linkWithSessionId, options.returnStrategy);
 
             openLinkBlank(linkWitStrategy);
         }
@@ -301,7 +336,7 @@ export function redirectToWallet(
 
             setOpenMethod('universal-link');
 
-            const linkWitStrategy = addReturnStrategy(universalLink, options.returnStrategy);
+            const linkWitStrategy = addReturnStrategy(linkWithSessionId, options.returnStrategy);
 
             sendOpenTelegramLink(linkWitStrategy, () => {
                 setOpenMethod('universal-link');
@@ -317,7 +352,7 @@ export function redirectToWallet(
                 options.returnStrategy = 'tg://resolve';
             }
 
-            const linkWitStrategy = addReturnStrategy(universalLink, options.returnStrategy);
+            const linkWitStrategy = addReturnStrategy(linkWithSessionId, options.returnStrategy);
             const useDeepLink = !!deepLink && !options.forceRedirect;
 
             // In case of deep link, use the `custom-deeplink` strategy with fallback to `universal-link`.
@@ -355,7 +390,7 @@ export function redirectToWallet(
                 }
             }
 
-            const linkWitStrategy = addReturnStrategy(universalLink, options.returnStrategy);
+            const linkWitStrategy = addReturnStrategy(linkWithSessionId, options.returnStrategy);
             const useDeepLink = !!deepLink && !options.forceRedirect;
 
             // In case of deep link, use the `custom-deeplink` strategy with fallback to `universal-link`.
@@ -393,7 +428,7 @@ export function redirectToWallet(
                 }
             }
 
-            const linkWitStrategy = addReturnStrategy(universalLink, options.returnStrategy);
+            const linkWitStrategy = addReturnStrategy(linkWithSessionId, options.returnStrategy);
             const useDeepLink = !!deepLink && !options.forceRedirect;
 
             // In case of deep link, use the `custom-deeplink` strategy with fallback to `universal-link`.
@@ -414,7 +449,7 @@ export function redirectToWallet(
             // Fallback for unknown platforms. Should use desktop strategy.
             setOpenMethod('universal-link');
 
-            const linkWitStrategy = addReturnStrategy(universalLink, options.returnStrategy);
+            const linkWitStrategy = addReturnStrategy(linkWithSessionId, options.returnStrategy);
 
             openLinkBlank(linkWitStrategy);
         }
@@ -445,11 +480,11 @@ export function redirectToWallet(
                 setOpenMethod('universal-link');
 
                 // TODO: in case when the wallet does not exist, the location.href will be rewritten
-                openLink(addReturnStrategy(universalLink, options.returnStrategy), '_self');
+                openLink(addReturnStrategy(linkWithSessionId, options.returnStrategy), '_self');
             } else {
                 setOpenMethod('universal-link');
 
-                openLinkBlank(addReturnStrategy(universalLink, options.returnStrategy));
+                openLinkBlank(addReturnStrategy(linkWithSessionId, options.returnStrategy));
             }
         } else if (isOS('android')) {
             // Use the `back` strategy, the user will transition to the other app
@@ -470,7 +505,7 @@ export function redirectToWallet(
 
             setOpenMethod('universal-link');
 
-            openLinkBlank(addReturnStrategy(universalLink, options.returnStrategy));
+            openLinkBlank(addReturnStrategy(linkWithSessionId, options.returnStrategy));
         } else if (isOS('ipad')) {
             // Use the `back` strategy, the user will transition to the other app
             // and return to the browser when the action is completed.
@@ -497,11 +532,11 @@ export function redirectToWallet(
                 setOpenMethod('universal-link');
 
                 // TODO: in case when the wallet does not exist, the location.href will be rewritten
-                openLink(addReturnStrategy(universalLink, options.returnStrategy), '_self');
+                openLink(addReturnStrategy(linkWithSessionId, options.returnStrategy), '_self');
             } else {
                 setOpenMethod('universal-link');
 
-                openLinkBlank(addReturnStrategy(universalLink, options.returnStrategy));
+                openLinkBlank(addReturnStrategy(linkWithSessionId, options.returnStrategy));
             }
         } else if (isOS('macos', 'windows', 'linux')) {
             // Use the `back` strategy, the user will transition to the other app
@@ -522,7 +557,7 @@ export function redirectToWallet(
                 }
             }
 
-            const linkWitStrategy = addReturnStrategy(universalLink, options.returnStrategy);
+            const linkWitStrategy = addReturnStrategy(linkWithSessionId, options.returnStrategy);
             const useDeepLink = !!deepLink && !options.forceRedirect;
 
             // In case of deep link, use the `custom-deeplink` strategy with fallback to `universal-link`.
@@ -543,9 +578,34 @@ export function redirectToWallet(
             // Fallback for unknown platforms. Should use desktop strategy.
             setOpenMethod('universal-link');
 
-            openLinkBlank(addReturnStrategy(universalLink, options.returnStrategy));
+            openLinkBlank(addReturnStrategy(linkWithSessionId, options.returnStrategy));
         }
     }
+}
+
+/**
+ * Adds a session ID parameter to a universal link for transaction/signData confirmation.
+ * This is similar to the logic in bridge provider for connection links.
+ * @param universalLink The universal link to add session ID to
+ * @param sessionId The session ID to add
+ * @returns The universal link with session ID parameter
+ */
+export function addSessionIdToUniversalLink(universalLink: string, sessionId: string): string {
+    console.log('[TonConnect][DEBUG] Adding sessionId to universal link:', { sessionId, universalLink });
+
+    // Check if this looks like a connection link or transaction/signData link
+    const url = new URL(universalLink);
+    const hasV = url.searchParams.has('v');
+    const hasR = url.searchParams.has('r');
+    const hasId = url.searchParams.has('id');
+
+    console.log('[TonConnect][DEBUG] URL analysis - has v:', hasV, 'has r:', hasR, 'has id:', hasId);
+    console.log('[TonConnect][DEBUG] URL search params:', Object.fromEntries(url.searchParams.entries()));
+
+    url.searchParams.append('id', sessionId);
+    const result = url.toString();
+    console.log('[TonConnect][DEBUG] Universal link with sessionId:', result);
+    return result;
 }
 
 /**
