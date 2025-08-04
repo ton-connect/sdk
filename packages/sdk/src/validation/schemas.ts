@@ -1,4 +1,5 @@
-const ADDRESS_HEX_REGEX = /^(0x)?[0-9a-fA-F]{64}$/;
+import { isValidUserFriendlyAddress, isValidRawAddress } from 'src/utils/address';
+
 const BASE64_REGEX = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
 const BOC_PREFIX = 'te6cc';
 
@@ -49,7 +50,7 @@ export function validateSendTransactionRequest(data: any): ValidationResult {
     }
 
     if (data.from !== undefined) {
-        if (!isValidString(data.from) || !ADDRESS_HEX_REGEX.test(data.from)) {
+        if (!isValidString(data.from) || !isValidRawAddress(data.from)) {
             return "Invalid 'from' address format";
         }
     }
@@ -82,7 +83,7 @@ function validateTransactionMessage(message: any, index: number): ValidationResu
     if (!isValidString(message.address)) {
         return `'address' is required in message at index ${index}`;
     }
-    if (!ADDRESS_HEX_REGEX.test(message.address)) {
+    if (!isValidUserFriendlyAddress(message.address)) {
         return `Wrong 'address' format in message at index ${index}`;
     }
 
