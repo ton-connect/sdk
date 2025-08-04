@@ -2,6 +2,8 @@ import { isValidUserFriendlyAddress, isValidRawAddress } from 'src/utils/address
 
 const BASE64_REGEX = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
 const BOC_PREFIX = 'te6cc';
+const INTEGER_REGEX = /^-?\d+$/;
+const POSITIVE_INTEGER_REGEX = /^\d+$/;
 
 type ValidationResult = string | null;
 
@@ -117,7 +119,7 @@ function validateTransactionMessage(message: any, index: number): ValidationResu
             return `Invalid 'extraCurrency' in message at index ${index}`;
         }
         for (const [key, value] of Object.entries(message.extraCurrency)) {
-            if (!isValidNumber(Number(key)) || !isValidString(value)) {
+            if (!INTEGER_REGEX.test(key) || typeof value !== 'string' || !POSITIVE_INTEGER_REGEX.test(value)) {
                 return `Invalid 'extraCurrency' format in message at index ${index}`;
             }
         }
