@@ -43,6 +43,12 @@ export function validateSendTransactionRequest(data: any): ValidationResult {
         return "Incorrect 'validUntil'";
     }
 
+    const now = Math.floor(Date.now() / 1000);
+    const fiveMinutesFromNow = now + 300;
+    if (data.validUntil > fiveMinutesFromNow) {
+        console.warn(`validUntil (${data.validUntil}) is more than 5 minutes from now (${now})`);
+    }
+
     if (data.network !== undefined) {
         if (!isValidString(data.network) || !/^[\d-]+$/.test(data.network)) {
             return "Invalid 'network' format";
