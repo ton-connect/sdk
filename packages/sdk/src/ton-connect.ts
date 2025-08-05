@@ -62,6 +62,7 @@ import { createAbortController } from 'src/utils/create-abort-controller';
 import { TonConnectTracker } from 'src/tracker/ton-connect-tracker';
 import { tonConnectSdkVersion } from 'src/constants/version';
 import { validateSendTransactionRequest, validateSignDataPayload, validateConnectAdditionalRequest } from './validation/schemas';
+import { isQaModeEnabled } from './utils/qa-mode';
 
 export class TonConnect implements ITonConnect {
     private static readonly walletsList = new WalletsListManager();
@@ -263,7 +264,11 @@ export class TonConnect implements ITonConnect {
         if (options.request) {
             const validationError = validateConnectAdditionalRequest(options.request);
             if (validationError) {
-                throw new TonConnectError('ConnectAdditionalRequest validation failed: ' + validationError);
+                if (isQaModeEnabled()) {
+                    console.error('ConnectAdditionalRequest validation failed: ' + validationError);
+                } else {
+                    throw new TonConnectError('ConnectAdditionalRequest validation failed: ' + validationError);
+                }
             }
         }
 
@@ -440,7 +445,11 @@ export class TonConnect implements ITonConnect {
         // Validate transaction
         const validationError = validateSendTransactionRequest(transaction);
         if (validationError) {
-            throw new TonConnectError('SendTransactionRequest validation failed: ' + validationError);
+            if (isQaModeEnabled()) {
+                console.error('SendTransactionRequest validation failed: ' + validationError);
+            } else {
+                throw new TonConnectError('SendTransactionRequest validation failed: ' + validationError);
+            }
         }
 
         const abortController = createAbortController(options?.signal);
@@ -511,7 +520,11 @@ export class TonConnect implements ITonConnect {
         // Validate sign data
         const validationError = validateSignDataPayload(data);
         if (validationError) {
-            throw new TonConnectError('SignDataPayload validation failed: ' + validationError);
+            if (isQaModeEnabled()) {
+                console.error('SignDataPayload validation failed: ' + validationError);
+            } else {
+                throw new TonConnectError('SignDataPayload validation failed: ' + validationError);
+            }
         }
 
         this.checkConnection();

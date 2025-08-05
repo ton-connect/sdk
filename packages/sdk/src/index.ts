@@ -87,3 +87,4 @@ export {
 export { toUserFriendlyAddress } from './utils/address';
 export { checkRequiredWalletFeatures } from './utils/feature-support';
 export { isTelegramUrl, encodeTelegramUrlParameters } from './utils/url';
+export { enableQaMode, isQaModeEnabled } from './utils/qa-mode';

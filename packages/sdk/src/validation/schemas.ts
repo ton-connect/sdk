@@ -1,4 +1,5 @@
 import { isValidUserFriendlyAddress, isValidRawAddress } from 'src/utils/address';
+import { isQaModeEnabled, logValidationError } from 'src/utils/qa-mode';
 
 const BASE64_REGEX = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
 const BOC_PREFIX = 'te6cc';
@@ -7,42 +8,53 @@ const POSITIVE_INTEGER_REGEX = /^\d+$/;
 
 type ValidationResult = string | null;
 
-function isValidNumber(value: any): boolean {
+function isValidNumber(value: unknown): value is number {
     return typeof value === 'number' && !isNaN(value);
 }
 
-function isValidString(value: any): boolean {
+function isValidString(value: unknown): value is string {
     return typeof value === 'string' && value.length > 0;
 }
 
-function isValidBoc(value: any): boolean {
+function isValidBoc(value: unknown): value is string {
     return typeof value === 'string' && BASE64_REGEX.test(value) && value.startsWith(BOC_PREFIX);
 }
 
-function isValidObject(value: any): boolean {
+function isValidObject(value: unknown): value is Record<string, unknown> {
     return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function isValidArray(value: any): boolean {
+function isValidArray(value: unknown): value is unknown[] {
     return Array.isArray(value);
 }
 
-function hasExtraProperties(obj: any, allowedKeys: string[]): boolean {
+function hasExtraProperties(obj: Record<string, unknown>, allowedKeys: string[]): boolean {
     return Object.keys(obj).some(key => !allowedKeys.includes(key));
 }
 
-export function validateSendTransactionRequest(data: any): ValidationResult {
+export function validateSendTransactionRequest(data: unknown): ValidationResult {
+    console.log('[Validation Debug] validateSendTransactionRequest called');
+    console.log('[Validation Debug] isQaModeEnabled():', isQaModeEnabled());
+
     if (!isValidObject(data)) {
-        return "Request must be an object";
+        const error = "Request must be an object";
+        logValidationError(error);
+        const shouldReturnNull = isQaModeEnabled();
+        console.log('[Validation Debug] Should return null:', shouldReturnNull);
+        return shouldReturnNull ? null : error;
     }
 
     const allowedKeys = ['validUntil', 'network', 'from', 'messages'];
     if (hasExtraProperties(data, allowedKeys)) {
-        return "Request contains extra properties";
+        const error = "Request contains extra properties";
+        logValidationError(error);
+        return isQaModeEnabled() ? null : error;
     }
 
     if (!isValidNumber(data.validUntil)) {
-        return "Incorrect 'validUntil'";
+        const error = "Incorrect 'validUntil'";
+        logValidationError(error);
+        return isQaModeEnabled() ? null : error;
     }
 
     const now = Math.floor(Date.now() / 1000);
@@ -53,18 +65,24 @@ export function validateSendTransactionRequest(data: any): ValidationResult {
 
     if (data.network !== undefined) {
         if (!isValidString(data.network) || !/^[\d-]+$/.test(data.network)) {
-            return "Invalid 'network' format";
+            const error = "Invalid 'network' format";
+            logValidationError(error);
+            return isQaModeEnabled() ? null : error;
         }
     }
 
     if (data.from !== undefined) {
         if (!isValidString(data.from) || !isValidRawAddress(data.from)) {
-            return "Invalid 'from' address format";
+            const error = "Invalid 'from' address format";
+            logValidationError(error);
+            return isQaModeEnabled() ? null : error;
         }
     }
 
     if (!isValidArray(data.messages) || data.messages.length === 0) {
-        return "'messages' is required";
+        const error = "'messages' is required";
+        logValidationError(error);
+        return isQaModeEnabled() ? null : error;
     }
 
     for (let i = 0; i < data.messages.length; i++) {
@@ -78,7 +96,7 @@ export function validateSendTransactionRequest(data: any): ValidationResult {
     return null;
 }
 
-function validateTransactionMessage(message: any, index: number): ValidationResult {
+function validateTransactionMessage(message: unknown, index: number): ValidationResult {
     if (!isValidObject(message)) {
         return `Message at index ${index} must be an object`;
     }
@@ -128,7 +146,7 @@ function validateTransactionMessage(message: any, index: number): ValidationResu
     return null;
 }
 
-export function validateConnectAdditionalRequest(data: any): ValidationResult {
+export function validateConnectAdditionalRequest(data: unknown): ValidationResult {
     if (!isValidObject(data)) {
         return "Request must be an object";
     }
@@ -145,7 +163,7 @@ export function validateConnectAdditionalRequest(data: any): ValidationResult {
     return null;
 }
 
-export function validateSignDataPayload(data: any): ValidationResult {
+export function validateSignDataPayload(data: unknown): ValidationResult {
     if (!isValidObject(data)) {
         return "Payload must be an object";
     }
@@ -166,7 +184,7 @@ export function validateSignDataPayload(data: any): ValidationResult {
     }
 }
 
-function validateSignDataPayloadText(data: any): ValidationResult {
+function validateSignDataPayloadText(data: Record<string, unknown>): ValidationResult {
     const allowedKeys = ['type', 'text', 'network', 'from'];
     if (hasExtraProperties(data, allowedKeys)) {
         return "Text payload contains extra properties";
@@ -189,7 +207,7 @@ function validateSignDataPayloadText(data: any): ValidationResult {
     return null;
 }
 
-function validateSignDataPayloadBinary(data: any): ValidationResult {
+function validateSignDataPayloadBinary(data: Record<string, unknown>): ValidationResult {
     const allowedKeys = ['type', 'bytes', 'network', 'from'];
     if (hasExtraProperties(data, allowedKeys)) {
         return "Binary payload contains extra properties";
@@ -212,7 +230,7 @@ function validateSignDataPayloadBinary(data: any): ValidationResult {
     return null;
 }
 
-function validateSignDataPayloadCell(data: any): ValidationResult {
+function validateSignDataPayloadCell(data: Record<string, unknown>): ValidationResult {
     const allowedKeys = ['type', 'schema', 'cell', 'network', 'from'];
     if (hasExtraProperties(data, allowedKeys)) {
         return "Cell payload contains extra properties";
