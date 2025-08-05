@@ -23,7 +23,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Set up dependencies
-        run: pnpm i --frozen-lockfiles
+        run: pnpm i --frozen-lockfile
 
       - name: Build
         uses: ./.github/actions/build
