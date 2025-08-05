@@ -2,7 +2,7 @@ name: Build docs
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "feat/monorepo-migration" ]
 
 jobs:
   build:
@@ -14,19 +14,22 @@ jobs:
       - name: Read .nvmrc
         run: echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_ENV
 
+      - uses: pnpm/action-setup@v4
+
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: '${{ env.NVMRC }}'
+          cache: 'pnpm'
 
       - name: Set up dependencies
-        run: npm ci
+        run: pnpm i --frozen-lockfile
 
       - name: Build
         uses: ./.github/actions/build
 
       - name: Build docs
-        run: npm run generateDocs
+        run: pnpm generateDocs
 
       - name: Create and switch to docs branch
         run: |

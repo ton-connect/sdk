@@ -22,17 +22,17 @@ git clone git@github.com:ton-connect/sdk.git && cd sdk
 Next, install all dependencies using the following command:
 
 ```shell
-npm ci
+pnpm i --frozen-lockfile
 ```
 
-> Note: The `npm ci` installs dependencies based on the `package-lock.json` file, ensuring consistent versions as in the repository, and prevents any automatic updates.
+> Note: The `pnpm i --frozen-lockfile` installs dependencies based on the `package-lock.json` file, ensuring consistent versions as in the repository, and prevents any automatic updates.
 
 # Setting Up Your Development Environment
 
 Before starting development, you need to build all packages:
 
 ```shell
-nx run-many --target=build --all --parallel=1
+pnpm build
 ```
 
 > Note: The `--parallel=1` flag ensures packages are built one after the other to avoid potential errors caused by package dependencies.
@@ -67,7 +67,7 @@ Replace the `build` script in `packages/ui/package.json` with the following:
 Now, build the `@tonconnect/ui-react` package in watch mode:
 
 ```shell
-nx affected:build --parallel=1 --watch
+pnpm watch
 ```
 
 > Note: As before, `--parallel=1` is used to build packages sequentially, preventing errors due to interdependencies.
@@ -85,7 +85,7 @@ The release process is divided into distinct stages to ensure a smooth and error
 
 Whether you're publishing a beta version or a new release, the process consists of several common steps with slight variations depending on the version type.
 
-> TODO: automate this process with an nx plugin.
+> TODO: automate this process with a plugin.
 
 ### Step-by-step guide
 
@@ -104,28 +104,20 @@ Only update the packages that have changes or are below another package in this 
 
 If a package depends on another, update the dependency version and make a "chore" commit before moving on to the next package.
 
-For example, if changes were made in `@tonconnect/ui` and `@tonconnect/ui-react`, you should first run the following for `@tonconnect/ui`:
+We use `changesets` to manage versions. It automatically updates all affected packages, so you only need to select packages that were updated, all dependencies will receive updates automatically.
 
- - For a beta version:
-   ```shell
-   nx run ui:version --releaseAs=prerelease --preid=beta
-   ```
- - For a new release:
-   ```shell
-   nx run ui:version --releaseAs=patch
-   ```
+For example, if changes were made in `@tonconnect/ui`, you should run `pnpm changeset add`, select `@tonconnect/ui`, choose type of the version update(MAJOR.MINOR.PATCH) and write changelog. After you are done with `add` command, you need to run `pnpm changeset version`, which will update `package.json` and `CHANGELOG.md` for relevant packages. `@tonconnect/ui-react` will be updated automatically.
+For beta version you need to run `pnpm changeset pre enter beta` before executing `add` and `version` commands. After you're done with releasing beta tag, you can exit pre mode by running `pnpm changeset pre exit`
 
-> Note: Follow this [link](https://github.com/jscutlery/semver#specify-the-level-of-change) to learn more about `--releaseAs` and `--preid`.
+> Note: Follow this [link](https://github.com/changesets/changesets/blob/main/docs/adding-a-changeset.md) to learn more about `changesets`.
 
 #### 2. Build Packages
 
 After updating the version, build all packages:
 
- ```shell
- nx run-many --target=build --all --parallel=1
- ```
-
-> Note: The `--parallel=1` is used to build packages one by one since some packages depend on each other, and parallel building may result in errors.
+```shell
+pnpm build
+```
 
 #### 3. Publish Version
 
@@ -133,11 +125,15 @@ Next, publish the version of the package. For `@tonconnect/ui`:
 
 - For a beta version:
   ```shell
-  cd packages/ui && npm publish --access=public --tag=beta
+  cd packages/ui && pnpm publish --access=public --tag=beta
   ```
 - For a new release:
   ```shell
-  cd packages/ui && npm publish --access=public
+  cd packages/ui && pnpm publish --access=public
+  ```
+- You can publish all updated packages by running:
+  ```shell
+  pnpm publish -r --access=public
   ```
 
 > Note: The `--tag=beta` is used to publish the package with the `beta` tag to prevent accidental installation of the beta version.
@@ -164,7 +160,7 @@ After publishing the version of `@tonconnect/ui`, update its version in the `dep
  }
  ```
 
-> TODO: add a step to run `npm install` in `@tonconnect/ui-react` for updating `package-lock.json` file when the step will be tested.
+> TODO: add a step to run `pnpm install` in `@tonconnect/ui-react` for updating `pnpm-lock.json` file when the step will be tested.
 
 Then, create a "chore" commit to save this change:
 
@@ -211,10 +207,10 @@ Update the `@tonconnect/ui-react` package version in the `package.json` file:
 
 #### 3. Install Dependencies
 
-Install the necessary dependencies and update the `package-lock.json` file:
+Install the necessary dependencies and update the `pnpm-lock.json` file:
 
 ```shell
-npm install
+pnpm install
 ```
 
 #### 4. Build and Test
@@ -222,7 +218,7 @@ npm install
 Build the demo app and check if it works correctly:
 
 ```shell
-npm run build
+pnpm run build
 ```
 
 #### 5. Commit and Push Changes

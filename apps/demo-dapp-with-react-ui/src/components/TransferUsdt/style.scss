@@ -1,0 +1,50 @@
+.transfer-usdt {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px;
+    align-items: center;
+    margin-top: 32px;
+
+    h3,
+    h4 {
+        margin: 0;
+        color: white;
+        opacity: 0.8;
+    }
+
+    .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        width: 500px;
+
+        label {
+            display: flex;
+            flex-direction: column;
+            color: white;
+        }
+
+        input {
+            width: 500px;
+            padding: 5px 10px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+        }
+    }
+
+    a {
+        color:rgba(102, 170, 238, 0.91)
+    }
+
+    button {
+        margin-top: 16px;
+        border: none;
+        padding: 7px 15px;
+        border-radius: 15px;
+        cursor: pointer;
+        background-color: rgba(102, 170, 238, 0.91);
+        color: white;
+        font-size: 16px;
+    }
+}

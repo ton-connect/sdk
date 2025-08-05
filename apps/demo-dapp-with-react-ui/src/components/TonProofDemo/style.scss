@@ -1,0 +1,50 @@
+.ton-proof-demo {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+  margin-top: 60px;
+  padding: 20px;
+
+  h3 {
+    color: white;
+    opacity: 0.8;
+  }
+
+  > div:nth-child(3) {
+    width: 100%;
+
+    span {
+      word-break: break-word;
+    }
+  }
+
+  &__error {
+    color: rgba(102,170,238,0.91);
+    font-size: 18px;
+    line-height: 20px;
+  }
+
+  button {
+    border: none;
+    padding: 7px 15px;
+    border-radius: 15px;
+    cursor: pointer;
+
+    background-color: rgba(102,170,238,0.91);
+    color: white;
+    font-size: 16px;
+    line-height: 20px;
+
+    transition: transform 0.1s ease-in-out;
+
+    &:hover {
+      transform: scale(1.03);
+    }
+
+    &:active {
+      transform: scale(0.97);
+    }
+  }
+}

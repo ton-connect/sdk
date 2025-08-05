@@ -11,7 +11,6 @@ module.exports = {
                 createDefaultProgram: true
             },
             plugins: [
-                '@nrwl/nx',
                 '@typescript-eslint',
                 'import',
                 'unused-imports'
@@ -22,26 +21,6 @@ module.exports = {
                 'prettier'
             ],
             rules: {
-                "@nrwl/nx/enforce-module-boundaries": [
-                    "error",
-                    {
-                        "allow": [],
-                        "depConstraints": [
-                            {
-                                "sourceTag": "scope:core",
-                                "onlyDependOnLibsWithTags": []
-                            },
-                            {
-                                "sourceTag": "scope:ui",
-                                "onlyDependOnLibsWithTags": ["scope:sdk"]
-                            },
-                            {
-                                "sourceTag": "scope:ui-react",
-                                "onlyDependOnLibsWithTags": ["scope:ui"]
-                            }
-                        ]
-                    }
-                ],
                 'import/extensions': [
                     'error',
                     'ignorePackages',

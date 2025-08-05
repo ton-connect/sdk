@@ -42,10 +42,5 @@
   },
   "devDependencies": {
     "@types/eventsource": "^1.1.11"
-  },
-  "nx": {
-    "tags": [
-      "scope:isomorphic-eventsource"
-    ]
   }
 }

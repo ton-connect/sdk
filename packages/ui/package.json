@@ -6,11 +6,6 @@
     "dev": "vite",
     "build": "tsc --noEmit --emitDeclarationOnly false && vite build && rollup -c rollup.config.mjs && vite build -c vite.cdn-config.ts && node ./scripts/patch-build_ssr-fix.js"
   },
-  "nx": {
-    "tags": [
-      "scope:ui"
-    ]
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ton-connect/sdk.git"
@@ -47,7 +42,7 @@
     }
   },
   "dependencies": {
-    "@tonconnect/sdk": "3.3.0-beta.0",
+    "@tonconnect/sdk": "workspace:*",
     "classnames": "^2.3.2",
     "deepmerge": "^4.2.2",
     "ua-parser-js": "^1.0.35",

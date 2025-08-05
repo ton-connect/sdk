@@ -40,10 +40,5 @@
   "dependencies": {
     "node-fetch": "^2.6.9"
   },
-  "devDependencies": {},
-  "nx": {
-    "tags": [
-      "scope:isomorphic-fetch"
-    ]
-  }
+  "devDependencies": {}
 }
