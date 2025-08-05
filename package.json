@@ -23,7 +23,7 @@
     "prettier": "^2.7.1",
     "rimraf": "^3.0.2",
     "turbo": "^2.5.5",
-    "typedoc": "^0.23.21",
+    "typedoc": "^0.28.9",
     "typescript": "~5.8.2"
   },
   "workspaces": [
