@@ -10,7 +10,6 @@
   "private": true,
   "devDependencies": {
     "@changesets/cli": "^2.29.5",
-    "@jscutlery/semver": "^2.29.3",
     "@microsoft/api-extractor": "^7.34.4",
     "@types/node": "18.16.9",
     "@typescript-eslint/eslint-plugin": "^5.38.1",

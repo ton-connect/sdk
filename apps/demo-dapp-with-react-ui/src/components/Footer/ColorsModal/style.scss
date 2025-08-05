@@ -1,0 +1,28 @@
+.modal {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  z-index: 10000000;
+
+  background-color: rgb(16, 22, 31);
+
+  padding: 20px;
+
+  color: white;
+
+  > button {
+    float: right;
+  }
+
+  &__toggle {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+
+    > a {
+      color: white;
+    }
+  }
+}

@@ -1,0 +1,23 @@
+.app {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  > header {
+    margin-bottom: 10px;
+  }
+}
+
+.react-json-view {
+  background: rgba(24, 32, 48, 0.98) !important;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px 0 rgba(16, 22, 31, 0.13);
+  padding: 18px 18px 14px 18px;
+  margin-top: 0;
+  margin-bottom: 0;
+  width: 100%;
+  overflow-x: auto;
+  font-size: 15px;
+  word-break: break-all;
+  white-space: pre-wrap;
+}

@@ -1,0 +1,59 @@
+.send-tx-form {
+  flex: 1;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  align-items: center;
+
+  h3 {
+    color: white;
+    opacity: 0.8;
+    font-size: 28px;
+  }
+
+  > div:nth-child(2) {
+    width: 100%;
+
+    span {
+      word-break: break-word;
+    }
+  }
+
+  > button {
+    border: none;
+    padding: 7px 15px;
+    border-radius: 15px;
+    cursor: pointer;
+
+    background-color: rgba(102,170,238,0.91);
+    color: white;
+    font-size: 16px;
+    line-height: 20px;
+
+    transition: transform 0.1s ease-in-out;
+
+    &:hover {
+      transform: scale(1.03);
+    }
+
+    &:active {
+      transform: scale(0.97);
+    }
+  }
+
+  &__json-view {
+    background: rgba(24, 32, 48, 0.98);
+    border-radius: 14px;
+    box-shadow: 0 2px 12px 0 rgba(16, 22, 31, 0.13);
+    padding: 18px 18px 14px 18px;
+    margin-top: 0;
+    margin-bottom: 0;
+    width: 100%;
+    overflow-x: auto;
+    font-size: 15px;
+    word-break: break-all;
+    white-space: pre-wrap;
+  }
+}
