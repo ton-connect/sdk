@@ -12,6 +12,7 @@ import {
 import { InjectedProvider } from 'src/provider/injected/injected-provider';
 import { logError } from 'src/utils/log';
 import { FALLBACK_WALLETS_LIST } from 'src/resources/fallback-wallets-list';
+import { isQaModeEnabled } from './utils/qa-mode';
 
 export class WalletsListManager {
     private walletsListCache: Promise<WalletInfo[]> | null = null;
@@ -26,12 +27,17 @@ export class WalletsListManager {
         walletsListSource?: string;
         cacheTTLMs?: number;
     }) {
-        this.walletsListSource =
-            options?.walletsListSource ??
-            'https://raw.githubusercontent.com/ton-blockchain/wallets-list/main/wallets-v2.json';
+        if (isQaModeEnabled()) {
+            this.walletsListSource = 'https://raw.githubusercontent.com/ton-connect/wallet-list/refs/heads/main/wallet-list.json';
+        } else {
+            this.walletsListSource =
+                options?.walletsListSource ??
+                'https://raw.githubusercontent.com/ton-blockchain/wallets-list/main/wallets-v2.json';
+        }
 
         this.cacheTTLMs = options?.cacheTTLMs;
     }
+
 
     public async getWallets(): Promise<WalletInfo[]> {
         if (
@@ -69,6 +75,7 @@ export class WalletsListManager {
         try {
             const walletsResponse = await fetch(this.walletsListSource);
             walletsList = await walletsResponse.json();
+            console.log('did i get here?');
 
             if (!Array.isArray(walletsList)) {
                 throw new FetchWalletsError(
