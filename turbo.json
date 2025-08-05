@@ -8,6 +8,9 @@
     "dev": {
       "persistent": true,
       "cache": false
+    },
+    "preview": {
+      "dependsOn": ["build"]
     }
   }
 }

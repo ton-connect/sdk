@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host --force",
-    "build": "tsc && GH_PAGES=true VITE_GH_PAGES=true vite build",
+    "build": "tsc && vite build",
     "build:dev": "tsc && vite build",
     "preview": "vite preview"
   },

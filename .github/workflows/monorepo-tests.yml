@@ -2,7 +2,7 @@ name: Build docs
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "feat/monorepo-migration" ]
 
 jobs:
   build:
@@ -30,15 +30,3 @@ jobs:
 
       - name: Build docs
         run: pnpm generateDocs
-
-      - name: Create and switch to docs branch
-        run: |
-            git config --global user.email "BOT_TonConnect_Builder@tonconnect.ton"
-            git config --global user.name "BOT_TonConnect_Builder"
-            git checkout -B docs/release
-            
-      - name: Commit and push docs to docs branch
-        run: |
-            git add -A
-            git commit -m "build(docs): docs rebuild by github action" || echo "No changes to commit"
-            git push origin docs/release --force
