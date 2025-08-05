@@ -104,28 +104,20 @@ Only update the packages that have changes or are below another package in this 
 
 If a package depends on another, update the dependency version and make a "chore" commit before moving on to the next package.
 
-For example, if changes were made in `@tonconnect/ui` and `@tonconnect/ui-react`, you should first run the following for `@tonconnect/ui`:
+We use `changesets` to manage versions. It automatically updates all affected packages, so you only need to select packages that were updated, all dependencies will receive updates automatically.
 
- - For a beta version:
-   ```shell
-   nx run ui:version --releaseAs=prerelease --preid=beta
-   ```
- - For a new release:
-   ```shell
-   nx run ui:version --releaseAs=patch
-   ```
+For example, if changes were made in `@tonconnect/ui`, you should run `pnpm changeset add`, select `@tonconnect/ui`, choose type of the version update(MAJOR.MINOR.PATCH) and write changelog. After you are done with `add` command, you need to run `pnpm changeset version`, which will update `package.json` and `CHANGELOG.md` for relevant packages. `@tonconnect/ui-react` will be updated automatically.
+For beta version you need to run `pnpm changeset pre enter beta` before executing `add` and `version` commands. After you're done with releasing beta tag, you can exit pre mode by running `pnpm changeset pre exit`
 
-> Note: Follow this [link](https://github.com/jscutlery/semver#specify-the-level-of-change) to learn more about `--releaseAs` and `--preid`.
+> Note: Follow this [link](https://github.com/changesets/changesets/blob/main/docs/adding-a-changeset.md) to learn more about `changesets`.
 
 #### 2. Build Packages
 
 After updating the version, build all packages:
 
- ```shell
+```shell
 pnpm build
- ```
-
-> Note: The `--parallel=1` is used to build packages one by one since some packages depend on each other, and parallel building may result in errors.
+```
 
 #### 3. Publish Version
 
@@ -133,11 +125,15 @@ Next, publish the version of the package. For `@tonconnect/ui`:
 
 - For a beta version:
   ```shell
-  cd packages/ui && npm publish --access=public --tag=beta
+  cd packages/ui && pnpm publish --access=public --tag=beta
   ```
 - For a new release:
   ```shell
-  cd packages/ui && npm publish --access=public
+  cd packages/ui && pnpm publish --access=public
+  ```
+- You can publish all updated packages by running:
+  ```shell
+  pnpm publish -r --access=public
   ```
 
 > Note: The `--tag=beta` is used to publish the package with the `beta` tag to prevent accidental installation of the beta version.
