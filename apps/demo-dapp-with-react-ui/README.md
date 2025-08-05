@@ -1,6 +1,6 @@
 # Demo dapp with @tonconnect/ui-react
 
-Try it out https://ton-connect.github.io/demo-dapp-with-react-ui/
+Try it out https://tonconnect-sdk-demo-dapp.vercel.app/
 
 ## Learn more about Ton Connect
 - https://docs.ton.org/develop/dapps/ton-connect/

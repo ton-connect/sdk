@@ -17,7 +17,7 @@ import {
 } from "../dto/check-sign-data-request-dto";
 import { tryParsePublicKey } from "../wrappers/wallets-data";
 
-const allowedDomains = ["ton-connect.github.io", "localhost:5173"];
+const allowedDomains = ["ton-connect.github.io", "localhost:5173", "tonconnect-sdk-demo-dapp.vercel.app"];
 const validAuthTime = 15 * 60; // 15 minutes
 
 export class SignDataService {
