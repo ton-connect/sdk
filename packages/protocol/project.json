@@ -1,5 +1,5 @@
 {
-  "root": "packages/protocol/",
+  "root": "packages/protocol",
   "targets": {
     "version": {
       "executor": "@jscutlery/semver:version",
@@ -7,6 +7,9 @@
         "changelogHeader": "# Changelog @tonconnect/protocol \n",
         "push": false
       }
+    },
+    "build": {
+      "dependsOn": ["^build"]
     }
   }
 }

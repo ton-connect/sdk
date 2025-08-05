@@ -1,5 +1,5 @@
 {
-  "root": "packages/ui/",
+  "root": "packages/ui",
   "targets": {
     "version": {
       "executor": "@jscutlery/semver:version",

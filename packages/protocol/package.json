@@ -48,11 +48,6 @@
     "rollup": "^3.18.0",
     "ts-jest": "^29.0.3"
   },
-  "nx": {
-    "tags": [
-      "scope:protocol"
-    ]
-  },
   "typedoc": {
     "entryPoint": "./src/index.ts"
   }

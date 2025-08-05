@@ -1,5 +1,5 @@
 {
-  "root": "packages/isomorphic-fetch/",
+  "root": "packages/isomorphic-fetch",
   "targets": {
     "version": {
       "executor": "@jscutlery/semver:version",

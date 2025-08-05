@@ -2,16 +2,7 @@
   "compileOnSave": false,
   "compilerOptions": {
     "declaration": true,
-    "lib": [
-      "ES2015",
-      "ES2016",
-      "ES2017",
-      "ES2018",
-      "ES2019",
-      "ES2020",
-      "ESNext",
-      "dom"
-    ],
+    "lib": ["ES2015", "ES2016", "ES2017", "ES2018", "ES2019", "ES2020", "ESNext", "dom"],
     "resolveJsonModule": true,
     "experimentalDecorators": false,
     "esModuleInterop": true,
@@ -40,8 +31,9 @@
     "allowJs": true,
     "rootDir": ".",
     "baseUrl": "./",
-    "paths": {}
+    "paths": {
+      "animal": ["packages/animal/src/index.ts"]
+    }
   },
-  "exclude": [
-    "./__tests__","node_modules", "lib", "types"]
+  "exclude": ["./__tests__", "node_modules", "lib", "types"]
 }

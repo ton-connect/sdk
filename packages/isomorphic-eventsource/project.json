@@ -1,5 +1,5 @@
 {
-  "root": "packages/isomorphic-eventsource/",
+  "root": "packages/isomorphic-eventsource",
   "targets": {
     "version": {
       "executor": "@jscutlery/semver:version",

@@ -1,5 +1,5 @@
 {
-  "root": "packages/sdk/",
+  "root": "packages/sdk",
   "targets": {
     "version": {
       "executor": "@jscutlery/semver:version",

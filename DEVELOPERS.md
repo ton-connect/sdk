@@ -32,7 +32,7 @@ pnpm i --frozen-lockfile
 Before starting development, you need to build all packages:
 
 ```shell
-pnpm nx run-many --target=build --all --parallel=1
+pnpm build
 ```
 
 > Note: The `--parallel=1` flag ensures packages are built one after the other to avoid potential errors caused by package dependencies.
@@ -67,7 +67,7 @@ Replace the `build` script in `packages/ui/package.json` with the following:
 Now, build the `@tonconnect/ui-react` package in watch mode:
 
 ```shell
-nx affected:build --parallel=1 --watch
+pnpm watch
 ```
 
 > Note: As before, `--parallel=1` is used to build packages sequentially, preventing errors due to interdependencies.
@@ -85,7 +85,7 @@ The release process is divided into distinct stages to ensure a smooth and error
 
 Whether you're publishing a beta version or a new release, the process consists of several common steps with slight variations depending on the version type.
 
-> TODO: automate this process with an nx plugin.
+> TODO: automate this process with a plugin.
 
 ### Step-by-step guide
 
@@ -122,7 +122,7 @@ For example, if changes were made in `@tonconnect/ui` and `@tonconnect/ui-react`
 After updating the version, build all packages:
 
  ```shell
- nx run-many --target=build --all --parallel=1
+pnpm build
  ```
 
 > Note: The `--parallel=1` is used to build packages one by one since some packages depend on each other, and parallel building may result in errors.
