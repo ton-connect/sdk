@@ -2,7 +2,7 @@ name: Build docs
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "feat/monorepo-migration" ]
 
 jobs:
   build:
