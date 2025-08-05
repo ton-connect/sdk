@@ -22,17 +22,17 @@ git clone git@github.com:ton-connect/sdk.git && cd sdk
 Next, install all dependencies using the following command:
 
 ```shell
-npm ci
+pnpm i --frozen-lockfile
 ```
 
-> Note: The `npm ci` installs dependencies based on the `package-lock.json` file, ensuring consistent versions as in the repository, and prevents any automatic updates.
+> Note: The `pnpm i --frozen-lockfile` installs dependencies based on the `package-lock.json` file, ensuring consistent versions as in the repository, and prevents any automatic updates.
 
 # Setting Up Your Development Environment
 
 Before starting development, you need to build all packages:
 
 ```shell
-nx run-many --target=build --all --parallel=1
+pnpm nx run-many --target=build --all --parallel=1
 ```
 
 > Note: The `--parallel=1` flag ensures packages are built one after the other to avoid potential errors caused by package dependencies.
@@ -164,7 +164,7 @@ After publishing the version of `@tonconnect/ui`, update its version in the `dep
  }
  ```
 
-> TODO: add a step to run `npm install` in `@tonconnect/ui-react` for updating `package-lock.json` file when the step will be tested.
+> TODO: add a step to run `pnpm install` in `@tonconnect/ui-react` for updating `pnpm-lock.json` file when the step will be tested.
 
 Then, create a "chore" commit to save this change:
 
@@ -211,10 +211,10 @@ Update the `@tonconnect/ui-react` package version in the `package.json` file:
 
 #### 3. Install Dependencies
 
-Install the necessary dependencies and update the `package-lock.json` file:
+Install the necessary dependencies and update the `pnpm-lock.json` file:
 
 ```shell
-npm install
+pnpm install
 ```
 
 #### 4. Build and Test
@@ -222,7 +222,7 @@ npm install
 Build the demo app and check if it works correctly:
 
 ```shell
-npm run build
+pnpm run build
 ```
 
 #### 5. Commit and Push Changes
