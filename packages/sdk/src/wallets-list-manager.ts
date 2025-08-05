@@ -28,7 +28,7 @@ export class WalletsListManager {
         cacheTTLMs?: number;
     }) {
         if (isQaModeEnabled()) {
-            this.walletsListSource = 'https://raw.githubusercontent.com/ton-connect/wallet-list/refs/heads/main/wallet-list.json';
+            this.walletsListSource = 'https://raw.githubusercontent.com/ton-connect/wallets-list-staging/refs/heads/main/wallets-v2.json';
         } else {
             this.walletsListSource =
                 options?.walletsListSource ??
@@ -75,7 +75,6 @@ export class WalletsListManager {
         try {
             const walletsResponse = await fetch(this.walletsListSource);
             walletsList = await walletsResponse.json();
-            console.log('did i get here?');
 
             if (!Array.isArray(walletsList)) {
                 throw new FetchWalletsError(

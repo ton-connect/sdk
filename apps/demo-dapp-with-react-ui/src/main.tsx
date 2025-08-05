@@ -7,6 +7,14 @@ import {render} from 'react-dom';
 import App from './App'
 import './index.scss'
 import {runSingleInstance} from "./utils/run-single-instance";
+import { enableQaMode } from '@tonconnect/ui-react';
+import { getTonconnectVersion } from './utils/get-tonconnect-version';
+
+if (import.meta.env.VITE_QA_MODE === 'enable') {
+  enableQaMode();
+}
+
+getTonconnectVersion();
 
 eruda.init();
 

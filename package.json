@@ -5,7 +5,8 @@
   "scripts": {
     "generateDocs": "typedoc",
     "build": "turbo run build",
-    "watch": "turbo watch build"
+    "watch": "turbo watch build",
+    "preview": "turbo run preview"
   },
   "private": true,
   "devDependencies": {
