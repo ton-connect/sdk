@@ -1,8 +1,7 @@
-name: Build docs
+name: Test build
 
 on:
   push:
-    branches: [ "feat/monorepo-migration" ]
 
 jobs:
   build:
