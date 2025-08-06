@@ -3,7 +3,7 @@ import './polyfills';
 import eruda from "eruda";
 
 import React, {StrictMode} from 'react'
-import {render} from 'react-dom';
+import {createRoot} from 'react-dom/client';
 import App from './App'
 import './index.scss'
 import {runSingleInstance} from "./utils/run-single-instance";
@@ -57,9 +57,12 @@ async function enableMocking() {
   });
 }
 
-enableMocking().then(() => render(
-  <StrictMode>
-    <App/>
-  </StrictMode>,
-  document.getElementById('root') as HTMLElement
-));
+enableMocking().then(() => {
+  const container = document.getElementById('root') as HTMLElement;
+  const root = createRoot(container);
+  root.render(
+    <StrictMode>
+      <App/>
+    </StrictMode>
+  );
+});
