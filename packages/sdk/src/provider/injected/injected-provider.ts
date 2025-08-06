@@ -3,7 +3,6 @@ import {
     AppRequest,
     ConnectEventError,
     ConnectRequest,
-    Feature,
     RpcMethod,
     WalletEvent,
     WalletResponse
@@ -96,7 +95,10 @@ export class InjectedProvider<T extends string = string> implements InternalProv
 
     private listeners: Array<(e: WithoutIdDistributive<WalletEvent>) => void> = [];
 
-    constructor(storage: IStorage, private readonly injectedWalletKey: T) {
+    constructor(
+        storage: IStorage,
+        private readonly injectedWalletKey: T
+    ) {
         const window: Window | undefined | WindowWithTon<T> = InjectedProvider.window;
         if (!InjectedProvider.isWindowContainsWallet(window, injectedWalletKey)) {
             throw new WalletNotInjectedError();

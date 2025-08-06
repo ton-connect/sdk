@@ -23,12 +23,10 @@ export class WalletsListManager {
 
     private readonly walletsListSource: string;
 
-    constructor(options?: {
-        walletsListSource?: string;
-        cacheTTLMs?: number;
-    }) {
+    constructor(options?: { walletsListSource?: string; cacheTTLMs?: number }) {
         if (isQaModeEnabled()) {
-            this.walletsListSource = 'https://raw.githubusercontent.com/ton-connect/wallets-list-staging/refs/heads/main/wallets-v2.json';
+            this.walletsListSource =
+                'https://raw.githubusercontent.com/ton-connect/wallets-list-staging/refs/heads/main/wallets-v2.json';
         } else {
             this.walletsListSource =
                 options?.walletsListSource ??
@@ -37,7 +35,6 @@ export class WalletsListManager {
 
         this.cacheTTLMs = options?.cacheTTLMs;
     }
-
 
     public async getWallets(): Promise<WalletInfo[]> {
         if (

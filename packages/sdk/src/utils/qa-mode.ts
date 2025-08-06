@@ -93,10 +93,10 @@ function addQaModeStyles(): void {
 function startBannerObserver(): void {
     if (typeof window === 'undefined' || bannerObserver) return;
 
-    bannerObserver = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
+    bannerObserver = new MutationObserver(mutations => {
+        mutations.forEach(mutation => {
             if (mutation.type === 'childList') {
-                mutation.removedNodes.forEach((node) => {
+                mutation.removedNodes.forEach(node => {
                     if (node.nodeType === Node.ELEMENT_NODE) {
                         const element = node as Element;
                         if (element.id === 'ton-connect-qa-banner' && qaModeEnabled) {
@@ -121,4 +121,4 @@ function startBannerObserver(): void {
         childList: true,
         subtree: false
     });
-} 
+}

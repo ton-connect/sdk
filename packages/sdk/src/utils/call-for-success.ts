@@ -28,6 +28,7 @@ export type CallForSuccessOptions = {
  * @param {T} fn - function to call
  * @param {CallForSuccessOptions} [options] - optional configuration options
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function callForSuccess<T extends (options: { signal?: AbortSignal }) => Promise<any>>(
     fn: T,
     options?: CallForSuccessOptions

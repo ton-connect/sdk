@@ -28,7 +28,9 @@ export const ModalBackgroundStyled = styled.div`
 `;
 
 export const ModalWrapperClass = css`
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 16px 64px rgba(0, 0, 0, 0.16);
+    box-shadow:
+        0 4px 16px rgba(0, 0, 0, 0.08),
+        0 16px 64px rgba(0, 0, 0, 0.16);
     width: fit-content;
     margin: auto;
 

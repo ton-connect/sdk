@@ -59,6 +59,7 @@ export function addReturnStrategy(
  * The function adapts its behavior based on the execution context, such as the TMA or browser environment, and the operating system.
  * Different strategies involve manipulating URL parameters and utilizing platform-specific features for optimal user experience.
  */
+// eslint-disable-next-line complexity
 export function redirectToTelegram(
     universalLink: string,
     options: {
@@ -260,6 +261,7 @@ export function redirectToTelegram(
  * The function adapts its behavior based on the execution context, such as the TMA or browser environment, and the operating system.
  * Different strategies involve manipulating URL parameters and utilizing platform-specific features for optimal user experience.
  */
+// eslint-disable-next-line complexity
 export function redirectToWallet(
     universalLink: string,
     deepLink: string | undefined,

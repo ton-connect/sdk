@@ -4,8 +4,8 @@
 export type RemoveTonConnectPrefix<T> = T extends `ton-connect-ui-${infer Rest}`
     ? Rest
     : T extends `ton-connect-${infer Rest}`
-    ? Rest
-    : T;
+      ? Rest
+      : T;
 
 export type AddTonConnectPrefix<T extends string> = `ton-connect-${T}` | `ton-connect-ui-${T}`;
 

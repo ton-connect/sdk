@@ -21,5 +21,3 @@ export function logWarning(...args: Parameters<Console['warn']>): void {
         } catch {}
     }
 }
-
-

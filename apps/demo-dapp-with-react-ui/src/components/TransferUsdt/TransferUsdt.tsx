@@ -6,7 +6,6 @@ import { JettonMinter, storeJettonTransferMessage } from '@ton-community/assets-
 import './style.scss';
 import { retry } from '../../server/utils/transactions-utils';
 import { formatUnits, parseUnits } from '../../utils/units';
-import { truncate } from 'node:fs';
 
 const USDT_MASTER = Address.parse('EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs');
 const USDT_DECIMALS = 6;
@@ -28,10 +27,11 @@ export function TransferUsdt() {
     const [destination, setDestination] = useState<string | null>(null);
     const [jettonWallet, setJettonWallet] = useState<string | null>(null);
 
-
     useEffect(() => {
         if (senderAddress) {
-            setDestination(Address.parse(senderAddress).toString({ urlSafe: true, bounceable: false }));
+            setDestination(
+                Address.parse(senderAddress).toString({ urlSafe: true, bounceable: false })
+            );
         } else {
             setDestination(null);
         }
@@ -39,30 +39,32 @@ export function TransferUsdt() {
         setTonBalance(null);
         setUsdtBalance(null);
         setJettonWallet(null);
-
-    }, [senderAddress,
-        setDestination,
-        setTonBalance,
-        setUsdtBalance,
-        setJettonWallet,
-    ]);
+    }, [senderAddress, setDestination, setTonBalance, setUsdtBalance, setJettonWallet]);
 
     useEffect(() => {
         if (!wallet || !senderAddress) return;
-
 
         const client = new TonClient({ endpoint: endpointByChain[wallet.account.chain] });
         const owner = Address.parse(senderAddress);
         const masterContract = client.open(JettonMinter.createFromAddress(USDT_MASTER));
 
         async function load() {
-            const clientTonBalance = await retry(() => client.getBalance(owner), { retries: 10, delay: 1500 });
+            const clientTonBalance = await retry(() => client.getBalance(owner), {
+                retries: 10,
+                delay: 1500
+            });
             setTonBalance(fromNano(clientTonBalance));
 
-            const jettonWalletAddr = await retry(() => masterContract.getWalletAddress(owner), { retries: 10, delay: 1500 });
+            const jettonWalletAddr = await retry(() => masterContract.getWalletAddress(owner), {
+                retries: 10,
+                delay: 1500
+            });
             const jettonWalletContract = client.open(JettonWallet.create(jettonWalletAddr));
 
-            const balance = await retry(() => jettonWalletContract.getBalance(), { retries: 10, delay: 1500 });
+            const balance = await retry(() => jettonWalletContract.getBalance(), {
+                retries: 10,
+                delay: 1500
+            });
             setUsdtBalance(formatUnits(balance, USDT_DECIMALS));
 
             if (!jettonWallet) {
@@ -101,7 +103,7 @@ export function TransferUsdt() {
                     responseDestination: Address.parse(senderAddress),
                     customPayload: null,
                     forwardAmount: toNano('0.001'),
-                    forwardPayload: beginCell().storeUint(0, 32).storeStringTail('hello!').endCell(),
+                    forwardPayload: beginCell().storeUint(0, 32).storeStringTail('hello!').endCell()
                 })
             )
             .endCell()
@@ -121,7 +123,19 @@ export function TransferUsdt() {
     };
 
     const loader = (
-        <span className="loader" style={{ display: 'inline-block', width: 18, height: 18, border: '3px solid #66aaee', borderTop: '3px solid transparent', borderRadius: '50%', animation: 'spin 1s linear infinite', verticalAlign: 'middle' }}></span>
+        <span
+            className="loader"
+            style={{
+                display: 'inline-block',
+                width: 18,
+                height: 18,
+                border: '3px solid #66aaee',
+                borderTop: '3px solid transparent',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite',
+                verticalAlign: 'middle'
+            }}
+        ></span>
     );
 
     return (
@@ -136,11 +150,16 @@ export function TransferUsdt() {
                 </label>
                 <label>
                     Destination
-                    <input value={destination ?? ''} onChange={e => setDestination(e.target.value)} />
+                    <input
+                        value={destination ?? ''}
+                        onChange={e => setDestination(e.target.value)}
+                    />
                 </label>
                 <label>
-                    <div>Sender Jetton Wallet   {loading && loader}</div>
-                    <a target="_blank" href={`https://tonviewer.com/${jettonWallet}`}>{jettonWallet}</a>
+                    <div>Sender Jetton Wallet {loading && loader}</div>
+                    <a target="_blank" href={`https://tonviewer.com/${jettonWallet}`}>
+                        {jettonWallet}
+                    </a>
                 </label>
             </div>
 

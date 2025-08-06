@@ -46,13 +46,13 @@ export function isPendingConnectionHttp(
 }
 
 export function isPendingConnectionHttpRaw(
-  connection: BridgePendingConnectionHttpRaw | BridgeConnectionHttpRaw
+    connection: BridgePendingConnectionHttpRaw | BridgeConnectionHttpRaw
 ): connection is BridgePendingConnectionHttpRaw {
     return !('connectEvent' in connection);
 }
 
 export function isExpiredPendingConnectionHttpRaw(
-  connection: BridgePendingConnectionHttpRaw
+    connection: BridgePendingConnectionHttpRaw
 ): boolean {
     return Date.now() - (connection.createdAt ?? 0) > CONNECTION_HTTP_EXPIRATION_TIME;
 }

@@ -44,17 +44,17 @@
     }
   },
   "devDependencies": {
-    "@rollup/plugin-replace": "5.0.5",
-    "@rollup/plugin-typescript": "^11.0.0",
+    "@rollup/plugin-replace": "6.0.2",
+    "@rollup/plugin-typescript": "^12.1.4",
     "@types/node": "^24.2.0",
-    "rollup": "^3.18.0",
+    "rollup": "^4.46.2",
     "ts-loader": "^9.4.1",
     "ts-patch": "^3.3.0",
     "typescript-transform-paths": "^3.3.1",
     "vite": "^7.0.6",
-    "vite-tsconfig-paths": "^4.0.5",
-    "vitest": "^0.29.2",
-    "vitest-fetch-mock": "^0.2.2",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.2.4",
+    "vitest-fetch-mock": "^0.4.5",
     "webpack": "^5.75.0",
     "webpack-cli": "^5.0.0"
   },
