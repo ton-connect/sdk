@@ -117,7 +117,7 @@ addEventListener('fetch', function (event) {
   }
 
   // Bypass event source requests.
-  const url = new URL(request.url)
+  const url = new URL(event.request.url)
   if (url.pathname.endsWith('/events')) {
     return
   }
