@@ -1,5 +1,11 @@
 # Changelog @tonconnect/sdk
 
+## 3.3.0-beta.2
+
+### Patch Changes
+
+-   chore: update dependencies
+
 ## 3.3.0-beta.1
 
 ### Patch Changes

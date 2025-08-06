@@ -1,5 +1,13 @@
 # Changelog @tonconnect/ui-react
 
+## 2.3.0-beta.2
+
+### Patch Changes
+
+-   chore: update dependencies
+-   Updated dependencies
+    -   @tonconnect/ui@2.3.0-beta.2
+
 ## 2.3.0-beta.1
 
 ### Patch Changes

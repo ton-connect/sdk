@@ -10,6 +10,7 @@
     "@tonconnect/ui-react": "2.3.0-beta.0"
   },
   "changesets": [
+    "brave-glasses-check",
     "petite-hounds-throw"
   ]
 }
