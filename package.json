@@ -6,7 +6,9 @@
     "generateDocs": "typedoc",
     "build": "turbo run build",
     "watch": "turbo watch build",
-    "preview": "turbo run preview"
+    "preview": "turbo run preview",
+    "lint": "eslint .",
+    "verify": "turbo run verify"
   },
   "private": true,
   "devDependencies": {

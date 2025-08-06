@@ -13,6 +13,11 @@
       "persistent": true,
       "cache": false,
       "dependsOn": ["build"]
+    },
+    "//#lint": {
+    },
+    "verify": {
+      "dependsOn": ["//#lint", "build"]
     }
   }
 }
