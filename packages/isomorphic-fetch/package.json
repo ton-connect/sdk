@@ -38,7 +38,6 @@
     }
   },
   "dependencies": {
-    "node-fetch": "^2.6.9"
-  },
-  "devDependencies": {}
+    "node-fetch": "^3.3.2"
+  }
 }

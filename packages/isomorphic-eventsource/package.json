@@ -38,9 +38,9 @@
     }
   },
   "dependencies": {
-    "eventsource": "^2.0.2"
+    "eventsource": "^4.0.0"
   },
   "devDependencies": {
-    "@types/eventsource": "^1.1.11"
+    "@types/eventsource": "^3.0.0"
   }
 }
