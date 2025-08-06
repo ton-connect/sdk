@@ -5,11 +5,9 @@ import { Cell, loadMessage, Transaction } from '@ton/core';
 import { badRequest, notFound, ok } from '../utils/http-utils';
 import { getNormalizedExtMessageHash, retry } from '../utils/transactions-utils';
 
-
-
 async function getTransactionByInMessage(
     inMessageBoc: string,
-    client: TonClient,
+    client: TonClient
 ): Promise<Transaction | undefined> {
     // Step 1. Convert Base64 boc to Message if input is a string
     const inMessage = loadMessage(Cell.fromBase64(inMessageBoc).beginParse());
@@ -34,9 +32,9 @@ async function getTransactionByInMessage(
                     hash,
                     lt,
                     limit: 10,
-                    archival: true,
+                    archival: true
                 }),
-            { delay: 1000, retries: 3 },
+            { delay: 1000, retries: 3 }
         );
 
         if (transactions.length === 0) {
@@ -69,6 +67,7 @@ async function getTransactionByInMessage(
  */
 export const findTransactionByExternalMessage: HttpResponseResolver = async ({ request }) => {
     try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const body = (await request.json()) as any;
         const boc = body.boc;
         const network = body.network;
@@ -77,7 +76,7 @@ export const findTransactionByExternalMessage: HttpResponseResolver = async ({ r
         }
 
         const client = new TonClient({
-            endpoint: `https://${network === 'testnet' ? 'tesnet.' : ''}toncenter.com/api/v2/jsonRPC`,
+            endpoint: `https://${network === 'testnet' ? 'tesnet.' : ''}toncenter.com/api/v2/jsonRPC`
         });
 
         const transaction = await getTransactionByInMessage(boc, client);
@@ -89,4 +88,4 @@ export const findTransactionByExternalMessage: HttpResponseResolver = async ({ r
     } catch (e) {
         return badRequest({ error: 'Invalid request', trace: e instanceof Error ? e.message : e });
     }
-}; 
+};

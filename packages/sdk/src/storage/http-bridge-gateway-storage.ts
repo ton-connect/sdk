@@ -3,7 +3,10 @@ import { IStorage } from 'src/storage/models/storage.interface';
 export class HttpBridgeGatewayStorage {
     private readonly storeKey: string;
 
-    constructor(private readonly storage: IStorage, bridgeUrl: string) {
+    constructor(
+        private readonly storage: IStorage,
+        bridgeUrl: string
+    ) {
         this.storeKey = 'ton-connect-storage_http-bridge-gateway::' + bridgeUrl;
     }
 

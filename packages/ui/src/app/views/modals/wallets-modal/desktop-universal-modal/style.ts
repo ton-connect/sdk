@@ -87,7 +87,9 @@ export const ExtensionLiStyled = styled.li`
     cursor: pointer;
     border-radius: ${props => hoverBorders[props.theme!.borderRadius]};
 
-    transition: background-color, transform 0.1s ease-in-out;
+    transition:
+        background-color,
+        transform 0.1s ease-in-out;
 
     &:hover {
         background-color: ${props => props.theme!.colors.background.secondary};

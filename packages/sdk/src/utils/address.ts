@@ -64,7 +64,12 @@ export function isValidRawAddress(address: string): boolean {
  * @param address user-friendly address
  * @returns parsed address components
  */
-export function parseUserFriendlyAddress(address: string): { wc: 0 | -1; hex: string; testOnly: boolean, isBounceable: boolean } {
+export function parseUserFriendlyAddress(address: string): {
+    wc: 0 | -1;
+    hex: string;
+    testOnly: boolean;
+    isBounceable: boolean;
+} {
     const base64 = address.replace(/-/g, '+').replace(/_/g, '/');
 
     let decoded: Uint8Array;
@@ -99,7 +104,9 @@ export function parseUserFriendlyAddress(address: string): { wc: 0 | -1; hex: st
 
     return {
         wc,
-        hex: Array.from(hex).map(b => b.toString(16).padStart(2, '0')).join(''),
+        hex: Array.from(hex)
+            .map(b => b.toString(16).padStart(2, '0'))
+            .join(''),
         testOnly,
         isBounceable
     };

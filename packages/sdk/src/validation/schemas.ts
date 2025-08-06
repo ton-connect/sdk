@@ -33,20 +33,23 @@ function hasExtraProperties(obj: Record<string, unknown>, allowedKeys: string[])
 }
 
 export function validateSendTransactionRequest(data: unknown): ValidationResult {
+    // eslint-disable-next-line no-console
     console.log('[Validation Debug] validateSendTransactionRequest called');
+    // eslint-disable-next-line no-console
     console.log('[Validation Debug] isQaModeEnabled():', isQaModeEnabled());
 
     if (!isValidObject(data)) {
-        const error = "Request must be an object";
+        const error = 'Request must be an object';
         logValidationError(error);
         const shouldReturnNull = isQaModeEnabled();
+        // eslint-disable-next-line no-console
         console.log('[Validation Debug] Should return null:', shouldReturnNull);
         return shouldReturnNull ? null : error;
     }
 
     const allowedKeys = ['validUntil', 'network', 'from', 'messages'];
     if (hasExtraProperties(data, allowedKeys)) {
-        const error = "Request contains extra properties";
+        const error = 'Request contains extra properties';
         logValidationError(error);
         return isQaModeEnabled() ? null : error;
     }
@@ -137,7 +140,11 @@ function validateTransactionMessage(message: unknown, index: number): Validation
             return `Invalid 'extraCurrency' in message at index ${index}`;
         }
         for (const [key, value] of Object.entries(message.extraCurrency)) {
-            if (!INTEGER_REGEX.test(key) || typeof value !== 'string' || !POSITIVE_INTEGER_REGEX.test(value)) {
+            if (
+                !INTEGER_REGEX.test(key) ||
+                typeof value !== 'string' ||
+                !POSITIVE_INTEGER_REGEX.test(value)
+            ) {
                 return `Invalid 'extraCurrency' format in message at index ${index}`;
             }
         }
@@ -148,12 +155,12 @@ function validateTransactionMessage(message: unknown, index: number): Validation
 
 export function validateConnectAdditionalRequest(data: unknown): ValidationResult {
     if (!isValidObject(data)) {
-        return "Request must be an object";
+        return 'Request must be an object';
     }
 
     const allowedKeys = ['tonProof'];
     if (hasExtraProperties(data, allowedKeys)) {
-        return "Request contains extra properties";
+        return 'Request contains extra properties';
     }
 
     if (data.tonProof !== undefined && !isValidString(data.tonProof)) {
@@ -165,7 +172,7 @@ export function validateConnectAdditionalRequest(data: unknown): ValidationResul
 
 export function validateSignDataPayload(data: unknown): ValidationResult {
     if (!isValidObject(data)) {
-        return "Payload must be an object";
+        return 'Payload must be an object';
     }
 
     if (!isValidString(data.type)) {
@@ -187,7 +194,7 @@ export function validateSignDataPayload(data: unknown): ValidationResult {
 function validateSignDataPayloadText(data: Record<string, unknown>): ValidationResult {
     const allowedKeys = ['type', 'text', 'network', 'from'];
     if (hasExtraProperties(data, allowedKeys)) {
-        return "Text payload contains extra properties";
+        return 'Text payload contains extra properties';
     }
 
     if (!isValidString(data.text)) {
@@ -210,7 +217,7 @@ function validateSignDataPayloadText(data: Record<string, unknown>): ValidationR
 function validateSignDataPayloadBinary(data: Record<string, unknown>): ValidationResult {
     const allowedKeys = ['type', 'bytes', 'network', 'from'];
     if (hasExtraProperties(data, allowedKeys)) {
-        return "Binary payload contains extra properties";
+        return 'Binary payload contains extra properties';
     }
 
     if (!isValidString(data.bytes)) {
@@ -233,7 +240,7 @@ function validateSignDataPayloadBinary(data: Record<string, unknown>): Validatio
 function validateSignDataPayloadCell(data: Record<string, unknown>): ValidationResult {
     const allowedKeys = ['type', 'schema', 'cell', 'network', 'from'];
     if (hasExtraProperties(data, allowedKeys)) {
-        return "Cell payload contains extra properties";
+        return 'Cell payload contains extra properties';
     }
 
     if (!isValidString(data.schema)) {
@@ -259,4 +266,4 @@ function validateSignDataPayloadCell(data: Record<string, unknown>): ValidationR
     }
 
     return null;
-} 
+}

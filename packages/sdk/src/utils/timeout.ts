@@ -25,6 +25,7 @@ export type DeferOptions = {
  */
 export type Deferrable<T> = (
     resolve: (value: T) => void,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     reject: (reason?: any) => void,
     options: DeferOptions
 ) => Promise<void>;

@@ -41,7 +41,9 @@ export const MenuButtonStyled = styled.button`
     border-radius: ${props => hoverBorders[props.theme!.borderRadius]};
     cursor: pointer;
 
-    transition: background-color, transform 0.1s ease-in-out;
+    transition:
+        background-color,
+        transform 0.1s ease-in-out;
 
     &:hover {
         background-color: ${props => props.theme!.colors.background.secondary};

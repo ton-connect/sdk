@@ -5,7 +5,12 @@ import {
     SIGN_DATA_ERROR_CODES,
     SignDataPayload
 } from '@tonconnect/protocol';
-import { SendTransactionRequest, SendTransactionResponse, SignDataResponse, Wallet } from 'src/models';
+import {
+    SendTransactionRequest,
+    SendTransactionResponse,
+    SignDataResponse,
+    Wallet
+} from 'src/models';
 
 /**
  * Request TON Connect UI version.
@@ -585,10 +590,7 @@ export function createDataSigningFailedEvent(
     };
 }
 
-export type DataSigningEvent =
-    | DataSentForSignatureEvent
-    | DataSignedEvent
-    | DataSigningFailedEvent;
+export type DataSigningEvent = DataSentForSignatureEvent | DataSignedEvent | DataSigningFailedEvent;
 
 /**
  * Disconnect event when a user initiates a disconnection.

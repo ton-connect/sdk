@@ -1,5 +1,5 @@
-import {ColorsSet, THEME, useTonConnectUI} from "@tonconnect/ui-react";
-import {FunctionComponent, useEffect, useState} from "react";
+import { ColorsSet, THEME, useTonConnectUI } from '@tonconnect/ui-react';
+import { FunctionComponent, useEffect, useState } from 'react';
 import './style.scss';
 
 const defaultColors = {
@@ -63,12 +63,13 @@ const defaultColors = {
             secondary: '#7D7D85'
         }
     }
-}
+};
 
 export interface ColorsSelectProps {
     theme: THEME;
 }
 export const ColorsSelect: FunctionComponent<ColorsSelectProps> = ({ theme }) => {
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const [_, setOptions] = useTonConnectUI();
     const [colors, setColors] = useState<ColorsSet>(defaultColors[theme]);
 
@@ -81,66 +82,77 @@ export const ColorsSelect: FunctionComponent<ColorsSelectProps> = ({ theme }) =>
             uiPreferences: {
                 colorsSet: {
                     [theme]: {
-                        [property1]: property2 ? {
-                            ...(colors as any)[property1],
-                            [property2]: value
-                        } : value
+                        [property1]: property2
+                            ? {
+                                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                  ...(colors as any)[property1],
+                                  [property2]: value
+                              }
+                            : value
                     }
                 }
             }
-        })
-
+        });
 
         setColors(colors => ({
             ...colors,
-            [property1]: property2 ? {
-                ...(colors as any)[property1],
-                [property2]: value
-            } : value
+            [property1]: property2
+                ? {
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      ...(colors as any)[property1],
+                      [property2]: value
+                  }
+                : value
         }));
 
         defaultColors[theme] = {
             ...defaultColors[theme],
-            [property1]: property2 ? {
-                ...(colors as any)[property1],
-                [property2]: value
-            } : value
-        }
-    }
+            [property1]: property2
+                ? {
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      ...(colors as any)[property1],
+                      [property2]: value
+                  }
+                : value
+        };
+    };
 
-    return <div  className="colors-container">
-        { Object.entries(colors).map(([key1, value1]) => {
-            if (typeof value1 === 'object') {
-                return <div key={key1}>
-                    <span>{key1}:</span>
-                    {
-                        Object.entries(value1).map(([key2, value2]) =>
-                            <label key={key1 + key2}>
-                                { key2 }
-                                <input
-                                    type="color"
-                                    value={(colors as any)[key1][key2]}
-                                    onChange={e => onChange(e.target.value, key1, key2)}
-                                />
-                            </label>
-                        )
-                    }
+    return (
+        <div className="colors-container">
+            {Object.entries(colors).map(([key1, value1]) => {
+                if (typeof value1 === 'object') {
+                    return (
+                        <div key={key1}>
+                            <span>{key1}:</span>
+                            {Object.entries(value1).map(([key2, _value2]) => (
+                                <label key={key1 + key2}>
+                                    {key2}
+                                    <input
+                                        type="color"
+                                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                        value={(colors as any)[key1][key2]}
+                                        onChange={e => onChange(e.target.value, key1, key2)}
+                                    />
+                                </label>
+                            ))}
+                        </div>
+                    );
+                }
 
-                </div>
-            }
-
-            return <div>
-                <span>{key1}:</span>
-                <label>
-                    <input
-                        type="color"
-                        value={(colors as any)[key1]}
-                        onChange={e => onChange(e.target.value, key1)}
-                    />
-                </label>
-            </div>
-
-          })
-        }
-    </div>
-}
+                return (
+                    <div>
+                        <span>{key1}:</span>
+                        <label>
+                            <input
+                                type="color"
+                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                value={(colors as any)[key1]}
+                                onChange={e => onChange(e.target.value, key1)}
+                            />
+                        </label>
+                    </div>
+                );
+            })}
+        </div>
+    );
+};

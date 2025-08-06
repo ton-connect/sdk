@@ -492,9 +492,9 @@ export class TonConnectUI {
                 this.redirectAfterRequestSent({
                     returnStrategy,
                     twaReturnUrl,
-                    forceRedirect,
+                    forceRedirect
                 });
-            }
+            };
 
             options?.onRequestSent?.(redirectToWallet);
         };
@@ -559,7 +559,7 @@ export class TonConnectUI {
      */
     public async signData(
         data: SignDataPayload,
-        options?: { onRequestSent?: (redirectToWallet: () => void) => void } 
+        options?: { onRequestSent?: (redirectToWallet: () => void) => void }
     ): Promise<SignDataResponse> {
         this.tracker.trackDataSentForSignature(this.wallet, data);
 
@@ -613,9 +613,9 @@ export class TonConnectUI {
                 this.redirectAfterRequestSent({
                     returnStrategy,
                     twaReturnUrl,
-                    forceRedirect,
+                    forceRedirect
                 });
-            }
+            };
 
             options?.onRequestSent?.(redirectToWallet);
         };
@@ -677,7 +677,7 @@ export class TonConnectUI {
     private redirectAfterRequestSent({
         returnStrategy,
         twaReturnUrl,
-        forceRedirect, 
+        forceRedirect
     }: {
         returnStrategy: ReturnStrategy;
         twaReturnUrl?: `${string}://${string}`;
@@ -1044,6 +1044,7 @@ export class TonConnectUI {
         }
     }
 
+    // eslint-disable-next-line complexity
     private getModalsAndNotificationsConfiguration(
         options?: ActionConfiguration
     ): StrictActionConfiguration {
