@@ -90,6 +90,7 @@ addEventListener('message', async function (event) {
 
       break
     }
+
   }
 })
 
@@ -115,6 +116,18 @@ addEventListener('fetch', function (event) {
     return
   }
 
+  // Bypass event source requests.
+  const url = new URL(request.url)
+  if (url.pathname.endsWith('/events')) {
+    return
+  }
+
+  // Bypass event with not the same origin and not start with /api
+  if (url.origin !== location.origin && !url.pathname.startsWith('/api')) {
+    return
+  }
+
+  // Generate unique request ID.
   const requestId = crypto.randomUUID()
   event.respondWith(handleRequest(event, requestId))
 })
