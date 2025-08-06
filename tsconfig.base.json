@@ -31,9 +31,7 @@
     "allowJs": true,
     "rootDir": ".",
     "baseUrl": "./",
-    "paths": {
-      "animal": ["packages/animal/src/index.ts"]
-    }
+    "paths": {}
   },
   "exclude": ["./__tests__", "node_modules", "lib", "types"]
 }
