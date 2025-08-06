@@ -1,9 +1,9 @@
 import cn from 'classnames';
 import { Component, createEffect, JSXElement, Show } from 'solid-js';
 import { Transition } from 'solid-transition-group';
-// import clickOutsideDirective from 'src/app/directives/click-outside';
-// import keyPressedDirective from 'src/app/directives/key-pressed';
-// import androidBackHandlerDirective from 'src/app/directives/android-back-handler';
+import clickOutsideDirective from 'src/app/directives/click-outside';
+import keyPressedDirective from 'src/app/directives/key-pressed';
+import androidBackHandlerDirective from 'src/app/directives/android-back-handler';
 import { Styleable } from 'src/app/models/styleable';
 import { isDevice, media } from 'src/app/styles/media';
 import {
@@ -22,9 +22,12 @@ import { useDataAttributes } from 'src/app/hooks/use-data-attributes';
 import { TonConnectBrand } from 'src/app/components';
 import { animate } from 'src/app/utils/animate';
 
-// const clickOutside = clickOutsideDirective;
-// const keyPressed = keyPressedDirective;
-// const androidBackHandler = androidBackHandlerDirective;
+// eslint-disable-next-line unused-imports/no-unused-vars
+const clickOutside = clickOutsideDirective;
+// eslint-disable-next-line unused-imports/no-unused-vars
+const keyPressed = keyPressedDirective;
+// eslint-disable-next-line unused-imports/no-unused-vars
+const androidBackHandler = androidBackHandlerDirective;
 
 export interface ModalProps extends Styleable, WithDataAttributes {
     children: JSXElement;
