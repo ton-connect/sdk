@@ -4,7 +4,7 @@
   "scripts": {
     "start": "vite --host",
     "dev": "vite",
-    "build": "tsc --noEmit --emitDeclarationOnly false && vite build && rollup -c rollup.config.mjs && vite build -c vite.cdn-config.ts && node ./scripts/patch-build_ssr-fix.js"
+    "build": "tsc --noEmit --emitDeclarationOnly false && vite build && rollup -c rollup.config.mjs && vite build -c vite.cdn-config.ts"
   },
   "repository": {
     "type": "git",
@@ -43,30 +43,29 @@
   },
   "dependencies": {
     "@tonconnect/sdk": "workspace:*",
-    "classnames": "^2.3.2",
-    "csstype": "^3.1.1",
-    "deepmerge": "^4.2.2",
+    "classnames": "^2.5.1",
+    "csstype": "^3.1.3",
+    "deepmerge": "^4.3.1",
     "ua-parser-js": "^1.0.35"
   },
   "devDependencies": {
-    "@floating-ui/dom": "^1.0.12",
-    "@rollup/plugin-replace": "5.0.5",
+    "@floating-ui/dom": "^1.7.3",
+    "@rollup/plugin-replace": "6.0.2",
     "@solid-primitives/i18n": "^1.1.2",
-    "@types/node": "^18.11.17",
+    "@types/node": "^24.2.0",
     "@types/ua-parser-js": "^0.7.36",
-    "eslint-plugin-solid": "^0.7.3",
     "is-plain-object": "^5.0.0",
     "qrcode-generator": "^1.4.4",
-    "rollup": "^3.8.0",
-    "rollup-plugin-dts": "^5.0.0",
+    "rollup": "^4.46.2",
+    "rollup-plugin-dts": "^6.2.1",
     "solid-devtools": "^0.24.7",
-    "solid-floating-ui": "^0.2.0",
-    "solid-js": "^1.5.1",
+    "solid-floating-ui": "^0.3.1",
+    "solid-js": "^1.9.7",
     "solid-styled-components": "^0.28.5",
-    "solid-transition-group": "^0.0.12",
-    "typescript": "^4.8.2",
-    "vite": "^3.2.11",
-    "vite-plugin-solid": "^2.3.0"
+    "solid-transition-group": "^0.3.0",
+    "typescript": "^5.9.2",
+    "vite": "^7.0.6",
+    "vite-plugin-solid": "^2.11.8"
   },
   "typedoc": {
     "entryPoint": "./src/library.ts"
