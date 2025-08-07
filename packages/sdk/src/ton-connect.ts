@@ -577,6 +577,7 @@ export class TonConnect implements ITonConnect {
         if (!this.connected) {
             throw new WalletNotConnectedError();
         }
+
         const abortController = createAbortController(options?.signal);
         const prevAbortController = this.abortController;
         this.abortController = abortController;
@@ -590,6 +591,33 @@ export class TonConnect implements ITonConnect {
             signal: abortController.signal
         });
         prevAbortController?.abort();
+    }
+
+    /**
+     * Gets the current session ID if available.
+     * @returns session ID string or null if not available.
+     */
+    public async getSessionId(): Promise<string | null> {
+        if (!this.provider || !this.connected) {
+            return null;
+        }
+
+        try {
+            const connection = await this.bridgeConnectionStorage.getConnection();
+            if (!connection || connection.type === 'injected') {
+                return null;
+            }
+
+            if ('sessionCrypto' in connection) {
+                // Pending connection
+                return connection.sessionCrypto.sessionId;
+            } else {
+                // Established connection
+                return connection.session.sessionCrypto.sessionId;
+            }
+        } catch {
+            return null;
+        }
     }
 
     /**
