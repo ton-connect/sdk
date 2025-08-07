@@ -33,10 +33,14 @@ const App: Component<AppProps> = props => {
                 <ConnectorContext.Provider value={appState.connector}>
                     <GlobalStyles />
                     <ThemeProvider theme={themeState}>
-                        <Show when={appState.buttonRootId}>
-                            <Portal mount={document.getElementById(appState.buttonRootId!)!}>
-                                <AccountButton />
-                            </Portal>
+                        <Show when={Array.isArray(appState.buttonRootId) && appState.buttonRootId.length > 0}>
+                            <>
+                                {appState.buttonRootId && (appState.buttonRootId as string[]).map((id) => (
+                                    <Portal mount={document.getElementById(id)!}>
+                                        <AccountButton />
+                                    </Portal>
+                                ))}
+                            </>
                         </Show>
                         <Dynamic component={globalStylesTag}>
                             <WalletsModal />
