@@ -43,7 +43,7 @@ import { WalletsModalManager } from 'src/managers/wallets-modal-manager';
 import { TransactionModalManager } from 'src/managers/transaction-modal-manager';
 import { WalletsModal, WalletsModalCloseReason, WalletsModalState } from 'src/models/wallets-modal';
 import { isInTMA, sendExpand } from 'src/app/utils/tma-api';
-import { redirectToTelegram, redirectToWallet } from 'src/app/utils/url-strategy-helpers';
+import { redirectToTelegram, redirectToWallet, addSessionIdToUniversalLink } from 'src/app/utils/url-strategy-helpers';
 import { SingleWalletModalManager } from 'src/managers/single-wallet-modal-manager';
 import { SingleWalletModal, SingleWalletModalState } from 'src/models/single-wallet-modal';
 import { TonConnectUITracker } from 'src/tracker/ton-connect-ui-tracker';
@@ -455,7 +455,6 @@ export class TonConnectUI {
             this.getModalsAndNotificationsConfiguration(options);
 
         const sessionId = await this.getSessionId();
-        console.log('[TonConnect][DEBUG] sendTransaction: sessionId:', sessionId);
 
         widgetController.setAction({
             name: 'confirm-transaction',
@@ -582,7 +581,6 @@ export class TonConnectUI {
             this.getModalsAndNotificationsConfiguration();
 
         const sessionId = await this.getSessionId();
-        console.log('[TonConnect][DEBUG] signData: sessionId:', sessionId);
 
         widgetController.setAction({
             name: 'confirm-sign-data',
@@ -691,7 +689,6 @@ export class TonConnectUI {
      */
     private async getSessionId(): Promise<string | null> {
         if (!this.connected) {
-            console.log('[TonConnect][DEBUG] getSessionId: not connected, returning null');
             return null;
         }
 
@@ -707,21 +704,17 @@ export class TonConnectUI {
                         const { SessionCrypto } = await import('@tonconnect/protocol');
                         const sessionCrypto = new SessionCrypto(connection.sessionCrypto);
                         const sessionId = sessionCrypto.sessionId;
-                        console.log('[TonConnect][DEBUG] getSessionId: found pending connection sessionId:', sessionId);
                         return sessionId;
                     } else if (connection.type === 'http' && connection.session?.sessionKeyPair) {
                         // For established connections
                         const { SessionCrypto } = await import('@tonconnect/protocol');
                         const sessionCrypto = new SessionCrypto(connection.session.sessionKeyPair);
                         const sessionId = sessionCrypto.sessionId;
-                        console.log('[TonConnect][DEBUG] getSessionId: found established connection sessionId:', sessionId);
                         return sessionId;
                     }
                 }
             }
-            console.log('[TonConnect][DEBUG] getSessionId: no session found in storage');
         } catch (e) {
-            console.log('[TonConnect][DEBUG] getSessionId: error retrieving session:', e);
             // Ignore errors, sessionId will remain null
         }
         return null;
@@ -744,23 +737,25 @@ export class TonConnectUI {
         ) {
             // Get session ID for transaction/signData confirmation
             const sessionId = await this.getSessionId();
-            console.log('[TonConnect][DEBUG] redirectAfterRequestSent: sessionId for redirect:', sessionId);
+
+            // Add session ID to universal link if provided
+            const linkWithSessionId = sessionId
+                ? addSessionIdToUniversalLink(this.walletInfo.universalLink, sessionId)
+                : this.walletInfo.universalLink;
 
             if (isTelegramUrl(this.walletInfo.universalLink)) {
-                redirectToTelegram(this.walletInfo.universalLink, {
+                redirectToTelegram(linkWithSessionId, {
                     returnStrategy,
                     twaReturnUrl: twaReturnUrl || appState.twaReturnUrl,
-                    forceRedirect: forceRedirect || false,
-                    sessionId: sessionId || undefined
+                    forceRedirect: forceRedirect || false
                 });
             } else {
                 redirectToWallet(
-                    this.walletInfo.universalLink,
+                    linkWithSessionId,
                     this.walletInfo.deepLink,
                     {
                         returnStrategy,
-                        forceRedirect: forceRedirect || false,
-                        sessionId: sessionId || undefined
+                        forceRedirect: forceRedirect || false
                     },
                     () => { }
                 );
