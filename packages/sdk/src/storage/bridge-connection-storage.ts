@@ -11,7 +11,7 @@ import {
     BridgePendingConnectionHttpRaw,
     isExpiredPendingConnectionHttpRaw,
     isPendingConnectionHttp,
-    isPendingConnectionHttpRaw,
+    isPendingConnectionHttpRaw
 } from 'src/provider/bridge/models/bridge-connection';
 import { IStorage } from 'src/storage/models/storage.interface';
 

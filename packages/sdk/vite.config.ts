@@ -1,5 +1,5 @@
 /// <reference types="vitest" />
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
@@ -10,5 +10,5 @@ export default defineConfig({
             tsconfig: './tsconfig.test.json'
         },
         setupFiles: './tests/setup'
-    },
-})
+    }
+});

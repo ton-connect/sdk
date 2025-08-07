@@ -1,0 +1,28 @@
+.footer {
+  padding: 20px;
+  display: flex;
+  gap: 20px;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+
+  > div > label {
+    color: white;
+    margin-right: 5px;
+  }
+}
+
+.footer-checkbox-container {
+  display: flex;
+  flex-direction: column;
+
+  > span {
+    color: white;
+    font-weight: bold;
+    margin-bottom: 4px;
+  }
+
+  input {
+    margin-left: 3px;
+  }
+}

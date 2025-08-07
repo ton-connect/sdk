@@ -1,0 +1,14 @@
+.colors-container {
+  > div {
+    margin-bottom: 20px;
+
+    > span {
+      margin-right: 14px;
+      font-weight: bold;
+    }
+
+    > label {
+      margin-right: 10px;
+    }
+  }
+}

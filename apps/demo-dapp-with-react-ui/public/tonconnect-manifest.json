@@ -1,0 +1,7 @@
+{
+  "url": "https://tonconnect-sdk-demo-dapp.vercel.app/",
+  "name": "Demo Dapp with React UI",
+  "iconUrl": "https://tonconnect-sdk-demo-dapp.vercel.app/apple-touch-icon.png",
+  "termsOfUseUrl": "https://tonconnect-sdk-demo-dapp.vercel.app/terms-of-use.txt",
+  "privacyPolicyUrl": "https://tonconnect-sdk-demo-dapp.vercel.app/privacy-policy.txt"
+}

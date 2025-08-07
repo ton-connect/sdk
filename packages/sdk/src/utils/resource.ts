@@ -5,6 +5,7 @@ import { createAbortController } from 'src/utils/create-abort-controller';
 /**
  * The resource interface.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Resource<T, Args extends any[]> = {
     /**
      * Create a new resource.
@@ -36,6 +37,7 @@ export type Resource<T, Args extends any[]> = {
  * @param {(...args: Args) => Promise<T>} createFn - A function that creates the resource.
  * @param {(resource: T) => Promise<void>} [disposeFn] - An optional function that disposes the resource.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createResource<T extends EventSource, Args extends any[]>(
     createFn: (signal?: AbortSignal, ...args: Args) => Promise<T>,
     disposeFn: (resource: T) => Promise<void>

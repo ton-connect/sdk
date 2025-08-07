@@ -20,7 +20,7 @@ async function dev(): Promise<void> {
             borderRadius: 'm'
         },
         language: 'ru',
-        restoreConnection: true,
+        restoreConnection: true
         /*walletsListConfiguration: {
             includeWallets: [
                 {

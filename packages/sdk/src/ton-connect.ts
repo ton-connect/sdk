@@ -3,7 +3,6 @@ import {
     ConnectEventSuccess,
     ConnectItem,
     ConnectRequest,
-    Feature,
     SendTransactionRpcResponseSuccess,
     SignDataPayload,
     SignDataRpcResponseSuccess,
@@ -61,6 +60,12 @@ import { logDebug, logError } from 'src/utils/log';
 import { createAbortController } from 'src/utils/create-abort-controller';
 import { TonConnectTracker } from 'src/tracker/ton-connect-tracker';
 import { tonConnectSdkVersion } from 'src/constants/version';
+import {
+    validateSendTransactionRequest,
+    validateSignDataPayload,
+    validateConnectAdditionalRequest
+} from './validation/schemas';
+import { isQaModeEnabled } from './utils/qa-mode';
 
 export class TonConnect implements ITonConnect {
     private static readonly walletsList = new WalletsListManager();
@@ -259,6 +264,18 @@ export class TonConnect implements ITonConnect {
             options.openingDeadlineMS = requestOrOptions?.openingDeadlineMS;
             options.signal = requestOrOptions?.signal;
         }
+        if (options.request) {
+            const validationError = validateConnectAdditionalRequest(options.request);
+            if (validationError) {
+                if (isQaModeEnabled()) {
+                    console.error('ConnectAdditionalRequest validation failed: ' + validationError);
+                } else {
+                    throw new TonConnectError(
+                        'ConnectAdditionalRequest validation failed: ' + validationError
+                    );
+                }
+            }
+        }
 
         if (this.connected) {
             throw new WalletAlreadyConnectedError();
@@ -430,6 +447,18 @@ export class TonConnect implements ITonConnect {
             options.signal = optionsOrOnRequestSent?.signal;
         }
 
+        // Validate transaction
+        const validationError = validateSendTransactionRequest(transaction);
+        if (validationError) {
+            if (isQaModeEnabled()) {
+                console.error('SendTransactionRequest validation failed: ' + validationError);
+            } else {
+                throw new TonConnectError(
+                    'SendTransactionRequest validation failed: ' + validationError
+                );
+            }
+        }
+
         const abortController = createAbortController(options?.signal);
         if (abortController.signal.aborted) {
             throw new TonConnectError('Transaction sending was aborted');
@@ -495,6 +524,16 @@ export class TonConnect implements ITonConnect {
             throw new TonConnectError('data sending was aborted');
         }
 
+        // Validate sign data
+        const validationError = validateSignDataPayload(data);
+        if (validationError) {
+            if (isQaModeEnabled()) {
+                console.error('SignDataPayload validation failed: ' + validationError);
+            } else {
+                throw new TonConnectError('SignDataPayload validation failed: ' + validationError);
+            }
+        }
+
         this.checkConnection();
         checkSignDataSupport(this.wallet!.device.features, { requiredTypes: [data.type] });
 
@@ -503,11 +542,14 @@ export class TonConnect implements ITonConnect {
         const from = data.from || this.account!.address;
         const network = data.network || this.account!.chain;
 
-        const response = await this.provider!.sendRequest(signDataParser.convertToRpcRequest({
-            ...data,
-            from,
-            network,
-        }), { onRequestSent: options?.onRequestSent, signal: abortController.signal });
+        const response = await this.provider!.sendRequest(
+            signDataParser.convertToRpcRequest({
+                ...data,
+                from,
+                network
+            }),
+            { onRequestSent: options?.onRequestSent, signal: abortController.signal }
+        );
 
         if (signDataParser.isError(response)) {
             this.tracker.trackDataSigningFailed(
@@ -665,29 +707,31 @@ export class TonConnect implements ITonConnect {
         if (tonProofItem) {
             let tonProof: TonProofItemReply | undefined = undefined;
             try {
-                if ('proof' in tonProofItem) { // success
+                if ('proof' in tonProofItem) {
+                    // success
                     tonProof = {
                         name: 'ton_proof',
                         proof: {
                             timestamp: tonProofItem.proof.timestamp,
                             domain: {
                                 lengthBytes: tonProofItem.proof.domain.lengthBytes,
-                                value: tonProofItem.proof.domain.value,
+                                value: tonProofItem.proof.domain.value
                             },
                             payload: tonProofItem.proof.payload,
-                            signature: tonProofItem.proof.signature,
+                            signature: tonProofItem.proof.signature
                         }
                     };
-                } else if ('error' in tonProofItem) { // error
+                } else if ('error' in tonProofItem) {
+                    // error
                     tonProof = {
                         name: 'ton_proof',
                         error: {
                             code: tonProofItem.error.code,
-                            message: tonProofItem.error.message,
+                            message: tonProofItem.error.message
                         }
                     };
                 } else {
-                    throw new TonConnectError('Invalid data format')
+                    throw new TonConnectError('Invalid data format');
                 }
             } catch (e) {
                 tonProof = {
@@ -696,7 +740,7 @@ export class TonConnect implements ITonConnect {
                         code: CONNECT_ITEM_ERROR_CODES.UNKNOWN_ERROR,
                         message: 'Invalid data format'
                     }
-                }
+                };
             }
 
             wallet.connectItems = { tonProof };

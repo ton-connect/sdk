@@ -1,0 +1,44 @@
+{
+  "name": "demo-dapp-react-ui",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host --force",
+    "build": "tsc && vite build",
+    "build:dev": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@ton-community/assets-sdk": "0.0.5",
+    "@ton/core": "0.61.0",
+    "@ton/crypto": "3.3.0",
+    "@ton/ton": "15.3.1",
+    "@tonconnect/sdk": "workspace:*",
+    "@tonconnect/ui-react": "workspace:*",
+    "buffer": "^6.0.3",
+    "crc-32": "^1.2.2",
+    "eruda": "^3.4.3",
+    "jose": "^6.0.12",
+    "msw": "2.10.4",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-json-view": "^1.21.3",
+    "tweetnacl": "^1.0.3",
+    "zod": "^4.0.15"
+  },
+  "devDependencies": {
+    "@types/node": "^24.2.0",
+    "@types/react": "^19.1.9",
+    "@types/react-dom": "^19.1.7",
+    "@vitejs/plugin-react": "^4.7.0",
+    "sass": "^1.90.0",
+    "typescript": "^5.9.2",
+    "vite": "^7.0.6"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
+  }
+}

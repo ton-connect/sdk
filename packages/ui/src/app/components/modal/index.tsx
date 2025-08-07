@@ -22,8 +22,11 @@ import { useDataAttributes } from 'src/app/hooks/use-data-attributes';
 import { TonConnectBrand } from 'src/app/components';
 import { animate } from 'src/app/utils/animate';
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 const clickOutside = clickOutsideDirective;
+// eslint-disable-next-line unused-imports/no-unused-vars
 const keyPressed = keyPressedDirective;
+// eslint-disable-next-line unused-imports/no-unused-vars
 const androidBackHandler = androidBackHandlerDirective;
 
 export interface ModalProps extends Styleable, WithDataAttributes {

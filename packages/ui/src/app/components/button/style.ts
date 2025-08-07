@@ -28,8 +28,8 @@ export const ButtonStyled = styled.button<{
         props.appearance === 'flat'
             ? 'transparent'
             : props.appearance === 'secondary'
-            ? props.theme!.colors.background.tint
-            : rgba(props.theme!.colors.accent, 0.12)};
+              ? props.theme!.colors.background.tint
+              : rgba(props.theme!.colors.accent, 0.12)};
     color: ${props =>
         props.appearance === 'secondary'
             ? props.theme!.colors.text.primary

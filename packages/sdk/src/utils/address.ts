@@ -31,6 +31,87 @@ export function toUserFriendlyAddress(hexAddress: string, testOnly = false): str
     return addressBase64.replace(/\+/g, '-').replace(/\//g, '_');
 }
 
+/**
+ * Validates if the address is in user-friendly format by attempting to parse it.
+ * @param address address to validate
+ * @returns true if the address is valid user-friendly format, false otherwise
+ */
+export function isValidUserFriendlyAddress(address: string): boolean {
+    try {
+        parseUserFriendlyAddress(address);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+/**
+ * Validates if the address is in raw hex format (e.g., "0:1234..." or "-1:1234...").
+ * @param address address to validate
+ * @returns true if the address is valid raw format, false otherwise
+ */
+export function isValidRawAddress(address: string): boolean {
+    try {
+        parseHexAddress(address);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+/**
+ * Parses user-friendly address and returns its components.
+ * @param address user-friendly address
+ * @returns parsed address components
+ */
+export function parseUserFriendlyAddress(address: string): {
+    wc: 0 | -1;
+    hex: string;
+    testOnly: boolean;
+    isBounceable: boolean;
+} {
+    const base64 = address.replace(/-/g, '+').replace(/_/g, '/');
+
+    let decoded: Uint8Array;
+    try {
+        decoded = Base64.decode(base64).toUint8Array();
+    } catch {
+        throw new WrongAddressError(`Invalid base64 encoding in address: ${address}`);
+    }
+
+    if (decoded.length !== 36) {
+        throw new WrongAddressError(`Invalid address length: ${address}`);
+    }
+
+    const addr = decoded.slice(0, 34);
+    const checksum = decoded.slice(34);
+
+    const calculatedChecksum = crc16(addr);
+    if (!checksum.every((byte, i) => byte === calculatedChecksum[i])) {
+        throw new WrongAddressError(`Invalid checksum in address: ${address}`);
+    }
+
+    const tag = addr[0]!;
+    const wc = addr[1] as 0 | -1;
+    const hex = addr.slice(2);
+
+    if (wc !== 0 && wc !== -1) {
+        throw new WrongAddressError(`Invalid workchain: ${wc}`);
+    }
+
+    const testOnly = (tag & testOnlyTag) !== 0;
+    const isBounceable = (tag & 0x40) !== 0;
+
+    return {
+        wc,
+        hex: Array.from(hex)
+            .map(b => b.toString(16).padStart(2, '0'))
+            .join(''),
+        testOnly,
+        isBounceable
+    };
+}
+
 function parseHexAddress(hexAddress: string): { wc: 0 | -1; hex: Uint8Array } {
     if (!hexAddress.includes(':')) {
         throw new WrongAddressError(`Wrong address ${hexAddress}. Address must include ":".`);

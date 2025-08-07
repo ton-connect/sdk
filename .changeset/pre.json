@@ -1,0 +1,16 @@
+{
+  "mode": "pre",
+  "tag": "beta",
+  "initialVersions": {
+    "@tonconnect/isomorphic-eventsource": "0.0.2",
+    "@tonconnect/isomorphic-fetch": "0.0.3",
+    "@tonconnect/protocol": "2.3.0",
+    "@tonconnect/sdk": "3.3.0-beta.0",
+    "@tonconnect/ui": "2.3.0-beta.0",
+    "@tonconnect/ui-react": "2.3.0-beta.0"
+  },
+  "changesets": [
+    "brave-glasses-check",
+    "petite-hounds-throw"
+  ]
+}

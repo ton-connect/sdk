@@ -1,0 +1,156 @@
+.find-transaction-demo {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+    margin: 60px auto 0 auto;
+    padding: 28px 28px 24px 28px;
+
+    h3 {
+        color: white;
+        opacity: 0.8;
+    }
+
+    &__form {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        max-width: 600px;
+        width: 100%;
+    }
+
+    &__select-row {
+        display: flex;
+        gap: 12px;
+        width: 100%;
+        margin-bottom: 0;
+    }
+
+    &__json-label {
+        color: #b8d4f1;
+        font-size: 15px;
+        margin-bottom: 6px;
+        font-weight: 500;
+        margin-top: 18px;
+        margin-left: 2px;
+        letter-spacing: 0.01em;
+    }
+
+    >div:nth-child(3) {
+        width: 100%;
+
+        span {
+            word-break: break-word;
+        }
+    }
+
+    &__error {
+        color: rgba(102, 170, 238, 0.91);
+        font-size: 18px;
+        line-height: 20px;
+    }
+
+    button {
+        border: none;
+        padding: 7px 15px;
+        border-radius: 15px;
+        cursor: pointer;
+
+        background-color: rgba(102, 170, 238, 0.91);
+        color: white;
+        font-size: 16px;
+        line-height: 20px;
+
+        transition: transform 0.1s ease-in-out;
+
+        &:hover {
+            transform: scale(1.03);
+        }
+
+        &:active {
+            transform: scale(0.97);
+        }
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="search"] {
+        width: 100%;
+        padding: 10px 14px;
+        border-radius: 12px;
+        border: 1px solid rgba(102, 170, 238, 0.25);
+        background: rgba(30, 40, 60, 0.7);
+        color: #fff;
+        font-size: 16px;
+        margin-bottom: 10px;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        box-shadow: 0 1px 4px 0 rgba(16, 22, 31, 0.08);
+    }
+
+    textarea {
+        width: 100%;
+        min-width: 100%;
+        max-width: 100%;
+        min-height: 100px;
+        padding: 14px 18px;
+        border-radius: 14px;
+        border: 1.5px solid rgba(102, 170, 238, 0.25);
+        background: rgba(30, 40, 60, 0.8);
+        color: #fff;
+        font-size: 16px;
+        margin-bottom: 12px;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        box-shadow: 0 2px 8px 0 rgba(16, 22, 31, 0.10);
+        resize: vertical;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    input[type="search"]:focus,
+    textarea:focus {
+        border-color: #66aaee;
+        box-shadow: 0 0 0 2px rgba(102, 170, 238, 0.15);
+        background: rgba(30, 40, 60, 0.92);
+    }
+
+    label {
+        color: #b8d4f1;
+        font-size: 15px;
+        margin-bottom: 6px;
+        font-weight: 500;
+        letter-spacing: 0.01em;
+        display: block;
+        margin-top: 10px;
+        margin-left: 2px;
+    }
+
+    select {
+        width: 100%;
+        padding: 10px 14px;
+        border-radius: 12px;
+        border: 1px solid rgba(102, 170, 238, 0.25);
+        background: rgba(30, 40, 60, 0.7);
+        color: #fff;
+        font-size: 16px;
+        margin-bottom: 10px;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        box-shadow: 0 1px 4px 0 rgba(16, 22, 31, 0.08);
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg width='16' height='16' fill='white' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%2366aaee' stroke-width='2' fill='none' fill-rule='evenodd'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 18px 18px;
+    }
+
+    select:focus {
+        border-color: #66aaee;
+        box-shadow: 0 0 0 2px rgba(102, 170, 238, 0.15);
+        background: rgba(30, 40, 60, 0.92);
+    }
+}

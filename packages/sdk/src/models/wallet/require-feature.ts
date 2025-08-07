@@ -1,4 +1,4 @@
-import { SignDataType } from "@tonconnect/protocol";
+import { SignDataType } from '@tonconnect/protocol';
 
 /**
  * Required features for wallets.
@@ -10,7 +10,6 @@ export type RequiredFeatures = {
     sendTransaction?: RequiredSendTransactionFeature;
     signData?: RequiredSignDataFeature;
 };
-
 
 /**
  * Required features for the send transaction feature.

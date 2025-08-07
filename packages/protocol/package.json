@@ -19,7 +19,7 @@
   "author": "tonconnect",
   "license": "Apache-2.0",
   "scripts": {
-    "build": "npx rimraf types-dist && npx rimraf lib && npx rollup -c rollup.config.mjs && tsc && api-extractor run && npx rimraf types-dist",
+    "build": "rimraf types-dist && rimraf lib && rollup -c rollup.config.mjs && tsc && api-extractor run && rimraf types-dist",
     "test": "jest"
   },
   "files": [
@@ -37,20 +37,16 @@
     }
   },
   "dependencies": {
-    "tweetnacl-util": "^0.15.1",
-    "tweetnacl": "^1.0.3"
+    "tweetnacl": "^1.0.3",
+    "tweetnacl-util": "^0.15.1"
   },
   "devDependencies": {
-    "jest": "^29.2.2",
-    "ts-jest": "^29.0.3",
-    "@types/jest": "^29.2.0",
-    "rollup": "^3.18.0",
-    "@rollup/plugin-typescript": "^11.0.0"
-  },
-  "nx": {
-    "tags": [
-      "scope:protocol"
-    ]
+    "@rollup/plugin-typescript": "^12.1.4",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.2.0",
+    "jest": "^30.0.5",
+    "rollup": "^4.46.2",
+    "ts-jest": "^29.0.3"
   },
   "typedoc": {
     "entryPoint": "./src/index.ts"
