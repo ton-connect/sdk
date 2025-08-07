@@ -564,7 +564,6 @@ export class TonConnectUI {
     public async signData(
         data: SignDataPayload,
         options?: { onRequestSent?: (redirectToWallet: () => void) => void }
-        options?: { onRequestSent?: (redirectToWallet: () => void) => void }
     ): Promise<SignDataResponse> {
         this.tracker.trackDataSentForSignature(this.wallet, data);
 
