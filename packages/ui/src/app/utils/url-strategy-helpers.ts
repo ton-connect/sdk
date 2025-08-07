@@ -26,9 +26,9 @@ export function addReturnStrategy(
     strategy:
         | ReturnStrategy
         | {
-            returnStrategy: ReturnStrategy;
-            twaReturnUrl: `${string}://${string}` | undefined;
-        }
+              returnStrategy: ReturnStrategy;
+              twaReturnUrl: `${string}://${string}` | undefined;
+          }
 ): string {
     let returnStrategy;
     if (typeof strategy === 'string') {
@@ -81,7 +81,10 @@ export function redirectToTelegram(
     if (isInTelegramBrowser()) {
         // return back to the telegram browser
         options.returnStrategy = 'back';
-        const linkWithStrategy = addReturnStrategy(directLinkUrl.toString(), options.returnStrategy);
+        const linkWithStrategy = addReturnStrategy(
+            directLinkUrl.toString(),
+            options.returnStrategy
+        );
 
         openLinkBlank(linkWithStrategy);
     } else if (isInTMA()) {

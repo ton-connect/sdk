@@ -240,10 +240,10 @@ export class TonConnect implements ITonConnect {
         requestOrOptions?:
             | ConnectAdditionalRequest
             | {
-                request?: ConnectAdditionalRequest;
-                openingDeadlineMS?: number;
-                signal?: AbortSignal;
-            }
+                  request?: ConnectAdditionalRequest;
+                  openingDeadlineMS?: number;
+                  signal?: AbortSignal;
+              }
     ): void | string {
         // TODO: remove deprecated method
         const options: {
@@ -430,9 +430,9 @@ export class TonConnect implements ITonConnect {
         transaction: SendTransactionRequest,
         optionsOrOnRequestSent?:
             | {
-                onRequestSent?: () => void;
-                signal?: AbortSignal;
-            }
+                  onRequestSent?: () => void;
+                  signal?: AbortSignal;
+              }
             | (() => void)
     ): Promise<SendTransactionResponse> {
         // TODO: remove deprecated method
@@ -654,7 +654,7 @@ export class TonConnect implements ITonConnect {
                 if (document.hidden) {
                     this.pauseConnection();
                 } else {
-                    this.unPauseConnection().catch(() => { });
+                    this.unPauseConnection().catch(() => {});
                 }
             });
         } catch (e) {

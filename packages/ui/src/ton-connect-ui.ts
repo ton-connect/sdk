@@ -43,7 +43,11 @@ import { WalletsModalManager } from 'src/managers/wallets-modal-manager';
 import { TransactionModalManager } from 'src/managers/transaction-modal-manager';
 import { WalletsModal, WalletsModalCloseReason, WalletsModalState } from 'src/models/wallets-modal';
 import { isInTMA, sendExpand } from 'src/app/utils/tma-api';
-import { redirectToTelegram, redirectToWallet, addSessionIdToUniversalLink } from 'src/app/utils/url-strategy-helpers';
+import {
+    redirectToTelegram,
+    redirectToWallet,
+    addSessionIdToUniversalLink
+} from 'src/app/utils/url-strategy-helpers';
 import { SingleWalletModalManager } from 'src/managers/single-wallet-modal-manager';
 import { SingleWalletModal, SingleWalletModalState } from 'src/models/single-wallet-modal';
 import { TonConnectUITracker } from 'src/tracker/ton-connect-ui-tracker';
@@ -693,6 +697,7 @@ export class TonConnectUI {
 
         try {
             // Try to get session ID from storage as a fallback
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const storage = (this.connector as any).dappSettings?.storage;
             if (storage) {
                 const stored = await storage.getItem('ton-connect-storage_bridge-connection');
@@ -722,7 +727,7 @@ export class TonConnectUI {
     private async redirectAfterRequestSent({
         returnStrategy,
         twaReturnUrl,
-        forceRedirect,
+        forceRedirect
     }: {
         returnStrategy: ReturnStrategy;
         twaReturnUrl?: `${string}://${string}`;
@@ -756,7 +761,7 @@ export class TonConnectUI {
                         returnStrategy,
                         forceRedirect: forceRedirect || false
                     },
-                    () => { }
+                    () => {}
                 );
             }
         }

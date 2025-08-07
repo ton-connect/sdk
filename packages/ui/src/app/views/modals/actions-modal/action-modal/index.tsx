@@ -15,7 +15,11 @@ import { isTelegramUrl } from '@tonconnect/sdk';
 import { appState } from 'src/app/state/app.state';
 import { action } from 'src/app/state/modals-state';
 import { isInTMA } from 'src/app/utils/tma-api';
-import { redirectToTelegram, redirectToWallet, addSessionIdToUniversalLink } from 'src/app/utils/url-strategy-helpers';
+import {
+    redirectToTelegram,
+    redirectToWallet,
+    addSessionIdToUniversalLink
+} from 'src/app/utils/url-strategy-helpers';
 
 interface ActionModalProps extends WithDataAttributes {
     headerTranslationKey: string;
@@ -40,18 +44,18 @@ export const ActionModal: Component<ActionModalProps> = props => {
 
         setSent(
             !!currentAction &&
-            (('sent' in currentAction && currentAction.sent) ||
-                currentAction.name === 'transaction-sent')
+                (('sent' in currentAction && currentAction.sent) ||
+                    currentAction.name === 'transaction-sent')
         );
         setSigned(
             !!currentAction &&
-            (('signed' in currentAction && currentAction.signed) ||
-                currentAction.name === 'data-signed')
+                (('signed' in currentAction && currentAction.signed) ||
+                    currentAction.name === 'data-signed')
         );
         setCanceled(
             !!currentAction &&
-            (currentAction.name === 'transaction-canceled' ||
-                currentAction.name === 'sign-data-canceled')
+                (currentAction.name === 'transaction-canceled' ||
+                    currentAction.name === 'sign-data-canceled')
         );
     });
 
@@ -107,7 +111,7 @@ export const ActionModal: Component<ActionModalProps> = props => {
                     returnStrategy: returnStrategy,
                     forceRedirect: forceRedirect
                 },
-                () => { }
+                () => {}
             );
         }
     };
