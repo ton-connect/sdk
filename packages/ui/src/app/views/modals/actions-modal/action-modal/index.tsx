@@ -90,8 +90,10 @@ export const ActionModal: Component<ActionModalProps> = props => {
         setFirstClick(false);
 
         // Add session ID to universal link if provided
-        const linkWithSessionId = addSessionIdToUniversalLink(universalLink!, currentAction.sessionId);
-
+        const linkWithSessionId = addSessionIdToUniversalLink(
+            universalLink!,
+            currentAction.sessionId
+        );
 
         if (isTelegramUrl(universalLink)) {
             redirectToTelegram(linkWithSessionId, {

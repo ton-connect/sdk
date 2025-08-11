@@ -4,7 +4,7 @@ import type {
     RequiredFeatures,
     SignDataPayload,
     SignDataResponse,
-    WalletInfoCurrentlyEmbedded,
+    WalletInfoCurrentlyEmbedded
 } from '@tonconnect/sdk';
 import {
     isTelegramUrl,
@@ -17,7 +17,7 @@ import {
     Wallet,
     WalletInfo,
     WalletNotSupportFeatureError,
-    SessionCrypto,
+    SessionCrypto
 } from '@tonconnect/sdk';
 import { widgetController } from 'src/app/widget-controller';
 import { TonConnectUIError } from 'src/errors/ton-connect-ui.error';
@@ -747,7 +747,10 @@ export class TonConnectUI {
             (this.walletInfo.openMethod === 'universal-link' ||
                 this.walletInfo.openMethod === 'custom-deeplink')
         ) {
-            const linkWithSessionId = addSessionIdToUniversalLink(this.walletInfo.universalLink, sessionId)
+            const linkWithSessionId = addSessionIdToUniversalLink(
+                this.walletInfo.universalLink,
+                sessionId
+            );
 
             if (isTelegramUrl(this.walletInfo.universalLink)) {
                 redirectToTelegram(linkWithSessionId, {
