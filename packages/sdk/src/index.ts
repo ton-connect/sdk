@@ -80,6 +80,7 @@ export {
     TonProofItemReplyError,
     ConnectItemReplyError,
     SessionCrypto,
+    KeyPair,
     CONNECT_ITEM_ERROR_CODES,
     CONNECT_EVENT_ERROR_CODES,
     SEND_TRANSACTION_ERROR_CODES,
