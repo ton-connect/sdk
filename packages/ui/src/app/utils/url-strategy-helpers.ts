@@ -36,6 +36,7 @@ export function addReturnStrategy(
     } else {
         returnStrategy = isInTMA() ? strategy.twaReturnUrl || strategy.returnStrategy : 'none';
     }
+
     const newUrl = addQueryParameter(url, 'ret', returnStrategy);
 
     if (!isTelegramUrl(url)) {
@@ -604,5 +605,7 @@ function convertToTGDeepLink(directLink: string): string {
     const parsed = new URL(directLink);
     const [, domain, appname] = parsed.pathname.split('/');
     const startapp = parsed.searchParams.get('startapp');
-    return `tg://resolve?domain=${domain}&appname=${appname}&startapp=${startapp}`;
+    const id = parsed.searchParams.get('id');
+
+    return `tg://resolve?domain=${domain}&appname=${appname}&startapp=${startapp}&id=${id}`;
 }

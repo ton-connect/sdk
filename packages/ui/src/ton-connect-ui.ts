@@ -485,7 +485,8 @@ export class TonConnectUI {
 
             this.redirectAfterRequestSent({
                 returnStrategy,
-                twaReturnUrl
+                twaReturnUrl,
+                sessionId: sessionId || undefined
             });
 
             let firstClick = true;
@@ -500,7 +501,8 @@ export class TonConnectUI {
                 await this.redirectAfterRequestSent({
                     returnStrategy,
                     twaReturnUrl,
-                    forceRedirect
+                    forceRedirect,
+                    sessionId: sessionId || undefined
                 });
             };
 
@@ -610,11 +612,12 @@ export class TonConnectUI {
 
             this.redirectAfterRequestSent({
                 returnStrategy,
-                twaReturnUrl
+                twaReturnUrl,
+                sessionId: sessionId || undefined
             });
 
             let firstClick = true;
-            const redirectToWallet = async () => {
+            const redirectToWallet = () => {
                 if (abortController.signal.aborted) {
                     return;
                 }
@@ -622,10 +625,11 @@ export class TonConnectUI {
                 const forceRedirect = !firstClick;
                 firstClick = false;
 
-                await this.redirectAfterRequestSent({
+                this.redirectAfterRequestSent({
                     returnStrategy,
                     twaReturnUrl,
-                    forceRedirect
+                    forceRedirect,
+                    sessionId: sessionId || undefined
                 });
             };
 
@@ -701,8 +705,10 @@ export class TonConnectUI {
             const storage = (this.connector as any).dappSettings?.storage;
             if (storage) {
                 const stored = await storage.getItem('ton-connect-storage_bridge-connection');
+
                 if (stored) {
                     const connection = JSON.parse(stored);
+
                     if (connection.type === 'http' && connection.sessionCrypto) {
                         // For pending connections
                         const { SessionCrypto } = await import('@tonconnect/protocol');
@@ -721,28 +727,27 @@ export class TonConnectUI {
         } catch (e) {
             // Ignore errors, sessionId will remain null
         }
+
         return null;
     }
 
-    private async redirectAfterRequestSent({
+    private redirectAfterRequestSent({
         returnStrategy,
         twaReturnUrl,
-        forceRedirect
+        forceRedirect,
+        sessionId
     }: {
         returnStrategy: ReturnStrategy;
         twaReturnUrl?: `${string}://${string}`;
         forceRedirect?: boolean;
-    }): Promise<void> {
+        sessionId?: string;
+    }): void {
         if (
             this.walletInfo &&
             'universalLink' in this.walletInfo &&
             (this.walletInfo.openMethod === 'universal-link' ||
                 this.walletInfo.openMethod === 'custom-deeplink')
         ) {
-            // Get session ID for transaction/signData confirmation
-            const sessionId = await this.getSessionId();
-
-            // Add session ID to universal link if provided
             const linkWithSessionId = sessionId
                 ? addSessionIdToUniversalLink(this.walletInfo.universalLink, sessionId)
                 : this.walletInfo.universalLink;
