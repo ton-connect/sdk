@@ -4,7 +4,7 @@ import type {
     RequiredFeatures,
     SignDataPayload,
     SignDataResponse,
-    WalletInfoCurrentlyEmbedded
+    WalletInfoCurrentlyEmbedded,
 } from '@tonconnect/sdk';
 import {
     isTelegramUrl,
@@ -16,7 +16,8 @@ import {
     TonConnectError,
     Wallet,
     WalletInfo,
-    WalletNotSupportFeatureError
+    WalletNotSupportFeatureError,
+    SessionCrypto,
 } from '@tonconnect/sdk';
 import { widgetController } from 'src/app/widget-controller';
 import { TonConnectUIError } from 'src/errors/ton-connect-ui.error';
@@ -711,13 +712,11 @@ export class TonConnectUI {
 
                     if (connection.type === 'http' && connection.sessionCrypto) {
                         // For pending connections
-                        const { SessionCrypto } = await import('@tonconnect/protocol');
                         const sessionCrypto = new SessionCrypto(connection.sessionCrypto);
                         const sessionId = sessionCrypto.sessionId;
                         return sessionId;
                     } else if (connection.type === 'http' && connection.session?.sessionKeyPair) {
                         // For established connections
-                        const { SessionCrypto } = await import('@tonconnect/protocol');
                         const sessionCrypto = new SessionCrypto(connection.session.sessionKeyPair);
                         const sessionId = sessionCrypto.sessionId;
                         return sessionId;
@@ -748,9 +747,7 @@ export class TonConnectUI {
             (this.walletInfo.openMethod === 'universal-link' ||
                 this.walletInfo.openMethod === 'custom-deeplink')
         ) {
-            const linkWithSessionId = sessionId
-                ? addSessionIdToUniversalLink(this.walletInfo.universalLink, sessionId)
-                : this.walletInfo.universalLink;
+            const linkWithSessionId = addSessionIdToUniversalLink(this.walletInfo.universalLink, sessionId)
 
             if (isTelegramUrl(this.walletInfo.universalLink)) {
                 redirectToTelegram(linkWithSessionId, {

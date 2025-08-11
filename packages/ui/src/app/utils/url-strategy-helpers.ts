@@ -568,7 +568,11 @@ export function redirectToWallet(
  * @param sessionId The session ID to add
  * @returns The universal link with session ID parameter
  */
-export function addSessionIdToUniversalLink(universalLink: string, sessionId: string): string {
+export function addSessionIdToUniversalLink(universalLink: string, sessionId?: string | null): string {
+    if (!sessionId) {
+        return universalLink;
+    }
+
     const url = new URL(universalLink);
     url.searchParams.set('id', sessionId);
 
