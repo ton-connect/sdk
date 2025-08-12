@@ -15,6 +15,10 @@ function isValidString(value: unknown): value is string {
     return typeof value === 'string' && value.length > 0;
 }
 
+function isValidAddress(value: unknown): boolean {
+    return isValidString(value) && (isValidRawAddress(value) || isValidUserFriendlyAddress(value));
+}
+
 function isValidBoc(value: unknown): value is string {
     return typeof value === 'string' && BASE64_REGEX.test(value) && value.startsWith(BOC_PREFIX);
 }
@@ -57,13 +61,8 @@ export function validateSendTransactionRequest(data: unknown): ValidationResult 
         }
     }
 
-    if (data.from !== undefined) {
-        if (
-            !isValidString(data.from) ||
-            (!isValidRawAddress(data.from) && !isValidUserFriendlyAddress(data.from))
-        ) {
-            return "Invalid 'from' address format";
-        }
+    if (data.from !== undefined && !isValidAddress(data.from)) {
+        return "Invalid 'from' address format";
     }
 
     if (!isValidArray(data.messages) || data.messages.length === 0) {
@@ -189,12 +188,7 @@ function validateSignDataPayloadText(data: Record<string, unknown>): ValidationR
         }
     }
 
-    if (
-        (data.from !== undefined && !isValidString(data.from)) ||
-        (typeof data.from === 'string' &&
-            !isValidRawAddress(data.from) &&
-            !isValidUserFriendlyAddress(data.from))
-    ) {
+    if (data.from !== undefined && !isValidAddress(data.from)) {
         return "Invalid 'from'";
     }
 
@@ -217,12 +211,7 @@ function validateSignDataPayloadBinary(data: Record<string, unknown>): Validatio
         }
     }
 
-    if (
-        (data.from !== undefined && !isValidString(data.from)) ||
-        (typeof data.from === 'string' &&
-            !isValidRawAddress(data.from) &&
-            !isValidUserFriendlyAddress(data.from))
-    ) {
+    if (data.from !== undefined && !isValidAddress(data.from)) {
         return "Invalid 'from'";
     }
 
@@ -253,12 +242,7 @@ function validateSignDataPayloadCell(data: Record<string, unknown>): ValidationR
         }
     }
 
-    if (
-        (data.from !== undefined && !isValidString(data.from)) ||
-        (typeof data.from === 'string' &&
-            !isValidRawAddress(data.from) &&
-            !isValidUserFriendlyAddress(data.from))
-    ) {
+    if (data.from !== undefined && !isValidAddress(data.from)) {
         return "Invalid 'from'";
     }
 
@@ -274,7 +258,7 @@ export function validateTonProofItemReply(data: unknown): ValidationResult {
         return 'ton_proof item must be an object';
     }
 
-    const allowedKeys = ['error', 'proof'];
+    const allowedKeys = ['error', 'proof', 'name'];
     if (hasExtraProperties(data, allowedKeys)) {
         return 'ton_proof item contains extra properties';
     }
