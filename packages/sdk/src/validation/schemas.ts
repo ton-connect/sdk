@@ -45,14 +45,16 @@ export function validateSendTransactionRequest(data: unknown): ValidationResult 
         return 'Request contains extra properties';
     }
 
-    if (!isValidNumber(data.validUntil)) {
-        return "Incorrect 'validUntil'";
-    }
+    if (data.validUntil) {
+        if (!isValidNumber(data.validUntil)) {
+            return "Incorrect 'validUntil'";
+        }
 
-    const now = Math.floor(Date.now() / 1000);
-    const fiveMinutesFromNow = now + 300;
-    if (data.validUntil > fiveMinutesFromNow) {
-        console.warn(`validUntil (${data.validUntil}) is more than 5 minutes from now (${now})`);
+        const now = Math.floor(Date.now() / 1000);
+        const fiveMinutesFromNow = now + 300;
+        if (data.validUntil > fiveMinutesFromNow) {
+            console.warn(`validUntil (${data.validUntil}) is more than 5 minutes from now (${now})`);
+        }
     }
 
     if (data.network !== undefined) {

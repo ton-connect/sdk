@@ -56,11 +56,6 @@ describe('validation/schemas', () => {
             expect(result).toBe('Request must be an object');
         });
 
-        it('returns error by default when QA mode is disabled', () => {
-            const result = validateSendTransactionRequest({} as unknown);
-            expect(result).toBe("Incorrect 'validUntil'");
-        });
-
         it('detects extra top-level properties', () => {
             const result = validateSendTransactionRequest({
                 validUntil: 1,
