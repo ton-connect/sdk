@@ -207,7 +207,21 @@ describe('validation/schemas', () => {
     describe('validateSignDataPayload', () => {
         it('validates text payload', () => {
             expect(
-                validateSignDataPayload({ type: 'text', text: 'hello', network: '0', from: 'me' })
+                validateSignDataPayload({
+                    type: 'text',
+                    text: 'hello',
+                    network: '0',
+                    from: RAW_ADDRESS
+                })
+            ).toBeNull();
+
+            expect(
+                validateSignDataPayload({
+                    type: 'text',
+                    text: 'hello',
+                    network: '0',
+                    from: USER_FRIENDLY_ADDRESS
+                })
             ).toBeNull();
 
             expect(
@@ -221,7 +235,21 @@ describe('validation/schemas', () => {
 
         it('validates binary payload', () => {
             expect(
-                validateSignDataPayload({ type: 'binary', bytes: 'AA==', network: '1', from: 'x' })
+                validateSignDataPayload({
+                    type: 'binary',
+                    bytes: 'AA==',
+                    network: '1',
+                    from: USER_FRIENDLY_ADDRESS
+                })
+            ).toBeNull();
+
+            expect(
+                validateSignDataPayload({
+                    type: 'binary',
+                    bytes: 'AA==',
+                    network: '1',
+                    from: RAW_ADDRESS
+                })
             ).toBeNull();
 
             expect(
@@ -236,7 +264,17 @@ describe('validation/schemas', () => {
                     schema: 'v1',
                     cell: VALID_BOC,
                     network: '0',
-                    from: 'x'
+                    from: RAW_ADDRESS
+                })
+            ).toBeNull();
+
+            expect(
+                validateSignDataPayload({
+                    type: 'cell',
+                    schema: 'v1',
+                    cell: VALID_BOC,
+                    network: '0',
+                    from: USER_FRIENDLY_ADDRESS
                 })
             ).toBeNull();
 

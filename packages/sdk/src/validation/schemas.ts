@@ -189,7 +189,12 @@ function validateSignDataPayloadText(data: Record<string, unknown>): ValidationR
         }
     }
 
-    if (data.from !== undefined && !isValidString(data.from)) {
+    if (
+        (data.from !== undefined && !isValidString(data.from)) ||
+        (typeof data.from === 'string' &&
+            !isValidRawAddress(data.from) &&
+            !isValidUserFriendlyAddress(data.from))
+    ) {
         return "Invalid 'from'";
     }
 
@@ -212,7 +217,12 @@ function validateSignDataPayloadBinary(data: Record<string, unknown>): Validatio
         }
     }
 
-    if (data.from !== undefined && !isValidString(data.from)) {
+    if (
+        (data.from !== undefined && !isValidString(data.from)) ||
+        (typeof data.from === 'string' &&
+            !isValidRawAddress(data.from) &&
+            !isValidUserFriendlyAddress(data.from))
+    ) {
         return "Invalid 'from'";
     }
 
@@ -243,7 +253,12 @@ function validateSignDataPayloadCell(data: Record<string, unknown>): ValidationR
         }
     }
 
-    if (data.from !== undefined && !isValidString(data.from)) {
+    if (
+        (data.from !== undefined && !isValidString(data.from)) ||
+        (typeof data.from === 'string' &&
+            !isValidRawAddress(data.from) &&
+            !isValidUserFriendlyAddress(data.from))
+    ) {
         return "Invalid 'from'";
     }
 
