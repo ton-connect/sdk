@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
 import {
     validateSendTransactionRequest,
@@ -14,19 +14,6 @@ const USER_FRIENDLY_ADDRESS = toUserFriendlyAddress(RAW_ADDRESS);
 const VALID_BOC = 'te6ccAAA';
 
 describe('validation/schemas', () => {
-    let qaSpy: ReturnType<typeof vi.spyOn> | undefined;
-
-    beforeEach(() => {
-        qaSpy = undefined;
-        vi.restoreAllMocks();
-    });
-
-    afterEach(() => {
-        if (qaSpy) qaSpy.mockRestore();
-        vi.restoreAllMocks();
-        vi.resetModules();
-    });
-
     describe('validateSendTransactionRequest', () => {
         it('accepts a valid request', () => {
             const result = validateSendTransactionRequest({
