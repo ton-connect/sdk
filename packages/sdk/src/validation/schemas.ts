@@ -58,7 +58,7 @@ export function validateSendTransactionRequest(data: unknown): ValidationResult 
     }
 
     if (data.from !== undefined) {
-        if (!isValidString(data.from) || !isValidRawAddress(data.from)) {
+        if (!isValidString(data.from) || (!isValidRawAddress(data.from) && !isValidUserFriendlyAddress(data.from))) {
             return "Invalid 'from' address format";
         }
     }

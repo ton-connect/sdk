@@ -33,6 +33,24 @@ describe('validation/schemas', () => {
             expect(result).toBeNull();
         });
 
+        it('accepts a valid request with friendly format from', () => {
+            const result = validateSendTransactionRequest({
+                validUntil: Math.floor(Date.now() / 1000) + 60,
+                network: '0',
+                from: USER_FRIENDLY_ADDRESS,
+                messages: [
+                    {
+                        address: USER_FRIENDLY_ADDRESS,
+                        amount: '1000',
+                        stateInit: VALID_BOC,
+                        payload: VALID_BOC,
+                        extraCurrency: { 100: '1' }
+                    }
+                ]
+            });
+            expect(result).toBeNull();
+        });
+
         it('returns error for non-object input', () => {
             const result = validateSendTransactionRequest(null as unknown);
             expect(result).toBe('Request must be an object');
