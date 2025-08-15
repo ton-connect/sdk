@@ -36,6 +36,7 @@ export function addReturnStrategy(
     } else {
         returnStrategy = isInTMA() ? strategy.twaReturnUrl || strategy.returnStrategy : 'none';
     }
+
     const newUrl = addQueryParameter(url, 'ret', returnStrategy);
 
     if (!isTelegramUrl(url)) {
@@ -69,6 +70,7 @@ export function redirectToTelegram(
     }
 ): void {
     options = { ...options };
+
     // TODO: Remove this line after all dApps and the wallets-list.json have been updated
     const directLink = convertToTGDirectLink(universalLink);
     const directLinkUrl = new URL(directLink);
@@ -80,9 +82,12 @@ export function redirectToTelegram(
     if (isInTelegramBrowser()) {
         // return back to the telegram browser
         options.returnStrategy = 'back';
-        const linkWitStrategy = addReturnStrategy(directLinkUrl.toString(), options.returnStrategy);
+        const linkWithStrategy = addReturnStrategy(
+            directLinkUrl.toString(),
+            options.returnStrategy
+        );
 
-        openLinkBlank(linkWitStrategy);
+        openLinkBlank(linkWithStrategy);
     } else if (isInTMA()) {
         if (isTmaPlatform('ios', 'android', 'macos', 'tdesktop', 'web')) {
             // Use the `back` strategy, the current TMA instance will keep open.
@@ -90,12 +95,12 @@ export function redirectToTelegram(
             // itself after the user action.
 
             options.returnStrategy = 'back';
-            const linkWitStrategy = addReturnStrategy(
+            const linkWithStrategy = addReturnStrategy(
                 directLinkUrl.toString(),
                 options.returnStrategy
             );
 
-            sendOpenTelegramLink(linkWitStrategy);
+            sendOpenTelegramLink(linkWithStrategy);
         } else if (isTmaPlatform('weba')) {
             // TODO: move weba to the ios/android/macOS/tdesktop strategy
             // Similar to tdesktop strategy, but opening another TMA occurs
@@ -287,9 +292,9 @@ export function redirectToWallet(
             // Fallback for unknown platforms. Should use desktop strategy.
             setOpenMethod('universal-link');
 
-            const linkWitStrategy = addReturnStrategy(universalLink, options.returnStrategy);
+            const linkWithStrategy = addReturnStrategy(universalLink, options.returnStrategy);
 
-            openLinkBlank(linkWitStrategy);
+            openLinkBlank(linkWithStrategy);
         }
     } else if (isInTMA()) {
         if (isTmaPlatform('ios', 'android')) {
@@ -303,12 +308,12 @@ export function redirectToWallet(
 
             setOpenMethod('universal-link');
 
-            const linkWitStrategy = addReturnStrategy(universalLink, options.returnStrategy);
+            const linkWithStrategy = addReturnStrategy(universalLink, options.returnStrategy);
 
-            sendOpenTelegramLink(linkWitStrategy, () => {
+            sendOpenTelegramLink(linkWithStrategy, () => {
                 setOpenMethod('universal-link');
 
-                openLinkBlank(linkWitStrategy);
+                openLinkBlank(linkWithStrategy);
             });
         } else if (isTmaPlatform('macos', 'tdesktop')) {
             // Use the `tg://resolve` strategy instead of `back`, the user will transition to the other app
@@ -319,22 +324,22 @@ export function redirectToWallet(
                 options.returnStrategy = 'tg://resolve';
             }
 
-            const linkWitStrategy = addReturnStrategy(universalLink, options.returnStrategy);
+            const linkWithStrategy = addReturnStrategy(universalLink, options.returnStrategy);
             const useDeepLink = !!deepLink && !options.forceRedirect;
 
             // In case of deep link, use the `custom-deeplink` strategy with fallback to `universal-link`.
             if (useDeepLink) {
                 setOpenMethod('custom-deeplink');
 
-                openDeeplinkWithFallback(toDeeplink(linkWitStrategy, deepLink), () => {
+                openDeeplinkWithFallback(toDeeplink(linkWithStrategy, deepLink), () => {
                     setOpenMethod('universal-link');
 
-                    openLinkBlank(linkWitStrategy);
+                    openLinkBlank(linkWithStrategy);
                 });
             } else {
                 setOpenMethod('universal-link');
 
-                openLinkBlank(linkWitStrategy);
+                openLinkBlank(linkWithStrategy);
             }
         } else if (isTmaPlatform('weba')) {
             // Use the `back` strategy, the user will transition to the other app
@@ -357,22 +362,22 @@ export function redirectToWallet(
                 }
             }
 
-            const linkWitStrategy = addReturnStrategy(universalLink, options.returnStrategy);
+            const linkWithStrategy = addReturnStrategy(universalLink, options.returnStrategy);
             const useDeepLink = !!deepLink && !options.forceRedirect;
 
             // In case of deep link, use the `custom-deeplink` strategy with fallback to `universal-link`.
             if (useDeepLink) {
                 setOpenMethod('custom-deeplink');
 
-                openDeeplinkWithFallback(toDeeplink(linkWitStrategy, deepLink), () => {
+                openDeeplinkWithFallback(toDeeplink(linkWithStrategy, deepLink), () => {
                     setOpenMethod('universal-link');
 
-                    openLinkBlank(linkWitStrategy);
+                    openLinkBlank(linkWithStrategy);
                 });
             } else {
                 setOpenMethod('universal-link');
 
-                openLinkBlank(linkWitStrategy);
+                openLinkBlank(linkWithStrategy);
             }
         } else if (isTmaPlatform('web')) {
             // Use the `back` strategy, the user will transition to the other app
@@ -395,30 +400,30 @@ export function redirectToWallet(
                 }
             }
 
-            const linkWitStrategy = addReturnStrategy(universalLink, options.returnStrategy);
+            const linkWithStrategy = addReturnStrategy(universalLink, options.returnStrategy);
             const useDeepLink = !!deepLink && !options.forceRedirect;
 
             // In case of deep link, use the `custom-deeplink` strategy with fallback to `universal-link`.
             if (useDeepLink) {
                 setOpenMethod('custom-deeplink');
 
-                openDeeplinkWithFallback(toDeeplink(linkWitStrategy, deepLink), () => {
+                openDeeplinkWithFallback(toDeeplink(linkWithStrategy, deepLink), () => {
                     setOpenMethod('universal-link');
 
-                    openLinkBlank(linkWitStrategy);
+                    openLinkBlank(linkWithStrategy);
                 });
             } else {
                 setOpenMethod('universal-link');
 
-                openLinkBlank(linkWitStrategy);
+                openLinkBlank(linkWithStrategy);
             }
         } else {
             // Fallback for unknown platforms. Should use desktop strategy.
             setOpenMethod('universal-link');
 
-            const linkWitStrategy = addReturnStrategy(universalLink, options.returnStrategy);
+            const linkWithStrategy = addReturnStrategy(universalLink, options.returnStrategy);
 
-            openLinkBlank(linkWitStrategy);
+            openLinkBlank(linkWithStrategy);
         }
     } else {
         if (isOS('ios')) {
@@ -524,22 +529,22 @@ export function redirectToWallet(
                 }
             }
 
-            const linkWitStrategy = addReturnStrategy(universalLink, options.returnStrategy);
+            const linkWithStrategy = addReturnStrategy(universalLink, options.returnStrategy);
             const useDeepLink = !!deepLink && !options.forceRedirect;
 
             // In case of deep link, use the `custom-deeplink` strategy with fallback to `universal-link`.
             if (useDeepLink) {
                 setOpenMethod('custom-deeplink');
 
-                openDeeplinkWithFallback(toDeeplink(linkWitStrategy, deepLink), () => {
+                openDeeplinkWithFallback(toDeeplink(linkWithStrategy, deepLink), () => {
                     setOpenMethod('universal-link');
 
-                    openLinkBlank(linkWitStrategy);
+                    openLinkBlank(linkWithStrategy);
                 });
             } else {
                 setOpenMethod('universal-link');
 
-                openLinkBlank(linkWitStrategy);
+                openLinkBlank(linkWithStrategy);
             }
         } else {
             // Fallback for unknown platforms. Should use desktop strategy.
@@ -556,6 +561,27 @@ export function redirectToWallet(
  * @param key
  * @param value
  */
+/**
+ * Adds a session ID parameter to a universal link for transaction/signData confirmation.
+ * This is similar to the logic in bridge provider for connection links.
+ * @param universalLink The universal link to add session ID to
+ * @param sessionId The session ID to add
+ * @returns The universal link with session ID parameter
+ */
+export function addSessionIdToUniversalLink(
+    universalLink: string,
+    sessionId?: string | null
+): string {
+    if (!sessionId) {
+        return universalLink;
+    }
+
+    const url = new URL(universalLink);
+    url.searchParams.set('id', sessionId);
+
+    return url.toString();
+}
+
 function addQueryParameter(url: string, key: string, value: string): string {
     const parsed = new URL(url);
     parsed.searchParams.append(key, value);
@@ -586,5 +612,7 @@ function convertToTGDeepLink(directLink: string): string {
     const parsed = new URL(directLink);
     const [, domain, appname] = parsed.pathname.split('/');
     const startapp = parsed.searchParams.get('startapp');
-    return `tg://resolve?domain=${domain}&appname=${appname}&startapp=${startapp}`;
+    const id = parsed.searchParams.get('id');
+
+    return `tg://resolve?domain=${domain}&appname=${appname}&startapp=${startapp}&id=${id}`;
 }
