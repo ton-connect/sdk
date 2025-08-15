@@ -63,7 +63,8 @@ import { tonConnectSdkVersion } from 'src/constants/version';
 import {
     validateSendTransactionRequest,
     validateSignDataPayload,
-    validateConnectAdditionalRequest
+    validateConnectAdditionalRequest,
+    validateTonProofItemReply
 } from './validation/schemas';
 import { isQaModeEnabled } from './utils/qa-mode';
 
@@ -733,42 +734,54 @@ export class TonConnect implements ITonConnect {
         };
 
         if (tonProofItem) {
+            const validationError = validateTonProofItemReply(tonProofItem as unknown);
             let tonProof: TonProofItemReply | undefined = undefined;
-            try {
-                if ('proof' in tonProofItem) {
-                    // success
-                    tonProof = {
-                        name: 'ton_proof',
-                        proof: {
-                            timestamp: tonProofItem.proof.timestamp,
-                            domain: {
-                                lengthBytes: tonProofItem.proof.domain.lengthBytes,
-                                value: tonProofItem.proof.domain.value
-                            },
-                            payload: tonProofItem.proof.payload,
-                            signature: tonProofItem.proof.signature
-                        }
-                    };
-                } else if ('error' in tonProofItem) {
-                    // error
-                    tonProof = {
-                        name: 'ton_proof',
-                        error: {
-                            code: tonProofItem.error.code,
-                            message: tonProofItem.error.message
-                        }
-                    };
-                } else {
-                    throw new TonConnectError('Invalid data format');
+            if (validationError) {
+                if (isQaModeEnabled()) {
+                    console.error('TonProofItem validation failed: ' + validationError);
                 }
-            } catch (e) {
                 tonProof = {
                     name: 'ton_proof',
                     error: {
                         code: CONNECT_ITEM_ERROR_CODES.UNKNOWN_ERROR,
-                        message: 'Invalid data format'
+                        message: validationError
                     }
                 };
+            } else {
+                try {
+                    if ('proof' in tonProofItem) {
+                        tonProof = {
+                            name: 'ton_proof',
+                            proof: {
+                                timestamp: tonProofItem.proof.timestamp,
+                                domain: {
+                                    lengthBytes: tonProofItem.proof.domain.lengthBytes,
+                                    value: tonProofItem.proof.domain.value
+                                },
+                                payload: tonProofItem.proof.payload,
+                                signature: tonProofItem.proof.signature
+                            }
+                        };
+                    } else if ('error' in tonProofItem) {
+                        tonProof = {
+                            name: 'ton_proof',
+                            error: {
+                                code: tonProofItem.error.code,
+                                message: tonProofItem.error.message
+                            }
+                        };
+                    } else {
+                        throw new TonConnectError('Invalid data format');
+                    }
+                } catch (e) {
+                    tonProof = {
+                        name: 'ton_proof',
+                        error: {
+                            code: CONNECT_ITEM_ERROR_CODES.UNKNOWN_ERROR,
+                            message: 'Invalid data format'
+                        }
+                    };
+                }
             }
 
             wallet.connectItems = { tonProof };
