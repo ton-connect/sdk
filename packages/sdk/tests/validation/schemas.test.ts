@@ -178,6 +178,102 @@ describe('validation/schemas', () => {
             } as unknown);
             expect(result).toBe("Invalid 'extraCurrency' format in message at index 0");
         });
+
+        it('accepts undefined values for optional fields', () => {
+            const result = validateSendTransactionRequest({
+                validUntil: 1,
+                network: undefined,
+                from: undefined,
+                messages: [
+                    {
+                        address: USER_FRIENDLY_ADDRESS,
+                        amount: '1',
+                        stateInit: undefined,
+                        payload: undefined,
+                        extraCurrency: undefined
+                    }
+                ]
+            });
+            expect(result).toBeNull();
+        });
+
+        it('accepts undefined values for optional message fields', () => {
+            const result = validateSendTransactionRequest({
+                validUntil: 1,
+                messages: [
+                    {
+                        address: USER_FRIENDLY_ADDRESS,
+                        amount: '1',
+                        stateInit: undefined,
+                        payload: undefined,
+                        extraCurrency: undefined
+                    }
+                ]
+            });
+            expect(result).toBeNull();
+        });
+
+        it('rejects null values for optional fields', () => {
+            const result = validateSendTransactionRequest({
+                validUntil: 1,
+                network: null,
+                from: null,
+                messages: [
+                    {
+                        address: USER_FRIENDLY_ADDRESS,
+                        amount: '1',
+                        stateInit: null,
+                        payload: null,
+                        extraCurrency: null
+                    }
+                ]
+            } as unknown);
+            expect(result).toBe("Invalid 'network' format");
+        });
+
+        it('rejects empty strings for optional fields', () => {
+            const result = validateSendTransactionRequest({
+                validUntil: 1,
+                network: '',
+                from: '',
+                messages: [
+                    {
+                        address: USER_FRIENDLY_ADDRESS,
+                        amount: '1',
+                        stateInit: '',
+                        payload: '',
+                        extraCurrency: {}
+                    }
+                ]
+            } as unknown);
+            expect(result).toBe("Invalid 'network' format");
+        });
+
+        it('accepts omitted optional fields', () => {
+            const result = validateSendTransactionRequest({
+                validUntil: 1,
+                messages: [
+                    {
+                        address: USER_FRIENDLY_ADDRESS,
+                        amount: '1'
+                    }
+                ]
+            });
+            expect(result).toBeNull();
+        });
+
+        it('accepts omitted optional fields at top level', () => {
+            const result = validateSendTransactionRequest({
+                validUntil: 1,
+                messages: [
+                    {
+                        address: USER_FRIENDLY_ADDRESS,
+                        amount: '1'
+                    }
+                ]
+            });
+            expect(result).toBeNull();
+        });
     });
 
     describe('validateConnectAdditionalRequest', () => {
@@ -187,6 +283,26 @@ describe('validation/schemas', () => {
 
         it('accepts valid tonProof string', () => {
             expect(validateConnectAdditionalRequest({ tonProof: 'proof' })).toBeNull();
+        });
+
+        it('accepts undefined tonProof', () => {
+            expect(validateConnectAdditionalRequest({ tonProof: undefined })).toBeNull();
+        });
+
+        it('rejects null tonProof', () => {
+            expect(validateConnectAdditionalRequest({ tonProof: null } as unknown)).toBe(
+                "Invalid 'tonProof'"
+            );
+        });
+
+        it('rejects empty string tonProof', () => {
+            expect(validateConnectAdditionalRequest({ tonProof: '' } as unknown)).toBe(
+                "Invalid 'tonProof'"
+            );
+        });
+
+        it('accepts omitted tonProof field', () => {
+            expect(validateConnectAdditionalRequest({})).toBeNull();
         });
 
         it('rejects non-object and wrong types', () => {
@@ -228,6 +344,48 @@ describe('validation/schemas', () => {
             ).toBe("Invalid 'from'");
         });
 
+        it('accepts undefined values for optional fields in text payload', () => {
+            expect(
+                validateSignDataPayload({
+                    type: 'text',
+                    text: 'hello',
+                    network: undefined,
+                    from: undefined
+                })
+            ).toBeNull();
+        });
+
+        it('rejects null values for optional fields in text payload', () => {
+            expect(
+                validateSignDataPayload({
+                    type: 'text',
+                    text: 'hello',
+                    network: null,
+                    from: null
+                } as unknown)
+            ).toBe("Invalid 'network' format");
+        });
+
+        it('rejects empty strings for optional fields in text payload', () => {
+            expect(
+                validateSignDataPayload({
+                    type: 'text',
+                    text: 'hello',
+                    network: '',
+                    from: ''
+                } as unknown)
+            ).toBe("Invalid 'network' format");
+        });
+
+        it('accepts omitted optional fields in text payload', () => {
+            expect(
+                validateSignDataPayload({
+                    type: 'text',
+                    text: 'hello'
+                })
+            ).toBeNull();
+        });
+
         it('validates binary payload', () => {
             expect(
                 validateSignDataPayload({
@@ -250,6 +408,48 @@ describe('validation/schemas', () => {
             expect(
                 validateSignDataPayload({ type: 'binary', bytes: 'AA==', network: 'x' } as unknown)
             ).toBe("Invalid 'network' format");
+        });
+
+        it('accepts undefined values for optional fields in binary payload', () => {
+            expect(
+                validateSignDataPayload({
+                    type: 'binary',
+                    bytes: 'AA==',
+                    network: undefined,
+                    from: undefined
+                })
+            ).toBeNull();
+        });
+
+        it('rejects null values for optional fields in binary payload', () => {
+            expect(
+                validateSignDataPayload({
+                    type: 'binary',
+                    bytes: 'AA==',
+                    network: null,
+                    from: null
+                } as unknown)
+            ).toBe("Invalid 'network' format");
+        });
+
+        it('rejects empty strings for optional fields in binary payload', () => {
+            expect(
+                validateSignDataPayload({
+                    type: 'binary',
+                    bytes: 'AA==',
+                    network: '',
+                    from: ''
+                } as unknown)
+            ).toBe("Invalid 'network' format");
+        });
+
+        it('accepts omitted optional fields in binary payload', () => {
+            expect(
+                validateSignDataPayload({
+                    type: 'binary',
+                    bytes: 'AA=='
+                })
+            ).toBeNull();
         });
 
         it('validates cell payload', () => {
@@ -276,6 +476,52 @@ describe('validation/schemas', () => {
             expect(
                 validateSignDataPayload({ type: 'cell', schema: 'v1', cell: 'bad' } as unknown)
             ).toBe("Invalid 'cell' format (must be valid base64)");
+        });
+
+        it('accepts undefined values for optional fields in cell payload', () => {
+            expect(
+                validateSignDataPayload({
+                    type: 'cell',
+                    schema: 'v1',
+                    cell: VALID_BOC,
+                    network: undefined,
+                    from: undefined
+                })
+            ).toBeNull();
+        });
+
+        it('rejects null values for optional fields in cell payload', () => {
+            expect(
+                validateSignDataPayload({
+                    type: 'cell',
+                    schema: 'v1',
+                    cell: VALID_BOC,
+                    network: null,
+                    from: null
+                } as unknown)
+            ).toBe("Invalid 'network' format");
+        });
+
+        it('rejects empty strings for optional fields in cell payload', () => {
+            expect(
+                validateSignDataPayload({
+                    type: 'cell',
+                    schema: 'v1',
+                    cell: VALID_BOC,
+                    network: '',
+                    from: ''
+                } as unknown)
+            ).toBe("Invalid 'network' format");
+        });
+
+        it('accepts omitted optional fields in cell payload', () => {
+            expect(
+                validateSignDataPayload({
+                    type: 'cell',
+                    schema: 'v1',
+                    cell: VALID_BOC
+                })
+            ).toBeNull();
         });
 
         it('rejects unknown payload type', () => {

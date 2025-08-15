@@ -53,7 +53,9 @@ export function validateSendTransactionRequest(data: unknown): ValidationResult 
         const now = Math.floor(Date.now() / 1000);
         const fiveMinutesFromNow = now + 300;
         if (data.validUntil > fiveMinutesFromNow) {
-            console.warn(`validUntil (${data.validUntil}) is more than 5 minutes from now (${now})`);
+            console.warn(
+                `validUntil (${data.validUntil}) is more than 5 minutes from now (${now})`
+            );
         }
     }
 
