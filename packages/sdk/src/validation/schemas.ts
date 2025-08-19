@@ -316,6 +316,10 @@ export function validateTonProofItemReply(data: unknown): ValidationResult {
         return "'ton_proof' item must contain either 'proof' or 'error'";
     }
 
+    if (hasProof && hasError) {
+        return "'ton_proof' item must contain either 'proof' or 'error', not both";
+    }
+
     if (hasProof) {
         const proof = (data as Record<string, unknown>).proof as
             | Record<string, unknown>

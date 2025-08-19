@@ -660,6 +660,21 @@ describe('validation/schemas', () => {
             expect(result).toBe("'ton_proof' item must contain either 'proof' or 'error'");
         });
 
+        it('rejects when both proof and error are present', () => {
+            const result = validateTonProofItemReply({
+                proof: {
+                    timestamp: Math.floor(Date.now() / 1000),
+                    domain: { lengthBytes: 11, value: 'example.com' },
+                    payload: 'some-payload',
+                    signature: 'YWJjZA=='
+                },
+                error: { code: 1, message: 'oops' }
+            });
+            expect(result).toBe(
+                "'ton_proof' item must contain either 'proof' or 'error', not both"
+            );
+        });
+
         it('rejects extra properties at any level', () => {
             expect(validateTonProofItemReply({ x: 1 } as unknown as Record<string, unknown>)).toBe(
                 'ton_proof item contains extra properties'
