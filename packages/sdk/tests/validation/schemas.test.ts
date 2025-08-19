@@ -297,7 +297,7 @@ describe('validation/schemas', () => {
 
         it('rejects empty string tonProof', () => {
             expect(validateConnectAdditionalRequest({ tonProof: '' } as unknown)).toBe(
-                "Invalid 'tonProof'"
+                "Empty 'tonProof' payload"
             );
         });
 
@@ -312,6 +312,109 @@ describe('validation/schemas', () => {
             expect(validateConnectAdditionalRequest({ tonProof: 1 } as unknown)).toBe(
                 "Invalid 'tonProof'"
             );
+        });
+
+        describe('tonProof size validation', () => {
+            let originalWindow: typeof window;
+
+            beforeEach(() => {
+                originalWindow = global.window;
+                // Mock window.location for testing
+                global.window = {
+                    location: {
+                        hostname: 'example.com'
+                    }
+                } as Window;
+            });
+
+            afterEach(() => {
+                global.window = originalWindow;
+            });
+
+            it('rejects tonProof payload exceeding 128 bytes', () => {
+                const longPayload = 'a'.repeat(129);
+                expect(validateConnectAdditionalRequest({ tonProof: longPayload })).toBe(
+                    "'tonProof' payload exceeds 128 bytes limit"
+                );
+            });
+
+            it('accepts tonProof payload exactly 128 bytes', () => {
+                const exactPayload = 'a'.repeat(128);
+                expect(validateConnectAdditionalRequest({ tonProof: exactPayload })).toBeNull();
+            });
+
+            it('rejects when domain + payload exceeds 222 bytes', () => {
+                // example.com = 11 bytes, so payload can be max 211 bytes
+                // But payload must not exceed 128 bytes, so we test with a payload that's within 128 bytes
+                // but when combined with domain exceeds 222 bytes
+                const longPayload = 'a'.repeat(128); // Exactly 128 bytes
+                // Mock a domain that's 95 bytes (128 + 95 = 223 > 222)
+                global.window = {
+                    location: {
+                        hostname: 'a'.repeat(95)
+                    }
+                } as Window;
+
+                expect(validateConnectAdditionalRequest({ tonProof: longPayload })).toBe(
+                    "'tonProof' domain + payload exceeds 222 bytes limit"
+                );
+            });
+
+            it('accepts when domain + payload equals 222 bytes', () => {
+                // example.com = 11 bytes, so payload can be max 211 bytes
+                // But payload must not exceed 128 bytes, so we test with a payload that's within 128 bytes
+                // and when combined with domain equals 222 bytes
+                const exactPayload = 'a'.repeat(128); // Exactly 128 bytes
+                // Mock a domain that's 94 bytes (128 + 94 = 222)
+                global.window = {
+                    location: {
+                        hostname: 'a'.repeat(94)
+                    }
+                } as Window;
+
+                expect(validateConnectAdditionalRequest({ tonProof: exactPayload })).toBeNull();
+            });
+
+            it('rejects when domain exceeds 128 bytes', () => {
+                // Mock a very long domain
+                global.window = {
+                    location: {
+                        hostname: 'a'.repeat(129)
+                    }
+                } as Window;
+
+                expect(validateConnectAdditionalRequest({ tonProof: 'test' })).toBe(
+                    'Current domain exceeds 128 bytes limit'
+                );
+            });
+
+            it('works with very long domain and small payload', () => {
+                // Mock a domain that's exactly 128 bytes
+                global.window = {
+                    location: {
+                        hostname: 'a'.repeat(128)
+                    }
+                } as Window;
+
+                // Payload can be max 94 bytes (222 - 128)
+                const smallPayload = 'a'.repeat(94);
+                expect(validateConnectAdditionalRequest({ tonProof: smallPayload })).toBeNull();
+            });
+
+            it('rejects when domain is 128 bytes and payload is 95 bytes', () => {
+                // Mock a domain that's exactly 128 bytes
+                global.window = {
+                    location: {
+                        hostname: 'a'.repeat(128)
+                    }
+                } as Window;
+
+                // Payload is 95 bytes, total would be 223 bytes (exceeds 222)
+                const payload = 'a'.repeat(95);
+                expect(validateConnectAdditionalRequest({ tonProof: payload })).toBe(
+                    "'tonProof' domain + payload exceeds 222 bytes limit"
+                );
+            });
         });
     });
 

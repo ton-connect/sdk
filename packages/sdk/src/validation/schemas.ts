@@ -5,6 +5,10 @@ const BOC_PREFIX = 'te6cc';
 const INTEGER_REGEX = /^-?\d+$/;
 const POSITIVE_INTEGER_REGEX = /^\d+$/;
 
+const MAX_DOMAIN_BYTES = 128;
+const MAX_PAYLOAD_BYTES = 128;
+const MAX_TOTAL_BYTES = 222;
+
 type ValidationResult = string | null;
 
 function isValidNumber(value: unknown): value is number {
@@ -148,8 +152,46 @@ export function validateConnectAdditionalRequest(data: unknown): ValidationResul
         return 'Request contains extra properties';
     }
 
-    if (data.tonProof !== undefined && !isValidString(data.tonProof)) {
-        return "Invalid 'tonProof'";
+    if (data.tonProof !== undefined) {
+        if (typeof data.tonProof !== 'string') {
+            return "Invalid 'tonProof'";
+        }
+
+        const payload = data.tonProof;
+        if (payload.length === 0) {
+            return "Empty 'tonProof' payload";
+        }
+
+        // Get current domain for validation first
+        let domain: string;
+        try {
+            // In browser environment
+            if (typeof window !== 'undefined' && window.location) {
+                domain = window.location.hostname;
+            } else {
+                // In Node.js environment, skip domain validation
+                return null;
+            }
+        } catch {
+            return null;
+        }
+
+        // Validate domain size (max 128 bytes)
+        const domainBytes = new TextEncoder().encode(domain).length;
+        if (domainBytes > MAX_DOMAIN_BYTES) {
+            return 'Current domain exceeds 128 bytes limit';
+        }
+
+        // Validate payload size (max 128 bytes)
+        const payloadBytes = new TextEncoder().encode(payload).length;
+        if (payloadBytes > MAX_PAYLOAD_BYTES) {
+            return "'tonProof' payload exceeds 128 bytes limit";
+        }
+
+        // Validate total size (domain + payload <= 222 bytes)
+        if (domainBytes + payloadBytes > MAX_TOTAL_BYTES) {
+            return "'tonProof' domain + payload exceeds 222 bytes limit";
+        }
     }
 
     return null;
