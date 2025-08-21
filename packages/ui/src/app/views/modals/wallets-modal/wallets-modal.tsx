@@ -51,6 +51,7 @@ export const WalletsModal: Component = () => {
     createEffect(() => {
         if (getWalletsModalIsOpened()) {
             updateIsMobile();
+            refetchWallets();
         } else {
             setSelectedWalletInfo(null);
             setSelectedTab('universal');
@@ -60,7 +61,10 @@ export const WalletsModal: Component = () => {
 
     const connector = useContext(ConnectorContext)!;
     const tonConnectUI = useContext(TonConnectUiContext);
-    const [fetchedWalletsList] = createResource(() => tonConnectUI!.getWallets());
+
+    const [fetchedWalletsList, { refetch: refetchWallets }] = createResource(() => {
+        return tonConnectUI!.getWallets();
+    });
 
     const [selectedWalletInfo, setSelectedWalletInfo] = createSignal<UIWalletInfo | null>(null);
     const [selectedWalletError, setSelectedWalletError] = createSignal<
