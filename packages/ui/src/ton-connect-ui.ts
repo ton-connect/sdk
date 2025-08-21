@@ -17,7 +17,8 @@ import {
     Wallet,
     WalletInfo,
     WalletNotSupportFeatureError,
-    SessionCrypto
+    SessionCrypto,
+    isQaModeEnabled
 } from '@tonconnect/sdk';
 import { widgetController } from 'src/app/widget-controller';
 import { TonConnectUIError } from 'src/errors/ton-connect-ui.error';
@@ -1050,6 +1051,12 @@ export class TonConnectUI {
             const walletInfo = walletsList.find(item => eqWalletName(item, wallet.device.appName));
 
             if (!walletInfo) {
+                if (isQaModeEnabled()) {
+                    console.warn(
+                        `[QA Mode] WalletInfo not found for '${wallet.device.appName}' wallet, but continuing due to QA mode`
+                    );
+                    return null;
+                }
                 throw new TonConnectUIError(
                     `Cannot find WalletInfo for the '${wallet.device.appName}' wallet`
                 );

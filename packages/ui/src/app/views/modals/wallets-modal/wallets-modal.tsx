@@ -6,7 +6,8 @@ import {
     Wallet,
     WalletInfoRemote,
     checkRequiredWalletFeatures,
-    WalletInfo
+    WalletInfo,
+    isQaModeEnabled
 } from '@tonconnect/sdk';
 import {
     Component,
@@ -150,6 +151,12 @@ export const WalletsModal: Component = () => {
                 const wallet = walletsList()?.find(w => w.appName.toLowerCase() === errorAppName);
 
                 if (!wallet) {
+                    if (isQaModeEnabled()) {
+                        console.warn(
+                            '[QA Mode] Wallet not found in error handler, but continuing due to QA mode'
+                        );
+                        return;
+                    }
                     throw new TonConnectError('Wallet not found');
                 }
 
