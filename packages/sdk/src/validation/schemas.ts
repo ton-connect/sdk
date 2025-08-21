@@ -1,4 +1,5 @@
 import { isValidUserFriendlyAddress, isValidRawAddress } from 'src/utils/address';
+import { getDomain } from 'src/utils/web-api';
 
 const BASE64_REGEX = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
 const BOC_PREFIX = 'te6cc';
@@ -163,16 +164,9 @@ export function validateConnectAdditionalRequest(data: unknown): ValidationResul
         }
 
         // Get current domain for validation first
-        let domain: string;
-        try {
-            // In browser environment
-            if (typeof window !== 'undefined' && window.location) {
-                domain = window.location.hostname;
-            } else {
-                // In Node.js environment, skip domain validation
-                return null;
-            }
-        } catch {
+        const domain = getDomain();
+        if (!domain) {
+            // In Node.js environment, skip domain validation
             return null;
         }
 
