@@ -114,6 +114,10 @@ export class WalletsListManager {
     }
 
     private getCurrentlyInjectedWallets(): WalletInfoCurrentlyInjected[] {
+        if (!isQaModeEnabled()) {
+            return [];
+        }
+
         try {
             return InjectedProvider.getCurrentlyInjectedWallets();
         } catch (e) {
