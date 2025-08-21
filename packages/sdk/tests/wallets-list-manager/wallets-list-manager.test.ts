@@ -79,7 +79,7 @@ describe('Wallets list manager tests', () => {
         expect(logError).toBeCalledTimes(1);
 
         expect((logError as Mock).mock.calls[0].toString()).toEqual(
-            'FetchError: invalid json response body at  reason: Unexpected end of JSON input'
+            'SyntaxError: Unexpected end of JSON input'
         );
         expect(walletsList).toEqual(
             walletsListManager['walletConfigDTOListToWalletConfigList'](FALLBACK_WALLETS_LIST)

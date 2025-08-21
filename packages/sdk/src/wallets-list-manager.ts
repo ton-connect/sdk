@@ -15,9 +15,9 @@ import { FALLBACK_WALLETS_LIST } from 'src/resources/fallback-wallets-list';
 import { isQaModeEnabled } from './utils/qa-mode';
 
 export class WalletsListManager {
-    private walletsListCache: Promise<WalletInfo[]> | null = null;
+    private walletsListDTOCache: Promise<WalletInfoDTO[]> | null = null;
 
-    private walletsListCacheCreationTimestamp: number | null = null;
+    private walletsListDTOCacheCreationTimestamp: number | null = null;
 
     private readonly cacheTTLMs: number | undefined;
 
@@ -37,27 +37,15 @@ export class WalletsListManager {
     }
 
     public async getWallets(): Promise<WalletInfo[]> {
-        if (
-            this.cacheTTLMs &&
-            this.walletsListCacheCreationTimestamp &&
-            Date.now() > this.walletsListCacheCreationTimestamp + this.cacheTTLMs
-        ) {
-            this.walletsListCache = null;
-        }
+        const [walletsListDTO, currentlyInjectedWallets] = await Promise.all([
+            this.fetchWalletsListDTO(),
+            this.getCurrentlyInjectedWallets()
+        ]);
 
-        if (!this.walletsListCache) {
-            this.walletsListCache = this.fetchWalletsList();
-            this.walletsListCache
-                .then(() => {
-                    this.walletsListCacheCreationTimestamp = Date.now();
-                })
-                .catch(() => {
-                    this.walletsListCache = null;
-                    this.walletsListCacheCreationTimestamp = null;
-                });
-        }
-
-        return this.walletsListCache;
+        return this.mergeWalletsLists(
+            this.walletConfigDTOListToWalletConfigList(walletsListDTO),
+            currentlyInjectedWallets
+        );
     }
 
     public async getEmbeddedWallet(): Promise<WalletInfoCurrentlyEmbedded | null> {
@@ -66,7 +54,31 @@ export class WalletsListManager {
         return embeddedWallets.length === 1 ? embeddedWallets[0]! : null;
     }
 
-    private async fetchWalletsList(): Promise<WalletInfo[]> {
+    private async fetchWalletsListDTO(): Promise<WalletInfoDTO[]> {
+        if (
+            this.cacheTTLMs &&
+            this.walletsListDTOCacheCreationTimestamp &&
+            Date.now() > this.walletsListDTOCacheCreationTimestamp + this.cacheTTLMs
+        ) {
+            this.walletsListDTOCache = null;
+        }
+
+        if (!this.walletsListDTOCache) {
+            this.walletsListDTOCache = this.fetchWalletsListFromSource();
+            this.walletsListDTOCache
+                .then(() => {
+                    this.walletsListDTOCacheCreationTimestamp = Date.now();
+                })
+                .catch(() => {
+                    this.walletsListDTOCache = null;
+                    this.walletsListDTOCacheCreationTimestamp = null;
+                });
+        }
+
+        return this.walletsListDTOCache;
+    }
+
+    private async fetchWalletsListFromSource(): Promise<WalletInfoDTO[]> {
         let walletsList: WalletInfoDTO[] = [];
 
         try {
@@ -98,17 +110,16 @@ export class WalletsListManager {
             walletsList = FALLBACK_WALLETS_LIST;
         }
 
-        let currentlyInjectedWallets: WalletInfoCurrentlyInjected[] = [];
+        return walletsList;
+    }
+
+    private getCurrentlyInjectedWallets(): WalletInfoCurrentlyInjected[] {
         try {
-            currentlyInjectedWallets = InjectedProvider.getCurrentlyInjectedWallets();
+            return InjectedProvider.getCurrentlyInjectedWallets();
         } catch (e) {
             logError(e);
+            return [];
         }
-
-        return this.mergeWalletsLists(
-            this.walletConfigDTOListToWalletConfigList(walletsList),
-            currentlyInjectedWallets
-        );
     }
 
     private walletConfigDTOListToWalletConfigList(walletConfigDTO: WalletInfoDTO[]): WalletInfo[] {
@@ -139,6 +150,7 @@ export class WalletsListManager {
                         InjectedProvider.isInsideWalletBrowser(jsBridgeKey);
                 }
             });
+
             return walletConfig as WalletInfo;
         });
     }
