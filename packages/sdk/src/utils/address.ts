@@ -99,13 +99,14 @@ export function parseUserFriendlyAddress(address: string): {
         isTestOnly = true;
         tag = tag ^ testOnlyTag;
     }
-    if ((tag !== bounceableTag) && (tag !== noBounceableTag)) {
+    if (tag !== bounceableTag && tag !== noBounceableTag) {
         throw new WrongAddressError(`Unknown address tag: ${tag}`);
     }
 
     isBounceable = tag === bounceableTag;
     let wc = null;
-    if (addr[1] === 0xff) { // TODO we should read signed integer here
+    if (addr[1] === 0xff) {
+        // TODO we should read signed integer here
         wc = -1;
     } else {
         wc = addr[1] as 0 | -1;

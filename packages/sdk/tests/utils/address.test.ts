@@ -9,8 +9,10 @@ const HASH = '3333333333333333333333333333333333333333333333333333333333333333';
 const BOUNCEABLE_MASTERCHAIN_MAINNET_ADDRESS = 'Ef8zMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzM0vF';
 const BOUNCEABLE_MASTERCHAIN_TESTNET_ADDRESS = 'kf8zMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzM_BP';
 
-const NON_BOUNCEABLE_MASTERCHAIN_MAINNET_ADDRESS = 'Uf8zMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMxYA';
-const NON_BOUNCEABLE_MASTERCHAIN_TESTNET_ADDRESS = '0f8zMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzM62K';
+const NON_BOUNCEABLE_MASTERCHAIN_MAINNET_ADDRESS =
+    'Uf8zMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMxYA';
+const NON_BOUNCEABLE_MASTERCHAIN_TESTNET_ADDRESS =
+    '0f8zMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzM62K';
 
 const BOUNCEABLE_WORKCHAIN_MAINNET_ADDRESS = 'EQAzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzM7SN';
 const BOUNCEABLE_WORKCHAIN_TESTNET_ADDRESS = 'kQAzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMw8H';
@@ -19,7 +21,6 @@ const NON_BOUNCEABLE_WORKCHAIN_MAINNET_ADDRESS = 'UQAzMzMzMzMzMzMzMzMzMzMzMzMzMz
 const NON_BOUNCEABLE_WORKCHAIN_TESTNET_ADDRESS = '0QAzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzM1LC';
 
 describe.each([
-
     {
         address: BOUNCEABLE_MASTERCHAIN_MAINNET_ADDRESS,
         expected: { wc: MASTERCHAIN, hex: HASH, testOnly: false, isBounceable: true }
@@ -53,7 +54,6 @@ describe.each([
         address: NON_BOUNCEABLE_WORKCHAIN_TESTNET_ADDRESS,
         expected: { wc: WORKCHAIN, hex: HASH, testOnly: true, isBounceable: false }
     }
-
 ])(`utils/address parseUserFriendlyAddress($address)`, ({ address, expected }) => {
     it(`urlSafeBase64 returns { wc: ${expected.wc}, hex: ${expected.hex}, testOnly: ${expected.testOnly}, isBounceable: ${expected.isBounceable} }`, () => {
         const result = parseUserFriendlyAddress(address);
@@ -118,23 +118,26 @@ describe.each([
         testOnly: true,
         expected: NON_BOUNCEABLE_WORKCHAIN_TESTNET_ADDRESS
     }
-])('utils/address toUserFriendlyAddress($address, $testOnly)', ({ address, testOnly, expected }) => {
-    it(`converts to user-friendly format`, () => {
-        const result = toUserFriendlyAddress(address, testOnly);
-        expect(result).toBe(expected);
-    });
+])(
+    'utils/address toUserFriendlyAddress($address, $testOnly)',
+    ({ address, testOnly, expected }) => {
+        it(`converts to user-friendly format`, () => {
+            const result = toUserFriendlyAddress(address, testOnly);
+            expect(result).toBe(expected);
+        });
 
-    it(`generated address can be parsed back correctly`, () => {
-        const userFriendly = toUserFriendlyAddress(address, testOnly);
-        const parsed = parseUserFriendlyAddress(userFriendly);
-        
-        const wc = address.split(':')[0] === '-1' ? -1 : 0;
-        expect(parsed.wc).toBe(wc);
-        expect(parsed.hex).toBe(HASH);
-        expect(parsed.testOnly).toBe(testOnly);
-        expect(parsed.isBounceable).toBe(false);
-    });
-});
+        it(`generated address can be parsed back correctly`, () => {
+            const userFriendly = toUserFriendlyAddress(address, testOnly);
+            const parsed = parseUserFriendlyAddress(userFriendly);
+
+            const wc = address.split(':')[0] === '-1' ? -1 : 0;
+            expect(parsed.wc).toBe(wc);
+            expect(parsed.hex).toBe(HASH);
+            expect(parsed.testOnly).toBe(testOnly);
+            expect(parsed.isBounceable).toBe(false);
+        });
+    }
+);
 
 describe.each([
     {
