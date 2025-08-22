@@ -1,5 +1,5 @@
 import './global.d.ts';
-import { Show } from 'solid-js';
+import { Show, createEffect } from 'solid-js';
 import type { Component } from 'solid-js';
 import { Dynamic, Portal } from 'solid-js/web';
 import { ThemeProvider } from 'solid-styled-components';
@@ -16,6 +16,7 @@ import { createI18nContext, I18nContext } from '@solid-primitives/i18n';
 import { appState } from 'src/app/state/app.state';
 import { defineStylesRoot, fixMobileSafariActiveTransition } from 'src/app/utils/web-api';
 import { SingleWalletModal } from 'src/app/views/modals/wallets-modal/single-wallet-modal';
+import { validateWidgetRoot } from './utils/dom-validation';
 
 export type AppProps = {
     tonConnectUI: TonConnectUI;
@@ -26,6 +27,10 @@ const App: Component<AppProps> = props => {
 
     defineStylesRoot();
     fixMobileSafariActiveTransition();
+
+    createEffect(() => {
+        validateWidgetRoot('tc-widget-root');
+    });
 
     return (
         <I18nContext.Provider value={translations}>

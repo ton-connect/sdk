@@ -54,6 +54,7 @@ import { SingleWalletModal, SingleWalletModalState } from 'src/models/single-wal
 import { TonConnectUITracker } from 'src/tracker/ton-connect-ui-tracker';
 import { tonConnectUiVersion } from 'src/constants/version';
 import { ReturnStrategy } from './models';
+import { validateWidgetRoot } from './app/utils/dom-validation';
 
 export class TonConnectUI {
     public static getWallets(): Promise<WalletInfo[]> {
@@ -349,6 +350,8 @@ export class TonConnectUI {
      * Opens the modal window, returns a promise that resolves after the modal window is opened.
      */
     public async openModal(): Promise<void> {
+        // Validate that the widget root element exists before opening modal
+        validateWidgetRoot('tc-widget-root');
         return this.modal.open();
     }
 
@@ -378,6 +381,8 @@ export class TonConnectUI {
      * @experimental
      */
     public async openSingleWalletModal(wallet: string): Promise<void> {
+        // Validate that the widget root element exists before opening modal
+        validateWidgetRoot('tc-widget-root');
         return this.singleWalletModal.open(wallet);
     }
 
@@ -445,6 +450,9 @@ export class TonConnectUI {
         tx: SendTransactionRequest,
         options?: ActionConfiguration & { onRequestSent?: (redirectToWallet: () => void) => void }
     ): Promise<SendTransactionResponse> {
+        // Validate that the widget root element exists before sending transaction
+        validateWidgetRoot('tc-widget-root');
+
         this.tracker.trackTransactionSentForSignature(this.wallet, tx);
 
         if (!this.connected) {
@@ -572,6 +580,9 @@ export class TonConnectUI {
         data: SignDataPayload,
         options?: { onRequestSent?: (redirectToWallet: () => void) => void }
     ): Promise<SignDataResponse> {
+        // Validate that the widget root element exists before signing data
+        validateWidgetRoot('tc-widget-root');
+
         this.tracker.trackDataSentForSignature(this.wallet, data);
 
         if (!this.connected) {
@@ -1092,7 +1103,16 @@ export class TonConnectUI {
             const rootElement = document.createElement('div');
             rootElement.id = rootId;
             document.body.appendChild(rootElement);
+
+            // Log that we created the default root element
+            console.warn(
+                `%c[TON Connect UI] Created default widget root element with ID "${rootId}"`,
+                'color: #ff6b35; font-weight: bold;'
+            );
         }
+
+        // Validate the root element exists and log any issues
+        validateWidgetRoot(rootId);
 
         return rootId;
     }

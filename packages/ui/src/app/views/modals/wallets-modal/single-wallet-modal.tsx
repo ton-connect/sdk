@@ -16,7 +16,7 @@ import {
 import { H1Styled, LoaderContainerStyled, StyledModal } from './style';
 import { useI18n } from '@solid-primitives/i18n';
 import { appState } from 'src/app/state/app.state';
-import { isMobile, updateIsMobile } from 'src/app/hooks/isMobile';
+import { isMobile } from 'src/app/hooks/isMobile';
 import { LoaderIcon } from 'src/app/components';
 import { LoadableReady } from 'src/models/loadable';
 import { DesktopConnectionModal } from 'src/app/views/modals/wallets-modal/desktop-connection-modal';
@@ -25,6 +25,7 @@ import { MobileConnectionModal } from 'src/app/views/modals/wallets-modal/mobile
 import { Dynamic } from 'solid-js/web';
 import { WalletsModalCloseReason } from 'src/models';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
+import { validateWidgetRoot } from 'src/app/utils/dom-validation';
 
 export const SingleWalletModal: Component = () => {
     const { locale } = useI18n()[1];
@@ -32,7 +33,8 @@ export const SingleWalletModal: Component = () => {
 
     createEffect(() => {
         if (getSingleWalletModalIsOpened()) {
-            updateIsMobile();
+            // Validate that the widget root element exists when modal is opened
+            validateWidgetRoot('tc-widget-root');
         }
     });
 
