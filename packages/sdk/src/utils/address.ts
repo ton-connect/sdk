@@ -1,6 +1,7 @@
 import { WrongAddressError, ParseHexError } from 'src/errors';
 import { Base64 } from '@tonconnect/protocol';
 
+const bounceableTag = 0x11;
 const noBounceableTag = 0x51;
 const testOnlyTag = 0x80;
 
@@ -84,30 +85,43 @@ export function parseUserFriendlyAddress(address: string): {
     }
 
     const addr = decoded.slice(0, 34);
-    const checksum = decoded.slice(34);
+    const checksum = decoded.slice(34, 36);
 
     const calculatedChecksum = crc16(addr);
     if (!checksum.every((byte, i) => byte === calculatedChecksum[i])) {
         throw new WrongAddressError(`Invalid checksum in address: ${address}`);
     }
 
-    const tag = addr[0]!;
-    const wc = addr[1] as 0 | -1;
+    let tag = addr[0]!;
+    let isTestOnly = false;
+    let isBounceable = false;
+    if (tag & testOnlyTag) {
+        isTestOnly = true;
+        tag = tag ^ testOnlyTag;
+    }
+    if ((tag !== bounceableTag) && (tag !== noBounceableTag)) {
+        throw new WrongAddressError(`Unknown address tag: ${tag}`);
+    }
+
+    isBounceable = tag === bounceableTag;
+    let wc = null;
+    if (addr[1] === 0xff) { // TODO we should read signed integer here
+        wc = -1;
+    } else {
+        wc = addr[1] as 0 | -1;
+    }
     const hex = addr.slice(2);
 
     if (wc !== 0 && wc !== -1) {
         throw new WrongAddressError(`Invalid workchain: ${wc}`);
     }
 
-    const testOnly = (tag & testOnlyTag) !== 0;
-    const isBounceable = (tag & 0x40) !== 0;
-
     return {
         wc,
         hex: Array.from(hex)
             .map(b => b.toString(16).padStart(2, '0'))
             .join(''),
-        testOnly,
+        testOnly: isTestOnly,
         isBounceable
     };
 }
@@ -175,7 +189,7 @@ for (let ord = 0; ord <= 0xff; ord++) {
     toByteMap[s] = ord;
 }
 
-function hexToBytes(hex: string): Uint8Array {
+export function hexToBytes(hex: string): Uint8Array {
     hex = hex.toLowerCase();
     const length2 = hex.length;
     if (length2 % 2 !== 0) {

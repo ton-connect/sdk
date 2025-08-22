@@ -24,6 +24,10 @@ function isValidAddress(value: unknown): boolean {
     return isValidString(value) && (isValidRawAddress(value) || isValidUserFriendlyAddress(value));
 }
 
+function isValidNetwork(value: unknown): boolean {
+    return isValidString(value) && /^-?\d+$/.test(value);
+}
+
 function isValidBoc(value: unknown): value is string {
     return typeof value === 'string' && BASE64_REGEX.test(value) && value.startsWith(BOC_PREFIX);
 }
@@ -65,7 +69,7 @@ export function validateSendTransactionRequest(data: unknown): ValidationResult 
     }
 
     if (data.network !== undefined) {
-        if (!isValidString(data.network) || !/^[\d-]+$/.test(data.network)) {
+        if (!isValidNetwork(data.network)) {
             return "Invalid 'network' format";
         }
     }
@@ -223,7 +227,7 @@ function validateSignDataPayloadText(data: Record<string, unknown>): ValidationR
     }
 
     if (data.network !== undefined) {
-        if (!isValidString(data.network) || !/^\d+$/.test(data.network)) {
+        if (!isValidNetwork(data.network)) {
             return "Invalid 'network' format";
         }
     }
@@ -246,7 +250,7 @@ function validateSignDataPayloadBinary(data: Record<string, unknown>): Validatio
     }
 
     if (data.network !== undefined) {
-        if (!isValidString(data.network) || !/^\d+$/.test(data.network)) {
+        if (!isValidNetwork(data.network)) {
             return "Invalid 'network' format";
         }
     }
@@ -277,7 +281,7 @@ function validateSignDataPayloadCell(data: Record<string, unknown>): ValidationR
     }
 
     if (data.network !== undefined) {
-        if (!isValidString(data.network) || !/^\d+$/.test(data.network)) {
+        if (!isValidNetwork(data.network)) {
             return "Invalid 'network' format";
         }
     }

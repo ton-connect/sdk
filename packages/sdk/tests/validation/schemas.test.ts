@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
+import { CHAIN } from '@tonconnect/protocol';
 import {
     validateSendTransactionRequest,
     validateConnectAdditionalRequest,
@@ -18,7 +19,7 @@ describe('validation/schemas', () => {
         it('accepts a valid request', () => {
             const result = validateSendTransactionRequest({
                 validUntil: Math.floor(Date.now() / 1000) + 60,
-                network: '0',
+                network: CHAIN.MAINNET,
                 from: RAW_ADDRESS,
                 messages: [
                     {
@@ -36,7 +37,7 @@ describe('validation/schemas', () => {
         it('accepts a valid request with friendly format from', () => {
             const result = validateSendTransactionRequest({
                 validUntil: Math.floor(Date.now() / 1000) + 60,
-                network: '0',
+                network: CHAIN.MAINNET,
                 from: USER_FRIENDLY_ADDRESS,
                 messages: [
                     {
@@ -181,7 +182,7 @@ describe('validation/schemas', () => {
 
         it('accepts undefined values for optional fields', () => {
             const result = validateSendTransactionRequest({
-                validUntil: 1,
+                validUntil: undefined,
                 network: undefined,
                 from: undefined,
                 messages: [
@@ -213,35 +214,107 @@ describe('validation/schemas', () => {
             expect(result).toBeNull();
         });
 
-        it('rejects null values for optional fields', () => {
+        it('rejects null value for network field', () => {
             const result = validateSendTransactionRequest({
                 validUntil: 1,
                 network: null,
-                from: null,
+                from: undefined,
                 messages: [
                     {
                         address: USER_FRIENDLY_ADDRESS,
                         amount: '1',
-                        stateInit: null,
-                        payload: null,
-                        extraCurrency: null
+                        stateInit: undefined,
+                        payload: undefined,
+                        extraCurrency: undefined
                     }
                 ]
             } as unknown);
             expect(result).toBe("Invalid 'network' format");
         });
 
-        it('rejects empty strings for optional fields', () => {
+        it('rejects null value for from field', () => {
             const result = validateSendTransactionRequest({
                 validUntil: 1,
-                network: '',
-                from: '',
+                network: undefined,
+                from: null,
                 messages: [
                     {
                         address: USER_FRIENDLY_ADDRESS,
                         amount: '1',
-                        stateInit: '',
-                        payload: '',
+                        stateInit: undefined,
+                        payload: undefined,
+                        extraCurrency: undefined
+                    }
+                ]
+            } as unknown);
+            expect(result).toBe("Invalid 'from' address format");
+        });
+
+        it('rejects null value for stateInit field', () => {
+            const result = validateSendTransactionRequest({
+                validUntil: 1,
+                network: undefined,
+                from: undefined,
+                messages: [
+                    {
+                        address: USER_FRIENDLY_ADDRESS,
+                        amount: '1',
+                        stateInit: null,
+                        payload: undefined,
+                        extraCurrency: undefined
+                    }
+                ]
+            } as unknown);
+            expect(result).toBe("Invalid 'stateInit' in message at index 0");
+        });
+
+        it('rejects null value for payload field', () => {
+            const result = validateSendTransactionRequest({
+                validUntil: 1,
+                network: undefined,
+                from: undefined,
+                messages: [
+                    {
+                        address: USER_FRIENDLY_ADDRESS,
+                        amount: '1',
+                        stateInit: undefined,
+                        payload: null,
+                        extraCurrency: undefined
+                    }
+                ]
+            } as unknown);
+            expect(result).toBe("Invalid 'payload' in message at index 0");
+        });
+
+        it('rejects null value for extraCurrency field', () => {
+            const result = validateSendTransactionRequest({
+                validUntil: 1,
+                network: undefined,
+                from: undefined,
+                messages: [
+                    {
+                        address: USER_FRIENDLY_ADDRESS,
+                        amount: '1',
+                        stateInit: undefined,
+                        payload: undefined,
+                        extraCurrency: null
+                    }
+                ]
+            } as unknown);
+            expect(result).toBe("Invalid 'extraCurrency' in message at index 0");
+        });
+
+        it('rejects empty strings for network field', () => {
+            const result = validateSendTransactionRequest({
+                validUntil: 1,
+                network: '',
+                from: undefined,
+                messages: [
+                    {
+                        address: USER_FRIENDLY_ADDRESS,
+                        amount: '1',
+                        stateInit: undefined,
+                        payload: undefined,
                         extraCurrency: {}
                     }
                 ]
@@ -249,9 +322,62 @@ describe('validation/schemas', () => {
             expect(result).toBe("Invalid 'network' format");
         });
 
-        it('accepts omitted optional fields', () => {
+        it('rejects empty strings for from field', () => {
             const result = validateSendTransactionRequest({
                 validUntil: 1,
+                network: undefined,
+                from: '',
+                messages: [
+                    {
+                        address: USER_FRIENDLY_ADDRESS,
+                        amount: '1',
+                        stateInit: undefined,
+                        payload: undefined,
+                        extraCurrency: {}
+                    }
+                ]
+            } as unknown);
+            expect(result).toBe("Invalid 'from' address format");
+        });
+
+        it('rejects empty strings for stateInit field', () => {
+            const result = validateSendTransactionRequest({
+                validUntil: 1,
+                network: undefined,
+                from: undefined,
+                messages: [
+                    {
+                        address: USER_FRIENDLY_ADDRESS,
+                        amount: '1',
+                        stateInit: '',
+                        payload: undefined,
+                        extraCurrency: {}
+                    }
+                ]
+            } as unknown);
+            expect(result).toBe("Invalid 'stateInit' in message at index 0");
+        });
+
+        it('rejects empty strings for payload field', () => {
+            const result = validateSendTransactionRequest({
+                validUntil: 1,
+                network: undefined,
+                from: undefined,
+                messages: [
+                    {
+                        address: USER_FRIENDLY_ADDRESS,
+                        amount: '1',
+                        stateInit: undefined,
+                        payload: '',
+                        extraCurrency: {}
+                    }
+                ]
+            } as unknown);
+            expect(result).toBe("Invalid 'payload' in message at index 0");
+        });
+
+        it('accepts omitted optional fields', () => {
+            const result = validateSendTransactionRequest({
                 messages: [
                     {
                         address: USER_FRIENDLY_ADDRESS,
@@ -262,9 +388,9 @@ describe('validation/schemas', () => {
             expect(result).toBeNull();
         });
 
-        it('accepts omitted optional fields at top level', () => {
+        it('accepts long validUntil, but logs warning', () => {
             const result = validateSendTransactionRequest({
-                validUntil: 1,
+                validUntil: Date.now(),
                 messages: [
                     {
                         address: USER_FRIENDLY_ADDRESS,
@@ -320,6 +446,7 @@ describe('validation/schemas', () => {
             beforeEach(() => {
                 originalWindow = global.window;
                 // Mock window.location for testing
+                // @ts-ignore
                 global.window = {
                     location: {
                         hostname: 'example.com'
@@ -349,6 +476,7 @@ describe('validation/schemas', () => {
                 // but when combined with domain exceeds 222 bytes
                 const longPayload = 'a'.repeat(128); // Exactly 128 bytes
                 // Mock a domain that's 95 bytes (128 + 95 = 223 > 222)
+                // @ts-ignore
                 global.window = {
                     location: {
                         hostname: 'a'.repeat(95)
@@ -366,6 +494,7 @@ describe('validation/schemas', () => {
                 // and when combined with domain equals 222 bytes
                 const exactPayload = 'a'.repeat(128); // Exactly 128 bytes
                 // Mock a domain that's 94 bytes (128 + 94 = 222)
+                // @ts-ignore
                 global.window = {
                     location: {
                         hostname: 'a'.repeat(94)
@@ -377,6 +506,7 @@ describe('validation/schemas', () => {
 
             it('rejects when domain exceeds 128 bytes', () => {
                 // Mock a very long domain
+                // @ts-ignore
                 global.window = {
                     location: {
                         hostname: 'a'.repeat(129)
@@ -390,6 +520,7 @@ describe('validation/schemas', () => {
 
             it('works with very long domain and small payload', () => {
                 // Mock a domain that's exactly 128 bytes
+                // @ts-ignore
                 global.window = {
                     location: {
                         hostname: 'a'.repeat(128)
@@ -403,6 +534,7 @@ describe('validation/schemas', () => {
 
             it('rejects when domain is 128 bytes and payload is 95 bytes', () => {
                 // Mock a domain that's exactly 128 bytes
+                // @ts-ignore
                 global.window = {
                     location: {
                         hostname: 'a'.repeat(128)
@@ -424,7 +556,7 @@ describe('validation/schemas', () => {
                 validateSignDataPayload({
                     type: 'text',
                     text: 'hello',
-                    network: '0',
+                    network: CHAIN.MAINNET,
                     from: RAW_ADDRESS
                 })
             ).toBeNull();
@@ -433,7 +565,7 @@ describe('validation/schemas', () => {
                 validateSignDataPayload({
                     type: 'text',
                     text: 'hello',
-                    network: '0',
+                    network: CHAIN.MAINNET,
                     from: USER_FRIENDLY_ADDRESS
                 })
             ).toBeNull();
