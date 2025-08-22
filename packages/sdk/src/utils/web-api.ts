@@ -80,3 +80,40 @@ function isNodeJs(): boolean {
         typeof process !== 'undefined' && process.versions != null && process.versions.node != null
     );
 }
+
+/**
+ * Returns the current domain (hostname) if available.
+ * In browser environment, returns window.location.hostname.
+ * In Node.js environment or when window is not available, returns null.
+ */
+export function getDomain(): string | null {
+    try {
+        // In browser environment
+        if (typeof window !== 'undefined' && window.location) {
+            return window.location.hostname;
+        } else {
+            // In Node.js environment, skip domain validation
+            return null;
+        }
+    } catch {
+        return null;
+    }
+}
+
+/**
+ * Returns an array of [key, value] pairs from window object if available.
+ * In browser environment, returns Object.entries(window).
+ * In Node.js environment or when window is not available, returns empty array.
+ */
+export function getWindowEntries(): [string, unknown][] {
+    const window = getWindow();
+    if (!window) {
+        return [];
+    }
+
+    try {
+        return Object.entries(window);
+    } catch {
+        return [];
+    }
+}
