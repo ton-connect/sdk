@@ -9,6 +9,9 @@ export default defineConfig({
         typecheck: {
             tsconfig: './tsconfig.test.json'
         },
-        setupFiles: './tests/setup'
+        setupFiles: './tests/setup',
+        coverage: {
+            provider: 'istanbul'
+        }
     }
 });

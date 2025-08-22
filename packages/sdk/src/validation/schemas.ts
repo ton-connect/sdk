@@ -1,10 +1,14 @@
 import { isValidUserFriendlyAddress, isValidRawAddress } from 'src/utils/address';
-import { isQaModeEnabled, logValidationError } from 'src/utils/qa-mode';
+import { getDomain } from 'src/utils/web-api';
 
 const BASE64_REGEX = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
 const BOC_PREFIX = 'te6cc';
 const INTEGER_REGEX = /^-?\d+$/;
 const POSITIVE_INTEGER_REGEX = /^\d+$/;
+
+const MAX_DOMAIN_BYTES = 128;
+const MAX_PAYLOAD_BYTES = 128;
+const MAX_TOTAL_BYTES = 222;
 
 type ValidationResult = string | null;
 
@@ -14,6 +18,14 @@ function isValidNumber(value: unknown): value is number {
 
 function isValidString(value: unknown): value is string {
     return typeof value === 'string' && value.length > 0;
+}
+
+function isValidAddress(value: unknown): boolean {
+    return isValidString(value) && (isValidRawAddress(value) || isValidUserFriendlyAddress(value));
+}
+
+function isValidNetwork(value: unknown): boolean {
+    return isValidString(value) && /^-?\d+$/.test(value);
 }
 
 function isValidBoc(value: unknown): value is string {
@@ -33,59 +45,41 @@ function hasExtraProperties(obj: Record<string, unknown>, allowedKeys: string[])
 }
 
 export function validateSendTransactionRequest(data: unknown): ValidationResult {
-    // eslint-disable-next-line no-console
-    console.log('[Validation Debug] validateSendTransactionRequest called');
-    // eslint-disable-next-line no-console
-    console.log('[Validation Debug] isQaModeEnabled():', isQaModeEnabled());
-
     if (!isValidObject(data)) {
-        const error = 'Request must be an object';
-        logValidationError(error);
-        const shouldReturnNull = isQaModeEnabled();
-        // eslint-disable-next-line no-console
-        console.log('[Validation Debug] Should return null:', shouldReturnNull);
-        return shouldReturnNull ? null : error;
+        return 'Request must be an object';
     }
 
     const allowedKeys = ['validUntil', 'network', 'from', 'messages'];
     if (hasExtraProperties(data, allowedKeys)) {
-        const error = 'Request contains extra properties';
-        logValidationError(error);
-        return isQaModeEnabled() ? null : error;
+        return 'Request contains extra properties';
     }
 
-    if (!isValidNumber(data.validUntil)) {
-        const error = "Incorrect 'validUntil'";
-        logValidationError(error);
-        return isQaModeEnabled() ? null : error;
-    }
+    if (data.validUntil) {
+        if (!isValidNumber(data.validUntil)) {
+            return "Incorrect 'validUntil'";
+        }
 
-    const now = Math.floor(Date.now() / 1000);
-    const fiveMinutesFromNow = now + 300;
-    if (data.validUntil > fiveMinutesFromNow) {
-        console.warn(`validUntil (${data.validUntil}) is more than 5 minutes from now (${now})`);
+        const now = Math.floor(Date.now() / 1000);
+        const fiveMinutesFromNow = now + 300;
+        if (data.validUntil > fiveMinutesFromNow) {
+            console.warn(
+                `validUntil (${data.validUntil}) is more than 5 minutes from now (${now})`
+            );
+        }
     }
 
     if (data.network !== undefined) {
-        if (!isValidString(data.network) || !/^[\d-]+$/.test(data.network)) {
-            const error = "Invalid 'network' format";
-            logValidationError(error);
-            return isQaModeEnabled() ? null : error;
+        if (!isValidNetwork(data.network)) {
+            return "Invalid 'network' format";
         }
     }
 
-    if (data.from !== undefined) {
-        if (!isValidString(data.from) || !isValidRawAddress(data.from)) {
-            const error = "Invalid 'from' address format";
-            logValidationError(error);
-            return isQaModeEnabled() ? null : error;
-        }
+    if (data.from !== undefined && !isValidAddress(data.from)) {
+        return "Invalid 'from' address format";
     }
 
     if (!isValidArray(data.messages) || data.messages.length === 0) {
-        const error = "'messages' is required";
-        logValidationError(error);
-        return isQaModeEnabled() ? null : error;
+        return "'messages' is required";
     }
 
     for (let i = 0; i < data.messages.length; i++) {
@@ -163,8 +157,39 @@ export function validateConnectAdditionalRequest(data: unknown): ValidationResul
         return 'Request contains extra properties';
     }
 
-    if (data.tonProof !== undefined && !isValidString(data.tonProof)) {
-        return "Invalid 'tonProof'";
+    if (data.tonProof !== undefined) {
+        if (typeof data.tonProof !== 'string') {
+            return "Invalid 'tonProof'";
+        }
+
+        const payload = data.tonProof;
+        if (payload.length === 0) {
+            return "Empty 'tonProof' payload";
+        }
+
+        // Get current domain for validation first
+        const domain = getDomain();
+        if (!domain) {
+            // In Node.js environment, skip domain validation
+            return null;
+        }
+
+        // Validate domain size (max 128 bytes)
+        const domainBytes = new TextEncoder().encode(domain).length;
+        if (domainBytes > MAX_DOMAIN_BYTES) {
+            return 'Current domain exceeds 128 bytes limit';
+        }
+
+        // Validate payload size (max 128 bytes)
+        const payloadBytes = new TextEncoder().encode(payload).length;
+        if (payloadBytes > MAX_PAYLOAD_BYTES) {
+            return "'tonProof' payload exceeds 128 bytes limit";
+        }
+
+        // Validate total size (domain + payload <= 222 bytes)
+        if (domainBytes + payloadBytes > MAX_TOTAL_BYTES) {
+            return "'tonProof' domain + payload exceeds 222 bytes limit";
+        }
     }
 
     return null;
@@ -202,12 +227,12 @@ function validateSignDataPayloadText(data: Record<string, unknown>): ValidationR
     }
 
     if (data.network !== undefined) {
-        if (!isValidString(data.network) || !/^\d+$/.test(data.network)) {
+        if (!isValidNetwork(data.network)) {
             return "Invalid 'network' format";
         }
     }
 
-    if (data.from !== undefined && !isValidString(data.from)) {
+    if (data.from !== undefined && !isValidAddress(data.from)) {
         return "Invalid 'from'";
     }
 
@@ -225,12 +250,12 @@ function validateSignDataPayloadBinary(data: Record<string, unknown>): Validatio
     }
 
     if (data.network !== undefined) {
-        if (!isValidString(data.network) || !/^\d+$/.test(data.network)) {
+        if (!isValidNetwork(data.network)) {
             return "Invalid 'network' format";
         }
     }
 
-    if (data.from !== undefined && !isValidString(data.from)) {
+    if (data.from !== undefined && !isValidAddress(data.from)) {
         return "Invalid 'from'";
     }
 
@@ -256,13 +281,111 @@ function validateSignDataPayloadCell(data: Record<string, unknown>): ValidationR
     }
 
     if (data.network !== undefined) {
-        if (!isValidString(data.network) || !/^\d+$/.test(data.network)) {
+        if (!isValidNetwork(data.network)) {
             return "Invalid 'network' format";
         }
     }
 
-    if (data.from !== undefined && !isValidString(data.from)) {
+    if (data.from !== undefined && !isValidAddress(data.from)) {
         return "Invalid 'from'";
+    }
+
+    return null;
+}
+
+/**
+ * Validates ton_proof item received from wallet in connect event.
+ */
+// eslint-disable-next-line complexity
+export function validateTonProofItemReply(data: unknown): ValidationResult {
+    if (!isValidObject(data)) {
+        return 'ton_proof item must be an object';
+    }
+
+    const allowedKeys = ['error', 'proof', 'name'];
+    if (hasExtraProperties(data, allowedKeys)) {
+        return 'ton_proof item contains extra properties';
+    }
+
+    const hasProof = Object.prototype.hasOwnProperty.call(data, 'proof');
+    const hasError = Object.prototype.hasOwnProperty.call(data, 'error');
+
+    if (!hasProof && !hasError) {
+        return "'ton_proof' item must contain either 'proof' or 'error'";
+    }
+
+    if (hasProof && hasError) {
+        return "'ton_proof' item must contain either 'proof' or 'error', not both";
+    }
+
+    if (hasProof) {
+        const proof = (data as Record<string, unknown>).proof as
+            | Record<string, unknown>
+            | undefined;
+        if (!isValidObject(proof)) {
+            return "Invalid 'proof' object";
+        }
+
+        const allowedProofKeys = ['timestamp', 'domain', 'payload', 'signature'];
+        if (hasExtraProperties(proof, allowedProofKeys)) {
+            return 'ton_proof item contains extra properties';
+        }
+
+        if (!isValidNumber(proof.timestamp)) {
+            return "Invalid 'proof.timestamp'";
+        }
+
+        const domain = proof.domain as Record<string, unknown> | undefined;
+        if (!isValidObject(domain)) {
+            return "Invalid 'proof.domain'";
+        }
+        if (!isValidNumber(domain.lengthBytes)) {
+            return "Invalid 'proof.domain.lengthBytes'";
+        }
+        if (!isValidString(domain.value)) {
+            return "Invalid 'proof.domain.value'";
+        }
+        // Try to verify that provided byte length matches actual byte length of value
+        try {
+            const encoderAvailable = typeof TextEncoder !== 'undefined';
+            const actualLength = encoderAvailable
+                ? new TextEncoder().encode(domain.value).length
+                : (domain.value as string).length;
+            if (actualLength !== (domain.lengthBytes as number)) {
+                return "'proof.domain.lengthBytes' does not match 'proof.domain.value'";
+            }
+        } catch {
+            // Ignore environment issues; best-effort validation
+        }
+
+        if (!isValidString(proof.payload)) {
+            return "Invalid 'proof.payload'";
+        }
+
+        if (!isValidString(proof.signature) || !BASE64_REGEX.test(proof.signature)) {
+            return "Invalid 'proof.signature' format";
+        }
+    }
+
+    if (hasError) {
+        const error = (data as Record<string, unknown>).error as
+            | Record<string, unknown>
+            | undefined;
+        if (!isValidObject(error)) {
+            return "Invalid 'error' object";
+        }
+
+        const allowedErrorKeys = ['code', 'message'];
+        if (hasExtraProperties(error, allowedErrorKeys)) {
+            return 'ton_proof error contains extra properties';
+        }
+
+        if (!isValidNumber(error.code)) {
+            return "Invalid 'error.code'";
+        }
+        if (!isValidString(error.message)) {
+            return "Invalid 'error.message'";
+        }
     }
 
     return null;

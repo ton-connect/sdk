@@ -10,3 +10,4 @@ dist
 .github/instructions/nx.instructions.md
 
 .turbo
+coverage

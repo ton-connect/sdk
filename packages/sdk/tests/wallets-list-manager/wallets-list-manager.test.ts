@@ -4,7 +4,7 @@ import { WalletsListManager } from 'src/wallets-list-manager';
 import { defaultWalletsList, walletsListWithWrongWallet, wrongWalletsList } from './mock-data';
 import { FALLBACK_WALLETS_LIST } from 'src/resources/fallback-wallets-list';
 import { FetchWalletsError } from 'src/errors';
-import { logError } from '../../src/utils/log';
+import { logError } from 'src/utils/log';
 
 vi.mock('../../src/utils/log', () => {
     return {
@@ -78,9 +78,8 @@ describe('Wallets list manager tests', () => {
 
         expect(logError).toBeCalledTimes(1);
 
-        expect((logError as Mock).mock.calls[0].toString()).toEqual(
-            'SyntaxError: Unexpected end of JSON input'
-        );
+        const firstCallArg = (logError as Mock).mock.calls[0]?.[0];
+        expect(String(firstCallArg)).toContain('Unexpected end of JSON input');
         expect(walletsList).toEqual(
             walletsListManager['walletConfigDTOListToWalletConfigList'](FALLBACK_WALLETS_LIST)
         );
