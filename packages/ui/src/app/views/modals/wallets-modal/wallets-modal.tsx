@@ -43,6 +43,7 @@ import { WalletsModalCloseReason } from 'src/models';
 import { DesktopFeatureNotSupportModal } from './feature-not-supoprt-modal';
 import { widgetController } from 'src/app/widget-controller';
 import { ChooseSupportedFeatureWalletsModal } from 'src/models/wallets-modal';
+import { validateWidgetRoot } from 'src/app/utils/dom-validation';
 
 export const WalletsModal: Component = () => {
     const { locale } = useI18n()[1];
@@ -51,6 +52,8 @@ export const WalletsModal: Component = () => {
     createEffect(() => {
         if (getWalletsModalIsOpened()) {
             updateIsMobile();
+
+            validateWidgetRoot('tc-widget-root');
         } else {
             setSelectedWalletInfo(null);
             setSelectedTab('universal');

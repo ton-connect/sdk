@@ -1,4 +1,4 @@
-import { Component, Match, Switch } from 'solid-js';
+import { Component, Match, Switch, createEffect } from 'solid-js';
 import { Modal } from 'src/app/components';
 import { appState } from 'src/app/state/app.state';
 import { action, setAction } from 'src/app/state/modals-state';
@@ -8,8 +8,16 @@ import { TransactionSentModal } from 'src/app/views/modals/actions-modal/transac
 import { ConfirmSignDataModal } from './confirm-sign-data-modal';
 import { SignDataCanceledModal } from './sign-data-canceled-modal';
 import { DataSignedModal } from './data-signed-modal';
+import { validateWidgetRoot } from 'src/app/utils/dom-validation';
 
 export const ActionsModal: Component = () => {
+    // Validate that the widget root element exists when modal is opened
+    createEffect(() => {
+        if (action() !== null && action()?.openModal === true) {
+            validateWidgetRoot('tc-widget-root');
+        }
+    });
+
     return (
         <Modal
             opened={action() !== null && action()?.openModal === true}

@@ -3,3 +3,4 @@ export { TonConnectUI } from './ton-connect-ui';
 export type { UserActionEvent } from './tracker/types';
 export * from './models';
 export * from './errors';
+export * from './app/utils/dom-validation';

@@ -1,4 +1,12 @@
-import { Component, createSignal, onCleanup, onMount, Show, useContext } from 'solid-js';
+import {
+    Component,
+    createSignal,
+    onCleanup,
+    onMount,
+    Show,
+    useContext,
+    createEffect
+} from 'solid-js';
 import { ArrowIcon, Text, TonIcon } from 'src/app/components';
 import { ConnectorContext } from 'src/app/state/connector.context';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
@@ -19,6 +27,7 @@ import { Transition } from 'solid-transition-group';
 import { useTheme } from 'solid-styled-components';
 import { globalStylesTag } from 'src/app/styles/global-styles';
 import { animate } from 'src/app/utils/animate';
+import { validateWidgetRoot } from 'src/app/utils/dom-validation';
 
 interface AccountButtonProps {}
 
@@ -39,6 +48,13 @@ export const AccountButton: Component<AccountButtonProps> = () => {
         whileElementsMounted: autoUpdate,
         placement: 'bottom-end',
         middleware: [flip(), shift()]
+    });
+
+    // Validate that the widget root element exists when account button is rendered
+    createEffect(() => {
+        if (account() || restoringProcess()) {
+            validateWidgetRoot('tc-widget-root');
+        }
     });
 
     const normalizedAddress = (): string => {
