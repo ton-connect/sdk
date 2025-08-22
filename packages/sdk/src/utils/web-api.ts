@@ -99,3 +99,21 @@ export function getDomain(): string | null {
         return null;
     }
 }
+
+/**
+ * Returns an array of [key, value] pairs from window object if available.
+ * In browser environment, returns Object.entries(window).
+ * In Node.js environment or when window is not available, returns empty array.
+ */
+export function getWindowEntries(): [string, unknown][] {
+    const window = getWindow();
+    if (!window) {
+        return [];
+    }
+
+    try {
+        return Object.entries(window);
+    } catch {
+        return [];
+    }
+}

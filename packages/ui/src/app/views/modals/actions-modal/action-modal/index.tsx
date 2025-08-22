@@ -15,7 +15,11 @@ import { isTelegramUrl } from '@tonconnect/sdk';
 import { appState } from 'src/app/state/app.state';
 import { action } from 'src/app/state/modals-state';
 import { isInTMA } from 'src/app/utils/tma-api';
-import { redirectToTelegram, redirectToWallet } from 'src/app/utils/url-strategy-helpers';
+import {
+    redirectToTelegram,
+    redirectToWallet,
+    addSessionIdToUniversalLink
+} from 'src/app/utils/url-strategy-helpers';
 
 interface ActionModalProps extends WithDataAttributes {
     headerTranslationKey: string;
@@ -85,8 +89,14 @@ export const ActionModal: Component<ActionModalProps> = props => {
         const forceRedirect = !firstClick();
         setFirstClick(false);
 
+        // Add session ID to universal link if provided
+        const linkWithSessionId = addSessionIdToUniversalLink(
+            universalLink!,
+            currentAction.sessionId
+        );
+
         if (isTelegramUrl(universalLink)) {
-            redirectToTelegram(universalLink, {
+            redirectToTelegram(linkWithSessionId, {
                 returnStrategy: returnStrategy,
                 twaReturnUrl:
                     'twaReturnUrl' in currentAction
@@ -96,7 +106,7 @@ export const ActionModal: Component<ActionModalProps> = props => {
             });
         } else {
             redirectToWallet(
-                universalLink!,
+                linkWithSessionId,
                 deepLink,
                 {
                     returnStrategy: returnStrategy,

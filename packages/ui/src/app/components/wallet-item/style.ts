@@ -51,7 +51,6 @@ export const WalletItemStyled = styled.button`
     border: none;
     background-color: unset;
     padding: 8px 4px;
-    width: 100%;
     min-width: 78px;
     display: flex;
     flex-direction: column;

@@ -72,6 +72,10 @@ export function disableScroll(): void {
 }
 
 export function enableScroll(): void {
+    if (!document.body.classList.contains(disableScrollClass)) {
+        return;
+    }
+
     document.body.classList.remove(disableScrollClass);
     document.documentElement.scrollTo({ top: -parseFloat(getComputedStyle(document.body).top) });
     document.body.style.top = 'auto';
