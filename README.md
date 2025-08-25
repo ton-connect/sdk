@@ -3,7 +3,7 @@
 Welcome to the implementation of the TonConnect protocol! Before diving in, here's where to start:
 
 
-- Easily connect users to your Dapp and start blockchain interactions:
+- Easily connect users to your Dapp and start block chain interactions:
   - [TON Connect UI React](https://www.npmjs.com/package/@tonconnect/ui-react): Seamlessly integrate wallet connection components into your React app.
   - [TON Connect UI](https://www.npmjs.com/package/@tonconnect/ui): Quickly add wallet connection components to your Dapp.
 
