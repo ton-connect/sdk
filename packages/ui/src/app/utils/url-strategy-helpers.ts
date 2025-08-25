@@ -576,7 +576,6 @@ export function addSessionIdToUniversalLink(
         return universalLink;
     }
 
-
     if (!isTelegramUrl(universalLink)) {
         const newUrl = addQueryParameter(universalLink, 'id', sessionId);
 
@@ -593,7 +592,9 @@ export function addSessionIdToUniversalLink(
     const newUrl = addQueryParameter(directLinkUrl.toString(), 'id', sessionId);
 
     const lastParam = newUrl.slice(newUrl.lastIndexOf('&') + 1);
-    return newUrl.slice(0, newUrl.lastIndexOf('&')) + '-v__2-' + encodeTelegramUrlParameters(lastParam);
+    return (
+        newUrl.slice(0, newUrl.lastIndexOf('&')) + '-v__2-' + encodeTelegramUrlParameters(lastParam)
+    );
 }
 
 function addQueryParameter(url: string, key: string, value: string): string {

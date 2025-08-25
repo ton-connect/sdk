@@ -7,7 +7,7 @@ export default defineConfig({
     plugins: [react()],
     build: {
         outDir: 'docs',
-        sourcemap: true,
+        sourcemap: true
     },
     // @ts-ignore
     base: './',

@@ -29,7 +29,6 @@ export function encodeTelegramUrlParameters(parameters: string): string {
         .replaceAll('%', '--');
 }
 
-
 export function decodeTelegramUrlParameters(parameters: string): string {
     return parameters
         .replaceAll('--', '%')
