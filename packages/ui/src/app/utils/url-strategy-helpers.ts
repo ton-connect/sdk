@@ -13,7 +13,7 @@ import {
     openLinkBlank,
     toDeeplink
 } from 'src/app/utils/web-api';
-import { encodeTelegramUrlParameters, isTelegramUrl } from '@tonconnect/sdk';
+import { isTelegramUrl } from '@tonconnect/sdk';
 
 /**
  * Adds a return strategy to a url.
@@ -43,8 +43,35 @@ export function addReturnStrategy(
         return newUrl;
     }
 
-    const lastParam = newUrl.slice(newUrl.lastIndexOf('&') + 1);
-    return newUrl.slice(0, newUrl.lastIndexOf('&')) + '-' + encodeTelegramUrlParameters(lastParam);
+    // Parse URL and encode all query parameters in the correct format
+    const urlObj = new URL(newUrl);
+    const entries = Array.from(urlObj.searchParams.entries());
+
+    if (entries.length === 0) {
+        return newUrl;
+    }
+
+    // Ensure startapp is always first, then other parameters
+    const startappEntry = entries.find(([key]) => key === 'startapp');
+    const otherEntries = entries.filter(([key]) => key !== 'startapp');
+
+    let encodedParams = '';
+    if (startappEntry) {
+        encodedParams = `${startappEntry[0]}=${startappEntry[1]}`;
+        if (otherEntries.length > 0) {
+            const otherParams = otherEntries.map(([key, value]) => `${key}__${value}`).join('-');
+            encodedParams = `${encodedParams}-${otherParams}`;
+        }
+    } else {
+        // If no startapp, use first parameter as before
+        const firstParam = `${entries[0]![0]}=${entries[0]![1]}`;
+        const otherParams = entries
+            .slice(1)
+            .map(([key, value]) => `${key}__${value}`)
+            .join('-');
+        encodedParams = otherParams ? `${firstParam}-${otherParams}` : firstParam;
+    }
+    return `${urlObj.origin}${urlObj.pathname}?${encodedParams}`;
 }
 
 /**
