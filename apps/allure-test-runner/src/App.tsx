@@ -1,30 +1,32 @@
-import { useState } from 'react';
-import reactLogo from './assets/react.svg';
-import viteLogo from '/vite.svg';
+import { useEffect, useState } from 'react';
 import './App.css';
+import { STORAGE_KEYS } from './constants';
+import { AuthForm } from './components/AuthForm';
+import { TestRuns } from './components/TestRuns';
 
 function App() {
-    const [count, setCount] = useState(0);
+    const [jwt, setJwt] = useState<string | null>(null);
+
+    useEffect(() => {
+        const saved = localStorage.getItem(STORAGE_KEYS.jwtToken);
+        if (saved) setJwt(saved);
+    }, []);
 
     return (
-        <>
-            <div>
-                <a href="https://vite.dev" target="_blank">
-                    <img src={viteLogo} className="logo" alt="Vite logo" />
-                </a>
-                <a href="https://react.dev" target="_blank">
-                    <img src={reactLogo} className="logo react" alt="React logo" />
-                </a>
-            </div>
-            <h1>Vite + React</h1>
-            <div className="card">
-                <button onClick={() => setCount(count => count + 1)}>count is {count}</button>
-                <p>
-                    Edit <code>src/App.tsx</code> and save to test HMR
-                </p>
-            </div>
-            <p className="read-the-docs">Click on the Vite and React logos to learn more</p>
-        </>
+        <div
+            style={{
+                maxWidth: 800,
+                margin: '0 auto',
+                padding: 16,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 16
+            }}
+        >
+            <h1 style={{ margin: 0 }}>Allure TestOps Stand</h1>
+            <AuthForm onSubmit={({ jwtToken }) => setJwt(jwtToken)} />
+            {jwt ? <TestRuns jwtToken={jwt} /> : <p>Enter endpoint and token to continue</p>}
+        </div>
     );
 }
 
