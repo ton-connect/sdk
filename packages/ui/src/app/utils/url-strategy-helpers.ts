@@ -43,8 +43,6 @@ export function addReturnStrategy(
         return newUrl;
     }
 
-    console.log('🔗 [addReturnStrategy] New URL:', newUrl);
-
     // Parse URL and encode all query parameters in the correct format
     const urlObj = new URL(newUrl);
     const entries = Array.from(urlObj.searchParams.entries());
