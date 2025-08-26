@@ -1,5 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
-import { AllureApiClient } from '../../api/allure.api';
+import { useState } from 'react';
 import { DEFAULT_PROJECT_ID } from '../../constants';
 import { LaunchesList } from './LaunchesList';
 import { SearchBar } from './SearchBar';
@@ -7,14 +6,11 @@ import { TestCasesSection } from './TestCasesSection';
 import './TestLaunches.scss';
 import { useQuery } from '../../hooks/useQuery';
 import { useDebounce } from '../../hooks/useDebounce';
-
-type Props = {
-    jwtToken: string;
-};
+import { useAllureApi } from '../../hooks/useAllureApi';
 
 // TODO: fix search so it not reloads every frame y.mileyka
-export function TestLaunches({ jwtToken }: Props) {
-    const client = useMemo(() => new AllureApiClient({ jwtToken }), [jwtToken]);
+export function TestLaunches() {
+    const client = useAllureApi();
     const [search, setSearch] = useState('');
     const searchQuery = useDebounce(search.trim(), 300);
 
@@ -26,10 +22,6 @@ export function TestLaunches({ jwtToken }: Props) {
         { deps: [client, searchQuery] }
     );
     const launches = result?.content ?? [];
-
-    useEffect(() => {
-        refetch();
-    }, [jwtToken]);
 
     const complete = async (id: number) => {
         // TODO: deal with error
@@ -105,7 +97,6 @@ export function TestLaunches({ jwtToken }: Props) {
             {selectedLaunchId && (
                 <TestCasesSection
                     launchId={selectedLaunchId}
-                    jwtToken={jwtToken}
                     onClose={() => setSelectedLaunchId(null)}
                 />
             )}

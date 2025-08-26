@@ -8,12 +8,11 @@ import { useDebounce } from '../../hooks/useDebounce';
 
 type Props = {
     launchId: number;
-    jwtToken?: string;
     onClose: () => void;
 };
 
-export function TestCasesSection({ launchId, jwtToken, onClose }: Props) {
-    const client = useAllureApi(jwtToken);
+export function TestCasesSection({ launchId, onClose }: Props) {
+    const client = useAllureApi();
     const [search, setSearch] = useState('');
     const searchQuery = useDebounce(search.trim(), 300);
 

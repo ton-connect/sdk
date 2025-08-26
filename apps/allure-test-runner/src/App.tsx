@@ -4,9 +4,10 @@ import { Header } from './components/Header';
 import { STORAGE_KEYS } from './constants';
 import { AuthForm } from './components/AuthForm';
 import { TestLaunches } from './components/TestLaunches';
+import { AuthProvider } from './context/AuthContext';
 
 function App() {
-    const [jwt, setJwt] = useState<string | null>(null);
+    const [jwt, setJwt] = useState<string>();
 
     useEffect(() => {
         const saved = localStorage.getItem(STORAGE_KEYS.jwtToken);
@@ -15,16 +16,18 @@ function App() {
 
     return (
         <TonConnectProvider>
-            <div className="container">
-                <Header />
-                <main className="main-content">
-                    {!jwt ? (
-                        <AuthForm onSubmit={({ jwtToken }) => setJwt(jwtToken)} />
-                    ) : (
-                        <TestLaunches jwtToken={jwt} />
-                    )}
-                </main>
-            </div>
+            <AuthProvider token={jwt}>
+                <div className="container">
+                    <Header />
+                    <main className="main-content">
+                        {!jwt ? (
+                            <AuthForm onSubmit={({ jwtToken }) => setJwt(jwtToken)} />
+                        ) : (
+                            <TestLaunches />
+                        )}
+                    </main>
+                </div>
+            </AuthProvider>
         </TonConnectProvider>
     );
 }

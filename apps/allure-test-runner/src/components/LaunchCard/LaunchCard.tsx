@@ -1,4 +1,4 @@
-import type { Launch } from '../../types';
+import type { Launch } from '../../models';
 import './LaunchCard.scss';
 
 interface LaunchCardProps {
