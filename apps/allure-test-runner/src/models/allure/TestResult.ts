@@ -1,0 +1,27 @@
+export type TestResult = {
+    id: number;
+    projectId: number;
+    launchId: number;
+    testCaseId: number;
+    historyKey: string;
+    name: string;
+    description: string;
+    descriptionHtml: string;
+    precondition: string;
+    preconditionHtml: string;
+    expectedResult: string;
+    expectedResultHtml: string;
+    external: boolean;
+    manual: boolean;
+    flaky: boolean;
+    muted: boolean;
+    known: boolean;
+    hidden: boolean;
+    createdDate: number;
+    lastModifiedDate: number;
+    createdBy: string;
+    lastModifiedBy: string;
+    parameters: unknown[];
+    tags: unknown[];
+    links: unknown[];
+};

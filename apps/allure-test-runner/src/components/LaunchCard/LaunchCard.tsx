@@ -27,8 +27,6 @@ export function LaunchCard({ launch, onOpen, onComplete, isSelected }: LaunchCar
 
             <h3 className="launch-card__title">{launch.name}</h3>
 
-            {launch.description && <p className="launch-card__description">{launch.description}</p>}
-
             <div className="launch-card__actions">
                 <button
                     onClick={e => {

@@ -3,7 +3,8 @@ import type {
     TestCase,
     PaginatedResponse,
     LaunchFilters,
-    TestCaseFilters
+    TestCaseFilters,
+    TestResult
 } from '../models';
 import { Base64 } from '@tonconnect/protocol';
 
@@ -123,13 +124,14 @@ export class AllureApiClient {
         }
     }
 
-    async getLaunchDetails(id: number): Promise<Launch> {
-        const res = await fetch(this.buildUrl(`/api/launch/${id}`), {
-            headers: this.buildHeaders()
+    async getTestResult(id: number, signal?: AbortSignal): Promise<TestResult> {
+        const res = await fetch(this.buildUrl(`/api/testresult/${id}`), {
+            headers: this.buildHeaders(),
+            signal
         });
 
         if (!res.ok) {
-            throw new Error(`Failed to fetch launch details: ${res.status} ${res.statusText}`);
+            throw new Error(`Failed to fetch test result ${id}: ${res.status} ${res.statusText}`);
         }
 
         return res.json();
