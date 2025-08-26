@@ -20,7 +20,7 @@ export interface TestCase {
   testCaseId?: string;
 }
 
-export interface ApiResponse<T> {
+export interface PaginatedResponse<T> {
   content: T[];
   totalElements: number;
   totalPages: number;
@@ -38,6 +38,7 @@ export interface LaunchFilters {
 
 export interface TestCaseFilters {
   launchId: number;
+  search?: string;
   page?: number;
   size?: number;
   sort?: string;

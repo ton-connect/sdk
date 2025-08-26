@@ -1,4 +1,5 @@
-import type { Launch, TestCase, ApiResponse, LaunchFilters, TestCaseFilters } from '../types';
+import type { Launch, TestCase, PaginatedResponse, LaunchFilters, TestCaseFilters } from '../types';
+import { Base64 } from '@tonconnect/protocol';
 
 export type ApiClientOptions = { jwtToken?: string };
 
@@ -12,6 +13,19 @@ export class AllureApiClient {
 
     setJwtToken(token: string) {
         this.jwtToken = token;
+    }
+
+    private buildUrl(path: string, query?: Record<string, string | number | undefined>): URL {
+        const url = new URL(path, this.baseUrl);
+
+        if (query) {
+            for (const [key, value] of Object.entries(query)) {
+                if (value === undefined) continue;
+                url.searchParams.set(key, value.toString());
+            }
+        }
+
+        return url;
     }
 
     private buildHeaders(): HeadersInit {
@@ -43,9 +57,17 @@ export class AllureApiClient {
         return access;
     }
 
-    async getLaunches(params: LaunchFilters): Promise<ApiResponse<Launch>> {
-        const { projectId, search = '', page = 0, size = 10, sort = 'created_date,DESC' } = params;
-        const url = `${this.baseUrl}/api/launch?projectId=${projectId}&search=${encodeURIComponent(search)}&page=${page}&size=${size}&sort=${sort}`;
+    async getLaunches(params: LaunchFilters): Promise<PaginatedResponse<Launch>> {
+        const { projectId, search, page = 0, size = 10, sort = 'created_date,DESC' } = params;
+        const searchEncoded = search ? this.buildNameSearch(search) : undefined;
+
+        const url = this.buildUrl('/api/launch', {
+            search: searchEncoded,
+            page,
+            size,
+            sort,
+            projectId
+        });
 
         const res = await fetch(url, { headers: this.buildHeaders() });
         if (!res.ok) {
@@ -55,9 +77,20 @@ export class AllureApiClient {
         return res.json();
     }
 
-    async getLaunchItems(params: TestCaseFilters): Promise<ApiResponse<TestCase>> {
-        const { launchId, page = 0, size = 100, sort = 'name,ASC' } = params;
-        const url = `${this.baseUrl}/api/v2/launch/${launchId}/test-result/flat?page=${page}&size=${size}&sort=${sort}`;
+    private buildNameSearch(value: string) {
+        return Base64.encode(JSON.stringify([{ id: 'name', value, type: 'string' }]));
+    }
+
+    async getLaunchItems(params: TestCaseFilters): Promise<PaginatedResponse<TestCase>> {
+        const { launchId, search, page = 0, size = 100, sort = 'name,ASC' } = params;
+        const searchEncoded = search ? this.buildNameSearch(search) : undefined;
+
+        const url = this.buildUrl(`/api/v2/launch/${launchId}/test-result/flat`, {
+            search: searchEncoded,
+            page,
+            size,
+            sort
+        });
 
         const res = await fetch(url, { headers: this.buildHeaders() });
         if (!res.ok) {
@@ -68,8 +101,10 @@ export class AllureApiClient {
     }
 
     async completeLaunch(id: number): Promise<void> {
-        const url = `${this.baseUrl}/api/launch/${id}/close`;
-        const res = await fetch(url, { method: 'POST', headers: this.buildHeaders() });
+        const res = await fetch(this.buildUrl(`/api/launch/${id}/close`), {
+            method: 'POST',
+            headers: this.buildHeaders()
+        });
 
         if (!res.ok) {
             throw new Error(`Failed to complete launch ${id}: ${res.status} ${res.statusText}`);
@@ -77,8 +112,9 @@ export class AllureApiClient {
     }
 
     async getLaunchDetails(id: number): Promise<Launch> {
-        const url = `${this.baseUrl}/api/launch/${id}`;
-        const res = await fetch(url, { headers: this.buildHeaders() });
+        const res = await fetch(this.buildUrl(`/api/launch/${id}`), {
+            headers: this.buildHeaders()
+        });
 
         if (!res.ok) {
             throw new Error(`Failed to fetch launch details: ${res.status} ${res.statusText}`);

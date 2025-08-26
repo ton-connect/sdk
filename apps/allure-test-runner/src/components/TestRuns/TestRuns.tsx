@@ -26,6 +26,7 @@ export function TestRuns({ jwtToken }: Props) {
             try {
                 setLoading(true);
                 setError(null);
+                // TODO: add pagination y.mileyka
                 const data = await client.getLaunches({
                     projectId: DEFAULT_PROJECT_ID,
                     search: searchTerm || searchQuery
@@ -88,6 +89,7 @@ export function TestRuns({ jwtToken }: Props) {
         setSelectedLaunchId(id);
         try {
             setLoading(true);
+            // TODO: add search and pagination y.mileyka
             const data = await client.getLaunchItems({
                 launchId: id
             });
