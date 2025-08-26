@@ -137,6 +137,34 @@
     margin-bottom: 1rem;
 }
 
+.test-cases-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.test-cases-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.test-case-item {
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 10px 12px;
+    cursor: pointer;
+    background: #0f172a;
+}
+
+.test-case-item--selected {
+    outline: 2px solid #3b82f6;
+}
+
+.test-case-title {
+    font-weight: 600;
+}
+
 @media (max-width: 768px) {
     .test-runs__section {
         padding: 1rem;

@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import type { PaginatedResponse, TestCase } from '../../models';
-import { TestCaseCard } from '../TestCaseCard';
 import { useAllureApi } from '../../hooks/useAllureApi';
 import { SearchBar } from './SearchBar';
 import { useQuery } from '../../hooks/useQuery';
 import { useDebounce } from '../../hooks/useDebounce';
+import { TestCaseDetails } from './TestCaseDetails';
 
 type Props = {
     launchId: number;
@@ -20,6 +20,8 @@ export function TestCasesSection({ launchId, onClose }: Props) {
         signal => client.getLaunchItems({ launchId, search: searchQuery }, signal),
         { deps: [client, launchId, searchQuery] }
     );
+
+    const [selectedTestId, setSelectedTestId] = useState<number | null>(null);
 
     const content = Array.isArray(result?.content) ? result.content : [];
 
@@ -50,10 +52,22 @@ export function TestCasesSection({ launchId, onClose }: Props) {
             ) : content.length === 0 ? (
                 <div className="test-runs__empty">No test cases found</div>
             ) : (
-                <div className="test-runs__grid test-runs__grid--test-cases">
-                    {content.map(testCase => (
-                        <TestCaseCard key={testCase.id} testCase={testCase} />
-                    ))}
+                <div className="test-cases-layout">
+                    <div className="test-cases-list">
+                        {content.map(testCase => (
+                            <div
+                                key={testCase.id}
+                                className={`test-case-item ${selectedTestId === testCase.id ? 'test-case-item--selected' : ''}`}
+                                onClick={() => setSelectedTestId(testCase.id)}
+                            >
+                                <div className="test-case-title">{testCase.name}</div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="test-case-details">
+                        <TestCaseDetails testId={selectedTestId} />
+                    </div>
                 </div>
             )}
         </div>
