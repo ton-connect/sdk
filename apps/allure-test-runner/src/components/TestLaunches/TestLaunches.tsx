@@ -1,20 +1,20 @@
 import { useState } from 'react';
 import { DEFAULT_PROJECT_ID } from '../../constants';
-import { LaunchesList } from './LaunchesList';
-import { SearchBar } from './SearchBar';
-import { TestCasesSection } from './TestCasesSection';
+import { LaunchesList } from './LaunchesList/LaunchesList';
+import { SearchBar } from './SearchBar/SearchBar';
+import { TestCasesSection } from './TestCasesSection/TestCasesSection';
 import './TestLaunches.scss';
 import { useQuery } from '../../hooks/useQuery';
 import { useDebounce } from '../../hooks/useDebounce';
 import { useAllureApi } from '../../hooks/useAllureApi';
 
-// TODO: fix search so it not reloads every frame y.mileyka
 export function TestLaunches() {
     const client = useAllureApi();
     const [search, setSearch] = useState('');
     const searchQuery = useDebounce(search.trim(), 300);
 
     const [selectedLaunchId, setSelectedLaunchId] = useState<number | null>(null);
+    const [completeError, setCompleteError] = useState<string | null>(null);
 
     const { loading, error, refetch, result } = useQuery(
         signal =>
@@ -24,9 +24,16 @@ export function TestLaunches() {
     const launches = result?.content ?? [];
 
     const complete = async (id: number) => {
-        // TODO: deal with error
-        await client.completeLaunch(id).catch(console.error);
-        refetch();
+        try {
+            setCompleteError(null);
+            await client.completeLaunch(id);
+            refetch();
+        } catch (error) {
+            const errorMessage =
+                error instanceof Error ? error.message : 'Failed to complete launch';
+            setCompleteError(errorMessage);
+            console.error('Failed to complete launch:', error);
+        }
     };
 
     const openLaunch = async (id: number) => {
@@ -42,20 +49,13 @@ export function TestLaunches() {
         refetch();
     };
 
-    if (loading && launches.length === 0) {
-        return (
-            <div className="test-runs__loading">
-                <div className="text-lg">Loading...</div>
-            </div>
-        );
-    }
-
     if (error) {
         return (
             <div className="test-runs__error">
-                <div className="test-runs__error-title">Error</div>
+                <div className="test-runs__error-icon">⚠️</div>
+                <div className="test-runs__error-title">Failed to load launches</div>
                 <div className="test-runs__error-message">{String(error)}</div>
-                <button onClick={() => refetch()} className="btn btn-secondary">
+                <button onClick={() => refetch()} className="btn btn-primary">
                     Try Again
                 </button>
             </div>
@@ -78,11 +78,39 @@ export function TestLaunches() {
                     />
                 </div>
 
+                {completeError && (
+                    <div className="test-runs__complete-error">
+                        <div className="test-runs__complete-error-icon">❌</div>
+                        <div className="test-runs__complete-error-content">
+                            <div className="test-runs__complete-error-title">
+                                Failed to complete launch
+                            </div>
+                            <div className="test-runs__complete-error-message">{completeError}</div>
+                        </div>
+                        <button
+                            onClick={() => setCompleteError(null)}
+                            className="test-runs__complete-error-close"
+                        >
+                            ×
+                        </button>
+                    </div>
+                )}
+
+                {loading && launches.length === 0 && (
+                    <div className="test-runs__loading">
+                        <div className="test-runs__loading-spinner"></div>
+                        <div className="test-runs__loading-text">Loading launches...</div>
+                    </div>
+                )}
+
                 {launches.length === 0 ? (
                     <div className="test-runs__empty">
-                        {searchQuery
-                            ? `No launches found for "${searchQuery}"`
-                            : 'No launches found'}
+                        <div className="test-runs__empty-icon">📋</div>
+                        <div className="test-runs__empty-text">
+                            {searchQuery
+                                ? `No launches found for "${searchQuery}"`
+                                : 'No launches found'}
+                        </div>
                     </div>
                 ) : (
                     <LaunchesList

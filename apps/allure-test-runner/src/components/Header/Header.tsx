@@ -7,7 +7,7 @@ export function Header() {
             <div className="header-content">
                 <div className="flex items-center gap-3">
                     <div>
-                        <h1 className="brand-title">Allure TestOps Runner</h1>
+                        <h1 className="brand-title">Tonconnect TestOps Runner</h1>
                     </div>
                 </div>
                 <TonConnectButton />

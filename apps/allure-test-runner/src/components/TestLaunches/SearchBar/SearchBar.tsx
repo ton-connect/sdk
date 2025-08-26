@@ -1,20 +1,30 @@
+import { memo } from 'react';
+
 type Props = {
     value: string;
+    placeholder?: string;
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     loading?: boolean;
     onRefresh: () => void;
 };
 
-export function SearchBar({ value, onChange, loading, onRefresh }: Props) {
+export const SearchBar = memo(function SearchBar({
+    value,
+    onChange,
+    loading,
+    onRefresh,
+    placeholder
+}: Props) {
     return (
         <div className="test-runs__controls">
             <div className="test-runs__search-container">
                 <input
-                    placeholder="Search launches..."
+                    placeholder={placeholder || 'Search...'}
                     value={value}
                     onChange={onChange}
                     className="test-runs__search"
-                    disabled={!!loading}
+                    // disabled={!!loading}
+                    autoComplete="off"
                 />
                 {loading && <div className="test-runs__search-spinner">🔍</div>}
             </div>
@@ -23,4 +33,4 @@ export function SearchBar({ value, onChange, loading, onRefresh }: Props) {
             </button>
         </div>
     );
-}
+});

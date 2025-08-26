@@ -1,0 +1,50 @@
+.status-checkbox {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    cursor: default;
+    background: transparent;
+    
+    .status-icon {
+        width: 16px;
+        height: 16px;
+        
+        &--passed {
+            color: #28a745;
+        }
+        
+        &--failed {
+            color: #dc3545;
+        }
+        
+        &--unknown {
+            color: #ffc107;
+        }
+        
+        &--in-progress {
+            color: #6c757d;
+        }
+    }
+    
+    &--passed {
+        border: 2px solid #28a745;
+        border-radius: 4px;
+    }
+    
+    &--failed {
+        border: 2px solid #dc3545;
+        border-radius: 4px;
+    }
+    
+    &--unknown {
+        border: 2px solid #ffc107;
+        border-radius: 4px;
+    }
+    
+    &--in-progress {
+        border: 2px solid #6c757d;
+        border-radius: 4px;
+    }
+}

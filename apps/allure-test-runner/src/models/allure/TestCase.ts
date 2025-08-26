@@ -8,4 +8,5 @@ export type TestCase = {
     manual: boolean;
     createdDate: number;
     lastModifiedDate: number;
+    status?: 'unknown' | 'passed' | 'failed';
 };

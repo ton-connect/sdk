@@ -24,4 +24,5 @@ export type TestResult = {
     parameters: unknown[];
     tags: unknown[];
     links: unknown[];
+    status?: 'unknown' | 'passed' | 'failed';
 };

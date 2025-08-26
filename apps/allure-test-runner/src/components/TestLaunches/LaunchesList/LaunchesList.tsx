@@ -1,5 +1,5 @@
-import type { Launch } from '../../models';
-import { LaunchCard } from '../LaunchCard';
+import type { Launch } from '../../../models';
+import { LaunchCard } from '../../LaunchCard';
 
 type Props = {
     launches: Launch[];
