@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import './App.css';
+import { TonConnectProvider } from './components/TonConnectProvider';
+import { Header } from './components/Header';
 import { STORAGE_KEYS } from './constants';
 import { AuthForm } from './components/AuthForm';
 import { TestRuns } from './components/TestRuns';
@@ -13,20 +14,18 @@ function App() {
     }, []);
 
     return (
-        <div
-            style={{
-                maxWidth: 800,
-                margin: '0 auto',
-                padding: 16,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 16
-            }}
-        >
-            <h1 style={{ margin: 0 }}>Allure TestOps Stand</h1>
-            <AuthForm onSubmit={({ jwtToken }) => setJwt(jwtToken)} />
-            {jwt ? <TestRuns jwtToken={jwt} /> : <p>Enter endpoint and token to continue</p>}
-        </div>
+        <TonConnectProvider>
+            <div className="container">
+                <Header />
+                <main className="main-content">
+                    {!jwt ? (
+                        <AuthForm onSubmit={({ jwtToken }) => setJwt(jwtToken)} />
+                    ) : (
+                        <TestRuns jwtToken={jwt} />
+                    )}
+                </main>
+            </div>
+        </TonConnectProvider>
     );
 }
 
