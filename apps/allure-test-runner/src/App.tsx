@@ -3,7 +3,7 @@ import { TonConnectProvider } from './components/TonConnectProvider';
 import { Header } from './components/Header';
 import { STORAGE_KEYS } from './constants';
 import { AuthForm } from './components/AuthForm';
-import { TestRuns } from './components/TestRuns';
+import { TestLaunches } from './components/TestLaunches';
 
 function App() {
     const [jwt, setJwt] = useState<string | null>(null);
@@ -21,7 +21,7 @@ function App() {
                     {!jwt ? (
                         <AuthForm onSubmit={({ jwtToken }) => setJwt(jwtToken)} />
                     ) : (
-                        <TestRuns jwtToken={jwt} />
+                        <TestLaunches jwtToken={jwt} />
                     )}
                 </main>
             </div>
