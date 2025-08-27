@@ -42,3 +42,12 @@ export type TestCaseFilters = {
     size?: number;
     sort?: string;
 };
+
+export type ResolveTestResultParams = {
+    id: number;
+    start?: number;
+    stop?: number;
+    duration?: number;
+    status: 'passed' | 'failed';
+    message?: string;
+};

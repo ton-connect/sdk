@@ -4,7 +4,8 @@ import type {
     PaginatedResponse,
     LaunchFilters,
     TestCaseFilters,
-    TestResult
+    TestResult,
+    ResolveTestResultParams
 } from '../models';
 import { Base64 } from '@tonconnect/protocol';
 
@@ -22,7 +23,10 @@ export class AllureApiClient {
         this.jwtToken = token;
     }
 
-    private buildUrl(path: string, query?: Record<string, string | number | undefined>): URL {
+    private buildUrl(
+        path: string,
+        query?: Record<string, string | number | boolean | undefined>
+    ): URL {
         const url = new URL(path, this.baseUrl);
 
         if (query) {
@@ -135,5 +139,28 @@ export class AllureApiClient {
         }
 
         return res.json();
+    }
+
+    async resolveTestResult(params: ResolveTestResultParams, signal?: AbortSignal): Promise<void> {
+        const url = this.buildUrl(`/api/testresult/${params.id}/resolve`, { v2: true });
+
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: this.buildHeaders(),
+            signal,
+            body: JSON.stringify({
+                start: params.start,
+                stop: params.stop,
+                duration: params.duration,
+                status: params.status,
+                message: params.message
+            })
+        });
+
+        if (!res.ok) {
+            throw new Error(
+                `Failed to resolve test result ${params.id}: ${res.status} ${res.statusText}`
+            );
+        }
     }
 }

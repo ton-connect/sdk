@@ -32,7 +32,7 @@ export function TestCaseDetails({ testId }: Props) {
     const [expandedExpectedResult, setExpandedExpectedResult] = useState(true);
     const [expandedTransactionResult, setExpandedTransactionResult] = useState(true);
 
-    const { loading, result } = useQuery<TestResult | undefined>(
+    const { loading, result, refetch } = useQuery<TestResult | undefined>(
         signal => (testId ? client.getTestResult(testId, signal) : Promise.resolve(undefined)),
         { deps: [client, testId] }
     );
@@ -61,6 +61,7 @@ export function TestCaseDetails({ testId }: Props) {
             setIsSwitching(false);
         }
     }, [result]);
+    const [isResolving, setIsResolving] = useState(false);
 
     if (!testId) {
         return (
@@ -158,6 +159,17 @@ export function TestCaseDetails({ testId }: Props) {
             );
         } finally {
             setIsSending(false);
+        }
+    };
+
+    const handleResolve = async () => {
+        if (!result) return;
+        try {
+            setIsResolving(true);
+            await client.resolveTestResult({ id: result.id, status: 'passed' });
+            await refetch();
+        } finally {
+            setIsResolving(false);
         }
     };
 
@@ -279,6 +291,14 @@ export function TestCaseDetails({ testId }: Props) {
                         Connect Wallet & Send Transaction
                     </button>
                 )}
+                <button
+                    onClick={handleResolve}
+                    disabled={isResolving || !result}
+                    className="btn btn-secondary"
+                    style={{ marginLeft: 8 }}
+                >
+                    {isResolving ? 'Resolving…' : 'Resolve as Passed'}
+                </button>
                 {!parsedPre && (
                     <div className="test-case-note">
                         Note: Precondition data is required to send transaction
