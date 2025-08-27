@@ -4,13 +4,27 @@ function extractFromCodeFence(input: string): string | null {
     return null;
 }
 
-export function tryParseJson(input: string | undefined | null): unknown | null {
+function nowPlusMinutes(minutes: number): number {
+    return Math.floor(Date.now() / 1000) + minutes * 60;
+}
+
+function nowPlus5Minutes() {
+    return Math.floor(Date.now() / 1000).toString();
+}
+
+function nowMinus5Minutes() {}
+
+const functionScope = [nowPlusMinutes, nowPlus5Minutes, nowMinus5Minutes];
+
+export function evalFenceCondition(input: string | undefined | null): unknown | null {
     if (!input) return null;
-    // Prefer fenced code blocks
     const fromFence = extractFromCodeFence(input);
-    const candidate = fromFence ?? input;
+    if (!fromFence) return null;
     try {
-        return JSON.parse(candidate);
+        return new Function(
+            ...functionScope.map(fn => fn.name),
+            `"use strict";return (${fromFence});`
+        )(...functionScope);
     } catch {
         return null;
     }

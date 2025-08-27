@@ -121,8 +121,7 @@ export function useTestCaseDetails(testId: number | null, onTestCasesRefresh?: (
                     payload.message = message.trim();
                 }
                 await client.resolveTestResult(payload);
-                await refetch();
-                // Обновляем список тест-кейсов после изменения статуса
+                refetch();
                 onTestCasesRefresh?.();
             } finally {
                 setIsFailing(false);
