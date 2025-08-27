@@ -1,5 +1,13 @@
 # Changelog @tonconnect/ui-react
 
+## 2.3.0-beta.4
+
+### Patch Changes
+
+- fix: links telegram format
+- Updated dependencies
+    - @tonconnect/ui@2.3.0-beta.4
+
 ## 2.3.0-beta.3
 
 ### Patch Changes
