@@ -28,3 +28,13 @@ export function encodeTelegramUrlParameters(parameters: string): string {
         .replaceAll('=', '__')
         .replaceAll('%', '--');
 }
+
+export function decodeTelegramUrlParameters(parameters: string): string {
+    return parameters
+        .replaceAll('--', '%')
+        .replaceAll('__', '=')
+        .replaceAll('-', '&')
+        .replaceAll('%5F', '_')
+        .replaceAll('%2D', '-')
+        .replaceAll('%2E', '.');
+}

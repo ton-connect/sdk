@@ -576,10 +576,25 @@ export function addSessionIdToUniversalLink(
         return universalLink;
     }
 
-    const url = new URL(universalLink);
-    url.searchParams.set('id', sessionId);
+    if (!isTelegramUrl(universalLink)) {
+        const newUrl = addQueryParameter(universalLink, 'id', sessionId);
 
-    return url.toString();
+        return newUrl;
+    }
+
+    const directLink = convertToTGDirectLink(universalLink);
+    const directLinkUrl = new URL(directLink);
+
+    if (!directLinkUrl.searchParams.has('startapp')) {
+        directLinkUrl.searchParams.append('startapp', 'tonconnect');
+    }
+
+    const newUrl = addQueryParameter(directLinkUrl.toString(), 'id', sessionId);
+
+    const lastParam = newUrl.slice(newUrl.lastIndexOf('&') + 1);
+    return (
+        newUrl.slice(0, newUrl.lastIndexOf('&')) + '-v__2-' + encodeTelegramUrlParameters(lastParam)
+    );
 }
 
 function addQueryParameter(url: string, key: string, value: string): string {
@@ -612,7 +627,5 @@ function convertToTGDeepLink(directLink: string): string {
     const parsed = new URL(directLink);
     const [, domain, appname] = parsed.pathname.split('/');
     const startapp = parsed.searchParams.get('startapp');
-    const id = parsed.searchParams.get('id');
-
-    return `tg://resolve?domain=${domain}&appname=${appname}&startapp=${startapp}&id=${id}`;
+    return `tg://resolve?domain=${domain}&appname=${appname}&startapp=${startapp}`;
 }
