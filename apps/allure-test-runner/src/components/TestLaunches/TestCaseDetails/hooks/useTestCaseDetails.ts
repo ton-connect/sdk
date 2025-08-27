@@ -2,8 +2,9 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { useQuery } from '../../../../hooks/useQuery';
 import { useAllureApi } from '../../../../hooks/useAllureApi';
-import { tryParseJson } from '../../../../utils/parse-json';
+import { evalFenceCondition } from '../../../../utils/parse-json';
 import type { TestResult } from '../../../../models';
+import type { SendTransactionRpcResponse } from '@tonconnect/protocol';
 
 interface TransactionData {
     validUntil: number;
@@ -19,7 +20,7 @@ export function useTestCaseDetails(testId: number | null, onTestCasesRefresh?: (
     const client = useAllureApi();
     const [tonConnectUI] = useTonConnectUI();
     const wallet = useTonWallet();
-    const [transactionResult, setTransactionResult] = useState<string | null>(null);
+    const [transactionResult, setTransactionResult] = useState<Record<string, unknown>>();
     const [isSending, setIsSending] = useState(false);
     const [isSwitching, setIsSwitching] = useState(false);
     const [isResolving, setIsResolving] = useState(false);
@@ -34,7 +35,7 @@ export function useTestCaseDetails(testId: number | null, onTestCasesRefresh?: (
     );
 
     const parsedPre = useMemo(() => {
-        const parsed = tryParseJson(result?.precondition);
+        const parsed = evalFenceCondition(result?.precondition);
         return parsed &&
             typeof parsed === 'object' &&
             'validUntil' in parsed &&
@@ -43,12 +44,12 @@ export function useTestCaseDetails(testId: number | null, onTestCasesRefresh?: (
             : null;
     }, [result]);
 
-    const parsedExpected = useMemo(() => tryParseJson(result?.expectedResult), [result]);
+    const parsedExpected = useMemo(() => evalFenceCondition(result?.expectedResult), [result]);
 
     useEffect(() => {
         if (testId) {
             setIsSwitching(true);
-            setTransactionResult(null);
+            setTransactionResult(undefined);
         }
     }, [testId]);
 
@@ -60,59 +61,36 @@ export function useTestCaseDetails(testId: number | null, onTestCasesRefresh?: (
 
     const handleSendTransaction = useCallback(async () => {
         if (!parsedPre) {
-            setTransactionResult(
-                JSON.stringify(
-                    {
-                        error: 'No precondition data available',
-                        timestamp: new Date().toISOString()
-                    },
-                    null,
-                    2
-                )
-            );
+            setTransactionResult({
+                error: 'No precondition data available',
+                timestamp: new Date().toISOString()
+            });
             return;
         }
 
+        let res2: SendTransactionRpcResponse | undefined = undefined;
+        const origDebug = console.debug.bind(console);
+        console.debug = (...args: unknown[]) => {
+            if (args.includes('Wallet message received:')) {
+                console.debug = origDebug;
+                res2 = args[2] as SendTransactionRpcResponse;
+            }
+            origDebug(...args);
+        };
+
         try {
             setIsSending(true);
-            setTransactionResult(null);
+            setTransactionResult(undefined);
 
             const transaction = {
                 validUntil: Math.floor(Date.now() / 1000) + 300,
                 messages: parsedPre.messages
             };
 
-            const result = await tonConnectUI.sendTransaction(transaction);
-            setTransactionResult(
-                JSON.stringify(
-                    {
-                        success: true,
-                        message: 'Transaction sent successfully',
-                        result: result,
-                        timestamp: new Date().toISOString(),
-                        transaction: transaction
-                    },
-                    null,
-                    2
-                )
-            );
+            await tonConnectUI.sendTransaction(transaction);
         } catch (error) {
-            setTransactionResult(
-                JSON.stringify(
-                    {
-                        success: false,
-                        error: error instanceof Error ? error.message : 'Unknown error',
-                        timestamp: new Date().toISOString(),
-                        transaction: {
-                            validUntil: Math.floor(Date.now() / 1000) + 300,
-                            messages: parsedPre.messages
-                        }
-                    },
-                    null,
-                    2
-                )
-            );
         } finally {
+            setTransactionResult(res2);
             setIsSending(false);
         }
     }, [parsedPre, tonConnectUI]);
