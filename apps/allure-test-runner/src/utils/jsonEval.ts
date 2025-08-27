@@ -16,7 +16,28 @@ function nowMinus5Minutes() {
     return nowPlusMinutes(-5);
 }
 
-const functionScope = [nowPlusMinutes, nowPlus5Minutes, nowMinus5Minutes];
+function isValidBoc(value: unknown): boolean {
+    // TODO:
+    value;
+    return true;
+}
+
+function isValidString(value: unknown) {
+    return typeof value === 'string';
+}
+
+function isNonNegativeInt(value: unknown) {
+    return Number.isInteger(value) && (value as number) >= 0;
+}
+
+const functionScope = [
+    nowPlusMinutes,
+    nowPlus5Minutes,
+    nowMinus5Minutes,
+    isValidBoc,
+    isValidString,
+    isNonNegativeInt
+];
 
 export function evalFenceCondition<T = unknown>(input: string | undefined | null): T | null {
     if (!input) return null;
@@ -27,7 +48,8 @@ export function evalFenceCondition<T = unknown>(input: string | undefined | null
             ...functionScope.map(fn => fn.name),
             `"use strict";return (${fromFence});`
         )(...functionScope);
-    } catch {
+    } catch (error) {
+        console.error(error);
         return null;
     }
 }

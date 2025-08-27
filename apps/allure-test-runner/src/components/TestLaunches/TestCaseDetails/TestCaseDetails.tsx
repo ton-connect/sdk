@@ -31,7 +31,9 @@ export function TestCaseDetails({ testId, onTestCasesRefresh }: Props) {
         handleFail,
         togglePrecondition,
         toggleExpectedResult,
-        toggleTransactionResult
+        toggleTransactionResult,
+        isResultValid,
+        errors
     } = useTestCaseDetails(testId, onTestCasesRefresh);
 
     const stateComponent = TestCaseStates({ testId, isSwitching, loading, hasResult: !!result });
@@ -72,13 +74,18 @@ export function TestCaseDetails({ testId, onTestCasesRefresh }: Props) {
                 />
 
                 {transactionResult && (
-                    <TestCaseJsonSection
-                        title="Transaction Result"
-                        isExpanded={expandedTransactionResult}
-                        onToggle={toggleTransactionResult}
-                        data={transactionResult}
-                        className="transaction-result-json"
-                    />
+                    <>
+                        <TestCaseJsonSection
+                            title="Transaction Result"
+                            isExpanded={expandedTransactionResult}
+                            onToggle={toggleTransactionResult}
+                            data={transactionResult}
+                            className="transaction-result-json"
+                        />
+                        <div>
+                            {isResultValid ? 'VALID' : 'NOT VALID'} {errors.join('\n')}
+                        </div>
+                    </>
                 )}
             </div>
 

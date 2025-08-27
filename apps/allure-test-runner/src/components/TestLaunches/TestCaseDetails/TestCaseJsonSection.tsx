@@ -16,7 +16,20 @@ export function TestCaseJsonSection({ title, isExpanded, onToggle, data, classNa
             {isExpanded && (
                 <div className="test-case-content">
                     <div className={className || 'json-block'}>
-                        <pre>{data ? JSON.stringify(data, null, 2) : '—'}</pre>
+                        <pre>
+                            {/*TODO fix function name and NaN in string quotes.*/}
+                            {data
+                                ? JSON.stringify(
+                                      data,
+                                      (_, val) => {
+                                          if (typeof val === 'function') return val.name;
+                                          if (Number.isNaN(val)) return 'NaN';
+                                          return val;
+                                      },
+                                      2
+                                  )
+                                : '—'}
+                        </pre>
                     </div>
                 </div>
             )}

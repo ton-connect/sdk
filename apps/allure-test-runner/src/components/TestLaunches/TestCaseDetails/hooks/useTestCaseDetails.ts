@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { useQuery } from '../../../../hooks/useQuery';
 import { useAllureApi } from '../../../../hooks/useAllureApi';
-import { evalFenceCondition } from '../../../../utils/jsonEval.ts';
+import { evalFenceCondition } from '../../../../utils/jsonEval';
 import type { TestResult } from '../../../../models';
 import type { SendTransactionRpcResponse } from '@tonconnect/protocol';
 
@@ -14,6 +14,40 @@ interface TransactionData {
         stateInit?: string;
         payload?: string;
     }>;
+}
+
+// TODO: collect fields recursively
+export function compareResult(result: any, expected: any, errors: string[]): boolean {
+    console.log('RESULT', result);
+    console.log('EXPECTED', expected);
+    let success = true;
+    if (typeof expected === 'object') {
+        for (const key in expected) {
+            if (!(key in result)) {
+                success = false;
+                errors.push(`key ${key} not in ${result}`);
+            }
+            if (!compareResult(result[key], expected[key], errors)) {
+                success = false;
+            }
+        }
+
+        return success;
+    }
+
+    if (typeof expected === 'function') {
+        success = expected(result);
+        if (!success) {
+            errors.push(`value ${result} not passes condition ${expected.name}`);
+        }
+        return success;
+    }
+
+    success = result === expected;
+    if (!success) {
+        errors.push(`value ${result} not equal ${expected}`);
+    }
+    return success;
 }
 
 export function useTestCaseDetails(testId: number | null, onTestCasesRefresh?: () => void) {
@@ -52,6 +86,21 @@ export function useTestCaseDetails(testId: number | null, onTestCasesRefresh?: (
             setIsSwitching(false);
         }
     }, [result]);
+
+    // TODO: refactor (errors not displaying) (not updating)
+    let errors: string[] = [];
+    const isResultValid = useMemo(
+        () =>
+            transactionResult
+                ? (() => {
+                      errors = [];
+                      const res = compareResult(transactionResult, parsedExpected, errors);
+                      console.log(errors);
+                      return res;
+                  })()
+                : true,
+        [transactionResult, parsedExpected]
+    );
 
     const handleSendTransaction = useCallback(async () => {
         if (!parsedPre) {
@@ -152,6 +201,8 @@ export function useTestCaseDetails(testId: number | null, onTestCasesRefresh?: (
         expandedTransactionResult,
         wallet,
         tonConnectUI,
+        isResultValid,
+        errors,
 
         // Actions
         handleSendTransaction,
