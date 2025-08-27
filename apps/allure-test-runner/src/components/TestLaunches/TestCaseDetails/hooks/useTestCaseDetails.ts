@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { useQuery } from '../../../../hooks/useQuery';
 import { useAllureApi } from '../../../../hooks/useAllureApi';
-import { evalFenceCondition } from '../../../../utils/parse-json';
+import { evalFenceCondition } from '../../../../utils/jsonEval.ts';
 import type { TestResult } from '../../../../models';
 import type { SendTransactionRpcResponse } from '@tonconnect/protocol';
 
@@ -34,16 +34,10 @@ export function useTestCaseDetails(testId: number | null, onTestCasesRefresh?: (
         { deps: [client, testId] }
     );
 
-    const parsedPre = useMemo(() => {
-        const parsed = evalFenceCondition(result?.precondition);
-        return parsed &&
-            typeof parsed === 'object' &&
-            'validUntil' in parsed &&
-            'messages' in parsed
-            ? (parsed as TransactionData)
-            : null;
-    }, [result]);
-
+    const parsedPre = useMemo(
+        () => evalFenceCondition<TransactionData>(result?.precondition),
+        [result]
+    );
     const parsedExpected = useMemo(() => evalFenceCondition(result?.expectedResult), [result]);
 
     useEffect(() => {

@@ -9,14 +9,16 @@ function nowPlusMinutes(minutes: number): number {
 }
 
 function nowPlus5Minutes() {
-    return Math.floor(Date.now() / 1000).toString();
+    return nowPlusMinutes(5);
 }
 
-function nowMinus5Minutes() {}
+function nowMinus5Minutes() {
+    return nowPlusMinutes(-5);
+}
 
 const functionScope = [nowPlusMinutes, nowPlus5Minutes, nowMinus5Minutes];
 
-export function evalFenceCondition(input: string | undefined | null): unknown | null {
+export function evalFenceCondition<T = unknown>(input: string | undefined | null): T | null {
     if (!input) return null;
     const fromFence = extractFromCodeFence(input);
     if (!fromFence) return null;
