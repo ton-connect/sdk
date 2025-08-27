@@ -25,4 +25,5 @@ export type TestResult = {
     tags: unknown[];
     links: unknown[];
     status?: 'unknown' | 'passed' | 'failed';
+    message?: string;
 };

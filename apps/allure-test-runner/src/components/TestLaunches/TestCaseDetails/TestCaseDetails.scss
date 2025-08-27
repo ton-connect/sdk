@@ -188,6 +188,11 @@
     }
 }
 
+.btn-success {
+    background-color: #22c55e;
+    color: #fff;
+}
+
 .transaction-btn__spinner {
     width: 16px;
     height: 16px;
@@ -279,11 +284,15 @@
 }
 
 .test-case-details__actions {
+    display: flex;
+    gap: 4px;
+    height: 60px;
     position: sticky;
     bottom: 0;
     background: #0f172a;
+    border-radius: 0 0 12px 12px;
+    padding: 8px;
     border-top: 1px solid #334155;
-    padding: 16px;
     margin: 0;
     z-index: 10;
 }

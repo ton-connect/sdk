@@ -22,7 +22,7 @@ body {
 
 /* Layout classes */
 .container {
-  margin: 0 auto;
+  margin: -45px auto 0;
   padding: 0 1rem;
 }
 

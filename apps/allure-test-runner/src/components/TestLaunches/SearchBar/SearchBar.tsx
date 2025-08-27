@@ -23,7 +23,6 @@ export const SearchBar = memo(function SearchBar({
                     value={value}
                     onChange={onChange}
                     className="test-runs__search"
-                    // disabled={!!loading}
                     autoComplete="off"
                 />
                 {loading && <div className="test-runs__search-spinner">🔍</div>}

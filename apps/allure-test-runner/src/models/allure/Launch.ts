@@ -11,5 +11,3 @@ export type Launch = {
     createdBy: string;
     lastModifiedBy: string;
 };
-
-
