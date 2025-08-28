@@ -1,3 +1,5 @@
+import type { OPERATION_TYPE } from './CustomField';
+
 export type TestResult = {
     id: number;
     projectId: number;
@@ -26,4 +28,10 @@ export type TestResult = {
     links: unknown[];
     status?: 'unknown' | 'passed' | 'failed';
     message?: string;
+};
+
+export type TestResultWithCustomFields = TestResult & {
+    customFields: {
+        operationType?: keyof typeof OPERATION_TYPE;
+    };
 };

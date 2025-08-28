@@ -1,13 +1,11 @@
 import { useState, useCallback, useEffect } from 'react';
-import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { useQuery } from '../../../../hooks/useQuery';
 import { useAllureApi } from '../../../../hooks/useAllureApi';
-import type { TestResult } from '../../../../models';
+import type { TestResult, TestResultWithCustomFields } from '../../../../models';
+import { AllureService } from '../../../../services/allure.service';
 
 export function useTestCaseDetails(testId: number | null, onTestCasesRefresh?: () => void) {
-    const client = useAllureApi();
-    const [tonConnectUI] = useTonConnectUI();
-    const wallet = useTonWallet();
+    const api = useAllureApi();
     const [isSwitching, setIsSwitching] = useState(false);
     const [isResolving, setIsResolving] = useState(false);
     const [isFailing, setIsFailing] = useState(false);
@@ -17,8 +15,18 @@ export function useTestCaseDetails(testId: number | null, onTestCasesRefresh?: (
         result: testResult,
         refetch
     } = useQuery<TestResult | undefined>(
-        signal => (testId ? client.getTestResult(testId, signal) : Promise.resolve(undefined)),
-        { deps: [client, testId] }
+        signal => (testId ? api.getTestResult(testId, signal) : Promise.resolve(undefined)),
+        { deps: [api, testId] }
+    );
+
+    const { result: testResultWithCustomFields } = useQuery<TestResultWithCustomFields | undefined>(
+        signal =>
+            testResult
+                ? AllureService.from(api, signal).populateWithCustomFields(testResult)
+                : Promise.resolve(undefined),
+        {
+            deps: [api, testResult]
+        }
     );
 
     useEffect(() => {
@@ -40,13 +48,13 @@ export function useTestCaseDetails(testId: number | null, onTestCasesRefresh?: (
         if (!testResult) return;
         try {
             setIsResolving(true);
-            await client.resolveTestResult({ id: testResult.id, status: 'passed' });
+            await api.resolveTestResult({ id: testResult.id, status: 'passed' });
             refetch();
             onTestCasesRefresh?.();
         } finally {
             setIsResolving(false);
         }
-    }, [testResult, client, refetch, onTestCasesRefresh]);
+    }, [testResult, api, refetch, onTestCasesRefresh]);
 
     const handleFail = useCallback(
         async (message: string) => {
@@ -60,23 +68,23 @@ export function useTestCaseDetails(testId: number | null, onTestCasesRefresh?: (
                 if (message.trim()) {
                     payload.message = message.trim();
                 }
-                await client.resolveTestResult(payload);
+                await api.resolveTestResult(payload);
                 refetch();
                 onTestCasesRefresh?.();
             } finally {
                 setIsFailing(false);
             }
         },
-        [testResult, client, refetch, onTestCasesRefresh]
+        [testResult, api, refetch, onTestCasesRefresh]
     );
 
     const handleRerun = useCallback(async () => {
         if (!testResult) return;
 
-        await client.rerunTestResult({ id: testResult.id, username: testResult.createdBy });
+        await api.rerunTestResult({ id: testResult.id, username: testResult.createdBy });
         refetch();
         onTestCasesRefresh?.();
-    }, [testResult, onTestCasesRefresh]);
+    }, [api, testResult, onTestCasesRefresh]);
 
     return {
         // State
@@ -85,14 +93,13 @@ export function useTestCaseDetails(testId: number | null, onTestCasesRefresh?: (
         isSwitching,
         isResolving,
         isFailing,
-        wallet,
-        tonConnectUI,
-        setValidationErrors,
+        testResultWithCustomFields,
         validationErrors,
         showFailModal,
-        setShowFailModal,
 
         // Actions
+        setValidationErrors,
+        setShowFailModal,
         handleResolve,
         handleFail,
         handleRerun

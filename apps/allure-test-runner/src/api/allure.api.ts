@@ -6,7 +6,8 @@ import type {
     TestCaseFilters,
     TestResult,
     ResolveTestResultParams,
-    RerunTestResultParams
+    RerunTestResultParams,
+    CustomField
 } from '../models';
 import { Base64 } from '@tonconnect/protocol';
 
@@ -47,7 +48,7 @@ export class AllureApiClient {
         };
     }
 
-    async authenticate(userToken: string): Promise<string> {
+    async authenticate(userToken: string, signal?: AbortSignal): Promise<string> {
         const form = new URLSearchParams();
         form.set('grant_type', 'apitoken');
         form.set('scope', 'openid');
@@ -56,7 +57,8 @@ export class AllureApiClient {
         const res = await fetch(`${this.baseUrl}/api/uaa/oauth/token`, {
             method: 'POST',
             headers: { Accept: 'application/json' },
-            body: form
+            body: form,
+            signal
         });
 
         if (!res.ok) {
@@ -163,10 +165,11 @@ export class AllureApiClient {
         return res.json();
     }
 
-    async completeLaunch(id: number): Promise<void> {
+    async completeLaunch(id: number, signal?: AbortSignal): Promise<void> {
         const res = await fetch(this.buildUrl(`/api/launch/${id}/close`), {
             method: 'POST',
-            headers: this.buildHeaders()
+            headers: this.buildHeaders(),
+            signal
         });
 
         if (!res.ok) {
@@ -210,13 +213,14 @@ export class AllureApiClient {
         }
     }
 
-    async rerunTestResult(params: RerunTestResultParams): Promise<void> {
+    async rerunTestResult(params: RerunTestResultParams, signal?: AbortSignal): Promise<void> {
         const res = await fetch(this.buildUrl(`/api/testresult/${params.id}/rerun`), {
             method: 'POST',
             headers: this.buildHeaders(),
             body: JSON.stringify({
                 username: params.username
-            })
+            }),
+            signal
         });
 
         if (!res.ok) {
@@ -224,5 +228,20 @@ export class AllureApiClient {
                 `Failed to rerun test result ${params.id}: ${res.status} ${res.statusText}`
             );
         }
+    }
+
+    async getCustomFields(testResultId: number, signal?: AbortSignal): Promise<CustomField[]> {
+        const res = await fetch(this.buildUrl(`/api/testresult/${testResultId}/cfv`), {
+            headers: this.buildHeaders(),
+            signal
+        });
+
+        if (!res.ok) {
+            throw new Error(
+                `Failed to fetch custom fields for test result ${testResultId}: ${res.status} ${res.statusText}`
+            );
+        }
+
+        return res.json();
     }
 }

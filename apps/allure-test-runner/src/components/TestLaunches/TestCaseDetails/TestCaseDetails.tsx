@@ -27,7 +27,8 @@ export function TestCaseDetails({ testId, onTestCasesRefresh }: Props) {
         validationErrors,
         setValidationErrors,
         showFailModal,
-        setShowFailModal
+        setShowFailModal,
+        testResultWithCustomFields
     } = useTestCaseDetails(testId, onTestCasesRefresh);
 
     const {
@@ -60,29 +61,28 @@ export function TestCaseDetails({ testId, onTestCasesRefresh }: Props) {
     return (
         <div className="test-case-details">
             <div className="test-case-details__content">
+                {/*TODO: manage carefuly*/}
+                CUSTOM FIELD OPERATION TYPE:
+                {testResultWithCustomFields?.customFields?.operationType}
                 <TestCaseHeader
                     name={testResult.name}
                     status={testResult.status}
                     message={testResult.message}
                 />
-
                 <TestCaseDescription
                     description={testResult.description}
                     descriptionHtml={testResult.descriptionHtml}
                 />
-
                 <TestCaseExpandableSection
                     title="Precondition"
                     data={testResult.precondition}
                     dataHtml={testResult.preconditionHtml}
                 />
-
                 <TestCaseExpandableSection
                     title="Expected Result"
                     data={testResult.expectedResult}
                     dataHtml={testResult.expectedResultHtml}
                 />
-
                 {/*TODO: extract*/}
                 {transactionResult && (
                     <>
