@@ -3,6 +3,8 @@ import { TestCaseDescription } from './TestCaseDescription';
 import { TestCaseJsonSection } from './TestCaseJsonSection';
 import { TestCaseActions } from './TestCaseActions';
 import { TestCaseStates } from './TestCaseStates';
+import { FailModal } from './FailModal';
+
 import { useTestCaseDetails } from './hooks';
 import './TestCaseDetails.scss';
 
@@ -29,11 +31,14 @@ export function TestCaseDetails({ testId, onTestCasesRefresh }: Props) {
         handleSendTransaction,
         handleResolve,
         handleFail,
+        isFailing,
         togglePrecondition,
         toggleExpectedResult,
         toggleTransactionResult,
         isResultValid,
-        errors
+        validationErrors,
+        showFailModal,
+        setShowFailModal
     } = useTestCaseDetails(testId, onTestCasesRefresh);
 
     const stateComponent = TestCaseStates({ testId, isSwitching, loading, hasResult: !!result });
@@ -82,8 +87,27 @@ export function TestCaseDetails({ testId, onTestCasesRefresh }: Props) {
                             data={transactionResult}
                             className="transaction-result-json"
                         />
-                        <div>
-                            {isResultValid ? 'VALID' : 'NOT VALID'} {errors.join('\n')}
+                        <div className="validation-status">
+                            <div
+                                className={`validation-status__indicator ${isResultValid ? 'valid' : 'invalid'}`}
+                            >
+                                {isResultValid ? '✓ VALID' : '✗ NOT VALID'}
+                            </div>
+                            {!isResultValid && validationErrors.length > 0 && (
+                                <div className="validation-errors">
+                                    <h4 className="validation-errors__title">Validation Errors:</h4>
+                                    <div className="validation-errors__list">
+                                        {validationErrors.map((error, index) => (
+                                            <div key={index} className="validation-errors__item">
+                                                <span className="validation-errors__icon">⚠️</span>
+                                                <span className="validation-errors__text">
+                                                    {error}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </>
                 )}
@@ -101,6 +125,14 @@ export function TestCaseDetails({ testId, onTestCasesRefresh }: Props) {
                 onSendTransaction={handleSendTransaction}
                 onResolve={handleResolve}
                 onFail={handleFail}
+            />
+
+            <FailModal
+                isOpen={showFailModal}
+                onClose={() => setShowFailModal(false)}
+                onSubmit={handleFail}
+                isSubmitting={isFailing}
+                initialMessage={validationErrors.join('\n')}
             />
         </div>
     );

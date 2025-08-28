@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './FailModal.scss';
 
 type Props = {
@@ -6,14 +6,18 @@ type Props = {
     onClose: () => void;
     onSubmit: (message: string) => void;
     isSubmitting: boolean;
+    initialMessage?: string;
 };
 
-export function FailModal({ isOpen, onClose, onSubmit, isSubmitting }: Props) {
+export function FailModal({ isOpen, onClose, onSubmit, isSubmitting, initialMessage = '' }: Props) {
     const [message, setMessage] = useState('');
 
-    if (!isOpen) {
-        return null;
-    }
+    // Set initial message when modal opens
+    useEffect(() => {
+        if (isOpen && initialMessage) {
+            setMessage(initialMessage);
+        }
+    }, [isOpen, initialMessage]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -28,9 +32,13 @@ export function FailModal({ isOpen, onClose, onSubmit, isSubmitting }: Props) {
         }
     };
 
+    if (!isOpen) {
+        return null;
+    }
+
     return (
         <div className="fail-modal-overlay" onClick={handleClose}>
-            <div className="fail-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="fail-modal" onClick={e => e.stopPropagation()}>
                 <div className="fail-modal__header">
                     <h3 className="fail-modal__title">Mark Test Case as Failed</h3>
                     <button
@@ -44,15 +52,13 @@ export function FailModal({ isOpen, onClose, onSubmit, isSubmitting }: Props) {
 
                 <form onSubmit={handleSubmit} className="fail-modal__form">
                     <div className="fail-modal__field">
-                        <label className="fail-modal__label">
-                            Failure Reason (Optional)
-                        </label>
+                        <label className="fail-modal__label">Failure Reason</label>
                         <textarea
                             value={message}
-                            onChange={(e) => setMessage(e.target.value)}
-                            placeholder="Describe why the test case failed (optional)..."
+                            onChange={e => setMessage(e.target.value)}
+                            placeholder="Describe why the test case failed..."
                             className="fail-modal__textarea"
-                            rows={4}
+                            rows={6}
                             disabled={isSubmitting}
                         />
                     </div>
@@ -66,11 +72,7 @@ export function FailModal({ isOpen, onClose, onSubmit, isSubmitting }: Props) {
                         >
                             Cancel
                         </button>
-                        <button
-                            type="submit"
-                            className="btn btn-danger"
-                            disabled={isSubmitting}
-                        >
+                        <button type="submit" className="btn btn-danger" disabled={isSubmitting}>
                             {isSubmitting ? 'Marking as Failed...' : 'Mark as Failed'}
                         </button>
                     </div>

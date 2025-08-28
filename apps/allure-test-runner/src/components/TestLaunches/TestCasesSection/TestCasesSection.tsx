@@ -6,9 +6,11 @@ import { useTestCases, useResize } from './hooks';
 type Props = {
     launchId: number;
     onClose: () => void;
+    onComplete?: (id: number) => void;
+    launchClosed?: boolean;
 };
 
-export function TestCasesSection({ launchId, onClose }: Props) {
+export function TestCasesSection({ launchId, onClose, onComplete, launchClosed = false }: Props) {
     const {
         search,
         content,
@@ -26,10 +28,19 @@ export function TestCasesSection({ launchId, onClose }: Props) {
     return (
         <div className="test-runs__section">
             <div className="test-runs__section-header">
+                <div className="test-runs__section-header-left">
+                    <button onClick={onClose} className="btn btn-back">
+                        ← Back to Launches
+                    </button>
+                </div>
                 <h3 className="test-runs__section-title">Test Cases in Launch #{launchId}</h3>
-                <button onClick={onClose} className="btn btn-secondary">
-                    Close
-                </button>
+                <div className="test-runs__section-header-right">
+                    {!launchClosed && onComplete && (
+                        <button onClick={() => onComplete(launchId)} className="btn btn-success">
+                            Complete Launch
+                        </button>
+                    )}
+                </div>
             </div>
 
             <div className="test-runs__section-header">

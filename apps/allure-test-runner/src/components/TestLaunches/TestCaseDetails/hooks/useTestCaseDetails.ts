@@ -17,18 +17,23 @@ interface TransactionData {
 }
 
 // TODO: collect fields recursively
-export function compareResult(result: any, expected: any, errors: string[]): boolean {
-    console.log('RESULT', result);
-    console.log('EXPECTED', expected);
+export function compareResult(result: unknown, expected: unknown, errors: string[]): boolean {
     let success = true;
-    if (typeof expected === 'object') {
+    if (typeof expected === 'object' && expected !== null) {
         for (const key in expected) {
-            if (!(key in result)) {
+            if (typeof result === 'object' && result !== null && key in result) {
+                if (
+                    !compareResult(
+                        (result as Record<string, unknown>)[key],
+                        (expected as Record<string, unknown>)[key],
+                        errors
+                    )
+                ) {
+                    success = false;
+                }
+            } else {
                 success = false;
-                errors.push(`key ${key} not in ${result}`);
-            }
-            if (!compareResult(result[key], expected[key], errors)) {
-                success = false;
+                errors.push(`Missing key "${key}" in result`);
             }
         }
 
@@ -36,16 +41,18 @@ export function compareResult(result: any, expected: any, errors: string[]): boo
     }
 
     if (typeof expected === 'function') {
-        success = expected(result);
+        success = (expected as Function)(result);
         if (!success) {
-            errors.push(`value ${result} not passes condition ${expected.name}`);
+            errors.push(
+                `Value "${result}" does not pass condition "${(expected as Function).name}".`
+            );
         }
         return success;
     }
 
     success = result === expected;
     if (!success) {
-        errors.push(`value ${result} not equal ${expected}`);
+        errors.push(`Expected "${expected}", but got "${result}"`);
     }
     return success;
 }
@@ -88,14 +95,22 @@ export function useTestCaseDetails(testId: number | null, onTestCasesRefresh?: (
     }, [result]);
 
     // TODO: refactor (errors not displaying) (not updating)
-    let errors: string[] = [];
+    const [validationErrors, setValidationErrors] = useState<string[]>([]);
+    const [showFailModal, setShowFailModal] = useState(false);
+
     const isResultValid = useMemo(
         () =>
             transactionResult
                 ? (() => {
-                      errors = [];
+                      const errors: string[] = [];
                       const res = compareResult(transactionResult, parsedExpected, errors);
-                      console.log(errors);
+                      setValidationErrors(errors);
+
+                      // Show fail modal if validation failed
+                      if (!res && errors.length > 0) {
+                          setShowFailModal(true);
+                      }
+
                       return res;
                   })()
                 : true,
@@ -151,6 +166,13 @@ export function useTestCaseDetails(testId: number | null, onTestCasesRefresh?: (
         }
     }, [result, client, refetch, onTestCasesRefresh]);
 
+    // Auto-resolve test if validation passed
+    useEffect(() => {
+        if (transactionResult && isResultValid && result && result.status !== 'passed') {
+            handleResolve();
+        }
+    }, [transactionResult, isResultValid, result, handleResolve]);
+
     const handleFail = useCallback(
         async (message: string) => {
             if (!result) return;
@@ -202,7 +224,9 @@ export function useTestCaseDetails(testId: number | null, onTestCasesRefresh?: (
         wallet,
         tonConnectUI,
         isResultValid,
-        errors,
+        validationErrors,
+        showFailModal,
+        setShowFailModal,
 
         // Actions
         handleSendTransaction,

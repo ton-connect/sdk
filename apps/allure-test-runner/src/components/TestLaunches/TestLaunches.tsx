@@ -38,6 +38,21 @@ export function TestLaunches() {
         );
     }
 
+    // Если выбран ланч, показываем только тест-кейсы
+    if (selectedLaunchId) {
+        const selectedLaunch = launches.find(launch => launch.id === selectedLaunchId);
+
+        return (
+            <TestCasesSection
+                launchId={selectedLaunchId}
+                onClose={() => setSelectedLaunchId(null)}
+                onComplete={complete}
+                launchClosed={selectedLaunch?.closed}
+            />
+        );
+    }
+
+    // Иначе показываем список ланчей
     return (
         <div className="test-runs">
             <div className="test-runs__section">
@@ -94,13 +109,6 @@ export function TestLaunches() {
                     />
                 )}
             </div>
-
-            {selectedLaunchId && (
-                <TestCasesSection
-                    launchId={selectedLaunchId}
-                    onClose={() => setSelectedLaunchId(null)}
-                />
-            )}
         </div>
     );
 }
