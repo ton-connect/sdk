@@ -20,9 +20,7 @@ export function OperationTypeField({ operationType }: Props) {
     return (
         <div className="operation-type-field">
             <div className="operation-type-field__label">Operation Type:</div>
-            <div className="operation-type-field__value">
-                {formatOperationType(operationType)}
-            </div>
+            <div className="operation-type-field__value">{formatOperationType(operationType)}</div>
         </div>
     );
 }

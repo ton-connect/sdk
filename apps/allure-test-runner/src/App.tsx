@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
+import { RouterProvider } from 'react-router-dom';
 import { TonConnectProvider } from './components/TonConnectProvider';
 import { Header } from './components/Header';
 import { STORAGE_KEYS } from './constants';
 import { AuthForm } from './components/AuthForm';
-import { TestLaunches } from './components/TestLaunches';
 import { AuthProvider } from './context/AuthContext';
+import { router } from './routes';
 
 function App() {
     const [jwt, setJwt] = useState<string>();
@@ -23,7 +24,7 @@ function App() {
                         {!jwt ? (
                             <AuthForm onSubmit={({ jwtToken }) => setJwt(jwtToken)} />
                         ) : (
-                            <TestLaunches />
+                            <RouterProvider router={router} />
                         )}
                     </main>
                 </div>
