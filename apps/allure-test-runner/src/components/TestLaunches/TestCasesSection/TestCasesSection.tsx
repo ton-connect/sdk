@@ -36,7 +36,8 @@ export function TestCasesSection({ launchId, onClose, onComplete, launchClosed =
         toggleGroup,
         isGroupExpanded,
         getGroupContents,
-        isGroupLoading
+        isGroupLoading,
+        hasGroupBeenLoaded
     } = useTestCases(launchId);
 
     const { isResizing, listWidth, detailsWidth, layoutRef, handleMouseDown } = useResize();
@@ -103,9 +104,6 @@ export function TestCasesSection({ launchId, onClose, onComplete, launchClosed =
                     }
                 >
                     <div className="test-cases-list">
-                        {loading && content.length > 0 && (
-                            <Loader size="small" text="Loading..." overlay />
-                        )}
                         {content.map(item => {
                             if (item.type === 'GROUP') {
                                 const group = item as TestCaseGroup;
@@ -119,6 +117,7 @@ export function TestCasesSection({ launchId, onClose, onComplete, launchClosed =
                                         onTestSelect={openTest}
                                         selectedTestId={selectedTestId}
                                         loading={isGroupLoading(group.id)}
+                                        hasBeenLoaded={hasGroupBeenLoaded(group.id)}
                                     />
                                 );
                             } else {
@@ -143,6 +142,7 @@ export function TestCasesSection({ launchId, onClose, onComplete, launchClosed =
                         <TestCaseDetails
                             testId={selectedTestId}
                             onTestCasesRefresh={refreshTestCases}
+                            onTestIdChange={openTest}
                         />
                     </div>
 

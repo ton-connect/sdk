@@ -13,9 +13,10 @@ import { useTransactionValidation } from './hooks/useTransactionValidation';
 type Props = {
     testId: number | null;
     onTestCasesRefresh?: () => void;
+    onTestIdChange?: (newTestId: number) => void;
 };
 
-export function TestCaseDetails({ testId, onTestCasesRefresh }: Props) {
+export function TestCaseDetails({ testId, onTestCasesRefresh, onTestIdChange }: Props) {
     const {
         testResult,
         loading,
@@ -30,7 +31,7 @@ export function TestCaseDetails({ testId, onTestCasesRefresh }: Props) {
         showFailModal,
         setShowFailModal,
         testResultWithCustomFields
-    } = useTestCaseDetails(testId, onTestCasesRefresh);
+    } = useTestCaseDetails(testId, onTestCasesRefresh, onTestIdChange);
 
     const {
         isResultValid,

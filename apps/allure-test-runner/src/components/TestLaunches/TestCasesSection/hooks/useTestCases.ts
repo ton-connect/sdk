@@ -1,13 +1,12 @@
 import { useState, useCallback } from 'react';
 import { useQuery } from '../../../../hooks/useQuery';
-import { useDebounce } from '../../../../hooks/useDebounce';
 import { useAllureApi } from '../../../../hooks/useAllureApi';
 import type { PaginatedResponse, TestCase } from '../../../../models';
 
 export function useTestCases(launchId: number) {
     const client = useAllureApi();
     const [search, setSearch] = useState('');
-    const searchQuery = useDebounce(search.trim(), 300);
+    const searchQuery = search.trim();
     const [selectedTestId, setSelectedTestId] = useState<number | null>(null);
     const [currentPath, setCurrentPath] = useState<number | undefined>(undefined);
     const [pathHistory, setPathHistory] = useState<Array<{ id: number; name: string }>>([]);
@@ -50,9 +49,23 @@ export function useTestCases(launchId: number) {
         setSelectedTestId(null);
     }, []);
 
-    const refreshTestCases = useCallback(() => {
+    const refreshTestCases = useCallback(async () => {
+        const currentExpandedGroups = new Set(expandedGroups);
+
+        setGroupContents(new Map());
+        setLoadingGroups(new Set());
+
         refetch();
-    }, [refetch]);
+
+        for (const groupId of currentExpandedGroups) {
+            try {
+                const result = await client.getLaunchItemTree(launchId, groupId);
+                setGroupContents(prev => new Map(prev).set(groupId, result.content));
+            } catch (error) {
+                console.error(`Failed to reload group ${groupId}:`, error);
+            }
+        }
+    }, [refetch, expandedGroups, client, launchId]);
 
     const openGroup = useCallback((group: { id: number; name: string }) => {
         setPathHistory(prev => [...prev, group]);
@@ -160,6 +173,13 @@ export function useTestCases(launchId: number) {
         [loadingGroups]
     );
 
+    const hasGroupBeenLoaded = useCallback(
+        (groupId: number) => {
+            return groupContents.has(groupId);
+        },
+        [groupContents]
+    );
+
     return {
         // State
         search,
@@ -186,6 +206,7 @@ export function useTestCases(launchId: number) {
         toggleGroup,
         isGroupExpanded,
         getGroupContents,
-        isGroupLoading
+        isGroupLoading,
+        hasGroupBeenLoaded
     };
 }

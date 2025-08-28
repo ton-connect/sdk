@@ -4,7 +4,11 @@ import { useAllureApi } from '../../../../hooks/useAllureApi';
 import type { TestResult, TestResultWithCustomFields } from '../../../../models';
 import { AllureService } from '../../../../services/allure.service';
 
-export function useTestCaseDetails(testId: number | null, onTestCasesRefresh?: () => void) {
+export function useTestCaseDetails(
+    testId: number | null,
+    onTestCasesRefresh?: () => void,
+    onTestIdChange?: (newTestId: number) => void
+) {
     const api = useAllureApi();
     const [isSwitching, setIsSwitching] = useState(false);
     const [isResolving, setIsResolving] = useState(false);
@@ -81,10 +85,23 @@ export function useTestCaseDetails(testId: number | null, onTestCasesRefresh?: (
     const handleRerun = useCallback(async () => {
         if (!testResult) return;
 
-        await api.rerunTestResult({ id: testResult.id, username: testResult.createdBy });
-        refetch();
-        onTestCasesRefresh?.();
-    }, [api, testResult, onTestCasesRefresh]);
+        try {
+            const rerunResult = await api.rerunTestResult({
+                id: testResult.id,
+                username: testResult.createdBy
+            });
+
+            if (rerunResult.id && onTestIdChange) {
+                onTestIdChange(rerunResult.id);
+                onTestCasesRefresh?.();
+            } else {
+                refetch();
+                onTestCasesRefresh?.();
+            }
+        } catch (error) {
+            console.error('Rerun failed:', error);
+        }
+    }, [api, testResult, refetch, onTestCasesRefresh, onTestIdChange]);
 
     return {
         // State

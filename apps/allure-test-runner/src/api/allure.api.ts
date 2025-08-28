@@ -213,7 +213,10 @@ export class AllureApiClient {
         }
     }
 
-    async rerunTestResult(params: RerunTestResultParams, signal?: AbortSignal): Promise<void> {
+    async rerunTestResult(
+        params: RerunTestResultParams,
+        signal?: AbortSignal
+    ): Promise<{ id: number; name: string }> {
         const res = await fetch(this.buildUrl(`/api/testresult/${params.id}/rerun`), {
             method: 'POST',
             headers: this.buildHeaders(),
@@ -228,6 +231,8 @@ export class AllureApiClient {
                 `Failed to rerun test result ${params.id}: ${res.status} ${res.statusText}`
             );
         }
+
+        return res.json();
     }
 
     async getCustomFields(testResultId: number, signal?: AbortSignal): Promise<CustomField[]> {

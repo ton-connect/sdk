@@ -1,6 +1,6 @@
 import { StatusLabel } from '../StatusLabel/StatusLabel';
 import { GroupStatistic } from '../GroupStatistic';
-import { Skeleton } from '../Skeleton';
+import { Loader } from '../Loader';
 import type { TestCaseGroup, TestCaseItem, TestCase } from '../../../models';
 import './ExpandableGroup.scss';
 
@@ -12,6 +12,7 @@ type ExpandableGroupProps = {
     onTestSelect: (testId: number) => void;
     selectedTestId: number | null;
     loading?: boolean;
+    hasBeenLoaded?: boolean;
 };
 
 export function ExpandableGroup({
@@ -21,7 +22,8 @@ export function ExpandableGroup({
     onToggle,
     onTestSelect,
     selectedTestId,
-    loading = false
+    loading = false,
+    hasBeenLoaded = false
 }: ExpandableGroupProps) {
     const handleToggle = () => {
         onToggle(group.id);
@@ -80,8 +82,10 @@ export function ExpandableGroup({
 
             {isExpanded && (
                 <div className="expandable-group__content">
-                    {loading ? (
-                        <Skeleton type="group-content" lines={3} />
+                    {loading || (!hasBeenLoaded && contents.length === 0) ? (
+                        <div className="expandable-group__loading">
+                            <Loader size="small" text="Loading group content..." />
+                        </div>
                     ) : contents.length === 0 ? (
                         <div className="expandable-group__empty">No items found in this group</div>
                     ) : (
