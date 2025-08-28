@@ -32,6 +32,12 @@
     gap: 1rem;
 }
 
+.test-runs__section-header-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
 .btn-back {
     display: flex;
     align-items: center;
@@ -436,6 +442,13 @@
     overflow-y: auto;
     padding: 6px 12px;
     max-height: 100%;
+    position: relative;
+    
+    /* Убеждаемся, что элементы располагаются в нормальном потоке */
+    & > * {
+        position: relative;
+        z-index: auto;
+    }
 }
 
 .test-case-details-container {
@@ -481,25 +494,49 @@
 .test-case-item {
     border: 1px solid #334155;
     border-radius: 8px;
-    padding: 10px 12px;
+    padding: 8px 12px; /* Уменьшили padding для меньшей высоты */
     cursor: pointer;
     background: #0f172a;
     display: flex;
     align-items: center;
     gap: 12px;
+    transition: all 0.2s ease;
+
+    &:hover {
+        border-color: #475569;
+        background: #1e293b;
+    }
+
+    &--selected {
+        outline: 2px solid #3b82f6;
+    }
 }
 
-.test-case-item--selected {
-    outline: 2px solid #3b82f6;
+.test-case-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.test-case-chevron {
+    font-size: 1.2rem;
+    color: #94a3b8;
+    font-weight: bold;
 }
 
 .test-case-title {
     font-weight: 600;
     flex: 1;
+    font-size: 14px; /* Уменьшили размер шрифта */
 }
 
 .test-case-status {
     flex-shrink: 0;
+}
+
+.test-case-content {
+    margin-top: 8px;
 }
 
 @media (max-width: 768px) {

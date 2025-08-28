@@ -1,7 +1,12 @@
 import { SearchBar } from '../SearchBar/SearchBar';
 import { TestCaseDetails } from '../TestCaseDetails';
 import { StatusLabel } from '../StatusLabel/StatusLabel';
+
+import { TreeNavigation } from '../TreeNavigation';
+import { Loader } from '../Loader';
+import { ExpandableGroup } from '../ExpandableGroup';
 import { useTestCases, useResize } from './hooks';
+import type { TestCaseGroup, TestCaseItem } from '../../../models';
 
 type Props = {
     launchId: number;
@@ -17,10 +22,21 @@ export function TestCasesSection({ launchId, onClose, onComplete, launchClosed =
         selectedTestId,
         loading,
         error,
+        viewMode,
+        pathHistory,
         handleRefresh,
         handleSearchChange,
         openTest,
-        refreshTestCases
+        refreshTestCases,
+
+        goBack,
+        goToRoot,
+        toggleViewMode,
+        navigateToLevel,
+        toggleGroup,
+        isGroupExpanded,
+        getGroupContents,
+        isGroupLoading
     } = useTestCases(launchId);
 
     const { isResizing, listWidth, detailsWidth, layoutRef, handleMouseDown } = useResize();
@@ -35,6 +51,13 @@ export function TestCasesSection({ launchId, onClose, onComplete, launchClosed =
                 </div>
                 <h3 className="test-runs__section-title">Test Cases in Launch #{launchId}</h3>
                 <div className="test-runs__section-header-right">
+                    <button
+                        onClick={toggleViewMode}
+                        className={`btn ${viewMode === 'tree' ? 'btn-primary' : 'btn-secondary'}`}
+                        title={`Switch to ${viewMode === 'tree' ? 'flat' : 'tree'} view`}
+                    >
+                        {viewMode === 'tree' ? 'Tree View' : 'Flat View'}
+                    </button>
                     {!launchClosed && onComplete && (
                         <button onClick={() => onComplete(launchId)} className="btn btn-success">
                             Complete Launch
@@ -52,10 +75,20 @@ export function TestCasesSection({ launchId, onClose, onComplete, launchClosed =
                 />
             </div>
 
+            {viewMode === 'tree' && (
+                <TreeNavigation
+                    pathHistory={pathHistory}
+                    onGoToRoot={goToRoot}
+                    onGoBack={goBack}
+                    onNavigateTo={navigateToLevel}
+                    loading={loading}
+                />
+            )}
+
             {error ? (
                 <div className="test-runs__error">Failed to load test cases</div>
             ) : loading && content.length === 0 ? (
-                <div className="test-runs__loading">Loading test cases...</div>
+                <Loader size="large" text="Loading test cases..." />
             ) : content.length === 0 ? (
                 <div className="test-runs__empty">No test cases found</div>
             ) : (
@@ -70,18 +103,40 @@ export function TestCasesSection({ launchId, onClose, onComplete, launchClosed =
                     }
                 >
                     <div className="test-cases-list">
-                        {content.map(testCase => (
-                            <div
-                                key={testCase.id}
-                                className={`test-case-item ${selectedTestId === testCase.id ? 'test-case-item--selected' : ''}`}
-                                onClick={() => openTest(testCase.id)}
-                            >
-                                <div className="test-case-title">{testCase.name}</div>
-                                <div className="test-case-status">
-                                    <StatusLabel status={testCase.status} />
-                                </div>
-                            </div>
-                        ))}
+                        {loading && content.length > 0 && (
+                            <Loader size="small" text="Loading..." overlay />
+                        )}
+                        {content.map(item => {
+                            if (item.type === 'GROUP') {
+                                const group = item as TestCaseGroup;
+                                return (
+                                    <ExpandableGroup
+                                        key={group.id}
+                                        group={group}
+                                        isExpanded={isGroupExpanded(group.id)}
+                                        contents={getGroupContents(group.id)}
+                                        onToggle={toggleGroup}
+                                        onTestSelect={openTest}
+                                        selectedTestId={selectedTestId}
+                                        loading={isGroupLoading(group.id)}
+                                    />
+                                );
+                            } else {
+                                const testCase = item as TestCaseItem;
+                                return (
+                                    <div
+                                        key={testCase.id}
+                                        className={`test-case-item ${selectedTestId === testCase.id ? 'test-case-item--selected' : ''}`}
+                                        onClick={() => openTest(testCase.id)}
+                                    >
+                                        <div className="test-case-title">{testCase.name}</div>
+                                        <div className="test-case-status">
+                                            <StatusLabel status={testCase.status} />
+                                        </div>
+                                    </div>
+                                );
+                            }
+                        })}
                     </div>
 
                     <div className="test-case-details-container">

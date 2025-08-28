@@ -17,25 +17,25 @@ export function TestCaseDetails({ testId, onTestCasesRefresh }: Props) {
     const {
         result,
         loading,
-        isSwitching,
-        isSending,
-        isResolving,
-        transactionResult,
+        isSwitching, // Вынести стейты кнопок
+        isSending, // useTransactionValidation
+        isResolving, // Вынести
+        transactionResult, // useTransactionValidation
         parsedPre,
         parsedExpected,
-        expandedPrecondition,
-        expandedExpectedResult,
-        expandedTransactionResult,
-        wallet,
-        tonConnectUI,
-        handleSendTransaction,
+        expandedPrecondition, // Вынести состояния открытости 
+        expandedExpectedResult, // Вынести состояния открытости 
+        expandedTransactionResult, // Вынести состояния открытости 
+        wallet, // вынести в свой хук useTonConnect
+        tonConnectUI, // вынести в свой хук useTonConnect
+        handleSendTransaction, // вынести в хук useTransactionValidation
         handleResolve,
         handleFail,
         handleRerun,
         isFailing,
-        togglePrecondition,
-        toggleExpectedResult,
-        toggleTransactionResult,
+        togglePrecondition, // Вынести
+        toggleExpectedResult, // Вынести
+        toggleTransactionResult, // Вынести
         isResultValid,
         validationErrors,
         showFailModal,

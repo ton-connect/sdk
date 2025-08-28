@@ -94,7 +94,6 @@ export function useTestCaseDetails(testId: number | null, onTestCasesRefresh?: (
         }
     }, [result]);
 
-    // TODO: refactor (errors not displaying) (not updating)
     const [validationErrors, setValidationErrors] = useState<string[]>([]);
     const [showFailModal, setShowFailModal] = useState(false);
 

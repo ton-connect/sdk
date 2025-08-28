@@ -1,0 +1,65 @@
+.tree-navigation {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    background-color: var(--background-secondary);
+    border-radius: 6px;
+    margin-bottom: 12px;
+    font-size: 14px;
+    gap: 4px;
+
+    &__item {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+        font-size: inherit;
+
+        &:hover {
+            background-color: var(--background-hover);
+            color: var(--text-primary);
+        }
+
+        &--root {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+    }
+
+    &__segment {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    &__separator {
+        color: var(--text-tertiary);
+        font-weight: bold;
+        padding: 0 4px;
+    }
+
+    &__back-btn {
+        background: var(--background-primary);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        cursor: pointer;
+        padding: 4px 12px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+        font-size: inherit;
+        margin-left: auto;
+
+        &:hover:not(:disabled) {
+            background-color: var(--background-hover);
+            border-color: var(--border-hover);
+        }
+
+        &:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    }
+}

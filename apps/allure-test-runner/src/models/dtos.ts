@@ -41,6 +41,7 @@ export type TestCaseFilters = {
     page?: number;
     size?: number;
     sort?: string;
+    path?: number;
 };
 
 export type ResolveTestResultParams = {

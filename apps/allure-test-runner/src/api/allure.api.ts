@@ -118,6 +118,51 @@ export class AllureApiClient {
         return res.json();
     }
 
+    async getLaunchItemsTree(
+        params: TestCaseFilters,
+        signal?: AbortSignal
+    ): Promise<PaginatedResponse<TestCase>> {
+        const { launchId, search, page = 0, size = 100, sort = 'name,ASC', path } = params;
+        const searchEncoded = search ? this.buildSearch('content', search) : undefined;
+
+        const url = this.buildUrl(`/api/v2/launch/${launchId}/test-result/tree/entity`, {
+            search: searchEncoded,
+            page,
+            size,
+            sort,
+            treeId: 70,
+            path
+        });
+
+        const res = await fetch(url, { headers: this.buildHeaders(), signal });
+        if (!res.ok) {
+            throw new Error(`Failed to fetch launch items tree: ${res.status} ${res.statusText}`);
+        }
+
+        return res.json();
+    }
+
+    async getLaunchItemTree(
+        launchId: number,
+        groupId: number,
+        signal?: AbortSignal
+    ): Promise<PaginatedResponse<TestCase>> {
+        const url = this.buildUrl(`/api/v2/launch/${launchId}/test-result/tree/entity`, {
+            treeId: 70,
+            path: groupId,
+            page: 0,
+            size: 100,
+            sort: 'name,ASC'
+        });
+
+        const res = await fetch(url, { headers: this.buildHeaders(), signal });
+        if (!res.ok) {
+            throw new Error(`Failed to fetch launch item tree: ${res.status} ${res.statusText}`);
+        }
+
+        return res.json();
+    }
+
     async completeLaunch(id: number): Promise<void> {
         const res = await fetch(this.buildUrl(`/api/launch/${id}/close`), {
             method: 'POST',
