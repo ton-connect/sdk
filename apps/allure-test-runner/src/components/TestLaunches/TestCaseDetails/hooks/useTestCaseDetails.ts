@@ -158,7 +158,7 @@ export function useTestCaseDetails(testId: number | null, onTestCasesRefresh?: (
         try {
             setIsResolving(true);
             await client.resolveTestResult({ id: result.id, status: 'passed' });
-            await refetch();
+            refetch();
             // Обновляем список тест-кейсов после изменения статуса
             onTestCasesRefresh?.();
         } finally {
@@ -194,6 +194,14 @@ export function useTestCaseDetails(testId: number | null, onTestCasesRefresh?: (
         },
         [result, client, refetch, onTestCasesRefresh]
     );
+
+    const handleRerun = useCallback(async () => {
+        if (!result) return;
+
+        await client.rerunTestResult({ id: result.id, username: result.createdBy });
+        refetch();
+        onTestCasesRefresh?.();
+    }, [result, result, onTestCasesRefresh]);
 
     const togglePrecondition = useCallback(() => {
         setExpandedPrecondition(prev => !prev);
@@ -232,6 +240,7 @@ export function useTestCaseDetails(testId: number | null, onTestCasesRefresh?: (
         handleSendTransaction,
         handleResolve,
         handleFail,
+        handleRerun,
         togglePrecondition,
         toggleExpectedResult,
         toggleTransactionResult

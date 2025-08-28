@@ -51,3 +51,8 @@ export type ResolveTestResultParams = {
     status: 'passed' | 'failed';
     message?: string;
 };
+
+export type RerunTestResultParams = {
+    id: number;
+    username: string;
+};

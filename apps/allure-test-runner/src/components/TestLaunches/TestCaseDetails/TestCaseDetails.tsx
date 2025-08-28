@@ -31,6 +31,7 @@ export function TestCaseDetails({ testId, onTestCasesRefresh }: Props) {
         handleSendTransaction,
         handleResolve,
         handleFail,
+        handleRerun,
         isFailing,
         togglePrecondition,
         toggleExpectedResult,
@@ -125,6 +126,7 @@ export function TestCaseDetails({ testId, onTestCasesRefresh }: Props) {
                 onSendTransaction={handleSendTransaction}
                 onResolve={handleResolve}
                 onFail={handleFail}
+                onRerun={handleRerun}
             />
 
             <FailModal

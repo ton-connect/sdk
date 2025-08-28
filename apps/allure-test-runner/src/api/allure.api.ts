@@ -5,7 +5,8 @@ import type {
     LaunchFilters,
     TestCaseFilters,
     TestResult,
-    ResolveTestResultParams
+    ResolveTestResultParams,
+    RerunTestResultParams
 } from '../models';
 import { Base64 } from '@tonconnect/protocol';
 
@@ -160,6 +161,22 @@ export class AllureApiClient {
         if (!res.ok) {
             throw new Error(
                 `Failed to resolve test result ${params.id}: ${res.status} ${res.statusText}`
+            );
+        }
+    }
+
+    async rerunTestResult(params: RerunTestResultParams): Promise<void> {
+        const res = await fetch(this.buildUrl(`/api/testresult/${params.id}/rerun`), {
+            method: 'POST',
+            headers: this.buildHeaders(),
+            body: JSON.stringify({
+                username: params.username
+            })
+        });
+
+        if (!res.ok) {
+            throw new Error(
+                `Failed to rerun test result ${params.id}: ${res.status} ${res.statusText}`
             );
         }
     }

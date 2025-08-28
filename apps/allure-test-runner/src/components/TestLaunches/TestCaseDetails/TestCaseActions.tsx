@@ -14,6 +14,7 @@ type Props = {
     onSendTransaction: () => void;
     onResolve: () => void;
     onFail: (message: string) => void;
+    onRerun: () => void;
 };
 
 export function TestCaseActions({
@@ -27,7 +28,8 @@ export function TestCaseActions({
     status,
     onSendTransaction,
     onResolve,
-    onFail
+    onFail,
+    onRerun
 }: Props) {
     const [isFailModalOpen, setIsFailModalOpen] = useState(false);
 
@@ -85,6 +87,17 @@ export function TestCaseActions({
                             {isFailing ? 'Marking as Failed...' : 'Failed'}
                         </button>
                     </>
+                )}
+
+                {isStatusFinal && (
+                    <button
+                        onClick={onRerun}
+                        disabled={!hasResult}
+                        className="btn btn-secondary"
+                        style={{ marginLeft: 4 }}
+                    >
+                        Rerun
+                    </button>
                 )}
 
                 {!hasPrecondition && (
