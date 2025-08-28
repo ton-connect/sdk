@@ -5,45 +5,65 @@ import { evalFenceCondition } from '../../../../utils/jsonEval';
 import type { TestResult } from '../../../../models';
 import type { SendTransactionRpcResponse } from '@tonconnect/protocol';
 
-// TODO: collect fields recursively
-export function compareResult(result: unknown, expected: unknown, errors: string[]): boolean {
+function compareResult(result: unknown, expected: unknown) {
+    const errors: string[] = [];
+    const success = compareResultInner(result, expected, errors);
+    return [success, errors] as const;
+}
+
+function compareResultInner(
+    result: unknown,
+    expected: unknown,
+    errors: string[],
+    path: string = ''
+): boolean {
     let success = true;
+    const field = path ? `field "${path}"` : 'value';
+
     if (typeof expected === 'object' && expected !== null) {
+        if (typeof result !== 'object' || result === null) {
+            errors.push(`${field}: expected object, got ${typeof result}`);
+            return false;
+        }
+
         for (const key in expected) {
-            if (typeof result === 'object' && result !== null && key in result) {
+            const newPath = path ? `${path}.${key}` : key;
+
+            if (key in (result as Record<string, unknown>)) {
                 if (
-                    !compareResult(
+                    !compareResultInner(
                         (result as Record<string, unknown>)[key],
                         (expected as Record<string, unknown>)[key],
-                        errors
+                        errors,
+                        newPath
                     )
                 ) {
                     success = false;
                 }
             } else {
                 success = false;
-                errors.push(`Missing key "${key}" in result`);
+                errors.push(`field "${newPath}" is missing`);
             }
         }
-
         return success;
     }
 
     if (typeof expected === 'function') {
-        success = (expected as Function)(result);
-        if (!success) {
+        const passed = expected(result);
+        if (!passed) {
             errors.push(
-                `Value "${result}" does not pass condition "${(expected as Function).name}".`
+                `${field}: value "${result}" failed for predicate ${expected.name || 'predicate'}`
             );
         }
-        return success;
+        return passed;
     }
 
-    success = result === expected;
-    if (!success) {
-        errors.push(`Expected "${expected}", but got "${result}"`);
+    if (result !== expected) {
+        errors.push(`${field}: expected "${expected}", got "${result}"`);
+        return false;
     }
-    return success;
+
+    return true;
 }
 
 export function useTransactionValidation({
@@ -70,19 +90,21 @@ export function useTransactionValidation({
         () =>
             transactionResult && testResult
                 ? (() => {
-                      const errors: string[] = [];
                       const parsedExpected = evalFenceCondition(testResult.expectedResult);
-                      const res = compareResult(transactionResult, parsedExpected, errors);
+                      const [isResultValid, errors] = compareResult(
+                          transactionResult,
+                          parsedExpected
+                      );
                       setValidationErrors(errors);
 
                       // Show fail modal if validation failed
-                      if (!res && errors.length > 0) {
+                      if (!isResultValid && errors.length > 0) {
                           setShowFailModal(true);
                       } else if (testResult.status !== 'passed') {
                           handleResolve();
                       }
 
-                      return res;
+                      return isResultValid;
                   })()
                 : undefined,
         [transactionResult]
