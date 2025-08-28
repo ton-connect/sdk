@@ -39,10 +39,10 @@ const functionScope = [
     isNonNegativeInt
 ];
 
-export function evalFenceCondition<T = unknown>(input: string | undefined | null): T | null {
-    if (!input) return null;
+export function evalFenceCondition<T = unknown>(input: string | undefined | null): T | undefined {
+    if (!input) return undefined;
     const fromFence = extractFromCodeFence(input);
-    if (!fromFence) return null;
+    if (!fromFence) return undefined;
     try {
         return new Function(
             ...functionScope.map(fn => fn.name),
@@ -50,6 +50,6 @@ export function evalFenceCondition<T = unknown>(input: string | undefined | null
         )(...functionScope);
     } catch (error) {
         console.error(error);
-        return null;
+        return undefined;
     }
 }

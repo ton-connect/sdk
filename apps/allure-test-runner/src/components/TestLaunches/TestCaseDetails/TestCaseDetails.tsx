@@ -1,12 +1,13 @@
 import { TestCaseHeader } from './TestCaseHeader';
 import { TestCaseDescription } from './TestCaseDescription';
-import { TestCaseJsonSection } from './TestCaseJsonSection';
+import { TestCaseExpandableSection } from './TestCaseExpandableSection';
 import { TestCaseActions } from './TestCaseActions';
 import { TestCaseStates } from './TestCaseStates';
 import { FailModal } from './FailModal';
 
 import { useTestCaseDetails } from './hooks';
 import './TestCaseDetails.scss';
+import { useTransactionValidation } from './hooks/useTransactionValidation';
 
 type Props = {
     testId: number | null;
@@ -15,39 +16,44 @@ type Props = {
 
 export function TestCaseDetails({ testId, onTestCasesRefresh }: Props) {
     const {
-        result,
+        testResult,
         loading,
-        isSwitching, // Вынести стейты кнопок
-        isSending, // useTransactionValidation
-        isResolving, // Вынести
-        transactionResult, // useTransactionValidation
-        parsedPre,
-        parsedExpected,
-        expandedPrecondition, // Вынести состояния открытости 
-        expandedExpectedResult, // Вынести состояния открытости 
-        expandedTransactionResult, // Вынести состояния открытости 
-        wallet, // вынести в свой хук useTonConnect
-        tonConnectUI, // вынести в свой хук useTonConnect
-        handleSendTransaction, // вынести в хук useTransactionValidation
+        isSwitching,
+        isResolving,
+        isFailing,
         handleResolve,
         handleFail,
         handleRerun,
-        isFailing,
-        togglePrecondition, // Вынести
-        toggleExpectedResult, // Вынести
-        toggleTransactionResult, // Вынести
-        isResultValid,
         validationErrors,
+        setValidationErrors,
         showFailModal,
         setShowFailModal
     } = useTestCaseDetails(testId, onTestCasesRefresh);
 
-    const stateComponent = TestCaseStates({ testId, isSwitching, loading, hasResult: !!result });
+    const {
+        isResultValid,
+        transactionResult,
+        handleSendTransaction,
+        isSending,
+        sendTransactionParams
+    } = useTransactionValidation({
+        testResult,
+        setValidationErrors,
+        setShowFailModal,
+        handleResolve
+    });
+
+    const stateComponent = TestCaseStates({
+        testId,
+        isSwitching,
+        loading,
+        hasResult: !!testResult
+    });
     if (stateComponent) {
         return stateComponent;
     }
 
-    if (!result) {
+    if (!testResult) {
         return null;
     }
 
@@ -55,37 +61,35 @@ export function TestCaseDetails({ testId, onTestCasesRefresh }: Props) {
         <div className="test-case-details">
             <div className="test-case-details__content">
                 <TestCaseHeader
-                    name={result.name}
-                    status={result.status}
-                    message={result.message}
+                    name={testResult.name}
+                    status={testResult.status}
+                    message={testResult.message}
                 />
 
                 <TestCaseDescription
-                    description={result.description}
-                    descriptionHtml={result.descriptionHtml}
+                    description={testResult.description}
+                    descriptionHtml={testResult.descriptionHtml}
                 />
 
-                <TestCaseJsonSection
+                <TestCaseExpandableSection
                     title="Precondition"
-                    isExpanded={expandedPrecondition}
-                    onToggle={togglePrecondition}
-                    data={parsedPre}
+                    data={testResult.precondition}
+                    dataHtml={testResult.preconditionHtml}
                 />
 
-                <TestCaseJsonSection
+                <TestCaseExpandableSection
                     title="Expected Result"
-                    isExpanded={expandedExpectedResult}
-                    onToggle={toggleExpectedResult}
-                    data={parsedExpected}
+                    data={testResult.expectedResult}
+                    dataHtml={testResult.expectedResultHtml}
                 />
 
+                {/*TODO: extract*/}
                 {transactionResult && (
                     <>
-                        <TestCaseJsonSection
+                        <TestCaseExpandableSection
                             title="Transaction Result"
-                            isExpanded={expandedTransactionResult}
-                            onToggle={toggleTransactionResult}
-                            data={transactionResult}
+                            // TODO: как то не джейсоницццаца
+                            data={JSON.stringify(transactionResult, null, 2)}
                             className="transaction-result-json"
                         />
                         <div className="validation-status">
@@ -115,14 +119,11 @@ export function TestCaseDetails({ testId, onTestCasesRefresh }: Props) {
             </div>
 
             <TestCaseActions
-                wallet={wallet}
-                tonConnectUI={tonConnectUI}
+                testResult={testResult}
+                sendTransactionParams={sendTransactionParams}
                 isSending={isSending}
                 isResolving={isResolving}
                 isFailing={isResolving}
-                hasPrecondition={!!parsedPre}
-                hasResult={!!result}
-                status={result.status}
                 onSendTransaction={handleSendTransaction}
                 onResolve={handleResolve}
                 onFail={handleFail}

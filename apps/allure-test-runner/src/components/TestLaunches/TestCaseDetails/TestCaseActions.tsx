@@ -1,16 +1,17 @@
 import { useState } from 'react';
-import type { TonConnectUI } from '@tonconnect/ui-react';
+import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
+import type { SendTransactionRequest } from '@tonconnect/ui-react';
 import { FailModal } from './FailModal';
+import type { TestResult } from '../../../models';
 
 type Props = {
-    wallet: { account: { address: string } } | null;
-    tonConnectUI: TonConnectUI;
+    testResult: TestResult | undefined;
+    sendTransactionParams: SendTransactionRequest | undefined;
+
     isSending: boolean;
     isResolving: boolean;
     isFailing: boolean;
-    hasPrecondition: boolean;
-    hasResult: boolean;
-    status?: 'unknown' | 'passed' | 'failed';
+
     onSendTransaction: () => void;
     onResolve: () => void;
     onFail: (message: string) => void;
@@ -18,19 +19,18 @@ type Props = {
 };
 
 export function TestCaseActions({
-    wallet,
-    tonConnectUI,
+    testResult,
+    sendTransactionParams,
     isSending,
     isResolving,
     isFailing,
-    hasPrecondition,
-    hasResult,
-    status,
     onSendTransaction,
     onResolve,
     onFail,
     onRerun
 }: Props) {
+    const wallet = useTonWallet();
+    const [tonConnectUI] = useTonConnectUI();
     const [isFailModalOpen, setIsFailModalOpen] = useState(false);
 
     const handleFailSubmit = (message: string) => {
@@ -38,7 +38,7 @@ export function TestCaseActions({
         setIsFailModalOpen(false);
     };
 
-    const isStatusFinal = status === 'passed' || status === 'failed';
+    const isStatusFinal = testResult?.status === 'passed' || testResult?.status === 'failed';
 
     return (
         <>
@@ -46,7 +46,7 @@ export function TestCaseActions({
                 {wallet ? (
                     <button
                         onClick={onSendTransaction}
-                        disabled={isSending || !hasPrecondition}
+                        disabled={isSending || !sendTransactionParams}
                         className="btn btn-primary transaction-btn"
                     >
                         {isSending ? (
@@ -60,7 +60,7 @@ export function TestCaseActions({
                     </button>
                 ) : (
                     <button
-                        onClick={() => tonConnectUI.connectWallet()}
+                        onClick={() => tonConnectUI.openModal()}
                         className="btn btn-secondary transaction-btn"
                     >
                         Connect Wallet & Send Transaction
@@ -71,7 +71,7 @@ export function TestCaseActions({
                     <>
                         <button
                             onClick={onResolve}
-                            disabled={isResolving || !hasResult}
+                            disabled={isResolving || !testResult}
                             className="btn btn-success"
                             style={{ marginLeft: 4 }}
                         >
@@ -80,7 +80,7 @@ export function TestCaseActions({
 
                         <button
                             onClick={() => setIsFailModalOpen(true)}
-                            disabled={isFailing || !hasResult}
+                            disabled={isFailing || !testResult}
                             className="btn btn-danger"
                             style={{ marginLeft: 4 }}
                         >
@@ -91,19 +91,14 @@ export function TestCaseActions({
 
                 {isStatusFinal && (
                     <button
+                        // TODO: fixme button not reloading states tata ta tat tat (TREE VIEW!!!!)
                         onClick={onRerun}
-                        disabled={!hasResult}
+                        disabled={!testResult}
                         className="btn btn-secondary"
                         style={{ marginLeft: 4 }}
                     >
                         Rerun
                     </button>
-                )}
-
-                {!hasPrecondition && (
-                    <div className="test-case-note">
-                        Note: Precondition data is required to send transaction
-                    </div>
                 )}
             </div>
 
