@@ -11,6 +11,11 @@ export function TestCaseExpandableSection({ title, data, dataHtml, className }: 
     const [isExpanded, setExpanded] = useState(false);
     const toggle = () => setExpanded(value => !value);
 
+    // Определяем, является ли контент JSON
+    const isJsonContent =
+        className === 'transaction-result-json' ||
+        (data && data.trim().startsWith('{') && data.trim().endsWith('}'));
+
     return (
         <div className="test-case-section">
             <button className="test-case-section-header" onClick={toggle}>
@@ -19,13 +24,22 @@ export function TestCaseExpandableSection({ title, data, dataHtml, className }: 
             </button>
             {isExpanded && (
                 <div className="test-case-content">
-                    <div className={className || 'json-block'}>
-                        {dataHtml ? (
-                            <div dangerouslySetInnerHTML={{ __html: dataHtml }} />
-                        ) : (
-                            <code>{data ?? '-'}</code>
-                        )}
-                    </div>
+                    {dataHtml ? (
+                        <div
+                            className="plain-text html-content"
+                            dangerouslySetInnerHTML={{ __html: dataHtml }}
+                        />
+                    ) : (
+                        <div className={className || (isJsonContent ? 'json-block' : 'text-block')}>
+                            {isJsonContent ? (
+                                <pre>
+                                    <code>{data ?? '-'}</code>
+                                </pre>
+                            ) : (
+                                <div className="plain-text">{data ?? '-'}</div>
+                            )}
+                        </div>
+                    )}
                 </div>
             )}
         </div>
