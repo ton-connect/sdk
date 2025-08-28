@@ -1,0 +1,39 @@
+.operation-type-field {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding: 12px;
+    background: #1e293b;
+    border-radius: 8px;
+    border: 1px solid #334155;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+
+    &__label {
+        font-weight: 600;
+        color: #e2e8f0;
+        font-size: 0.9rem;
+    }
+
+    &__value {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #e2e8f0;
+    }
+}
+
+// Адаптивность для мобильных устройств
+@media (max-width: 768px) {
+    .operation-type-field {
+        padding: 10px;
+
+        &__label {
+            font-size: 0.8rem;
+        }
+
+        &__value {
+            font-size: 0.8rem;
+            padding: 3px 6px;
+        }
+    }
+}

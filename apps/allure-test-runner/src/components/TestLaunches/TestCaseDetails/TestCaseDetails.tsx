@@ -4,6 +4,7 @@ import { TestCaseExpandableSection } from './TestCaseExpandableSection';
 import { TestCaseActions } from './TestCaseActions';
 import { TestCaseStates } from './TestCaseStates';
 import { FailModal } from './FailModal';
+import { OperationTypeField } from './OperationTypeField';
 
 import { useTestCaseDetails } from './hooks';
 import './TestCaseDetails.scss';
@@ -61,13 +62,13 @@ export function TestCaseDetails({ testId, onTestCasesRefresh }: Props) {
     return (
         <div className="test-case-details">
             <div className="test-case-details__content">
-                {/*TODO: manage carefuly*/}
-                CUSTOM FIELD OPERATION TYPE:
-                {testResultWithCustomFields?.customFields?.operationType}
                 <TestCaseHeader
                     name={testResult.name}
                     status={testResult.status}
                     message={testResult.message}
+                />
+                <OperationTypeField
+                    operationType={testResultWithCustomFields?.customFields?.operationType}
                 />
                 <TestCaseDescription
                     description={testResult.description}
