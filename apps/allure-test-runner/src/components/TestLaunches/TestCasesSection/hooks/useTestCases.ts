@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '../../../../hooks/useQuery';
 import { useAllureApi } from '../../../../hooks/useAllureApi';
 import type { PaginatedResponse, TestCase } from '../../../../models';
+import { useDebounce } from '../../../../hooks/useDebounce';
 
 // URL state management utilities
 type TreeUrlState = {
@@ -70,7 +71,7 @@ export function useTestCases(launchId: number) {
             : (urlState.selectedTestId ?? null);
 
     const [search, setSearch] = useState('');
-    const searchQuery = search.trim();
+    const searchQuery = useDebounce(search.trim(), 300);
     const [currentPath, setCurrentPath] = useState<number | undefined>(
         urlState.pathHistory && urlState.pathHistory.length > 0
             ? urlState.pathHistory[urlState.pathHistory.length - 1].id

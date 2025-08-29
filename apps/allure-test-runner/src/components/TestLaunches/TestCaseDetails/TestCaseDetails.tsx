@@ -9,6 +9,7 @@ import { OperationTypeField } from './OperationTypeField';
 import { useTestCaseDetails } from './hooks';
 import './TestCaseDetails.scss';
 import { useTransactionValidation } from './hooks/useTransactionValidation';
+import { ValidationStatus } from './ValidationStatus';
 
 type Props = {
     testId: number | null;
@@ -94,28 +95,10 @@ export function TestCaseDetails({ testId, onTestCasesRefresh, onTestIdChange }: 
                             data={JSON.stringify(transactionResult, null, 2)}
                             className="transaction-result-json"
                         />
-                        <div className="validation-status">
-                            <div
-                                className={`validation-status__indicator ${isResultValid ? 'valid' : 'invalid'}`}
-                            >
-                                {isResultValid ? '✓ VALID' : '✗ NOT VALID'}
-                            </div>
-                            {!isResultValid && validationErrors.length > 0 && (
-                                <div className="validation-errors">
-                                    <h4 className="validation-errors__title">Validation Errors:</h4>
-                                    <div className="validation-errors__list">
-                                        {validationErrors.map((error, index) => (
-                                            <div key={index} className="validation-errors__item">
-                                                <span className="validation-errors__icon">⚠️</span>
-                                                <span className="validation-errors__text">
-                                                    {error}
-                                                </span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
+                        <ValidationStatus
+                            isResultValid={isResultValid}
+                            validationErrors={validationErrors}
+                        />
                     </>
                 )}
             </div>
