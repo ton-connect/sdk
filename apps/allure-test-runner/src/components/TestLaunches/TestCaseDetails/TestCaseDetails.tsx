@@ -9,6 +9,7 @@ import { OperationTypeField } from './OperationTypeField';
 import { useTestCaseDetails } from './hooks';
 import './TestCaseDetails.scss';
 import { useTransactionValidation } from './hooks/useTransactionValidation';
+import { SendTransactionAction } from './Operations/SendTransactionOperation/SendTransactionActions';
 import { ValidationStatus } from './ValidationStatus';
 
 type Props = {
@@ -16,6 +17,34 @@ type Props = {
     onTestCasesRefresh?: () => void;
     onTestIdChange?: (newTestId: number) => void;
 };
+
+type SendTransactionResultProps = {
+    transactionResult: Record<string, unknown> | undefined;
+    isResultValid: boolean | undefined;
+    validationErrors: string[];
+};
+
+export function SendTransactionResult({
+    transactionResult,
+    isResultValid,
+    validationErrors
+}: SendTransactionResultProps) {
+    if (!transactionResult) {
+        return null;
+    }
+
+    return (
+        <>
+            <TestCaseExpandableSection
+                title="Transaction Result"
+                // TODO: как то не джейсоницццаца
+                data={JSON.stringify(transactionResult, null, 2)}
+                className="transaction-result-json"
+            />
+            <ValidationStatus isResultValid={isResultValid} validationErrors={validationErrors} />
+        </>
+    );
+}
 
 export function TestCaseDetails({ testId, onTestCasesRefresh, onTestIdChange }: Props) {
     const {
@@ -86,30 +115,24 @@ export function TestCaseDetails({ testId, onTestCasesRefresh, onTestIdChange }: 
                     data={testResult.expectedResult}
                     dataHtml={testResult.expectedResultHtml}
                 />
-                {/*TODO: extract*/}
-                {transactionResult && (
-                    <>
-                        <TestCaseExpandableSection
-                            title="Transaction Result"
-                            // TODO: как то не джейсоницццаца
-                            data={JSON.stringify(transactionResult, null, 2)}
-                            className="transaction-result-json"
-                        />
-                        <ValidationStatus
-                            isResultValid={isResultValid}
-                            validationErrors={validationErrors}
-                        />
-                    </>
-                )}
+                <SendTransactionResult
+                    transactionResult={transactionResult}
+                    isResultValid={isResultValid}
+                    validationErrors={validationErrors}
+                />
             </div>
 
             <TestCaseActions
+                customAction={
+                    <SendTransactionAction
+                        isSending={isSending}
+                        sendTransactionParams={sendTransactionParams}
+                        onSendTransaction={handleSendTransaction}
+                    />
+                }
                 testResult={testResult}
-                sendTransactionParams={sendTransactionParams}
-                isSending={isSending}
                 isResolving={isResolving}
                 isFailing={isResolving}
-                onSendTransaction={handleSendTransaction}
                 onResolve={handleResolve}
                 onFail={handleFail}
                 onRerun={handleRerun}
