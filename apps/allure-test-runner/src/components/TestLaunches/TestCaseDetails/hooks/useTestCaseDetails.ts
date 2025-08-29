@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useQuery } from '../../../../hooks/useQuery';
 import { useAllureApi } from '../../../../hooks/useAllureApi';
-import type { TestResult, TestResultWithCustomFields } from '../../../../models';
+import type { TestResultWithCustomFields } from '../../../../models';
 import { AllureService } from '../../../../services/allure.service';
 
 export function useTestCaseDetails(
@@ -18,26 +18,15 @@ export function useTestCaseDetails(
         loading,
         result: testResult,
         refetch
-    } = useQuery<TestResult | undefined>(
-        signal => (testId ? api.getTestResult(testId, signal) : Promise.resolve(undefined)),
-        { deps: [api, testId] }
-    );
-
-    const { result: testResultWithCustomFields } = useQuery<TestResultWithCustomFields | undefined>(
+    } = useQuery<TestResultWithCustomFields | undefined>(
         signal =>
-            testResult
-                ? AllureService.from(api, signal).populateWithCustomFields(testResult)
+            testId
+                ? AllureService.from(api, signal).getWithCustomFields(testId)
                 : Promise.resolve(undefined),
         {
-            deps: [api, testResult]
+            deps: [api, testId]
         }
     );
-
-    useEffect(() => {
-        if (testId) {
-            setIsSwitching(true);
-        }
-    }, [testId]);
 
     useEffect(() => {
         if (testResult) {
@@ -110,7 +99,6 @@ export function useTestCaseDetails(
         isSwitching,
         isResolving,
         isFailing,
-        testResultWithCustomFields,
         validationErrors,
         showFailModal,
 

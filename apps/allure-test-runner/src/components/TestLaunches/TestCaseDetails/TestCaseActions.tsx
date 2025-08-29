@@ -1,10 +1,8 @@
-import { useState } from 'react';
-import type { ReactNode } from 'react';
+import { type PropsWithChildren, useState } from 'react';
 import { FailModal } from './FailModal';
 import type { TestResult } from '../../../models';
 
-type Props = {
-    customAction?: ReactNode;
+type Props = PropsWithChildren<{
     testResult: TestResult | undefined;
 
     isResolving: boolean;
@@ -13,10 +11,10 @@ type Props = {
     onResolve: () => void;
     onFail: (message: string) => void;
     onRerun: () => void;
-};
+}>;
 
 export function TestCaseActions({
-    customAction,
+    children,
     testResult,
     isResolving,
     isFailing,
@@ -36,7 +34,7 @@ export function TestCaseActions({
     return (
         <>
             <div className="test-case-details__actions">
-                {customAction ?? null}
+                {children ?? null}
                 {!isStatusFinal && (
                     <>
                         <button

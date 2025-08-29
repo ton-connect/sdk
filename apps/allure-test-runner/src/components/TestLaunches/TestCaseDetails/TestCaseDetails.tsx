@@ -1,16 +1,13 @@
-import { TestCaseHeader } from './TestCaseHeader';
-import { TestCaseDescription } from './TestCaseDescription';
-import { TestCaseExpandableSection } from './TestCaseExpandableSection';
 import { TestCaseActions } from './TestCaseActions';
 import { TestCaseStates } from './TestCaseStates';
 import { FailModal } from './FailModal';
-import { OperationTypeField } from './OperationTypeField';
 
 import { useTestCaseDetails } from './hooks';
 import './TestCaseDetails.scss';
 import { useTransactionValidation } from './hooks/useTransactionValidation';
 import { SendTransactionAction } from './Operations/SendTransactionOperation/SendTransactionActions';
 import { SendTransactionResult } from './Operations/SendTransactionOperation/SendTransactionResult';
+import { TestCaseInfo } from './TestCaseInfo';
 
 type Props = {
     testId: number | null;
@@ -31,8 +28,7 @@ export function TestCaseDetails({ testId, onTestCasesRefresh, onTestIdChange }: 
         validationErrors,
         setValidationErrors,
         showFailModal,
-        setShowFailModal,
-        testResultWithCustomFields
+        setShowFailModal
     } = useTestCaseDetails(testId, onTestCasesRefresh, onTestIdChange);
 
     const {
@@ -64,51 +60,27 @@ export function TestCaseDetails({ testId, onTestCasesRefresh, onTestIdChange }: 
 
     return (
         <div className="test-case-details">
-            <div className="test-case-details__content">
-                <TestCaseHeader
-                    name={testResult.name}
-                    status={testResult.status}
-                    message={testResult.message}
-                />
-                <OperationTypeField
-                    operationType={testResultWithCustomFields?.customFields?.operationType}
-                />
-                <TestCaseDescription
-                    description={testResult.description}
-                    descriptionHtml={testResult.descriptionHtml}
-                />
-                <TestCaseExpandableSection
-                    title="Precondition"
-                    data={testResult.precondition}
-                    dataHtml={testResult.preconditionHtml}
-                />
-                <TestCaseExpandableSection
-                    title="Expected Result"
-                    data={testResult.expectedResult}
-                    dataHtml={testResult.expectedResultHtml}
-                />
+            <TestCaseInfo testResult={testResult}>
                 <SendTransactionResult
                     transactionResult={transactionResult}
                     isResultValid={isResultValid}
                     validationErrors={validationErrors}
                 />
-            </div>
-
+            </TestCaseInfo>
             <TestCaseActions
-                customAction={
-                    <SendTransactionAction
-                        isSending={isSending}
-                        sendTransactionParams={sendTransactionParams}
-                        onSendTransaction={handleSendTransaction}
-                    />
-                }
                 testResult={testResult}
                 isResolving={isResolving}
                 isFailing={isResolving}
                 onResolve={handleResolve}
                 onFail={handleFail}
                 onRerun={handleRerun}
-            />
+            >
+                <SendTransactionAction
+                    isSending={isSending}
+                    sendTransactionParams={sendTransactionParams}
+                    onSendTransaction={handleSendTransaction}
+                />
+            </TestCaseActions>
 
             <FailModal
                 isOpen={showFailModal}

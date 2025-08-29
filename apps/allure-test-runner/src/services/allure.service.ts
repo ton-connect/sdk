@@ -1,10 +1,5 @@
 import type { AllureApiClient } from '../api/allure.api';
-import {
-    CUSTOM_FIELD_NAMES,
-    OPERATION_TYPE,
-    type TestResult,
-    type TestResultWithCustomFields
-} from '../models';
+import { CUSTOM_FIELD_NAMES, OPERATION_TYPE, type TestResultWithCustomFields } from '../models';
 
 export class AllureService {
     static from(api: AllureApiClient, signal?: AbortSignal) {
@@ -18,8 +13,11 @@ export class AllureService {
         this.signal = signal;
     }
 
-    async populateWithCustomFields(testResult: TestResult): Promise<TestResultWithCustomFields> {
-        const customFields = await this.api.getCustomFields(testResult.id);
+    async getWithCustomFields(testId: number): Promise<TestResultWithCustomFields> {
+        const [testResult, customFields] = await Promise.all([
+            this.api.getTestResult(testId, this.signal),
+            this.api.getCustomFields(testId)
+        ]);
 
         const operationType = customFields.find(
             value => value.customField.name === CUSTOM_FIELD_NAMES.OPERATION_TYPE
