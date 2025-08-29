@@ -3,17 +3,18 @@ import { useTonConnectUI } from '@tonconnect/ui-react';
 import type { SendTransactionRequest } from '@tonconnect/ui-react';
 import { evalFenceCondition } from '../../../../utils/jsonEval';
 import type { TestResult } from '../../../../models';
-import type { SendTransactionRpcResponse } from '@tonconnect/protocol';
+import type { SendTransactionRpcRequest, SendTransactionRpcResponse } from '@tonconnect/protocol';
 
-function compareResult(result: unknown, expected: unknown) {
+function compareResult(result: unknown, expected: unknown, context: unknown = undefined) {
     const errors: string[] = [];
-    const success = compareResultInner(result, expected, errors);
+    const success = compareResultInner(result, expected, context, errors);
     return [success, errors] as const;
 }
 
 function compareResultInner(
     result: unknown,
     expected: unknown,
+    context: unknown,
     errors: string[],
     path: string = ''
 ): boolean {
@@ -34,6 +35,7 @@ function compareResultInner(
                     !compareResultInner(
                         (result as Record<string, unknown>)[key],
                         (expected as Record<string, unknown>)[key],
+                        context,
                         errors,
                         newPath
                     )
@@ -49,7 +51,7 @@ function compareResultInner(
     }
 
     if (typeof expected === 'function') {
-        const passed = expected(result);
+        const passed = expected(result, context);
         if (!passed) {
             errors.push(
                 `${field}: value "${result}" failed for predicate ${expected.name || 'predicate'}`
@@ -86,32 +88,10 @@ export function useTransactionValidation({
         [testResult]
     );
 
-    const isResultValid = useMemo(
-        () =>
-            transactionResult && testResult
-                ? (() => {
-                      const parsedExpected = evalFenceCondition(testResult.expectedResult);
-                      const [isResultValid, errors] = compareResult(
-                          transactionResult,
-                          parsedExpected
-                      );
-                      setValidationErrors(errors);
-
-                      // Show fail modal if validation failed
-                      if (!isResultValid && errors.length > 0) {
-                          setShowFailModal(true);
-                      } else if (testResult.status !== 'passed') {
-                          handleResolve();
-                      }
-
-                      return isResultValid;
-                  })()
-                : undefined,
-        [transactionResult]
-    );
+    const [isResultValid, setIsResultValid] = useState(true);
 
     const handleSendTransaction = useCallback(async () => {
-        if (!sendTransactionParams) {
+        if (!sendTransactionParams || !testResult) {
             setTransactionResult({
                 error: 'No precondition',
                 timestamp: new Date().toISOString()
@@ -119,9 +99,13 @@ export function useTransactionValidation({
             return;
         }
 
+        let rpcRequest: SendTransactionRpcRequest | undefined = undefined;
         let rpcResponse: SendTransactionRpcResponse | undefined = undefined;
         const origDebug = console.debug.bind(console);
         console.debug = (...args: unknown[]) => {
+            if (args.includes('Send http-bridge request:')) {
+                rpcRequest = args[2] as SendTransactionRpcRequest;
+            }
             if (args.includes('Wallet message received:')) {
                 console.debug = origDebug;
                 rpcResponse = args[2] as SendTransactionRpcResponse;
@@ -143,6 +127,20 @@ export function useTransactionValidation({
         } finally {
             setTransactionResult(rpcResponse);
             setIsSending(false);
+        }
+
+        const parsedExpected = evalFenceCondition(testResult.expectedResult);
+        const [isResultValid, errors] = compareResult(rpcResponse, parsedExpected, {
+            sendTransactionRpcRequest: rpcRequest
+        });
+
+        setIsResultValid(isResultValid);
+        setValidationErrors(errors);
+
+        if (!isResultValid && errors.length > 0) {
+            setShowFailModal(true);
+        } else if (testResult.status !== 'passed') {
+            handleResolve();
         }
     }, [sendTransactionParams, tonConnectUI]);
 

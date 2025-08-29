@@ -1,3 +1,5 @@
+import type { SendTransactionRpcRequest } from '@tonconnect/protocol';
+
 function extractFromCodeFence(input: string): string | null {
     const fence = /```(?:json)?\n([\s\S]*?)\n```/i.exec(input);
     if (fence && fence[1]) return fence[1].trim();
@@ -14,6 +16,20 @@ function nowPlus5Minutes() {
 
 function nowMinus5Minutes() {
     return nowPlusMinutes(-5);
+}
+
+function isValidSendTransactionId(
+    value: unknown,
+    context?: {
+        sendTransactionRpcRequest: SendTransactionRpcRequest;
+    }
+): boolean {
+    if (!context?.sendTransactionRpcRequest) {
+        console.error('Invalid context to isValidSendTransactionId provided');
+        return false;
+    }
+
+    return value === context.sendTransactionRpcRequest.id;
 }
 
 function isValidBoc(value: unknown): boolean {
@@ -36,7 +52,8 @@ const functionScope = [
     nowMinus5Minutes,
     isValidBoc,
     isValidString,
-    isNonNegativeInt
+    isNonNegativeInt,
+    isValidSendTransactionId
 ];
 
 export function evalFenceCondition<T = unknown>(input: string | undefined | null): T | undefined {
