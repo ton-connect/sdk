@@ -1,4 +1,6 @@
 import type { SendTransactionRpcRequest } from '@tonconnect/protocol';
+import type { SendTransactionRequest } from '@tonconnect/sdk';
+import { Cell, loadMessage } from '@ton/core';
 
 function extractFromCodeFence(input: string): string | null {
     const fence = /```(?:json)?\n([\s\S]*?)\n```/i.exec(input);
@@ -21,7 +23,7 @@ function nowMinus5Minutes() {
 function isValidSendTransactionId(
     value: unknown,
     context?: {
-        sendTransactionRpcRequest: SendTransactionRpcRequest;
+        sendTransactionRpcRequest?: SendTransactionRpcRequest;
     }
 ): boolean {
     if (!context?.sendTransactionRpcRequest) {
@@ -32,10 +34,55 @@ function isValidSendTransactionId(
     return value === context.sendTransactionRpcRequest.id;
 }
 
-function isValidBoc(value: unknown): boolean {
-    // TODO:
-    value;
-    return true;
+function isValidSendTransactionBoc(
+    value: unknown,
+    context?: {
+        sendTransactionParams?: SendTransactionRequest;
+    }
+): boolean {
+    if (!context?.sendTransactionParams) {
+        console.error('Invalid context to isValidSendTransactionId provided');
+        return false;
+    }
+    // const {
+    //     sendTransactionParams: { validUntil, network, messages }
+    // } = context;
+    if (typeof value !== 'string') {
+        return false;
+    }
+    try {
+        const message = loadMessage(Cell.fromBase64(value).beginParse());
+        // const bodyParsed = message.body.beginParse();
+        // v5 message formats
+        // try {
+        //     const ref = bodyParsed.loadRef();
+        //     const outList = loadOutList(ref.beginParse());
+        //     if (outList.length !== messages.length) {
+        //         return false;
+        //     }
+        //
+        //     for (let i = 0; i < outList.length; i++) {
+        //         const out = outList[i];
+        //         if (out.type !== 'sendMsg') {
+        //             return false;
+        //         }
+        //
+        //         const { outMsg } = out;
+        //
+        //         const sentOutMsg = messages[i];
+        //         if (outMsg.info.type !== '') out.address;
+        //     }
+        // } catch (error) {
+        //     // v4 format
+        // }
+        if (message.info.type !== 'external-in') {
+            return false;
+        }
+        return true;
+    } catch (err) {
+        console.error(err);
+        return false;
+    }
 }
 
 function isValidString(value: unknown) {
@@ -50,7 +97,7 @@ const functionScope = [
     nowPlusMinutes,
     nowPlus5Minutes,
     nowMinus5Minutes,
-    isValidBoc,
+    isValidSendTransactionBoc,
     isValidString,
     isNonNegativeInt,
     isValidSendTransactionId

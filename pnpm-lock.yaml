@@ -68,6 +68,12 @@ importers:
 
   apps/allure-test-runner:
     dependencies:
+      '@ton/core':
+        specifier: 0.61.0
+        version: 0.61.0(@ton/crypto@3.3.0)
+      '@ton/ton':
+        specifier: 15.3.1
+        version: 15.3.1(@ton/core@0.61.0(@ton/crypto@3.3.0))(@ton/crypto@3.3.0)
       '@tonconnect/protocol':
         specifier: workspace:*
         version: link:../../packages/protocol
@@ -77,6 +83,9 @@ importers:
       '@tonconnect/ui-react':
         specifier: workspace:*
         version: link:../../packages/ui-react
+      buffer:
+        specifier: ^6.0.3
+        version: 6.0.3
       react:
         specifier: ^19.1.1
         version: 19.1.1
