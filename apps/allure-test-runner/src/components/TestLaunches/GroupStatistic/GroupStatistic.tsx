@@ -1,4 +1,4 @@
-import { TestCaseStatistic } from '../../../models';
+import type { TestCaseStatistic } from '../../../models';
 import './GroupStatistic.scss';
 
 type GroupStatisticProps = {
