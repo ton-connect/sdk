@@ -118,6 +118,10 @@ export function TestCasesSection({ launchId, onClose, onComplete, launchClosed =
                                         selectedTestId={selectedTestId}
                                         loading={isGroupLoading(group.id)}
                                         hasBeenLoaded={hasGroupBeenLoaded(group.id)}
+                                        isGroupExpanded={isGroupExpanded}
+                                        getGroupContents={getGroupContents}
+                                        isGroupLoading={isGroupLoading}
+                                        hasGroupBeenLoaded={hasGroupBeenLoaded}
                                     />
                                 );
                             } else {

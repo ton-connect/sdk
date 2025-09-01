@@ -2,10 +2,10 @@ import { useState, useCallback, useEffect } from 'react';
 import { useSearchParams, useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '../../../../hooks/useQuery';
 import { useAllureApi } from '../../../../hooks/useAllureApi';
-import type { PaginatedResponse, TestCase } from '../../../../models';
+import type { PaginatedResponse, TestCase, TestCaseGroup } from '../../../../models';
 import { useDebounce } from '../../../../hooks/useDebounce';
 
-// URL state management utilities
+//
 type TreeUrlState = {
     launchId: number | null;
     viewMode: 'flat' | 'tree';
@@ -60,10 +60,8 @@ export function useTestCases(launchId: number) {
     const params = useParams<{ testId?: string }>();
     const [searchParams, setSearchParams] = useSearchParams();
 
-    // Initialize state from URL
     const urlState = parseTreeStateFromSearchParams(searchParams);
 
-    // Get selected test ID from URL params (if we're on a test details page)
     const selectedTestIdFromUrl = params.testId ? parseInt(params.testId) : null;
     const selectedTestId =
         selectedTestIdFromUrl && !isNaN(selectedTestIdFromUrl)
@@ -85,9 +83,11 @@ export function useTestCases(launchId: number) {
         new Set(urlState.expandedGroups ?? [])
     );
     const [groupContents, setGroupContents] = useState<Map<number, TestCase[]>>(new Map());
+    const [parentPathByGroupId, setParentPathByGroupId] = useState<Map<number, number[]>>(
+        new Map()
+    );
     const [loadingGroups, setLoadingGroups] = useState<Set<number>>(new Set());
 
-    // Helper function to update search params
     const updateSearchParams = useCallback(
         (updates: Partial<TreeUrlState>) => {
             setSearchParams(prevParams => {
@@ -135,18 +135,34 @@ export function useTestCases(launchId: number) {
             if (viewMode === 'flat') {
                 return client.getLaunchItems({ launchId, search: searchQuery }, signal);
             } else {
+                const pathChain = pathHistory.length > 0 ? pathHistory.map(p => p.id) : undefined;
                 return client.getLaunchItemsTree(
-                    { launchId, search: searchQuery, path: currentPath },
+                    { launchId, search: searchQuery, path: pathChain },
                     signal
                 );
             }
         },
-        { deps: [client, launchId, searchQuery, currentPath, viewMode] }
+        { deps: [client, launchId, searchQuery, pathHistory, viewMode] }
     );
 
     const content = Array.isArray(result?.content) ? result.content : [];
 
-    // Update URL when state changes
+    useEffect(() => {
+        if (viewMode !== 'tree') return;
+        const pathChain = pathHistory.length > 0 ? pathHistory.map(p => p.id) : [];
+        if (Array.isArray(content) && content.length > 0) {
+            setParentPathByGroupId(prev => {
+                const next = new Map(prev);
+                for (const item of content as TestCase[]) {
+                    if ((item as TestCaseGroup).type === 'GROUP') {
+                        next.set((item as TestCaseGroup).id, pathChain);
+                    }
+                }
+                return next;
+            });
+        }
+    }, [content, pathHistory, viewMode]);
+
     useEffect(() => {
         updateSearchParams({
             viewMode,
@@ -155,15 +171,34 @@ export function useTestCases(launchId: number) {
         });
     }, [viewMode, expandedGroups, pathHistory, updateSearchParams]);
 
-    // Load expanded groups content on mount if they exist in URL
     useEffect(() => {
         const loadExpandedGroups = async () => {
             for (const groupId of expandedGroups) {
                 if (!groupContents.has(groupId)) {
+                    const knownBasePath = parentPathByGroupId.get(groupId);
+                    if (!knownBasePath) {
+                        continue;
+                    }
                     setLoadingGroups(prev => new Set(prev).add(groupId));
                     try {
-                        const result = await client.getLaunchItemTree(launchId, groupId);
+                        const result = await client.getLaunchItemTree(launchId, [
+                            ...knownBasePath,
+                            groupId
+                        ]);
                         setGroupContents(prev => new Map(prev).set(groupId, result.content));
+
+                        setParentPathByGroupId(prev => {
+                            const next = new Map(prev);
+                            for (const item of result.content as TestCase[]) {
+                                if ((item as TestCaseGroup).type === 'GROUP') {
+                                    next.set((item as TestCaseGroup).id, [
+                                        ...knownBasePath,
+                                        groupId
+                                    ]);
+                                }
+                            }
+                            return next;
+                        });
                     } catch (error) {
                         console.error(`Failed to load group ${groupId} from URL:`, error);
                     } finally {
@@ -180,9 +215,8 @@ export function useTestCases(launchId: number) {
         if (expandedGroups.size > 0) {
             loadExpandedGroups();
         }
-    }, [launchId]); // Only run on mount/launchId change
+    }, [launchId, expandedGroups, parentPathByGroupId]);
 
-    // Handle URL parameter changes (when user navigates back/forward or manually changes URL)
     useEffect(() => {
         const urlState = parseTreeStateFromSearchParams(searchParams);
 
@@ -212,13 +246,11 @@ export function useTestCases(launchId: number) {
                 setExpandedGroups(urlGroupsSet);
             }
         }
-
-        // selectedTestId is now managed by routing, so we don't update it from URL params
     }, [searchParams]);
 
     const handleRefresh = useCallback(() => {
         setSearch('');
-        // Navigate back to launch page (closes any selected test)
+
         navigate(`/launches/${launchId}`);
         refetch();
     }, [refetch, navigate, launchId]);
@@ -247,9 +279,21 @@ export function useTestCases(launchId: number) {
         refetch();
 
         for (const groupId of currentExpandedGroups) {
+            const basePath = parentPathByGroupId.get(groupId) ?? pathHistory.map(p => p.id);
+            if (!basePath) continue;
             try {
-                const result = await client.getLaunchItemTree(launchId, groupId);
+                const result = await client.getLaunchItemTree(launchId, [...basePath, groupId]);
                 setGroupContents(prev => new Map(prev).set(groupId, result.content));
+
+                setParentPathByGroupId(prev => {
+                    const next = new Map(prev);
+                    for (const item of result.content as TestCase[]) {
+                        if ((item as TestCaseGroup).type === 'GROUP') {
+                            next.set((item as TestCaseGroup).id, [...basePath, groupId]);
+                        }
+                    }
+                    return next;
+                });
             } catch (error) {
                 console.error(`Failed to reload group ${groupId}:`, error);
             }
@@ -264,7 +308,7 @@ export function useTestCases(launchId: number) {
                 return newHistory;
             });
             setCurrentPath(group.id);
-            // Keep the same selected test when navigating
+
             if (selectedTestId) {
                 navigate(`/launches/${launchId}/tests/${selectedTestId}`);
             } else {
@@ -282,7 +326,7 @@ export function useTestCases(launchId: number) {
                 newHistory.length > 0 ? newHistory[newHistory.length - 1].id : undefined
             );
             updateSearchParams({ pathHistory: newHistory });
-            // Keep the same selected test when going back
+
             if (selectedTestId) {
                 navigate(`/launches/${launchId}/tests/${selectedTestId}`);
             } else {
@@ -295,7 +339,7 @@ export function useTestCases(launchId: number) {
         setPathHistory([]);
         setCurrentPath(undefined);
         updateSearchParams({ pathHistory: [] });
-        // Keep the same selected test when going to root
+
         if (selectedTestId) {
             navigate(`/launches/${launchId}/tests/${selectedTestId}`);
         } else {
@@ -312,7 +356,7 @@ export function useTestCases(launchId: number) {
             viewMode: newViewMode,
             pathHistory: []
         });
-        // Keep the same selected test when toggling view mode
+
         if (selectedTestId) {
             navigate(`/launches/${launchId}/tests/${selectedTestId}`);
         } else {
@@ -328,7 +372,7 @@ export function useTestCases(launchId: number) {
                 newHistory.length > 0 ? newHistory[newHistory.length - 1].id : undefined
             );
             updateSearchParams({ pathHistory: newHistory });
-            // Keep the same selected test when navigating to level
+
             if (selectedTestId) {
                 navigate(`/launches/${launchId}/tests/${selectedTestId}`);
             } else {
@@ -343,7 +387,6 @@ export function useTestCases(launchId: number) {
             const isExpanded = expandedGroups.has(groupId);
 
             if (isExpanded) {
-                // Collapse group
                 setExpandedGroups(prev => {
                     const newSet = new Set(prev);
                     newSet.delete(groupId);
@@ -351,23 +394,36 @@ export function useTestCases(launchId: number) {
                     return newSet;
                 });
             } else {
-                // Expand group
                 setExpandedGroups(prev => {
                     const newSet = new Set(prev).add(groupId);
                     updateSearchParams({ expandedGroups: Array.from(newSet) });
                     return newSet;
                 });
 
-                // Load contents if not already loaded
                 if (!groupContents.has(groupId)) {
                     setLoadingGroups(prev => new Set(prev).add(groupId));
 
                     try {
-                        const result = await client.getLaunchItemTree(launchId, groupId);
+                        const basePath =
+                            parentPathByGroupId.get(groupId) ?? pathHistory.map(p => p.id);
+                        const result = await client.getLaunchItemTree(launchId, [
+                            ...basePath,
+                            groupId
+                        ]);
                         setGroupContents(prev => new Map(prev).set(groupId, result.content));
+
+                        setParentPathByGroupId(prev => {
+                            const next = new Map(prev);
+                            for (const item of result.content as TestCase[]) {
+                                if ((item as TestCaseGroup).type === 'GROUP') {
+                                    next.set((item as TestCaseGroup).id, [...basePath, groupId]);
+                                }
+                            }
+                            return next;
+                        });
                     } catch (error) {
                         console.error('Failed to load group contents:', error);
-                        // On error, collapse the group
+
                         setExpandedGroups(prev => {
                             const newSet = new Set(prev);
                             newSet.delete(groupId);
@@ -416,7 +472,6 @@ export function useTestCases(launchId: number) {
     );
 
     return {
-        // State
         search,
         content,
         selectedTestId,
@@ -426,7 +481,6 @@ export function useTestCases(launchId: number) {
         currentPath,
         pathHistory,
 
-        // Actions
         handleRefresh,
         handleSearchChange,
         openTest,

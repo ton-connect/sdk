@@ -13,6 +13,10 @@ type ExpandableGroupProps = {
     selectedTestId: number | null;
     loading?: boolean;
     hasBeenLoaded?: boolean;
+    isGroupExpanded: (groupId: number) => boolean;
+    getGroupContents: (groupId: number) => TestCase[];
+    isGroupLoading: (groupId: number) => boolean;
+    hasGroupBeenLoaded: (groupId: number) => boolean;
 };
 
 export function ExpandableGroup({
@@ -23,7 +27,11 @@ export function ExpandableGroup({
     onTestSelect,
     selectedTestId,
     loading = false,
-    hasBeenLoaded = false
+    hasBeenLoaded = false,
+    isGroupExpanded,
+    getGroupContents,
+    isGroupLoading,
+    hasGroupBeenLoaded
 }: ExpandableGroupProps) {
     const handleToggle = () => {
         onToggle(group.id);
@@ -31,14 +39,51 @@ export function ExpandableGroup({
 
     const renderItem = (item: TestCase, depth = 0) => {
         if (item.type === 'GROUP') {
-            // Nested groups (if they exist)
+            const nestedExpanded = isGroupExpanded(item.id);
+            const nestedLoading = isGroupLoading(item.id);
+            const nestedHasLoaded = hasGroupBeenLoaded(item.id);
+            const nestedContents = getGroupContents(item.id);
+
             return (
                 <div key={item.id} className={`nested-group nested-group--depth-${depth}`}>
-                    <div className="nested-group__header">
+                    <div
+                        className={`nested-group__header ${nestedExpanded ? 'nested-group__header--expanded' : ''}`}
+                        onClick={() => onToggle(item.id)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={e => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                onToggle(item.id);
+                            }
+                        }}
+                    >
+                        <span
+                            className={`nested-group__chevron ${nestedExpanded ? 'nested-group__chevron--expanded' : ''}`}
+                        >
+                            ▶
+                        </span>
                         <span className="nested-group__icon">📁</span>
                         <span className="nested-group__name">{item.name}</span>
                         <GroupStatistic statistic={item.statistic} />
                     </div>
+
+                    {nestedExpanded && (
+                        <div className="nested-group__content">
+                            {nestedLoading || (!nestedHasLoaded && nestedContents.length === 0) ? (
+                                <div className="nested-group__loading">
+                                    <Loader size="small" text="Loading group content..." />
+                                </div>
+                            ) : nestedContents.length === 0 ? (
+                                <div className="nested-group__empty">
+                                    No items found in this group
+                                </div>
+                            ) : (
+                                <div className="nested-group__items">
+                                    {nestedContents.map(child => renderItem(child, depth + 1))}
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             );
         } else {

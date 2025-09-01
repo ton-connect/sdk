@@ -27,14 +27,23 @@ export class AllureApiClient {
 
     private buildUrl(
         path: string,
-        query?: Record<string, string | number | boolean | undefined>
+        query?: Record<
+            string,
+            string | number | boolean | Array<string | number | boolean> | undefined
+        >
     ): URL {
         const url = new URL(path, this.baseUrl);
 
         if (query) {
             for (const [key, value] of Object.entries(query)) {
                 if (value === undefined) continue;
-                url.searchParams.set(key, value.toString());
+                if (Array.isArray(value)) {
+                    for (const v of value) {
+                        url.searchParams.append(key, v.toString());
+                    }
+                } else {
+                    url.searchParams.set(key, value.toString());
+                }
             }
         }
 
@@ -124,14 +133,15 @@ export class AllureApiClient {
         params: TestCaseFilters,
         signal?: AbortSignal
     ): Promise<PaginatedResponse<TestCase>> {
-        const { launchId, search, page = 0, size = 100, sort = 'name,ASC', path } = params;
+        const { launchId, search, page = 0, size = 100, path } = params;
         const searchEncoded = search ? this.buildSearch('content', search) : undefined;
 
         const url = this.buildUrl(`/api/v2/launch/${launchId}/test-result/tree/entity`, {
             search: searchEncoded,
             page,
             size,
-            sort,
+            sort: ['nodeSortOrder,asc', 'name,asc'],
+            deleted: false,
             treeId: 70,
             path
         });
@@ -146,15 +156,16 @@ export class AllureApiClient {
 
     async getLaunchItemTree(
         launchId: number,
-        groupId: number,
+        path: number | number[],
         signal?: AbortSignal
     ): Promise<PaginatedResponse<TestCase>> {
         const url = this.buildUrl(`/api/v2/launch/${launchId}/test-result/tree/entity`, {
             treeId: 70,
-            path: groupId,
+            path,
             page: 0,
             size: 100,
-            sort: 'name,ASC'
+            sort: ['nodeSortOrder,asc', 'name,asc'],
+            deleted: false
         });
 
         const res = await fetch(url, { headers: this.buildHeaders(), signal });
