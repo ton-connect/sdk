@@ -1,36 +1,38 @@
-import type { SendTransactionRequest } from '@tonconnect/sdk';
+import type { SignDataPayload } from '@tonconnect/sdk';
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { useState } from 'react';
 
-type SendTransactionActionProps = {
-    sendTransactionParams: SendTransactionRequest | undefined;
-    onSendTransaction: () => Promise<void>;
+type SignDataActionsProps = {
+    signDataPayload: SignDataPayload | undefined;
+    onSignData: () => Promise<void>;
 };
 
-export function SendTransactionAction({
-    sendTransactionParams,
-    onSendTransaction
-}: SendTransactionActionProps) {
+export function SignDataActions({ signDataPayload, onSignData }: SignDataActionsProps) {
+    const [isSending, setIsSending] = useState(false);
+
     const wallet = useTonWallet();
     const [tonConnectUI] = useTonConnectUI();
-    const [isSending, setIsSending] = useState(false);
 
     return wallet ? (
         <button
-            onClick={() => {
+            onClick={async () => {
                 setIsSending(true);
-                onSendTransaction().finally(() => setIsSending(false));
+                try {
+                    await onSignData();
+                } finally {
+                    setIsSending(false);
+                }
             }}
-            disabled={isSending || !sendTransactionParams}
+            disabled={isSending || !signDataPayload}
             className="btn btn-primary transaction-btn"
         >
             {isSending ? (
                 <>
                     <div className="transaction-btn__spinner"></div>
-                    Sending...
+                    Signing...
                 </>
             ) : (
-                'Send Transaction with Precondition Data'
+                'Sign data'
             )}
         </button>
     ) : (
@@ -38,7 +40,7 @@ export function SendTransactionAction({
             onClick={() => tonConnectUI.openModal()}
             className="btn btn-secondary transaction-btn"
         >
-            Connect Wallet & Send Transaction
+            Connect Wallet & Sign Data
         </button>
     );
 }

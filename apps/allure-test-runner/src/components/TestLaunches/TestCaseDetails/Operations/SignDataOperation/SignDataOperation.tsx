@@ -1,25 +1,25 @@
-import { useTransactionValidation } from './hooks/useTransactionValidation';
-import { SendTransactionResult } from './SendTransactionResult';
-import { SendTransactionAction } from './SendTransactionActions';
+import { SignDataResult } from './SignDataResult';
 import { useTestCaseDetails } from '../../hooks';
 import { TestCaseInfo } from '../../TestCaseInfo';
 import { TestCaseActions } from '../../TestCaseActions';
 import { FailModal } from '../../FailModal';
 import type { TestResultWithCustomFields } from '../../../../../models';
+import { useSignDataValidation } from './hooks/useSignDataValidation';
+import { SignDataActions } from './SignDataActions';
 
-type SendTransactionOperationProps = {
+type SignDataOperationProps = {
     testResult: TestResultWithCustomFields;
     refetchTestResult?: () => void;
     onTestCasesRefresh?: () => void;
     onTestIdChange?: (newTestId: number) => void;
 };
 
-export function SendTransactionOperation({
+export function SignDataOperation({
     testResult,
     refetchTestResult,
     onTestCasesRefresh,
     onTestIdChange
-}: SendTransactionOperationProps) {
+}: SignDataOperationProps) {
     const {
         isResolving,
         isFailing,
@@ -32,8 +32,8 @@ export function SendTransactionOperation({
         setShowFailModal
     } = useTestCaseDetails(testResult, refetchTestResult, onTestCasesRefresh, onTestIdChange);
 
-    const { isResultValid, transactionResult, handleSendTransaction, sendTransactionParams } =
-        useTransactionValidation({
+    const { isResultValid, signDataResult, handleSignData, signDataPayload } =
+        useSignDataValidation({
             testResult,
             setValidationErrors,
             setShowFailModal,
@@ -47,8 +47,8 @@ export function SendTransactionOperation({
     return (
         <div className="test-case-details">
             <TestCaseInfo testResult={testResult}>
-                <SendTransactionResult
-                    transactionResult={transactionResult}
+                <SignDataResult
+                    signDataResult={signDataResult}
                     isResultValid={isResultValid}
                     validationErrors={validationErrors}
                 />
@@ -61,10 +61,7 @@ export function SendTransactionOperation({
                 onFail={handleFail}
                 onRerun={handleRerun}
             >
-                <SendTransactionAction
-                    sendTransactionParams={sendTransactionParams}
-                    onSendTransaction={handleSendTransaction}
-                />
+                <SignDataActions signDataPayload={signDataPayload} onSignData={handleSignData} />
             </TestCaseActions>
 
             <FailModal

@@ -1,4 +1,4 @@
-import type { SendTransactionRpcRequest } from '@tonconnect/protocol';
+import type { SendTransactionRpcRequest, SignDataRpcRequest } from '@tonconnect/protocol';
 import type { SendTransactionRequest } from '@tonconnect/sdk';
 import { Cell, loadMessage } from '@ton/core';
 
@@ -32,6 +32,20 @@ function isValidSendTransactionId(
     }
 
     return value === context.sendTransactionRpcRequest.id;
+}
+
+function isValidSignDataId(
+    value: unknown,
+    context?: {
+        signDataRpcRequest?: SignDataRpcRequest;
+    }
+): boolean {
+    if (!context?.signDataRpcRequest) {
+        console.error('Invalid context to isValidSignDataId provided');
+        return false;
+    }
+
+    return value === context.signDataRpcRequest.id;
 }
 
 function isValidSendTransactionBoc(
@@ -100,13 +114,20 @@ const functionScope = [
     isValidSendTransactionBoc,
     isValidString,
     isNonNegativeInt,
-    isValidSendTransactionId
+    isValidSendTransactionId,
+    isValidSignDataId
 ];
 
 export function evalFenceCondition<T = unknown>(input: string | undefined | null): T | undefined {
-    if (!input) return undefined;
+    if (!input) {
+        console.warn('No input');
+        return undefined;
+    }
     const fromFence = extractFromCodeFence(input);
-    if (!fromFence) return undefined;
+    if (!fromFence) {
+        console.warn(`No code from fence ${input}`);
+        return undefined;
+    }
     try {
         return new Function(
             ...functionScope.map(fn => fn.name),

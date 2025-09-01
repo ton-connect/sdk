@@ -6,6 +6,7 @@ import { useAllureApi } from '../../../hooks/useAllureApi';
 import { SendTransactionOperation } from './Operations/SendTransactionOperation/SendTransactionOperation';
 import { TestCaseStates } from './TestCaseStates';
 import type { JSX } from 'react';
+import { SignDataOperation } from './Operations/SignDataOperation/SignDataOperation';
 
 type Props = {
     testId: number | null;
@@ -48,6 +49,17 @@ export function TestCaseDetails({ testId, onTestCasesRefresh, onTestIdChange }: 
         case OPERATION_TYPE.SEND_TRANSACTION: {
             component = (
                 <SendTransactionOperation
+                    testResult={testResult}
+                    refetchTestResult={refetchTestResult}
+                    onTestCasesRefresh={onTestCasesRefresh}
+                    onTestIdChange={onTestIdChange}
+                />
+            );
+            break;
+        }
+        case OPERATION_TYPE.SIGN_DATA: {
+            component = (
+                <SignDataOperation
                     testResult={testResult}
                     refetchTestResult={refetchTestResult}
                     onTestCasesRefresh={onTestCasesRefresh}
