@@ -1,6 +1,6 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
-import { LaunchesPage } from './LaunchesPage.tsx';
-import { LaunchDetailsPage } from './LaunchDetailsPage.tsx';
+import { LaunchesPage } from './LaunchesPage';
+import { LaunchDetailsPage } from './LaunchDetailsPage';
 
 export const router = createBrowserRouter([
     {
