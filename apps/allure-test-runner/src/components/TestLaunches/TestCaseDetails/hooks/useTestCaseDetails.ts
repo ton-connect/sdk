@@ -1,38 +1,16 @@
-import { useState, useCallback, useEffect } from 'react';
-import { useQuery } from '../../../../hooks/useQuery';
+import { useState, useCallback } from 'react';
 import { useAllureApi } from '../../../../hooks/useAllureApi';
 import type { TestResultWithCustomFields } from '../../../../models';
-import { AllureService } from '../../../../services/allure.service';
 
 export function useTestCaseDetails(
-    testId: number | null,
+    testResult: TestResultWithCustomFields | undefined,
+    refetchTestResult?: () => void,
     onTestCasesRefresh?: () => void,
     onTestIdChange?: (newTestId: number) => void
 ) {
     const api = useAllureApi();
-    const [isSwitching, setIsSwitching] = useState(false);
     const [isResolving, setIsResolving] = useState(false);
     const [isFailing, setIsFailing] = useState(false);
-
-    const {
-        loading,
-        result: testResult,
-        refetch
-    } = useQuery<TestResultWithCustomFields | undefined>(
-        signal =>
-            testId
-                ? AllureService.from(api, signal).getWithCustomFields(testId)
-                : Promise.resolve(undefined),
-        {
-            deps: [api, testId]
-        }
-    );
-
-    useEffect(() => {
-        if (testResult) {
-            setIsSwitching(false);
-        }
-    }, [testResult]);
 
     const [validationErrors, setValidationErrors] = useState<string[]>([]);
     const [showFailModal, setShowFailModal] = useState(false);
@@ -42,12 +20,12 @@ export function useTestCaseDetails(
         try {
             setIsResolving(true);
             await api.resolveTestResult({ id: testResult.id, status: 'passed' });
-            refetch();
+            refetchTestResult?.();
             onTestCasesRefresh?.();
         } finally {
             setIsResolving(false);
         }
-    }, [testResult, api, refetch, onTestCasesRefresh]);
+    }, [testResult, api, refetchTestResult, onTestCasesRefresh]);
 
     const handleFail = useCallback(
         async (message: string) => {
@@ -62,13 +40,13 @@ export function useTestCaseDetails(
                     payload.message = message.trim();
                 }
                 await api.resolveTestResult(payload);
-                refetch();
+                refetchTestResult?.();
                 onTestCasesRefresh?.();
             } finally {
                 setIsFailing(false);
             }
         },
-        [testResult, api, refetch, onTestCasesRefresh]
+        [testResult, api, refetchTestResult, onTestCasesRefresh]
     );
 
     const handleRerun = useCallback(async () => {
@@ -84,19 +62,16 @@ export function useTestCaseDetails(
                 onTestIdChange(rerunResult.id);
                 onTestCasesRefresh?.();
             } else {
-                refetch();
+                refetchTestResult?.();
                 onTestCasesRefresh?.();
             }
         } catch (error) {
             console.error('Rerun failed:', error);
         }
-    }, [api, testResult, refetch, onTestCasesRefresh, onTestIdChange]);
+    }, [api, testResult, refetchTestResult, onTestCasesRefresh, onTestIdChange]);
 
     return {
         // State
-        testResult,
-        loading,
-        isSwitching,
         isResolving,
         isFailing,
         validationErrors,

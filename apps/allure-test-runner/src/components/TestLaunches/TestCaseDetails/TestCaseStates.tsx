@@ -1,11 +1,10 @@
 type Props = {
     testId: number | null;
-    isSwitching: boolean;
     loading: boolean;
     hasResult: boolean;
 };
 
-export function TestCaseStates({ testId, isSwitching, loading, hasResult }: Props) {
+export function TestCaseStates({ testId, loading, hasResult }: Props) {
     if (!testId) {
         return (
             <div className="test-case-details__empty">
@@ -15,7 +14,7 @@ export function TestCaseStates({ testId, isSwitching, loading, hasResult }: Prop
         );
     }
 
-    if (isSwitching || (loading && !hasResult)) {
+    if (loading && !hasResult) {
         return (
             <div className="test-case-details__loading">
                 <div className="test-case-details__loading-spinner"></div>

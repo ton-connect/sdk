@@ -8,7 +8,7 @@ type Props = {
 };
 
 export function TestCaseExpandableSection({ title, data, dataHtml, className }: Props) {
-    const [isExpanded, setExpanded] = useState(false);
+    const [isExpanded, setExpanded] = useState(true);
     const toggle = () => setExpanded(value => !value);
 
     // Определяем, является ли контент JSON

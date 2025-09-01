@@ -1,13 +1,11 @@
-import { TestCaseActions } from './TestCaseActions';
-import { TestCaseStates } from './TestCaseStates';
-import { FailModal } from './FailModal';
-
-import { useTestCaseDetails } from './hooks';
 import './TestCaseDetails.scss';
-import { useTransactionValidation } from './hooks/useTransactionValidation';
-import { SendTransactionAction } from './Operations/SendTransactionOperation/SendTransactionActions';
-import { SendTransactionResult } from './Operations/SendTransactionOperation/SendTransactionResult';
-import { TestCaseInfo } from './TestCaseInfo';
+import { useQuery } from '../../../hooks/useQuery';
+import { OPERATION_TYPE, type TestResultWithCustomFields } from '../../../models';
+import { AllureService } from '../../../services/allure.service';
+import { useAllureApi } from '../../../hooks/useAllureApi';
+import { SendTransactionOperation } from './Operations/SendTransactionOperation/SendTransactionOperation';
+import { TestCaseStates } from './TestCaseStates';
+import type { JSX } from 'react';
 
 type Props = {
     testId: number | null;
@@ -16,40 +14,27 @@ type Props = {
 };
 
 export function TestCaseDetails({ testId, onTestCasesRefresh, onTestIdChange }: Props) {
+    const api = useAllureApi();
     const {
-        testResult,
         loading,
-        isSwitching,
-        isResolving,
-        isFailing,
-        handleResolve,
-        handleFail,
-        handleRerun,
-        validationErrors,
-        setValidationErrors,
-        showFailModal,
-        setShowFailModal
-    } = useTestCaseDetails(testId, onTestCasesRefresh, onTestIdChange);
-
-    const {
-        isResultValid,
-        transactionResult,
-        handleSendTransaction,
-        isSending,
-        sendTransactionParams
-    } = useTransactionValidation({
-        testResult,
-        setValidationErrors,
-        setShowFailModal,
-        handleResolve
-    });
+        result: testResult,
+        refetch: refetchTestResult
+    } = useQuery<TestResultWithCustomFields | undefined>(
+        signal =>
+            testId
+                ? AllureService.from(api, signal).getWithCustomFields(testId)
+                : Promise.resolve(undefined),
+        {
+            deps: [api, testId]
+        }
+    );
 
     const stateComponent = TestCaseStates({
         testId,
-        isSwitching,
         loading,
         hasResult: !!testResult
     });
+
     if (stateComponent) {
         return stateComponent;
     }
@@ -58,37 +43,31 @@ export function TestCaseDetails({ testId, onTestCasesRefresh, onTestIdChange }: 
         return null;
     }
 
-    return (
-        <div className="test-case-details">
-            <TestCaseInfo testResult={testResult}>
-                <SendTransactionResult
-                    transactionResult={transactionResult}
-                    isResultValid={isResultValid}
-                    validationErrors={validationErrors}
+    let component: JSX.Element;
+    switch (testResult.customFields.operationType) {
+        case OPERATION_TYPE.SEND_TRANSACTION: {
+            component = (
+                <SendTransactionOperation
+                    testResult={testResult}
+                    refetchTestResult={refetchTestResult}
+                    onTestCasesRefresh={onTestCasesRefresh}
+                    onTestIdChange={onTestIdChange}
                 />
-            </TestCaseInfo>
-            <TestCaseActions
-                testResult={testResult}
-                isResolving={isResolving}
-                isFailing={isResolving}
-                onResolve={handleResolve}
-                onFail={handleFail}
-                onRerun={handleRerun}
-            >
-                <SendTransactionAction
-                    isSending={isSending}
-                    sendTransactionParams={sendTransactionParams}
-                    onSendTransaction={handleSendTransaction}
+            );
+            break;
+        }
+        default: {
+            // TODO:
+            component = (
+                <SendTransactionOperation
+                    testResult={testResult}
+                    refetchTestResult={refetchTestResult}
+                    onTestCasesRefresh={onTestCasesRefresh}
+                    onTestIdChange={onTestIdChange}
                 />
-            </TestCaseActions>
+            );
+        }
+    }
 
-            <FailModal
-                isOpen={showFailModal}
-                onClose={() => setShowFailModal(false)}
-                onSubmit={handleFail}
-                isSubmitting={isFailing}
-                initialMessage={validationErrors.join('\n')}
-            />
-        </div>
-    );
+    return component;
 }
