@@ -1,6 +1,14 @@
 import type { SendTransactionRpcRequest, SignDataRpcRequest } from '@tonconnect/protocol';
-import type { SendTransactionRequest } from '@tonconnect/sdk';
-import { Cell, loadMessage } from '@ton/core';
+import { type SendTransactionRequest } from '@tonconnect/sdk';
+import { Address, beginCell, Cell, loadMessage, storeStateInit, toNano } from '@ton/core';
+import {
+    buildSuccessMerkleProof,
+    buildSuccessMerkleUpdate,
+    buildVerifyMerkleProof,
+    buildVerifyMerkleUpdate,
+    Exotic,
+    EXOTIC_CODE
+} from '../contracts/exotic';
 
 function extractFromCodeFence(input: string): string | null {
     const fence = /```(?:json)?\n([\s\S]*?)\n```/i.exec(input);
@@ -107,10 +115,107 @@ function isNonNegativeInt(value: unknown) {
     return Number.isInteger(value) && (value as number) >= 0;
 }
 
+function verifyMerkleProofMessage(context?: { sender?: string }) {
+    if (!context?.sender) {
+        console.error('Invalid context for exoticMessagesResolver provided');
+        return undefined;
+    }
+
+    const { sender } = context;
+
+    const exotic = Exotic.createFromConfig(
+        {
+            owner: Address.parse(sender)
+        },
+        EXOTIC_CODE
+    );
+
+    const exoticAddress = exotic.address.toString({
+        urlSafe: true,
+        bounceable: true
+    });
+
+    const stateInit = beginCell().store(storeStateInit(exotic.init!)).endCell();
+
+    return {
+        address: exoticAddress,
+        amount: toNano('0.06').toString(),
+        stateInit: stateInit.toBoc().toString('base64'),
+        payload: buildVerifyMerkleProof(buildSuccessMerkleProof()).toBoc().toString('base64')
+    };
+}
+
+function sender(format: 'raw' | 'bounceable' | 'non-bounceable') {
+    return (context?: { sender?: string }) => {
+        if (!context?.sender) {
+            console.error('Invalid context for senderResolver provided');
+            return undefined;
+        }
+        const sender = Address.parse(context.sender);
+
+        switch (format) {
+            case 'raw':
+                return sender.toRawString();
+            case 'bounceable':
+                return sender.toString({ bounceable: true });
+            case 'non-bounceable':
+                return sender.toString({ bounceable: false });
+            default:
+                console.error('Invalid format for senderResolver provided');
+                return undefined;
+        }
+    };
+}
+
+function updateMerkleProofMessage(context?: { sender?: string }) {
+    if (!context?.sender) {
+        console.error('Invalid context for updateMerkleProofMessageResolver provided');
+        return undefined;
+    }
+
+    const { sender } = context;
+
+    const exotic = Exotic.createFromConfig(
+        {
+            owner: Address.parse(sender)
+        },
+        EXOTIC_CODE
+    );
+
+    const exoticAddress = exotic.address.toString({
+        bounceable: true
+    });
+
+    const stateInit = beginCell().store(storeStateInit(exotic.init!)).endCell();
+
+    return {
+        address: exoticAddress,
+        amount: toNano('0.06').toString(),
+        stateInit: stateInit.toBoc().toString('base64'),
+        payload: buildVerifyMerkleUpdate(buildSuccessMerkleUpdate()).toBoc().toString('base64')
+    };
+}
+
+function mainnet() {
+    return '-239';
+}
+
+function testnet() {
+    return '-3';
+}
+
 const functionScope = [
     nowPlusMinutes,
     nowPlus5Minutes,
     nowMinus5Minutes,
+    mainnet,
+    testnet,
+
+    sender,
+
+    verifyMerkleProofMessage,
+    updateMerkleProofMessage,
+
     isValidSendTransactionBoc,
     isValidString,
     isNonNegativeInt,
@@ -137,4 +242,31 @@ export function evalFenceCondition<T = unknown>(input: string | undefined | null
         console.error(error);
         return undefined;
     }
+}
+
+export function evalWithContext<T = unknown>(
+    input: string | undefined | null,
+    context: unknown
+): T {
+    return populateWithContext(evalFenceCondition(input), context) as T;
+}
+
+export function populateWithContext(value: unknown, context: unknown): unknown {
+    if (typeof value === 'function') {
+        return value(context);
+    }
+
+    if (typeof value !== 'object' || value === null) {
+        return value;
+    }
+
+    if (Array.isArray(value)) {
+        return value.map(item => populateWithContext(item, context));
+    }
+
+    return Object.fromEntries(
+        Object.entries(value).map(([key, value]) => {
+            return [key, populateWithContext(value, context)];
+        })
+    );
 }

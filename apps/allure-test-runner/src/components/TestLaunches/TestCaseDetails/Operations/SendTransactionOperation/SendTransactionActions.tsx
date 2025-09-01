@@ -30,7 +30,7 @@ export function SendTransactionAction({
                     Sending...
                 </>
             ) : (
-                'Send Transaction with Precondition Data'
+                'Send Transaction'
             )}
         </button>
     ) : (
