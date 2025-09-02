@@ -15,6 +15,7 @@ import {
 import { Buffer } from 'buffer';
 import { WalletContractV4R1 } from './wallet-contract-v4-r1';
 
+WalletContractV1R1;
 const knownWallets = [
     { contract: WalletContractV1R1, loadData: loadWalletV1Data },
     { contract: WalletContractV1R2, loadData: loadWalletV1Data },

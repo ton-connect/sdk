@@ -97,7 +97,8 @@ export function useTransactionValidation({
 
         const parsedExpected = evalFenceCondition(testResult.expectedResult, {
             sendTransactionRpcRequest: rpcRequest,
-            sendTransactionParams
+            sendTransactionParams,
+            wallet
         });
         const [isResultValid, errors] = compareResult(rpcResponse, parsedExpected);
 
