@@ -48,7 +48,7 @@ export function SendTransactionAction({
                 </button>
             )}
 
-            <label style={{ marginLeft: 12, userSelect: 'none' }}>
+            <label style={{ userSelect: 'none' }}>
                 <input
                     type="checkbox"
                     checked={!!waitForTx}

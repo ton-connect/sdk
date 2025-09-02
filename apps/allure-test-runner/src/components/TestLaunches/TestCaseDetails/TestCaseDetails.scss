@@ -9,6 +9,30 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
+// Send transaction action row adjustments
+.send-transaction-with-options {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+
+    label {
+        display: inline-flex;
+        align-items: center;
+        margin-top: 2px;
+        font-size: 13px;
+        line-height: 1.3;
+        color: #d1e4ff;
+        white-space: nowrap;
+    }
+
+    input[type='checkbox'] {
+        width: 16px;
+        height: 16px;
+        border-radius: 4px;
+    }
+}
+
 .test-case-details-name {
     text-align: center;
     padding: 12px;
@@ -371,9 +395,11 @@
 }
 
 .test-case-details__actions {
-    display: flex;
-    gap: 4px;
-    height: 60px;
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    align-items: start;
+    gap: 8px;
+    min-height: 60px;
     position: sticky;
     bottom: 0;
     background: #0f172a;
