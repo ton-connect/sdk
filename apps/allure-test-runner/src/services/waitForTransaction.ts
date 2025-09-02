@@ -1,11 +1,11 @@
-import { beginCell, storeMessage } from '@ton/core';
+import { beginCell, type Message, storeMessage } from '@ton/core';
 import { Cell, loadMessage, TonClient, type Transaction } from '@ton/ton';
 
 function endpointByNetwork(network: 'mainnet' | 'testnet') {
     return `https://${network === 'testnet' ? 'testnet.' : ''}toncenter.com/api/v2/jsonRPC`;
 }
 
-function getNormalizedExtMessageHash(message: any) {
+function getNormalizedExtMessageHash(message: Message) {
     if (message.info.type !== 'external-in') {
         throw new Error(`Message must be "external-in", got ${message.info.type}`);
     }
