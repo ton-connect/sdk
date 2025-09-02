@@ -1,26 +1,32 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
-import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
+import { CHAIN, useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import type { SendTransactionRequest } from '@tonconnect/ui-react';
 import { evalFenceCondition, evalWithContext } from '../../../../../../utils/jsonEval';
 import type { TestResult } from '../../../../../../models';
 import type { SendTransactionRpcRequest, SendTransactionRpcResponse } from '@tonconnect/protocol';
 import { compareResult } from '../../../../../../utils/compareResult';
+import { waitForTransaction } from '../../../../../../services/waitForTransaction';
 
 export function useTransactionValidation({
     testResult,
     setValidationErrors,
     setShowFailModal,
-    handleResolve
+    handleResolve,
+    waitForTx
 }: {
     testResult: TestResult | undefined;
     setValidationErrors: (value: string[]) => void;
     setShowFailModal: (value: boolean) => void;
     handleResolve: () => void;
+    waitForTx?: boolean;
 }) {
     const [tonConnectUI] = useTonConnectUI();
     const wallet = useTonWallet();
 
     const [transactionResult, setTransactionResult] = useState<Record<string, unknown>>();
+    const [isWaitingForTx, setIsWaitingForTx] = useState(false);
+    const [confirmedTransaction, setConfirmedTransaction] = useState<Record<string, unknown>>();
+    const [explorerUrl, setExplorerUrl] = useState<string | null>(null);
 
     const sendTransactionParams = useMemo(
         () =>
@@ -34,6 +40,7 @@ export function useTransactionValidation({
 
     useEffect(() => {
         setTransactionResult(undefined);
+        setConfirmedTransaction(undefined);
         setIsResultValid(true);
         setValidationErrors([]);
         setShowFailModal(false);
@@ -64,9 +71,26 @@ export function useTransactionValidation({
 
         try {
             setTransactionResult(undefined);
+            if (waitForTx) setIsWaitingForTx(true);
 
-            await tonConnectUI.sendTransaction(sendTransactionParams);
+            const sent = await tonConnectUI.sendTransaction(sendTransactionParams);
+            setTransactionResult(rpcResponse);
+            if (waitForTx && wallet?.account && sent?.boc) {
+                try {
+                    const network = wallet.account.chain === CHAIN.TESTNET ? 'testnet' : 'mainnet';
+                    const result = await waitForTransaction(sent.boc, network);
+                    setExplorerUrl(result);
+                } catch {
+                } finally {
+                    setIsWaitingForTx(false);
+                }
+            } else if (waitForTx) {
+                setIsWaitingForTx(false);
+            }
         } catch (error) {
+            if (waitForTx) {
+                setIsWaitingForTx(false);
+            }
         } finally {
             setTransactionResult(rpcResponse);
         }
@@ -85,14 +109,17 @@ export function useTransactionValidation({
         } else if (testResult.status !== 'passed') {
             handleResolve();
         }
-    }, [sendTransactionParams, tonConnectUI]);
+    }, [sendTransactionParams, tonConnectUI, waitForTx, wallet?.account?.chain, explorerUrl]);
 
     return {
         // State
         sendTransactionParams,
         transactionResult,
+        confirmedTransaction,
+        explorerUrl,
         tonConnectUI,
         isResultValid,
+        isWaitingForTx,
 
         // Actions
         handleSendTransaction

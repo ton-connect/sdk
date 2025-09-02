@@ -6,6 +6,7 @@ import { TestCaseInfo } from '../../TestCaseInfo';
 import { TestCaseActions } from '../../TestCaseActions';
 import { FailModal } from '../../FailModal';
 import type { TestResultWithCustomFields } from '../../../../../models';
+import { useState } from 'react';
 
 type SendTransactionOperationProps = {
     testResult: TestResultWithCustomFields;
@@ -32,13 +33,22 @@ export function SendTransactionOperation({
         setShowFailModal
     } = useTestCaseDetails(testResult, refetchTestResult, onTestCasesRefresh, onTestIdChange);
 
-    const { isResultValid, transactionResult, handleSendTransaction, sendTransactionParams } =
-        useTransactionValidation({
-            testResult,
-            setValidationErrors,
-            setShowFailModal,
-            handleResolve
-        });
+    const [waitForTx, setWaitForTx] = useState(false);
+
+    const {
+        isResultValid,
+        transactionResult,
+        handleSendTransaction,
+        sendTransactionParams,
+        explorerUrl,
+        isWaitingForTx
+    } = useTransactionValidation({
+        testResult,
+        setValidationErrors,
+        setShowFailModal,
+        handleResolve,
+        waitForTx
+    });
 
     if (!testResult) {
         return null;
@@ -49,6 +59,8 @@ export function SendTransactionOperation({
             <TestCaseInfo testResult={testResult}>
                 <SendTransactionResult
                     transactionResult={transactionResult}
+                    explorerUrl={explorerUrl}
+                    isWaitingForTx={isWaitingForTx}
                     isResultValid={isResultValid}
                     validationErrors={validationErrors}
                 />
@@ -64,6 +76,8 @@ export function SendTransactionOperation({
                 <SendTransactionAction
                     sendTransactionParams={sendTransactionParams}
                     onSendTransaction={handleSendTransaction}
+                    waitForTx={waitForTx}
+                    onToggleWaitForTx={setWaitForTx}
                 />
             </TestCaseActions>
 

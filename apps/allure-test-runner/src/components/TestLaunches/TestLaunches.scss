@@ -257,6 +257,15 @@
     padding: 2rem 0;
 }
 
+// Lighter link style for visibility
+.link-light {
+    color: #3b82f6;
+    text-decoration: underline;
+}
+.link-light:hover {
+    color: #60a5fa;
+}
+
 .test-runs__loading {
     text-align: center;
     color: #94a3b8;
