@@ -29,40 +29,40 @@ function nowMinus5Minutes() {
 }
 
 function isValidSendTransactionId(
-    value: unknown,
-    context?: {
+    this: {
         sendTransactionRpcRequest?: SendTransactionRpcRequest;
-    }
+    } | null,
+    value: unknown
 ): boolean {
-    if (!context?.sendTransactionRpcRequest) {
+    if (!this?.sendTransactionRpcRequest) {
         console.error('Invalid context to isValidSendTransactionId provided');
         return false;
     }
 
-    return value === context.sendTransactionRpcRequest.id;
+    return value === this.sendTransactionRpcRequest.id;
 }
 
 function isValidSignDataId(
-    value: unknown,
-    context?: {
+    this: {
         signDataRpcRequest?: SignDataRpcRequest;
-    }
+    } | null,
+    value: unknown
 ): boolean {
-    if (!context?.signDataRpcRequest) {
+    if (!this?.signDataRpcRequest) {
         console.error('Invalid context to isValidSignDataId provided');
         return false;
     }
 
-    return value === context.signDataRpcRequest.id;
+    return value === this.signDataRpcRequest.id;
 }
 
 function isValidSendTransactionBoc(
-    value: unknown,
-    context?: {
+    this: {
         sendTransactionParams?: SendTransactionRequest;
-    }
+    },
+    value: unknown
 ): boolean {
-    if (!context?.sendTransactionParams) {
+    if (!this?.sendTransactionParams) {
         console.error('Invalid context to isValidSendTransactionId provided');
         return false;
     }
@@ -115,13 +115,13 @@ function isNonNegativeInt(value: unknown) {
     return Number.isInteger(value) && (value as number) >= 0;
 }
 
-function verifyMerkleProofMessage(context?: { sender?: string }) {
-    if (!context?.sender) {
+function verifyMerkleProofMessage(this: { sender?: string } | null) {
+    if (!this?.sender) {
         console.error('Invalid context for exoticMessagesResolver provided');
         return undefined;
     }
 
-    const { sender } = context;
+    const { sender } = this;
 
     const exotic = Exotic.createFromConfig(
         {
@@ -145,35 +145,33 @@ function verifyMerkleProofMessage(context?: { sender?: string }) {
     };
 }
 
-function sender(format: 'raw' | 'bounceable' | 'non-bounceable') {
-    return (context?: { sender?: string }) => {
-        if (!context?.sender) {
-            console.error('Invalid context for senderResolver provided');
-            return undefined;
-        }
-        const sender = Address.parse(context.sender);
+function sender(this: { sender?: string } | null, format: 'raw' | 'bounceable' | 'non-bounceable') {
+    if (!this?.sender) {
+        console.error('Invalid context for senderResolver provided');
+        return undefined;
+    }
+    const sender = Address.parse(this.sender);
 
-        switch (format) {
-            case 'raw':
-                return sender.toRawString();
-            case 'bounceable':
-                return sender.toString({ bounceable: true });
-            case 'non-bounceable':
-                return sender.toString({ bounceable: false });
-            default:
-                console.error('Invalid format for senderResolver provided');
-                return undefined;
-        }
-    };
+    switch (format) {
+        case 'raw':
+            return sender.toRawString();
+        case 'bounceable':
+            return sender.toString({ bounceable: true });
+        case 'non-bounceable':
+            return sender.toString({ bounceable: false });
+        default:
+            console.error('Invalid format for senderResolver provided');
+            return undefined;
+    }
 }
 
-function updateMerkleProofMessage(context?: { sender?: string }) {
-    if (!context?.sender) {
+function updateMerkleProofMessage(this: { sender?: string } | null) {
+    if (!this?.sender) {
         console.error('Invalid context for updateMerkleProofMessageResolver provided');
         return undefined;
     }
 
-    const { sender } = context;
+    const { sender } = this;
 
     const exotic = Exotic.createFromConfig(
         {
@@ -223,7 +221,10 @@ const functionScope = [
     isValidSignDataId
 ];
 
-export function evalFenceCondition<T = unknown>(input: string | undefined | null): T | undefined {
+export function evalFenceCondition<T = unknown>(
+    input: string | undefined | null,
+    context: unknown = null
+): T | undefined {
     if (!input) {
         console.warn('No input');
         return undefined;
@@ -237,36 +238,9 @@ export function evalFenceCondition<T = unknown>(input: string | undefined | null
         return new Function(
             ...functionScope.map(fn => fn.name),
             `"use strict";return (${fromFence});`
-        )(...functionScope);
+        )(...functionScope.map(fn => fn.bind(context)));
     } catch (error) {
         console.error(error);
         return undefined;
     }
-}
-
-export function evalWithContext<T = unknown>(
-    input: string | undefined | null,
-    context: unknown
-): T {
-    return populateWithContext(evalFenceCondition(input), context) as T;
-}
-
-export function populateWithContext(value: unknown, context: unknown): unknown {
-    if (typeof value === 'function') {
-        return value(context);
-    }
-
-    if (typeof value !== 'object' || value === null) {
-        return value;
-    }
-
-    if (Array.isArray(value)) {
-        return value.map(item => populateWithContext(item, context));
-    }
-
-    return Object.fromEntries(
-        Object.entries(value).map(([key, value]) => {
-            return [key, populateWithContext(value, context)];
-        })
-    );
 }

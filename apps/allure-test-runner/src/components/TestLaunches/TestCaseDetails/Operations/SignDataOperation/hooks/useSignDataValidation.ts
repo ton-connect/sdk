@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { type SignDataPayload, useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
-import { evalFenceCondition, evalWithContext } from '../../../../../../utils/jsonEval';
+import { evalFenceCondition } from '../../../../../../utils/jsonEval';
 import type { TestResult } from '../../../../../../models';
 import type { SignDataRpcRequest, SignDataRpcResponse } from '@tonconnect/protocol';
 import { compareResult } from '../../../../../../utils/compareResult';
@@ -22,7 +22,7 @@ export function useSignDataValidation({
 
     const signDataPayload = useMemo(
         () =>
-            evalWithContext<SignDataPayload>(testResult?.precondition, {
+            evalFenceCondition<SignDataPayload>(testResult?.precondition, {
                 sender: wallet?.account.address
             }),
         [wallet, testResult]
@@ -68,11 +68,11 @@ export function useSignDataValidation({
             setSignDataResult(rpcResponse);
         }
 
-        const parsedExpected = evalFenceCondition(testResult.expectedResult);
-        const [isResultValid, errors] = compareResult(rpcResponse, parsedExpected, {
+        const parsedExpected = evalFenceCondition(testResult.expectedResult, {
             signDataRpcRequest: rpcRequest,
             signDataPayload
         });
+        const [isResultValid, errors] = compareResult(rpcResponse, parsedExpected);
 
         setIsResultValid(isResultValid);
         setValidationErrors(errors);

@@ -1,13 +1,12 @@
-export function compareResult(result: unknown, expected: unknown, context: unknown = undefined) {
+export function compareResult(result: unknown, expected: unknown) {
     const errors: string[] = [];
-    const success = compareResultInner(result, expected, context, errors);
+    const success = compareResultInner(result, expected, errors);
     return [success, errors] as const;
 }
 
 function compareResultInner(
     result: unknown,
     expected: unknown,
-    context: unknown,
     errors: string[],
     path: string = ''
 ): boolean {
@@ -28,7 +27,6 @@ function compareResultInner(
                     !compareResultInner(
                         (result as Record<string, unknown>)[key],
                         (expected as Record<string, unknown>)[key],
-                        context,
                         errors,
                         newPath
                     )
@@ -44,7 +42,7 @@ function compareResultInner(
     }
 
     if (typeof expected === 'function') {
-        const passed = expected(result, context);
+        const passed = expected(result);
         if (!passed) {
             errors.push(
                 `${field}: value "${result}" failed for predicate ${expected.name || 'predicate'}`

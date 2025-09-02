@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { CHAIN, useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import type { SendTransactionRequest } from '@tonconnect/ui-react';
-import { evalFenceCondition, evalWithContext } from '../../../../../../utils/jsonEval';
+import { evalFenceCondition } from '../../../../../../utils/jsonEval';
 import type { TestResult } from '../../../../../../models';
 import type { SendTransactionRpcRequest, SendTransactionRpcResponse } from '@tonconnect/protocol';
 import { compareResult } from '../../../../../../utils/compareResult';
@@ -30,7 +30,7 @@ export function useTransactionValidation({
 
     const sendTransactionParams = useMemo(
         () =>
-            evalWithContext<SendTransactionRequest>(testResult?.precondition, {
+            evalFenceCondition<SendTransactionRequest>(testResult?.precondition, {
                 sender: wallet?.account.address
             }),
         [wallet, testResult]
@@ -95,11 +95,11 @@ export function useTransactionValidation({
             setTransactionResult(rpcResponse);
         }
 
-        const parsedExpected = evalFenceCondition(testResult.expectedResult);
-        const [isResultValid, errors] = compareResult(rpcResponse, parsedExpected, {
+        const parsedExpected = evalFenceCondition(testResult.expectedResult, {
             sendTransactionRpcRequest: rpcRequest,
             sendTransactionParams
         });
+        const [isResultValid, errors] = compareResult(rpcResponse, parsedExpected);
 
         setIsResultValid(isResultValid);
         setValidationErrors(errors);
