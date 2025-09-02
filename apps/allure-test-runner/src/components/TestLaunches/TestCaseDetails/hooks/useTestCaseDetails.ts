@@ -1,6 +1,48 @@
 import { useState, useCallback } from 'react';
 import { useAllureApi } from '../../../../hooks/useAllureApi';
-import type { TestResultWithCustomFields } from '../../../../models';
+import type { TestResultWithCustomFields, ResolveTestResultParams } from '../../../../models';
+
+type StepStatus = 'passed' | 'failed' | 'skipped';
+
+function getStepStatusesFromStorage(testKey: string): Record<string, StepStatus> {
+    try {
+        const savedStatuses = localStorage.getItem(`stepStatuses-${testKey}`);
+        return savedStatuses ? JSON.parse(savedStatuses) : {};
+    } catch (error) {
+        console.error('Failed to parse saved step statuses:', error);
+        return {};
+    }
+}
+
+function createExecutionData(
+    testResult: TestResultWithCustomFields,
+    testKey: string,
+    executionStatus: 'passed' | 'failed'
+) {
+    if (!testResult.execution?.steps || testResult.execution.steps.length === 0) {
+        return null;
+    }
+
+    const stepStatuses = getStepStatusesFromStorage(testKey);
+    const steps = testResult.execution.steps.map((step, index) => {
+        const stepKey = `${testKey}-${index}`;
+        const stepStatus = stepStatuses[stepKey] || 'skipped';
+
+        return {
+            type: step.type,
+            body: step.body,
+            showMessage: step.showMessage || false,
+            steps: [],
+            markup: step.body ? `<p>${step.body}</p>` : undefined,
+            status: stepStatus
+        };
+    });
+
+    return {
+        status: executionStatus,
+        steps
+    };
+}
 
 export function useTestCaseDetails(
     testResult: TestResultWithCustomFields | undefined,
@@ -19,7 +61,21 @@ export function useTestCaseDetails(
         if (!testResult) return;
         try {
             setIsResolving(true);
-            await api.resolveTestResult({ id: testResult.id, status: 'passed' });
+
+            const testKey = `${testResult.launchId}-${testResult.id}`;
+
+            const payload: ResolveTestResultParams = {
+                id: testResult.id,
+                status: 'passed' as const
+            };
+
+            // Добавляем execution если есть шаги
+            const execution = createExecutionData(testResult, testKey, 'passed');
+            if (execution) {
+                payload.execution = execution;
+            }
+
+            await api.resolveTestResult(payload);
             refetchTestResult?.();
             onTestCasesRefresh?.();
         } finally {
@@ -32,13 +88,23 @@ export function useTestCaseDetails(
             if (!testResult) return;
             try {
                 setIsFailing(true);
-                const payload: { id: number; status: 'failed'; message?: string } = {
+
+                const testKey = `${testResult.launchId}-${testResult.id}`;
+
+                const payload: ResolveTestResultParams = {
                     id: testResult.id,
-                    status: 'failed'
+                    status: 'failed' as const
                 };
+
                 if (message.trim()) {
                     payload.message = message.trim();
                 }
+
+                const execution = createExecutionData(testResult, testKey, 'failed');
+                if (execution) {
+                    payload.execution = execution;
+                }
+
                 await api.resolveTestResult(payload);
                 refetchTestResult?.();
                 onTestCasesRefresh?.();

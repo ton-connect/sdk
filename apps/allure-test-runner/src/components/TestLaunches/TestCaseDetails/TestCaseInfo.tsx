@@ -4,6 +4,7 @@ import { TestCaseHeader } from './TestCaseHeader';
 import { OperationTypeField } from './OperationTypeField';
 import { TestCaseDescription } from './TestCaseDescription';
 import { TestCaseExpandableSection } from './TestCaseExpandableSection';
+import { TestSteps } from './TestSteps';
 
 type TestCaseInfoProps = PropsWithChildren<{
     testResult: TestResultWithCustomFields;
@@ -27,6 +28,9 @@ export function TestCaseInfo({ testResult, children }: TestCaseInfoProps) {
                 data={testResult.precondition}
                 dataHtml={testResult.preconditionHtml}
             />
+
+            <TestSteps testResult={testResult} />
+
             <TestCaseExpandableSection
                 title="Expected Result"
                 data={testResult.expectedResult}

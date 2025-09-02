@@ -14,9 +14,10 @@ export class AllureService {
     }
 
     async getWithCustomFields(testId: number): Promise<TestResultWithCustomFields> {
-        const [testResult, customFields] = await Promise.all([
+        const [testResult, customFields, execution] = await Promise.all([
             this.api.getTestResult(testId, this.signal),
-            this.api.getCustomFields(testId)
+            this.api.getCustomFields(testId),
+            this.api.getExecution(testId)
         ]);
 
         const operationType = customFields.find(
@@ -27,7 +28,8 @@ export class AllureService {
             ...testResult,
             customFields: {
                 operationType: operationType?.name as keyof typeof OPERATION_TYPE
-            }
+            },
+            execution
         };
     }
 }

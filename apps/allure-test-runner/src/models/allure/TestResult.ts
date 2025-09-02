@@ -1,4 +1,5 @@
 import type { OPERATION_TYPE } from './CustomField';
+import type { Execution } from './Execution';
 
 export type TestResult = {
     id: number;
@@ -34,4 +35,5 @@ export type TestResultWithCustomFields = TestResult & {
     customFields: {
         operationType?: keyof typeof OPERATION_TYPE;
     };
+    execution?: Execution;
 };

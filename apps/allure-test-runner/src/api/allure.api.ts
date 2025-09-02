@@ -7,7 +7,8 @@ import type {
     TestResult,
     ResolveTestResultParams,
     RerunTestResultParams,
-    CustomField
+    CustomField,
+    Execution
 } from '../models';
 import { Base64 } from '@tonconnect/protocol';
 
@@ -204,17 +205,23 @@ export class AllureApiClient {
     async resolveTestResult(params: ResolveTestResultParams, signal?: AbortSignal): Promise<void> {
         const url = this.buildUrl(`/api/testresult/${params.id}/resolve`, { v2: true });
 
+        const payload: Record<string, unknown> = {
+            start: params.start,
+            stop: params.stop,
+            duration: params.duration,
+            status: params.status,
+            message: params.message
+        };
+
+        if (params.execution) {
+            payload.execution = params.execution;
+        }
+
         const res = await fetch(url, {
             method: 'POST',
             headers: this.buildHeaders(),
             signal,
-            body: JSON.stringify({
-                start: params.start,
-                stop: params.stop,
-                duration: params.duration,
-                status: params.status,
-                message: params.message
-            })
+            body: JSON.stringify(payload)
         });
 
         if (!res.ok) {
@@ -255,6 +262,24 @@ export class AllureApiClient {
         if (!res.ok) {
             throw new Error(
                 `Failed to fetch custom fields for test result ${testResultId}: ${res.status} ${res.statusText}`
+            );
+        }
+
+        return res.json();
+    }
+
+    async getExecution(testResultId: number, signal?: AbortSignal): Promise<Execution> {
+        const res = await fetch(
+            this.buildUrl(`/api/testresult/${testResultId}/execution?v2=true`),
+            {
+                headers: this.buildHeaders(),
+                signal
+            }
+        );
+
+        if (!res.ok) {
+            throw new Error(
+                `Failed to fetch execution for test result ${testResultId}: ${res.status} ${res.statusText}`
             );
         }
 

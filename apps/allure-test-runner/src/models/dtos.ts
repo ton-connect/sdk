@@ -51,6 +51,17 @@ export type ResolveTestResultParams = {
     duration?: number;
     status: 'passed' | 'failed';
     message?: string;
+    execution?: {
+        status: 'passed' | 'failed';
+        steps?: Array<{
+            type: string;
+            body?: string;
+            showMessage?: boolean;
+            steps?: unknown[];
+            markup?: string;
+            status?: 'passed' | 'failed' | 'skipped';
+        }>;
+    };
 };
 
 export type RerunTestResultParams = {
