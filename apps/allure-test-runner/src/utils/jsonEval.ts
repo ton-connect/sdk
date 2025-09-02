@@ -73,7 +73,6 @@ function isValidSendTransactionBoc(
 
     const stateInit = this.wallet?.account?.walletStateInit;
     const walletVersion = determineWalletVersion(stateInit);
-    console.log(walletVersion);
     if (!walletVersion) {
         console.error('Unsupported wallet version');
         return false;
@@ -88,7 +87,6 @@ function isValidSendTransactionBoc(
     try {
         const message = loadMessage(Cell.fromBase64(value).beginParse());
         const walletTransfer = loadWalletTransfer(message.body, walletVersion);
-        console.log(walletTransfer);
 
         if (message.info.type !== 'external-in') {
             return false;
