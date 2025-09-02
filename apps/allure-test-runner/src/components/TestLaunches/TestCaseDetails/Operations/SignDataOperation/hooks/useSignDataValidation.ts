@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { type SignDataPayload, useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { evalFenceCondition, evalWithContext } from '../../../../../../utils/jsonEval';
 import type { TestResult } from '../../../../../../models';
@@ -29,6 +29,13 @@ export function useSignDataValidation({
     );
 
     const [isResultValid, setIsResultValid] = useState(true);
+
+    useEffect(() => {
+        setSignDataResult(undefined);
+        setIsResultValid(true);
+        setValidationErrors([]);
+        setShowFailModal(false);
+    }, [testResult?.id]);
 
     const handleSignData = useCallback(async () => {
         if (!signDataPayload || !testResult) {

@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import type { SendTransactionRequest } from '@tonconnect/ui-react';
 import { evalFenceCondition, evalWithContext } from '../../../../../../utils/jsonEval';
@@ -31,6 +31,13 @@ export function useTransactionValidation({
     );
 
     const [isResultValid, setIsResultValid] = useState(true);
+
+    useEffect(() => {
+        setTransactionResult(undefined);
+        setIsResultValid(true);
+        setValidationErrors([]);
+        setShowFailModal(false);
+    }, [testResult?.id]);
 
     const handleSendTransaction = useCallback(async () => {
         if (!sendTransactionParams || !testResult) {

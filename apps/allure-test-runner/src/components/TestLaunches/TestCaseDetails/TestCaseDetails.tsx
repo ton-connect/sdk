@@ -49,6 +49,7 @@ export function TestCaseDetails({ testId, onTestCasesRefresh, onTestIdChange }: 
         case OPERATION_TYPE.SEND_TRANSACTION: {
             component = (
                 <SendTransactionOperation
+                    key={testResult.id}
                     testResult={testResult}
                     refetchTestResult={refetchTestResult}
                     onTestCasesRefresh={onTestCasesRefresh}
@@ -60,6 +61,7 @@ export function TestCaseDetails({ testId, onTestCasesRefresh, onTestIdChange }: 
         case OPERATION_TYPE.SIGN_DATA: {
             component = (
                 <SignDataOperation
+                    key={testResult.id}
                     testResult={testResult}
                     refetchTestResult={refetchTestResult}
                     onTestCasesRefresh={onTestCasesRefresh}
@@ -72,6 +74,7 @@ export function TestCaseDetails({ testId, onTestCasesRefresh, onTestIdChange }: 
             // TODO:
             component = (
                 <SendTransactionOperation
+                    key={testResult.id}
                     testResult={testResult}
                     refetchTestResult={refetchTestResult}
                     onTestCasesRefresh={onTestCasesRefresh}
