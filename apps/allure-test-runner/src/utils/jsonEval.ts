@@ -1,5 +1,5 @@
 import type { SendTransactionRpcRequest, SignDataRpcRequest } from '@tonconnect/protocol';
-import { type SendTransactionRequest, type Wallet } from '@tonconnect/sdk';
+import { CHAIN, type SendTransactionRequest, type Wallet } from '@tonconnect/sdk';
 import { Address, beginCell, Cell, loadMessage, storeStateInit, toNano } from '@ton/ton';
 import {
     buildSuccessMerkleProof,
@@ -79,7 +79,7 @@ function isValidSendTransactionBoc(
     }
 
     const {
-        sendTransactionParams: { validUntil, messages }
+        sendTransactionParams: { validUntil, messages, network }
     } = this;
     if (typeof value !== 'string') {
         return false;
@@ -89,6 +89,17 @@ function isValidSendTransactionBoc(
         const walletTransfer = loadWalletTransfer(message.body, walletVersion);
 
         if (message.info.type !== 'external-in') {
+            return false;
+        }
+
+        let walletV5Id =
+            (network ?? this.wallet?.account?.chain) === CHAIN.TESTNET ? 2147483645 : 2147483409;
+        let expectedWalletId = ['v5r1', 'v5beta'].includes(walletVersion) ? walletV5Id : 698983191;
+
+        if (walletTransfer.walletId !== expectedWalletId) {
+            console.error(
+                `Invalid wallet id, expected ${expectedWalletId}, got ${walletTransfer.walletId}`
+            );
             return false;
         }
 
@@ -246,11 +257,11 @@ function updateMerkleProofMessage(this: { sender?: string } | null) {
 }
 
 function mainnet() {
-    return '-239';
+    return CHAIN.MAINNET;
 }
 
 function testnet() {
-    return '-3';
+    return CHAIN.TESTNET;
 }
 
 const functionScope = [
