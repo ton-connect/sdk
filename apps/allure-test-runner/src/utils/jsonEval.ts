@@ -10,6 +10,7 @@ import {
     EXOTIC_CODE
 } from '../contracts/exotic';
 import { determineWalletVersion, loadWalletTransfer } from '../contracts/wallet';
+import { createJettonMaster, mintMessage } from '../contracts/jetton';
 
 function extractFromCodeFence(input: string): string | null {
     const fence = /```(?:json)?\n([\s\S]*?)\n```/i.exec(input);
@@ -243,7 +244,8 @@ function updateMerkleProofMessage(this: { sender?: string } | null) {
     );
 
     const exoticAddress = exotic.address.toString({
-        bounceable: true
+        bounceable: true,
+        urlSafe: true
     });
 
     const stateInit = beginCell().store(storeStateInit(exotic.init!)).endCell();
@@ -256,6 +258,47 @@ function updateMerkleProofMessage(this: { sender?: string } | null) {
     };
 }
 
+function mintJettonWithDeployMessage(this: { sender?: string } | null) {
+    if (!this?.sender) {
+        console.error('Invalid context for updateMerkleProofMessageResolver provided');
+        return undefined;
+    }
+
+    const sender = Address.parse(this?.sender);
+    const jettonMaster = createJettonMaster(sender);
+
+    const stateInit = beginCell().store(storeStateInit(jettonMaster.init!)).endCell();
+
+    return {
+        address: jettonMaster.address.toString({
+            urlSafe: true,
+            bounceable: true
+        }),
+        amount: toNano('0.06').toString(),
+        stateInit: stateInit.toBoc().toString('base64'),
+        payload: mintMessage({ from: jettonMaster.address, to: sender }).toBoc().toString('base64')
+    };
+}
+
+function mintJettonWithoutDeployMessage(this: { sender?: string } | null) {
+    if (!this?.sender) {
+        console.error('Invalid context for updateMerkleProofMessageResolver provided');
+        return undefined;
+    }
+
+    const sender = Address.parse(this?.sender);
+    const jettonMaster = createJettonMaster(sender);
+
+    return {
+        address: jettonMaster.address.toString({
+            urlSafe: true,
+            bounceable: true
+        }),
+        amount: toNano('0.06').toString(),
+        payload: mintMessage({ from: jettonMaster.address, to: sender }).toBoc().toString('base64')
+    };
+}
+
 function mainnet() {
     return CHAIN.MAINNET;
 }
@@ -265,17 +308,19 @@ function testnet() {
 }
 
 const functionScope = [
+    // should be called with (...args), e.g. updateMerkleProofMessage() or sender('raw')
     nowPlusMinutes,
     nowPlus5Minutes,
     nowMinus5Minutes,
     mainnet,
     testnet,
-
     sender,
-
     verifyMerkleProofMessage,
     updateMerkleProofMessage,
+    mintJettonWithDeployMessage,
+    mintJettonWithoutDeployMessage,
 
+    // should be left as it is, e.g. isValidSendTransactionBoc without parentheses
     isValidSendTransactionBoc,
     isValidString,
     isNonNegativeInt,

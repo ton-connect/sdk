@@ -68,6 +68,9 @@ importers:
 
   apps/allure-test-runner:
     dependencies:
+      '@ton-community/assets-sdk':
+        specifier: 0.0.5
+        version: 0.0.5(@ton/core@0.61.0(@ton/crypto@3.3.0))(@ton/crypto@3.3.0)(@ton/ton@15.3.1(@ton/core@0.61.0(@ton/crypto@3.3.0))(@ton/crypto@3.3.0))
       '@ton/core':
         specifier: 0.61.0
         version: 0.61.0(@ton/crypto@3.3.0)
