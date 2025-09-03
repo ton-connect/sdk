@@ -6,13 +6,16 @@ import { STORAGE_KEYS } from './constants';
 import { AuthForm } from './components/AuthForm';
 import { AuthProvider } from './context/AuthContext';
 import { router } from './routes';
+import { isMoreThanDayToExpire } from './utils/jwt';
 
 function App() {
     const [jwt, setJwt] = useState<string>();
 
     useEffect(() => {
         const saved = localStorage.getItem(STORAGE_KEYS.jwtToken);
-        if (saved) setJwt(saved);
+        if (saved && isMoreThanDayToExpire(saved)) {
+            setJwt(saved);
+        }
     }, []);
 
     return (
