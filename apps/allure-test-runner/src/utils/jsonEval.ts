@@ -12,6 +12,13 @@ import {
 import { determineWalletVersion, loadWalletTransfer } from '../contracts/wallet';
 import { createJettonMaster, mintMessage } from '../contracts/jetton';
 
+type EvalContext = {
+    sendTransactionRpcRequest?: SendTransactionRpcRequest;
+    signDataRpcRequest?: SignDataRpcRequest;
+    wallet?: Wallet | null;
+    sendTransactionParams?: SendTransactionRequest;
+} | null;
+
 function extractFromCodeFence(input: string): string | null {
     const fence = /```(?:json)?\n([\s\S]*?)\n```/i.exec(input);
     if (fence && fence[1]) return fence[1].trim();
@@ -30,12 +37,7 @@ function nowMinus5Minutes() {
     return nowPlusMinutes(-5);
 }
 
-function isValidSendTransactionId(
-    this: {
-        sendTransactionRpcRequest?: SendTransactionRpcRequest;
-    } | null,
-    value: unknown
-): boolean {
+function isValidSendTransactionId(this: EvalContext, value: unknown): boolean {
     if (!this?.sendTransactionRpcRequest) {
         console.error('Invalid context to isValidSendTransactionId provided');
         return false;
@@ -44,12 +46,7 @@ function isValidSendTransactionId(
     return value === this.sendTransactionRpcRequest.id;
 }
 
-function isValidSignDataId(
-    this: {
-        signDataRpcRequest?: SignDataRpcRequest;
-    } | null,
-    value: unknown
-): boolean {
+function isValidSignDataId(this: EvalContext, value: unknown): boolean {
     if (!this?.signDataRpcRequest) {
         console.error('Invalid context to isValidSignDataId provided');
         return false;
@@ -59,13 +56,7 @@ function isValidSignDataId(
 }
 
 // eslint-disable-next-line complexity
-function isValidSendTransactionBoc(
-    this: {
-        wallet?: Wallet;
-        sendTransactionParams?: SendTransactionRequest;
-    },
-    value: unknown
-): boolean {
+function isValidSendTransactionBoc(this: EvalContext, value: unknown): boolean {
     // TODO: somehow make errors appear on ui
     if (!this?.sendTransactionParams) {
         console.error('Invalid context to isValidSendTransactionId provided');
@@ -178,13 +169,12 @@ function isNonNegativeInt(value: unknown) {
     return Number.isInteger(value) && (value as number) >= 0;
 }
 
-function verifyMerkleProofMessage(this: { sender?: string } | null) {
-    if (!this?.sender) {
-        console.error('Invalid context for exoticMessagesResolver provided');
+function verifyMerkleProofMessage(this: EvalContext) {
+    if (!this?.wallet?.account.address) {
+        console.error('Invalid context for verifyMerkleProofMessage provided');
         return undefined;
     }
-
-    const { sender } = this;
+    const sender = this.wallet.account.address;
 
     const exotic = Exotic.createFromConfig(
         {
@@ -208,12 +198,12 @@ function verifyMerkleProofMessage(this: { sender?: string } | null) {
     };
 }
 
-function sender(this: { sender?: string } | null, format: 'raw' | 'bounceable' | 'non-bounceable') {
-    if (!this?.sender) {
+function sender(this: EvalContext, format: 'raw' | 'bounceable' | 'non-bounceable') {
+    if (!this?.wallet?.account.address) {
         console.error('Invalid context for senderResolver provided');
         return undefined;
     }
-    const sender = Address.parse(this.sender);
+    const sender = Address.parse(this.wallet.account.address);
 
     switch (format) {
         case 'raw':
@@ -228,13 +218,12 @@ function sender(this: { sender?: string } | null, format: 'raw' | 'bounceable' |
     }
 }
 
-function updateMerkleProofMessage(this: { sender?: string } | null) {
-    if (!this?.sender) {
-        console.error('Invalid context for updateMerkleProofMessageResolver provided');
+function updateMerkleProofMessage(this: EvalContext) {
+    if (!this?.wallet?.account.address) {
+        console.error('Invalid context for updateMerkleProofMessage provided');
         return undefined;
     }
-
-    const { sender } = this;
+    const sender = this.wallet.account.address;
 
     const exotic = Exotic.createFromConfig(
         {
@@ -258,13 +247,13 @@ function updateMerkleProofMessage(this: { sender?: string } | null) {
     };
 }
 
-function mintJettonWithDeployMessage(this: { sender?: string } | null) {
-    if (!this?.sender) {
-        console.error('Invalid context for updateMerkleProofMessageResolver provided');
+function mintJettonWithDeployMessage(this: EvalContext) {
+    if (!this?.wallet?.account.address) {
+        console.error('Invalid context for mintJettonWithDeployMessage provided');
         return undefined;
     }
+    const sender = Address.parse(this.wallet.account.address);
 
-    const sender = Address.parse(this?.sender);
     const jettonMaster = createJettonMaster(sender);
 
     const stateInit = beginCell().store(storeStateInit(jettonMaster.init!)).endCell();
@@ -280,13 +269,13 @@ function mintJettonWithDeployMessage(this: { sender?: string } | null) {
     };
 }
 
-function mintJettonWithoutDeployMessage(this: { sender?: string } | null) {
-    if (!this?.sender) {
-        console.error('Invalid context for updateMerkleProofMessageResolver provided');
+function mintJettonWithoutDeployMessage(this: EvalContext) {
+    if (!this?.wallet?.account.address) {
+        console.error('Invalid context for mintJettonWithDeployMessage provided');
         return undefined;
     }
+    const sender = Address.parse(this.wallet.account.address);
 
-    const sender = Address.parse(this?.sender);
     const jettonMaster = createJettonMaster(sender);
 
     return {
@@ -307,11 +296,7 @@ function testnet() {
     return CHAIN.TESTNET;
 }
 
-function maxMessages(
-    this: {
-        wallet?: Wallet;
-    } | null
-) {
+function maxMessages(this: EvalContext) {
     if (!this?.wallet?.account.walletStateInit) {
         console.error('Invalid wallet for maxMessages provided');
         return undefined;
@@ -356,7 +341,7 @@ const functionScope = [
 
 export function evalFenceCondition<T = unknown>(
     input: string | undefined | null,
-    context: unknown = null
+    context: EvalContext = null
 ): T | undefined {
     if (!input) {
         console.warn('No input');

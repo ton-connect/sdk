@@ -21,10 +21,7 @@ export function useSignDataValidation({
     const [signDataResult, setSignDataResult] = useState<Record<string, unknown>>();
 
     const signDataPayload = useMemo(
-        () =>
-            evalFenceCondition<SignDataPayload>(testResult?.precondition, {
-                sender: wallet?.account.address
-            }),
+        () => evalFenceCondition<SignDataPayload>(testResult?.precondition, { wallet }),
         [wallet, testResult]
     );
 
@@ -69,8 +66,7 @@ export function useSignDataValidation({
         }
 
         const parsedExpected = evalFenceCondition(testResult.expectedResult, {
-            signDataRpcRequest: rpcRequest,
-            signDataPayload
+            signDataRpcRequest: rpcRequest
         });
         const [isResultValid, errors] = compareResult(rpcResponse, parsedExpected);
 

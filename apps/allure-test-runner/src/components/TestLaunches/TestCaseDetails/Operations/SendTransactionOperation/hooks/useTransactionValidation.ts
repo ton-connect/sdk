@@ -29,11 +29,7 @@ export function useTransactionValidation({
     const [explorerUrl, setExplorerUrl] = useState<string | null>(null);
 
     const sendTransactionParams = useMemo(
-        () =>
-            evalFenceCondition<SendTransactionRequest>(testResult?.precondition, {
-                sender: wallet?.account?.address,
-                wallet
-            }),
+        () => evalFenceCondition<SendTransactionRequest>(testResult?.precondition, { wallet }),
         [wallet, testResult]
     );
 
