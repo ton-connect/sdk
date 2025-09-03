@@ -31,7 +31,8 @@ export function useTransactionValidation({
     const sendTransactionParams = useMemo(
         () =>
             evalFenceCondition<SendTransactionRequest>(testResult?.precondition, {
-                sender: wallet?.account.address
+                sender: wallet?.account?.address,
+                wallet
             }),
         [wallet, testResult]
     );

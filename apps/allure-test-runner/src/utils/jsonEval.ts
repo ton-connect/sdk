@@ -307,6 +307,31 @@ function testnet() {
     return CHAIN.TESTNET;
 }
 
+function maxMessages(
+    this: {
+        wallet?: Wallet;
+    } | null
+) {
+    if (!this?.wallet?.account.walletStateInit) {
+        console.error('Invalid wallet for maxMessages provided');
+        return undefined;
+    }
+
+    const stateInit = this.wallet?.account?.walletStateInit;
+    const address = Address.parse(this?.wallet.account.address).toString({
+        urlSafe: true,
+        bounceable: false
+    });
+
+    const walletVersion = determineWalletVersion(stateInit);
+
+    const messagesCount = ['v5r1', 'v5beta'].includes(walletVersion!) ? 255 : 4;
+    return new Array(messagesCount).fill(null).map(() => ({
+        address,
+        amount: '10000'
+    }));
+}
+
 const functionScope = [
     // should be called with (...args), e.g. updateMerkleProofMessage() or sender('raw')
     nowPlusMinutes,
@@ -319,6 +344,7 @@ const functionScope = [
     updateMerkleProofMessage,
     mintJettonWithDeployMessage,
     mintJettonWithoutDeployMessage,
+    maxMessages,
 
     // should be left as it is, e.g. isValidSendTransactionBoc without parentheses
     isValidSendTransactionBoc,
