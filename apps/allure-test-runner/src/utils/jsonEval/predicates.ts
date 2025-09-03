@@ -2,6 +2,8 @@ import { determineWalletVersion, loadWalletTransfer } from '../../contracts/wall
 import { Address, beginCell, Cell, loadMessage, storeStateInit } from '@ton/ton';
 import { CHAIN } from '@tonconnect/sdk';
 import type { EvalContext } from './context';
+import { sha256_sync, signVerify } from '@ton/crypto';
+import { bstr as crc32 } from 'crc-32';
 
 export type PredicateResult = {
     isValid: boolean;
@@ -157,7 +159,6 @@ export function isValidSendTransactionBoc(this: EvalContext, value: unknown): Pr
         return { isValid: false, errors };
     }
 }
-
 export function isValidString(value: unknown): PredicateResult {
     if (typeof value === 'string') {
         return { isValid: true };
@@ -173,4 +174,140 @@ export function isNonNegativeInt(value: unknown): PredicateResult {
         isValid: false,
         errors: [`expected non-negative integer, got ${JSON.stringify(value)}`]
     };
+}
+
+export function isValidRawAddressString(value: unknown): PredicateResult {
+    if (typeof value !== 'string') {
+        return {
+            isValid: false,
+            errors: [`expected string, got ${typeof value}`]
+        };
+    }
+
+    if (Address.isRaw(value)) {
+        return { isValid: false, errors: ['address in not in raw format'] };
+    }
+
+    return {
+        isValid: true
+    };
+}
+
+export function isValidCurrentTimestamp(value: unknown): PredicateResult {
+    if (typeof value !== 'number') {
+        return {
+            isValid: false,
+            errors: [`expected number, got ${typeof value}`]
+        };
+    }
+
+    const now = Math.floor(Date.now() / 1000);
+    const oneDayInSeconds = 24 * 60 * 60;
+
+    if (value < now - oneDayInSeconds || value > now + oneDayInSeconds) {
+        return {
+            isValid: false,
+            errors: ['timestamp is not within ±1 day of current time']
+        };
+    }
+
+    return {
+        isValid: true
+    };
+}
+
+export function isValidDataSignature(this: EvalContext, value: unknown): PredicateResult {
+    if (!this?.signDataResponse || !this?.wallet?.account?.publicKey) {
+        return {
+            isValid: false,
+            errors: ['invalid context provided']
+        };
+    }
+
+    if (typeof value !== 'string') {
+        return {
+            isValid: false,
+            errors: [`expected string, got ${typeof value}`]
+        };
+    }
+
+    const publicKey = Buffer.from(this.wallet.account.publicKey, 'hex');
+    let signatureBuffer: Buffer;
+    try {
+        signatureBuffer = Buffer.from(value, 'base64');
+    } catch {
+        return {
+            isValid: false,
+            errors: ['invalid Base64 encoding']
+        };
+    }
+
+    const { address: addressRaw, payload, timestamp, domain } = this.signDataResponse;
+    const address = Address.parse(addressRaw);
+    try {
+        let isValid: boolean;
+        if (payload.type === 'cell') {
+            let signatureCell = beginCell()
+                .storeUint(0x75569022, 32)
+                .storeUint(crc32(payload.schema), 32)
+                .storeUint(timestamp, 64)
+                .storeAddress(address)
+                .storeStringRefTail(domain)
+                .storeRef(Cell.fromBase64(payload.cell))
+                .endCell();
+
+            isValid = signVerify(signatureCell.hash(), signatureBuffer, publicKey);
+        } else {
+            const prefix = Buffer.from([0xff, 0xff]);
+            const header = Buffer.from('ton-connect/sign-data/', 'utf8');
+
+            const workchainBuffer = Buffer.alloc(4);
+            workchainBuffer.writeInt32BE(address.workChain);
+
+            const hashBuffer = address.hash; // 32 bytes Buffer
+
+            const appDomainBytes = Buffer.from(domain, 'utf8');
+            const appDomainLength = Buffer.alloc(4);
+            appDomainLength.writeUInt32BE(appDomainBytes.length);
+
+            const appDomainEncoded = Buffer.concat([appDomainLength, appDomainBytes]);
+
+            const timestampBuffer = Buffer.alloc(8);
+            timestampBuffer.writeBigUInt64BE(BigInt(timestamp));
+
+            const payloadData =
+                payload.type === 'text'
+                    ? Buffer.from(payload.text, 'utf8')
+                    : Buffer.from(payload.bytes, 'base64');
+            const payloadTypePrefix = Buffer.from(payload.type === 'text' ? 'txt' : 'bin', 'utf8');
+
+            const payloadLength = Buffer.alloc(4);
+            payloadLength.writeUInt32BE(payloadData.length);
+
+            const payloadFull = Buffer.concat([payloadTypePrefix, payloadLength, payloadData]);
+
+            const message = Buffer.concat([
+                prefix,
+                header,
+                workchainBuffer,
+                hashBuffer,
+                appDomainEncoded,
+                timestampBuffer,
+                payloadFull
+            ]);
+
+            const messageHash = sha256_sync(message);
+
+            isValid = signVerify(messageHash, signatureBuffer, publicKey);
+        }
+
+        return isValid
+            ? { isValid: true }
+            : { isValid: false, errors: [`invalid ${payload.type} signature`] };
+    } catch (err) {
+        return {
+            isValid: false,
+            errors: [`cannot construct signature ${String(err)}`]
+        };
+    }
 }

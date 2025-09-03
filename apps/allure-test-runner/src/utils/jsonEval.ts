@@ -1,5 +1,8 @@
 import {
     isNonNegativeInt,
+    isValidCurrentTimestamp,
+    isValidDataSignature,
+    isValidRawAddressString,
     isValidSendTransactionBoc,
     isValidSendTransactionId,
     isValidSignDataId,
@@ -39,7 +42,10 @@ const functionScope = [
     isValidString,
     isNonNegativeInt,
     isValidSendTransactionId,
-    isValidSignDataId
+    isValidSignDataId,
+    isValidRawAddressString,
+    isValidCurrentTimestamp,
+    isValidDataSignature
 ];
 
 function extractFromCodeFence(input: string): string | null {

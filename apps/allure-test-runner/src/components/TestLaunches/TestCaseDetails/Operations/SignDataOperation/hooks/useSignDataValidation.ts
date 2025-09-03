@@ -4,6 +4,7 @@ import { evalFenceCondition } from '../../../../../../utils/jsonEval';
 import type { TestResult } from '../../../../../../models';
 import type { SignDataRpcRequest, SignDataRpcResponse } from '@tonconnect/protocol';
 import { compareResult } from '../../../../../../utils/compareResult';
+import type { SignDataResponse } from '@tonconnect/sdk';
 
 export function useSignDataValidation({
     testResult,
@@ -59,18 +60,22 @@ export function useSignDataValidation({
             origDebug(...args);
         };
 
+        let signDataResponse: SignDataResponse | undefined = undefined;
         try {
             setSignDataResult(undefined);
 
-            await tonConnectUI.signData(signDataPayload);
+            signDataResponse = await tonConnectUI.signData(signDataPayload);
         } catch (error) {
         } finally {
             setSignDataResult(rpcResponse);
         }
 
         const parsedExpected = evalFenceCondition(testResult.expectedResult, {
-            signDataRpcRequest: rpcRequest
+            signDataRpcRequest: rpcRequest,
+            signDataResponse,
+            wallet
         });
+
         const [isResultValid, errors] = compareResult(rpcResponse, parsedExpected);
 
         setIsResultValid(isResultValid);
@@ -81,7 +86,7 @@ export function useSignDataValidation({
         } else if (testResult.status !== 'passed') {
             showValidationModal(true);
         }
-    }, [signDataPayload, tonConnectUI]);
+    }, [signDataPayload, tonConnectUI, wallet]);
 
     return {
         // State

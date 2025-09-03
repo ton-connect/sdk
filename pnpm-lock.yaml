@@ -74,6 +74,9 @@ importers:
       '@ton/core':
         specifier: 0.61.0
         version: 0.61.0(@ton/crypto@3.3.0)
+      '@ton/crypto':
+        specifier: 3.3.0
+        version: 3.3.0
       '@ton/ton':
         specifier: 15.3.1
         version: 15.3.1(@ton/core@0.61.0(@ton/crypto@3.3.0))(@ton/crypto@3.3.0)
@@ -89,6 +92,9 @@ importers:
       buffer:
         specifier: ^6.0.3
         version: 6.0.3
+      crc-32:
+        specifier: ^1.2.2
+        version: 1.2.2
       react:
         specifier: ^19.1.1
         version: 19.1.1
