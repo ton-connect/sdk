@@ -59,7 +59,6 @@ export function TestCaseActions({
 
                 {isStatusFinal && (
                     <button
-                        // TODO: fixme button not reloading states tata ta tat tat (TREE VIEW!!!!)
                         onClick={onRerun}
                         disabled={!testResult}
                         className="btn btn-secondary"

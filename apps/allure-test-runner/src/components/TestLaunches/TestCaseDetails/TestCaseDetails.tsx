@@ -7,6 +7,7 @@ import { SendTransactionOperation } from './Operations/SendTransactionOperation/
 import { TestCaseStates } from './TestCaseStates';
 import type { JSX } from 'react';
 import { SignDataOperation } from './Operations/SignDataOperation/SignDataOperation';
+import { DefaultTestCaseOperation } from './Operations/DefaultTestCaseOperation/DefaultTestCaseOperation';
 
 type Props = {
     testId: number | null;
@@ -71,9 +72,8 @@ export function TestCaseDetails({ testId, onTestCasesRefresh, onTestIdChange }: 
             break;
         }
         default: {
-            // TODO:
             component = (
-                <SendTransactionOperation
+                <DefaultTestCaseOperation
                     key={testResult.id}
                     testResult={testResult}
                     refetchTestResult={refetchTestResult}

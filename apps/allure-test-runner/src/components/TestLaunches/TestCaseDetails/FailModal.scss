@@ -118,6 +118,9 @@
     background: #dc2626;
     border: 1px solid #b91c1c;
     color: #fef2f2;
+    min-width: 120px;
+    height: 44px;
+    flex: 1;
 
     &:hover:not(:disabled) {
         background: #b91c1c;
