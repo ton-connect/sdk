@@ -46,7 +46,10 @@ export function useSignDataValidation({
         let rpcResponse: SignDataRpcResponse | undefined = undefined;
         const origDebug = console.debug.bind(console);
         console.debug = (...args: unknown[]) => {
-            if (args.includes('Send http-bridge request:')) {
+            if (
+                args.includes('Send http-bridge request:') ||
+                args.includes('Send injected-bridge request:')
+            ) {
                 rpcRequest = args[2] as SignDataRpcRequest;
             }
             if (args.includes('Wallet message received:')) {
