@@ -1,3 +1,5 @@
+import type { PredicateResult } from './jsonEval/predicates';
+
 export function compareResult(result: unknown, expected: unknown) {
     const errors: string[] = [];
     const success = compareResultInner(result, expected, errors);
@@ -42,13 +44,28 @@ function compareResultInner(
     }
 
     if (typeof expected === 'function') {
-        const passed = expected(result);
-        if (!passed) {
-            errors.push(
-                `${field}: value "${result}" failed for predicate ${expected.name || 'predicate'}`
-            );
+        const predicateOutcome = expected(result);
+
+        let isValid: boolean;
+        let predicateErrors: string[] | undefined = undefined;
+        if (typeof predicateOutcome === 'boolean') {
+            isValid = predicateOutcome;
+        } else {
+            ({ isValid, errors: predicateErrors } = predicateOutcome as PredicateResult);
         }
-        return passed;
+
+        if (!isValid) {
+            let errorMessage = `${field}: value ${JSON.stringify(result)} failed for predicate ${expected.name || 'predicate'}`;
+
+            if (Array.isArray(predicateErrors) && predicateErrors.length > 0) {
+                errorMessage += `\n\t${predicateErrors.join('\n\t')}`;
+            }
+            errors.push(errorMessage);
+
+            return false;
+        }
+
+        return true;
     }
 
     if (result !== expected) {

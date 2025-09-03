@@ -20,7 +20,6 @@ export function SignDataResult({
         <>
             <TestCaseExpandableSection
                 title="Transaction Result"
-                // TODO: как то не джейсоницццаца
                 data={JSON.stringify(signDataResult, null, 2)}
                 className="transaction-result-json"
             />
