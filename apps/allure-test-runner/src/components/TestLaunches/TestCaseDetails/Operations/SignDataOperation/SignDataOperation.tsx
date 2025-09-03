@@ -2,7 +2,7 @@ import { SignDataResult } from './SignDataResult';
 import { useTestCaseDetails } from '../../hooks';
 import { TestCaseInfo } from '../../TestCaseInfo';
 import { TestCaseActions } from '../../TestCaseActions';
-import { FailModal } from '../../FailModal';
+import { StatusModal } from '../../StatusModal/StatusModal';
 import type { TestResultWithCustomFields } from '../../../../../models';
 import { useSignDataValidation } from './hooks/useSignDataValidation';
 import { SignDataActions } from './SignDataActions';
@@ -28,16 +28,19 @@ export function SignDataOperation({
         handleRerun,
         validationErrors,
         setValidationErrors,
-        showFailModal,
-        setShowFailModal
+        showStatusModal,
+        statusModalInitialStatus,
+        showValidationModal,
+        handleStatusModalSubmit,
+        setShowStatusModal
     } = useTestCaseDetails(testResult, refetchTestResult, onTestCasesRefresh, onTestIdChange);
 
     const { isResultValid, signDataResult, handleSignData, signDataPayload } =
         useSignDataValidation({
             testResult,
             setValidationErrors,
-            setShowFailModal,
-            handleResolve
+            showValidationModal,
+            setShowStatusModal
         });
 
     if (!testResult) {
@@ -64,12 +67,12 @@ export function SignDataOperation({
                 <SignDataActions signDataPayload={signDataPayload} onSignData={handleSignData} />
             </TestCaseActions>
 
-            <FailModal
-                isOpen={showFailModal}
-                onClose={() => setShowFailModal(false)}
-                onSubmit={handleFail}
-                isSubmitting={isFailing}
-                initialMessage={validationErrors.join('\n')}
+            <StatusModal
+                isOpen={showStatusModal}
+                onClose={() => setShowStatusModal(false)}
+                onSubmit={handleStatusModalSubmit}
+                initialStatus={statusModalInitialStatus}
+                isSubmitting={isResolving || isFailing}
             />
         </div>
     );

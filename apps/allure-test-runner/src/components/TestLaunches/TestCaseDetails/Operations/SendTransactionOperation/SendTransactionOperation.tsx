@@ -4,7 +4,7 @@ import { SendTransactionAction } from './SendTransactionActions';
 import { useTestCaseDetails } from '../../hooks';
 import { TestCaseInfo } from '../../TestCaseInfo';
 import { TestCaseActions } from '../../TestCaseActions';
-import { FailModal } from '../../FailModal';
+import { StatusModal } from '../../StatusModal/StatusModal';
 import type { TestResultWithCustomFields } from '../../../../../models';
 import { useState } from 'react';
 
@@ -29,8 +29,11 @@ export function SendTransactionOperation({
         handleRerun,
         validationErrors,
         setValidationErrors,
-        showFailModal,
-        setShowFailModal
+        showStatusModal,
+        statusModalInitialStatus,
+        showValidationModal,
+        handleStatusModalSubmit,
+        setShowStatusModal
     } = useTestCaseDetails(testResult, refetchTestResult, onTestCasesRefresh, onTestIdChange);
 
     const [waitForTx, setWaitForTx] = useState(false);
@@ -45,8 +48,8 @@ export function SendTransactionOperation({
     } = useTransactionValidation({
         testResult,
         setValidationErrors,
-        setShowFailModal,
-        handleResolve,
+        showValidationModal,
+        setShowStatusModal,
         waitForTx
     });
 
@@ -81,12 +84,12 @@ export function SendTransactionOperation({
                 />
             </TestCaseActions>
 
-            <FailModal
-                isOpen={showFailModal}
-                onClose={() => setShowFailModal(false)}
-                onSubmit={handleFail}
-                isSubmitting={isFailing}
-                initialMessage={validationErrors.join('\n')}
+            <StatusModal
+                isOpen={showStatusModal}
+                onClose={() => setShowStatusModal(false)}
+                onSubmit={handleStatusModalSubmit}
+                initialStatus={statusModalInitialStatus}
+                isSubmitting={isResolving || isFailing}
             />
         </div>
     );

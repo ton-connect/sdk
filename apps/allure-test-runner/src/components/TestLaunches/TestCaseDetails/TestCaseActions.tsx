@@ -1,5 +1,5 @@
 import { type PropsWithChildren, useState } from 'react';
-import { FailModal } from './FailModal';
+import { StatusModal } from './StatusModal/StatusModal';
 import type { TestResult } from '../../../models';
 
 type Props = PropsWithChildren<{
@@ -8,7 +8,7 @@ type Props = PropsWithChildren<{
     isResolving: boolean;
     isFailing: boolean;
 
-    onResolve: () => void;
+    onResolve: (reason?: string) => void;
     onFail: (message: string) => void;
     onRerun: () => void;
 }>;
@@ -22,11 +22,21 @@ export function TestCaseActions({
     onFail,
     onRerun
 }: Props) {
-    const [isFailModalOpen, setIsFailModalOpen] = useState(false);
+    const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+    const [modalInitialStatus, setModalInitialStatus] = useState<'passed' | 'failed'>('passed');
 
-    const handleFailSubmit = (message: string) => {
-        onFail(message);
-        setIsFailModalOpen(false);
+    const handleStatusButtonClick = (status: 'passed' | 'failed') => {
+        setModalInitialStatus(status);
+        setIsStatusModalOpen(true);
+    };
+
+    const handleStatusSubmit = (status: 'passed' | 'failed', reason?: string) => {
+        if (status === 'passed') {
+            onResolve(reason);
+        } else {
+            onFail(reason || '');
+        }
+        setIsStatusModalOpen(false);
     };
 
     const isStatusFinal = testResult?.status === 'passed' || testResult?.status === 'failed';
@@ -38,21 +48,21 @@ export function TestCaseActions({
                 {!isStatusFinal && (
                     <>
                         <button
-                            onClick={onResolve}
-                            disabled={isResolving || !testResult}
+                            onClick={() => handleStatusButtonClick('passed')}
+                            disabled={isResolving || isFailing || !testResult}
                             className="btn btn-success"
                             style={{ marginLeft: 4 }}
                         >
-                            {isResolving ? 'Resolving…' : 'Passed'}
+                            Passed
                         </button>
 
                         <button
-                            onClick={() => setIsFailModalOpen(true)}
-                            disabled={isFailing || !testResult}
+                            onClick={() => handleStatusButtonClick('failed')}
+                            disabled={isResolving || isFailing || !testResult}
                             className="btn btn-danger"
                             style={{ marginLeft: 4 }}
                         >
-                            {isFailing ? 'Marking as Failed...' : 'Failed'}
+                            Failed
                         </button>
                     </>
                 )}
@@ -69,11 +79,12 @@ export function TestCaseActions({
                 )}
             </div>
 
-            <FailModal
-                isOpen={isFailModalOpen}
-                onClose={() => setIsFailModalOpen(false)}
-                onSubmit={handleFailSubmit}
-                isSubmitting={isFailing}
+            <StatusModal
+                isOpen={isStatusModalOpen}
+                onClose={() => setIsStatusModalOpen(false)}
+                onSubmit={handleStatusSubmit}
+                initialStatus={modalInitialStatus}
+                isSubmitting={isResolving || isFailing}
             />
         </>
     );

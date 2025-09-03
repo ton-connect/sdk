@@ -1,0 +1,195 @@
+.status-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.status-modal {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.status-modal__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem;
+    border-bottom: 1px solid #334155;
+
+    h3 {
+        margin: 0;
+        color: #f1f5f9;
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+}
+
+.status-modal__close {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+
+    &:hover {
+        background: #374151;
+        color: #f1f5f9;
+    }
+}
+
+.status-modal__form {
+    padding: 1.5rem;
+}
+
+.status-modal__status-selection {
+    margin-bottom: 1.5rem;
+}
+
+.status-modal__label {
+    display: block;
+    color: #f1f5f9;
+    font-weight: 500;
+    margin-bottom: 0.75rem;
+    font-size: 0.875rem;
+}
+
+.status-modal__select {
+    width: 100%;
+    background: #0f172a;
+    border: 2px solid #334155;
+    border-radius: 10px;
+    padding: 0.875rem 1rem;
+    color: #f1f5f9;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.75rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+
+    &:hover {
+        border-color: #475569;
+        background-color: #1e293b;
+    }
+
+    &:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        background-color: #1e293b;
+    }
+
+    option {
+        background: #0f172a;
+        color: #f1f5f9;
+        padding: 0.5rem;
+    }
+}
+
+.status-modal__reason {
+    margin-bottom: 1.5rem;
+}
+
+.status-modal__textarea {
+    width: 100%;
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 0.75rem;
+    color: #f1f5f9;
+    font-size: 0.875rem;
+    resize: vertical;
+    min-height: 80px;
+    font-family: inherit;
+
+    &:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    &::placeholder {
+        color: #64748b;
+    }
+}
+
+.status-modal__actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+}
+
+.status-modal__btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.875rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 100px;
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    &--cancel {
+        background: #374151;
+        color: #f1f5f9;
+        border: 1px solid #4b5563;
+
+        &:hover:not(:disabled) {
+            background: #4b5563;
+        }
+    }
+
+    &--submit {
+        color: #fff;
+    }
+
+    &--success {
+        background: #22c55e;
+        border: 1px solid #16a34a;
+
+        &:hover:not(:disabled) {
+            background: #16a34a;
+            border-color: #15803d;
+        }
+    }
+
+    &--danger {
+        background: #ef4444;
+        border: 1px solid #dc2626;
+
+        &:hover:not(:disabled) {
+            background: #dc2626;
+            border-color: #b91c1c;
+        }
+    }
+}

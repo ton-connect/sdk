@@ -10,14 +10,14 @@ import { waitForTransaction } from '../../../../../../services/waitForTransactio
 export function useTransactionValidation({
     testResult,
     setValidationErrors,
-    setShowFailModal,
-    handleResolve,
+    showValidationModal,
+    setShowStatusModal,
     waitForTx
 }: {
     testResult: TestResult | undefined;
     setValidationErrors: (value: string[]) => void;
-    setShowFailModal: (value: boolean) => void;
-    handleResolve: () => void;
+    showValidationModal: (isSuccess: boolean, errors?: string[]) => void;
+    setShowStatusModal: (value: boolean) => void;
     waitForTx?: boolean;
 }) {
     const [tonConnectUI] = useTonConnectUI();
@@ -44,8 +44,8 @@ export function useTransactionValidation({
         setConfirmedTransaction(undefined);
         setIsResultValid(true);
         setValidationErrors([]);
-        setShowFailModal(false);
-    }, [testResult?.id]);
+        setShowStatusModal(false);
+    }, [testResult?.id, setShowStatusModal]);
 
     const handleSendTransaction = useCallback(async () => {
         if (!sendTransactionParams || !testResult) {
@@ -107,9 +107,9 @@ export function useTransactionValidation({
         setValidationErrors(errors);
 
         if (!isResultValid && errors.length > 0) {
-            setShowFailModal(true);
+            showValidationModal(false, errors);
         } else if (testResult.status !== 'passed') {
-            handleResolve();
+            showValidationModal(true);
         }
     }, [sendTransactionParams, tonConnectUI, waitForTx, wallet?.account?.chain, explorerUrl]);
 

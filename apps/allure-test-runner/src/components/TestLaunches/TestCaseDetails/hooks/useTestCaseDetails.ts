@@ -55,33 +55,43 @@ export function useTestCaseDetails(
     const [isFailing, setIsFailing] = useState(false);
 
     const [validationErrors, setValidationErrors] = useState<string[]>([]);
-    const [showFailModal, setShowFailModal] = useState(false);
+    const [showStatusModal, setShowStatusModal] = useState(false);
+    const [statusModalInitialStatus, setStatusModalInitialStatus] = useState<'passed' | 'failed'>(
+        'failed'
+    );
+    const [statusModalMessage, setStatusModalMessage] = useState<string>('');
 
-    const handleResolve = useCallback(async () => {
-        if (!testResult) return;
-        try {
-            setIsResolving(true);
+    const handleResolve = useCallback(
+        async (reason?: string) => {
+            if (!testResult) return;
+            try {
+                setIsResolving(true);
 
-            const testKey = `${testResult.launchId}-${testResult.id}`;
+                const testKey = `${testResult.launchId}-${testResult.id}`;
 
-            const payload: ResolveTestResultParams = {
-                id: testResult.id,
-                status: 'passed' as const
-            };
+                const payload: ResolveTestResultParams = {
+                    id: testResult.id,
+                    status: 'passed' as const
+                };
 
-            // Добавляем execution если есть шаги
-            const execution = createExecutionData(testResult, testKey, 'passed');
-            if (execution) {
-                payload.execution = execution;
+                if (reason?.trim()) {
+                    payload.message = reason.trim();
+                }
+
+                const execution = createExecutionData(testResult, testKey, 'passed');
+                if (execution) {
+                    payload.execution = execution;
+                }
+
+                await api.resolveTestResult(payload);
+                refetchTestResult?.();
+                onTestCasesRefresh?.();
+            } finally {
+                setIsResolving(false);
             }
-
-            await api.resolveTestResult(payload);
-            refetchTestResult?.();
-            onTestCasesRefresh?.();
-        } finally {
-            setIsResolving(false);
-        }
-    }, [testResult, api, refetchTestResult, onTestCasesRefresh]);
+        },
+        [testResult, api, refetchTestResult, onTestCasesRefresh]
+    );
 
     const handleFail = useCallback(
         async (message: string) => {
@@ -136,18 +146,50 @@ export function useTestCaseDetails(
         }
     }, [api, testResult, refetchTestResult, onTestCasesRefresh, onTestIdChange]);
 
+    const showValidationModal = useCallback((isSuccess: boolean, errors: string[] = []) => {
+        setValidationErrors(errors);
+
+        if (isSuccess) {
+            setStatusModalInitialStatus('passed');
+            setStatusModalMessage('');
+        } else {
+            setStatusModalInitialStatus('failed');
+            setStatusModalMessage(errors.join('\n'));
+        }
+
+        setShowStatusModal(true);
+    }, []);
+
+    const handleStatusModalSubmit = useCallback(
+        (status: 'passed' | 'failed', reason?: string) => {
+            if (status === 'passed') {
+                handleResolve(reason);
+            } else {
+                handleFail(reason || statusModalMessage);
+            }
+            setShowStatusModal(false);
+            setValidationErrors([]);
+            setStatusModalMessage('');
+        },
+        [handleResolve, handleFail, statusModalMessage]
+    );
+
     return {
         // State
         isResolving,
         isFailing,
         validationErrors,
-        showFailModal,
+        showStatusModal,
+        statusModalInitialStatus,
+        statusModalMessage,
 
         // Actions
         setValidationErrors,
-        setShowFailModal,
         handleResolve,
         handleFail,
-        handleRerun
+        handleRerun,
+        showValidationModal,
+        handleStatusModalSubmit,
+        setShowStatusModal
     };
 }

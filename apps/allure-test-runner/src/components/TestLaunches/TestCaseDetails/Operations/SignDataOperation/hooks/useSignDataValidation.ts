@@ -8,13 +8,13 @@ import { compareResult } from '../../../../../../utils/compareResult';
 export function useSignDataValidation({
     testResult,
     setValidationErrors,
-    setShowFailModal,
-    handleResolve
+    showValidationModal,
+    setShowStatusModal
 }: {
     testResult: TestResult | undefined;
     setValidationErrors: (value: string[]) => void;
-    setShowFailModal: (value: boolean) => void;
-    handleResolve: () => void;
+    showValidationModal: (isSuccess: boolean, errors?: string[]) => void;
+    setShowStatusModal: (value: boolean) => void;
 }) {
     const [tonConnectUI] = useTonConnectUI();
     const wallet = useTonWallet();
@@ -34,8 +34,8 @@ export function useSignDataValidation({
         setSignDataResult(undefined);
         setIsResultValid(true);
         setValidationErrors([]);
-        setShowFailModal(false);
-    }, [testResult?.id]);
+        setShowStatusModal(false);
+    }, [testResult?.id, setShowStatusModal]);
 
     const handleSignData = useCallback(async () => {
         if (!signDataPayload || !testResult) {
@@ -78,9 +78,9 @@ export function useSignDataValidation({
         setValidationErrors(errors);
 
         if (!isResultValid && errors.length > 0) {
-            setShowFailModal(true);
+            showValidationModal(false, errors);
         } else if (testResult.status !== 'passed') {
-            handleResolve();
+            showValidationModal(true);
         }
     }, [signDataPayload, tonConnectUI]);
 
