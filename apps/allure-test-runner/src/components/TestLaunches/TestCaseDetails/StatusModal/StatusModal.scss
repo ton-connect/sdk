@@ -15,8 +15,8 @@
     background: #1e293b;
     border: 1px solid #334155;
     border-radius: 12px;
-    width: 90%;
-    max-width: 500px;
+    width: 95%;
+    max-width: 700px;
     max-height: 90vh;
     overflow-y: auto;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
@@ -26,7 +26,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1.5rem;
+    padding: 2rem 2rem 1.5rem 2rem;
     border-bottom: 1px solid #334155;
 
     h3 {
@@ -59,7 +59,7 @@
 }
 
 .status-modal__form {
-    padding: 1.5rem;
+    padding: 2rem;
 }
 
 .status-modal__status-selection {
@@ -92,16 +92,64 @@
     background-size: 1.5em 1.5em;
     padding-right: 2.5rem;
 
-    &:hover {
+    &--passed {
+        border-color: #22c55e;
+        color: #22c55e;
+        background-color: rgba(34, 197, 94, 0.1);
+        
+        &:hover {
+            border-color: #16a34a;
+            background-color: rgba(34, 197, 94, 0.15);
+        }
+
+        &:focus {
+            outline: none;
+            border-color: #16a34a;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+            background-color: rgba(34, 197, 94, 0.15);
+        }
+    }
+
+    &--failed {
+        border-color: #ef4444;
+        color: #ef4444;
+        background-color: rgba(239, 68, 68, 0.1);
+        
+        &:hover {
+            border-color: #dc2626;
+            background-color: rgba(239, 68, 68, 0.15);
+        }
+
+        &:focus {
+            outline: none;
+            border-color: #dc2626;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+            background-color: rgba(239, 68, 68, 0.15);
+        }
+    }
+
+    &:hover:not(.status-modal__select--passed):not(.status-modal__select--failed) {
         border-color: #475569;
         background-color: #1e293b;
     }
 
-    &:focus {
+    &:focus:not(.status-modal__select--passed):not(.status-modal__select--failed) {
         outline: none;
         border-color: #3b82f6;
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         background-color: #1e293b;
+    }
+
+    option[value="passed"] {
+        background: #0f172a;
+        color: #22c55e;
+        font-weight: 600;
+    }
+
+    option[value="failed"] {
+        background: #0f172a;
+        color: #ef4444;
+        font-weight: 600;
     }
 
     option {
@@ -120,12 +168,13 @@
     background: #0f172a;
     border: 1px solid #334155;
     border-radius: 8px;
-    padding: 0.75rem;
+    padding: 1rem;
     color: #f1f5f9;
     font-size: 0.875rem;
     resize: vertical;
-    min-height: 80px;
+    min-height: 150px;
     font-family: inherit;
+    line-height: 1.5;
 
     &:focus {
         outline: none;

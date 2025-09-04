@@ -30,6 +30,7 @@ export function ConnectOperation({
         setValidationErrors,
         showStatusModal,
         statusModalInitialStatus,
+        statusModalMessage,
         showValidationModal,
         handleStatusModalSubmit,
         setShowStatusModal
@@ -67,6 +68,7 @@ export function ConnectOperation({
                 onResolve={handleResolve}
                 onFail={handleFail}
                 onRerun={handleRerun}
+                disableInternalModal={true}
             >
                 <ConnectActions onConnect={handleConnect} />
             </TestCaseActions>
@@ -76,6 +78,7 @@ export function ConnectOperation({
                 onClose={() => setShowStatusModal(false)}
                 onSubmit={handleStatusModalSubmit}
                 initialStatus={statusModalInitialStatus}
+                initialReason={statusModalMessage}
                 isSubmitting={isResolving || isFailing}
             />
         </div>

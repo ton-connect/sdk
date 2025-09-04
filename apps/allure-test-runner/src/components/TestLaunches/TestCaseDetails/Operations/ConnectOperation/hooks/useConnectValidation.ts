@@ -27,7 +27,7 @@ export function useConnectValidation({
         setIsResultValid(true);
         setValidationErrors([]);
         setShowStatusModal(false);
-    }, [testResult?.id, setShowStatusModal]);
+    }, [testResult?.id, setValidationErrors, setShowStatusModal]);
 
     const handleConnect = useCallback(async () => {
         if (!testResult) {
@@ -90,7 +90,7 @@ export function useConnectValidation({
 
                 if (!isResultValid && errors.length > 0) {
                     showValidationModal(false, errors);
-                } else if (testResult.status !== 'passed') {
+                } else if (isResultValid) {
                     showValidationModal(true);
                 }
             } else {

@@ -35,16 +35,6 @@ export function ConnectActions({ onConnect }: ConnectActionsProps) {
                             <p>Please disconnect your wallet first to test the connection flow.</p>
                         </div>
                     </div>
-                    <div className="wallet-connected-details">
-                        <div className="wallet-info">
-                            <strong>Connected:</strong>{' '}
-                            {'name' in wallet ? wallet.name : wallet.device.appName}
-                        </div>
-                        <div className="wallet-address">
-                            {wallet.account.address.slice(0, 4)}...
-                            {wallet.account.address.slice(-4)}
-                        </div>
-                    </div>
                     <button
                         onClick={handleDisconnect}
                         disabled={isDisconnecting}

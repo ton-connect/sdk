@@ -11,6 +11,9 @@ type Props = PropsWithChildren<{
     onResolve: (reason?: string) => void;
     onFail: (message: string) => void;
     onRerun: () => void;
+
+    // Disable internal modal when external modal is used
+    disableInternalModal?: boolean;
 }>;
 
 export function TestCaseActions({
@@ -20,7 +23,8 @@ export function TestCaseActions({
     isFailing,
     onResolve,
     onFail,
-    onRerun
+    onRerun,
+    disableInternalModal = false
 }: Props) {
     const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
     const [modalInitialStatus, setModalInitialStatus] = useState<'passed' | 'failed'>('passed');
@@ -48,7 +52,7 @@ export function TestCaseActions({
                 {!isStatusFinal && (
                     <>
                         <button
-                            onClick={() => handleStatusButtonClick('passed')}
+                            onClick={() => onResolve()}
                             disabled={isResolving || isFailing || !testResult}
                             className="btn btn-success"
                             style={{ marginLeft: 4 }}
@@ -57,7 +61,11 @@ export function TestCaseActions({
                         </button>
 
                         <button
-                            onClick={() => handleStatusButtonClick('failed')}
+                            onClick={() =>
+                                disableInternalModal
+                                    ? onFail('')
+                                    : handleStatusButtonClick('failed')
+                            }
                             disabled={isResolving || isFailing || !testResult}
                             className="btn btn-danger"
                             style={{ marginLeft: 4 }}
@@ -79,13 +87,15 @@ export function TestCaseActions({
                 )}
             </div>
 
-            <StatusModal
-                isOpen={isStatusModalOpen}
-                onClose={() => setIsStatusModalOpen(false)}
-                onSubmit={handleStatusSubmit}
-                initialStatus={modalInitialStatus}
-                isSubmitting={isResolving || isFailing}
-            />
+            {!disableInternalModal && (
+                <StatusModal
+                    isOpen={isStatusModalOpen}
+                    onClose={() => setIsStatusModalOpen(false)}
+                    onSubmit={handleStatusSubmit}
+                    initialStatus={modalInitialStatus}
+                    isSubmitting={isResolving || isFailing}
+                />
+            )}
         </>
     );
 }

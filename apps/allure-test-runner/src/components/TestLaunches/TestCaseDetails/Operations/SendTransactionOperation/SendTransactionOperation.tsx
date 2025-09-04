@@ -31,6 +31,7 @@ export function SendTransactionOperation({
         setValidationErrors,
         showStatusModal,
         statusModalInitialStatus,
+        statusModalMessage,
         showValidationModal,
         handleStatusModalSubmit,
         setShowStatusModal
@@ -89,6 +90,7 @@ export function SendTransactionOperation({
                 onClose={() => setShowStatusModal(false)}
                 onSubmit={handleStatusModalSubmit}
                 initialStatus={statusModalInitialStatus}
+                initialReason={statusModalMessage}
                 isSubmitting={isResolving || isFailing}
             />
         </div>

@@ -6,6 +6,7 @@ type StatusModalProps = {
     onClose: () => void;
     onSubmit: (status: 'passed' | 'failed', reason?: string) => void;
     initialStatus: 'passed' | 'failed';
+    initialReason?: string;
     isSubmitting?: boolean;
 };
 
@@ -14,6 +15,7 @@ export function StatusModal({
     onClose,
     onSubmit,
     initialStatus,
+    initialReason = '',
     isSubmitting = false
 }: StatusModalProps) {
     const [selectedStatus, setSelectedStatus] = useState<'passed' | 'failed'>(initialStatus);
@@ -22,9 +24,9 @@ export function StatusModal({
     useEffect(() => {
         if (isOpen) {
             setSelectedStatus(initialStatus);
-            setReason('');
+            setReason(initialReason);
         }
-    }, [isOpen, initialStatus]);
+    }, [isOpen, initialStatus, initialReason]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -52,7 +54,7 @@ export function StatusModal({
                             id="status"
                             value={selectedStatus}
                             onChange={e => setSelectedStatus(e.target.value as 'passed' | 'failed')}
-                            className="status-modal__select"
+                            className={`status-modal__select status-modal__select--${selectedStatus}`}
                         >
                             <option value="passed">Passed</option>
                             <option value="failed">Failed</option>

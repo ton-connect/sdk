@@ -30,6 +30,7 @@ export function SignDataOperation({
         setValidationErrors,
         showStatusModal,
         statusModalInitialStatus,
+        statusModalMessage,
         showValidationModal,
         handleStatusModalSubmit,
         setShowStatusModal
@@ -72,6 +73,7 @@ export function SignDataOperation({
                 onClose={() => setShowStatusModal(false)}
                 onSubmit={handleStatusModalSubmit}
                 initialStatus={statusModalInitialStatus}
+                initialReason={statusModalMessage}
                 isSubmitting={isResolving || isFailing}
             />
         </div>
