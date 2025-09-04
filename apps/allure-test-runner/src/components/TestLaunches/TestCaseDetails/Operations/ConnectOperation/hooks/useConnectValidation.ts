@@ -58,57 +58,46 @@ export function useConnectValidation({
             return;
         }
 
-        let connectResponse: Record<string, unknown> | undefined = undefined;
         const origDebug = console.debug.bind(console);
-        console.debug = (...args: unknown[]) => {
-            if (
-                args.includes('Wallet message received:') ||
-                args.includes('Injected Provider connect response:')
-            ) {
-                connectResponse = args[2] as Record<string, unknown>;
-                console.debug = origDebug; // Restore original debug after capturing
-            }
-            origDebug(...args);
-        };
+        const connectResponsePromise = new Promise<Record<string, unknown>>(resolve => {
+            console.debug = (...args: unknown[]) => {
+                if (
+                    args.includes('Wallet message received:') ||
+                    args.includes('Injected Provider connect response:')
+                ) {
+                    console.debug = origDebug; // Restore original debug after capturing
+                    resolve(args[2] as Record<string, unknown>);
+                }
+                origDebug(...args);
+            };
+        });
 
+        await tonConnectUI.openModal();
         try {
             setConnectResult(undefined);
 
-            // Connect to wallet
-            await tonConnectUI.openModal();
+            // TODO add abort!
+            const connectResponse = await connectResponsePromise;
+            setConnectResult(connectResponse);
 
-            // Wait a bit for the wallet message to be received
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            const parsedExpected = evalFenceCondition(testResult.expectedResult, {
+                connectResponse: connectResponse,
+                wallet
+            });
+
+            const [isResultValid, errors] = compareResult(connectResponse, parsedExpected);
+
+            setIsResultValid(isResultValid);
+            setValidationErrors(errors);
+
+            if (!isResultValid && errors.length > 0) {
+                showValidationModal(false, errors);
+            } else if (isResultValid) {
+                showValidationModal(true);
+            }
         } catch (error) {
             // Handle connection error
             console.error('Connection error:', error);
-        } finally {
-            // Restore original console.debug
-            console.debug = origDebug;
-
-            setConnectResult(connectResponse);
-
-            if (connectResponse) {
-                const parsedExpected = evalFenceCondition(testResult.expectedResult, {
-                    connectResponse: connectResponse,
-                    wallet
-                });
-
-                const [isResultValid, errors] = compareResult(connectResponse, parsedExpected);
-
-                setIsResultValid(isResultValid);
-                setValidationErrors(errors);
-
-                if (!isResultValid && errors.length > 0) {
-                    showValidationModal(false, errors);
-                } else if (isResultValid) {
-                    showValidationModal(true);
-                }
-            } else {
-                setIsResultValid(false);
-                setValidationErrors(['No wallet response received']);
-                showValidationModal(false, ['No wallet response received']);
-            }
         }
     }, [
         tonConnectUI,
