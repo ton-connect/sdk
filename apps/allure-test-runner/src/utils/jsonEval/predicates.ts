@@ -6,7 +6,6 @@ import { sha256_sync, signVerify } from '@ton/crypto';
 import { bstr as crc32 } from 'crc-32';
 import { loadStateInit } from '@ton/core';
 import { Buffer } from 'buffer';
-import { sign } from 'tweetnacl';
 
 export type PredicateResult = {
     isValid: boolean;
@@ -481,7 +480,7 @@ export function isValidTonProofSignature(this: EvalContext, value: unknown): Pre
     const result = Buffer.from(sha256_sync(fullMsg));
 
     try {
-        const isValid = sign.detached.verify(
+        const isValid = signVerify(
             result,
             Buffer.from(value, 'base64'),
             Buffer.from(tonAddr.publicKey, 'hex')
