@@ -2,7 +2,6 @@ import { useState, useCallback, useEffect } from 'react';
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { evalFenceCondition } from '../../../../../../utils/jsonEval';
 import type { TestResult } from '../../../../../../models';
-import type { ConnectRequest } from '@tonconnect/protocol';
 import { compareResult } from '../../../../../../utils/compareResult';
 import { getSecureRandomBytes } from '@ton/crypto';
 
@@ -59,14 +58,13 @@ export function useConnectValidation({
             return;
         }
 
-        let connectRequest: ConnectRequest | undefined = undefined;
         let connectResponse: Record<string, unknown> | undefined = undefined;
         const origDebug = console.debug.bind(console);
         console.debug = (...args: unknown[]) => {
-            if (args.includes('Send http-bridge request:')) {
-                connectRequest = args[2] as ConnectRequest;
-            }
-            if (args.includes('Wallet message received:')) {
+            if (
+                args.includes('Wallet message received:') ||
+                args.includes('Injected Provider connect response:')
+            ) {
                 connectResponse = args[2] as Record<string, unknown>;
                 console.debug = origDebug; // Restore original debug after capturing
             }
@@ -77,7 +75,7 @@ export function useConnectValidation({
             setConnectResult(undefined);
 
             // Connect to wallet
-            await tonConnectUI.connectWallet();
+            await tonConnectUI.openModal();
 
             // Wait a bit for the wallet message to be received
             await new Promise(resolve => setTimeout(resolve, 1000));
@@ -92,7 +90,6 @@ export function useConnectValidation({
 
             if (connectResponse) {
                 const parsedExpected = evalFenceCondition(testResult.expectedResult, {
-                    connectRequest: connectRequest,
                     connectResponse: connectResponse,
                     wallet
                 });
