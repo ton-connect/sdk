@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
-import { LaunchesList } from '../components/TestLaunches/LaunchesList/LaunchesList';
+import { InfiniteScrollLaunchesList } from '../components/TestLaunches/InfiniteScrollLaunchesList/InfiniteScrollLaunchesList';
 import { SearchBar } from '../components/TestLaunches/SearchBar/SearchBar';
-import { useLaunches } from '../components/TestLaunches/hooks';
+import { useInfiniteLaunches } from '../components/TestLaunches/hooks/useInfiniteLaunches';
 import '../components/TestLaunches/TestLaunches.scss';
 
 export function LaunchesPage() {
@@ -11,14 +11,17 @@ export function LaunchesPage() {
         search,
         launches,
         loading,
+        loadingMore,
         error,
         completeError,
+        hasMore,
         complete,
         handleSearchChange,
         handleRefresh,
         clearCompleteError,
-        refetch
-    } = useLaunches();
+        refetch,
+        loadMore
+    } = useInfiniteLaunches();
 
     const openLaunch = (id: number) => {
         navigate(`/launches/${id}`);
@@ -68,11 +71,15 @@ export function LaunchesPage() {
                     </div>
                 )}
 
-                <LaunchesList
+                <InfiniteScrollLaunchesList
                     launches={launches}
                     selectedLaunchId={null}
+                    loading={loading}
+                    loadingMore={loadingMore}
+                    hasMore={hasMore}
                     onOpen={openLaunch}
                     onComplete={complete}
+                    onLoadMore={loadMore}
                 />
             </div>
         </div>

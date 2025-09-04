@@ -96,8 +96,7 @@
 }
 
 .launches-table__body {
-    max-height: 600px;
-    overflow-y: auto;
+    // Remove height restrictions to allow table to expand with page scroll
 }
 
 .launches-table__row {
@@ -586,4 +585,44 @@
 
 .resize-handle:active {
     background: rgba(59, 130, 246, 0.5);
+}
+
+// Infinite scroll styles
+.infinite-scroll-launches {
+    width: 100%;
+    // Remove any height restrictions to allow page scroll
+}
+
+.infinite-scroll-trigger {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+    min-height: 80px;
+}
+
+.infinite-scroll-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.infinite-scroll-spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid #334155;
+    border-top: 3px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.infinite-scroll-end {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    color: #64748b;
+    font-size: 0.9rem;
+    font-style: italic;
 }
