@@ -68,6 +68,7 @@ import {
 } from './validation/schemas';
 import { isQaModeEnabled } from './utils/qa-mode';
 
+//new TonConnect().dappSettings.manifestUrl = '';
 export class TonConnect implements ITonConnect {
     private static readonly walletsList = new WalletsListManager();
 
