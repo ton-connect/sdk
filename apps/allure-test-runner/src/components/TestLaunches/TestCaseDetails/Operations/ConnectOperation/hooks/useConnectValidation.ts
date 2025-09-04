@@ -4,6 +4,7 @@ import { evalFenceCondition } from '../../../../../../utils/jsonEval';
 import type { TestResult } from '../../../../../../models';
 import type { ConnectRequest } from '@tonconnect/protocol';
 import { compareResult } from '../../../../../../utils/compareResult';
+import { getSecureRandomBytes } from '@ton/crypto';
 
 export function useConnectValidation({
     testResult,
@@ -17,6 +18,19 @@ export function useConnectValidation({
     setShowStatusModal: (value: boolean) => void;
 }) {
     const [tonConnectUI] = useTonConnectUI();
+
+    useEffect(() => {
+        const effect = async () => {
+            const payload = await getSecureRandomBytes(32);
+            tonConnectUI.setConnectRequestParameters({
+                state: 'ready',
+                value: { tonProof: payload.toString('hex') }
+            });
+        };
+
+        effect();
+    }, [tonConnectUI]);
+
     const wallet = useTonWallet();
 
     const [connectResult, setConnectResult] = useState<Record<string, unknown>>();
