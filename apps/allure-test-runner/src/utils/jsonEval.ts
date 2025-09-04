@@ -10,9 +10,12 @@ import {
     isValidSendTransactionId,
     isValidSignDataId,
     isValidStateInitString,
-    isValidString
+    isValidString,
+    isValidTonProofSignature
 } from './jsonEval/predicates';
 import {
+    appHost,
+    appHostLength,
     mainnet,
     maxMessages,
     mintJettonWithDeployMessage,
@@ -22,6 +25,7 @@ import {
     nowPlusMinutes,
     sender,
     testnet,
+    tonProofPayload,
     updateMerkleProofMessage,
     verifyMerkleProofMessage
 } from './jsonEval/providers';
@@ -40,6 +44,9 @@ const functionScope = {
     mintJettonWithDeployMessage,
     mintJettonWithoutDeployMessage,
     maxMessages,
+    tonProofPayload,
+    appHost,
+    appHostLength,
 
     // should be left as it is, e.g. isValidSendTransactionBoc without parentheses
     isValidSendTransactionBoc,
@@ -53,7 +60,8 @@ const functionScope = {
     isValidNetwork,
     isValidStateInitString,
     isValidPublicKey,
-    isValidFeatureList
+    isValidFeatureList,
+    isValidTonProofSignature
 };
 
 function extractFromCodeFence(input: string): string | null {

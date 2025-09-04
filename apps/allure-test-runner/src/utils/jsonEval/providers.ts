@@ -171,3 +171,15 @@ export function maxMessages(this: EvalContext) {
         amount: '10000'
     }));
 }
+
+export function tonProofPayload(this: EvalContext) {
+    return this?.tonProof;
+}
+
+export function appHost() {
+    return window.location.hostname;
+}
+
+export function appHostLength() {
+    return window.location.hostname.length;
+}

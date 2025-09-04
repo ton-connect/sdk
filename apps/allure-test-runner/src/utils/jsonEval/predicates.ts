@@ -5,6 +5,8 @@ import type { EvalContext } from './context';
 import { sha256_sync, signVerify } from '@ton/crypto';
 import { bstr as crc32 } from 'crc-32';
 import { loadStateInit } from '@ton/core';
+import { Buffer } from 'buffer';
+import { sign } from 'tweetnacl';
 
 export type PredicateResult = {
     isValid: boolean;
@@ -185,7 +187,7 @@ export function isValidRawAddressString(value: unknown): PredicateResult {
         };
     }
 
-    if (Address.isRaw(value)) {
+    if (!Address.isRaw(value)) {
         return { isValid: false, errors: ['address in not in raw format'] };
     }
 
@@ -217,6 +219,7 @@ export function isValidCurrentTimestamp(value: unknown): PredicateResult {
     };
 }
 
+// SHOULD NOT BE USED FOR PRODUCTION VERIFICATION
 export function isValidDataSignature(this: EvalContext, value: unknown): PredicateResult {
     if (!this?.signDataResponse || !this?.wallet?.account?.publicKey) {
         return {
@@ -421,4 +424,75 @@ export function isValidFeatureList(value: unknown): PredicateResult {
     }
 
     return errors.length > 0 ? { isValid: false, errors } : { isValid: true };
+}
+
+// SHOULD NOT BE USED FOR PRODUCTION VERIFICATION
+export function isValidTonProofSignature(this: EvalContext, value: unknown): PredicateResult {
+    if (this?.connectResponse?.event !== 'connect') {
+        return {
+            isValid: false,
+            errors: ['invalid context to isValidTonProofSignature provided']
+        };
+    }
+    if (typeof value !== 'string') {
+        return { isValid: false, errors: [`invalid type: expected string, got ${typeof value}`] };
+    }
+
+    const tonProof = this.connectResponse.payload.items.find(item => item.name === 'ton_proof');
+    if (!tonProof) {
+        return { isValid: false, errors: ['cannot find ton_proof'] };
+    }
+    const tonAddr = this.connectResponse.payload.items.find(item => item.name === 'ton_addr');
+    if (!tonAddr) {
+        return { isValid: false, errors: ['cannot find ton_addr'] };
+    }
+    if ('error' in tonProof) {
+        return { isValid: false, errors: [tonProof.error.message ?? ''] };
+    }
+
+    const {
+        proof: { payload, domain, timestamp }
+    } = tonProof;
+
+    const address = Address.parse(tonAddr.address);
+    const wc = Buffer.alloc(4);
+    wc.writeUInt32BE(address.workChain, 0);
+
+    const ts = Buffer.alloc(8);
+    ts.writeBigUInt64LE(BigInt(timestamp), 0);
+
+    const dl = Buffer.alloc(4);
+    dl.writeUInt32LE(domain.lengthBytes, 0);
+
+    const msg = Buffer.concat([
+        Buffer.from('ton-proof-item-v2/'),
+        wc,
+        address.hash,
+        dl,
+        Buffer.from(domain.value),
+        ts,
+        Buffer.from(payload)
+    ]);
+
+    const msgHash = Buffer.from(sha256_sync(msg));
+
+    const fullMsg = Buffer.concat([Buffer.from([0xff, 0xff]), Buffer.from('ton-connect'), msgHash]);
+
+    const result = Buffer.from(sha256_sync(fullMsg));
+
+    try {
+        const isValid = sign.detached.verify(
+            result,
+            Buffer.from(value, 'base64'),
+            Buffer.from(tonAddr.publicKey, 'hex')
+        );
+
+        if (!isValid) {
+            return { isValid, errors: ['signature invalid'] };
+        }
+
+        return { isValid };
+    } catch (err) {
+        return { isValid: false, errors: [String(err)] };
+    }
 }

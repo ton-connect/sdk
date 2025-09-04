@@ -1,9 +1,10 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { evalFenceCondition } from '../../../../../../utils/jsonEval';
 import type { TestResult } from '../../../../../../models';
 import { compareResult } from '../../../../../../utils/compareResult';
 import { getSecureRandomBytes } from '@ton/crypto';
+import type { ConnectEvent } from '@tonconnect/protocol';
 
 export function useConnectValidation({
     testResult,
@@ -17,13 +18,16 @@ export function useConnectValidation({
     setShowStatusModal: (value: boolean) => void;
 }) {
     const [tonConnectUI] = useTonConnectUI();
+    const tonProofRef = useRef<string>(undefined);
 
     useEffect(() => {
         const effect = async () => {
             const payload = await getSecureRandomBytes(32);
+            const tonProof = payload.toString('hex');
+            tonProofRef.current = tonProof;
             tonConnectUI.setConnectRequestParameters({
                 state: 'ready',
-                value: { tonProof: payload.toString('hex') }
+                value: { tonProof }
             });
         };
 
@@ -68,8 +72,7 @@ export function useConnectValidation({
         setIsConnecting(true);
 
         const origDebug = console.debug.bind(console);
-        const connectResponsePromise = new Promise<Record<string, unknown>>((resolve, reject) => {
-            // Check if aborted
+        const connectResponsePromise = new Promise<ConnectEvent>((resolve, reject) => {
             if (controller.signal.aborted) {
                 reject(new Error('Connection aborted'));
                 return;
@@ -80,15 +83,13 @@ export function useConnectValidation({
                     args.includes('Wallet message received:') ||
                     args.includes('Injected Provider connect response:')
                 ) {
-                    console.debug = origDebug; // Restore original debug after capturing
-                    resolve(args[2] as Record<string, unknown>);
+                    console.debug = origDebug;
+                    resolve(args[2] as ConnectEvent);
                 }
                 origDebug(...args);
             };
 
-            // Listen for abort signal
             controller.signal.addEventListener('abort', () => {
-                console.debug = origDebug;
                 reject(new Error('Connection aborted'));
             });
         });
@@ -98,11 +99,12 @@ export function useConnectValidation({
             setConnectResult(undefined);
 
             const connectResponse = await connectResponsePromise;
-            setConnectResult(connectResponse);
+            setConnectResult(connectResponse as unknown as Record<string, unknown>);
 
             const parsedExpected = evalFenceCondition(testResult.expectedResult, {
-                connectResponse: connectResponse,
-                wallet
+                connectResponse,
+                wallet,
+                tonProof: tonProofRef.current
             });
 
             const [isResultValid, errors] = compareResult(connectResponse, parsedExpected);
@@ -116,7 +118,6 @@ export function useConnectValidation({
                 showValidationModal(true);
             }
         } catch (error) {
-            // Handle connection error
             console.error('Connection error:', error);
             if (error instanceof Error && error.message === 'Connection aborted') {
                 setConnectResult({
@@ -130,7 +131,7 @@ export function useConnectValidation({
         } finally {
             setIsConnecting(false);
             setAbortController(null);
-            console.debug = origDebug; // Ensure original debug is restored
+            console.debug = origDebug;
         }
     }, [
         tonConnectUI,
