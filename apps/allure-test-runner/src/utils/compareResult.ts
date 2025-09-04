@@ -6,6 +6,7 @@ export function compareResult(result: unknown, expected: unknown) {
     return [success, errors] as const;
 }
 
+// eslint-disable-next-line complexity
 function compareResultInner(
     result: unknown,
     expected: unknown,
@@ -14,6 +15,30 @@ function compareResultInner(
 ): boolean {
     let success = true;
     const field = path ? `field "${path}"` : 'value';
+
+    if (Array.isArray(expected)) {
+        if (!Array.isArray(result)) {
+            errors.push(`${field}: expected array, got ${typeof result}`);
+            return false;
+        }
+
+        if (result.length !== expected.length) {
+            errors.push(
+                `${field}: expected array of length ${expected.length}, got ${result.length}`
+            );
+            success = false;
+        }
+
+        const minLength = Math.min(result.length, expected.length);
+        for (let i = 0; i < minLength; i++) {
+            const itemPath = `${path}[${i}]`;
+            if (!compareResultInner(result[i], expected[i], errors, itemPath)) {
+                success = false;
+            }
+        }
+
+        return success;
+    }
 
     if (typeof expected === 'object' && expected !== null) {
         if (typeof result !== 'object' || result === null) {

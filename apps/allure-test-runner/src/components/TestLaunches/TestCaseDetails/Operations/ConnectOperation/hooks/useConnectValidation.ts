@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { evalFenceCondition } from '../../../../../../utils/jsonEval';
 import type { TestResult } from '../../../../../../models';
@@ -11,6 +11,7 @@ import { manifestUrl } from '../../../../../../providers/TonConnectProvider';
 type ConnectPrecondition = {
     __meta?: {
         manifestUrl?: string;
+        excludeTonProof?: boolean;
     };
 };
 
@@ -28,7 +29,23 @@ export function useConnectValidation({
     const [tonConnectUI] = useTonConnectUI();
     const tonProofRef = useRef<string>(undefined);
 
+    const parsedPrecondition = useMemo(
+        () => testResult && evalFenceCondition<ConnectPrecondition>(testResult.precondition),
+        [testResult]
+    );
+
     useEffect(() => {
+        if (!parsedPrecondition) return;
+
+        if (parsedPrecondition.__meta?.excludeTonProof) {
+            tonProofRef.current = undefined;
+            tonConnectUI.setConnectRequestParameters({
+                state: 'ready',
+                value: { tonProof: undefined }
+            });
+            return;
+        }
+
         const effect = async () => {
             const payload = await getSecureRandomBytes(32);
             const tonProof = payload.toString('hex');
@@ -39,8 +56,8 @@ export function useConnectValidation({
             });
         };
 
-        effect();
-    }, [tonConnectUI]);
+        void effect();
+    }, [tonConnectUI, parsedPrecondition]);
 
     const wallet = useTonWallet();
 
@@ -100,7 +117,6 @@ export function useConnectValidation({
             });
         });
 
-        const parsedPrecondition = evalFenceCondition<ConnectPrecondition>(testResult.precondition);
         const meta = parsedPrecondition?.__meta;
 
         if (meta?.manifestUrl) {
