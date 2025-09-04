@@ -1,0 +1,129 @@
+import { useState, useCallback, useEffect } from 'react';
+import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
+import { evalFenceCondition } from '../../../../../../utils/jsonEval';
+import type { TestResult } from '../../../../../../models';
+import type { ConnectRequest } from '@tonconnect/protocol';
+import { compareResult } from '../../../../../../utils/compareResult';
+
+export function useConnectValidation({
+    testResult,
+    setValidationErrors,
+    showValidationModal,
+    setShowStatusModal
+}: {
+    testResult: TestResult | undefined;
+    setValidationErrors: (value: string[]) => void;
+    showValidationModal: (isSuccess: boolean, errors?: string[]) => void;
+    setShowStatusModal: (value: boolean) => void;
+}) {
+    const [tonConnectUI] = useTonConnectUI();
+    const wallet = useTonWallet();
+
+    const [connectResult, setConnectResult] = useState<Record<string, unknown>>();
+    const [isResultValid, setIsResultValid] = useState(true);
+
+    useEffect(() => {
+        setConnectResult(undefined);
+        setIsResultValid(true);
+        setValidationErrors([]);
+        setShowStatusModal(false);
+    }, [testResult?.id, setShowStatusModal]);
+
+    const handleConnect = useCallback(async () => {
+        if (!testResult) {
+            setConnectResult({
+                error: 'No precondition'
+            });
+            return;
+        }
+
+        // If wallet is already connected, don't proceed with connection test
+        if (wallet) {
+            setConnectResult({
+                error: 'Wallet already connected. Please disconnect first to test connection flow.'
+            });
+            return;
+        }
+
+        let connectRequest: ConnectRequest | undefined = undefined;
+        let connectResponse: any = undefined;
+        const origDebug = console.debug.bind(console);
+        console.debug = (...args: unknown[]) => {
+            if (args.includes('Send http-bridge request:')) {
+                connectRequest = args[2] as ConnectRequest;
+            }
+            if (args.includes('Wallet message received:')) {
+                connectResponse = args[2];
+                console.debug = origDebug; // Restore original debug after capturing
+            }
+            origDebug(...args);
+        };
+
+        try {
+            setConnectResult(undefined);
+
+            // Connect to wallet
+            await tonConnectUI.connectWallet();
+
+            // Wait a bit for the wallet message to be received
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        } catch (error) {
+            // Handle connection error
+            console.error('Connection error:', error);
+        } finally {
+            // Restore original console.debug
+            console.debug = origDebug;
+
+            setConnectResult(connectResponse);
+
+            if (connectResponse) {
+                console.log('Connect response received:', connectResponse);
+                console.log('Connect request:', connectRequest);
+                console.log('Expected result:', testResult.expectedResult);
+
+                const parsedExpected = evalFenceCondition(testResult.expectedResult, {
+                    connectRequest: connectRequest,
+                    connectResponse: connectResponse,
+                    wallet
+                });
+
+                console.log('Parsed expected result:', parsedExpected);
+
+                const [isResultValid, errors] = compareResult(connectResponse, parsedExpected);
+
+                console.log('Validation result:', { isResultValid, errors });
+
+                setIsResultValid(isResultValid);
+                setValidationErrors(errors);
+
+                if (!isResultValid && errors.length > 0) {
+                    showValidationModal(false, errors);
+                } else if (testResult.status !== 'passed') {
+                    showValidationModal(true);
+                }
+            } else {
+                console.log('No connect response received');
+                setIsResultValid(false);
+                setValidationErrors(['No wallet response received']);
+                showValidationModal(false, ['No wallet response received']);
+            }
+        }
+    }, [
+        tonConnectUI,
+        testResult,
+        wallet,
+        setValidationErrors,
+        showValidationModal,
+        setShowStatusModal
+    ]);
+
+    return {
+        // State
+        connectResult,
+        isResultValid,
+        wallet,
+
+        // Actions
+        handleConnect
+    };
+}

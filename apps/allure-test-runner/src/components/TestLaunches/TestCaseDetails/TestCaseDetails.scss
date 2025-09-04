@@ -367,6 +367,248 @@
     word-wrap: normal;
 }
 
+// Connect wallet specific styles
+.connect-wallet-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.wallet-connected-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    border-radius: 8px;
+    width: 100%;
+}
+
+.wallet-info {
+    font-size: 0.9rem;
+    color: #22c55e;
+    font-weight: 600;
+}
+
+.wallet-address {
+    font-size: 0.85rem;
+    color: #e2e8f0;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    background: rgba(30, 41, 59, 0.5);
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(51, 65, 85, 0.5);
+}
+
+.connect-btn {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background-color: #3b82f6;
+    color: #fff;
+
+    &:hover:not(:disabled) {
+        background-color: #2563eb;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+}
+
+.connect-btn__spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.wallet-address-display {
+    font-size: 0.9rem;
+    color: #e2e8f0;
+    padding: 8px 12px;
+    background: rgba(30, 41, 59, 0.5);
+    border: 1px solid rgba(51, 65, 85, 0.5);
+    border-radius: 6px;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
+.connection-result-json {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 12px;
+    overflow-x: auto;
+}
+
+.connection-result-json pre {
+    margin: 0;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.875rem;
+    color: #e2e8f0;
+    line-height: 1.4;
+    white-space: pre;
+    word-wrap: normal;
+}
+
+// Wallet disconnect required styles
+.wallet-disconnect-required {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+}
+
+.wallet-disconnect-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: 8px;
+}
+
+.wallet-disconnect-icon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.wallet-disconnect-text {
+    flex: 1;
+    
+    strong {
+        display: block;
+        color: #f59e0b;
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+    
+    p {
+        margin: 0;
+        color: #e2e8f0;
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+}
+
+.wallet-connected-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    background: rgba(30, 41, 59, 0.5);
+    border: 1px solid rgba(51, 65, 85, 0.5);
+    border-radius: 6px;
+}
+
+.disconnect-btn {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background-color: #f59e0b;
+    color: #fff;
+
+    &:hover:not(:disabled) {
+        background-color: #d97706;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+}
+
+.disconnect-btn__spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+// Connection success info styles
+.connection-success-info {
+    padding: 16px;
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    border-radius: 8px;
+    margin: 8px 0;
+}
+
+.connection-success-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    
+    strong {
+        color: #22c55e;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+}
+
+.connection-success-icon {
+    font-size: 1.2rem;
+}
+
+.connection-details {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.connection-detail {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: #e2e8f0;
+    
+    strong {
+        color: #94a3b8;
+        min-width: 80px;
+        font-weight: 500;
+    }
+}
+
 .test-case-section--sticky {
     margin-top: auto;
     position: sticky;

@@ -4,7 +4,8 @@ export const CUSTOM_FIELD_NAMES = {
 
 export const OPERATION_TYPE = {
     SEND_TRANSACTION: 'Send transaction',
-    SIGN_DATA: 'Sign data'
+    SIGN_DATA: 'Sign data',
+    CONNECT: 'Connect'
 };
 
 export type CustomField = {

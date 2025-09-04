@@ -56,11 +56,13 @@ export function useTransactionValidation({
         let rpcResponse: SendTransactionRpcResponse | undefined = undefined;
         const origDebug = console.debug.bind(console);
         console.debug = (...args: unknown[]) => {
+            console.log('args', args);
             if (
                 args.includes('Send http-bridge request:') ||
                 args.includes('Send injected-bridge request:')
             ) {
                 rpcRequest = args[2] as SendTransactionRpcRequest;
+                console.log('rpcRequest', rpcRequest);
             }
             if (args.includes('Wallet message received:')) {
                 console.debug = origDebug;
@@ -74,6 +76,7 @@ export function useTransactionValidation({
             if (waitForTx) setIsWaitingForTx(true);
 
             const sent = await tonConnectUI.sendTransaction(sendTransactionParams);
+            console.log(rpcRequest, rpcResponse);
             setTransactionResult(rpcResponse);
             if (waitForTx && wallet?.account && sent?.boc) {
                 try {

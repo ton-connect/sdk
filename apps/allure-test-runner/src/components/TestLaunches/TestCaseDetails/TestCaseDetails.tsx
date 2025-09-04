@@ -7,6 +7,7 @@ import { SendTransactionOperation } from './Operations/SendTransactionOperation/
 import { TestCaseStates } from './TestCaseStates';
 import type { JSX } from 'react';
 import { SignDataOperation } from './Operations/SignDataOperation/SignDataOperation';
+import { ConnectOperation } from './Operations/ConnectOperation/ConnectOperation';
 import { DefaultTestCaseOperation } from './Operations/DefaultTestCaseOperation/DefaultTestCaseOperation';
 
 type Props = {
@@ -62,6 +63,18 @@ export function TestCaseDetails({ testId, onTestCasesRefresh, onTestIdChange }: 
         case OPERATION_TYPE.SIGN_DATA: {
             component = (
                 <SignDataOperation
+                    key={testResult.id}
+                    testResult={testResult}
+                    refetchTestResult={refetchTestResult}
+                    onTestCasesRefresh={onTestCasesRefresh}
+                    onTestIdChange={onTestIdChange}
+                />
+            );
+            break;
+        }
+        case OPERATION_TYPE.CONNECT: {
+            component = (
+                <ConnectOperation
                     key={testResult.id}
                     testResult={testResult}
                     refetchTestResult={refetchTestResult}
