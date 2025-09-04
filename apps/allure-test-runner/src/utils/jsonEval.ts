@@ -23,7 +23,7 @@ import {
 } from './jsonEval/providers';
 import type { EvalContext } from './jsonEval/context';
 
-const functionScope = [
+const functionScope = {
     // should be called with (...args), e.g. updateMerkleProofMessage() or sender('raw')
     nowPlusMinutes,
     nowPlus5Minutes,
@@ -46,7 +46,7 @@ const functionScope = [
     isValidRawAddressString,
     isValidCurrentTimestamp,
     isValidDataSignature
-];
+};
 
 function extractFromCodeFence(input: string): string | null {
     const fence = /```(?:json)?\n([\s\S]*?)\n```/i.exec(input);
@@ -68,10 +68,9 @@ export function evalFenceCondition<T = unknown>(
         return undefined;
     }
     try {
-        return new Function(
-            ...functionScope.map(fn => fn.name),
-            `"use strict";return (${fromFence});`
-        )(...functionScope.map(fn => fn.bind(context)));
+        return new Function(...Object.keys(functionScope), `"use strict";return (${fromFence});`)(
+            ...Object.values(functionScope).map(fn => fn.bind(context))
+        );
     } catch (error) {
         console.error(error);
         return undefined;
