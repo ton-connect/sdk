@@ -1,6 +1,6 @@
 import { determineWalletVersion, loadWalletTransfer } from '../../contracts/wallet';
 import { Address, beginCell, Cell, loadMessage, storeStateInit } from '@ton/ton';
-import { CHAIN } from '@tonconnect/sdk';
+import { CHAIN } from '@tonconnect/ui-react';
 import type { EvalContext } from './context';
 import { sha256_sync, signVerify } from '@ton/crypto';
 import { bstr as crc32 } from 'crc-32';

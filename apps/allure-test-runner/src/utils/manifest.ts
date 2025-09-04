@@ -1,4 +1,4 @@
-import { TonConnectUI } from '@tonconnect/ui';
+import { TonConnectUI } from '@tonconnect/ui-react';
 
 export function changeManifestUrl(tonConnectUI: TonConnectUI, newUrl: string | undefined) {
     (

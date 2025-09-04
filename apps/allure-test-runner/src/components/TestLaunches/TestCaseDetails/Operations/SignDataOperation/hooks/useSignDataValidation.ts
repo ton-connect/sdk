@@ -4,7 +4,7 @@ import { evalFenceCondition } from '../../../../../../utils/jsonEval';
 import type { TestResult } from '../../../../../../models';
 import type { SignDataRpcRequest, SignDataRpcResponse } from '@tonconnect/protocol';
 import { compareResult } from '../../../../../../utils/compareResult';
-import type { SignDataResponse } from '@tonconnect/sdk';
+import type { SignDataResponse } from '@tonconnect/ui-react';
 
 export function useSignDataValidation({
     testResult,

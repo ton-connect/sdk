@@ -9,7 +9,7 @@ import {
 } from '../../contracts/exotic';
 import { Address, beginCell, storeStateInit, toNano } from '@ton/ton';
 import { createJettonMaster, mintMessage } from '../../contracts/jetton';
-import { CHAIN } from '@tonconnect/sdk';
+import { CHAIN } from '@tonconnect/ui-react';
 import { determineWalletVersion } from '../../contracts/wallet';
 
 export function nowPlusMinutes(minutes: number): number {

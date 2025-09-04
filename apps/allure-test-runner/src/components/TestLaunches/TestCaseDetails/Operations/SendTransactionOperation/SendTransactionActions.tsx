@@ -1,4 +1,4 @@
-import type { SendTransactionRequest } from '@tonconnect/sdk';
+import type { SendTransactionRequest } from '@tonconnect/ui-react';
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { useState } from 'react';
 

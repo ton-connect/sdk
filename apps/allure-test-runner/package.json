@@ -15,7 +15,6 @@
     "@ton/crypto": "3.3.0",
     "@ton/ton": "15.3.1",
     "@tonconnect/protocol": "workspace:*",
-    "@tonconnect/sdk": "workspace:*",
     "@tonconnect/ui-react": "workspace:*",
     "buffer": "^6.0.3",
     "crc-32": "^1.2.2",

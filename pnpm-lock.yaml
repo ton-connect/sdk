@@ -83,9 +83,6 @@ importers:
       '@tonconnect/protocol':
         specifier: workspace:*
         version: link:../../packages/protocol
-      '@tonconnect/sdk':
-        specifier: workspace:*
-        version: link:../../packages/sdk
       '@tonconnect/ui-react':
         specifier: workspace:*
         version: link:../../packages/ui-react

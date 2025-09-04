@@ -1,4 +1,4 @@
-import type { SignDataPayload } from '@tonconnect/sdk';
+import type { SignDataPayload } from '@tonconnect/ui-react';
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { useState } from 'react';
 

@@ -3,7 +3,7 @@ import type {
     SendTransactionRpcRequest,
     SignDataRpcRequest
 } from '@tonconnect/protocol';
-import type { SendTransactionRequest, SignDataResponse, Wallet } from '@tonconnect/sdk';
+import type { SendTransactionRequest, SignDataResponse, Wallet } from '@tonconnect/ui-react';
 
 export type EvalContext = {
     sendTransactionRpcRequest?: SendTransactionRpcRequest;
