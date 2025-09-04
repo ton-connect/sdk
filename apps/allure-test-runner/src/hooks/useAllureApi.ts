@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { AllureApiClient } from '../api/allure.api';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../providers/AuthProvider';
 
 export function useAllureApi() {
     const { token } = useAuth() ?? {};

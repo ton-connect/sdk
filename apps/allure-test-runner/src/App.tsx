@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { RouterProvider } from 'react-router-dom';
-import { TonConnectProvider } from './components/TonConnectProvider';
+import { TonConnectProvider } from './providers/TonConnectProvider';
 import { Header } from './components/Header';
 import { STORAGE_KEYS } from './constants';
 import { AuthForm } from './components/AuthForm';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider } from './providers/AuthProvider';
 import { router } from './routes';
 import { isMoreThanDayToExpire } from './utils/jwt';
 
