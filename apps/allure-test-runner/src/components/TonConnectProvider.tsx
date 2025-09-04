@@ -1,8 +1,7 @@
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
 import type { ReactNode } from 'react';
 
-const manifestUrl =
-    'https://ton-connect.github.io/demo-dapp-with-react-ui/tonconnect-manifest.json';
+const manifestUrl = 'https://allure-test-stand.vercel.app/tonconnect-manifest.json';
 
 interface TonConnectProviderProps {
     children: ReactNode;
