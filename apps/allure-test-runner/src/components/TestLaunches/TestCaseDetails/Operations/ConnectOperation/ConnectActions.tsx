@@ -3,12 +3,17 @@ import { useState } from 'react';
 
 type ConnectActionsProps = {
     onConnect: () => Promise<void>;
+    onAbort: () => void;
+    isConnecting: boolean;
 };
 
-export function ConnectActions({ onConnect }: ConnectActionsProps) {
+export function ConnectActions({
+    onConnect,
+    onAbort,
+    isConnecting: isConnectingFromHook
+}: ConnectActionsProps) {
     const wallet = useTonWallet();
     const [tonConnectUI] = useTonConnectUI();
-    const [isConnecting, setIsConnecting] = useState(false);
     const [isDisconnecting, setIsDisconnecting] = useState(false);
 
     const handleDisconnect = async () => {
@@ -51,23 +56,27 @@ export function ConnectActions({ onConnect }: ConnectActionsProps) {
                     </button>
                 </div>
             ) : (
-                <button
-                    onClick={() => {
-                        setIsConnecting(true);
-                        onConnect().finally(() => setIsConnecting(false));
-                    }}
-                    disabled={isConnecting}
-                    className="btn btn-primary connect-btn"
-                >
-                    {isConnecting ? (
+                <div className="connect-actions-container">
+                    {isConnectingFromHook ? (
                         <>
-                            <div className="connect-btn__spinner"></div>
-                            Connecting...
+                            <button onClick={onAbort} className="btn btn-danger abort-btn">
+                                Abort Connection
+                            </button>
+                            <div className="connecting-status">
+                                <div className="connect-btn__spinner"></div>
+                                <span>Waiting for wallet connection...</span>
+                            </div>
                         </>
                     ) : (
-                        'Connect Wallet'
+                        <button
+                            onClick={onConnect}
+                            disabled={isConnectingFromHook}
+                            className="btn btn-primary connect-btn"
+                        >
+                            Connect Wallet
+                        </button>
                     )}
-                </button>
+                </div>
             )}
         </div>
     );

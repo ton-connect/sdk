@@ -34,12 +34,16 @@ export function useConnectValidation({
 
     const [connectResult, setConnectResult] = useState<Record<string, unknown>>();
     const [isResultValid, setIsResultValid] = useState(true);
+    const [isConnecting, setIsConnecting] = useState(false);
+    const [abortController, setAbortController] = useState<AbortController | null>(null);
 
     useEffect(() => {
         setConnectResult(undefined);
         setIsResultValid(true);
         setValidationErrors([]);
         setShowStatusModal(false);
+        setIsConnecting(false);
+        setAbortController(null);
     }, [testResult?.id, setValidationErrors, setShowStatusModal]);
 
     const handleConnect = useCallback(async () => {
@@ -58,8 +62,19 @@ export function useConnectValidation({
             return;
         }
 
+        // Create abort controller for this connection attempt
+        const controller = new AbortController();
+        setAbortController(controller);
+        setIsConnecting(true);
+
         const origDebug = console.debug.bind(console);
-        const connectResponsePromise = new Promise<Record<string, unknown>>(resolve => {
+        const connectResponsePromise = new Promise<Record<string, unknown>>((resolve, reject) => {
+            // Check if aborted
+            if (controller.signal.aborted) {
+                reject(new Error('Connection aborted'));
+                return;
+            }
+
             console.debug = (...args: unknown[]) => {
                 if (
                     args.includes('Wallet message received:') ||
@@ -70,13 +85,18 @@ export function useConnectValidation({
                 }
                 origDebug(...args);
             };
+
+            // Listen for abort signal
+            controller.signal.addEventListener('abort', () => {
+                console.debug = origDebug;
+                reject(new Error('Connection aborted'));
+            });
         });
 
         await tonConnectUI.openModal();
         try {
             setConnectResult(undefined);
 
-            // TODO add abort!
             const connectResponse = await connectResponsePromise;
             setConnectResult(connectResponse);
 
@@ -98,6 +118,19 @@ export function useConnectValidation({
         } catch (error) {
             // Handle connection error
             console.error('Connection error:', error);
+            if (error instanceof Error && error.message === 'Connection aborted') {
+                setConnectResult({
+                    error: 'Connection was aborted by user'
+                });
+            } else {
+                setConnectResult({
+                    error: 'Connection failed'
+                });
+            }
+        } finally {
+            setIsConnecting(false);
+            setAbortController(null);
+            console.debug = origDebug; // Ensure original debug is restored
         }
     }, [
         tonConnectUI,
@@ -108,13 +141,21 @@ export function useConnectValidation({
         setShowStatusModal
     ]);
 
+    const handleAbort = useCallback(() => {
+        if (abortController) {
+            abortController.abort();
+        }
+    }, [abortController]);
+
     return {
         // State
         connectResult,
         isResultValid,
+        isConnecting,
         wallet,
 
         // Actions
-        handleConnect
+        handleConnect,
+        handleAbort
     };
 }

@@ -36,12 +36,13 @@ export function ConnectOperation({
         setShowStatusModal
     } = useTestCaseDetails(testResult, refetchTestResult, onTestCasesRefresh, onTestIdChange);
 
-    const { isResultValid, connectResult, handleConnect, wallet } = useConnectValidation({
-        testResult,
-        setValidationErrors,
-        showValidationModal,
-        setShowStatusModal
-    });
+    const { isResultValid, connectResult, isConnecting, handleConnect, handleAbort, wallet } =
+        useConnectValidation({
+            testResult,
+            setValidationErrors,
+            showValidationModal,
+            setShowStatusModal
+        });
 
     if (!testResult) {
         return null;
@@ -70,7 +71,11 @@ export function ConnectOperation({
                 onRerun={handleRerun}
                 disableInternalModal={true}
             >
-                <ConnectActions onConnect={handleConnect} />
+                <ConnectActions
+                    onConnect={handleConnect}
+                    onAbort={handleAbort}
+                    isConnecting={isConnecting}
+                />
             </TestCaseActions>
 
             <StatusModal
