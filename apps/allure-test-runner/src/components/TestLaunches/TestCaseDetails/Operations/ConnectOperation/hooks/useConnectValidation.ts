@@ -5,6 +5,8 @@ import type { TestResult } from '../../../../../../models';
 import { compareResult } from '../../../../../../utils/compareResult';
 import { getSecureRandomBytes } from '@ton/crypto';
 import type { ConnectEvent } from '@tonconnect/protocol';
+import { changeManifestUrl } from '../../../../../../utils/manifest';
+import { manifestUrl } from '../../../../../TonConnectProvider';
 
 type ConnectPrecondition = {
     __meta?: {
@@ -103,16 +105,16 @@ export function useConnectValidation({
         const parsedPrecondition = evalFenceCondition<ConnectPrecondition>(testResult.precondition);
         const meta = parsedPrecondition?.__meta;
 
-        let originalManifestUrl: string | undefined = undefined;
         if (meta?.manifestUrl) {
-            (tonConnectUI.connector as any).dappSettings.manifestUrl = meta.manifestUrl;
+            changeManifestUrl(tonConnectUI, meta.manifestUrl);
         }
 
         await tonConnectUI.openModal();
 
         if (meta?.manifestUrl) {
-            (tonConnectUI.connector as any).dappSettings.manifestUrl = originalManifestUrl;
+            changeManifestUrl(tonConnectUI, manifestUrl);
         }
+
         try {
             setConnectResult(undefined);
 
