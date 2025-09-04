@@ -6,7 +6,7 @@ import { compareResult } from '../../../../../../utils/compareResult';
 import { getSecureRandomBytes } from '@ton/crypto';
 import type { ConnectEvent } from '@tonconnect/protocol';
 import { changeManifestUrl } from '../../../../../../utils/manifest';
-import { manifestUrl } from '../../../../../TonConnectProvider';
+import { manifestUrl } from '../../../../../../providers/TonConnectProvider';
 
 type ConnectPrecondition = {
     __meta?: {
@@ -47,7 +47,7 @@ export function useConnectValidation({
     const [connectResult, setConnectResult] = useState<Record<string, unknown>>();
     const [isResultValid, setIsResultValid] = useState(true);
     const [isConnecting, setIsConnecting] = useState(false);
-    const [abortController, setAbortController] = useState<AbortController | null>(null);
+    const abortControllerRef = useRef<AbortController>(null);
 
     useEffect(() => {
         setConnectResult(undefined);
@@ -55,7 +55,6 @@ export function useConnectValidation({
         setValidationErrors([]);
         setShowStatusModal(false);
         setIsConnecting(false);
-        setAbortController(null);
     }, [testResult?.id, setValidationErrors, setShowStatusModal]);
 
     const handleConnect = useCallback(async () => {
@@ -66,7 +65,6 @@ export function useConnectValidation({
             return;
         }
 
-        // If wallet is already connected, don't proceed with connection test
         if (wallet) {
             setConnectResult({
                 error: 'Wallet already connected. Please disconnect first to test connection flow.'
@@ -74,9 +72,9 @@ export function useConnectValidation({
             return;
         }
 
-        // Create abort controller for this connection attempt
         const controller = new AbortController();
-        setAbortController(controller);
+        abortControllerRef.current = controller;
+
         setIsConnecting(true);
 
         const origDebug = console.debug.bind(console);
@@ -110,10 +108,6 @@ export function useConnectValidation({
         }
 
         await tonConnectUI.openModal();
-
-        if (meta?.manifestUrl) {
-            changeManifestUrl(tonConnectUI, manifestUrl);
-        }
 
         try {
             setConnectResult(undefined);
@@ -149,8 +143,10 @@ export function useConnectValidation({
                 });
             }
         } finally {
+            if (meta?.manifestUrl) {
+                changeManifestUrl(tonConnectUI, manifestUrl);
+            }
             setIsConnecting(false);
-            setAbortController(null);
             console.debug = origDebug;
         }
     }, [
@@ -162,11 +158,7 @@ export function useConnectValidation({
         setShowStatusModal
     ]);
 
-    const handleAbort = useCallback(() => {
-        if (abortController) {
-            abortController.abort();
-        }
-    }, [abortController]);
+    const handleAbort = () => abortControllerRef.current?.abort();
 
     return {
         // State
