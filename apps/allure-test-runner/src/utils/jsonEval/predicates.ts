@@ -4,6 +4,7 @@ import { CHAIN } from '@tonconnect/sdk';
 import type { EvalContext } from './context';
 import { sha256_sync, signVerify } from '@ton/crypto';
 import { bstr as crc32 } from 'crc-32';
+import { loadStateInit } from '@ton/core';
 
 export type PredicateResult = {
     isValid: boolean;
@@ -310,4 +311,114 @@ export function isValidDataSignature(this: EvalContext, value: unknown): Predica
             errors: [`cannot construct signature ${String(err)}`]
         };
     }
+}
+
+export function isValidNetwork(value: unknown): PredicateResult {
+    if (value !== CHAIN.TESTNET && value !== CHAIN.MAINNET) {
+        return {
+            isValid: false,
+            errors: [
+                `invalid network: expected ${CHAIN.MAINNET} or ${CHAIN.TESTNET}, got ${JSON.stringify(value)}`
+            ]
+        };
+    }
+
+    return {
+        isValid: true
+    };
+}
+
+export function isValidStateInitString(value: unknown): PredicateResult {
+    if (typeof value !== 'string') {
+        return { isValid: false };
+    }
+
+    try {
+        const stateInitCell = Cell.fromBase64(value);
+        loadStateInit(stateInitCell.beginParse());
+        return { isValid: true };
+    } catch (err) {
+        return {
+            isValid: false,
+            errors: [`Cannot parse state init ${JSON.stringify(value)}`]
+        };
+    }
+}
+
+export function isValidPublicKey(value: unknown): PredicateResult {
+    if (typeof value !== 'string') {
+        return { isValid: false };
+    }
+
+    try {
+        const buffer = Buffer.from(value, 'hex');
+        if (buffer.length !== 32) {
+            return {
+                isValid: false,
+                errors: [`invalid public key length: got "${buffer.length}" expected 32`]
+            };
+        }
+        return { isValid: true };
+    } catch {
+        return { isValid: false, errors: ['public key not in hex format'] };
+    }
+}
+
+export function isValidFeatureList(value: unknown): PredicateResult {
+    if (!Array.isArray(value)) {
+        return { isValid: false, errors: ['expected an array of features'] };
+    }
+
+    const errors: string[] = [];
+
+    for (let i = 0; i < value.length; i++) {
+        const feature = value[i];
+
+        if (typeof feature === 'string') {
+            if (feature !== 'SendTransaction') {
+                errors.push(`feature at index ${i} is an invalid string literal: ${feature}`);
+            }
+            continue;
+        }
+
+        if (typeof feature !== 'object' || feature === null) {
+            errors.push(`feature at index ${i} is not a valid object`);
+            continue;
+        }
+
+        const name = feature.name;
+
+        if (name === 'SendTransaction') {
+            if (typeof feature.maxMessages !== 'number') {
+                errors.push(`feature at index ${i} must have a numeric 'maxMessages'`);
+            }
+
+            if (
+                'extraCurrencySupported' in feature &&
+                typeof feature.extraCurrencySupported !== 'boolean'
+            ) {
+                errors.push(
+                    `feature at index ${i} has invalid 'extraCurrencySupported' (must be boolean)`
+                );
+            }
+        } else if (name === 'SignData') {
+            const types = feature.types;
+            if (!Array.isArray(types)) {
+                errors.push(`feature at index ${i} must have a 'types' array`);
+            } else {
+                const validTypes = ['text', 'binary', 'cell'];
+                for (const t of types) {
+                    if (!validTypes.includes(t)) {
+                        errors.push(
+                            `feature at index ${i} has invalid type '${t}' in 'types' array`
+                        );
+                    }
+                }
+            }
+        } else {
+            errors.push(`feature at index ${i} has unsupported name: ${name}`);
+        }
+    }
+
+    return errors.length > 0 ? { isValid: false, errors } : { isValid: true };
 }

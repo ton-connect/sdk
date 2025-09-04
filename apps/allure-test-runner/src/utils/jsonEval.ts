@@ -2,10 +2,14 @@ import {
     isNonNegativeInt,
     isValidCurrentTimestamp,
     isValidDataSignature,
+    isValidFeatureList,
+    isValidNetwork,
+    isValidPublicKey,
     isValidRawAddressString,
     isValidSendTransactionBoc,
     isValidSendTransactionId,
     isValidSignDataId,
+    isValidStateInitString,
     isValidString
 } from './jsonEval/predicates';
 import {
@@ -45,7 +49,11 @@ const functionScope = {
     isValidSignDataId,
     isValidRawAddressString,
     isValidCurrentTimestamp,
-    isValidDataSignature
+    isValidDataSignature,
+    isValidNetwork,
+    isValidStateInitString,
+    isValidPublicKey,
+    isValidFeatureList
 };
 
 function extractFromCodeFence(input: string): string | null {
