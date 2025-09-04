@@ -8,6 +8,15 @@ type ConnectResultProps = {
     walletAddress?: string;
 };
 
+type ConnectionInfo = {
+    event: unknown;
+    id: unknown;
+    address: string | undefined;
+    network: string | undefined;
+    device: Record<string, unknown> | undefined;
+    features: unknown;
+};
+
 export function ConnectResult({
     connectResult,
     isResultValid,
@@ -16,20 +25,24 @@ export function ConnectResult({
 }: ConnectResultProps) {
     if (!connectResult && !walletAddress) return null;
 
-    const getConnectionInfo = (result: Record<string, unknown>) => {
+    const getConnectionInfo = (result: Record<string, unknown>): ConnectionInfo | null => {
         if (result.event === 'connect' && result.payload) {
-            const payload = result.payload as any;
-            const tonAddrItem = payload.items?.find((item: any) => item.name === 'ton_addr');
+            const payload = result.payload as Record<string, unknown>;
+            const items = payload.items as Array<Record<string, unknown>> | undefined;
+            const tonAddrItem = items?.find(
+                (item: Record<string, unknown>) => item.name === 'ton_addr'
+            );
+            const device = payload.device as Record<string, unknown> | undefined;
             return {
                 event: result.event,
                 id: result.id,
-                address: tonAddrItem?.address,
-                network: tonAddrItem?.network,
-                device: payload.device,
-                features: payload.device?.features
+                address: tonAddrItem?.address as string | undefined,
+                network: tonAddrItem?.network as string | undefined,
+                device: device,
+                features: device?.features
             };
         }
-        return result;
+        return null;
     };
 
     const connectionInfo = connectResult ? getConnectionInfo(connectResult) : null;
@@ -53,7 +66,7 @@ export function ConnectResult({
                         </div>
                         <div className="connection-details">
                             <div className="connection-detail">
-                                <strong>Address:</strong> {connectionInfo.address}
+                                <strong>Address:</strong> {connectionInfo.address || 'N/A'}
                             </div>
                             <div className="connection-detail">
                                 <strong>Network:</strong>{' '}
@@ -61,16 +74,18 @@ export function ConnectResult({
                                     ? 'Mainnet'
                                     : connectionInfo.network === '-3'
                                       ? 'Testnet'
-                                      : connectionInfo.network}
+                                      : connectionInfo.network || 'N/A'}
                             </div>
                             {connectionInfo.device && (
                                 <>
                                     <div className="connection-detail">
-                                        <strong>Device:</strong> {connectionInfo.device.platform}
+                                        <strong>Device:</strong>{' '}
+                                        {(connectionInfo.device.platform as string) || 'N/A'}
                                     </div>
                                     <div className="connection-detail">
-                                        <strong>App:</strong> {connectionInfo.device.appName} v
-                                        {connectionInfo.device.appVersion}
+                                        <strong>App:</strong>{' '}
+                                        {(connectionInfo.device.appName as string) || 'N/A'} v
+                                        {(connectionInfo.device.appVersion as string) || 'N/A'}
                                     </div>
                                 </>
                             )}

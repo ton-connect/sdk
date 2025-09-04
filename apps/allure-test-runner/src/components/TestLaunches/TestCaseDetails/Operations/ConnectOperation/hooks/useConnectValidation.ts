@@ -46,14 +46,14 @@ export function useConnectValidation({
         }
 
         let connectRequest: ConnectRequest | undefined = undefined;
-        let connectResponse: any = undefined;
+        let connectResponse: Record<string, unknown> | undefined = undefined;
         const origDebug = console.debug.bind(console);
         console.debug = (...args: unknown[]) => {
             if (args.includes('Send http-bridge request:')) {
                 connectRequest = args[2] as ConnectRequest;
             }
             if (args.includes('Wallet message received:')) {
-                connectResponse = args[2];
+                connectResponse = args[2] as Record<string, unknown>;
                 console.debug = origDebug; // Restore original debug after capturing
             }
             origDebug(...args);
@@ -77,21 +77,13 @@ export function useConnectValidation({
             setConnectResult(connectResponse);
 
             if (connectResponse) {
-                console.log('Connect response received:', connectResponse);
-                console.log('Connect request:', connectRequest);
-                console.log('Expected result:', testResult.expectedResult);
-
                 const parsedExpected = evalFenceCondition(testResult.expectedResult, {
                     connectRequest: connectRequest,
                     connectResponse: connectResponse,
                     wallet
                 });
 
-                console.log('Parsed expected result:', parsedExpected);
-
                 const [isResultValid, errors] = compareResult(connectResponse, parsedExpected);
-
-                console.log('Validation result:', { isResultValid, errors });
 
                 setIsResultValid(isResultValid);
                 setValidationErrors(errors);
@@ -102,7 +94,6 @@ export function useConnectValidation({
                     showValidationModal(true);
                 }
             } else {
-                console.log('No connect response received');
                 setIsResultValid(false);
                 setValidationErrors(['No wallet response received']);
                 showValidationModal(false, ['No wallet response received']);

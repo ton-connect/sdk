@@ -37,10 +37,12 @@ export function ConnectActions({ onConnect }: ConnectActionsProps) {
                     </div>
                     <div className="wallet-connected-details">
                         <div className="wallet-info">
-                            <strong>Connected:</strong> {'name' in wallet ? wallet.name : wallet.device.appName}
+                            <strong>Connected:</strong>{' '}
+                            {'name' in wallet ? wallet.name : wallet.device.appName}
                         </div>
                         <div className="wallet-address">
-                            {wallet.account.address.slice(0, 4)}...{wallet.account.address.slice(-4)}
+                            {wallet.account.address.slice(0, 4)}...
+                            {wallet.account.address.slice(-4)}
                         </div>
                     </div>
                     <button
