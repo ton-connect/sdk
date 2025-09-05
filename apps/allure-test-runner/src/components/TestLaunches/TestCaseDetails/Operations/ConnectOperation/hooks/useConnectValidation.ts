@@ -35,9 +35,7 @@ export function useConnectValidation({
     );
 
     useEffect(() => {
-        if (!parsedPrecondition) return;
-
-        if (parsedPrecondition.__meta?.excludeTonProof) {
+        if (parsedPrecondition?.__meta?.excludeTonProof) {
             tonProofRef.current = undefined;
             tonConnectUI.setConnectRequestParameters({
                 state: 'ready',
