@@ -31,6 +31,12 @@ export function applyWalletsListConfiguration(
         );
     }
 
+    if (configuration.excludeWallets?.length) {
+        walletsList = walletsList.filter(v => {
+            return !configuration.excludeWallets?.find(w => eqWalletName(v, w));
+        });
+    }
+
     return walletsList;
 }
 
