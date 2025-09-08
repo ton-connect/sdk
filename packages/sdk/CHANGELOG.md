@@ -1,5 +1,41 @@
 # Changelog @tonconnect/sdk
 
+## 3.3.0
+
+### Patch Changes
+
+- c90140a: chore: update dependencies
+- 4d80c1f: feat: add id support for links (per spec
+  https://github.com/ton-blockchain/ton-connect/pull/90/files)
+- 4d80c1f: fix(ui): prevent enabling scroll if already enabled
+- 4d80c1f: fix(sdk): do not cache injected wallets in wallets list manager
+- 1e2f8f5: feat: implement validation for sendTransaction and signData feat: add qa mode
+- 4d80c1f: fix(ui): reload wallets list when the modal opens
+- 4d80c1f: BREAKING: strict request validation is now enforced
+
+    **ton_proof**
+    - `payload` size **≤ 128 bytes**
+    - `domain` size **≤ 128 bytes**
+    - (`payload` + `domain`) size **≤ 222 bytes**
+
+    **sendTransaction (dApp → wallet)**
+    - Request is validated against the
+      [**Requests and Responses** specification](https://github.com/ton-blockchain/ton-connect/blob/main/requests-responses.md)
+    - Invalid requests now fail.
+
+    **signData (dApp → wallet)**
+    - Request is validated against the
+      [**Requests and Responses** specification](https://github.com/ton-blockchain/ton-connect/blob/main/requests-responses.md)
+    - Invalid requests now fail.
+
+    ### Migration
+    - Keep `ton_proof` payload and `domain` within the limits above.
+    - Ensure your **sendTransaction** object strictly follows the specification.
+    - Ensure your **signData** request matches the specification.
+
+    If your app previously sent oversized `ton_proof` data or non-conformant requests, update them
+    to pass the new checks or they will be rejected.
+
 ## 3.3.0-beta.3
 
 ### Patch Changes

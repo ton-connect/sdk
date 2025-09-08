@@ -1,6 +1,6 @@
 {
   "name": "@tonconnect/sdk",
-  "version": "3.3.0-beta.3",
+  "version": "3.3.0",
   "scripts": {
     "build": "rimraf types-dist && rimraf lib && rollup -c rollup.config.mjs && tspc --project tsconfig.declarations.json && api-extractor run && rimraf types-dist && rimraf dist && webpack --config webpack.config.js",
     "test": "vitest run"
