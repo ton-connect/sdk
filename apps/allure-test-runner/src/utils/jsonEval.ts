@@ -65,7 +65,7 @@ const functionScope = {
 };
 
 function extractFromCodeFence(input: string): string | null {
-    const fence = /```(?:json)?\n([\s\S]*?)\n```/i.exec(input);
+    const fence = /```json?\n([\s\S]*?)\n```/i.exec(input);
     if (fence && fence[1]) return fence[1].trim();
     return null;
 }
