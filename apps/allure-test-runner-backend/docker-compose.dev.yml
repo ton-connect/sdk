@@ -2,17 +2,23 @@ version: '3.9'
 
 services:
   app:
-    build: .
+    build:
+      context: ../..
+      dockerfile: apps/allure-test-runner-backend/Dockerfile
     ports:
       - "4444:4444"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     env_file:
       - '.env'
     environment:
+      - PORT=4444
       - DB_HOST=postgres
       - DB_PORT=5432
-      - PORT=4444
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_DATABASE=${DB_DATABASE}
   postgres:
     image: postgres:17.6-alpine
     ports:
@@ -20,9 +26,14 @@ services:
     volumes:
       - p2p:/var/lib/postgresql/data
     environment:
-      - POSTGRES_PASSWORD=root
-      - POSTGRES_USER=postgres
-      - POSTGRES_DB=allure-test-runner
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-root}
+      - POSTGRES_USER=${DB_USERNAME:-postgres}
+      - POSTGRES_DB=${DB_DATABASE:-allure-test-runner}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres}"]
+      interval: 2s
+      timeout: 2s
+      retries: 20
 
 volumes:
   p2p:
