@@ -4,11 +4,11 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class HasherService {
-  hash(data: string): Promise<string> {
-    return hash(data, SALT_ROUNDS);
-  }
+    hash(data: string): Promise<string> {
+        return hash(data, SALT_ROUNDS);
+    }
 
-  isValidHash(data: string, dataHash: string): Promise<boolean> {
-    return compare(data, dataHash);
-  }
+    isValidHash(data: string, dataHash: string): Promise<boolean> {
+        return compare(data, dataHash);
+    }
 }

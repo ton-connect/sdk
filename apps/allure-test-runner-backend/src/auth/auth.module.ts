@@ -4,8 +4,8 @@ import * as Services from './services';
 import { UsersModule } from '../users';
 
 @Module({
-  imports: [UsersModule],
-  controllers: Object.values(Controllers),
-  providers: Object.values(Services),
+    imports: [UsersModule],
+    controllers: Object.values(Controllers),
+    providers: Object.values(Services)
 })
 export class AuthModule {}

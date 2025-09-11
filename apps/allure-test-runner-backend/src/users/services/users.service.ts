@@ -8,26 +8,26 @@ import { Creatable } from '../../core/types';
 
 @Injectable()
 export class UsersService {
-  constructor(
-    @InjectRepository(UserEntity)
-    private readonly userRepository: Repository<UserEntity>,
-  ) {}
+    constructor(
+        @InjectRepository(UserEntity)
+        private readonly userRepository: Repository<UserEntity>
+    ) {}
 
-  async create(props: Creatable<UserEntity>) {
-    await this.userRepository.insert(props);
-  }
-
-  async findOneBy(where: Partial<Pick<UserEntity, 'id' | 'login'>>) {
-    return this.userRepository.findOneBy(where);
-  }
-
-  async findOneByOrFail(where: Partial<Pick<UserEntity, 'id' | 'login'>>) {
-    const user = await this.userRepository.findOneBy(where);
-
-    if (!user) {
-      throw new NotFoundException(USER_NOT_FOUND);
+    async create(props: Creatable<UserEntity>) {
+        await this.userRepository.insert(props);
     }
 
-    return user;
-  }
+    async findOneBy(where: Partial<Pick<UserEntity, 'id' | 'login'>>) {
+        return this.userRepository.findOneBy(where);
+    }
+
+    async findOneByOrFail(where: Partial<Pick<UserEntity, 'id' | 'login'>>) {
+        const user = await this.userRepository.findOneBy(where);
+
+        if (!user) {
+            throw new NotFoundException(USER_NOT_FOUND);
+        }
+
+        return user;
+    }
 }

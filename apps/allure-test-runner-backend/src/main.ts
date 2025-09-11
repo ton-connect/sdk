@@ -10,38 +10,38 @@ import { cleanupOpenApiDoc } from 'nestjs-zod';
 import { Logger } from '@nestjs/common';
 
 async function bootstrap() {
-  const logger = new Logger();
-  const app = await NestFactory.create(AppModule, {
-    logger,
-  });
+    const logger = new Logger();
+    const app = await NestFactory.create(AppModule, {
+        logger
+    });
 
-  app.setGlobalPrefix('api/v1');
+    app.setGlobalPrefix('api/v1');
 
-  const corsOptions = {
-    origin: (origin, callback): void => {
-      callback(null, true);
-    },
-    credentials: true,
-    methods: ['GET', 'PUT', 'POST', 'OPTIONS', 'DELETE', 'PATCH'],
-    allowedHeaders: ['x-user', 'X-Signature', 'accept', 'content-type'],
-  } satisfies CorsOptions;
+    const corsOptions = {
+        origin: (_origin, callback): void => {
+            callback(null, true);
+        },
+        credentials: true,
+        methods: ['GET', 'PUT', 'POST', 'OPTIONS', 'DELETE', 'PATCH'],
+        allowedHeaders: ['x-user', 'X-Signature', 'accept', 'content-type']
+    } satisfies CorsOptions;
 
-  app.use(cors(corsOptions));
+    app.use(cors(corsOptions));
 
-  const documentBuilder = new DocumentBuilder()
-    .setTitle('Example API')
-    .setDescription('Example API description')
-    .setVersion('1.0')
-    .build();
+    const documentBuilder = new DocumentBuilder()
+        .setTitle('Example API')
+        .setDescription('Example API description')
+        .setVersion('1.0')
+        .build();
 
-  SwaggerModule.setup('api/v1', app, () =>
-    cleanupOpenApiDoc(SwaggerModule.createDocument(app, documentBuilder)),
-  );
+    SwaggerModule.setup('api/v1', app, () =>
+        cleanupOpenApiDoc(SwaggerModule.createDocument(app, documentBuilder))
+    );
 
-  const configService = app.get<AppConfigService>(ConfigService);
-  const port = configService.getOrThrow('PORT', { infer: true });
+    const configService = app.get<AppConfigService>(ConfigService);
+    const port = configService.getOrThrow('PORT', { infer: true });
 
-  await app.listen(port);
+    await app.listen(port);
 }
 
 bootstrap().catch(console.error);
