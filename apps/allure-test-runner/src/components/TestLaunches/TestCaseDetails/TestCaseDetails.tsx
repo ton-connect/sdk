@@ -1,8 +1,6 @@
 import './TestCaseDetails.scss';
-import { useQuery } from '../../../hooks/useQuery';
 import { OPERATION_TYPE, type TestResultWithCustomFields } from '../../../models';
-import { AllureService } from '../../../services/allure.service';
-import { useAllureApi } from '../../../hooks/useAllureApi';
+import { useGetTestResultWithCustomFieldsQuery } from '../../../store/api/allureApi';
 import { SendTransactionOperation } from './Operations/SendTransactionOperation/SendTransactionOperation';
 import { TestCaseStates } from './TestCaseStates';
 import type { JSX } from 'react';
@@ -17,20 +15,11 @@ type Props = {
 };
 
 export function TestCaseDetails({ testId, onTestCasesRefresh, onTestIdChange }: Props) {
-    const api = useAllureApi();
     const {
-        loading,
-        result: testResult,
-        refetch: refetchTestResult
-    } = useQuery<TestResultWithCustomFields | undefined>(
-        signal =>
-            testId
-                ? AllureService.from(api, signal).getWithCustomFields(testId)
-                : Promise.resolve(undefined),
-        {
-            deps: [api, testId]
-        }
-    );
+        data: testResult,
+        isLoading: loading,
+        refetch
+    } = useGetTestResultWithCustomFieldsQuery({ id: testId ?? -1 }, { skip: !testId });
 
     const stateComponent = TestCaseStates({
         testId,
@@ -46,13 +35,15 @@ export function TestCaseDetails({ testId, onTestCasesRefresh, onTestIdChange }: 
         return null;
     }
 
+    const refetchTestResult = () => refetch();
+
     let component: JSX.Element;
-    switch (testResult.customFields.operationType) {
+    switch (testResult.customFields.operationType as keyof typeof OPERATION_TYPE) {
         case OPERATION_TYPE.SEND_TRANSACTION: {
             component = (
                 <SendTransactionOperation
                     key={testResult.id}
-                    testResult={testResult}
+                    testResult={testResult as TestResultWithCustomFields}
                     refetchTestResult={refetchTestResult}
                     onTestCasesRefresh={onTestCasesRefresh}
                     onTestIdChange={onTestIdChange}
@@ -64,7 +55,7 @@ export function TestCaseDetails({ testId, onTestCasesRefresh, onTestIdChange }: 
             component = (
                 <SignDataOperation
                     key={testResult.id}
-                    testResult={testResult}
+                    testResult={testResult as TestResultWithCustomFields}
                     refetchTestResult={refetchTestResult}
                     onTestCasesRefresh={onTestCasesRefresh}
                     onTestIdChange={onTestIdChange}
@@ -76,7 +67,7 @@ export function TestCaseDetails({ testId, onTestCasesRefresh, onTestIdChange }: 
             component = (
                 <ConnectOperation
                     key={testResult.id}
-                    testResult={testResult}
+                    testResult={testResult as TestResultWithCustomFields}
                     refetchTestResult={refetchTestResult}
                     onTestCasesRefresh={onTestCasesRefresh}
                     onTestIdChange={onTestIdChange}
@@ -88,7 +79,7 @@ export function TestCaseDetails({ testId, onTestCasesRefresh, onTestIdChange }: 
             component = (
                 <DefaultTestCaseOperation
                     key={testResult.id}
-                    testResult={testResult}
+                    testResult={testResult as TestResultWithCustomFields}
                     refetchTestResult={refetchTestResult}
                     onTestCasesRefresh={onTestCasesRefresh}
                     onTestIdChange={onTestIdChange}

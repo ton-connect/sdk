@@ -10,4 +10,5 @@ export type Launch = {
     lastModifiedDate: number;
     createdBy: string;
     lastModifiedBy: string;
+    status: string;
 };

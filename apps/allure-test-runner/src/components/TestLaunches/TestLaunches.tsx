@@ -1,12 +1,15 @@
-import { useState } from 'react';
 import { LaunchesList } from './LaunchesList/LaunchesList';
 import { SearchBar } from './SearchBar/SearchBar';
 import { TestCasesSection } from './TestCasesSection/TestCasesSection';
-import { useLaunches } from './hooks';
+import { useLaunchesRedux } from '../../hooks/useLaunchesRedux';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { setSelectedLaunchId } from '../../store/slices/uiSlice';
+import { selectSelectedLaunchId } from '../../store/selectors';
 import './TestLaunches.scss';
 
 export function TestLaunches() {
-    const [selectedLaunchId, setSelectedLaunchId] = useState<number | null>(null);
+    const dispatch = useAppDispatch();
+    const selectedLaunchId = useAppSelector(selectSelectedLaunchId);
 
     const {
         search,
@@ -19,10 +22,10 @@ export function TestLaunches() {
         handleRefresh,
         clearCompleteError,
         refetch
-    } = useLaunches();
+    } = useLaunchesRedux();
 
     const openLaunch = (id: number) => {
-        setSelectedLaunchId(id);
+        dispatch(setSelectedLaunchId(id));
     };
 
     if (error) {
@@ -45,7 +48,7 @@ export function TestLaunches() {
         return (
             <TestCasesSection
                 launchId={selectedLaunchId}
-                onClose={() => setSelectedLaunchId(null)}
+                onClose={() => dispatch(setSelectedLaunchId(null))}
                 onComplete={complete}
                 launchClosed={selectedLaunch?.closed}
             />

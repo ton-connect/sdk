@@ -1,9 +1,12 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useSearchParams, useNavigate, useParams } from 'react-router-dom';
-import { useQuery } from '../../../../hooks/useQuery';
-import { useAllureApi } from '../../../../hooks/useAllureApi';
 import type { PaginatedResponse, TestCase, TestCaseGroup } from '../../../../models';
 import { useDebounce } from '../../../../hooks/useDebounce';
+import {
+    useGetLaunchItemsQuery,
+    useGetLaunchItemsTreeQuery,
+    useLazyGetLaunchItemTreeQuery
+} from '../../../../store/api/allureApi';
 
 //
 type TreeUrlState = {
@@ -55,7 +58,6 @@ function parseTreeStateFromSearchParams(params: URLSearchParams): Partial<TreeUr
 }
 
 export function useTestCases(launchId: number) {
-    const client = useAllureApi();
     const navigate = useNavigate();
     const params = useParams<{ testId?: string }>();
     const [searchParams, setSearchParams] = useSearchParams();
@@ -130,20 +132,28 @@ export function useTestCases(launchId: number) {
         [setSearchParams]
     );
 
-    const { loading, result, error, refetch } = useQuery<PaginatedResponse<TestCase>>(
-        signal => {
-            if (viewMode === 'flat') {
-                return client.getLaunchItems({ launchId, search: searchQuery }, signal);
-            } else {
-                const pathChain = pathHistory.length > 0 ? pathHistory.map(p => p.id) : undefined;
-                return client.getLaunchItemsTree(
-                    { launchId, search: searchQuery, path: pathChain },
-                    signal
-                );
-            }
-        },
-        { deps: [client, launchId, searchQuery, pathHistory, viewMode] }
+    const {
+        data: flatData,
+        isLoading: flatLoading,
+        refetch: refetchFlat
+    } = useGetLaunchItemsQuery({ launchId, search: searchQuery }, { skip: viewMode !== 'flat' });
+
+    const pathChain = pathHistory.length > 0 ? pathHistory.map(p => p.id) : undefined;
+    const {
+        data: treeData,
+        isLoading: treeLoading,
+        refetch: refetchTree
+    } = useGetLaunchItemsTreeQuery(
+        { launchId, search: searchQuery, path: pathChain },
+        { skip: viewMode !== 'tree' }
     );
+
+    const [triggerGetLaunchItemTree] = useLazyGetLaunchItemTreeQuery();
+
+    const loading = viewMode === 'flat' ? flatLoading : treeLoading;
+    const result = (viewMode === 'flat' ? flatData : treeData) as
+        | PaginatedResponse<TestCase>
+        | undefined;
 
     const content = Array.isArray(result?.content) ? result.content : [];
 
@@ -181,10 +191,10 @@ export function useTestCases(launchId: number) {
                     }
                     setLoadingGroups(prev => new Set(prev).add(groupId));
                     try {
-                        const result = await client.getLaunchItemTree(launchId, [
-                            ...knownBasePath,
-                            groupId
-                        ]);
+                        const result = await triggerGetLaunchItemTree(
+                            { launchId, path: [...knownBasePath, groupId] },
+                            true
+                        ).unwrap();
                         setGroupContents(prev => new Map(prev).set(groupId, result.content));
 
                         setParentPathByGroupId(prev => {
@@ -215,7 +225,7 @@ export function useTestCases(launchId: number) {
         if (expandedGroups.size > 0) {
             loadExpandedGroups();
         }
-    }, [launchId, expandedGroups, parentPathByGroupId]);
+    }, [launchId, expandedGroups, parentPathByGroupId, triggerGetLaunchItemTree, groupContents]);
 
     useEffect(() => {
         const urlState = parseTreeStateFromSearchParams(searchParams);
@@ -247,6 +257,11 @@ export function useTestCases(launchId: number) {
             }
         }
     }, [searchParams]);
+
+    const refetch = () => {
+        if (viewMode === 'flat') refetchFlat();
+        else refetchTree();
+    };
 
     const handleRefresh = useCallback(() => {
         setSearch('');
@@ -282,7 +297,10 @@ export function useTestCases(launchId: number) {
             const basePath = parentPathByGroupId.get(groupId) ?? pathHistory.map(p => p.id);
             if (!basePath) continue;
             try {
-                const result = await client.getLaunchItemTree(launchId, [...basePath, groupId]);
+                const result = await triggerGetLaunchItemTree(
+                    { launchId, path: [...basePath, groupId] },
+                    true
+                ).unwrap();
                 setGroupContents(prev => new Map(prev).set(groupId, result.content));
 
                 setParentPathByGroupId(prev => {
@@ -298,7 +316,14 @@ export function useTestCases(launchId: number) {
                 console.error(`Failed to reload group ${groupId}:`, error);
             }
         }
-    }, [refetch, expandedGroups, client, launchId]);
+    }, [
+        refetch,
+        expandedGroups,
+        launchId,
+        parentPathByGroupId,
+        pathHistory,
+        triggerGetLaunchItemTree
+    ]);
 
     const openGroup = useCallback(
         (group: { id: number; name: string }) => {
@@ -406,10 +431,10 @@ export function useTestCases(launchId: number) {
                     try {
                         const basePath =
                             parentPathByGroupId.get(groupId) ?? pathHistory.map(p => p.id);
-                        const result = await client.getLaunchItemTree(launchId, [
-                            ...basePath,
-                            groupId
-                        ]);
+                        const result = await triggerGetLaunchItemTree(
+                            { launchId, path: [...basePath, groupId] },
+                            true
+                        ).unwrap();
                         setGroupContents(prev => new Map(prev).set(groupId, result.content));
 
                         setParentPathByGroupId(prev => {
@@ -440,7 +465,15 @@ export function useTestCases(launchId: number) {
                 }
             }
         },
-        [expandedGroups, groupContents, client, launchId, loadingGroups]
+        [
+            expandedGroups,
+            groupContents,
+            launchId,
+            loadingGroups,
+            parentPathByGroupId,
+            pathHistory,
+            triggerGetLaunchItemTree
+        ]
     );
 
     const isGroupExpanded = useCallback(
@@ -476,7 +509,7 @@ export function useTestCases(launchId: number) {
         content,
         selectedTestId,
         loading,
-        error,
+        error: undefined,
         viewMode,
         currentPath,
         pathHistory,

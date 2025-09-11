@@ -1,6 +1,9 @@
 import { useState, useCallback } from 'react';
-import { useAllureApi } from '../../../../hooks/useAllureApi';
 import type { TestResultWithCustomFields, ResolveTestResultParams } from '../../../../models';
+import {
+    useResolveTestResultMutation,
+    useRerunTestResultMutation
+} from '../../../../store/api/allureApi';
 
 type StepStatus = 'passed' | 'failed' | 'skipped';
 
@@ -50,7 +53,9 @@ export function useTestCaseDetails(
     onTestCasesRefresh?: () => void,
     onTestIdChange?: (newTestId: number) => void
 ) {
-    const api = useAllureApi();
+    const [resolveTestResultTrigger] = useResolveTestResultMutation();
+    const [rerunTestResultTrigger] = useRerunTestResultMutation();
+
     const [isResolving, setIsResolving] = useState(false);
     const [isFailing, setIsFailing] = useState(false);
 
@@ -83,14 +88,14 @@ export function useTestCaseDetails(
                     payload.execution = execution;
                 }
 
-                await api.resolveTestResult(payload);
+                await resolveTestResultTrigger(payload).unwrap();
                 refetchTestResult?.();
                 onTestCasesRefresh?.();
             } finally {
                 setIsResolving(false);
             }
         },
-        [testResult, api, refetchTestResult, onTestCasesRefresh]
+        [testResult, resolveTestResultTrigger, refetchTestResult, onTestCasesRefresh]
     );
 
     const handleFail = useCallback(
@@ -115,24 +120,24 @@ export function useTestCaseDetails(
                     payload.execution = execution;
                 }
 
-                await api.resolveTestResult(payload);
+                await resolveTestResultTrigger(payload).unwrap();
                 refetchTestResult?.();
                 onTestCasesRefresh?.();
             } finally {
                 setIsFailing(false);
             }
         },
-        [testResult, api, refetchTestResult, onTestCasesRefresh]
+        [testResult, resolveTestResultTrigger, refetchTestResult, onTestCasesRefresh]
     );
 
     const handleRerun = useCallback(async () => {
         if (!testResult) return;
 
         try {
-            const rerunResult = await api.rerunTestResult({
+            const rerunResult = await rerunTestResultTrigger({
                 id: testResult.id,
                 username: testResult.createdBy
-            });
+            }).unwrap();
 
             if (rerunResult.id && onTestIdChange) {
                 onTestIdChange(rerunResult.id);
@@ -144,7 +149,7 @@ export function useTestCaseDetails(
         } catch (error) {
             console.error('Rerun failed:', error);
         }
-    }, [api, testResult, refetchTestResult, onTestCasesRefresh, onTestIdChange]);
+    }, [rerunTestResultTrigger, testResult, refetchTestResult, onTestCasesRefresh, onTestIdChange]);
 
     const showValidationModal = useCallback((isSuccess: boolean, errors: string[] = []) => {
         setValidationErrors(errors);
@@ -175,15 +180,12 @@ export function useTestCaseDetails(
     );
 
     return {
-        // State
         isResolving,
         isFailing,
         validationErrors,
         showStatusModal,
         statusModalInitialStatus,
         statusModalMessage,
-
-        // Actions
         setValidationErrors,
         handleResolve,
         handleFail,

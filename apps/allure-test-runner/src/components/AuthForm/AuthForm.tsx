@@ -1,16 +1,14 @@
 import { useState, useCallback, useMemo } from 'react';
-import { STORAGE_KEYS } from '../../constants';
-import { AllureApiClient } from '../../api/allure.api';
+import { useAppDispatch } from '../../store/hooks';
+import { setToken } from '../../store/slices/authSlice';
+import { useAuthenticateMutation } from '../../store/api/allureApi';
 import './AuthForm.scss';
 
-type Props = {
-    onSubmit: (params: { jwtToken: string }) => void;
-};
-
-export function AuthForm({ onSubmit }: Props) {
+export function AuthForm() {
     const [userToken, setUserToken] = useState('');
-    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const dispatch = useAppDispatch();
+    const [authenticate, { isLoading: loading }] = useAuthenticateMutation();
 
     const handleSubmit = useCallback(
         async (e: React.FormEvent) => {
@@ -20,20 +18,15 @@ export function AuthForm({ onSubmit }: Props) {
                 return;
             }
             try {
-                setLoading(true);
                 setError(null);
-                const api = new AllureApiClient({});
-                const access = await api.authenticate(userToken);
-                localStorage.setItem(STORAGE_KEYS.jwtToken, access);
-                onSubmit({ jwtToken: access });
+                const access = await authenticate({ userToken }).unwrap();
+                dispatch(setToken(access));
             } catch (e: unknown) {
                 const errorMessage = e instanceof Error ? e.message : 'Failed to authenticate';
                 setError(errorMessage);
-            } finally {
-                setLoading(false);
             }
         },
-        [userToken, onSubmit]
+        [userToken, authenticate, dispatch]
     );
 
     const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {

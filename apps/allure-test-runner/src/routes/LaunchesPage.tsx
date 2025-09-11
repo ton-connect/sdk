@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { InfiniteScrollLaunchesList } from '../components/TestLaunches/InfiniteScrollLaunchesList/InfiniteScrollLaunchesList';
 import { SearchBar } from '../components/TestLaunches/SearchBar/SearchBar';
-import { useInfiniteLaunches } from '../components/TestLaunches/hooks/useInfiniteLaunches';
+import { useLaunchesRedux } from '../hooks/useLaunchesRedux';
 import '../components/TestLaunches/TestLaunches.scss';
 
 export function LaunchesPage() {
@@ -21,7 +21,7 @@ export function LaunchesPage() {
         clearCompleteError,
         refetch,
         loadMore
-    } = useInfiniteLaunches();
+    } = useLaunchesRedux();
 
     const openLaunch = (id: number) => {
         navigate(`/launches/${id}`);

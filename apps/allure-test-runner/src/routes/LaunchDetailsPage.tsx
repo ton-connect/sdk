@@ -1,13 +1,13 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { TestCasesSection } from '../components/TestLaunches/TestCasesSection/TestCasesSection';
-import { useLaunches } from '../components/TestLaunches/hooks';
+import { useLaunchesRedux } from '../hooks/useLaunchesRedux';
 import '../components/TestLaunches/TestLaunches.scss';
 
 export function LaunchDetailsPage() {
     const { launchId } = useParams<{ launchId: string }>();
     const navigate = useNavigate();
 
-    const { launches, complete } = useLaunches();
+    const { launches, complete } = useLaunchesRedux();
 
     const launchIdNumber = launchId ? parseInt(launchId) : null;
 
