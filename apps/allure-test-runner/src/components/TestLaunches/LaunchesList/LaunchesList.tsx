@@ -6,7 +6,6 @@ type Props = {
     selectedLaunchId: number | null;
     onOpen: (id: number) => void;
     onComplete: (id: number) => void;
-    onCreateLaunch?: () => void;
 };
 
 export function LaunchesList({ launches, selectedLaunchId, onOpen, onComplete }: Props) {

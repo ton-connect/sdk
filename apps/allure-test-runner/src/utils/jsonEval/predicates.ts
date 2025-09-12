@@ -6,6 +6,7 @@ import { sha256_sync, signVerify } from '@ton/crypto';
 import { bstr as crc32 } from 'crc-32';
 import { loadStateInit } from '@ton/core';
 import { Buffer } from 'buffer';
+import { encodeDomainDnsLike } from './utils';
 
 export type PredicateResult = {
     isValid: boolean;
@@ -250,12 +251,14 @@ export function isValidDataSignature(this: EvalContext, value: unknown): Predica
     try {
         let isValid: boolean;
         if (payload.type === 'cell') {
+            const encodedDomain = encodeDomainDnsLike(domain);
+
             let signatureCell = beginCell()
                 .storeUint(0x75569022, 32)
                 .storeUint(crc32(payload.schema), 32)
                 .storeUint(timestamp, 64)
                 .storeAddress(address)
-                .storeStringRefTail(domain)
+                .storeStringRefTail(encodedDomain.toString('utf8'))
                 .storeRef(Cell.fromBase64(payload.cell))
                 .endCell();
 

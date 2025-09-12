@@ -1,1 +1,1 @@
-export * from './allure.module';
+export { AllureModule } from './allure.module';

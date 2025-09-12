@@ -9,6 +9,7 @@ import { AppExceptionFilter } from './core/exception.filter';
 import { AuthModule } from './auth';
 import { AllureModule } from './allure';
 import { AppConfigModule } from './core/config';
+import { UsersManagementModule } from './users-management';
 
 @Module({
     imports: [
@@ -30,8 +31,9 @@ import { AppConfigModule } from './core/config';
             }
         }),
         UsersModule,
-        AuthModule,
-        AllureModule
+        AuthModule.forRoot(),
+        AllureModule,
+        UsersManagementModule
     ],
     providers: [
         {

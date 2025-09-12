@@ -12,7 +12,6 @@ type Props = {
     onOpen: (id: number) => void;
     onComplete: (id: number) => void;
     onLoadMore: () => void;
-    onCreateLaunch?: () => void;
 };
 
 export function InfiniteScrollLaunchesList({

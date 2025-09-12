@@ -1,14 +1,17 @@
-import { UsersService } from '../../users/services';
+import { UsersService } from '../../users';
 import { Injectable } from '@nestjs/common';
 import { HasherService } from './hasher.service';
 import { LogicException, UnauthorizedException } from '../../core/exceptions';
 import { INCORRECT_PASSWORD, USER_ALREADY_EXISTS } from '../errors';
+import { TokensService } from './tokens.service';
+import { USER_ROLE } from '../../users';
 
 @Injectable()
 export class AuthService {
     constructor(
         private readonly usersService: UsersService,
-        private readonly hasherService: HasherService
+        private readonly hasherService: HasherService,
+        private readonly tokensService: TokensService
     ) {}
 
     async signUp(params: { login: string; password: string }) {
@@ -23,6 +26,7 @@ export class AuthService {
 
         await this.usersService.create({
             login,
+            role: USER_ROLE.USER,
             passwordHash
         });
     }
@@ -38,6 +42,6 @@ export class AuthService {
             throw new UnauthorizedException(INCORRECT_PASSWORD);
         }
 
-        return user;
+        return this.tokensService.issueTokens(user);
     }
 }
