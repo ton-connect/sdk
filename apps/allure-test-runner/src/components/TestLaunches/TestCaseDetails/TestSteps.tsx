@@ -54,8 +54,8 @@ export function TestSteps({ testResult }: TestStepsProps) {
                         };
 
                         return (
-                            <div key={index} className="flex items-start gap-2">
-                                <Caption className="text-muted-foreground w-5 flex-shrink-0 text-xs mt-0.5">
+                            <div key={index} className="flex items-center gap-2">
+                                <Caption className="text-muted-foreground w-5 flex-shrink-0 text-xs -mt-0.5">
                                     {index + 1}.
                                 </Caption>
 
@@ -76,7 +76,7 @@ export function TestSteps({ testResult }: TestStepsProps) {
 
                                         {/* Status buttons - shown on hover (desktop) or tap (mobile) */}
                                         <div
-                                            className={`absolute -left-[6.4px] -top-[6.4px] items-center gap-0.5 bg-card border border-border rounded-md shadow-lg p-1 z-10 ${
+                                            className={`absolute -left-2 -top-2 items-center gap-2 bg-card outline outline-1 outline-border rounded-md shadow-lg p-1 z-10 ${
                                                 expandedStep === index
                                                     ? 'flex'
                                                     : 'hidden group-hover:flex'
@@ -100,7 +100,7 @@ export function TestSteps({ testResult }: TestStepsProps) {
                                                 }`}
                                                 title="Mark as Passed"
                                             >
-                                                <CheckCircle className="h-3 w-3 text-green-600" />
+                                                <CheckCircle className="h-4 w-4 text-green-600" />
                                             </button>
                                             <button
                                                 onClick={e => {
@@ -120,7 +120,7 @@ export function TestSteps({ testResult }: TestStepsProps) {
                                                 }`}
                                                 title="Mark as Failed"
                                             >
-                                                <XCircle className="h-3 w-3 text-red-600" />
+                                                <XCircle className="h-4 w-4 text-red-600" />
                                             </button>
                                             <button
                                                 onClick={e => {
@@ -140,7 +140,7 @@ export function TestSteps({ testResult }: TestStepsProps) {
                                                 }`}
                                                 title="Mark as Skipped"
                                             >
-                                                <Minus className="h-3 w-3 text-yellow-600" />
+                                                <Minus className="h-4 w-4 text-yellow-600" />
                                             </button>
                                         </div>
                                     </div>
