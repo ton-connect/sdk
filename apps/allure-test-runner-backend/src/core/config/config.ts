@@ -9,7 +9,9 @@ export const configurationSchema = z.object({
     DB_PASSWORD: z.string(),
     DB_DATABASE: z.string(),
     ALLURE_API_TOKEN: z.string(),
-    ALLURE_BASE_URL: z.url().optional().default('https://tontech.testops.cloud')
+    ALLURE_BASE_URL: z.url().optional().default('https://tontech.testops.cloud'),
+    JWT_ACCESS_SECRET: z.string().min(32),
+    JWT_ACCESS_EXPIRES_DAYS: z.coerce.number().positive().int().optional().default(7)
 });
 
 export type Configuration = z.infer<typeof configurationSchema>;

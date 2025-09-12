@@ -17,9 +17,7 @@ export class AllureApi {
     }
 
     constructor(private readonly config: AppConfig) {
-        const baseURL =
-            this.config.get<string>('ALLURE_BASE_URL') || 'https://tontech.testops.cloud';
-
+        const baseURL = this.config.getOrThrow('ALLURE_BASE_URL', { infer: true });
         const apiToken = this.config.getOrThrow('ALLURE_API_TOKEN', { infer: true });
 
         this.client = axios.create({ baseURL });

@@ -1,8 +1,10 @@
-import { Body, Controller, Post } from '@nestjs/common';
-import { SignInBodyDTO, SignInResponseDTO, SignUpBodyDTO } from '../dtos';
+import { Body, Controller, Get, Post } from '@nestjs/common';
+import { GetMeResponseDTO, SignInBodyDTO, SignInResponseDTO, SignUpBodyDTO } from '../dtos';
 import { AuthService } from '../services';
-import { ZodResponse } from 'nestjs-zod';
 import { ApiTags } from '@nestjs/swagger';
+import { Auth, AuthUser } from '../decorators';
+import { type Principal } from '../types';
+import { ZodResponse } from 'nestjs-zod';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -17,6 +19,13 @@ export class AuthController {
     @Post('sign-in')
     @ZodResponse({ type: SignInResponseDTO })
     async signIn(@Body() body: SignInBodyDTO) {
-        return this.authService.signIn(body);
+        return await this.authService.signIn(body);
+    }
+
+    @Auth()
+    @Get('me')
+    @ZodResponse({ type: GetMeResponseDTO })
+    async me(@AuthUser() user: Principal) {
+        return user;
     }
 }

@@ -23,13 +23,14 @@ async function bootstrap() {
         },
         credentials: true,
         methods: ['GET', 'PUT', 'POST', 'OPTIONS', 'DELETE', 'PATCH'],
-        allowedHeaders: ['x-user', 'X-Signature', 'accept', 'content-type']
+        allowedHeaders: ['x-user', 'X-Signature', 'accept', 'content-type', 'authorization']
     } satisfies CorsOptions;
 
     app.use(cors(corsOptions));
 
     const documentBuilder = new DocumentBuilder()
         .setTitle('Example API')
+        .addBearerAuth()
         .setDescription('Example API description')
         .setVersion('1.0')
         .build();
