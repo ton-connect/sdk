@@ -375,6 +375,8 @@ export function isValidFeatureList(value: unknown): PredicateResult {
     }
 
     const errors: string[] = [];
+    let hasSendTransactionString = false;
+    let hasSendTransactionObject = false;
 
     for (let i = 0; i < value.length; i++) {
         const feature = value[i];
@@ -382,6 +384,8 @@ export function isValidFeatureList(value: unknown): PredicateResult {
         if (typeof feature === 'string') {
             if (feature !== 'SendTransaction') {
                 errors.push(`feature at index ${i} is an invalid string literal: ${feature}`);
+            } else {
+                hasSendTransactionString = true;
             }
             continue;
         }
@@ -394,6 +398,7 @@ export function isValidFeatureList(value: unknown): PredicateResult {
         const name = feature.name;
 
         if (name === 'SendTransaction') {
+            hasSendTransactionObject = true;
             if (typeof feature.maxMessages !== 'number') {
                 errors.push(`feature at index ${i} must have a numeric 'maxMessages'`);
             }
@@ -425,6 +430,13 @@ export function isValidFeatureList(value: unknown): PredicateResult {
         }
     }
 
+    // Check that array contains both 'SendTransaction' string and 'SendTransaction' object
+    if (!hasSendTransactionString) {
+        errors.push('feature array must contain the string "SendTransaction"');
+    }
+    if (!hasSendTransactionObject) {
+        errors.push('feature array must contain an object with name: "SendTransaction"');
+    }
     return errors.length > 0 ? { isValid: false, errors } : { isValid: true };
 }
 
