@@ -20,7 +20,9 @@ export function OperationTypeField({ operationType }: Props) {
     return (
         <div className="flex items-center justify-between p-2 bg-muted/20 border border-border rounded-md">
             <Caption className="font-medium text-xs">Operation:</Caption>
-            <Body className="font-medium text-blue-600 text-xs">{formatOperationType(operationType)}</Body>
+            <Body className="font-medium text-blue-600 text-xs">
+                {formatOperationType(operationType)}
+            </Body>
         </div>
     );
 }

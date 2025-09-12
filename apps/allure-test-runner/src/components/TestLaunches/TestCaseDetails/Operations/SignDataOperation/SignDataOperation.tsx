@@ -69,7 +69,10 @@ export function SignDataOperation({
                     onFail={handleFail}
                     onRerun={handleRerun}
                 >
-                    <SignDataActions signDataPayload={signDataPayload} onSignData={handleSignData} />
+                    <SignDataActions
+                        signDataPayload={signDataPayload}
+                        onSignData={handleSignData}
+                    />
                 </TestCaseActions>
             </div>
 

@@ -7,7 +7,12 @@ type LoaderProps = {
     horizontal?: boolean;
 };
 
-export function Loader({ size = 'medium', text, overlay = false, horizontal = false }: LoaderProps) {
+export function Loader({
+    size = 'medium',
+    text,
+    overlay = false,
+    horizontal = false
+}: LoaderProps) {
     const content = (
         <div className={`loader loader--${size} ${horizontal ? 'loader--horizontal' : ''}`}>
             <div className="loader__spinner" />
