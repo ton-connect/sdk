@@ -10,8 +10,9 @@ export class JwtAuthGuard implements CanActivate {
         const req = context.switchToHttp().getRequest();
         const auth = req.headers['authorization'] as string | undefined;
 
-        if (!auth || !auth.startsWith('Bearer '))
+        if (!auth || !auth.startsWith('Bearer ')) {
             throw new UnauthorizedException(INVALID_ACCESS_TOKEN);
+        }
 
         const accessToken = auth.replace('Bearer ', '');
         const payload = await this.tokensService.extractPrincipal(accessToken);
