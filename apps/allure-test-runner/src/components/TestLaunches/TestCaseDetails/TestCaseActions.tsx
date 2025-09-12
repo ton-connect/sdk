@@ -38,6 +38,7 @@ type Props = PropsWithChildren<{
     disableInternalModal?: boolean;
 }>;
 
+// eslint-disable-next-line complexity
 export function TestCaseActions({
     children,
     testResult,

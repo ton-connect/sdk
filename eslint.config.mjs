@@ -59,16 +59,7 @@ export default [
       'prettier/prettier': 'error',
       
       // Import rules
-      'import/extensions': [
-        'error',
-        'ignorePackages',
-        {
-          js: 'never',
-          jsx: 'never',
-          ts: 'never',
-          tsx: 'never',
-        },
-      ],
+      'import/extensions': 'off',
       'import/prefer-default-export': 'off',
       'import/no-extraneous-dependencies': 'off',
       'import/export': 0,

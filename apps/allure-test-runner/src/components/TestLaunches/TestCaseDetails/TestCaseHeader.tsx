@@ -40,18 +40,12 @@ export function TestCaseHeader({ name, status, message }: Props) {
             <div className="flex items-start justify-between gap-4">
                 <Title className="font-medium text-lg leading-tight flex-1 min-w-0">{name}</Title>
                 <div className="flex items-center flex-shrink-0">
-                    <span className={getStatusStyles(status)}>
-                        {getStatusText(status)}
-                    </span>
+                    <span className={getStatusStyles(status)}>{getStatusText(status)}</span>
                 </div>
             </div>
 
             {message && (
-                <TestCaseExpandableSection
-                    title="Error Details"
-                    data={message}
-                    variant="error"
-                />
+                <TestCaseExpandableSection title="Error Details" data={message} variant="error" />
             )}
         </div>
     );

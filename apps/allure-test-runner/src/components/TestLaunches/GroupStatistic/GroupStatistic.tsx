@@ -21,11 +21,16 @@ export function GroupStatistic({ statistic }: GroupStatisticProps) {
             {nonZeroStats.length > 0 && (
                 <Inline spacing="tight">
                     {nonZeroStats.map(stat => (
-                        <Caption 
+                        <Caption
                             key={stat.key}
                             className={`font-medium ${stat.colorClass}`}
-                            title={`${stat.label === 'P' ? 'Passed' : 
-                                    stat.label === 'F' ? 'Failed' : 'In Progress'}: ${stat.value}`}
+                            title={`${
+                                stat.label === 'P'
+                                    ? 'Passed'
+                                    : stat.label === 'F'
+                                      ? 'Failed'
+                                      : 'In Progress'
+                            }: ${stat.value}`}
                         >
                             {stat.label}:{stat.value}
                         </Caption>

@@ -23,7 +23,9 @@ export function TestCaseDescription({ description, descriptionHtml }: Props) {
                     />
                 ) : (
                     <div className="bg-muted/30 border border-border rounded-md p-1.5 w-full min-w-0 break-words overflow-hidden">
-                        <Body className="whitespace-pre-wrap break-words overflow-wrap-anywhere leading-snug word-break-anywhere w-full text-xs">{description}</Body>
+                        <Body className="whitespace-pre-wrap break-words overflow-wrap-anywhere leading-snug word-break-anywhere w-full text-xs">
+                            {description}
+                        </Body>
                     </div>
                 )}
             </div>
