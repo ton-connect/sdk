@@ -92,12 +92,12 @@ export class AllureController {
     }
 
     @Get('testplan')
-    getTestplans(@Query() query: GetTestPlansQueryDTO) {
+    getTestPlans(@Query() query: GetTestPlansQueryDTO) {
         return this.service.getTestPlans(query.projectId);
     }
 
     @Post('testplan/:id/run')
-    runTestplan(@Param() params: RunTestPlanParamDTO, @Body() body: RunTestPlanBodyDTO) {
+    runTestPlan(@Param() params: RunTestPlanParamDTO, @Body() body: RunTestPlanBodyDTO) {
         return this.service.runTestPlan({ id: params.id, launchName: body.launchName });
     }
 }

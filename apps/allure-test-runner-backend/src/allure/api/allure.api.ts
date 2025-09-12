@@ -8,7 +8,7 @@ export class AllureApi {
 
     private accessToken?: string;
 
-    get bearerToken(): string | undefined {
+    private get bearerToken(): string | undefined {
         if (this.accessToken) {
             return `Bearer ${this.accessToken}`;
         }
