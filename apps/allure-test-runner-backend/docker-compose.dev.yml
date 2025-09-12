@@ -19,6 +19,8 @@ services:
       - DB_USERNAME=${DB_USERNAME}
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_DATABASE=${DB_DATABASE}
+      - ALLURE_API_TOKEN=${ALLURE_API_TOKEN}
+      - ALLURE_BASE_URL=${ALLURE_BASE_URL:-https://tontech.testops.cloud}
   postgres:
     image: postgres:17.6-alpine
     ports:

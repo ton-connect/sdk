@@ -7,9 +7,11 @@ export const configurationSchema = z.object({
     DB_PORT: z.coerce.number(),
     DB_USERNAME: z.string(),
     DB_PASSWORD: z.string(),
-    DB_DATABASE: z.string()
+    DB_DATABASE: z.string(),
+    ALLURE_API_TOKEN: z.string(),
+    ALLURE_BASE_URL: z.url().optional().default('https://tontech.testops.cloud')
 });
 
 export type Configuration = z.infer<typeof configurationSchema>;
 
-export type AppConfigService = ConfigService<Configuration, true>;
+export class AppConfig extends ConfigService<Configuration, true> {}

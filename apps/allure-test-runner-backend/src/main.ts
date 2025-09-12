@@ -4,7 +4,7 @@ import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 
 import { AppModule } from './app.module';
-import { AppConfigService } from './core/config';
+import { AppConfig } from './core/config/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { cleanupOpenApiDoc } from 'nestjs-zod';
 import { Logger } from '@nestjs/common';
@@ -38,7 +38,7 @@ async function bootstrap() {
         cleanupOpenApiDoc(SwaggerModule.createDocument(app, documentBuilder))
     );
 
-    const configService = app.get<AppConfigService>(ConfigService);
+    const configService = app.get<AppConfig>(ConfigService);
     const port = configService.getOrThrow('PORT', { infer: true });
 
     await app.listen(port);

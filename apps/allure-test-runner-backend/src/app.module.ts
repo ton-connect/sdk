@@ -1,23 +1,21 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 
 import { UsersModule } from './users';
-import { AppConfigService, configurationSchema } from './core/config';
+import { AppConfig } from './core/config/config';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
 import { AppExceptionFilter } from './core/exception.filter';
 import { AuthModule } from './auth';
+import { AllureModule } from './allure';
+import { AppConfigModule } from './core/config';
 
 @Module({
     imports: [
-        ConfigModule.forRoot({
-            isGlobal: true,
-            validate: config => configurationSchema.parse(config)
-        }),
+        AppConfigModule.forRoot({ isGlobal: true }),
         TypeOrmModule.forRootAsync({
-            inject: [ConfigService],
-            useFactory: (configService: AppConfigService) => {
+            inject: [AppConfig],
+            useFactory: (configService: AppConfig) => {
                 return {
                     type: 'postgres',
                     host: configService.getOrThrow('DB_HOST', { infer: true }),
@@ -32,7 +30,8 @@ import { AuthModule } from './auth';
             }
         }),
         UsersModule,
-        AuthModule
+        AuthModule,
+        AllureModule
     ],
     providers: [
         {
