@@ -32,6 +32,10 @@
     gap: 1rem;
 }
 
+.test-runs__section-header-left .btn {
+    margin-left: 0.5rem;
+}
+
 .test-runs__section-header-right {
     display: flex;
     align-items: center;
@@ -94,6 +98,7 @@
     display: flex;
     align-items: center;
 }
+
 
 .launches-table__body {
     // Remove height restrictions to allow table to expand with page scroll

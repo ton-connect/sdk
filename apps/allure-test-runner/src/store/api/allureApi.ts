@@ -19,6 +19,7 @@ import type {
 } from '../../models';
 import { CUSTOM_FIELD_NAMES } from '../../models';
 import type { RootState } from '../index';
+import type { Testplan } from '../../models/allure/Testplan';
 
 const baseUrl = 'https://tontech.testops.cloud';
 
@@ -247,6 +248,21 @@ export const allureApi = createApi({
 
         getExecution: builder.query<Execution, { testResultId: number }>({
             query: ({ testResultId }) => `/api/testresult/${testResultId}/execution?v2=true`
+        }),
+        // Testplans
+        getTestplans: builder.query<{ content: Testplan[] }, { projectId: number }>({
+            query: ({ projectId }) => `/api/testplan?projectId=${projectId}`
+        }),
+
+        runTestplan: builder.mutation<{ id: number }, { id: number; launchName: string }>({
+            query: ({ id, launchName }) => ({
+                url: `/api/testplan/${id}/run`,
+                method: 'POST',
+                body: {
+                    launchName
+                }
+            }),
+            invalidatesTags: ['Launch']
         })
     })
 });
@@ -269,5 +285,7 @@ export const {
     useGetCustomFieldsQuery,
     useGetExecutionQuery,
     useGetTestResultWithCustomFieldsQuery,
-    useLazyGetLaunchItemTreeQuery
+    useLazyGetLaunchItemTreeQuery,
+    useGetTestplansQuery,
+    useRunTestplanMutation
 } = allureApi;

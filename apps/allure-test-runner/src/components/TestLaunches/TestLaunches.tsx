@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { LaunchesList } from './LaunchesList/LaunchesList';
 import { SearchBar } from './SearchBar/SearchBar';
 import { TestCasesSection } from './TestCasesSection/TestCasesSection';
+import { CreateLaunchModal } from './CreateLaunchModal';
 import { useLaunchesRedux } from '../../hooks/useLaunchesRedux';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { setSelectedLaunchId } from '../../store/slices/uiSlice';
@@ -10,6 +12,7 @@ import './TestLaunches.scss';
 export function TestLaunches() {
     const dispatch = useAppDispatch();
     const selectedLaunchId = useAppSelector(selectSelectedLaunchId);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
     const {
         search,
@@ -26,6 +29,15 @@ export function TestLaunches() {
 
     const openLaunch = (id: number) => {
         dispatch(setSelectedLaunchId(id));
+    };
+
+    const handleCreateLaunch = () => {
+        setIsCreateModalOpen(true);
+    };
+
+    const handleLaunchCreated = (launchId: number) => {
+        dispatch(setSelectedLaunchId(launchId));
+        setIsCreateModalOpen(false);
     };
 
     if (error) {
@@ -60,7 +72,12 @@ export function TestLaunches() {
         <div className="test-runs">
             <div className="test-runs__section">
                 <div className="test-runs__section-header">
-                    <h2 className="test-runs__section-title">Launches (Project 1)</h2>
+                    <div className="test-runs__section-header-left">
+                        <h2 className="test-runs__section-title">Launches (Project 1)</h2>
+                        <button className="btn btn-primary" onClick={handleCreateLaunch}>
+                            Create Launch
+                        </button>
+                    </div>
                     <SearchBar
                         value={search}
                         loading={loading}
@@ -112,6 +129,12 @@ export function TestLaunches() {
                     />
                 )}
             </div>
+
+            <CreateLaunchModal
+                isOpen={isCreateModalOpen}
+                onClose={() => setIsCreateModalOpen(false)}
+                onLaunchCreated={handleLaunchCreated}
+            />
         </div>
     );
 }
