@@ -1,175 +1,166 @@
 import { useTestSteps } from './hooks/useTestSteps';
 import type { TestResultWithCustomFields } from '../../../models';
+import { CheckCircle, XCircle, Minus } from 'lucide-react';
+import { Caption } from '../../ui/typography';
+import { useState, useEffect } from 'react';
 
 type TestStepsProps = {
     testResult: TestResultWithCustomFields;
 };
 
 export function TestSteps({ testResult }: TestStepsProps) {
-    const {
-        isStepsExpanded,
-        openDropdown,
-        dropdownPosition,
-        toggleStepsExpanded,
-        handleStatusSelect,
-        handleDropdownToggle,
-        canEditStepStatus,
-        getCurrentStepStatus
-    } = useTestSteps(testResult);
+    const { handleStatusSelect, canEditStepStatus, getCurrentStepStatus } =
+        useTestSteps(testResult);
+
+    const [expandedStep, setExpandedStep] = useState<number | null>(null);
+
+    // Close expanded menu when clicking outside
+    useEffect(() => {
+        const handleClickOutside = () => {
+            if (expandedStep !== null) {
+                setExpandedStep(null);
+            }
+        };
+
+        if (expandedStep !== null) {
+            document.addEventListener('click', handleClickOutside);
+            return () => document.removeEventListener('click', handleClickOutside);
+        }
+    }, [expandedStep]);
 
     if (!testResult.execution?.steps || testResult.execution.steps.length === 0) {
         return null;
     }
 
     return (
-        <div className="testcase-steps">
-            <div
-                className="testcase-steps__header"
-                onClick={toggleStepsExpanded}
-                style={{ cursor: 'pointer', userSelect: 'none' }}
-            >
-                <div className="testcase-steps__title">
-                    <span>Test Steps</span>
-                    <span className="testcase-steps__count">
-                        ({testResult.execution.steps.length})
-                    </span>
-                </div>
-                <div className="testcase-steps__toggle">{isStepsExpanded ? '▼' : '▶'}</div>
-            </div>
+        <div className="space-y-2">
+            <Caption className="font-medium text-muted-foreground">Test Steps:</Caption>
+            <div className="rounded border border-border/50 p-2">
+                <div className="space-y-1">
+                    {testResult.execution.steps.map((step, index) => {
+                        const isEditable = canEditStepStatus(testResult.status);
+                        const currentStatus = getCurrentStepStatus(step, index, isEditable);
 
-            {isStepsExpanded && (
-                <div className="testcase-steps__content">
-                    <ol className="testcase-steps__list">
-                        {testResult.execution.steps.map((step, index) => {
-                            const isEditable = canEditStepStatus(testResult.status);
-                            const currentStatus = getCurrentStepStatus(step, index, isEditable);
-
+                        const StatusIcon = () => {
+                            if (currentStatus === 'passed')
+                                return <CheckCircle className="h-4 w-4 text-green-600" />;
+                            if (currentStatus === 'failed')
+                                return <XCircle className="h-4 w-4 text-red-600" />;
+                            if (currentStatus === 'skipped')
+                                return <Minus className="h-4 w-4 text-yellow-600" />;
                             return (
-                                <li key={index} className="testcase-steps__item">
-                                    {isEditable ? (
-                                        <div
-                                            className="testcase-steps__item-row"
-                                            onClick={e => handleDropdownToggle(index, e)}
-                                            style={{ cursor: 'pointer' }}
-                                        >
-                                            <div className="testcase-steps__item-header">
-                                                <span className="testcase-steps__item-number">
-                                                    {index + 1}.
-                                                </span>
-
-                                                <div className="testcase-steps__dropdown-container">
-                                                    <span
-                                                        className={`testcase-steps__status-indicator ${
-                                                            currentStatus
-                                                                ? `testcase-steps__status-indicator--${currentStatus}`
-                                                                : 'testcase-steps__status-indicator--empty'
-                                                        }`}
-                                                    >
-                                                        {currentStatus === 'passed' && '✓'}
-                                                        {currentStatus === 'failed' && '✕'}
-                                                        {currentStatus === 'skipped' && '−'}
-                                                        {currentStatus === null && ''}
-                                                    </span>
-
-                                                    {openDropdown === index && dropdownPosition && (
-                                                        <div
-                                                            className="testcase-steps__dropdown"
-                                                            style={{
-                                                                position: 'absolute',
-                                                                left: dropdownPosition.x,
-                                                                top: dropdownPosition.y,
-                                                                zIndex: 9999
-                                                            }}
-                                                        >
-                                                            <button
-                                                                className="testcase-steps__dropdown-item"
-                                                                onClick={e =>
-                                                                    handleStatusSelect(
-                                                                        index,
-                                                                        'passed',
-                                                                        currentStatus,
-                                                                        e
-                                                                    )
-                                                                }
-                                                            >
-                                                                <span className="testcase-steps__dropdown-icon testcase-steps__dropdown-icon--passed">
-                                                                    ✓
-                                                                </span>
-                                                                Passed
-                                                            </button>
-                                                            <button
-                                                                className="testcase-steps__dropdown-item"
-                                                                onClick={e =>
-                                                                    handleStatusSelect(
-                                                                        index,
-                                                                        'failed',
-                                                                        currentStatus,
-                                                                        e
-                                                                    )
-                                                                }
-                                                            >
-                                                                <span className="testcase-steps__dropdown-icon testcase-steps__dropdown-icon--failed">
-                                                                    ✕
-                                                                </span>
-                                                                Failed
-                                                            </button>
-                                                            <button
-                                                                className="testcase-steps__dropdown-item"
-                                                                onClick={e =>
-                                                                    handleStatusSelect(
-                                                                        index,
-                                                                        'skipped',
-                                                                        currentStatus,
-                                                                        e
-                                                                    )
-                                                                }
-                                                            >
-                                                                <span className="testcase-steps__dropdown-icon testcase-steps__dropdown-icon--skipped">
-                                                                    −
-                                                                </span>
-                                                                Skipped
-                                                            </button>
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                <span className="testcase-steps__item-text">
-                                                    {step.body || step.type}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div className="testcase-steps__item-row">
-                                            <div className="testcase-steps__item-header">
-                                                <span className="testcase-steps__item-number">
-                                                    {index + 1}.
-                                                </span>
-                                                <div className="testcase-steps__dropdown-container">
-                                                    <span
-                                                        className={`testcase-steps__status-indicator ${
-                                                            currentStatus
-                                                                ? `testcase-steps__status-indicator--${currentStatus}`
-                                                                : 'testcase-steps__status-indicator--empty'
-                                                        }`}
-                                                    >
-                                                        {currentStatus === 'passed' && '✓'}
-                                                        {currentStatus === 'failed' && '✕'}
-                                                        {currentStatus === 'skipped' && '−'}
-                                                        {currentStatus === null && ''}
-                                                    </span>
-                                                </div>
-                                                <span className="testcase-steps__item-text">
-                                                    {step.body || step.type}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    )}
-                                </li>
+                                <div className="h-4 w-4 border-2 border-muted-foreground rounded-full" />
                             );
-                        })}
-                    </ol>
+                        };
+
+                        return (
+                            <div key={index} className="flex items-start gap-2">
+                                <Caption className="text-muted-foreground w-5 flex-shrink-0 text-xs mt-0.5">
+                                    {index + 1}.
+                                </Caption>
+
+                                {isEditable ? (
+                                    <div className="group relative flex-shrink-0">
+                                        {/* Current status icon - clickable on mobile, hoverable on desktop */}
+                                        <button
+                                            className="flex items-center justify-center w-4 h-4 touch-manipulation"
+                                            onClick={e => {
+                                                e.stopPropagation();
+                                                setExpandedStep(
+                                                    expandedStep === index ? null : index
+                                                );
+                                            }}
+                                        >
+                                            <StatusIcon />
+                                        </button>
+
+                                        {/* Status buttons - shown on hover (desktop) or tap (mobile) */}
+                                        <div
+                                            className={`absolute -left-[6.4px] -top-[6.4px] items-center gap-0.5 bg-card border border-border rounded-md shadow-lg p-1 z-10 ${
+                                                expandedStep === index
+                                                    ? 'flex'
+                                                    : 'hidden group-hover:flex'
+                                            }`}
+                                        >
+                                            <button
+                                                onClick={e => {
+                                                    e.stopPropagation();
+                                                    handleStatusSelect(
+                                                        index,
+                                                        'passed',
+                                                        currentStatus,
+                                                        e
+                                                    );
+                                                    setExpandedStep(null);
+                                                }}
+                                                className={`p-1 rounded transition-colors hover:bg-green-600/10 touch-manipulation ${
+                                                    currentStatus === 'passed'
+                                                        ? 'bg-green-600/20'
+                                                        : 'hover:bg-muted'
+                                                }`}
+                                                title="Mark as Passed"
+                                            >
+                                                <CheckCircle className="h-3 w-3 text-green-600" />
+                                            </button>
+                                            <button
+                                                onClick={e => {
+                                                    e.stopPropagation();
+                                                    handleStatusSelect(
+                                                        index,
+                                                        'failed',
+                                                        currentStatus,
+                                                        e
+                                                    );
+                                                    setExpandedStep(null);
+                                                }}
+                                                className={`p-1 rounded transition-colors hover:bg-red-600/10 touch-manipulation ${
+                                                    currentStatus === 'failed'
+                                                        ? 'bg-red-600/20'
+                                                        : 'hover:bg-muted'
+                                                }`}
+                                                title="Mark as Failed"
+                                            >
+                                                <XCircle className="h-3 w-3 text-red-600" />
+                                            </button>
+                                            <button
+                                                onClick={e => {
+                                                    e.stopPropagation();
+                                                    handleStatusSelect(
+                                                        index,
+                                                        'skipped',
+                                                        currentStatus,
+                                                        e
+                                                    );
+                                                    setExpandedStep(null);
+                                                }}
+                                                className={`p-1 rounded transition-colors hover:bg-yellow-600/10 touch-manipulation ${
+                                                    currentStatus === 'skipped'
+                                                        ? 'bg-yellow-600/20'
+                                                        : 'hover:bg-muted'
+                                                }`}
+                                                title="Mark as Skipped"
+                                            >
+                                                <Minus className="h-3 w-3 text-yellow-600" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex-shrink-0">
+                                        <StatusIcon />
+                                    </div>
+                                )}
+
+                                <div
+                                    className="text-sm leading-relaxed flex-1"
+                                    title={step.body || step.type}
+                                >
+                                    {step.body || step.type}
+                                </div>
+                            </div>
+                        );
+                    })}
                 </div>
-            )}
+            </div>
         </div>
     );
 }

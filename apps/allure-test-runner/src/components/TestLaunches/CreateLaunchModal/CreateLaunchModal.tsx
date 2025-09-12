@@ -1,7 +1,19 @@
 import React, { useState } from 'react';
 import { useGetTestplansQuery, useRunTestplanMutation } from '../../../store/api/allureApi';
 import { DEFAULT_PROJECT_ID } from '../../../constants';
-import './CreateLaunchModal.scss';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle
+} from '../../ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
+import { Button } from '../../ui/button';
+import { Input } from '../../ui/input';
+import { Label } from '../../ui/label';
+import { Loader2 } from 'lucide-react';
 
 type Props = {
     isOpen: boolean;
@@ -17,8 +29,6 @@ export function CreateLaunchModal({ isOpen, onClose, onLaunchCreated }: Props) {
     const { data: testplans, isLoading: testplansLoading } = useGetTestplansQuery({
         projectId: DEFAULT_PROJECT_ID
     });
-
-    console.log(testplans);
 
     const [runTestplan] = useRunTestplanMutation();
 
@@ -56,29 +66,22 @@ export function CreateLaunchModal({ isOpen, onClose, onLaunchCreated }: Props) {
         }
     };
 
-    if (!isOpen) {
-        return null;
-    }
-
     return (
-        <div className="modal-overlay" onClick={handleClose}>
-            <div className="modal" onClick={e => e.stopPropagation()}>
-                <div className="modal__header">
-                    <h3 className="modal__title">Create New Launch</h3>
-                    <button className="modal__close" onClick={handleClose} disabled={isCreating}>
-                        ×
-                    </button>
-                </div>
+        <Dialog open={isOpen} onOpenChange={open => !open && handleClose()}>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>Create New Launch</DialogTitle>
+                    <DialogDescription>
+                        Create a new test launch by selecting a testplan and providing a name.
+                    </DialogDescription>
+                </DialogHeader>
 
-                <form className="modal__form" onSubmit={handleSubmit}>
-                    <div className="form-group">
-                        <label htmlFor="launch-name" className="form-label">
-                            Launch Name
-                        </label>
-                        <input
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="launch-name">Launch Name</Label>
+                        <Input
                             id="launch-name"
                             type="text"
-                            className="form-input"
                             value={launchName}
                             onChange={e => setLaunchName(e.target.value)}
                             placeholder="Enter launch name"
@@ -87,55 +90,59 @@ export function CreateLaunchModal({ isOpen, onClose, onLaunchCreated }: Props) {
                         />
                     </div>
 
-                    <div className="form-group">
-                        <label htmlFor="testplan-select" className="form-label">
-                            Testplan
-                        </label>
-                        <select
-                            id="testplan-select"
-                            className="form-select"
-                            value={selectedTestplanId || ''}
-                            onChange={e => setSelectedTestplanId(Number(e.target.value) || null)}
-                            required
+                    <div className="space-y-2">
+                        <Label htmlFor="testplan-select">Testplan</Label>
+                        <Select
+                            value={selectedTestplanId?.toString() || ''}
+                            onValueChange={value =>
+                                setSelectedTestplanId(value ? Number(value) : null)
+                            }
                             disabled={isCreating || testplansLoading}
                         >
-                            <option value="">
-                                {testplansLoading ? 'Loading testplans...' : 'Select testplan'}
-                            </option>
-                            {testplans?.content.map(testplan => (
-                                <option key={testplan.id} value={testplan.id}>
-                                    {testplan.name} ({testplan.testCasesCount} test cases)
-                                </option>
-                            ))}
-                        </select>
+                            <SelectTrigger>
+                                <SelectValue
+                                    placeholder={
+                                        testplansLoading
+                                            ? 'Loading testplans...'
+                                            : 'Select testplan'
+                                    }
+                                />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {testplans?.content.map(testplan => (
+                                    <SelectItem key={testplan.id} value={testplan.id.toString()}>
+                                        {testplan.name} ({testplan.testCasesCount} test cases)
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
 
-                    <div className="modal__actions">
-                        <button
+                    <DialogFooter className="flex flex-col sm:flex-row gap-3">
+                        <Button
                             type="button"
-                            className="btn btn-secondary"
+                            variant="outline"
                             onClick={handleClose}
                             disabled={isCreating}
                         >
                             Cancel
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             type="submit"
-                            className="btn btn-primary"
                             disabled={isCreating || !selectedTestplanId || !launchName.trim()}
                         >
                             {isCreating ? (
                                 <>
-                                    <span className="btn__spinner"></span>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                     Creating...
                                 </>
                             ) : (
                                 'Create Launch'
                             )}
-                        </button>
-                    </div>
+                        </Button>
+                    </DialogFooter>
                 </form>
-            </div>
-        </div>
+            </DialogContent>
+        </Dialog>
     );
 }

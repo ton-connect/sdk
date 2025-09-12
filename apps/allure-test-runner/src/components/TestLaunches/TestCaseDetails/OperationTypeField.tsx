@@ -1,4 +1,4 @@
-import './OperationTypeField.scss';
+import { Caption, Body } from '../../ui/typography';
 
 type Props = {
     operationType?: string;
@@ -18,9 +18,9 @@ export function OperationTypeField({ operationType }: Props) {
     };
 
     return (
-        <div className="operation-type-field">
-            <div className="operation-type-field__label">Operation Type:</div>
-            <div className="operation-type-field__value">{formatOperationType(operationType)}</div>
+        <div className="flex items-center justify-between p-2 bg-muted/20 border border-border rounded-md">
+            <Caption className="font-medium text-xs">Operation:</Caption>
+            <Body className="font-medium text-blue-600 text-xs">{formatOperationType(operationType)}</Body>
         </div>
     );
 }

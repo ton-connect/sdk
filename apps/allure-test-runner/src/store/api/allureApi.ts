@@ -85,7 +85,7 @@ export const allureApi = createApi({
 
         // Test Cases
         getLaunchItems: builder.query<PaginatedResponse<TestCase>, TestCaseFilters>({
-            query: ({ launchId, search, page = 0, size = 100, sort = 'name,ASC' }) => {
+            query: ({ launchId, search, page = 0, size = 250, sort = 'name,ASC' }) => {
                 const searchEncoded = search ? buildSearch('content', search) : undefined;
                 return {
                     url: `/api/v2/launch/${launchId}/test-result/flat`,

@@ -1,5 +1,8 @@
+import { toUserFriendlyAddress } from '@tonconnect/ui-react';
 import { TestCaseExpandableSection } from '../../TestCaseExpandableSection';
 import { ValidationStatus } from '../../ValidationStatus';
+import { CheckCircle, Wallet } from 'lucide-react';
+import { useMemo } from 'react';
 
 type ConnectResultProps = {
     connectResult?: Record<string, unknown> | undefined;
@@ -47,57 +50,79 @@ export function ConnectResult({
 
     const connectionInfo = connectResult ? getConnectionInfo(connectResult) : null;
 
+    const walletFriendlyAddress = useMemo(() => {
+        let walletAddress = null;
+        try {
+            if (connectionInfo?.address) {
+                walletAddress = toUserFriendlyAddress(connectionInfo.address);
+            }
+        } catch (error) {}
+        return walletAddress;
+    }, [connectionInfo]);
+
     return (
         <>
             {connectResult && (
                 <TestCaseExpandableSection
                     title="Connection Result"
                     data={JSON.stringify(connectResult, null, 2)}
-                    className="connection-result-json"
                 />
             )}
 
             {connectionInfo && connectionInfo.event === 'connect' && (
-                <div style={{ margin: '8px 0 0 2px' }}>
-                    <div className="connection-success-info">
-                        <div className="connection-success-header">
-                            <span className="connection-success-icon">✅</span>
-                            <strong>Wallet Connected Successfully</strong>
+                <div className="bg-green-950/20 border border-green-800/40 rounded-lg p-4 space-y-3">
+                    <div className="flex items-center gap-3">
+                        <CheckCircle className="h-5 w-5 text-green-400 flex-shrink-0" />
+                        <div className="font-medium text-green-400">
+                            Wallet Connected Successfully
                         </div>
-                        <div className="connection-details">
-                            <div className="connection-detail">
-                                <strong>Address:</strong> {connectionInfo.address || 'N/A'}
-                            </div>
-                            <div className="connection-detail">
-                                <strong>Network:</strong>{' '}
+                    </div>
+                    <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                            <span className="text-muted-foreground">Address:</span>
+                            <span className="font-mono text-foreground">
+                                {walletFriendlyAddress ? walletFriendlyAddress : 'N/A'}
+                            </span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="text-muted-foreground">Network:</span>
+                            <span className="text-foreground">
                                 {connectionInfo.network === '-239'
                                     ? 'Mainnet'
                                     : connectionInfo.network === '-3'
                                       ? 'Testnet'
                                       : connectionInfo.network || 'N/A'}
-                            </div>
-                            {connectionInfo.device && (
-                                <>
-                                    <div className="connection-detail">
-                                        <strong>Device:</strong>{' '}
+                            </span>
+                        </div>
+                        {connectionInfo.device && (
+                            <>
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Device:</span>
+                                    <span className="text-foreground">
                                         {(connectionInfo.device.platform as string) || 'N/A'}
-                                    </div>
-                                    <div className="connection-detail">
-                                        <strong>App:</strong>{' '}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">App:</span>
+                                    <span className="text-foreground">
                                         {(connectionInfo.device.appName as string) || 'N/A'} v
                                         {(connectionInfo.device.appVersion as string) || 'N/A'}
-                                    </div>
-                                </>
-                            )}
-                        </div>
+                                    </span>
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
             )}
 
             {walletAddress && !connectionInfo && (
-                <div style={{ margin: '8px 0 0 2px' }}>
-                    <div className="wallet-address-display">
-                        <strong>Connected Wallet:</strong> {walletAddress}
+                <div className="bg-blue-950/20 border border-blue-800/40 rounded-lg p-3">
+                    <div className="flex items-center gap-3">
+                        <Wallet className="h-4 w-4 text-blue-400 flex-shrink-0" />
+                        <div className="flex justify-between w-full">
+                            <span className="text-blue-400 font-medium">Connected Wallet:</span>
+                            <span className="font-mono text-foreground">{walletAddress}</span>
+                        </div>
                     </div>
                 </div>
             )}

@@ -1,5 +1,7 @@
 import { useTonWallet, useTonConnectUI } from '@tonconnect/ui-react';
 import { useState } from 'react';
+import { Button } from '../../../../ui/button';
+import { Loader2, AlertTriangle, Unplug, Wifi } from 'lucide-react';
 
 type ConnectActionsProps = {
     onConnect: () => Promise<void>;
@@ -30,53 +32,72 @@ export function ConnectActions({
     };
 
     return (
-        <div className="connect-wallet-actions">
+        <div className="space-y-2">
             {wallet ? (
-                <div className="wallet-disconnect-required">
-                    <div className="wallet-disconnect-info">
-                        <div className="wallet-disconnect-icon">⚠️</div>
-                        <div className="wallet-disconnect-text">
-                            <strong>Wallet Already Connected</strong>
-                            <p>Please disconnect your wallet first to test the connection flow.</p>
+                <>
+                    <div className="p-2 bg-yellow-950/20 border border-yellow-800/40 rounded text-xs">
+                        <div className="flex items-start gap-2">
+                            <AlertTriangle className="h-4 w-4 text-yellow-400 flex-shrink-0 mt-0.5" />
+                            <div>
+                                <div className="font-medium text-yellow-300">Wallet Connected</div>
+                                <div className="text-yellow-400">
+                                    Disconnect to test connection flow
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <button
+                    <Button
                         onClick={handleDisconnect}
                         disabled={isDisconnecting}
-                        className="btn btn-warning disconnect-btn"
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
                     >
                         {isDisconnecting ? (
                             <>
-                                <div className="disconnect-btn__spinner"></div>
+                                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
                                 Disconnecting...
                             </>
                         ) : (
-                            'Disconnect Wallet'
+                            <>
+                                <Unplug className="h-3 w-3 mr-1" />
+                                Disconnect
+                            </>
                         )}
-                    </button>
-                </div>
+                    </Button>
+                </>
             ) : (
-                <div className="connect-actions-container">
+                <>
                     {isConnectingFromHook ? (
                         <>
-                            <button onClick={onAbort} className="btn btn-danger abort-btn">
-                                Abort Connection
-                            </button>
-                            <div className="connecting-status">
-                                <div className="connect-btn__spinner"></div>
-                                <span>Waiting for wallet connection...</span>
+                            <div className="p-2 bg-blue-950/20 border border-blue-800/40 rounded text-xs">
+                                <div className="flex items-center gap-2">
+                                    <Loader2 className="h-4 w-4 text-blue-400 animate-spin flex-shrink-0" />
+                                    <span className="text-blue-300">Connecting to wallet...</span>
+                                </div>
                             </div>
+                            <Button
+                                onClick={onAbort}
+                                variant="destructive"
+                                size="sm"
+                                className="w-full"
+                            >
+                                Abort Connection
+                            </Button>
                         </>
                     ) : (
-                        <button
+                        <Button
                             onClick={onConnect}
                             disabled={isConnectingFromHook}
-                            className="btn btn-primary connect-btn"
+                            variant="default"
+                            size="sm"
+                            className="w-full"
                         >
+                            <Wifi className="h-3 w-3 mr-1" />
                             Connect Wallet
-                        </button>
+                        </Button>
                     )}
-                </div>
+                </>
             )}
         </div>
     );

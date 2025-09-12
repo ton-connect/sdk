@@ -1,4 +1,3 @@
-import './TestCaseDetails.scss';
 import { OPERATION_TYPE, type TestResultWithCustomFields } from '../../../models';
 import { useGetTestResultWithCustomFieldsQuery } from '../../../store/api/allureApi';
 import { SendTransactionOperation } from './Operations/SendTransactionOperation/SendTransactionOperation';

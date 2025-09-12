@@ -49,24 +49,29 @@ export function SignDataOperation({
     }
 
     return (
-        <div className="test-case-details">
-            <TestCaseInfo testResult={testResult}>
-                <SignDataResult
-                    signDataResult={signDataResult}
-                    isResultValid={isResultValid}
-                    validationErrors={validationErrors}
-                />
-            </TestCaseInfo>
-            <TestCaseActions
-                testResult={testResult}
-                isResolving={isResolving}
-                isFailing={isResolving}
-                onResolve={handleResolve}
-                onFail={handleFail}
-                onRerun={handleRerun}
-            >
-                <SignDataActions signDataPayload={signDataPayload} onSignData={handleSignData} />
-            </TestCaseActions>
+        <div className="h-full flex flex-col bg-background overflow-hidden">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0">
+                <TestCaseInfo testResult={testResult}>
+                    <SignDataResult
+                        signDataResult={signDataResult}
+                        isResultValid={isResultValid}
+                        validationErrors={validationErrors}
+                    />
+                </TestCaseInfo>
+            </div>
+
+            <div className="flex-shrink-0 border-t border-border bg-background">
+                <TestCaseActions
+                    testResult={testResult}
+                    isResolving={isResolving}
+                    isFailing={isResolving}
+                    onResolve={handleResolve}
+                    onFail={handleFail}
+                    onRerun={handleRerun}
+                >
+                    <SignDataActions signDataPayload={signDataPayload} onSignData={handleSignData} />
+                </TestCaseActions>
+            </div>
 
             <StatusModal
                 isOpen={showStatusModal}

@@ -1,6 +1,8 @@
 import type { SendTransactionRequest } from '@tonconnect/ui-react';
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { useState } from 'react';
+import { Button } from '../../../../ui/button';
+import { Loader2, Send, Wifi } from 'lucide-react';
 
 type SendTransactionActionProps = {
     sendTransactionParams: SendTransactionRequest | undefined;
@@ -20,43 +22,60 @@ export function SendTransactionAction({
     const [isSending, setIsSending] = useState(false);
 
     return (
-        <div className="send-transaction-with-options">
+        <div className="space-y-2">
             {wallet ? (
-                <button
+                <Button
                     onClick={() => {
                         setIsSending(true);
                         onSendTransaction().finally(() => setIsSending(false));
                     }}
                     disabled={isSending || !sendTransactionParams}
-                    className="btn btn-primary transaction-btn"
+                    variant="default"
+                    size="sm"
+                    className="w-full"
                 >
                     {isSending ? (
                         <>
-                            <div className="transaction-btn__spinner"></div>
-                            Sending...
+                            <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                            Sending transaction...
                         </>
                     ) : (
-                        'Send Transaction'
+                        <>
+                            <Send className="h-3 w-3 mr-1" />
+                            Send Transaction
+                        </>
                     )}
-                </button>
+                </Button>
             ) : (
-                <button
+                <Button
                     onClick={() => tonConnectUI.openModal()}
-                    className="btn btn-secondary transaction-btn"
+                    variant="default"
+                    size="sm"
+                    className="w-full"
                 >
-                    Connect Wallet & Send Transaction
-                </button>
+                    <Wifi className="h-3 w-3 mr-1" />
+                    Connect & Send
+                </Button>
             )}
 
-            <label style={{ userSelect: 'none' }}>
-                <input
-                    type="checkbox"
-                    checked={!!waitForTx}
-                    onChange={e => onToggleWaitForTx?.(e.target.checked)}
-                    style={{ marginRight: 6 }}
-                />
-                Wait for transaction confirmation
-            </label>
+            {onToggleWaitForTx && (
+                <div className="p-2 bg-muted/30 border border-border/50 rounded text-xs">
+                    <label className="flex items-center gap-2 cursor-pointer select-none">
+                        <input
+                            type="checkbox"
+                            checked={!!waitForTx}
+                            onChange={e => onToggleWaitForTx(e.target.checked)}
+                            className="h-3 w-3 rounded border border-input bg-background text-primary focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        />
+                        <span className="text-foreground font-medium">
+                            Wait for transaction confirmation
+                        </span>
+                    </label>
+                    <p className="text-muted-foreground text-xs mt-1 ml-5">
+                        Test will wait until transaction is confirmed on blockchain
+                    </p>
+                </div>
+            )}
         </div>
     );
 }

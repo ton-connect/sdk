@@ -1,4 +1,5 @@
 import type { Launch } from '../../../models';
+import { LaunchCard } from '../../LaunchCard/LaunchCard';
 
 type Props = {
     launches: Launch[];
@@ -8,70 +9,37 @@ type Props = {
     onCreateLaunch?: () => void;
 };
 
-export function LaunchesList({ launches, selectedLaunchId, onOpen, onComplete, onCreateLaunch }: Props) {
+export function LaunchesList({ launches, selectedLaunchId, onOpen, onComplete }: Props) {
     if (launches.length === 0) {
         return null;
     }
 
-    const formatDate = (timestamp: number) => {
-        return new Date(timestamp).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    };
-
     return (
-        <div className="launches-table">
-            <div className="launches-table__header">
-                <div className="launches-table__header-cell">ID</div>
-                <div className="launches-table__header-cell">Name</div>
-                <div className="launches-table__header-cell">Status</div>
-                <div className="launches-table__header-cell">Created</div>
-                <div className="launches-table__header-cell">Created By</div>
-                <div className="launches-table__header-cell">Actions</div>
+        <div className="w-full h-full flex flex-col">
+            {/* Fixed Desktop Table Header */}
+            <div className="hidden lg:grid lg:grid-cols-12 lg:gap-4 lg:px-6 lg:py-3 lg:border-b lg:bg-muted/20 lg:font-medium lg:text-xs lg:text-muted-foreground lg:uppercase lg:tracking-wider lg:flex-shrink-0">
+                <div className="col-span-1">ID</div>
+                <div className="col-span-1">Status</div>
+                <div className="col-span-4">Launch Name</div>
+                <div className="col-span-2">Created</div>
+                <div className="col-span-2">Created By</div>
+                <div className="col-span-1">Defects</div>
+                <div className="col-span-1">Actions</div>
             </div>
-            <div className="launches-table__body">
-                {launches.map(launch => (
-                    <div
-                        key={launch.id}
-                        className={`launches-table__row ${selectedLaunchId === launch.id ? 'launches-table__row--selected' : ''}`}
-                        onClick={() => onOpen(launch.id)}
-                    >
-                        <div className="launches-table__cell launches-table__cell--id">
-                            #{launch.id}
-                        </div>
-                        <div className="launches-table__cell launches-table__cell--name">
-                            {launch.name}
-                        </div>
-                        <div className="launches-table__cell launches-table__cell--status">
-                            <span className={`status-badge ${launch.closed ? 'closed' : 'open'}`}>
-                                {launch.closed ? 'Closed' : 'Open'}
-                            </span>
-                        </div>
-                        <div className="launches-table__cell launches-table__cell--created">
-                            {formatDate(launch.createdDate)}
-                        </div>
-                        <div className="launches-table__cell launches-table__cell--author">
-                            {launch.createdBy}
-                        </div>
-                        <div className="launches-table__cell launches-table__cell--actions">
-                            {!launch.closed && (
-                                <button
-                                    className="btn btn-success btn-sm"
-                                    onClick={e => {
-                                        e.stopPropagation();
-                                        onComplete(launch.id);
-                                    }}
-                                >
-                                    Complete
-                                </button>
-                            )}
-                        </div>
-                    </div>
-                ))}
+
+            {/* Scrollable Launch Items */}
+            <div className="flex-1 overflow-y-auto">
+                <div className="space-y-4 lg:space-y-0">
+                    {launches.map(launch => (
+                        <LaunchCard
+                            key={launch.id}
+                            launch={launch}
+                            onOpen={onOpen}
+                            onComplete={onComplete}
+                            isSelected={selectedLaunchId === launch.id}
+                        />
+                    ))}
+                </div>
             </div>
         </div>
     );

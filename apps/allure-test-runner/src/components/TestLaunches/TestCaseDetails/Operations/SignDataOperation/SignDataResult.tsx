@@ -21,7 +21,6 @@ export function SignDataResult({
             <TestCaseExpandableSection
                 title="Transaction Result"
                 data={JSON.stringify(signDataResult, null, 2)}
-                className="transaction-result-json"
             />
             <ValidationStatus isResultValid={isResultValid} validationErrors={validationErrors} />
         </>
