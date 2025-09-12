@@ -24,17 +24,21 @@ export function DefaultTestCaseOperation({
     );
 
     return (
-        <div className="test-case-details">
-            <TestCaseInfo testResult={testResult} />
+        <div className="h-full flex flex-col bg-background overflow-hidden">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0">
+                <TestCaseInfo testResult={testResult} />
+            </div>
 
-            <TestCaseActions
-                testResult={testResult}
-                isResolving={isResolving}
-                isFailing={isFailing}
-                onResolve={handleResolve}
-                onFail={handleFail}
-                onRerun={handleRerun}
-            />
+            <div className="flex-shrink-0 border-t border-border bg-background">
+                <TestCaseActions
+                    testResult={testResult}
+                    isResolving={isResolving}
+                    isFailing={isFailing}
+                    onResolve={handleResolve}
+                    onFail={handleFail}
+                    onRerun={handleRerun}
+                />
+            </div>
         </div>
     );
 }

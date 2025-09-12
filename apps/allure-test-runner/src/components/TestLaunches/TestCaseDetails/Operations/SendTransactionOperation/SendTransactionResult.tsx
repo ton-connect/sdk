@@ -25,7 +25,6 @@ export function SendTransactionResult({
                 <TestCaseExpandableSection
                     title="Transaction Result"
                     data={JSON.stringify(transactionResult, null, 2)}
-                    className="transaction-result-json"
                 />
             )}
 

@@ -6,6 +6,8 @@ import { StatusModal } from '../../StatusModal/StatusModal';
 import type { TestResultWithCustomFields } from '../../../../../models';
 import { useConnectValidation } from './hooks/useConnectValidation';
 import { ConnectActions } from './ConnectActions';
+import { toUserFriendlyAddress } from '@tonconnect/ui-react';
+import { useMemo } from 'react';
 
 type ConnectOperationProps = {
     testResult: TestResultWithCustomFields;
@@ -48,35 +50,46 @@ export function ConnectOperation({
         return null;
     }
 
-    const walletAddress = wallet?.account?.address
-        ? `${wallet.account.address.slice(0, 4)}...${wallet.account.address.slice(-4)}`
-        : undefined;
+    const walletAddress = useMemo(() => {
+        let walletAddress = undefined;
+        try {
+            if (wallet?.account?.address) {
+                walletAddress = toUserFriendlyAddress(wallet.account.address);
+            }
+        } catch (error) {}
+        return walletAddress;
+    }, [wallet]);
 
     return (
-        <div className="test-case-details">
-            <TestCaseInfo testResult={testResult}>
-                <ConnectResult
-                    connectResult={connectResult}
-                    isResultValid={isResultValid}
-                    validationErrors={validationErrors}
-                    walletAddress={walletAddress}
-                />
-            </TestCaseInfo>
-            <TestCaseActions
-                testResult={testResult}
-                isResolving={isResolving}
-                isFailing={isFailing}
-                onResolve={handleResolve}
-                onFail={handleFail}
-                onRerun={handleRerun}
-                disableInternalModal={true}
-            >
-                <ConnectActions
-                    onConnect={handleConnect}
-                    onAbort={handleAbort}
-                    isConnecting={isConnecting}
-                />
-            </TestCaseActions>
+        <div className="h-full flex flex-col bg-background overflow-hidden">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0">
+                <TestCaseInfo testResult={testResult}>
+                    <ConnectResult
+                        connectResult={connectResult}
+                        isResultValid={isResultValid}
+                        validationErrors={validationErrors}
+                        walletAddress={walletAddress}
+                    />
+                </TestCaseInfo>
+            </div>
+
+            <div className="flex-shrink-0 border-t border-border bg-background">
+                <TestCaseActions
+                    testResult={testResult}
+                    isResolving={isResolving}
+                    isFailing={isFailing}
+                    onResolve={handleResolve}
+                    onFail={handleFail}
+                    onRerun={handleRerun}
+                    disableInternalModal={true}
+                >
+                    <ConnectActions
+                        onConnect={handleConnect}
+                        onAbort={handleAbort}
+                        isConnecting={isConnecting}
+                    />
+                </TestCaseActions>
+            </div>
 
             <StatusModal
                 isOpen={showStatusModal}

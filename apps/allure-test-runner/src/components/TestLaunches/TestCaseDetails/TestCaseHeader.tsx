@@ -1,4 +1,5 @@
-import { StatusLabel } from '../StatusLabel/StatusLabel';
+import { Title } from '../../ui/typography';
+import { TestCaseExpandableSection } from './TestCaseExpandableSection';
 
 type Props = {
     name: string;
@@ -20,26 +21,38 @@ export function TestCaseHeader({ name, status, message }: Props) {
         }
     };
 
-    return (
-        <>
-            <div className="test-case-details-name">
-                <h3 className="test-case-details-name-title">{name}</h3>
-            </div>
+    const getStatusStyles = (status?: 'unknown' | 'passed' | 'failed') => {
+        switch (status) {
+            case 'passed':
+                return 'text-green-400 bg-green-950/30 border border-green-800/40 px-2 py-1 rounded-md text-xs font-medium';
+            case 'failed':
+                return 'text-red-400 bg-red-950/30 border border-red-800/40 px-2 py-1 rounded-md text-xs font-medium';
+            case 'unknown':
+                return 'text-yellow-400 bg-yellow-950/30 border border-yellow-800/40 px-2 py-1 rounded-md text-xs font-medium';
+            default:
+                return 'text-blue-400 bg-blue-950/30 border border-blue-800/40 px-2 py-1 rounded-md text-xs font-medium';
+        }
+    };
 
-            <div className="test-case-details-header">
-                <div className="test-case-details-status-label">Status:</div>
-                <div className="test-case-details-status">
-                    <StatusLabel status={status} />
+    return (
+        <div className="space-y-3">
+            {/* Simple title with status - like launch cards */}
+            <div className="flex items-start justify-between gap-4">
+                <Title className="font-medium text-lg leading-tight flex-1 min-w-0">{name}</Title>
+                <div className="flex items-center flex-shrink-0">
+                    <span className={getStatusStyles(status)}>
+                        {getStatusText(status)}
+                    </span>
                 </div>
-                <div className="test-case-details-status-text">{getStatusText(status)}</div>
             </div>
 
             {message && (
-                <div className="test-case-details-message">
-                    <div className="test-case-details-message-label">Message:</div>
-                    <div className="test-case-details-message-text">{message}</div>
-                </div>
+                <TestCaseExpandableSection
+                    title="Error Details"
+                    data={message}
+                    variant="error"
+                />
             )}
-        </>
+        </div>
     );
 }
