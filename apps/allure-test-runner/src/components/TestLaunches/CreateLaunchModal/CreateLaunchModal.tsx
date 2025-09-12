@@ -18,8 +18,6 @@ export function CreateLaunchModal({ isOpen, onClose, onLaunchCreated }: Props) {
         projectId: DEFAULT_PROJECT_ID
     });
 
-    console.log(testplans);
-
     const [runTestplan] = useRunTestplanMutation();
 
     const handleSubmit = async (e: React.FormEvent) => {

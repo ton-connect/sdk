@@ -11,7 +11,6 @@ type Props = {
     onOpen: (id: number) => void;
     onComplete: (id: number) => void;
     onLoadMore: () => void;
-    onCreateLaunch?: () => void;
 };
 
 export function InfiniteScrollLaunchesList({
@@ -22,8 +21,7 @@ export function InfiniteScrollLaunchesList({
     hasMore,
     onOpen,
     onComplete,
-    onLoadMore,
-    onCreateLaunch
+    onLoadMore
 }: Props) {
     const observerRef = useRef<IntersectionObserver | null>(null);
     const loadMoreRef = useRef<HTMLDivElement | null>(null);
@@ -73,7 +71,6 @@ export function InfiniteScrollLaunchesList({
                 selectedLaunchId={selectedLaunchId}
                 onOpen={onOpen}
                 onComplete={onComplete}
-                onCreateLaunch={onCreateLaunch}
             />
 
             {/* Load more trigger element */}
