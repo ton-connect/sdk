@@ -115,6 +115,13 @@
   * {
     @apply border-border outline-ring/50;
   }
+  
+  /* iPhone Safari viewport fix */
+  html {
+    height: 100%;
+    height: -webkit-fill-available;
+  }
+  
   body {
     @apply bg-background text-foreground;
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
@@ -124,6 +131,17 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     letter-spacing: -0.003em;
+    height: 100%;
+    height: -webkit-fill-available;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+  
+  #root {
+    height: 100%;
+    height: -webkit-fill-available;
+    overflow: hidden;
   }
 }
 
@@ -266,5 +284,24 @@ pre, code {
   height: 1.5rem;
   background: linear-gradient(transparent, hsl(var(--card)));
   pointer-events: none;
+}
+
+/* iPhone Safari viewport utilities */
+.h-screen-safe {
+  height: 100vh;
+  height: -webkit-fill-available;
+  height: calc(var(--vh, 1vh) * 100);
+}
+
+.min-h-screen-safe {
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  min-height: calc(var(--vh, 1vh) * 100);
+}
+
+.max-h-screen-safe {
+  max-height: 100vh;
+  max-height: -webkit-fill-available;
+  max-height: calc(var(--vh, 1vh) * 100);
 }
 

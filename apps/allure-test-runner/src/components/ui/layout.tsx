@@ -13,7 +13,7 @@ export const PageContainer = forwardRef<HTMLDivElement, LayoutProps>(
         return (
             <div
                 ref={ref}
-                className={cn('w-full h-screen flex flex-col bg-background', className)}
+                className={cn('w-full h-screen-safe flex flex-col bg-background', className)}
                 {...props}
             >
                 {children}

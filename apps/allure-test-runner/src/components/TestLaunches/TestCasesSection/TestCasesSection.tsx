@@ -72,7 +72,7 @@ export function TestCasesSection({ launchId, onClose, onComplete, launchClosed =
     const toggleSidebar = () => setIsSidebarCollapsed(!isSidebarCollapsed);
 
     return (
-        <div className="h-screen flex flex-col bg-background">
+        <div className="h-screen-safe flex flex-col bg-background">
             {/* Professional Header */}
             <div className="flex-shrink-0 border-b border-border bg-background">
                 <div className="flex items-center justify-between px-4 py-3">
@@ -189,7 +189,7 @@ export function TestCasesSection({ launchId, onClose, onComplete, launchClosed =
                         className={`h-full grid gap-0.5 bg-border overflow-hidden transition-all duration-300 ${
                             isSidebarCollapsed
                                 ? 'grid-cols-1'
-                                : 'grid-cols-1 md:grid-cols-[380px_1fr] lg:grid-cols-[420px_1fr]'
+                                : 'grid-rows-[35%_1fr] md:grid-rows-1 md:grid-cols-[380px_1fr] lg:grid-cols-[420px_1fr]'
                         }`}
                     >
                         {/* Test Cases List */}
