@@ -39,7 +39,7 @@ export class UsersService {
         return this.findOneByOrFail({ id: userId });
     }
 
-    async count(where: FindOptionsWhere<UserEntity> = {}) {
+    async count(where: FindOptionsWhere<UserEntity> | FindOptionsWhere<UserEntity>[] = {}) {
         return this.userRepository.countBy(where);
     }
 

@@ -22,10 +22,10 @@ export class UsersManagementService {
 
     async getUsersWithCount(params: GetUsersParams) {
         const filter = params.search
-            ? {
-                  walletName: buildSearchQuery(params.search),
-                  login: buildSearchQuery(params.search)
-              }
+            ? [
+                  { walletName: buildSearchQuery(params.search) },
+                  { login: buildSearchQuery(params.search) }
+              ]
             : undefined;
 
         const [users, total] = await Promise.all([
@@ -33,7 +33,7 @@ export class UsersManagementService {
                 take: params.limit,
                 skip: params.offset,
                 order: Object.fromEntries(params.sort),
-                ...filter
+                where: filter
             }),
             this.usersService.count(filter)
         ]);
