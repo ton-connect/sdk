@@ -4,8 +4,6 @@ import { AllureService } from '../services';
 import {
     CompleteLaunchParamDTO,
     GetLaunchesQueryDTO,
-    GetLaunchItemTreeParamDTO,
-    GetLaunchItemTreeQueryDTO,
     GetLaunchItemsParamDTO,
     GetLaunchItemsQueryDTO,
     GetLaunchItemsTreeParamDTO,
@@ -47,14 +45,6 @@ export class AllureController {
         @Query() query: GetLaunchItemsTreeQueryDTO
     ) {
         return this.service.getLaunchItemsTree({ launchId: params.launchId, ...query });
-    }
-
-    @Get('launches/:launchId/item-tree')
-    getLaunchItemTree(
-        @Param() params: GetLaunchItemTreeParamDTO,
-        @Query() query: GetLaunchItemTreeQueryDTO
-    ) {
-        return this.service.getLaunchItemTree({ launchId: params.launchId, path: query.path });
     }
 
     @Get('testresult/:id')

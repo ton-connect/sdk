@@ -39,10 +39,6 @@ export class AllureService {
         return this.api.getLaunchItemsTree(params);
     }
 
-    async getLaunchItemTree(params: { launchId: number; path: number | number[] }) {
-        return this.api.getLaunchItemTree(params);
-    }
-
     async getTestResult(id: number) {
         return this.api.getTestResult(id);
     }

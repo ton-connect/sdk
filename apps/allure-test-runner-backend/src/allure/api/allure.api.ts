@@ -20,7 +20,17 @@ export class AllureApi {
         const baseURL = this.config.getOrThrow('ALLURE_BASE_URL', { infer: true });
         const apiToken = this.config.getOrThrow('ALLURE_API_TOKEN', { infer: true });
 
-        this.client = axios.create({ baseURL });
+        this.client = axios.create({
+            baseURL,
+            paramsSerializer: params =>
+                Object.entries(params)
+                    .map(([key, value]) =>
+                        Array.isArray(value)
+                            ? value.map(v => `${key}=${encodeURIComponent(v)}`).join('&')
+                            : `${key}=${encodeURIComponent(value)}`
+                    )
+                    .join('&')
+        });
 
         this.client.interceptors.request.use(async config => {
             config.headers.Authorization = this.bearerToken;
@@ -32,11 +42,15 @@ export class AllureApi {
             async error => {
                 const status = error?.response?.status;
                 if (status === HttpStatus.UNAUTHORIZED) {
-                    this.accessToken = await this.authenticate(apiToken);
-                    error.config.headers.Authorization = this.bearerToken;
-                    return await this.client.request(error.config);
+                    try {
+                        this.accessToken = await this.authenticate(apiToken);
+                        error.config.headers.Authorization = this.bearerToken;
+                        return await this.client.request(error.config);
+                    } catch (authError) {
+                        return Promise.reject(authError);
+                    }
                 }
-                return error;
+                return Promise.reject(error);
             }
         );
     }
@@ -105,24 +119,6 @@ export class AllureApi {
             {
                 params: {
                     ...rest,
-                    deleted: false,
-                    treeId: 70,
-                    sort: ['nodeSortOrder,asc', 'name,asc'],
-                    path
-                }
-            }
-        );
-        return data;
-    }
-
-    async getLaunchItemTree(params: { launchId: number; path: number | number[] }) {
-        const { launchId, path } = params;
-        const { data } = await this.client.get(
-            `/api/v2/launch/${launchId}/test-result/tree/entity`,
-            {
-                params: {
-                    page: 0,
-                    size: 100,
                     deleted: false,
                     treeId: 70,
                     sort: ['nodeSortOrder,asc', 'name,asc'],

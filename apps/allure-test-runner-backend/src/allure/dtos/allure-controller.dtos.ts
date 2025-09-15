@@ -60,5 +60,5 @@ export const getTestPlansQuerySchema = z.object({ projectId: z.coerce.number().i
 export class GetTestPlansQueryDTO extends createZodDto(getTestPlansQuerySchema) {}
 export const runTestPlanParamSchema = z.object({ id: z.coerce.number().int().positive() });
 export class RunTestPlanParamDTO extends createZodDto(runTestPlanParamSchema) {}
-export const runTestPlanBodySchema = z.object({ launchName: z.string().trim().nonempty() });
+export const runTestPlanBodySchema = z.object({ launchName: z.string().nonempty() });
 export class RunTestPlanBodyDTO extends createZodDto(runTestPlanBodySchema) {}
