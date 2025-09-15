@@ -78,18 +78,47 @@ export class AllureApi {
     async getLaunches(params: {
         projectId: number;
         search?: string;
+        tags?: number[];
         page?: number;
         size?: number;
         sort?: string;
     }) {
+        let searchParams: unknown[] = [];
+        if (params.search) {
+            searchParams.push({ id: 'search', value: params.search, type: 'string' });
+        }
+        if (params.tags?.length) {
+            searchParams.push({ id: 'tag', value: params.tags, type: 'longArray' });
+        }
+        const search = searchParams.length
+            ? Buffer.from(JSON.stringify(searchParams)).toString('base64')
+            : undefined;
+
         const { data } = await this.client.get(`/api/launch`, {
-            params
+            params: {
+                projectId: params.projectId,
+                page: params.page,
+                size: params.size,
+                sort: params.sort,
+                search
+            }
         });
+
         return data;
     }
 
     async completeLaunch(id: number) {
         const { data } = await this.client.post(`/api/launch/${id}/close`, undefined, {});
+        return data;
+    }
+
+    async getLaunchById(id: number): Promise<{
+        tags: {
+            id: number;
+            name: string;
+        }[];
+    }> {
+        const { data } = await this.client.get(`/api/launch/${id}`);
         return data;
     }
 
@@ -129,7 +158,7 @@ export class AllureApi {
         return data;
     }
 
-    async getTestResult(id: number) {
+    async getTestResult(id: number): Promise<{ launchId: number }> {
         const { data } = await this.client.get(`/api/testresult/${id}`, {});
         return data;
     }
@@ -186,9 +215,21 @@ export class AllureApi {
         return data;
     }
 
-    async runTestPlan(params: { id: number; launchName: string }) {
+    async createOrFindTag(name: string): Promise<{ id: number; name: string }> {
+        const { data } = await this.client.post(`/api/launch/tag`, {
+            name
+        });
+        return data;
+    }
+
+    async runTestPlan(params: {
+        id: number;
+        launchName: string;
+        tags?: { id: number; name: string }[];
+    }) {
         const { data } = await this.client.post(`/api/testplan/${params.id}/run`, {
-            launchName: params.launchName
+            launchName: params.launchName,
+            tags: params.tags
         });
         return data;
     }

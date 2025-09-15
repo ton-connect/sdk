@@ -35,7 +35,7 @@ export const allureApi = createApi({
             }
 
             return headers;
-        },
+        }
     }),
     tagTypes: ['Launch', 'TestCase', 'TestResult'],
     endpoints: builder => ({
@@ -97,11 +97,10 @@ export const allureApi = createApi({
         // Launches
         getLaunches: builder.query<PaginatedResponse<Launch>, LaunchFilters>({
             query: ({ projectId, search, page = 0, size = 10, sort = 'created_date,DESC' }) => {
-                const searchEncoded = search ? buildSearch('name', search) : undefined;
                 return {
                     url: '/allure/launches',
                     params: {
-                        search: searchEncoded,
+                        search,
                         page,
                         size,
                         sort,

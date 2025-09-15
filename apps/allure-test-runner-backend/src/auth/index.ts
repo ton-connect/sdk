@@ -1,4 +1,4 @@
-export { Auth, AuthUser, AdminOnly } from './decorators';
+export { Auth, AuthUser, AdminOnly, OptionalAuth } from './decorators';
 
 export { type Principal } from './types';
 

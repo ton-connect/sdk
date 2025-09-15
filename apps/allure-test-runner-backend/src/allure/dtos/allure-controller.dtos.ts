@@ -33,13 +33,6 @@ export const getLaunchItemsTreeQuerySchema = z.object({
 });
 export class GetLaunchItemsTreeQueryDTO extends createZodDto(getLaunchItemsTreeQuerySchema) {}
 
-export const getLaunchItemTreeParamSchema = getLaunchItemsParamSchema;
-export class GetLaunchItemTreeParamDTO extends createZodDto(getLaunchItemTreeParamSchema) {}
-export const getLaunchItemTreeQuerySchema = z.object({
-    path: z.union([z.coerce.number(), z.array(z.coerce.number())])
-});
-export class GetLaunchItemTreeQueryDTO extends createZodDto(getLaunchItemTreeQuerySchema) {}
-
 export const testResultIdParamSchema = z.object({ id: z.coerce.number().int().positive() });
 export class TestResultIdParamDTO extends createZodDto(testResultIdParamSchema) {}
 
