@@ -4,9 +4,9 @@ import { InfiniteScrollLaunchesList } from '../components/TestLaunches/InfiniteS
 import { SearchBar } from '../components/TestLaunches/SearchBar/SearchBar';
 import { CreateLaunchModal } from '../components/TestLaunches/CreateLaunchModal';
 import { useLaunchesRedux } from '../hooks/useLaunchesRedux';
-import { useAuth } from '../providers/AuthProvider';
+import { UserInfo } from '../components/UserInfo/UserInfo';
 import { Alert, AlertDescription } from '../components/ui/alert';
-import { AlertTriangle, X, LogOut } from 'lucide-react';
+import { AlertTriangle, X } from 'lucide-react';
 import {
     PageContainer,
     ContentContainer,
@@ -17,12 +17,10 @@ import {
 import { LargeTitle, Body } from '../components/ui/typography';
 import { Metric, MetricsGroup } from '../components/ui/status';
 import { CleanButton } from '../components/ui/form-field';
-import { Button } from '../components/ui/button';
 
 export function LaunchesPage() {
     const navigate = useNavigate();
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const { logout } = useAuth();
 
     const {
         search,
@@ -101,25 +99,17 @@ export function LaunchesPage() {
                                 spacing="normal"
                                 className="flex-col sm:flex-row sm:items-center"
                             >
-                                <LargeTitle>Test Launches</LargeTitle>
-                                <Inline spacing="normal">
-                                    <CleanButton
-                                        onClick={handleCreateLaunch}
-                                        className="w-full sm:w-auto"
-                                        size="default"
-                                    >
-                                        New Launch
-                                    </CleanButton>
-                                    <Button
-                                        onClick={logout}
-                                        variant="outline"
-                                        size="default"
-                                        className="w-full sm:w-auto"
-                                    >
-                                        <LogOut className="h-4 w-4 mr-2" />
-                                        Logout
-                                    </Button>
+                                <Inline spacing="normal" className="items-center">
+                                    <UserInfo />
+                                    <LargeTitle>Test Launches</LargeTitle>
                                 </Inline>
+                                <CleanButton
+                                    onClick={handleCreateLaunch}
+                                    className="w-full sm:w-auto"
+                                    size="default"
+                                >
+                                    New Launch
+                                </CleanButton>
                             </Inline>
 
                             {/* Statistics */}

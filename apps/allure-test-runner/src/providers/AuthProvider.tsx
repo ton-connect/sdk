@@ -84,7 +84,7 @@ function AuthInitializer({ children }: { children: React.ReactNode }) {
     }, []);
 
     if (isLoading || isCheckingAuth) {
-        return <div>Loading...</div>;
+        return null;
     }
 
     if (!isAuthenticated || forceShowAuth) {
@@ -108,6 +108,10 @@ export function useAuth() {
     const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
     const [isAuthenticated, setIsAuthenticated] = useState(!!token);
 
+    const { data: user } = useGetMeQuery(undefined, {
+        skip: !token
+    });
+
     const handleLogout = () => {
         // Use global logout function if available
         const globalLogout = (window as unknown as { handleLogout?: () => void }).handleLogout;
@@ -124,6 +128,7 @@ export function useAuth() {
     return {
         token,
         isAuthenticated,
+        user,
         logout: handleLogout
     };
 }

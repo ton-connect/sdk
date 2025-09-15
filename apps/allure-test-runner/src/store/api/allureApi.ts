@@ -35,7 +35,7 @@ export const allureApi = createApi({
             }
 
             return headers;
-        }
+        },
     }),
     tagTypes: ['Launch', 'TestCase', 'TestResult'],
     endpoints: builder => ({
@@ -54,8 +54,44 @@ export const allureApi = createApi({
                 body: credentials
             })
         }),
-        getMe: builder.query<{ id: number; role: string }, void>({
+        getMe: builder.query<{ id: number; login: string; role: string }, void>({
             query: () => '/auth/me'
+        }),
+
+        // Admin - Users Management
+        getUsers: builder.query<
+            {
+                total: number;
+                items: {
+                    id: number;
+                    login: string;
+                    role: string;
+                    walletName: string | null;
+                    createdAt: string;
+                }[];
+            },
+            { search?: string; limit?: number; offset?: number; sort?: string[] } | void
+        >({
+            query: args => ({
+                url: '/users',
+                params: args ?? {}
+            })
+        }),
+        updateUser: builder.mutation<
+            {
+                id: number;
+                login: string;
+                role: string;
+                walletName: string | null;
+                createdAt: string;
+            },
+            { id: number; role?: string; walletName?: string }
+        >({
+            query: ({ id, ...body }) => ({
+                url: `/users/${id}`,
+                method: 'PATCH',
+                body
+            })
         }),
 
         // Launches
@@ -271,6 +307,8 @@ export const {
     useSignUpMutation,
     useSignInMutation,
     useGetMeQuery,
+    useGetUsersQuery,
+    useUpdateUserMutation,
     useGetLaunchesQuery,
     useCompleteLaunchMutation,
     useGetLaunchItemsQuery,
