@@ -121,7 +121,8 @@ export class AllureApi {
                 params: {
                     ...rest,
                     deleted: false,
-                    treeId: 70
+                    treeId: 70,
+                    sort: ['nodeSortOrder,asc', 'name,asc']
                 }
             }
         );
