@@ -24,6 +24,7 @@ export class AllureApi {
             baseURL,
             paramsSerializer: params =>
                 Object.entries(params)
+                    .filter(([_, value]) => value !== undefined && value !== null)
                     .map(([key, value]) =>
                         Array.isArray(value)
                             ? value.map(v => `${key}=${encodeURIComponent(v)}`).join('&')
@@ -113,16 +114,14 @@ export class AllureApi {
         size?: number;
         path?: number | number[];
     }) {
-        const { launchId, path, ...rest } = params;
+        const { launchId, ...rest } = params;
         const { data } = await this.client.get(
             `/api/v2/launch/${launchId}/test-result/tree/entity`,
             {
                 params: {
                     ...rest,
                     deleted: false,
-                    treeId: 70,
-                    sort: ['nodeSortOrder,asc', 'name,asc'],
-                    path
+                    treeId: 70
                 }
             }
         );
