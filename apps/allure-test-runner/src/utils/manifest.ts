@@ -5,7 +5,6 @@ export function changeManifestUrl(tonConnectUI: TonConnectUI, newUrl: string | u
         connector: { dappSettings: { manifestUrl: string | undefined } };
     };
 
-    console.debug(`Changing manifest url to ${newUrl}`);
 
     tonConnect.connector.dappSettings.manifestUrl = newUrl;
 }

@@ -18,43 +18,44 @@ import type {
     Execution
 } from '../../models';
 import { CUSTOM_FIELD_NAMES } from '../../models';
-import type { RootState } from '../index';
 import type { Testplan } from '../../models/allure/Testplan';
 
-const baseUrl = 'https://tontech.testops.cloud';
+const baseUrl = 'http://localhost:4444/api/v1';
 
 export const allureApi = createApi({
     reducerPath: 'allureApi',
     baseQuery: fetchBaseQuery({
         baseUrl,
-        prepareHeaders: (headers, { getState }) => {
-            const token = (getState() as RootState).auth.token;
+        prepareHeaders: headers => {
+            headers.set('Content-Type', 'application/json');
+
+            const token = localStorage.getItem('token');
             if (token) {
-                headers.set('authorization', `Bearer ${token}`);
+                headers.set('Authorization', `Bearer ${token}`);
             }
-            // Do not set a global Content-Type; let each request define it
+
             return headers;
         }
     }),
     tagTypes: ['Launch', 'TestCase', 'TestResult'],
     endpoints: builder => ({
-        // Authentication
-        authenticate: builder.mutation<string, { userToken: string }>({
-            query: ({ userToken }) => ({
-                url: '/api/uaa/oauth/token',
+        // Auth
+        signUp: builder.mutation<void, { login: string; password: string }>({
+            query: credentials => ({
+                url: '/auth/sign-up',
                 method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: new URLSearchParams({
-                    grant_type: 'apitoken',
-                    scope: 'openid',
-                    token: userToken
-                })
-            }),
-            transformResponse: (response: unknown) =>
-                (response as { access_token: string }).access_token
+                body: credentials
+            })
+        }),
+        signIn: builder.mutation<{ accessToken: string }, { login: string; password: string }>({
+            query: credentials => ({
+                url: '/auth/sign-in',
+                method: 'POST',
+                body: credentials
+            })
+        }),
+        getMe: builder.query<{ id: number; role: string }, void>({
+            query: () => '/auth/me'
         }),
 
         // Launches
@@ -62,7 +63,7 @@ export const allureApi = createApi({
             query: ({ projectId, search, page = 0, size = 10, sort = 'created_date,DESC' }) => {
                 const searchEncoded = search ? buildSearch('name', search) : undefined;
                 return {
-                    url: '/api/launch',
+                    url: '/allure/launches',
                     params: {
                         search: searchEncoded,
                         page,
@@ -77,7 +78,7 @@ export const allureApi = createApi({
 
         completeLaunch: builder.mutation<void, { id: number }>({
             query: ({ id }) => ({
-                url: `/api/launch/${id}/close`,
+                url: `/allure/launches/${id}/close`,
                 method: 'POST'
             }),
             invalidatesTags: ['Launch']
@@ -88,7 +89,7 @@ export const allureApi = createApi({
             query: ({ launchId, search, page = 0, size = 250, sort = 'name,ASC' }) => {
                 const searchEncoded = search ? buildSearch('content', search) : undefined;
                 return {
-                    url: `/api/v2/launch/${launchId}/test-result/flat`,
+                    url: `/allure/launches/${launchId}/items`,
                     params: {
                         search: searchEncoded,
                         page,
@@ -118,7 +119,7 @@ export const allureApi = createApi({
                     qs.set('path', String(path));
                 }
                 return {
-                    url: `/api/v2/launch/${launchId}/test-result/tree/entity?${qs.toString()}`
+                    url: `/allure/launches/${launchId}/items-tree?${qs.toString()}`
                 };
             },
             providesTags: ['TestCase']
@@ -142,7 +143,7 @@ export const allureApi = createApi({
                 qs.append('sort', 'name,asc');
                 qs.set('deleted', String(false));
                 return {
-                    url: `/api/v2/launch/${launchId}/test-result/tree/entity?${qs.toString()}`
+                    url: `/allure/launches/${launchId}/item-tree?${qs.toString()}`
                 };
             },
             providesTags: ['TestCase']
@@ -150,7 +151,7 @@ export const allureApi = createApi({
 
         // Test Results
         getTestResult: builder.query<TestResult, { id: number }>({
-            query: ({ id }) => `/api/testresult/${id}`,
+            query: ({ id }) => `/allure/testresult/${id}`,
             providesTags: (_result, _error, { id }) => [{ type: 'TestResult', id }]
         }),
 
@@ -176,9 +177,9 @@ export const allureApi = createApi({
             > {
                 const { id } = arg;
                 const [resTest, resCF, resExec] = await Promise.all([
-                    baseQuery({ url: `/api/testresult/${id}` }),
-                    baseQuery({ url: `/api/testresult/${id}/cfv` }),
-                    baseQuery({ url: `/api/testresult/${id}/execution?v2=true` })
+                    baseQuery({ url: `/allure/testresult/${id}` }),
+                    baseQuery({ url: `/allure/testresult/${id}/cfv` }),
+                    baseQuery({ url: `/allure/testresult/${id}/execution?v2=true` })
                 ]);
 
                 if (resTest.error) return { error: resTest.error };
@@ -208,7 +209,7 @@ export const allureApi = createApi({
 
         resolveTestResult: builder.mutation<void, ResolveTestResultParams>({
             query: params => ({
-                url: `/api/testresult/${params.id}/resolve`,
+                url: `/allure/testresult/${params.id}/resolve`,
                 method: 'POST',
                 params: { v2: true },
                 body: {
@@ -229,7 +230,7 @@ export const allureApi = createApi({
 
         rerunTestResult: builder.mutation<{ id: number; name: string }, RerunTestResultParams>({
             query: params => ({
-                url: `/api/testresult/${params.id}/rerun`,
+                url: `/allure/testresult/${params.id}/rerun`,
                 method: 'POST',
                 body: {
                     username: params.username
@@ -243,20 +244,20 @@ export const allureApi = createApi({
         }),
 
         getCustomFields: builder.query<CustomField[], { testResultId: number }>({
-            query: ({ testResultId }) => `/api/testresult/${testResultId}/cfv`
+            query: ({ testResultId }) => `/allure/testresult/${testResultId}/cfv`
         }),
 
         getExecution: builder.query<Execution, { testResultId: number }>({
-            query: ({ testResultId }) => `/api/testresult/${testResultId}/execution?v2=true`
+            query: ({ testResultId }) => `/allure/testresult/${testResultId}/execution?v2=true`
         }),
         // Testplans
         getTestplans: builder.query<{ content: Testplan[] }, { projectId: number }>({
-            query: ({ projectId }) => `/api/testplan?projectId=${projectId}`
+            query: ({ projectId }) => `/allure/testplan?projectId=${projectId}`
         }),
 
         runTestplan: builder.mutation<{ id: number }, { id: number; launchName: string }>({
             query: ({ id, launchName }) => ({
-                url: `/api/testplan/${id}/run`,
+                url: `/allure/testplan/${id}/run`,
                 method: 'POST',
                 body: {
                     launchName
@@ -273,7 +274,9 @@ function buildSearch(id: string, value: string): string {
 }
 
 export const {
-    useAuthenticateMutation,
+    useSignUpMutation,
+    useSignInMutation,
+    useGetMeQuery,
     useGetLaunchesQuery,
     useCompleteLaunchMutation,
     useGetLaunchItemsQuery,

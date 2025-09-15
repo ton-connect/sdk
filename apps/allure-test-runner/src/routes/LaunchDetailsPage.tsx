@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { TestCasesSection } from '../components/TestLaunches/TestCasesSection/TestCasesSection';
-import { useLaunchesRedux } from '../hooks/useLaunchesRedux';
+import { useCompleteLaunchMutation } from '../store/api/allureApi';
 import { Button } from '../components/ui/button';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
@@ -9,7 +9,7 @@ export function LaunchDetailsPage() {
     const { launchId } = useParams<{ launchId: string }>();
     const navigate = useNavigate();
 
-    const { launches, complete } = useLaunchesRedux();
+    const [completeLaunch] = useCompleteLaunchMutation();
 
     const launchIdNumber = launchId ? parseInt(launchId) : null;
 
@@ -38,18 +38,26 @@ export function LaunchDetailsPage() {
         );
     }
 
-    const selectedLaunch = launches.find(launch => launch.id === launchIdNumber);
-
     const handleClose = () => {
         navigate('/launches');
+    };
+
+    const handleComplete = async (id: number) => {
+        try {
+            await completeLaunch({ id }).unwrap();
+
+            navigate('/launches');
+        } catch (error) {
+            console.error('Failed to complete launch:', error);
+        }
     };
 
     return (
         <TestCasesSection
             launchId={launchIdNumber}
             onClose={handleClose}
-            onComplete={complete}
-            launchClosed={selectedLaunch?.closed}
+            onComplete={handleComplete}
+            launchClosed={false} // We don't have launch data here, so we'll let TestCasesSection handle it
         />
     );
 }
