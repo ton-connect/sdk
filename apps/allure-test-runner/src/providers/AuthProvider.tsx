@@ -17,12 +17,15 @@ function AuthInitializer({ children }: { children: React.ReactNode }) {
     const dispatch = useAppDispatch();
     const isLoading = useAppSelector(selectAuthLoading);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isCheckingAuth, setIsCheckingAuth] = useState(true);
     const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
+    const [forceShowAuth, setForceShowAuth] = useState(false);
 
     const {
         data: user,
         error,
-        refetch
+        refetch,
+        isLoading: isMeLoading
     } = useGetMeQuery(undefined, {
         skip: !token
     });
@@ -34,30 +37,57 @@ function AuthInitializer({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         if (token) {
             refetch();
+        } else {
+            setIsCheckingAuth(false);
         }
     }, [token, refetch]);
 
     useEffect(() => {
         if (user) {
             setIsAuthenticated(true);
+            setIsCheckingAuth(false);
         } else if (error) {
             setIsAuthenticated(false);
             setToken(null);
             localStorage.removeItem('token');
+            setIsCheckingAuth(false);
         }
     }, [user, error]);
+
+    useEffect(() => {
+        if (isMeLoading === false && token) {
+            setIsCheckingAuth(false);
+        }
+    }, [isMeLoading, token]);
 
     const handleAuthSuccess = (newToken: string) => {
         setToken(newToken);
         localStorage.setItem('token', newToken);
         setIsAuthenticated(true);
+        setIsCheckingAuth(false);
+        setForceShowAuth(false);
     };
 
-    if (isLoading) {
+    const handleLogout = () => {
+        setToken(null);
+        setIsAuthenticated(false);
+        setForceShowAuth(true);
+        localStorage.removeItem('token');
+    };
+
+    // Expose logout function globally
+    useEffect(() => {
+        (window as unknown as { handleLogout?: () => void }).handleLogout = handleLogout;
+        return () => {
+            delete (window as unknown as { handleLogout?: () => void }).handleLogout;
+        };
+    }, []);
+
+    if (isLoading || isCheckingAuth) {
         return <div>Loading...</div>;
     }
 
-    if (!isAuthenticated) {
+    if (!isAuthenticated || forceShowAuth) {
         return <AuthForm onSuccess={handleAuthSuccess} />;
     }
 
@@ -79,9 +109,16 @@ export function useAuth() {
     const [isAuthenticated, setIsAuthenticated] = useState(!!token);
 
     const handleLogout = () => {
-        setToken(null);
-        setIsAuthenticated(false);
-        localStorage.removeItem('token');
+        // Use global logout function if available
+        const globalLogout = (window as unknown as { handleLogout?: () => void }).handleLogout;
+        if (globalLogout) {
+            globalLogout();
+        } else {
+            // Fallback to local logout
+            setToken(null);
+            setIsAuthenticated(false);
+            localStorage.removeItem('token');
+        }
     };
 
     return {
