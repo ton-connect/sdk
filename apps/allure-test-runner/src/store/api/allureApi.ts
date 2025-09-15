@@ -108,9 +108,6 @@ export const allureApi = createApi({
                 if (searchEncoded) qs.set('search', searchEncoded);
                 qs.set('page', String(page));
                 qs.set('size', String(size));
-                qs.append('sort', 'nodeSortOrder,asc');
-                qs.append('sort', 'name,asc');
-                qs.set('deleted', String(false));
                 qs.set('treeId', String(70));
                 if (Array.isArray(path)) {
                     // Append multiple path values
@@ -139,11 +136,8 @@ export const allureApi = createApi({
                 }
                 qs.set('page', String(0));
                 qs.set('size', String(100));
-                qs.append('sort', 'nodeSortOrder,asc');
-                qs.append('sort', 'name,asc');
-                qs.set('deleted', String(false));
                 return {
-                    url: `/allure/launches/${launchId}/item-tree?${qs.toString()}`
+                    url: `/allure/launches/${launchId}/items-tree?${qs.toString()}`
                 };
             },
             providesTags: ['TestCase']
