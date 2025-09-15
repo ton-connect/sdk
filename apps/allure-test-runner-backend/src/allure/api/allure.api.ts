@@ -35,6 +35,7 @@ export class AllureApi {
 
         this.client.interceptors.request.use(async config => {
             config.headers.Authorization = this.bearerToken;
+            console.log(config);
             return config;
         });
 
@@ -85,7 +86,7 @@ export class AllureApi {
     }) {
         let searchParams: unknown[] = [];
         if (params.search) {
-            searchParams.push({ id: 'search', value: params.search, type: 'string' });
+            searchParams.push({ id: 'name', value: params.search, type: 'string' });
         }
         if (params.tags?.length) {
             searchParams.push({ id: 'tag', value: params.tags, type: 'longArray' });
@@ -103,6 +104,8 @@ export class AllureApi {
                 search
             }
         });
+
+        console.log(data);
 
         return data;
     }

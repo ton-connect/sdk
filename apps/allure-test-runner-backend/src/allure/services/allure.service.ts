@@ -52,7 +52,7 @@ export class AllureService {
         const parsedParams = {
             ...params,
             tags:
-                user && user.role !== USER_ROLE.ADMIN
+                user && user.role === USER_ROLE.WALLET
                     ? [(await this.getTagIdByUser(user)).id]
                     : undefined
         };
