@@ -7,13 +7,13 @@ import {
     Logger
 } from '@nestjs/common';
 import { Response } from 'express';
-import { ZodError } from 'zod';
 import {
     AppException,
     LogicException,
     NotFoundException,
     UnauthorizedException
 } from './exceptions';
+import { ZodValidationException } from 'nestjs-zod';
 
 @Catch()
 export class AppExceptionFilter implements ExceptionFilter {
@@ -23,17 +23,12 @@ export class AppExceptionFilter implements ExceptionFilter {
         const ctx = host.switchToHttp();
         const response = ctx.getResponse<Response>();
 
-        if (exception instanceof ZodError) {
-            return response.status(HttpStatus.UNPROCESSABLE_ENTITY).json({
-                errors: exception.issues,
-                message: exception.message
-            });
+        if (exception instanceof ZodValidationException) {
+            return response.status(HttpStatus.UNPROCESSABLE_ENTITY).json(exception.getResponse());
         }
 
         if (exception instanceof HttpException) {
-            return response.status(exception.getStatus()).json({
-                message: exception.message
-            });
+            return response.status(exception.getStatus()).json(exception.getResponse());
         }
 
         if (exception instanceof AppException) {
@@ -47,6 +42,7 @@ export class AppExceptionFilter implements ExceptionFilter {
             }
 
             return response.status(status).json({
+                statusCode: status,
                 message: exception.message
             });
         }
@@ -54,6 +50,7 @@ export class AppExceptionFilter implements ExceptionFilter {
         this.logger.error(exception);
 
         return response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+            statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
             message: 'internal server error'
         });
     }

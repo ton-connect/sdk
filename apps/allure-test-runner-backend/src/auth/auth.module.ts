@@ -3,7 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import * as Controllers from './controllers';
 import * as Services from './services';
 import { UsersModule } from '../users';
-import { TokensService } from './services';
+import { HasherService, TokensService } from './services';
 
 export class AuthModule {
     static forRoot(): DynamicModule {
@@ -12,7 +12,7 @@ export class AuthModule {
 
             // for use of Auth decorators
             global: true,
-            exports: [TokensService],
+            exports: [TokensService, HasherService],
 
             imports: [UsersModule, ConfigModule],
             controllers: Object.values(Controllers),

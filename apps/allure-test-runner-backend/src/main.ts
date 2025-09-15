@@ -35,9 +35,9 @@ async function bootstrap() {
         .setVersion('1.0')
         .build();
 
-    SwaggerModule.setup('api/v1', app, () =>
-        cleanupOpenApiDoc(SwaggerModule.createDocument(app, documentBuilder))
-    );
+    const document = cleanupOpenApiDoc(SwaggerModule.createDocument(app, documentBuilder));
+
+    SwaggerModule.setup('api/v1', app, document);
 
     const configService = app.get<AppConfig>(ConfigService);
     const port = configService.getOrThrow('PORT', { infer: true });
