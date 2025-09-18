@@ -35,7 +35,6 @@ export class AllureApi {
 
         this.client.interceptors.request.use(async config => {
             config.headers.Authorization = this.bearerToken;
-            console.log(config);
             return config;
         });
 
@@ -104,8 +103,6 @@ export class AllureApi {
                 search
             }
         });
-
-        console.log(data);
 
         return data;
     }
