@@ -2,6 +2,8 @@ import { isValidUserFriendlyAddress, isValidRawAddress } from 'src/utils/address
 import { getDomain } from 'src/utils/web-api';
 
 const BASE64_REGEX = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
+const BASE64URL_REGEX = /^[A-Za-z0-9\-_]+$/;
+
 const BOC_PREFIX = 'te6cc';
 const INTEGER_REGEX = /^-?\d+$/;
 const POSITIVE_INTEGER_REGEX = /^\d+$/;
@@ -29,7 +31,11 @@ function isValidNetwork(value: unknown): boolean {
 }
 
 function isValidBoc(value: unknown): value is string {
-    return typeof value === 'string' && BASE64_REGEX.test(value) && value.startsWith(BOC_PREFIX);
+    return (
+        typeof value === 'string' &&
+        (BASE64_REGEX.test(value) || BASE64URL_REGEX.test(value)) &&
+        value.startsWith(BOC_PREFIX)
+    );
 }
 
 function isValidObject(value: unknown): value is Record<string, unknown> {

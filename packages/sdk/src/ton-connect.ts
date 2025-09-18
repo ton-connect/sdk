@@ -67,6 +67,7 @@ import {
     validateTonProofItemReply
 } from './validation/schemas';
 import { isQaModeEnabled } from './utils/qa-mode';
+import { normalizeBase64 } from './utils/base64';
 
 export class TonConnect implements ITonConnect {
     private static readonly walletsList = new WalletsListManager();
@@ -488,8 +489,10 @@ export class TonConnect implements ITonConnect {
                 from,
                 network,
                 valid_until: validUntil,
-                messages: messages.map(({ extraCurrency, ...msg }) => ({
+                messages: messages.map(({ extraCurrency, payload, stateInit, ...msg }) => ({
                     ...msg,
+                    payload: normalizeBase64(payload),
+                    stateInit: normalizeBase64(stateInit),
                     extra_currency: extraCurrency
                 }))
             }),
@@ -546,6 +549,7 @@ export class TonConnect implements ITonConnect {
         const response = await this.provider!.sendRequest(
             signDataParser.convertToRpcRequest({
                 ...data,
+                ...(data.type === 'cell' ? { cell: normalizeBase64(data.cell) } : {}),
                 from,
                 network
             }),
