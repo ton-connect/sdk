@@ -13,6 +13,7 @@ const RAW_ADDRESS = '0:' + 'a'.repeat(64);
 const USER_FRIENDLY_ADDRESS = toUserFriendlyAddress(RAW_ADDRESS);
 // Must match BASE64 regex and start with 'te6cc'. Keep length divisible by 4.
 const VALID_BOC = 'te6ccAAA';
+const VALID_BOC_URLSAFE = 'te6cc-_';
 
 describe('validation/schemas', () => {
     describe('validateSendTransactionRequest', () => {
@@ -28,6 +29,21 @@ describe('validation/schemas', () => {
                         stateInit: VALID_BOC,
                         payload: VALID_BOC,
                         extraCurrency: { 100: '1' }
+                    }
+                ]
+            });
+            expect(result).toBeNull();
+        });
+
+        it('accepts base64url for stateInit and payload', () => {
+            const result = validateSendTransactionRequest({
+                validUntil: Math.floor(Date.now() / 1000) + 60,
+                messages: [
+                    {
+                        address: USER_FRIENDLY_ADDRESS,
+                        amount: '1000',
+                        stateInit: VALID_BOC_URLSAFE,
+                        payload: VALID_BOC_URLSAFE
                     }
                 ]
             });
@@ -711,6 +727,18 @@ describe('validation/schemas', () => {
             expect(
                 validateSignDataPayload({ type: 'cell', schema: 'v1', cell: 'bad' } as unknown)
             ).toBe("Invalid 'cell' format (must be valid base64)");
+        });
+
+        it('accepts base64url for cell payload', () => {
+            expect(
+                validateSignDataPayload({
+                    type: 'cell',
+                    schema: 'v1',
+                    cell: VALID_BOC_URLSAFE,
+                    network: '0',
+                    from: RAW_ADDRESS
+                })
+            ).toBeNull();
         });
 
         it('accepts undefined values for optional fields in cell payload', () => {
