@@ -578,7 +578,7 @@ export function TestCasesSection({ launchId, onClose, onComplete, launchClosed =
     const toggleSidebar = () => setIsSidebarCollapsed(!isSidebarCollapsed);
 
     return (
-        <div className="h-screen flex flex-col bg-background">
+        <div className="h-screen-safe flex flex-col bg-background">
             <TestLaunchHeader
                 launchId={launchId}
                 launchClosed={launchClosed}
