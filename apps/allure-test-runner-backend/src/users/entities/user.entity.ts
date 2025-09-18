@@ -20,6 +20,9 @@ export class UserEntity {
     @Column({ unique: true })
     login: string;
 
+    @Column({ nullable: true, type: 'text' })
+    walletName?: string | null;
+
     @Column()
     passwordHash: string;
 

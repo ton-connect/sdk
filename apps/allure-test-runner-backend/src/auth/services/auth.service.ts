@@ -42,6 +42,10 @@ export class AuthService {
             throw new UnauthorizedException(INCORRECT_PASSWORD);
         }
 
-        return this.tokensService.issueTokens(user);
+        return this.tokensService.issueTokens({
+            id: user.id,
+            login: user.login,
+            role: user.role
+        });
     }
 }

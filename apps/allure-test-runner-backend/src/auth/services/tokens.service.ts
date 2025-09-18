@@ -21,9 +21,17 @@ export class TokensService {
     }
 
     async issueTokens(user: Principal) {
-        const accessToken = sign({ sub: String(user.id), role: user.role }, this.accessSecret, {
-            expiresIn: this.jwtAccessExpiresIn
-        });
+        const accessToken = sign(
+            {
+                sub: String(user.id),
+                login: user.login,
+                role: user.role
+            },
+            this.accessSecret,
+            {
+                expiresIn: this.jwtAccessExpiresIn
+            }
+        );
 
         return { accessToken };
     }
@@ -32,10 +40,12 @@ export class TokensService {
         try {
             const payload = verify(accessToken, this.accessSecret) as {
                 sub: string;
+                login: string;
                 role: USER_ROLE;
             };
             return {
                 id: Number(payload.sub),
+                login: payload.login,
                 role: payload.role
             };
         } catch (error) {

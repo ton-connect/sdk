@@ -4,6 +4,7 @@ import { InfiniteScrollLaunchesList } from '../components/TestLaunches/InfiniteS
 import { SearchBar } from '../components/TestLaunches/SearchBar/SearchBar';
 import { CreateLaunchModal } from '../components/TestLaunches/CreateLaunchModal';
 import { useLaunchesRedux } from '../hooks/useLaunchesRedux';
+import { UserInfo } from '../components/UserInfo/UserInfo';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import { AlertTriangle, X } from 'lucide-react';
 import {
@@ -29,6 +30,7 @@ export function LaunchesPage() {
         error,
         completeError,
         hasMore,
+        totalElements,
         complete,
         handleSearchChange,
         handleRefresh,
@@ -76,7 +78,7 @@ export function LaunchesPage() {
     }
 
     // Statistics
-    const totalLaunches = launches.length;
+    const totalLaunches = totalElements; // Use totalElements from API instead of loaded launches
     const activeLaunches = launches.filter(l => !l.closed).length;
     const totalDefects = launches.reduce((sum, l) => {
         const newDefects = typeof l.newDefectsCount === 'number' ? l.newDefectsCount : 0;
@@ -97,7 +99,10 @@ export function LaunchesPage() {
                                 spacing="normal"
                                 className="flex-col sm:flex-row sm:items-center"
                             >
-                                <LargeTitle>Test Launches</LargeTitle>
+                                <Inline spacing="normal" className="items-center">
+                                    <UserInfo />
+                                    <LargeTitle>Test Launches</LargeTitle>
+                                </Inline>
                                 <CleanButton
                                     onClick={handleCreateLaunch}
                                     className="w-full sm:w-auto"

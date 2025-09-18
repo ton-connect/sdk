@@ -139,6 +139,7 @@ export function useTestCases(launchId: number) {
     } = useGetLaunchItemsQuery({ launchId, search: searchQuery }, { skip: viewMode !== 'flat' });
 
     const pathChain = pathHistory.length > 0 ? pathHistory.map(p => p.id) : undefined;
+
     const {
         data: treeData,
         isLoading: treeLoading,

@@ -20,10 +20,22 @@ export class AllureApi {
         const baseURL = this.config.getOrThrow('ALLURE_BASE_URL', { infer: true });
         const apiToken = this.config.getOrThrow('ALLURE_API_TOKEN', { infer: true });
 
-        this.client = axios.create({ baseURL });
+        this.client = axios.create({
+            baseURL,
+            paramsSerializer: params =>
+                Object.entries(params)
+                    .filter(([_, value]) => value !== undefined && value !== null)
+                    .map(([key, value]) =>
+                        Array.isArray(value)
+                            ? value.map(v => `${key}=${encodeURIComponent(v)}`).join('&')
+                            : `${key}=${encodeURIComponent(value)}`
+                    )
+                    .join('&')
+        });
 
         this.client.interceptors.request.use(async config => {
             config.headers.Authorization = this.bearerToken;
+            console.log(config);
             return config;
         });
 
@@ -32,11 +44,15 @@ export class AllureApi {
             async error => {
                 const status = error?.response?.status;
                 if (status === HttpStatus.UNAUTHORIZED) {
-                    this.accessToken = await this.authenticate(apiToken);
-                    error.config.headers.Authorization = this.bearerToken;
-                    return await this.client.request(error.config);
+                    try {
+                        this.accessToken = await this.authenticate(apiToken);
+                        error.config.headers.Authorization = this.bearerToken;
+                        return await this.client.request(error.config);
+                    } catch (authError) {
+                        return Promise.reject(authError);
+                    }
                 }
-                return error;
+                return Promise.reject(error);
             }
         );
     }
@@ -63,18 +79,49 @@ export class AllureApi {
     async getLaunches(params: {
         projectId: number;
         search?: string;
+        tags?: number[];
         page?: number;
         size?: number;
         sort?: string;
     }) {
+        let searchParams: unknown[] = [];
+        if (params.search) {
+            searchParams.push({ id: 'name', value: params.search, type: 'string' });
+        }
+        if (params.tags?.length) {
+            searchParams.push({ id: 'tag', value: params.tags, type: 'longArray' });
+        }
+        const search = searchParams.length
+            ? Buffer.from(JSON.stringify(searchParams)).toString('base64')
+            : undefined;
+
         const { data } = await this.client.get(`/api/launch`, {
-            params
+            params: {
+                projectId: params.projectId,
+                page: params.page,
+                size: params.size,
+                sort: params.sort,
+                search
+            }
         });
+
+        console.log(data);
+
         return data;
     }
 
     async completeLaunch(id: number) {
         const { data } = await this.client.post(`/api/launch/${id}/close`, undefined, {});
+        return data;
+    }
+
+    async getLaunchById(id: number): Promise<{
+        tags: {
+            id: number;
+            name: string;
+        }[];
+    }> {
+        const { data } = await this.client.get(`/api/launch/${id}`);
         return data;
     }
 
@@ -99,7 +146,7 @@ export class AllureApi {
         size?: number;
         path?: number | number[];
     }) {
-        const { launchId, path, ...rest } = params;
+        const { launchId, ...rest } = params;
         const { data } = await this.client.get(
             `/api/v2/launch/${launchId}/test-result/tree/entity`,
             {
@@ -107,33 +154,14 @@ export class AllureApi {
                     ...rest,
                     deleted: false,
                     treeId: 70,
-                    sort: ['nodeSortOrder,asc', 'name,asc'],
-                    path
+                    sort: ['nodeSortOrder,asc', 'name,asc']
                 }
             }
         );
         return data;
     }
 
-    async getLaunchItemTree(params: { launchId: number; path: number | number[] }) {
-        const { launchId, path } = params;
-        const { data } = await this.client.get(
-            `/api/v2/launch/${launchId}/test-result/tree/entity`,
-            {
-                params: {
-                    page: 0,
-                    size: 100,
-                    deleted: false,
-                    treeId: 70,
-                    sort: ['nodeSortOrder,asc', 'name,asc'],
-                    path
-                }
-            }
-        );
-        return data;
-    }
-
-    async getTestResult(id: number) {
+    async getTestResult(id: number): Promise<{ launchId: number }> {
         const { data } = await this.client.get(`/api/testresult/${id}`, {});
         return data;
     }
@@ -190,9 +218,21 @@ export class AllureApi {
         return data;
     }
 
-    async runTestPlan(params: { id: number; launchName: string }) {
+    async createOrFindTag(name: string): Promise<{ id: number; name: string }> {
+        const { data } = await this.client.post(`/api/launch/tag`, {
+            name
+        });
+        return data;
+    }
+
+    async runTestPlan(params: {
+        id: number;
+        launchName: string;
+        tags?: { id: number; name: string }[];
+    }) {
         const { data } = await this.client.post(`/api/testplan/${params.id}/run`, {
-            launchName: params.launchName
+            launchName: params.launchName,
+            tags: params.tags
         });
         return data;
     }

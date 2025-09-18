@@ -40,6 +40,7 @@ import {
 import { Stack } from '../../ui/layout';
 import { Title, Body } from '../../ui/typography';
 import { Button } from '../../ui/button';
+import { UserInfo } from '../../UserInfo/UserInfo';
 
 type Props = {
     launchId: number;
@@ -128,6 +129,7 @@ function TestLaunchHeader({
         <div className="flex-shrink-0 border-b border-border bg-background">
             <div className="flex items-center justify-between px-4 py-3">
                 <div className="flex items-center gap-4">
+                    <UserInfo />
                     <Button
                         onClick={onClose}
                         variant="ghost"

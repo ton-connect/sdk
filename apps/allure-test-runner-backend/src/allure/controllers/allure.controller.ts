@@ -4,8 +4,6 @@ import { AllureService } from '../services';
 import {
     CompleteLaunchParamDTO,
     GetLaunchesQueryDTO,
-    GetLaunchItemTreeParamDTO,
-    GetLaunchItemTreeQueryDTO,
     GetLaunchItemsParamDTO,
     GetLaunchItemsQueryDTO,
     GetLaunchItemsTreeParamDTO,
@@ -17,20 +15,24 @@ import {
     RunTestPlanParamDTO,
     TestResultIdParamDTO
 } from '../dtos';
+import { Auth, AuthUser, OptionalAuth, type Principal } from '../../auth';
+import { USER_ROLE } from '../../users';
 
 @ApiTags('allure')
 @Controller('allure')
 export class AllureController {
     constructor(private readonly service: AllureService) {}
 
+    @OptionalAuth()
     @Get('launches')
-    getLaunches(@Query() query: GetLaunchesQueryDTO) {
-        return this.service.getLaunches(query);
+    getLaunches(@Query() query: GetLaunchesQueryDTO, @AuthUser() user?: Principal) {
+        return this.service.getLaunches(query, user);
     }
 
+    @Auth([USER_ROLE.WALLET, USER_ROLE.ADMIN])
     @Post('launches/:id/close')
-    completeLaunch(@Param() params: CompleteLaunchParamDTO) {
-        return this.service.completeLaunch(params.id);
+    completeLaunch(@Param() params: CompleteLaunchParamDTO, @AuthUser() user: Principal) {
+        return this.service.completeLaunch(params.id, user);
     }
 
     @Get('launches/:launchId/items')
@@ -49,14 +51,6 @@ export class AllureController {
         return this.service.getLaunchItemsTree({ launchId: params.launchId, ...query });
     }
 
-    @Get('launches/:launchId/item-tree')
-    getLaunchItemTree(
-        @Param() params: GetLaunchItemTreeParamDTO,
-        @Query() query: GetLaunchItemTreeQueryDTO
-    ) {
-        return this.service.getLaunchItemTree({ launchId: params.launchId, path: query.path });
-    }
-
     @Get('testresult/:id')
     getTestResult(@Param() params: TestResultIdParamDTO) {
         return this.service.getTestResult(params.id);
@@ -67,18 +61,26 @@ export class AllureController {
         return this.service.getTestResultWithCustomFields(params.id);
     }
 
+    @Auth([USER_ROLE.WALLET, USER_ROLE.ADMIN])
     @Post('testresult/:id/resolve')
     resolveTestResult(
         @Param() params: TestResultIdParamDTO,
-        @Body() body: ResolveTestResultBodyDTO
+        @Body() body: ResolveTestResultBodyDTO,
+        @AuthUser() user: Principal
     ) {
-        return this.service.resolveTestResult({ id: params.id, ...body });
+        return this.service.resolveTestResult({ id: params.id, ...body }, user);
     }
 
+    // TODO
+    @Auth([USER_ROLE.WALLET, USER_ROLE.ADMIN])
     @Post('testresult/:id/rerun')
     @HttpCode(200)
-    rerunTestResult(@Param() params: TestResultIdParamDTO, @Body() body: RerunTestResultBodyDTO) {
-        return this.service.rerunTestResult({ id: params.id, username: body.username });
+    rerunTestResult(
+        @Param() params: TestResultIdParamDTO,
+        @Body() body: RerunTestResultBodyDTO,
+        @AuthUser() user: Principal
+    ) {
+        return this.service.rerunTestResult({ id: params.id, username: body.username }, user);
     }
 
     @Get('testresult/:id/cfv')
@@ -96,8 +98,13 @@ export class AllureController {
         return this.service.getTestPlans(query.projectId);
     }
 
+    @Auth([USER_ROLE.WALLET, USER_ROLE.ADMIN])
     @Post('testplan/:id/run')
-    runTestPlan(@Param() params: RunTestPlanParamDTO, @Body() body: RunTestPlanBodyDTO) {
-        return this.service.runTestPlan({ id: params.id, launchName: body.launchName });
+    runTestPlan(
+        @Param() params: RunTestPlanParamDTO,
+        @Body() body: RunTestPlanBodyDTO,
+        @AuthUser() user: Principal
+    ) {
+        return this.service.runTestPlan({ id: params.id, launchName: body.launchName }, user);
     }
 }
