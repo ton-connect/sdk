@@ -210,7 +210,7 @@ While `tonConnectUI` internally delegates these calls to the `modal`, it is reco
 
 > The methods described in this section are marked as experimental and are subject to change in future releases.
 
-To open a modal window for a specific wallet, use the `openSingleWalletModal()` method. This method accepts the wallet `app_name` as a parameter (please refer to the [wallets-list.json](https://github.com/ton-blockchain/wallets-list/blob/main/wallets-v2.json)) and opens the corresponding wallet modal. It returns a promise that resolves after the modal window is successfully opened.
+To open a modal window for a specific wallet, use the `openSingleWalletModal()` method. This method accepts the wallet `app_name` as a parameter (please refer to the [wallets-list.json](https://config.ton.org/wallets-v2.json)) and opens the corresponding wallet modal. It returns a promise that resolves after the modal window is successfully opened.
 
 ```typescript
 await tonConnectUI.openSingleWalletModal('wallet_identifier');
