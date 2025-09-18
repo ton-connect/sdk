@@ -30,7 +30,7 @@ export class WalletsListManager {
         } else {
             this.walletsListSource =
                 options?.walletsListSource ??
-                'https://raw.githubusercontent.com/ton-blockchain/wallets-list/main/wallets-v2.json';
+                'https://whatever-zeta-two.vercel.app/wallets-v2.json';
         }
 
         this.cacheTTLMs = options?.cacheTTLMs;
