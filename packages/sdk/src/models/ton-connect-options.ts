@@ -25,7 +25,7 @@ export interface TonConnectOptions {
 
     /**
      * Redefine wallets list source URL. Must be a link to a json file with [following structure]{@link https://github.com/ton-connect/wallets-list}
-     * @default https://raw.githubusercontent.com/ton-connect/wallets-list/main/wallets.json
+     * @default https://config.ton.org/wallets-v2.json
      * @
      */
     walletsListSource?: string;

@@ -29,8 +29,7 @@ export class WalletsListManager {
                 'https://raw.githubusercontent.com/ton-connect/wallets-list-staging/refs/heads/main/wallets-v2.json';
         } else {
             this.walletsListSource =
-                options?.walletsListSource ??
-                'https://raw.githubusercontent.com/ton-blockchain/wallets-list/main/wallets-v2.json';
+                options?.walletsListSource ?? 'https://config.ton.org/wallets-v2.json';
         }
 
         this.cacheTTLMs = options?.cacheTTLMs;
