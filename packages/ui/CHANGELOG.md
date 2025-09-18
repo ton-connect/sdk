@@ -1,5 +1,17 @@
 # Changelog @tonconnect/ui
 
+## 2.3.1-beta.0
+
+### Patch Changes
+
+- f9735ee: chore: update fallback wallets list to match config.ton.org/wallets-v2.json
+- 958e7b3: feat: add base64 normalization to support URL-safe base64 encoding
+- 143ec17: feat: migrate wallet list URL to config.ton.org/wallets-v2.json
+- Updated dependencies [f9735ee]
+- Updated dependencies [958e7b3]
+- Updated dependencies [143ec17]
+    - @tonconnect/sdk@3.3.1-beta.0
+
 ## 2.3.0
 
 ### Patch Changes
