@@ -60,7 +60,7 @@ export function InfiniteScrollLaunchesList({
                 observerRef.current.disconnect();
             }
         };
-    }, [handleObserver]);
+    }, [hasMore, loadingMore, loading, onLoadMore]); // Depend on the actual values instead of handleObserver
 
     if (launches.length === 0 && !loading) {
         return null;

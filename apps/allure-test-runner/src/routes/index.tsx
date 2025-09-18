@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { LaunchesPage } from './LaunchesPage';
 import { LaunchDetailsPage } from './LaunchDetailsPage';
+import { AdminPage } from './AdminPage';
 
 export const router = createBrowserRouter([
     {
@@ -18,5 +19,9 @@ export const router = createBrowserRouter([
     {
         path: '/launches/:launchId/tests/:testId',
         element: <LaunchDetailsPage />
+    },
+    {
+        path: '/admin',
+        element: <AdminPage />
     }
 ]);

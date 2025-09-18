@@ -1,112 +1,135 @@
-import { useState, useCallback, useMemo } from 'react';
-import { useForm } from 'react-hook-form';
-import { Loader2 } from 'lucide-react';
-import { useAppDispatch } from '../../store/hooks';
-import { setToken } from '../../store/slices/authSlice';
-import { useAuthenticateMutation } from '../../store/api/allureApi';
-import { Stack, Card, CardContent } from '../ui/layout';
-import { Display, Body, Caption } from '../ui/typography';
-import { FormField, CleanInput, CleanButton } from '../ui/form-field';
+import React, { useState } from 'react';
+import { useSignUpMutation, useSignInMutation } from '../../store/api/allureApi';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { Alert, AlertDescription } from '../ui/alert';
+import { AlertCircle } from 'lucide-react';
 
-interface FormData {
-    userToken: string;
+interface AuthFormProps {
+    onSuccess: (token: string) => void;
 }
 
-export function AuthForm() {
-    const [error, setError] = useState<string | null>(null);
-    const dispatch = useAppDispatch();
-    const [authenticate, { isLoading: loading }] = useAuthenticateMutation();
-
-    const {
-        register,
-        handleSubmit,
-        watch,
-        formState: { errors }
-    } = useForm<FormData>({
-        defaultValues: {
-            userToken: ''
-        }
+export const AuthForm: React.FC<AuthFormProps> = ({ onSuccess }) => {
+    const [isSignUp, setIsSignUp] = useState(false);
+    const [formData, setFormData] = useState({
+        login: '',
+        password: ''
     });
+    const [error, setError] = useState<string | null>(null);
 
-    const userToken = watch('userToken');
+    const [signUp, { isLoading: isSignUpLoading }] = useSignUpMutation();
+    const [signIn, { isLoading: isSignInLoading }] = useSignInMutation();
 
-    const onSubmit = useCallback(
-        async (data: FormData) => {
-            if (!data.userToken.trim()) {
-                setError('User API token is required');
-                return;
+    const isLoading = isSignUpLoading || isSignInLoading;
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError(null);
+
+        try {
+            if (isSignUp) {
+                await signUp(formData).unwrap();
+                // After successful sign up, switch to sign in
+                setIsSignUp(false);
+            } else {
+                const result = await signIn(formData).unwrap();
+                onSuccess(result.accessToken);
             }
-            try {
-                setError(null);
-                const access = await authenticate({ userToken: data.userToken }).unwrap();
-                dispatch(setToken(access));
-            } catch (e: unknown) {
-                const errorMessage = e instanceof Error ? e.message : 'Failed to authenticate';
-                setError(errorMessage);
-            }
-        },
-        [authenticate, dispatch]
-    );
+        } catch (err: unknown) {
+            const errorMessage =
+                err &&
+                typeof err === 'object' &&
+                'data' in err &&
+                err.data &&
+                typeof err.data === 'object' &&
+                'message' in err.data &&
+                typeof err.data.message === 'string'
+                    ? err.data.message
+                    : 'An error occurred';
+            setError(errorMessage);
+        }
+    };
 
-    const isSubmitDisabled = useMemo(() => !userToken?.trim() || loading, [userToken, loading]);
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
 
     return (
-        <div className="w-full max-w-sm mx-auto">
-            <Card className="border-0 shadow-none bg-transparent">
+        <div className="min-h-screen flex items-center justify-center bg-background p-4">
+            <Card className="w-full max-w-md">
+                <CardHeader className="space-y-1">
+                    <CardTitle className="text-2xl text-center text-foreground">
+                        {isSignUp ? 'Create Account' : 'Welcome Back'}
+                    </CardTitle>
+                    <CardDescription className="text-center text-muted-foreground">
+                        {isSignUp
+                            ? 'Enter your credentials to create a new account'
+                            : 'Enter your credentials to sign in to your account'}
+                    </CardDescription>
+                </CardHeader>
                 <CardContent>
-                    <Stack spacing="relaxed">
-                        <Stack spacing="tight" className="text-center">
-                            <Display>Welcome</Display>
-                            <Body className="text-muted-foreground">
-                                Enter your API token to continue
-                            </Body>
-                        </Stack>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="login" className="text-foreground">
+                                Login
+                            </Label>
+                            <Input
+                                id="login"
+                                name="login"
+                                type="text"
+                                value={formData.login}
+                                onChange={handleInputChange}
+                                placeholder="Enter your login"
+                                required
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="password" className="text-foreground">
+                                Password
+                            </Label>
+                            <Input
+                                id="password"
+                                name="password"
+                                type="password"
+                                value={formData.password}
+                                onChange={handleInputChange}
+                                placeholder="Enter your password"
+                                required
+                            />
+                        </div>
 
                         {error && (
-                            <div className="rounded-lg bg-destructive/10 px-4 py-3">
-                                <Caption className="text-destructive">{error}</Caption>
-                            </div>
+                            <Alert variant="destructive">
+                                <AlertCircle className="h-4 w-4" />
+                                <AlertDescription>{error}</AlertDescription>
+                            </Alert>
                         )}
 
-                        <form onSubmit={handleSubmit(onSubmit)}>
-                            <Stack spacing="relaxed">
-                                <FormField
-                                    label="API Token"
-                                    required
-                                    error={errors.userToken?.message}
-                                >
-                                    <CleanInput
-                                        type="password"
-                                        placeholder="Enter your token"
-                                        autoComplete="off"
-                                        size="large"
-                                        className="bg-muted/30 border-0"
-                                        {...register('userToken', {
-                                            required: 'User API token is required'
-                                        })}
-                                    />
-                                </FormField>
+                        <Button type="submit" className="w-full" disabled={isLoading}>
+                            {isLoading ? 'Loading...' : isSignUp ? 'Create Account' : 'Sign In'}
+                        </Button>
+                    </form>
 
-                                <CleanButton
-                                    type="submit"
-                                    disabled={isSubmitDisabled}
-                                    className="w-full"
-                                    size="large"
-                                >
-                                    {loading ? (
-                                        <>
-                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                            Authenticating...
-                                        </>
-                                    ) : (
-                                        'Continue'
-                                    )}
-                                </CleanButton>
-                            </Stack>
-                        </form>
-                    </Stack>
+                    <div className="mt-4 text-center">
+                        <Button
+                            variant="link"
+                            onClick={() => setIsSignUp(!isSignUp)}
+                            className="text-sm text-muted-foreground hover:text-foreground"
+                        >
+                            {isSignUp
+                                ? 'Already have an account? Sign In'
+                                : "Don't have an account? Sign Up"}
+                        </Button>
+                    </div>
                 </CardContent>
             </Card>
         </div>
     );
-}
+};

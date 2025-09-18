@@ -1,10 +1,14 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { TokensService } from '../services';
 import { INVALID_ACCESS_TOKEN } from '../errors';
+import { Reflector } from '@nestjs/core';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-    constructor(private readonly tokensService: TokensService) {}
+    constructor(
+        private readonly reflector: Reflector,
+        private readonly tokensService: TokensService
+    ) {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const req = context.switchToHttp().getRequest();
@@ -15,7 +19,7 @@ export class JwtAuthGuard implements CanActivate {
         }
 
         const accessToken = auth.replace('Bearer ', '');
-        const payload = await this.tokensService.extractPrincipal(accessToken);
+        const payload = this.tokensService.extractPrincipal(accessToken);
         req.user = payload;
 
         return true;

@@ -4,13 +4,16 @@ import { useGetLaunchesQuery, useCompleteLaunchMutation } from '../store/api/all
 import {
     setSearch,
     setLaunches,
+    addLaunches,
+    setCurrentPage,
     setTotalElements,
     setHasMore,
     setLoading,
     setLoadingMore,
     setError,
     setCompleteError,
-    clearCompleteError
+    clearCompleteError,
+    resetLaunches
 } from '../store/slices/launchesSlice';
 import { selectLaunches } from '../store/selectors';
 import { DEFAULT_PROJECT_ID } from '../constants';
@@ -35,7 +38,7 @@ export function useLaunchesRedux() {
         {
             projectId: DEFAULT_PROJECT_ID,
             search: searchQuery,
-            page: 0,
+            page: launchesState.currentPage,
             size: INITIAL_PAGE_SIZE,
             sort: 'created_date,DESC'
         },
@@ -43,16 +46,41 @@ export function useLaunchesRedux() {
     );
 
     useEffect(() => {
-        if (launchesData) {
-            dispatch(setLaunches(launchesData.content));
-            dispatch(setTotalElements(launchesData.totalElements));
-            dispatch(setHasMore(false));
+        if (launchesState.search !== searchQuery) {
+            dispatch(resetLaunches());
+            dispatch(setCurrentPage(0));
         }
-    }, [launchesData, dispatch]);
+    }, [searchQuery, launchesState.search, dispatch]);
+
+    useEffect(() => {
+        if (launchesData) {
+            if (launchesState.currentPage === 0) {
+                dispatch(setLaunches(launchesData.content));
+            } else {
+                dispatch(addLaunches(launchesData.content));
+            }
+            dispatch(setTotalElements(launchesData.totalElements));
+
+            // Calculate if there are more pages using totalElements
+            // We need to check if we have loaded all available items
+            const totalLoaded =
+                launchesState.currentPage === 0
+                    ? launchesData.content.length
+                    : launchesState.launches.length;
+            const hasMorePages = totalLoaded < launchesData.totalElements;
+
+            // Debug logging
+
+            dispatch(setHasMore(hasMorePages));
+        }
+    }, [launchesData, dispatch, launchesState.currentPage, launchesState.launches.length]);
 
     useEffect(() => {
         dispatch(setLoading(isLoading || isFetching));
-        dispatch(setLoadingMore(false));
+        // Reset loadingMore when data is loaded
+        if (!isLoading && !isFetching) {
+            dispatch(setLoadingMore(false));
+        }
     }, [isLoading, isFetching, dispatch]);
 
     useEffect(() => {
@@ -71,16 +99,32 @@ export function useLaunchesRedux() {
     );
 
     const handleRefresh = useCallback(() => {
+        dispatch(resetLaunches());
+        dispatch(setCurrentPage(0));
         refetchLaunches();
-    }, [refetchLaunches]);
+    }, [refetchLaunches, dispatch]);
 
-    const loadMore = useCallback(() => {}, []);
+    const loadMore = useCallback(() => {
+        if (launchesState.hasMore && !launchesState.loadingMore && !launchesState.loading) {
+            dispatch(setLoadingMore(true));
+            dispatch(setCurrentPage(launchesState.currentPage + 1));
+        }
+    }, [
+        launchesState.hasMore,
+        launchesState.loadingMore,
+        launchesState.loading,
+        launchesState.currentPage,
+        dispatch
+    ]);
 
     const complete = useCallback(
         async (id: number) => {
             try {
                 dispatch(clearCompleteError());
                 await completeLaunch({ id }).unwrap();
+                // Reset and refetch to get updated data
+                dispatch(resetLaunches());
+                dispatch(setCurrentPage(0));
                 refetchLaunches();
             } catch (error) {
                 const errorMessage =
@@ -93,17 +137,19 @@ export function useLaunchesRedux() {
     );
 
     const refetch = useCallback(() => {
+        dispatch(resetLaunches());
+        dispatch(setCurrentPage(0));
         refetchLaunches();
-    }, [refetchLaunches]);
+    }, [refetchLaunches, dispatch]);
 
     return {
         search: launchesState.search,
         launches: launchesState.launches,
         loading: launchesState.loading,
-        loadingMore: false,
+        loadingMore: launchesState.loadingMore,
         error: launchesState.error,
         completeError: launchesState.completeError,
-        hasMore: false,
+        hasMore: launchesState.hasMore,
         totalElements: launchesState.totalElements,
         complete,
         handleSearchChange,
