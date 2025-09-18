@@ -289,11 +289,13 @@ export function useTestCases(launchId: number) {
     const refreshTestCases = useCallback(async () => {
         const currentExpandedGroups = new Set(expandedGroups);
 
-        setGroupContents(new Map());
-        setLoadingGroups(new Set());
+        // Don't clear existing content - keep it visible during refresh
+        // setGroupContents(new Map());
+        // setLoadingGroups(new Set());
 
         refetch();
 
+        // Refresh expanded groups in the background
         for (const groupId of currentExpandedGroups) {
             const basePath = parentPathByGroupId.get(groupId) ?? pathHistory.map(p => p.id);
             if (!basePath) continue;
