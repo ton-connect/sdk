@@ -11,3 +11,4 @@ export {
     SignDataFeature
 } from './feature';
 export { CHAIN } from './CHAIN';
+export { HeartbeatFormat } from './heartbeat';

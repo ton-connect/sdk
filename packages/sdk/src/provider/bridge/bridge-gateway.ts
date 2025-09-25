@@ -284,6 +284,7 @@ async function createEventSource(config: CreateEventSourceConfig): Promise<Event
             if (lastEventId) {
                 url.searchParams.append('last_event_id', lastEventId);
             }
+            url.searchParams.append('heartbeat', 'message');
 
             if (signal.aborted) {
                 reject(new TonConnectError('Bridge connection aborted'));
