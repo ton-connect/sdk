@@ -3,6 +3,7 @@ import { render } from 'solid-js/web';
 import {
     Action,
     lastSelectedWalletInfo,
+    lastVisibleWalletsInfo,
     setAction,
     setLastSelectedWalletInfo,
     setSingleWalletModalState,
@@ -13,6 +14,7 @@ import App from './App';
 import { WalletInfoWithOpenMethod, WalletOpenMethod } from 'src/models/connected-wallet';
 import { WalletsModalCloseReason } from 'src/models';
 import { WalletInfoRemote, WalletNotSupportFeatureError } from '@tonconnect/sdk';
+import { UIWalletInfo } from 'src/app/models/ui-wallet-info';
 
 export const widgetController = {
     openWalletsModal: (): void =>
@@ -62,6 +64,7 @@ export const widgetController = {
               openMethod: WalletOpenMethod;
           }
         | null => lastSelectedWalletInfo(),
+    getLastVisibleWallets: (): UIWalletInfo[] => lastVisibleWalletsInfo(),
     removeSelectedWalletInfo: (): void => setLastSelectedWalletInfo(null),
     renderApp: (root: string, tonConnectUI: TonConnectUI): (() => void) =>
         render(

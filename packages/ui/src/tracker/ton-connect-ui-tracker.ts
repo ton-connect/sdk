@@ -11,6 +11,7 @@ import {
     createTransactionSentForSignatureEvent,
     createTransactionSignedEvent,
     createTransactionSigningFailedEvent,
+    createWalletModalOpenedEvent,
     UserActionEvent
 } from './types';
 import {
@@ -161,6 +162,19 @@ export class TonConnectUITracker {
             this.eventDispatcher
                 ?.dispatchEvent(`${this.eventPrefix}${eventDetails.type}`, eventDetails)
                 .catch();
+        } catch (e) {}
+    }
+
+    /**
+     * Track wallet opened event.
+     * @param args
+     */
+    public trackWalletModalOpened(
+        ...args: WithoutVersion<Parameters<typeof createWalletModalOpenedEvent>>
+    ): void {
+        try {
+            const event = createWalletModalOpenedEvent(this.version, ...args);
+            this.dispatchUserActionEvent(event);
         } catch (e) {}
     }
 

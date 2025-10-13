@@ -68,6 +68,10 @@ import {
 } from './validation/schemas';
 import { isQaModeEnabled } from './utils/qa-mode';
 import { normalizeBase64 } from './utils/base64';
+import { AnalyticsManager } from 'src/analytics/analytics-manager';
+import { BrowserEventDispatcher } from 'src/tracker/browser-event-dispatcher';
+import { bindEventsTo } from 'src/analytics/sdk-actions-adapter';
+import { BridgePartialSession, BridgeSession } from 'src/provider/bridge/models/bridge-session';
 
 export class TonConnect implements ITonConnect {
     private static readonly walletsList = new WalletsListManager();
@@ -100,6 +104,8 @@ export class TonConnect implements ITonConnect {
     private readonly tracker: TonConnectTracker;
 
     private readonly walletsList = new WalletsListManager();
+
+    private readonly analytics?: AnalyticsManager;
 
     private readonly dappSettings: Pick<Required<TonConnectOptions>, 'manifestUrl' | 'storage'>;
 
@@ -144,8 +150,9 @@ export class TonConnect implements ITonConnect {
     }
 
     constructor(options?: TonConnectOptions) {
+        const manifestUrl = options?.manifestUrl || getWebPageManifest();
         this.dappSettings = {
-            manifestUrl: options?.manifestUrl || getWebPageManifest(),
+            manifestUrl,
             storage: options?.storage || new DefaultStorage()
         };
 
@@ -156,10 +163,16 @@ export class TonConnect implements ITonConnect {
             cacheTTLMs: options?.walletsListCacheTTLMs
         });
 
+        const eventDispatcher = options?.eventDispatcher ?? new BrowserEventDispatcher();
         this.tracker = new TonConnectTracker({
-            eventDispatcher: options?.eventDispatcher,
+            eventDispatcher,
             tonConnectSdkVersion: tonConnectSdkVersion
         });
+
+        // TODO: flag?
+        this.analytics = new AnalyticsManager();
+
+        bindEventsTo(eventDispatcher, this.analytics.scoped('tonconnect'));
 
         if (!this.dappSettings.manifestUrl) {
             throw new DappMetadataError(
@@ -340,10 +353,16 @@ export class TonConnect implements ITonConnect {
         try {
             switch (bridgeConnectionType) {
                 case 'http':
-                    provider = await BridgeProvider.fromStorage(this.dappSettings.storage);
+                    provider = await BridgeProvider.fromStorage(
+                        this.dappSettings.storage,
+                        this.analytics
+                    );
                     break;
                 case 'injected':
-                    provider = await InjectedProvider.fromStorage(this.dappSettings.storage);
+                    provider = await InjectedProvider.fromStorage(
+                        this.dappSettings.storage,
+                        this.analytics
+                    );
                     break;
                 default:
                     if (embeddedWallet) {
@@ -477,7 +496,8 @@ export class TonConnect implements ITonConnect {
             requireExtraCurrencies
         });
 
-        this.tracker.trackTransactionSentForSignature(this.wallet, transaction);
+        const sessionInfo = this.getSessionInfo();
+        this.tracker.trackTransactionSentForSignature(this.wallet, transaction, sessionInfo);
 
         const { validUntil, messages, ...tx } = transaction;
         const from = transaction.from || this.account!.address;
@@ -504,7 +524,8 @@ export class TonConnect implements ITonConnect {
                 this.wallet,
                 transaction,
                 response.error.message,
-                response.error.code
+                response.error.code,
+                sessionInfo
             );
             return sendTransactionParser.parseAndThrowError(response);
         }
@@ -512,7 +533,7 @@ export class TonConnect implements ITonConnect {
         const result = sendTransactionParser.convertFromRpcResponse(
             response as SendTransactionRpcResponseSuccess
         );
-        this.tracker.trackTransactionSigned(this.wallet, transaction, result);
+        this.tracker.trackTransactionSigned(this.wallet, transaction, result, sessionInfo);
         return result;
     }
 
@@ -541,7 +562,8 @@ export class TonConnect implements ITonConnect {
         this.checkConnection();
         checkSignDataSupport(this.wallet!.device.features, { requiredTypes: [data.type] });
 
-        this.tracker.trackDataSentForSignature(this.wallet, data);
+        const sessionInfo = this.getSessionInfo();
+        this.tracker.trackDataSentForSignature(this.wallet, data, sessionInfo);
 
         const from = data.from || this.account!.address;
         const network = data.network || this.account!.chain;
@@ -561,7 +583,8 @@ export class TonConnect implements ITonConnect {
                 this.wallet,
                 data,
                 response.error.message,
-                response.error.code
+                response.error.code,
+                sessionInfo
             );
             return signDataParser.parseAndThrowError(response);
         }
@@ -570,7 +593,7 @@ export class TonConnect implements ITonConnect {
             response as SignDataRpcResponseSuccess
         );
 
-        this.tracker.trackDataSigned(this.wallet, data, result);
+        this.tracker.trackDataSigned(this.wallet, data, result, sessionInfo);
 
         return result;
     }
@@ -603,7 +626,7 @@ export class TonConnect implements ITonConnect {
      * @returns session ID string or null if not available.
      */
     public async getSessionId(): Promise<string | null> {
-        if (!this.provider || !this.connected) {
+        if (!this.provider) {
             return null;
         }
 
@@ -620,6 +643,31 @@ export class TonConnect implements ITonConnect {
                 // Established connection
                 return connection.session.sessionCrypto.sessionId;
             }
+        } catch {
+            return null;
+        }
+    }
+
+    private getSessionInfo(): { clientId: string | null; walletId: string | null } | null {
+        if (this.provider?.type !== 'http') {
+            return null;
+        }
+
+        if (!('session' in this.provider)) {
+            return null;
+        }
+
+        try {
+            const session = this.provider.session as BridgeSession | BridgePartialSession | null;
+            if (!session) {
+                return null;
+            }
+            const clientId = session.sessionCrypto.sessionId;
+            let walletId = null;
+            if ('walletPublicKey' in session) {
+                walletId = session.walletPublicKey;
+            }
+            return { clientId, walletId };
         } catch {
             return null;
         }
@@ -673,9 +721,13 @@ export class TonConnect implements ITonConnect {
         let provider: Provider;
 
         if (!Array.isArray(wallet) && isWalletConnectionSourceJS(wallet)) {
-            provider = new InjectedProvider(this.dappSettings.storage, wallet.jsBridgeKey);
+            provider = new InjectedProvider(
+                this.dappSettings.storage,
+                wallet.jsBridgeKey,
+                this.analytics
+            );
         } else {
-            provider = new BridgeProvider(this.dappSettings.storage, wallet);
+            provider = new BridgeProvider(this.dappSettings.storage, wallet, this.analytics);
         }
 
         provider.listen(this.walletEventsListener.bind(this));
@@ -688,7 +740,11 @@ export class TonConnect implements ITonConnect {
                 this.onWalletConnected(e.payload);
                 break;
             case 'connect_error':
-                this.tracker.trackConnectionError(e.payload.message, e.payload.code);
+                this.tracker.trackConnectionError(
+                    e.payload.message,
+                    e.payload.code,
+                    this.getSessionInfo()
+                );
                 const walletError = connectErrorsParser.parseError(e.payload);
                 this.onWalletConnectError(walletError);
                 break;
@@ -793,12 +849,12 @@ export class TonConnect implements ITonConnect {
 
         this.wallet = wallet;
 
-        this.tracker.trackConnectionCompleted(wallet);
+        const sessionInfo = this.getSessionInfo();
+        this.tracker.trackConnectionCompleted(wallet, sessionInfo);
     }
 
     private onWalletConnectError(error: TonConnectError): void {
         this.statusChangeErrorSubscriptions.forEach(errorsHandler => errorsHandler(error));
-
         logDebug(error);
 
         if (error instanceof ManifestNotFoundError || error instanceof ManifestContentErrorError) {
@@ -808,7 +864,8 @@ export class TonConnect implements ITonConnect {
     }
 
     private onWalletDisconnected(scope: 'wallet' | 'dapp'): void {
-        this.tracker.trackDisconnection(this.wallet, scope);
+        const sessionInfo = this.getSessionInfo();
+        this.tracker.trackDisconnection(this.wallet, scope, sessionInfo);
         this.wallet = null;
     }
 

@@ -349,7 +349,15 @@ export class TonConnectUI {
      * Opens the modal window, returns a promise that resolves after the modal window is opened.
      */
     public async openModal(): Promise<void> {
-        return this.modal.open();
+        await this.modal.open();
+
+        const sessionId = await this.getSessionId();
+        const visibleWallets = widgetController.getLastVisibleWallets();
+
+        this.tracker.trackWalletModalOpened(
+            visibleWallets.map(wallet => wallet.name),
+            sessionId
+        );
     }
 
     /**
@@ -696,10 +704,6 @@ export class TonConnectUI {
      * @returns session ID string or null if not available.
      */
     private async getSessionId(): Promise<string | null> {
-        if (!this.connected) {
-            return null;
-        }
-
         try {
             // Try to get session ID from storage as a fallback
             // eslint-disable-next-line @typescript-eslint/no-explicit-any

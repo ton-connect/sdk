@@ -8,7 +8,7 @@ import {
 } from './style';
 import { ConnectAdditionalRequest } from '@tonconnect/sdk';
 import { appState } from 'src/app/state/app.state';
-import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
+import { setLastSelectedWalletInfo, setLastVisibleWalletsInfo } from 'src/app/state/modals-state';
 import { FourWalletsItem, H1, WalletLabeledItem } from 'src/app/components';
 import { UIWalletInfo } from 'src/app/models/ui-wallet-info';
 import { IMG } from 'src/app/env/IMG';
@@ -43,6 +43,7 @@ export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = prop
     );
 
     const visibleWallets = createMemo(() => supportedWallets().slice(0, 3), null);
+    setLastVisibleWalletsInfo(visibleWallets());
 
     const fourWalletsItem = createMemo(
         () =>

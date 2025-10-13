@@ -26,7 +26,8 @@ export {
     createDataSignedEvent,
     createRequestVersionEvent,
     createResponseVersionEvent,
-    createVersionInfo
+    createVersionInfo,
+    createWalletModalOpenedEvent
 } from './tracker/types';
 export type {
     AuthType,
@@ -41,7 +42,9 @@ export type {
     ConnectionRestoringCompletedEvent,
     DisconnectionEvent,
     TransactionInfo,
+    TransactionFullInfo,
     TransactionMessage,
+    TransactionFullMessage,
     TransactionSigningEvent,
     TransactionSignedEvent,
     TransactionSentForSignatureEvent,
@@ -53,9 +56,11 @@ export type {
     SdkActionEvent,
     RequestVersionEvent,
     ResponseVersionEvent,
+    WalletModalOpenedEvent,
     VersionEvent,
     Version,
-    WithoutVersion
+    WithoutVersion,
+    SessionInfo
 } from './tracker/types';
 export { BrowserEventDispatcher } from './tracker/browser-event-dispatcher';
 export type { TonAddressItem, TonProofItem, ConnectItem } from '@tonconnect/protocol';

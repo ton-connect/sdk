@@ -11,6 +11,8 @@ import { logDebug, logError } from 'src/utils/log';
 import { createResource } from 'src/utils/resource';
 import { timeout } from 'src/utils/timeout';
 import { createAbortController } from 'src/utils/create-abort-controller';
+import { AnalyticsManager } from 'src/analytics/analytics-manager';
+import { Analytics } from 'src/analytics/analytics';
 
 export class BridgeGateway {
     private readonly ssePath = 'events';
@@ -60,19 +62,40 @@ export class BridgeGateway {
     }
 
     private readonly bridgeGatewayStorage: HttpBridgeGatewayStorage;
+    private readonly analytics?: Analytics;
 
     constructor(
         storage: IStorage,
         public readonly bridgeUrl: string,
         public readonly sessionId: string,
         private listener: (msg: BridgeIncomingMessage) => void,
-        private errorsListener: (err: Event) => void
+        private errorsListener: (err: Event) => void,
+        analyticsManager?: AnalyticsManager
     ) {
         this.bridgeGatewayStorage = new HttpBridgeGatewayStorage(storage, bridgeUrl);
+        this.analytics = analyticsManager?.scoped('http-bridge', {
+            bridge_url: bridgeUrl,
+            client_id: sessionId
+        });
     }
 
     public async registerSession(options?: RegisterSessionOptions): Promise<void> {
-        await this.eventSource.create(options?.signal, options?.openingDeadlineMS);
+        try {
+            this.analytics?.emit({ event_name: 'bridge-client-connect-started' });
+            const connectionStarted = Date.now();
+            await this.eventSource.create(options?.signal, options?.openingDeadlineMS);
+
+            const bridgeConnectDuration = Date.now() - connectionStarted;
+            this.analytics?.emit({
+                event_name: 'bridge-client-connect-established',
+                bridge_connect_duration: bridgeConnectDuration
+            });
+        } catch (error) {
+            this.analytics?.emit({
+                event_name: 'bridge-client-connect-error',
+                error_message: String(error)
+            });
+        }
     }
 
     public async send(
@@ -83,6 +106,7 @@ export class BridgeGateway {
             ttl?: number;
             signal?: AbortSignal;
             attempts?: number;
+            messageId?: string;
         }
     ): Promise<void>;
     /** @deprecated use send(message, receiver, topic, options) instead */
@@ -96,7 +120,9 @@ export class BridgeGateway {
         message: Uint8Array,
         receiver: string,
         topic: RpcMethod,
-        ttlOrOptions?: number | { ttl?: number; signal?: AbortSignal; attempts?: number }
+        ttlOrOptions?:
+            | number
+            | { ttl?: number; signal?: AbortSignal; attempts?: number; messageId?: string }
     ): Promise<void> {
         // TODO: remove deprecated method
         const options: { ttl?: number; signal?: AbortSignal; attempts?: number } = {};

@@ -29,16 +29,24 @@ import { logDebug, logError } from 'src/utils/log';
 import { encodeTelegramUrlParameters, isTelegramUrl } from 'src/utils/url';
 import { callForSuccess } from 'src/utils/call-for-success';
 import { createAbortController } from 'src/utils/create-abort-controller';
+import { AnalyticsManager } from 'src/analytics/analytics-manager';
 
 export class BridgeProvider implements HTTPProvider {
-    public static async fromStorage(storage: IStorage): Promise<BridgeProvider> {
+    public static async fromStorage(
+        storage: IStorage,
+        analyticsManager?: AnalyticsManager
+    ): Promise<BridgeProvider> {
         const bridgeConnectionStorage = new BridgeConnectionStorage(storage);
         const connection = await bridgeConnectionStorage.getHttpConnection();
 
         if (isPendingConnectionHttp(connection)) {
-            return new BridgeProvider(storage, connection.connectionSource);
+            return new BridgeProvider(storage, connection.connectionSource, analyticsManager);
         }
-        return new BridgeProvider(storage, { bridgeUrl: connection.session.bridgeUrl });
+        return new BridgeProvider(
+            storage,
+            { bridgeUrl: connection.session.bridgeUrl },
+            analyticsManager
+        );
     }
 
     public readonly type = 'http';
@@ -70,7 +78,8 @@ export class BridgeProvider implements HTTPProvider {
         private readonly storage: IStorage,
         private readonly walletConnectionSource:
             | Optional<WalletConnectionSourceHTTP, 'universalLink'>
-            | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[]
+            | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
+        private readonly analytics?: AnalyticsManager
     ) {
         this.connectionStorage = new BridgeConnectionStorage(storage);
     }
@@ -190,7 +199,8 @@ export class BridgeProvider implements HTTPProvider {
             this.walletConnectionSource.bridgeUrl,
             storedConnection.session.sessionCrypto.sessionId,
             this.gatewayListener.bind(this),
-            this.gatewayErrorsListener.bind(this)
+            this.gatewayErrorsListener.bind(this),
+            this.analytics
         );
 
         if (abortController.signal.aborted) {
@@ -269,11 +279,20 @@ export class BridgeProvider implements HTTPProvider {
             );
 
             try {
+                this.analytics?.emit({
+                    bridge_url: this.gateway.bridgeUrl,
+                    event_name: 'bridge-client-message-sent',
+                    client_id: this.session.sessionCrypto.sessionId,
+                    wallet_id: this.session.walletPublicKey,
+                    message_id: id,
+                    request_type: request.method,
+                    encrypted_message_hash: '' // TODO: there is no hash on tonconnect side
+                });
                 await this.gateway.send(
                     encodedRequest,
                     this.session.walletPublicKey,
                     request.method,
-                    { attempts: options?.attempts, signal: options?.signal }
+                    { attempts: options?.attempts, signal: options?.signal, messageId: id }
                 );
                 options?.onRequestSent?.();
                 this.pendingRequests.set(id.toString(), resolve);
@@ -376,14 +395,37 @@ export class BridgeProvider implements HTTPProvider {
     }
 
     private async gatewayListener(bridgeIncomingMessage: BridgeIncomingMessage): Promise<void> {
-        const walletMessage: WalletMessage = JSON.parse(
-            this.session!.sessionCrypto.decrypt(
-                Base64.decode(bridgeIncomingMessage.message).toUint8Array(),
-                hexToByteArray(bridgeIncomingMessage.from)
-            )
-        );
+        let walletMessage: WalletMessage;
+        try {
+            walletMessage = JSON.parse(
+                this.session!.sessionCrypto.decrypt(
+                    Base64.decode(bridgeIncomingMessage.message).toUint8Array(),
+                    hexToByteArray(bridgeIncomingMessage.from)
+                )
+            );
+        } catch (err) {
+            this.analytics?.emit({
+                bridge_url: this.session!.bridgeUrl,
+                client_id: this.session!.sessionCrypto.sessionId,
+                event_name: 'bridge-client-message-decode-error',
+                wallet_id: bridgeIncomingMessage.from,
+                error_message: String(err),
+                encrypted_message_hash: '' // TODO: there is no hash on tonconnect side
+            });
+            throw err;
+        }
 
         logDebug('Wallet message received:', walletMessage);
+        const requestType = 'event' in walletMessage ? walletMessage.event : '';
+        this.analytics?.emit({
+            bridge_url: this.session!.bridgeUrl,
+            event_name: 'bridge-client-message-received',
+            client_id: this.session!.sessionCrypto.sessionId,
+            wallet_id: bridgeIncomingMessage.from,
+            message_id: String(walletMessage.id),
+            request_type: requestType,
+            encrypted_message_hash: '' // TODO: there is no hash on tonconnect side
+        });
 
         if (!('event' in walletMessage)) {
             const id = walletMessage.id.toString();
@@ -527,7 +569,9 @@ export class BridgeProvider implements HTTPProvider {
                     source.bridgeUrl,
                     sessionCrypto.sessionId,
                     () => {},
-                    () => {}
+                    () => {},
+                    // TODO: is there a reason to collect events for unknown bridges?
+                    this.analytics
                 );
 
                 gateway.setListener(message =>
@@ -572,7 +616,8 @@ export class BridgeProvider implements HTTPProvider {
                 this.walletConnectionSource.bridgeUrl,
                 sessionCrypto.sessionId,
                 this.gatewayListener.bind(this),
-                this.gatewayErrorsListener.bind(this)
+                this.gatewayErrorsListener.bind(this),
+                this.analytics
             );
             return await this.gateway.registerSession({
                 openingDeadlineMS: options?.openingDeadlineMS,

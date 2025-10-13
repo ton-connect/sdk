@@ -75,6 +75,11 @@ export type Version = {
     ton_connect_ui_lib: string | null;
 };
 
+export type SessionInfo = {
+    clientId: string | null;
+    walletId: string | null;
+};
+
 /**
  * Create a version info.
  * @param version
@@ -100,6 +105,10 @@ export type ConnectionInfo = {
      */
     wallet_address: string | null;
     /**
+     * Connected wallet state init.
+     */
+    wallet_state_init: string | null;
+    /**
      * Wallet type: 'tonkeeper', 'tonhub', etc.
      */
     wallet_type: string | null;
@@ -123,19 +132,30 @@ export type ConnectionInfo = {
          * Wallet provider.
          */
         provider: 'http' | 'injected' | null;
+
+        client_id: string | null;
+        wallet_id: string | null;
     } & Version;
 };
 
-function createConnectionInfo(version: Version, wallet: Wallet | null): ConnectionInfo {
+// eslint-disable-next-line complexity
+function createConnectionInfo(
+    version: Version,
+    wallet: Wallet | null,
+    sessionInfo?: SessionInfo | null
+): ConnectionInfo {
     const isTonProof = wallet?.connectItems?.tonProof && 'proof' in wallet.connectItems.tonProof;
     const authType: AuthType = isTonProof ? 'ton_proof' : 'ton_addr';
 
     return {
         wallet_address: wallet?.account?.address ?? null,
+        wallet_state_init: wallet?.account.walletStateInit ?? null,
         wallet_type: wallet?.device.appName ?? null,
         wallet_version: wallet?.device.appVersion ?? null,
         auth_type: authType,
         custom_data: {
+            client_id: sessionInfo?.clientId ?? null,
+            wallet_id: sessionInfo?.walletId ?? null,
             chain_id: wallet?.account?.chain ?? null,
             provider: wallet?.provider ?? null,
             ...createVersionInfo(version)
@@ -188,12 +208,13 @@ export type ConnectionCompletedEvent = {
  */
 export function createConnectionCompletedEvent(
     version: Version,
-    wallet: Wallet | null
+    wallet: Wallet | null,
+    sessionInfo?: SessionInfo | null
 ): ConnectionCompletedEvent {
     return {
         type: 'connection-completed',
         is_success: true,
-        ...createConnectionInfo(version, wallet)
+        ...createConnectionInfo(version, wallet, sessionInfo)
     };
 }
 
@@ -220,7 +241,10 @@ export type ConnectionErrorEvent = {
     /**
      * Custom data for the connection.
      */
-    custom_data: Version;
+    custom_data: {
+        client_id: string | null;
+        wallet_id: string | null;
+    } & Version;
 };
 
 /**
@@ -232,14 +256,19 @@ export type ConnectionErrorEvent = {
 export function createConnectionErrorEvent(
     version: Version,
     error_message: string,
-    errorCode: CONNECT_EVENT_ERROR_CODES | void
+    errorCode: CONNECT_EVENT_ERROR_CODES | void,
+    sessionInfo?: SessionInfo | null
 ): ConnectionErrorEvent {
     return {
         type: 'connection-error',
         is_success: false,
         error_message: error_message,
         error_code: errorCode ?? null,
-        custom_data: createVersionInfo(version)
+        custom_data: {
+            client_id: sessionInfo?.clientId ?? null,
+            wallet_id: sessionInfo?.walletId ?? null,
+            ...createVersionInfo(version)
+        }
     };
 }
 
@@ -298,12 +327,13 @@ export type ConnectionRestoringCompletedEvent = {
  */
 export function createConnectionRestoringCompletedEvent(
     version: Version,
-    wallet: Wallet | null
+    wallet: Wallet | null,
+    sessionInfo?: SessionInfo | null
 ): ConnectionRestoringCompletedEvent {
     return {
         type: 'connection-restoring-completed',
         is_success: true,
-        ...createConnectionInfo(version, wallet)
+        ...createConnectionInfo(version, wallet, sessionInfo)
     };
 }
 
@@ -369,6 +399,25 @@ export type TransactionMessage = {
 };
 
 /**
+ * Transaction message.
+ */
+export type TransactionFullMessage = {
+    /**
+     * Recipient address.
+     */
+    address: string | null;
+    /**
+     * Transfer amount.
+     */
+    amount: string | null;
+
+    /**
+     * Message payload
+     */
+    payload: string | null;
+};
+
+/**
  * Transaction information.
  */
 export type TransactionInfo = {
@@ -386,6 +435,13 @@ export type TransactionInfo = {
     messages: TransactionMessage[];
 };
 
+/**
+ * Transaction information.
+ */
+export type TransactionFullInfo = Omit<TransactionInfo, 'messages'> & {
+    messages: TransactionFullMessage[];
+};
+
 function createTransactionInfo(
     wallet: Wallet | null,
     transaction: SendTransactionRequest
@@ -396,6 +452,21 @@ function createTransactionInfo(
         messages: transaction.messages.map(message => ({
             address: message.address ?? null,
             amount: message.amount ?? null
+        }))
+    };
+}
+
+function createTransactionFullInfo(
+    wallet: Wallet | null,
+    transaction: SendTransactionRequest
+): TransactionFullInfo {
+    return {
+        valid_until: String(transaction.validUntil) ?? null,
+        from: transaction.from ?? wallet?.account?.address ?? null,
+        messages: transaction.messages.map(message => ({
+            address: message.address ?? null,
+            amount: message.amount ?? null,
+            payload: message.payload ?? null
         }))
     };
 }
@@ -420,11 +491,12 @@ export type TransactionSentForSignatureEvent = {
 export function createTransactionSentForSignatureEvent(
     version: Version,
     wallet: Wallet | null,
-    transaction: SendTransactionRequest
+    transaction: SendTransactionRequest,
+    sessionInfo?: SessionInfo | null
 ): TransactionSentForSignatureEvent {
     return {
         type: 'transaction-sent-for-signature',
-        ...createConnectionInfo(version, wallet),
+        ...createConnectionInfo(version, wallet, sessionInfo),
         ...createTransactionInfo(wallet, transaction)
     };
 }
@@ -459,13 +531,14 @@ export function createTransactionSignedEvent(
     version: Version,
     wallet: Wallet | null,
     transaction: SendTransactionRequest,
-    signedTransaction: SendTransactionResponse
+    signedTransaction: SendTransactionResponse,
+    sessionInfo?: SessionInfo | null
 ): TransactionSignedEvent {
     return {
         type: 'transaction-signed',
         is_success: true,
         signed_transaction: signedTransaction.boc,
-        ...createConnectionInfo(version, wallet),
+        ...createConnectionInfo(version, wallet, sessionInfo),
         ...createTransactionInfo(wallet, transaction)
     };
 }
@@ -491,7 +564,7 @@ export type TransactionSigningFailedEvent = {
      */
     error_code: SEND_TRANSACTION_ERROR_CODES | null;
 } & ConnectionInfo &
-    TransactionInfo;
+    TransactionFullInfo;
 
 /**
  * Create a transaction error event.
@@ -506,15 +579,16 @@ export function createTransactionSigningFailedEvent(
     wallet: Wallet | null,
     transaction: SendTransactionRequest,
     errorMessage: string,
-    errorCode: SEND_TRANSACTION_ERROR_CODES | void
+    errorCode: SEND_TRANSACTION_ERROR_CODES | void,
+    sessionInfo?: SessionInfo | null
 ): TransactionSigningFailedEvent {
     return {
         type: 'transaction-signing-failed',
         is_success: false,
         error_message: errorMessage,
         error_code: errorCode ?? null,
-        ...createConnectionInfo(version, wallet),
-        ...createTransactionInfo(wallet, transaction)
+        ...createConnectionInfo(version, wallet, sessionInfo),
+        ...createTransactionFullInfo(wallet, transaction)
     };
 }
 
@@ -534,12 +608,13 @@ export type DataSentForSignatureEvent = {
 export function createDataSentForSignatureEvent(
     version: Version,
     wallet: Wallet | null,
-    data: SignDataPayload
+    data: SignDataPayload,
+    sessionInfo?: SessionInfo | null
 ): DataSentForSignatureEvent {
     return {
         type: 'sign-data-request-initiated',
         data,
-        ...createConnectionInfo(version, wallet)
+        ...createConnectionInfo(version, wallet, sessionInfo)
     };
 }
 
@@ -554,14 +629,15 @@ export function createDataSignedEvent(
     version: Version,
     wallet: Wallet | null,
     data: SignDataPayload,
-    signedData: SignDataResponse
+    signedData: SignDataResponse,
+    sessionInfo?: SessionInfo | null
 ): DataSignedEvent {
     return {
         type: 'sign-data-request-completed',
         is_success: true,
         data,
         signed_data: signedData,
-        ...createConnectionInfo(version, wallet)
+        ...createConnectionInfo(version, wallet, sessionInfo)
     };
 }
 
@@ -578,7 +654,8 @@ export function createDataSigningFailedEvent(
     wallet: Wallet | null,
     data: SignDataPayload,
     errorMessage: string,
-    errorCode: SIGN_DATA_ERROR_CODES | void
+    errorCode: SIGN_DATA_ERROR_CODES | void,
+    sessionInfo?: SessionInfo | null
 ): DataSigningFailedEvent {
     return {
         type: 'sign-data-request-failed',
@@ -586,7 +663,7 @@ export function createDataSigningFailedEvent(
         data,
         error_message: errorMessage,
         error_code: errorCode ?? null,
-        ...createConnectionInfo(version, wallet)
+        ...createConnectionInfo(version, wallet, sessionInfo)
     };
 }
 
@@ -616,12 +693,33 @@ export type DisconnectionEvent = {
 export function createDisconnectionEvent(
     version: Version,
     wallet: Wallet | null,
-    scope: 'dapp' | 'wallet'
+    scope: 'dapp' | 'wallet',
+    sessionInfo?: SessionInfo | null
 ): DisconnectionEvent {
     return {
         type: 'disconnection',
         scope: scope,
-        ...createConnectionInfo(version, wallet)
+        ...createConnectionInfo(version, wallet, sessionInfo)
+    };
+}
+
+export type WalletModalOpenedEvent = {
+    type: 'wallet-modal-opened';
+    client_id: string | null;
+    visible_wallets: string[];
+    custom_data: Version;
+};
+
+export function createWalletModalOpenedEvent(
+    version: Version,
+    visibleWallets: string[],
+    clientId?: string | null
+): WalletModalOpenedEvent {
+    return {
+        type: 'wallet-modal-opened',
+        visible_wallets: visibleWallets,
+        client_id: clientId ?? null,
+        custom_data: version
     };
 }
 
@@ -634,7 +732,8 @@ export type SdkActionEvent =
     | ConnectionRestoringEvent
     | DisconnectionEvent
     | TransactionSigningEvent
-    | DataSigningEvent;
+    | DataSigningEvent
+    | WalletModalOpenedEvent;
 
 /**
  * Parameters without version field.

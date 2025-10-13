@@ -8,7 +8,7 @@ import {
     TelegramButtonStyled,
     TGImageStyled
 } from './style';
-import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
+import { setLastSelectedWalletInfo, setLastVisibleWalletsInfo } from 'src/app/state/modals-state';
 import { appState } from 'src/app/state/app.state';
 import { IMG } from 'src/app/env/IMG';
 import { supportsMobile } from 'src/app/utils/wallets';
@@ -140,6 +140,7 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
     );
 
     const visibleWallets = createMemo(() => supportedWallets().slice(0, 3), null);
+    setLastVisibleWalletsInfo(visibleWallets());
 
     const fourWalletsItem = createMemo(
         () =>

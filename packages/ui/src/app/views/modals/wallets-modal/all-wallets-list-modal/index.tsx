@@ -17,6 +17,7 @@ import { Transition } from 'solid-transition-group';
 import { animate } from 'src/app/utils/animate';
 import { ErrorIcon, Text } from 'src/app/components';
 import { UIWalletInfo } from 'src/app/models/ui-wallet-info';
+import { setLastVisibleWalletsInfo } from 'src/app/state/modals-state';
 
 export interface DesktopSelectWalletModalProps {
     walletsList: UIWalletInfo[];
@@ -56,6 +57,7 @@ export const AllWalletsListModal: Component<DesktopSelectWalletModalProps> = pro
 
     const supportedWallets = (): UIWalletInfo[] =>
         walletsList().filter(wallet => wallet.isSupportRequiredFeatures);
+    setLastVisibleWalletsInfo(supportedWallets());
 
     const unsupportedWallets = (): UIWalletInfo[] =>
         walletsList().filter(wallet => !wallet.isSupportRequiredFeatures);

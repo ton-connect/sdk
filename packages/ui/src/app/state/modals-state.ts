@@ -4,6 +4,7 @@ import { LastSelectedWalletInfoStorage } from 'src/storage';
 import { ReturnStrategy } from 'src/models';
 import { WalletsModalState } from 'src/models/wallets-modal';
 import { SingleWalletModalState } from 'src/models/single-wallet-modal';
+import { UIWalletInfo } from 'src/app/models/ui-wallet-info';
 
 export type ActionName =
     | 'confirm-transaction'
@@ -93,3 +94,4 @@ export const setLastSelectedWalletInfo = (
 };
 
 export const [action, setAction] = createSignal<Action | null>(null);
+export const [lastVisibleWalletsInfo, setLastVisibleWalletsInfo] = createSignal<UIWalletInfo[]>([]);
