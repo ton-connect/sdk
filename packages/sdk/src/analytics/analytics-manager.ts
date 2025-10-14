@@ -4,7 +4,7 @@ import { getTgUser, isInTMA } from 'src/utils/tma-api';
 import { tonConnectSdkVersion } from 'src/constants/version';
 import v7 from 'src/utils/uuid/v7';
 import { Analytics } from 'src/analytics/analytics';
-import { ScopedAnalyticsManager } from 'src/analytics/scoped-analytics-manager';
+import { pascalToKebab } from 'src/analytics/utils';
 
 export type EventsCollectorOptions = {
     batchTimeoutMs?: number;
@@ -13,7 +13,7 @@ export type EventsCollectorOptions = {
     enabled?: boolean;
 };
 
-export class AnalyticsManager implements Analytics {
+export class AnalyticsManager {
     private events: AnalyticsEvent[] = [];
     private timeoutId: ReturnType<typeof setTimeout> | null = null;
     private isProcessing = false;
@@ -29,26 +29,50 @@ export class AnalyticsManager implements Analytics {
         };
     }
 
-    scoped(
-        scope: 'tonconnect' | 'http-bridge' | 'js-bridge',
+    scoped<
+        TEvent extends AnalyticsEvent = AnalyticsEvent,
+        TOptional extends keyof TEvent = 'event_name'
+    >(
+        scope?: 'tonconnect' | 'http-bridge' | 'js-bridge',
         sharedData?: Partial<AnalyticsEvent>
-    ) {
+    ): Analytics<TEvent, TOptional> {
+        let enhancedEvent = {
+            ...sharedData
+        };
         if (scope === 'tonconnect') {
             const tgUser = getTgUser();
 
-            return new ScopedAnalyticsManager(this, {
+            enhancedEvent = {
                 locale: 'en', // TODO? how to get locale,
                 tg_id: tgUser?.id,
                 tma_is_premium: tgUser?.isPremium,
                 browser: '', // TODO,
                 ...sharedData
-            });
+            };
         }
 
-        return new ScopedAnalyticsManager(this, { ...sharedData });
+        return new Proxy(this, {
+            get(target, prop) {
+                const propName = prop.toString();
+                if (propName.startsWith('emit')) {
+                    const eventNamePascal = propName.replace('emit', '');
+                    const eventNameKebab = pascalToKebab(eventNamePascal);
+                    return function (event: Omit<AnalyticsEvent, 'event_name'>) {
+                        return target.emit({
+                            event_name: eventNameKebab,
+                            ...enhancedEvent,
+                            ...event
+                        } as AnalyticsEvent);
+                    };
+                }
+
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                return (target as any)[prop];
+            }
+        }) as unknown as Analytics<TEvent, TOptional>;
     }
 
-    emit(event: AnalyticsEvent): void {
+    private emit(event: AnalyticsEvent): void {
         if (!this.options.enabled) {
             return;
         }

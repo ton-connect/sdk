@@ -21,6 +21,7 @@ import { WalletInfoCurrentlyInjected } from 'src/models';
 import { logDebug } from 'src/utils/log';
 import { Analytics } from 'src/analytics/analytics';
 import { AnalyticsManager } from 'src/analytics/analytics-manager';
+import { JsBridgeEvent } from 'src/analytics/types';
 
 type WindowWithTon<T extends string> = {
     [key in T]: {
@@ -100,7 +101,10 @@ export class InjectedProvider<T extends string = string> implements InternalProv
     private listenSubscriptions = false;
 
     private listeners: Array<(e: WithoutIdDistributive<WalletEvent>) => void> = [];
-    private readonly analytics?: Analytics;
+    private readonly analytics?: Analytics<
+        JsBridgeEvent,
+        'bridge_key' | 'wallet_app_name' | 'wallet_app_version'
+    >;
 
     constructor(
         storage: IStorage,
@@ -131,13 +135,11 @@ export class InjectedProvider<T extends string = string> implements InternalProv
     public async restoreConnection(): Promise<void> {
         try {
             logDebug(`Injected Provider restoring connection...`);
-            this.analytics?.emit({
-                event_name: 'js-bridge-call',
+            this.analytics?.emitJsBridgeCall({
                 js_bridge_method: 'restoreConnection'
             });
             const connectEvent = await this.injectedWallet.restoreConnection();
-            this.analytics?.emit({
-                event_name: 'js-bridge-response',
+            this.analytics?.emitJsBridgeResponse({
                 js_bridge_method: 'restoreConnection'
             });
             logDebug('Injected Provider restoring connection response', connectEvent);
@@ -149,8 +151,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
                 await this.connectionStorage.removeConnection();
             }
         } catch (e) {
-            this.analytics?.emit({
-                event_name: 'js-bridge-error',
+            this.analytics?.emitJsBridgeError({
                 js_bridge_method: 'restoreConnection',
                 error_message: String(e)
             });
@@ -238,22 +239,19 @@ export class InjectedProvider<T extends string = string> implements InternalProv
         await this.connectionStorage.increaseNextRpcRequestId();
 
         logDebug('Send injected-bridge request:', { ...request, id });
-        this.analytics?.emit({
-            event_name: 'js-bridge-call',
+        this.analytics?.emitJsBridgeCall({
             js_bridge_method: 'send'
         });
         const result = this.injectedWallet.send<T>({ ...request, id } as AppRequest<T>);
         result
             .then(response => {
-                this.analytics?.emit({
-                    event_name: 'js-bridge-response',
+                this.analytics?.emitJsBridgeResponse({
                     js_bridge_method: 'send'
                 });
                 logDebug('Wallet message received:', response);
             })
             .catch(error => {
-                this.analytics?.emit({
-                    event_name: 'js-bridge-error',
+                this.analytics?.emitJsBridgeError({
                     js_bridge_method: 'send',
                     error_message: String(error)
                 });
@@ -269,13 +267,11 @@ export class InjectedProvider<T extends string = string> implements InternalProv
                 `Injected Provider connect request: protocolVersion: ${protocolVersion}, message:`,
                 message
             );
-            this.analytics?.emit({
-                event_name: 'js-bridge-call',
+            this.analytics?.emitJsBridgeCall({
                 js_bridge_method: 'connect'
             });
             const connectEvent = await this.injectedWallet.connect(protocolVersion, message);
-            this.analytics?.emit({
-                event_name: 'js-bridge-response',
+            this.analytics?.emitJsBridgeResponse({
                 js_bridge_method: 'connect'
             });
             logDebug('Injected Provider connect response:', connectEvent);
@@ -286,8 +282,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             }
             this.listeners.forEach(listener => listener(connectEvent));
         } catch (e) {
-            this.analytics?.emit({
-                event_name: 'js-bridge-error',
+            this.analytics?.emitJsBridgeError({
                 js_bridge_method: 'connect',
                 error_message: String(e)
             });
@@ -306,8 +301,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
 
     private makeSubscriptions(): void {
         this.listenSubscriptions = true;
-        this.analytics?.emit({
-            event_name: 'js-bridge-call',
+        this.analytics?.emitJsBridgeCall({
             js_bridge_method: 'listen'
         });
         try {
@@ -322,13 +316,11 @@ export class InjectedProvider<T extends string = string> implements InternalProv
                     this.disconnect();
                 }
             });
-            this.analytics?.emit({
-                event_name: 'js-bridge-response',
+            this.analytics?.emitJsBridgeResponse({
                 js_bridge_method: 'listen'
             });
         } catch (e) {
-            this.analytics?.emit({
-                event_name: 'js-bridge-error',
+            this.analytics?.emitJsBridgeError({
                 js_bridge_method: 'listen',
                 error_message: String(e)
             });

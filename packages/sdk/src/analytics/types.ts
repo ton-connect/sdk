@@ -244,7 +244,7 @@ export type JsBridgeError = BaseJsBridgeEvent & {
     error_message: string;
 };
 
-export type AnalyticsEvent =
+export type TonConnectEvent =
     | ConnectionStartedEvent
     | ConnectionCompletedEvent
     | ConnectionErrorEvent
@@ -254,13 +254,16 @@ export type AnalyticsEvent =
     | TransactionSigningFailedEvent
     | SignDataRequestInitiatedEvent
     | SignDataRequestCompletedEvent
-    | SignDataRequestFailedEvent
+    | SignDataRequestFailedEvent;
+
+export type BridgeClientEvent =
     | BridgeClientConnectStartedEvent
     | BridgeClientConnectEstablishedEvent
     | BridgeClientConnectErrorEvent
     | BridgeClientMessageSentEvent
     | BridgeClientMessageReceivedEvent
-    | BridgeClientMessageDecodeErrorEvent
-    | JsBridgeCall
-    | JsBridgeResponse
-    | JsBridgeError;
+    | BridgeClientMessageDecodeErrorEvent;
+
+export type JsBridgeEvent = JsBridgeCall | JsBridgeResponse | JsBridgeError;
+
+export type AnalyticsEvent = TonConnectEvent | BridgeClientEvent | JsBridgeEvent;

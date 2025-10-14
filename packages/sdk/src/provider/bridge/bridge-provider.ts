@@ -30,6 +30,8 @@ import { encodeTelegramUrlParameters, isTelegramUrl } from 'src/utils/url';
 import { callForSuccess } from 'src/utils/call-for-success';
 import { createAbortController } from 'src/utils/create-abort-controller';
 import { AnalyticsManager } from 'src/analytics/analytics-manager';
+import { Analytics } from 'src/analytics/analytics';
+import { BridgeClientEvent } from 'src/analytics/types';
 
 export class BridgeProvider implements HTTPProvider {
     public static async fromStorage(
@@ -74,14 +76,17 @@ export class BridgeProvider implements HTTPProvider {
 
     private abortController?: AbortController;
 
+    private readonly analytics?: Analytics<BridgeClientEvent>;
+
     constructor(
         private readonly storage: IStorage,
         private readonly walletConnectionSource:
             | Optional<WalletConnectionSourceHTTP, 'universalLink'>
             | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
-        private readonly analytics?: AnalyticsManager
+        private readonly analyticsManager?: AnalyticsManager
     ) {
         this.connectionStorage = new BridgeConnectionStorage(storage);
+        this.analytics = this.analyticsManager?.scoped('http-bridge');
     }
 
     public connect(
@@ -200,7 +205,7 @@ export class BridgeProvider implements HTTPProvider {
             storedConnection.session.sessionCrypto.sessionId,
             this.gatewayListener.bind(this),
             this.gatewayErrorsListener.bind(this),
-            this.analytics
+            this.analyticsManager
         );
 
         if (abortController.signal.aborted) {
@@ -279,9 +284,8 @@ export class BridgeProvider implements HTTPProvider {
             );
 
             try {
-                this.analytics?.emit({
+                this.analytics?.emitBridgeClientMessageSent({
                     bridge_url: this.gateway.bridgeUrl,
-                    event_name: 'bridge-client-message-sent',
                     client_id: this.session.sessionCrypto.sessionId,
                     wallet_id: this.session.walletPublicKey,
                     message_id: id,
@@ -404,10 +408,9 @@ export class BridgeProvider implements HTTPProvider {
                 )
             );
         } catch (err) {
-            this.analytics?.emit({
+            this.analytics?.emitBridgeClientMessageDecodeError({
                 bridge_url: this.session!.bridgeUrl,
                 client_id: this.session!.sessionCrypto.sessionId,
-                event_name: 'bridge-client-message-decode-error',
                 wallet_id: bridgeIncomingMessage.from,
                 error_message: String(err),
                 encrypted_message_hash: '' // TODO: there is no hash on tonconnect side
@@ -417,9 +420,8 @@ export class BridgeProvider implements HTTPProvider {
 
         logDebug('Wallet message received:', walletMessage);
         const requestType = 'event' in walletMessage ? walletMessage.event : '';
-        this.analytics?.emit({
+        this.analytics?.emitBridgeClientMessageReceived({
             bridge_url: this.session!.bridgeUrl,
-            event_name: 'bridge-client-message-received',
             client_id: this.session!.sessionCrypto.sessionId,
             wallet_id: bridgeIncomingMessage.from,
             message_id: String(walletMessage.id),
@@ -571,7 +573,7 @@ export class BridgeProvider implements HTTPProvider {
                     () => {},
                     () => {},
                     // TODO: is there a reason to collect events for unknown bridges?
-                    this.analytics
+                    this.analyticsManager
                 );
 
                 gateway.setListener(message =>
@@ -617,7 +619,7 @@ export class BridgeProvider implements HTTPProvider {
                 sessionCrypto.sessionId,
                 this.gatewayListener.bind(this),
                 this.gatewayErrorsListener.bind(this),
-                this.analytics
+                this.analyticsManager
             );
             return await this.gateway.registerSession({
                 openingDeadlineMS: options?.openingDeadlineMS,

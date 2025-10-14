@@ -13,6 +13,7 @@ import { timeout } from 'src/utils/timeout';
 import { createAbortController } from 'src/utils/create-abort-controller';
 import { AnalyticsManager } from 'src/analytics/analytics-manager';
 import { Analytics } from 'src/analytics/analytics';
+import { BridgeClientEvent } from 'src/analytics/types';
 
 export class BridgeGateway {
     private readonly ssePath = 'events';
@@ -62,7 +63,7 @@ export class BridgeGateway {
     }
 
     private readonly bridgeGatewayStorage: HttpBridgeGatewayStorage;
-    private readonly analytics?: Analytics;
+    private readonly analytics?: Analytics<BridgeClientEvent, 'bridge_url' | 'client_id'>;
 
     constructor(
         storage: IStorage,
@@ -81,18 +82,16 @@ export class BridgeGateway {
 
     public async registerSession(options?: RegisterSessionOptions): Promise<void> {
         try {
-            this.analytics?.emit({ event_name: 'bridge-client-connect-started' });
+            this.analytics?.emitBridgeClientConnectStarted({});
             const connectionStarted = Date.now();
             await this.eventSource.create(options?.signal, options?.openingDeadlineMS);
 
             const bridgeConnectDuration = Date.now() - connectionStarted;
-            this.analytics?.emit({
-                event_name: 'bridge-client-connect-established',
+            this.analytics?.emitBridgeClientConnectEstablished({
                 bridge_connect_duration: bridgeConnectDuration
             });
         } catch (error) {
-            this.analytics?.emit({
-                event_name: 'bridge-client-connect-error',
+            this.analytics?.emitBridgeClientConnectError({
                 error_message: String(error)
             });
         }

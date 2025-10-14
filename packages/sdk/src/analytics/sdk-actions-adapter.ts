@@ -28,8 +28,7 @@ export function bindEventsTo(
 ) {
     eventDispatcher.addEventListener('ton-connect-ui-wallet-modal-opened', event => {
         const { detail } = event;
-        analytics.emit({
-            event_name: 'connection-started',
+        analytics.emitConnectionStarted({
             client_id: detail.client_id || '',
             versions: buildVersionInfo(detail.custom_data),
             main_screen: detail.visible_wallets
@@ -38,15 +37,11 @@ export function bindEventsTo(
 
     eventDispatcher.addEventListener('ton-connect-connection-completed', event => {
         const { detail } = event;
-        analytics.emit({
-            event_name: 'connection-completed',
-            ...buildTonConnectEvent(detail)
-        });
+        analytics.emitConnectionCompleted(buildTonConnectEvent(detail));
     });
     eventDispatcher.addEventListener('ton-connect-connection-error', event => {
         const { detail } = event;
-        analytics.emit({
-            event_name: 'connection-error',
+        analytics.emitConnectionError({
             client_id: detail.custom_data.client_id || '', // TODO what if empty?,
             wallet_id: detail.custom_data.wallet_id || '', // TODO what if empty?,
             error_code: detail.error_code?.toString() ?? '',
@@ -55,30 +50,22 @@ export function bindEventsTo(
     });
     eventDispatcher.addEventListener('ton-connect-disconnection', event => {
         const { detail } = event;
-        analytics.emit({
-            event_name: 'disconnection',
-            ...buildTonConnectEvent(detail)
-        });
+        analytics.emitDisconnection(buildTonConnectEvent(detail));
     });
     eventDispatcher.addEventListener('ton-connect-transaction-sent-for-signature', event => {
         const { detail } = event;
-        analytics.emit({
-            event_name: 'transaction-sent',
-            ...buildTonConnectEvent(detail)
-        });
+        analytics.emitTransactionSent(buildTonConnectEvent(detail));
     });
     eventDispatcher.addEventListener('ton-connect-transaction-signed', event => {
         const { detail } = event;
-        analytics.emit({
-            event_name: 'transaction-signed',
+        analytics.emitTransactionSigned({
             ...buildTonConnectEvent(detail),
             signed_boc: event.detail.signed_transaction
         });
     });
     eventDispatcher.addEventListener('ton-connect-transaction-signing-failed', event => {
         const { detail } = event;
-        analytics.emit({
-            event_name: 'transaction-signing-failed',
+        analytics.emitTransactionSigningFailed({
             ...buildTonConnectEvent(detail),
             valid_until: Number(detail.valid_until),
             messages: detail.messages.map(message => ({
@@ -92,17 +79,11 @@ export function bindEventsTo(
     });
     eventDispatcher.addEventListener('ton-connect-sign-data-request-initiated', event => {
         const { detail } = event;
-        analytics?.emit({
-            event_name: 'sign-data-request-initiated',
-            ...buildTonConnectEvent(detail)
-        });
+        analytics?.emitSignDataRequestInitiated(buildTonConnectEvent(detail));
     });
     eventDispatcher.addEventListener('ton-connect-sign-data-request-completed', event => {
         const { detail } = event;
-        analytics?.emit({
-            event_name: 'sign-data-request-initiated',
-            ...buildTonConnectEvent(detail)
-        });
+        analytics?.emitSignDataRequestCompleted(buildTonConnectEvent(detail));
     });
     eventDispatcher.addEventListener('ton-connect-sign-data-request-failed', event => {
         const { detail } = event;
@@ -118,8 +99,7 @@ export function bindEventsTo(
         if (detail.data.type === 'binary') {
             signDataValue = detail.data.bytes;
         }
-        analytics?.emit({
-            event_name: 'sign-data-request-failed',
+        analytics?.emitSignDataRequestFailed({
             ...buildTonConnectEvent(detail),
             sign_data_type: detail.data.type,
             sign_data_value: signDataValue,
