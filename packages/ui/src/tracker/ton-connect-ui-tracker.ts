@@ -15,7 +15,6 @@ import {
     UserActionEvent
 } from './types';
 import {
-    BrowserEventDispatcher,
     createDataSentForSignatureEvent,
     createDataSignedEvent,
     createDataSigningFailedEvent,
@@ -29,9 +28,8 @@ import {
 export type TonConnectUITrackerOptions = {
     /**
      * Event dispatcher to track user actions.
-     * @default new BrowserEventDispatcher()
      */
-    eventDispatcher?: EventDispatcher<UserActionEvent> | null;
+    eventDispatcher: EventDispatcher<UserActionEvent>;
     /**
      * TonConnect UI version.
      */
@@ -99,7 +97,7 @@ export class TonConnectUITracker {
     private readonly eventDispatcher: EventDispatcher<UserActionEvent>;
 
     constructor(options: TonConnectUITrackerOptions) {
-        this.eventDispatcher = options?.eventDispatcher ?? new BrowserEventDispatcher();
+        this.eventDispatcher = options?.eventDispatcher;
         this.tonConnectUiVersion = options.tonConnectUiVersion;
 
         this.init().catch();

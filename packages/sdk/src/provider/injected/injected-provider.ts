@@ -120,7 +120,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
         this.injectedWallet = window[injectedWalletKey]!.tonconnect!;
 
         if (analyticsManager) {
-            this.analytics = analyticsManager.scoped('js-bridge', {
+            this.analytics = analyticsManager.scoped({
                 bridge_key: injectedWalletKey,
                 wallet_app_name: this.injectedWallet.deviceInfo.appName,
                 wallet_app_version: this.injectedWallet.deviceInfo.appVersion
@@ -319,11 +319,12 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             this.analytics?.emitJsBridgeResponse({
                 js_bridge_method: 'listen'
             });
-        } catch (e) {
+        } catch (err) {
             this.analytics?.emitJsBridgeError({
                 js_bridge_method: 'listen',
-                error_message: String(e)
+                error_message: String(err)
             });
+            throw err;
         }
     }
 

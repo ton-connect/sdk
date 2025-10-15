@@ -29,7 +29,11 @@ export class BridgeGateway {
     private readonly defaultResendDelay = 5000;
 
     private eventSource = createResource(
-        async (signal?: AbortSignal, openingDeadlineMS?: number): Promise<EventSource> => {
+        async (
+            signal?: AbortSignal,
+            openingDeadlineMS?: number,
+            traceId?: string
+        ): Promise<EventSource> => {
             const eventSourceConfig = {
                 bridgeUrl: this.bridgeUrl,
                 ssePath: this.ssePath,
@@ -38,7 +42,8 @@ export class BridgeGateway {
                 errorHandler: this.errorsHandler.bind(this),
                 messageHandler: this.messagesHandler.bind(this),
                 signal: signal,
-                openingDeadlineMS: openingDeadlineMS
+                openingDeadlineMS: openingDeadlineMS,
+                traceId
             };
             return await createEventSource(eventSourceConfig);
         },
@@ -74,7 +79,7 @@ export class BridgeGateway {
         analyticsManager?: AnalyticsManager
     ) {
         this.bridgeGatewayStorage = new HttpBridgeGatewayStorage(storage, bridgeUrl);
-        this.analytics = analyticsManager?.scoped('http-bridge', {
+        this.analytics = analyticsManager?.scoped({
             bridge_url: bridgeUrl,
             client_id: sessionId
         });
@@ -82,18 +87,27 @@ export class BridgeGateway {
 
     public async registerSession(options?: RegisterSessionOptions): Promise<void> {
         try {
-            this.analytics?.emitBridgeClientConnectStarted({});
+            this.analytics?.emitBridgeClientConnectStarted({
+                trace_id: options?.traceId
+            });
             const connectionStarted = Date.now();
-            await this.eventSource.create(options?.signal, options?.openingDeadlineMS);
+            await this.eventSource.create(
+                options?.signal,
+                options?.openingDeadlineMS,
+                options?.traceId
+            );
 
             const bridgeConnectDuration = Date.now() - connectionStarted;
             this.analytics?.emitBridgeClientConnectEstablished({
-                bridge_connect_duration: bridgeConnectDuration
+                bridge_connect_duration: bridgeConnectDuration,
+                trace_id: options?.traceId
             });
         } catch (error) {
             this.analytics?.emitBridgeClientConnectError({
+                trace_id: options?.traceId,
                 error_message: String(error)
             });
+            throw error;
         }
     }
 
@@ -102,10 +116,10 @@ export class BridgeGateway {
         receiver: string,
         topic: RpcMethod,
         options?: {
+            traceId?: string;
             ttl?: number;
             signal?: AbortSignal;
             attempts?: number;
-            messageId?: string;
         }
     ): Promise<void>;
     /** @deprecated use send(message, receiver, topic, options) instead */
@@ -121,16 +135,18 @@ export class BridgeGateway {
         topic: RpcMethod,
         ttlOrOptions?:
             | number
-            | { ttl?: number; signal?: AbortSignal; attempts?: number; messageId?: string }
+            | { ttl?: number; signal?: AbortSignal; attempts?: number; traceId?: string }
     ): Promise<void> {
         // TODO: remove deprecated method
-        const options: { ttl?: number; signal?: AbortSignal; attempts?: number } = {};
+        const options: { ttl?: number; signal?: AbortSignal; attempts?: number; traceId?: string } =
+            {};
         if (typeof ttlOrOptions === 'number') {
             options.ttl = ttlOrOptions;
         } else {
             options.ttl = ttlOrOptions?.ttl;
             options.signal = ttlOrOptions?.signal;
             options.attempts = ttlOrOptions?.attempts;
+            options.traceId = ttlOrOptions?.traceId;
         }
 
         const url = new URL(addPathToUrl(this.bridgeUrl, this.postPath));
@@ -138,6 +154,10 @@ export class BridgeGateway {
         url.searchParams.append('to', receiver);
         url.searchParams.append('ttl', (options?.ttl || this.defaultTtl).toString());
         url.searchParams.append('topic', topic);
+        if (options?.traceId) {
+            url.searchParams.append('trace_id', options.traceId);
+        }
+
         const body = Base64.encode(message);
 
         await callForSuccess(
@@ -224,13 +244,17 @@ export class BridgeGateway {
             return;
         }
 
-        let bridgeIncomingMessage: BridgeIncomingMessage;
+        let bridgeIncomingMessageRaw;
         try {
-            bridgeIncomingMessage = JSON.parse(e.data);
+            bridgeIncomingMessageRaw = JSON.parse(e.data);
         } catch (_) {
             throw new TonConnectError(`Bridge message parse failed, message ${e.data}`);
         }
-        this.listener(bridgeIncomingMessage);
+        this.listener({
+            message: bridgeIncomingMessageRaw.message,
+            from: bridgeIncomingMessageRaw.from,
+            traceId: bridgeIncomingMessageRaw.trace_id
+        });
     }
 }
 
@@ -247,6 +271,11 @@ export type RegisterSessionOptions = {
      * Signal to abort the operation.
      */
     signal?: AbortSignal;
+
+    /**
+     * Unique identifier used for tracking a specific user flow.
+     */
+    traceId?: string;
 };
 
 /**
@@ -285,6 +314,10 @@ export type CreateEventSourceConfig = {
      * Deadline for opening the event source.
      */
     openingDeadlineMS?: number;
+    /**
+     * Unique identifier used for tracking a specific user flow.
+     */
+    traceId?: string;
 };
 
 /**
@@ -308,6 +341,9 @@ async function createEventSource(config: CreateEventSourceConfig): Promise<Event
             const lastEventId = await config.bridgeGatewayStorage.getLastEventId();
             if (lastEventId) {
                 url.searchParams.append('last_event_id', lastEventId);
+            }
+            if (config.traceId) {
+                url.searchParams.append('trace_id', config.traceId);
             }
 
             if (signal.aborted) {

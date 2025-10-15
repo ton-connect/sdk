@@ -1,56 +1,48 @@
 import { logDebug, logError } from '../utils/log';
 import { AnalyticsEvent } from './types';
-import { getTgUser, isInTMA } from 'src/utils/tma-api';
 import { tonConnectSdkVersion } from 'src/constants/version';
-import v7 from 'src/utils/uuid/v7';
+import { v4, v7 } from 'src/utils/uuid';
 import { Analytics } from 'src/analytics/analytics';
 import { pascalToKebab } from 'src/analytics/utils';
+import { IEnvironment } from 'src/environment/models/environment.interface';
 
 export type EventsCollectorOptions = {
     batchTimeoutMs?: number;
     maxBatchSize?: number;
     analyticsUrl?: string;
     enabled?: boolean;
+    environment?: IEnvironment;
 };
 
 export class AnalyticsManager {
     private events: AnalyticsEvent[] = [];
     private timeoutId: ReturnType<typeof setTimeout> | null = null;
     private isProcessing = false;
-    private readonly options: Required<EventsCollectorOptions>;
+
+    private readonly batchTimeoutMs: number;
+    private readonly maxBatchSize: number;
+    private readonly analyticsUrl: string;
+    private enabled: boolean;
+
+    private readonly baseEvent: Partial<AnalyticsEvent>;
 
     constructor(options: EventsCollectorOptions = {}) {
-        this.options = {
-            batchTimeoutMs: 5000,
-            maxBatchSize: 100,
-            analyticsUrl: 'https://analytics.ton.org/swagger/index.html', // TODO: change to https://analytics.ton.org/events
-            enabled: true,
-            ...options
+        this.batchTimeoutMs = options.batchTimeoutMs ?? 5000;
+        this.maxBatchSize = options.maxBatchSize ?? 100;
+        this.analyticsUrl = options.analyticsUrl ?? 'https://analytics.ton.org/swagger/index.html';
+        this.enabled = options.enabled ?? true;
+
+        this.baseEvent = {
+            subsystem: 'dapp-sdk',
+            version: tonConnectSdkVersion,
+            client_environment: options.environment?.getClientEnvironment()
         };
     }
 
     scoped<
         TEvent extends AnalyticsEvent = AnalyticsEvent,
         TOptional extends keyof TEvent = 'event_name'
-    >(
-        scope?: 'tonconnect' | 'http-bridge' | 'js-bridge',
-        sharedData?: Partial<AnalyticsEvent>
-    ): Analytics<TEvent, TOptional> {
-        let enhancedEvent = {
-            ...sharedData
-        };
-        if (scope === 'tonconnect') {
-            const tgUser = getTgUser();
-
-            enhancedEvent = {
-                locale: 'en', // TODO? how to get locale,
-                tg_id: tgUser?.id,
-                tma_is_premium: tgUser?.isPremium,
-                browser: '', // TODO,
-                ...sharedData
-            };
-        }
-
+    >(sharedData?: Partial<AnalyticsEvent>): Analytics<TEvent, TOptional> {
         return new Proxy(this, {
             get(target, prop) {
                 const propName = prop.toString();
@@ -60,7 +52,7 @@ export class AnalyticsManager {
                     return function (event: Omit<AnalyticsEvent, 'event_name'>) {
                         return target.emit({
                             event_name: eventNameKebab,
-                            ...enhancedEvent,
+                            ...sharedData,
                             ...event
                         } as AnalyticsEvent);
                     };
@@ -73,25 +65,23 @@ export class AnalyticsManager {
     }
 
     private emit(event: AnalyticsEvent): void {
-        if (!this.options.enabled) {
+        if (!this.enabled) {
             return;
         }
 
+        const traceId = event.trace_id ?? v7();
+
         const enhancedEvent = {
-            subsystem: 'dapp-sdk',
-            version: tonConnectSdkVersion,
-            client_environment: isInTMA() ? 'miniapp' : 'web',
             ...event,
-            event_id: crypto.randomUUID(),
+            event_id: v4(),
             client_timestamp: Math.floor(Date.now() / 1000),
-            // TODO: trace id should be in protocol, for now generated here
-            trace_id: v7()
+            trace_id: traceId
         } as const;
 
         console.log(enhancedEvent);
         this.events.push(enhancedEvent);
 
-        if (this.events.length >= this.options.maxBatchSize) {
+        if (this.events.length >= this.maxBatchSize) {
             void this.flush();
             return;
         }
@@ -106,7 +96,7 @@ export class AnalyticsManager {
 
         this.timeoutId = setTimeout(() => {
             void this.flush();
-        }, this.options.batchTimeoutMs);
+        }, this.batchTimeoutMs);
     }
 
     async flush(): Promise<void> {
@@ -120,11 +110,13 @@ export class AnalyticsManager {
         }
 
         this.isProcessing = true;
-        const eventsToSend = this.events.slice(0, this.options.maxBatchSize);
-        this.events = this.events.slice(this.options.maxBatchSize);
+        const eventsToSend = this.events.slice(0, this.maxBatchSize);
+        this.events = this.events.slice(this.maxBatchSize);
 
         try {
             logDebug('Sending analytics events...', eventsToSend.length);
+            // TODO
+            // https://github.com/telegram-mini-apps-dev/analytics/blob/master/src/services/Batch.service.ts
             await this.sendEvents(eventsToSend);
             logDebug('Analytics events sent successfully');
         } catch (error) {
@@ -140,7 +132,7 @@ export class AnalyticsManager {
     }
 
     private async sendEvents(events: AnalyticsEvent[]): Promise<void> {
-        const url = `${this.options.analyticsUrl}/events`;
+        const url = `${this.analyticsUrl}/events`;
 
         const response = await fetch(url, {
             method: 'POST',
@@ -157,11 +149,11 @@ export class AnalyticsManager {
     }
 
     setEnabled(enabled: boolean): void {
-        this.options.enabled = enabled;
+        this.enabled = enabled;
     }
 
     isEnabled(): boolean {
-        return this.options.enabled;
+        return this.enabled;
     }
 
     getPendingEventsCount(): number {

@@ -86,7 +86,7 @@ export class BridgeProvider implements HTTPProvider {
         private readonly analyticsManager?: AnalyticsManager
     ) {
         this.connectionStorage = new BridgeConnectionStorage(storage);
-        this.analytics = this.analyticsManager?.scoped('http-bridge');
+        this.analytics = this.analyticsManager?.scoped();
     }
 
     public connect(
@@ -94,6 +94,7 @@ export class BridgeProvider implements HTTPProvider {
         options?: {
             openingDeadlineMS?: number;
             signal?: AbortSignal;
+            traceId?: string;
         }
     ): string {
         const abortController = createAbortController(options?.signal);
@@ -128,7 +129,8 @@ export class BridgeProvider implements HTTPProvider {
                         this.openGateways(sessionCrypto, {
                             openingDeadlineMS:
                                 options?.openingDeadlineMS ?? this.defaultOpeningDeadlineMS,
-                            signal: _options?.signal
+                            signal: _options?.signal,
+                            traceId: options?.traceId
                         }),
                     {
                         attempts: Number.MAX_SAFE_INTEGER,
@@ -150,7 +152,9 @@ export class BridgeProvider implements HTTPProvider {
     public async restoreConnection(options?: {
         openingDeadlineMS?: number;
         signal?: AbortSignal;
+        traceId?: string;
     }): Promise<void> {
+        const traceId = options?.traceId;
         const abortController = createAbortController(options?.signal);
         this.abortController?.abort();
         this.abortController = abortController;
@@ -182,7 +186,8 @@ export class BridgeProvider implements HTTPProvider {
 
             return await this.openGateways(storedConnection.sessionCrypto, {
                 openingDeadlineMS: openingDeadlineMS,
-                signal: abortController?.signal
+                signal: abortController?.signal,
+                traceId: options?.traceId
             });
         }
 
@@ -221,7 +226,8 @@ export class BridgeProvider implements HTTPProvider {
                 options =>
                     this.gateway!.registerSession({
                         openingDeadlineMS: openingDeadlineMS,
-                        signal: options.signal
+                        signal: options.signal,
+                        traceId
                     }),
                 {
                     attempts: Number.MAX_SAFE_INTEGER,
@@ -230,7 +236,7 @@ export class BridgeProvider implements HTTPProvider {
                 }
             );
         } catch (e) {
-            await this.disconnect({ signal: abortController.signal });
+            await this.disconnect({ signal: abortController.signal, traceId });
             return;
         }
     }
@@ -238,6 +244,7 @@ export class BridgeProvider implements HTTPProvider {
     public sendRequest<T extends RpcMethod>(
         request: WithoutId<AppRequest<T>>,
         options?: {
+            traceId?: string;
             attempts?: number;
             onRequestSent?: () => void;
             signal?: AbortSignal;
@@ -252,13 +259,19 @@ export class BridgeProvider implements HTTPProvider {
         request: WithoutId<AppRequest<T>>,
         optionsOrOnRequestSent?:
             | (() => void)
-            | { attempts?: number; onRequestSent?: () => void; signal?: AbortSignal }
+            | {
+                  attempts?: number;
+                  onRequestSent?: () => void;
+                  signal?: AbortSignal;
+                  traceId?: string;
+              }
     ): Promise<WithoutId<WalletResponse<T>>> {
         // TODO: remove deprecated method
         const options: {
             onRequestSent?: () => void;
             signal?: AbortSignal;
             attempts?: number;
+            traceId?: string;
         } = {};
         if (typeof optionsOrOnRequestSent === 'function') {
             options.onRequestSent = optionsOrOnRequestSent;
@@ -266,6 +279,7 @@ export class BridgeProvider implements HTTPProvider {
             options.onRequestSent = optionsOrOnRequestSent?.onRequestSent;
             options.signal = optionsOrOnRequestSent?.signal;
             options.attempts = optionsOrOnRequestSent?.attempts;
+            options.traceId = optionsOrOnRequestSent?.traceId;
         }
 
         return new Promise(async (resolve, reject) => {
@@ -290,13 +304,17 @@ export class BridgeProvider implements HTTPProvider {
                     wallet_id: this.session.walletPublicKey,
                     message_id: id,
                     request_type: request.method,
-                    encrypted_message_hash: '' // TODO: there is no hash on tonconnect side
+                    trace_id: options.traceId
                 });
                 await this.gateway.send(
                     encodedRequest,
                     this.session.walletPublicKey,
                     request.method,
-                    { attempts: options?.attempts, signal: options?.signal, messageId: id }
+                    {
+                        attempts: options?.attempts,
+                        signal: options?.signal,
+                        traceId: options.traceId
+                    }
                 );
                 options?.onRequestSent?.();
                 this.pendingRequests.set(id.toString(), resolve);
@@ -313,7 +331,7 @@ export class BridgeProvider implements HTTPProvider {
         this.gateway = null;
     }
 
-    public async disconnect(options?: { signal?: AbortSignal }): Promise<void> {
+    public async disconnect(options?: { signal?: AbortSignal; traceId?: string }): Promise<void> {
         return new Promise(async resolve => {
             let called = false;
             let timeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -337,7 +355,8 @@ export class BridgeProvider implements HTTPProvider {
                     {
                         onRequestSent: onRequestSent,
                         signal: abortController.signal,
-                        attempts: 1
+                        attempts: 1,
+                        traceId: options?.traceId
                     }
                 );
             } catch (e) {
@@ -413,7 +432,7 @@ export class BridgeProvider implements HTTPProvider {
                 client_id: this.session!.sessionCrypto.sessionId,
                 wallet_id: bridgeIncomingMessage.from,
                 error_message: String(err),
-                encrypted_message_hash: '' // TODO: there is no hash on tonconnect side
+                trace_id: bridgeIncomingMessage?.traceId
             });
             throw err;
         }
@@ -426,7 +445,7 @@ export class BridgeProvider implements HTTPProvider {
             wallet_id: bridgeIncomingMessage.from,
             message_id: String(walletMessage.id),
             request_type: requestType,
-            encrypted_message_hash: '' // TODO: there is no hash on tonconnect side
+            trace_id: bridgeIncomingMessage?.traceId
         });
 
         if (!('event' in walletMessage)) {
@@ -558,6 +577,7 @@ export class BridgeProvider implements HTTPProvider {
         options?: {
             openingDeadlineMS?: number;
             signal?: AbortSignal;
+            traceId?: string;
         }
     ): Promise<void> {
         if (Array.isArray(this.walletConnectionSource)) {
@@ -572,7 +592,6 @@ export class BridgeProvider implements HTTPProvider {
                     sessionCrypto.sessionId,
                     () => {},
                     () => {},
-                    // TODO: is there a reason to collect events for unknown bridges?
                     this.analyticsManager
                 );
 
@@ -594,7 +613,8 @@ export class BridgeProvider implements HTTPProvider {
                             return bridge.registerSession({
                                 openingDeadlineMS:
                                     options?.openingDeadlineMS ?? this.defaultOpeningDeadlineMS,
-                                signal: _options.signal
+                                signal: _options.signal,
+                                traceId: options?.traceId
                             });
                         },
                         {
@@ -623,7 +643,8 @@ export class BridgeProvider implements HTTPProvider {
             );
             return await this.gateway.registerSession({
                 openingDeadlineMS: options?.openingDeadlineMS,
-                signal: options?.signal
+                signal: options?.signal,
+                traceId: options?.traceId
             });
         }
     }

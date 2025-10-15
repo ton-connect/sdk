@@ -50,7 +50,22 @@ export interface ITonConnect {
      */
     connect<T extends WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[]>(
         wallet: T,
-        request?: ConnectAdditionalRequest
+        options?: {
+            request?: ConnectAdditionalRequest;
+            traceId?: string;
+            openingDeadlineMS?: number;
+            signal?: AbortSignal;
+        }
+    ): T extends WalletConnectionSourceJS ? void : string;
+    /** @deprecated use connect(wallet, { request, ...options }) instead */
+    connect<T extends WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[]>(
+        wallet: T,
+        request?: ConnectAdditionalRequest,
+        options?: {
+            openingDeadlineMS?: number;
+            signal?: AbortSignal;
+            traceId?: string;
+        }
     ): T extends WalletConnectionSourceJS ? void : string;
 
     /**
@@ -59,6 +74,7 @@ export interface ITonConnect {
     restoreConnection(options?: {
         openingDeadlineMS?: number;
         signal?: AbortSignal;
+        traceId?: string;
     }): Promise<void>;
 
     /**
@@ -75,7 +91,7 @@ export interface ITonConnect {
     /**
      * Disconnect form thw connected wallet and drop current session.
      */
-    disconnect(options?: { signal?: AbortSignal }): Promise<void>;
+    disconnect(options?: { signal?: AbortSignal; traceId?: string }): Promise<void>;
 
     /**
      * Asks connected wallet to sign and send the transaction.
@@ -87,6 +103,7 @@ export interface ITonConnect {
     sendTransaction(
         transaction: SendTransactionRequest,
         options?: {
+            traceId?: string;
             onRequestSent?: () => void;
             signal?: AbortSignal;
         }
@@ -103,6 +120,7 @@ export interface ITonConnect {
         options?: {
             onRequestSent?: () => void;
             signal?: AbortSignal;
+            traceId?: string;
         }
     ): Promise<SignDataResponse>;
 

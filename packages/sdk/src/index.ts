@@ -91,6 +91,10 @@ export {
     SEND_TRANSACTION_ERROR_CODES,
     SIGN_DATA_ERROR_CODES
 } from '@tonconnect/protocol';
+
+export { IEnvironment } from './environment/models/environment.interface';
+export { TelegramUser } from './environment/models/telegram-user';
+
 export { toUserFriendlyAddress } from './utils/address';
 export { checkRequiredWalletFeatures } from './utils/feature-support';
 export { isTelegramUrl, encodeTelegramUrlParameters } from './utils/url';

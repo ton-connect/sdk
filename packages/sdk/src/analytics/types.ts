@@ -1,6 +1,5 @@
 export type BaseEvent = {
     event_id?: string;
-    // TODO trace_id: ID to aggregate multiple events into one trace. UUIDv7 must be used (first 48 bits must be unix_ts_ms as in the specification) . trace_id older than 24h won't be accepted.
     /**
      * ID to aggregate multiple events into one trace. UUIDv7 must be used (first 48 bits must be unix_ts_ms as in the specification). trace_id older than 24h won't be accepted.
      */
@@ -48,7 +47,6 @@ export type SessionInfo = {
     wallet_id: string;
 };
 
-// TODO: could be extracted
 export type TonConnectBaseEvent = BaseEvent & {
     /**
      * URL of the current page (excluding query and hash part of the URL).
@@ -204,7 +202,7 @@ export type BridgeClientMessageSentEvent = BaseEvent & {
     wallet_id: string;
     message_id: string;
     request_type: string;
-    encrypted_message_hash: string;
+    encrypted_message_hash?: string;
 };
 
 export type BridgeClientMessageReceivedEvent = BaseEvent & {
@@ -214,7 +212,7 @@ export type BridgeClientMessageReceivedEvent = BaseEvent & {
     wallet_id: string;
     message_id: string;
     request_type: string;
-    encrypted_message_hash: string;
+    encrypted_message_hash?: string;
 };
 
 export type BridgeClientMessageDecodeErrorEvent = BaseEvent & {
@@ -223,7 +221,7 @@ export type BridgeClientMessageDecodeErrorEvent = BaseEvent & {
     client_id: string;
     wallet_id: string;
     error_message: string;
-    encrypted_message_hash: string;
+    encrypted_message_hash?: string;
 };
 
 export type BaseJsBridgeEvent = BaseEvent & {

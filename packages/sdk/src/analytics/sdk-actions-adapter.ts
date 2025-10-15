@@ -9,7 +9,7 @@ function buildVersionInfo(version: Version): Record<string, string> {
     };
 }
 
-function buildTonConnectEvent(detail: ConnectionInfo) {
+function buildTonConnectEvent(detail: ConnectionInfo & { trace_id?: string | null }) {
     return {
         versions: buildVersionInfo(detail.custom_data),
         network_id: detail.custom_data.chain_id ?? '',
@@ -18,7 +18,8 @@ function buildTonConnectEvent(detail: ConnectionInfo) {
         wallet_address: detail.wallet_address ?? '',
         wallet_app_name: detail.wallet_type ?? '',
         wallet_app_version: detail.wallet_version ?? '',
-        wallet_state_init: detail.wallet_state_init ?? ''
+        wallet_state_init: detail.wallet_state_init ?? '',
+        trace_id: detail.trace_id ?? undefined
     };
 }
 
@@ -31,7 +32,8 @@ export function bindEventsTo(
         analytics.emitConnectionStarted({
             client_id: detail.client_id || '',
             versions: buildVersionInfo(detail.custom_data),
-            main_screen: detail.visible_wallets
+            main_screen: detail.visible_wallets,
+            trace_id: detail.trace_id ?? undefined
         });
     });
 
@@ -42,10 +44,11 @@ export function bindEventsTo(
     eventDispatcher.addEventListener('ton-connect-connection-error', event => {
         const { detail } = event;
         analytics.emitConnectionError({
-            client_id: detail.custom_data.client_id || '', // TODO what if empty?,
-            wallet_id: detail.custom_data.wallet_id || '', // TODO what if empty?,
+            client_id: detail.custom_data.client_id || '',
+            wallet_id: detail.custom_data.wallet_id || '',
             error_code: detail.error_code?.toString() ?? '',
-            error_message: detail.error_message
+            error_message: detail.error_message,
+            trace_id: detail.trace_id ?? undefined
         });
     });
     eventDispatcher.addEventListener('ton-connect-disconnection', event => {

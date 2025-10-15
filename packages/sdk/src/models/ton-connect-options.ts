@@ -2,6 +2,7 @@ import { IStorage } from 'src/storage/models/storage.interface';
 import { EventDispatcher } from 'src/tracker/event-dispatcher';
 import { SdkActionEvent } from 'src/tracker/types';
 import { RequiredFeatures } from './wallet';
+import { IEnvironment } from 'src/environment/models/environment.interface';
 
 /**
  * TonConnect constructor options
@@ -45,4 +46,9 @@ export interface TonConnectOptions {
      * Allows to disable auto pause/unpause SSE connection on 'document.visibilitychange' event. It is not recommended to change default behaviour.
      */
     disableAutoPauseConnection?: boolean;
+
+    /**
+     * Represents the client environment in which the application is running.
+     */
+    environment?: IEnvironment;
 }

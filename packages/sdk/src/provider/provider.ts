@@ -23,6 +23,7 @@ export interface HTTPProvider extends BaseProvider {
         options?: {
             openingDeadlineMS?: number;
             signal?: AbortSignal;
+            traceId?: string;
         }
     ): string;
 
@@ -35,11 +36,12 @@ interface BaseProvider {
     restoreConnection(options?: {
         openingDeadlineMS?: number;
         signal?: AbortSignal;
+        traceId?: string;
     }): Promise<void>;
 
     closeConnection(): void;
 
-    disconnect(options?: { signal?: AbortSignal }): Promise<void>;
+    disconnect(options?: { signal?: AbortSignal; traceId?: string }): Promise<void>;
 
     sendRequest<T extends RpcMethod>(
         request: WithoutId<AppRequest<T>>,
@@ -47,6 +49,7 @@ interface BaseProvider {
             onRequestSent?: () => void;
             signal?: AbortSignal;
             attempts?: number;
+            traceId?: string;
         }
     ): Promise<WithoutId<WalletResponse<T>>>;
 

@@ -1,5 +1,6 @@
-import type {
+import {
     Account,
+    BrowserEventDispatcher,
     ConnectAdditionalRequest,
     RequiredFeatures,
     SignDataPayload,
@@ -54,6 +55,7 @@ import { SingleWalletModal, SingleWalletModalState } from 'src/models/single-wal
 import { TonConnectUITracker } from 'src/tracker/ton-connect-ui-tracker';
 import { tonConnectUiVersion } from 'src/constants/version';
 import { ReturnStrategy } from './models';
+import { TonConnectEnvironment } from 'src/environment/ton-connect-environment';
 
 export class TonConnectUI {
     public static getWallets(): Promise<WalletInfo[]> {
@@ -220,13 +222,16 @@ export class TonConnectUI {
 
     // TODO: `actionsConfiguration.twaReturnUrl` is used only in `connectWallet` method, but it's not used in `sendTransaction` method, NEED TO FIX IT
     constructor(options?: TonConnectUiCreateOptions) {
+        let eventDispatcher = options?.eventDispatcher ?? new BrowserEventDispatcher();
+
         if (options && 'connector' in options && options.connector) {
             this.connector = options.connector;
         } else if (options && 'manifestUrl' in options && options.manifestUrl) {
             this.connector = new TonConnect({
                 manifestUrl: options.manifestUrl,
-                eventDispatcher: options.eventDispatcher,
-                walletsRequiredFeatures: options.walletsRequiredFeatures
+                eventDispatcher,
+                walletsRequiredFeatures: options.walletsRequiredFeatures,
+                environment: new TonConnectEnvironment()
             });
         } else {
             throw new TonConnectUIError(
@@ -235,7 +240,7 @@ export class TonConnectUI {
         }
 
         this.tracker = new TonConnectUITracker({
-            eventDispatcher: options?.eventDispatcher,
+            eventDispatcher,
             tonConnectUiVersion: tonConnectUiVersion
         });
 
@@ -348,7 +353,7 @@ export class TonConnectUI {
     /**
      * Opens the modal window, returns a promise that resolves after the modal window is opened.
      */
-    public async openModal(): Promise<void> {
+    public async openModal(options?: { traceId?: string }): Promise<void> {
         await this.modal.open();
 
         const sessionId = await this.getSessionId();
@@ -356,7 +361,8 @@ export class TonConnectUI {
 
         this.tracker.trackWalletModalOpened(
             visibleWallets.map(wallet => wallet.name),
-            sessionId
+            sessionId,
+            options?.traceId
         );
     }
 
@@ -435,13 +441,13 @@ export class TonConnectUI {
     /**
      * Disconnect wallet and clean localstorage.
      */
-    public disconnect(): Promise<void> {
+    public disconnect(options?: { traceId?: string }): Promise<void> {
         this.tracker.trackDisconnection(this.wallet, 'dapp');
 
         widgetController.clearAction();
         widgetController.removeSelectedWalletInfo();
         this.walletInfoStorage.removeWalletInfo();
-        return this.connector.disconnect();
+        return this.connector.disconnect({ traceId: options?.traceId });
     }
 
     /**
@@ -451,7 +457,10 @@ export class TonConnectUI {
      */
     public async sendTransaction(
         tx: SendTransactionRequest,
-        options?: ActionConfiguration & { onRequestSent?: (redirectToWallet: () => void) => void }
+        options?: ActionConfiguration & {
+            onRequestSent?: (redirectToWallet: () => void) => void;
+            traceId?: string;
+        }
     ): Promise<SendTransactionResponse> {
         this.tracker.trackTransactionSentForSignature(this.wallet, tx);
 
@@ -533,7 +542,8 @@ export class TonConnectUI {
             const result = await this.waitForSendTransaction(
                 {
                     transaction: tx,
-                    signal: abortController.signal
+                    signal: abortController.signal,
+                    traceId: options?.traceId
                 },
                 onRequestSent
             );
@@ -578,7 +588,7 @@ export class TonConnectUI {
      */
     public async signData(
         data: SignDataPayload,
-        options?: { onRequestSent?: (redirectToWallet: () => void) => void }
+        options?: { onRequestSent?: (redirectToWallet: () => void) => void; traceId?: string }
     ): Promise<SignDataResponse> {
         this.tracker.trackDataSentForSignature(this.wallet, data);
 
@@ -660,7 +670,8 @@ export class TonConnectUI {
             const result = await this.waitForSignData(
                 {
                     data,
-                    signal: new AbortController().signal
+                    signal: new AbortController().signal,
+                    traceId: options?.traceId
                 },
                 onRequestSent
             );
@@ -951,7 +962,11 @@ export class TonConnectUI {
             signal.addEventListener('abort', onCanceledHandler, { once: true });
 
             this.connector
-                .sendTransaction(transaction, { onRequestSent: onRequestSent, signal: signal })
+                .sendTransaction(transaction, {
+                    onRequestSent: onRequestSent,
+                    signal: signal,
+                    traceId: options.traceId
+                })
                 .then(result => {
                     signal.removeEventListener('abort', onCanceledHandler);
                     return onTransactionHandler(result);
@@ -1181,14 +1196,17 @@ export class TonConnectUI {
 type WaitWalletConnectionOptions = {
     ignoreErrors?: boolean;
     signal?: AbortSignal | null;
+    traceId?: string;
 };
 
 type WaitSendTransactionOptions = {
     transaction: SendTransactionRequest;
     signal: AbortSignal;
+    traceId?: string;
 };
 
 type WaitSignDataOptions = {
     data: SignDataPayload;
     signal: AbortSignal;
+    traceId?: string;
 };

@@ -175,15 +175,23 @@ export type ConnectionStartedEvent = {
      * Custom data for the connection.
      */
     custom_data: Version;
+    /**
+     * Unique identifier used for tracking a specific user flow.
+     */
+    trace_id?: string | null;
 };
 
 /**
  * Create a connection init event.
  */
-export function createConnectionStartedEvent(version: Version): ConnectionStartedEvent {
+export function createConnectionStartedEvent(
+    version: Version,
+    traceId?: string | null
+): ConnectionStartedEvent {
     return {
         type: 'connection-started',
-        custom_data: createVersionInfo(version)
+        custom_data: createVersionInfo(version),
+        trace_id: traceId ?? null
     };
 }
 
@@ -199,21 +207,29 @@ export type ConnectionCompletedEvent = {
      * Connection success flag.
      */
     is_success: true;
+    /**
+     * Unique identifier used for tracking a specific user flow.
+     */
+    trace_id?: string | null;
 } & ConnectionInfo;
 
 /**
  * Create a connection completed event.
  * @param version
  * @param wallet
+ * @param sessionInfo
+ * @param traceId
  */
 export function createConnectionCompletedEvent(
     version: Version,
     wallet: Wallet | null,
-    sessionInfo?: SessionInfo | null
+    sessionInfo?: SessionInfo | null,
+    traceId?: string | null
 ): ConnectionCompletedEvent {
     return {
         type: 'connection-completed',
         is_success: true,
+        trace_id: traceId ?? null,
         ...createConnectionInfo(version, wallet, sessionInfo)
     };
 }
@@ -245,6 +261,10 @@ export type ConnectionErrorEvent = {
         client_id: string | null;
         wallet_id: string | null;
     } & Version;
+    /**
+     * Unique identifier used for tracking a specific user flow.
+     */
+    trace_id?: string | null;
 };
 
 /**
@@ -252,18 +272,22 @@ export type ConnectionErrorEvent = {
  * @param version
  * @param error_message
  * @param errorCode
+ * @param sessionInfo
+ * @param traceId
  */
 export function createConnectionErrorEvent(
     version: Version,
     error_message: string,
     errorCode: CONNECT_EVENT_ERROR_CODES | void,
-    sessionInfo?: SessionInfo | null
+    sessionInfo?: SessionInfo | null,
+    traceId?: string | null
 ): ConnectionErrorEvent {
     return {
         type: 'connection-error',
         is_success: false,
         error_message: error_message,
         error_code: errorCode ?? null,
+        trace_id: traceId ?? null,
         custom_data: {
             client_id: sessionInfo?.clientId ?? null,
             wallet_id: sessionInfo?.walletId ?? null,
@@ -292,17 +316,23 @@ export type ConnectionRestoringStartedEvent = {
      * Custom data for the connection.
      */
     custom_data: Version;
+    /**
+     * Unique identifier used for tracking a specific user flow.
+     */
+    trace_id?: string | null;
 };
 
 /**
  * Create a connection restoring started event.
  */
 export function createConnectionRestoringStartedEvent(
-    version: Version
+    version: Version,
+    traceId?: string | null
 ): ConnectionRestoringStartedEvent {
     return {
         type: 'connection-restoring-started',
-        custom_data: createVersionInfo(version)
+        custom_data: createVersionInfo(version),
+        trace_id: traceId ?? null
     };
 }
 
@@ -318,21 +348,29 @@ export type ConnectionRestoringCompletedEvent = {
      * Connection success flag.
      */
     is_success: true;
+    /**
+     * Unique identifier used for tracking a specific user flow.
+     */
+    trace_id?: string | null;
 } & ConnectionInfo;
 
 /**
  * Create a connection restoring completed event.
  * @param version
  * @param wallet
+ * @param sessionInfo
+ * @param traceId
  */
 export function createConnectionRestoringCompletedEvent(
     version: Version,
     wallet: Wallet | null,
-    sessionInfo?: SessionInfo | null
+    sessionInfo?: SessionInfo | null,
+    traceId?: string | null
 ): ConnectionRestoringCompletedEvent {
     return {
         type: 'connection-restoring-completed',
         is_success: true,
+        trace_id: traceId ?? null,
         ...createConnectionInfo(version, wallet, sessionInfo)
     };
 }
@@ -357,21 +395,28 @@ export type ConnectionRestoringErrorEvent = {
      * Custom data for the connection.
      */
     custom_data: Version;
+    /**
+     * Unique identifier used for tracking a specific user flow.
+     */
+    trace_id?: string | null;
 };
 
 /**
  * Create a connection restoring error event.
  * @param version
  * @param errorMessage
+ * @param traceId
  */
 export function createConnectionRestoringErrorEvent(
     version: Version,
-    errorMessage: string
+    errorMessage: string,
+    traceId?: string | null
 ): ConnectionRestoringErrorEvent {
     return {
         type: 'connection-restoring-error',
         is_success: false,
         error_message: errorMessage,
+        trace_id: traceId ?? null,
         custom_data: createVersionInfo(version)
     };
 }
@@ -479,6 +524,10 @@ export type TransactionSentForSignatureEvent = {
      * Event type.
      */
     type: 'transaction-sent-for-signature';
+    /**
+     * Unique identifier used for tracking a specific user flow.
+     */
+    trace_id?: string | null;
 } & ConnectionInfo &
     TransactionInfo;
 
@@ -487,15 +536,19 @@ export type TransactionSentForSignatureEvent = {
  * @param version
  * @param wallet
  * @param transaction
+ * @param sessionInfo
+ * @param traceId
  */
 export function createTransactionSentForSignatureEvent(
     version: Version,
     wallet: Wallet | null,
     transaction: SendTransactionRequest,
-    sessionInfo?: SessionInfo | null
+    sessionInfo?: SessionInfo | null,
+    traceId?: string | null
 ): TransactionSentForSignatureEvent {
     return {
         type: 'transaction-sent-for-signature',
+        trace_id: traceId ?? null,
         ...createConnectionInfo(version, wallet, sessionInfo),
         ...createTransactionInfo(wallet, transaction)
     };
@@ -517,6 +570,10 @@ export type TransactionSignedEvent = {
      * Signed transaction.
      */
     signed_transaction: string;
+    /**
+     * Unique identifier used for tracking a specific user flow.
+     */
+    trace_id?: string | null;
 } & ConnectionInfo &
     TransactionInfo;
 
@@ -526,18 +583,22 @@ export type TransactionSignedEvent = {
  * @param wallet
  * @param transaction
  * @param signedTransaction
+ * @param sessionInfo
+ * @param traceId
  */
 export function createTransactionSignedEvent(
     version: Version,
     wallet: Wallet | null,
     transaction: SendTransactionRequest,
     signedTransaction: SendTransactionResponse,
-    sessionInfo?: SessionInfo | null
+    sessionInfo?: SessionInfo | null,
+    traceId?: string | null
 ): TransactionSignedEvent {
     return {
         type: 'transaction-signed',
         is_success: true,
         signed_transaction: signedTransaction.boc,
+        trace_id: traceId ?? null,
         ...createConnectionInfo(version, wallet, sessionInfo),
         ...createTransactionInfo(wallet, transaction)
     };
@@ -563,6 +624,10 @@ export type TransactionSigningFailedEvent = {
      * Error code.
      */
     error_code: SEND_TRANSACTION_ERROR_CODES | null;
+    /**
+     * Unique identifier used for tracking a specific user flow.
+     */
+    trace_id?: string | null;
 } & ConnectionInfo &
     TransactionFullInfo;
 
@@ -573,6 +638,8 @@ export type TransactionSigningFailedEvent = {
  * @param transaction
  * @param errorMessage
  * @param errorCode
+ * @param sessionInfo
+ * @param traceId
  */
 export function createTransactionSigningFailedEvent(
     version: Version,
@@ -580,13 +647,15 @@ export function createTransactionSigningFailedEvent(
     transaction: SendTransactionRequest,
     errorMessage: string,
     errorCode: SEND_TRANSACTION_ERROR_CODES | void,
-    sessionInfo?: SessionInfo | null
+    sessionInfo?: SessionInfo | null,
+    traceId?: string | null
 ): TransactionSigningFailedEvent {
     return {
         type: 'transaction-signing-failed',
         is_success: false,
         error_message: errorMessage,
         error_code: errorCode ?? null,
+        trace_id: traceId ?? null,
         ...createConnectionInfo(version, wallet, sessionInfo),
         ...createTransactionFullInfo(wallet, transaction)
     };
@@ -603,17 +672,23 @@ export type TransactionSigningEvent =
 export type DataSentForSignatureEvent = {
     type: 'sign-data-request-initiated';
     data: SignDataPayload;
+    /**
+     * Unique identifier used for tracking a specific user flow.
+     */
+    trace_id?: string | null;
 } & ConnectionInfo;
 
 export function createDataSentForSignatureEvent(
     version: Version,
     wallet: Wallet | null,
     data: SignDataPayload,
-    sessionInfo?: SessionInfo | null
+    sessionInfo?: SessionInfo | null,
+    traceId?: string | null
 ): DataSentForSignatureEvent {
     return {
         type: 'sign-data-request-initiated',
         data,
+        trace_id: traceId ?? null,
         ...createConnectionInfo(version, wallet, sessionInfo)
     };
 }
@@ -623,6 +698,10 @@ export type DataSignedEvent = {
     is_success: true;
     data: SignDataPayload;
     signed_data: SignDataResponse;
+    /**
+     * Unique identifier used for tracking a specific user flow.
+     */
+    trace_id?: string | null;
 } & ConnectionInfo;
 
 export function createDataSignedEvent(
@@ -630,13 +709,15 @@ export function createDataSignedEvent(
     wallet: Wallet | null,
     data: SignDataPayload,
     signedData: SignDataResponse,
-    sessionInfo?: SessionInfo | null
+    sessionInfo?: SessionInfo | null,
+    traceId?: string | null
 ): DataSignedEvent {
     return {
         type: 'sign-data-request-completed',
         is_success: true,
         data,
         signed_data: signedData,
+        trace_id: traceId ?? null,
         ...createConnectionInfo(version, wallet, sessionInfo)
     };
 }
@@ -647,6 +728,10 @@ export type DataSigningFailedEvent = {
     error_message: string;
     error_code: SIGN_DATA_ERROR_CODES | null;
     data: SignDataPayload;
+    /**
+     * Unique identifier used for tracking a specific user flow.
+     */
+    trace_id?: string | null;
 } & ConnectionInfo;
 
 export function createDataSigningFailedEvent(
@@ -655,7 +740,8 @@ export function createDataSigningFailedEvent(
     data: SignDataPayload,
     errorMessage: string,
     errorCode: SIGN_DATA_ERROR_CODES | void,
-    sessionInfo?: SessionInfo | null
+    sessionInfo?: SessionInfo | null,
+    traceId?: string | null
 ): DataSigningFailedEvent {
     return {
         type: 'sign-data-request-failed',
@@ -663,6 +749,7 @@ export function createDataSigningFailedEvent(
         data,
         error_message: errorMessage,
         error_code: errorCode ?? null,
+        trace_id: traceId ?? null,
         ...createConnectionInfo(version, wallet, sessionInfo)
     };
 }
@@ -681,45 +768,69 @@ export type DisconnectionEvent = {
      * Disconnect scope: 'dapp' or 'wallet'.
      */
     scope: 'dapp' | 'wallet';
+    /**
+     * Unique identifier used for tracking a specific user flow.
+     */
+    trace_id?: string | null;
 } & ConnectionInfo;
 
-/**
- * Create a disconnect event.
- * @param version
- * @param wallet
- * @param scope
- * @returns
- */
 export function createDisconnectionEvent(
     version: Version,
     wallet: Wallet | null,
     scope: 'dapp' | 'wallet',
-    sessionInfo?: SessionInfo | null
+    sessionInfo?: SessionInfo | null,
+    traceId?: string | null
 ): DisconnectionEvent {
     return {
         type: 'disconnection',
         scope: scope,
+        trace_id: traceId ?? null,
         ...createConnectionInfo(version, wallet, sessionInfo)
     };
 }
 
+/**
+ * Represents the event triggered when the wallet modal is opened.
+ */
 export type WalletModalOpenedEvent = {
+    /**
+     * Event type.
+     */
     type: 'wallet-modal-opened';
+
+    /**
+     * The unique client identifier associated with the session or user.
+     */
     client_id: string | null;
+
+    /**
+     * A list of wallet identifiers that are currently visible in the modal.
+     */
     visible_wallets: string[];
+
+    /**
+     * Custom metadata containing versioning or contextual data for the modal.
+     */
     custom_data: Version;
+
+    /**
+     * Unique identifier used for tracking a specific user flow.
+     */
+    trace_id: string | null;
 };
 
 export function createWalletModalOpenedEvent(
     version: Version,
     visibleWallets: string[],
-    clientId?: string | null
+    clientId?: string | null,
+    traceId?: string | null
 ): WalletModalOpenedEvent {
     return {
         type: 'wallet-modal-opened',
         visible_wallets: visibleWallets,
         client_id: clientId ?? null,
-        custom_data: version
+        custom_data: version,
+        trace_id: traceId ?? null
     };
 }
 
