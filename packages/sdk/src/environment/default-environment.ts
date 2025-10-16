@@ -1,22 +1,20 @@
 import { IEnvironment } from 'src/environment/models/environment.interface';
 
 export class DefaultEnvironment implements IEnvironment {
-    constructor() {}
-
     getClientEnvironment() {
         return 'web';
     }
 
     getBrowser() {
-        return 'unknown';
+        return '';
     }
 
     getLocale() {
-        return 'unknown';
+        return 'en';
     }
 
     getPlatform() {
-        return 'unknown';
+        return '';
     }
 
     getTelegramUser() {

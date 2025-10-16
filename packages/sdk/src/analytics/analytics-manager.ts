@@ -6,6 +6,7 @@ import { Analytics } from 'src/analytics/analytics';
 import { pascalToKebab } from 'src/analytics/utils';
 import { IEnvironment } from 'src/environment/models/environment.interface';
 import { isQaModeEnabled } from 'src/utils/qa-mode';
+import { Dynamic } from 'src/utils/types';
 
 export type EventsCollectorOptions = {
     batchTimeoutMs?: number;
@@ -56,7 +57,7 @@ export class AnalyticsManager {
     scoped<
         TEvent extends AnalyticsEvent = AnalyticsEvent,
         TOptional extends keyof TEvent = 'event_name'
-    >(sharedData?: Partial<AnalyticsEvent>): Analytics<TEvent, TOptional> {
+    >(sharedData?: Partial<Dynamic<AnalyticsEvent>>): Analytics<TEvent, TOptional> {
         return new Proxy(this, {
             get(target, prop) {
                 const propName = prop.toString();
@@ -64,9 +65,16 @@ export class AnalyticsManager {
                     const eventNamePascal = propName.replace('emit', '');
                     const eventNameKebab = pascalToKebab(eventNamePascal);
                     return function (event: Omit<AnalyticsEvent, 'event_name'>) {
+                        const executedData = Object.fromEntries(
+                            Object.entries(sharedData ?? {}).map(([key, value]) => [
+                                key,
+                                typeof value === 'function' ? value() : value
+                            ])
+                        );
+
                         return target.emit({
                             event_name: eventNameKebab,
-                            ...sharedData,
+                            ...executedData,
                             ...event
                         } as AnalyticsEvent);
                     };

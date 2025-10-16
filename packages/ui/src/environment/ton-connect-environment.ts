@@ -9,10 +9,10 @@ export class TonConnectEnvironment implements IEnvironment {
         return navigator.languages?.[0] || navigator.language || 'en';
     }
     getBrowser() {
-        return this.userAgent.browser ?? 'unknown';
+        return this.userAgent.browser ?? '';
     }
     getPlatform() {
-        return this.userAgent.os ?? 'unknown';
+        return this.userAgent.os ?? '';
     }
     getTelegramUser() {
         return getTgUser();

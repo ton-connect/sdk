@@ -47,7 +47,7 @@ import { Provider } from 'src/provider/provider';
 import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { DefaultStorage } from 'src/storage/default-storage';
 import { ITonConnect } from 'src/ton-connect.interface';
-import { getDocument, getWebPageManifest } from 'src/utils/web-api';
+import { getDocument, getOriginWithPath, getWebPageManifest } from 'src/utils/web-api';
 import { WalletsListManager } from 'src/wallets-list-manager';
 import { WithoutIdDistributive } from 'src/utils/types';
 import {
@@ -174,9 +174,10 @@ export class TonConnect implements ITonConnect {
             tonConnectSdkVersion: tonConnectSdkVersion
         });
 
-        // TODO: in production ready make flag to enable them?
-        this.analytics = new AnalyticsManager();
         this.environment = options?.environment ?? new DefaultEnvironment();
+
+        // TODO: in production ready make flag to enable them?
+        this.analytics = new AnalyticsManager({ environment: this.environment });
 
         const telegramUser = this.environment.getTelegramUser();
         bindEventsTo(
@@ -186,7 +187,9 @@ export class TonConnect implements ITonConnect {
                 browser: this.environment.getBrowser(),
                 platform: this.environment.getPlatform(),
                 tg_id: telegramUser?.id,
-                tma_is_premium: telegramUser?.isPremium
+                tma_is_premium: telegramUser?.isPremium,
+                manifest_json_url: manifestUrl,
+                origin_url: getOriginWithPath
             })
         );
 

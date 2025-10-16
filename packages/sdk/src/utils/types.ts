@@ -24,3 +24,7 @@ export function hasProperties<T extends string>(
 
     return propertyKeys.every(propertyKey => propertyKey in value);
 }
+
+export type Dynamic<TObject extends Record<string, unknown>> = {
+    [Key in keyof TObject]: TObject[Key] | (() => TObject[Key]);
+};
