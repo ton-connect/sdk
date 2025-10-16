@@ -1,18 +1,13 @@
-import {
-    AppRequest,
-    ConnectRequest,
-    RpcMethod,
-    WalletEvent,
-    WalletResponse
-} from '@tonconnect/protocol';
-import { WithoutId, WithoutIdDistributive } from 'src/utils/types';
+import { AppRequest, ConnectRequest, RpcMethod } from '@tonconnect/protocol';
+import { OptionalTraceable, WithoutId } from 'src/utils/types';
+import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet/traceable-events';
 
 export type Provider = InternalProvider | HTTPProvider;
 
 export interface InternalProvider extends BaseProvider {
     type: 'injected';
 
-    connect(message: ConnectRequest): void;
+    connect(message: ConnectRequest, options?: OptionalTraceable): void;
 }
 
 export interface HTTPProvider extends BaseProvider {
@@ -20,11 +15,10 @@ export interface HTTPProvider extends BaseProvider {
 
     connect(
         message: ConnectRequest,
-        options?: {
+        options?: OptionalTraceable<{
             openingDeadlineMS?: number;
             signal?: AbortSignal;
-            traceId?: string;
-        }
+        }>
     ): string;
 
     pause(): void;
@@ -33,31 +27,31 @@ export interface HTTPProvider extends BaseProvider {
 }
 
 interface BaseProvider {
-    restoreConnection(options?: {
-        openingDeadlineMS?: number;
-        signal?: AbortSignal;
-        traceId?: string;
-    }): Promise<void>;
+    restoreConnection(
+        options?: OptionalTraceable<{
+            openingDeadlineMS?: number;
+            signal?: AbortSignal;
+        }>
+    ): Promise<void>;
 
     closeConnection(): void;
 
-    disconnect(options?: { signal?: AbortSignal; traceId?: string }): Promise<void>;
+    disconnect(options?: OptionalTraceable<{ signal?: AbortSignal }>): Promise<void>;
 
     sendRequest<T extends RpcMethod>(
         request: WithoutId<AppRequest<T>>,
-        options?: {
+        options?: OptionalTraceable<{
             onRequestSent?: () => void;
             signal?: AbortSignal;
             attempts?: number;
-            traceId?: string;
-        }
-    ): Promise<WithoutId<WalletResponse<T>>>;
+        }>
+    ): Promise<TraceableWalletResponse<T>>;
 
     /** @deprecated use sendRequest(transaction, options) instead */
     sendRequest<T extends RpcMethod>(
         request: WithoutId<AppRequest<T>>,
         onRequestSent?: () => void
-    ): Promise<WithoutId<WalletResponse<T>>>;
+    ): Promise<TraceableWalletResponse<T>>;
 
-    listen(eventsCallback: (e: WithoutIdDistributive<WalletEvent>) => void): void;
+    listen(eventsCallback: (e: TraceableWalletEvent) => void): void;
 }

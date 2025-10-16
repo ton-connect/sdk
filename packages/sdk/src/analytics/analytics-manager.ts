@@ -1,7 +1,7 @@
 import { logDebug, logError } from '../utils/log';
 import { AnalyticsEvent } from './types';
 import { tonConnectSdkVersion } from 'src/constants/version';
-import { v4, v7 } from 'src/utils/uuid';
+import { UUIDv4, UUIDv7 } from 'src/utils/uuid';
 import { Analytics } from 'src/analytics/analytics';
 import { pascalToKebab } from 'src/analytics/utils';
 import { IEnvironment } from 'src/environment/models/environment.interface';
@@ -91,12 +91,12 @@ export class AnalyticsManager {
             return;
         }
 
-        const traceId = event.trace_id ?? v7();
+        const traceId = event.trace_id ?? UUIDv7();
 
         const enhancedEvent = {
             ...this.baseEvent,
             ...event,
-            event_id: v4(),
+            event_id: UUIDv4(),
             client_timestamp: Math.floor(Date.now() / 1000),
             trace_id: traceId
         } as const;

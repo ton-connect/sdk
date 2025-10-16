@@ -2,9 +2,12 @@ import {
     Account,
     BrowserEventDispatcher,
     ConnectAdditionalRequest,
+    OptionalTraceable,
     RequiredFeatures,
     SignDataPayload,
     SignDataResponse,
+    Traceable,
+    UUIDv7,
     WalletInfoCurrentlyEmbedded
 } from '@tonconnect/sdk';
 import {
@@ -353,8 +356,8 @@ export class TonConnectUI {
     /**
      * Opens the modal window, returns a promise that resolves after the modal window is opened.
      */
-    public async openModal(options?: { traceId?: string }): Promise<void> {
-        await this.modal.open();
+    public async openModal(options?: OptionalTraceable): Promise<void> {
+        await this.modal.open(options);
 
         const sessionId = await this.getSessionId();
         const visibleWallets = widgetController.getLastVisibleWallets();
@@ -427,21 +430,23 @@ export class TonConnectUI {
      * @return Connected wallet.
      * @throws TonConnectUIError if connection was aborted.
      */
-    public async connectWallet(): Promise<ConnectedWallet> {
+    public async connectWallet(options?: OptionalTraceable): Promise<ConnectedWallet> {
+        const traceId = options?.traceId ?? UUIDv7();
+
         const walletsList = await this.getWallets();
         const embeddedWallet = walletsList.find(isWalletInfoCurrentlyEmbedded);
 
         if (embeddedWallet) {
-            return await this.connectEmbeddedWallet(embeddedWallet);
+            return await this.connectEmbeddedWallet(embeddedWallet, { traceId });
         } else {
-            return await this.connectExternalWallet();
+            return await this.connectExternalWallet({ traceId });
         }
     }
 
     /**
      * Disconnect wallet and clean localstorage.
      */
-    public disconnect(options?: { traceId?: string }): Promise<void> {
+    public disconnect(options?: OptionalTraceable): Promise<void> {
         this.tracker.trackDisconnection(this.wallet, 'dapp');
 
         widgetController.clearAction();
@@ -457,11 +462,13 @@ export class TonConnectUI {
      */
     public async sendTransaction(
         tx: SendTransactionRequest,
-        options?: ActionConfiguration & {
-            onRequestSent?: (redirectToWallet: () => void) => void;
-            traceId?: string;
-        }
-    ): Promise<SendTransactionResponse> {
+        options?: ActionConfiguration &
+            OptionalTraceable<{
+                onRequestSent?: (redirectToWallet: () => void) => void;
+            }>
+    ): Promise<OptionalTraceable<SendTransactionResponse>> {
+        const traceId = options?.traceId ?? UUIDv7();
+
         this.tracker.trackTransactionSentForSignature(this.wallet, tx);
 
         if (!this.connected) {
@@ -543,7 +550,7 @@ export class TonConnectUI {
                 {
                     transaction: tx,
                     signal: abortController.signal,
-                    traceId: options?.traceId
+                    traceId
                 },
                 onRequestSent
             );
@@ -588,8 +595,10 @@ export class TonConnectUI {
      */
     public async signData(
         data: SignDataPayload,
-        options?: { onRequestSent?: (redirectToWallet: () => void) => void; traceId?: string }
+        options?: OptionalTraceable<{ onRequestSent?: (redirectToWallet: () => void) => void }>
     ): Promise<SignDataResponse> {
+        const traceId = options?.traceId ?? UUIDv7();
+
         this.tracker.trackDataSentForSignature(this.wallet, data);
 
         if (!this.connected) {
@@ -671,7 +680,7 @@ export class TonConnectUI {
                 {
                     data,
                     signal: new AbortController().signal,
-                    traceId: options?.traceId
+                    traceId
                 },
                 onRequestSent
             );
@@ -795,7 +804,8 @@ export class TonConnectUI {
      * @internal
      */
     private async connectEmbeddedWallet(
-        embeddedWallet: WalletInfoCurrentlyEmbedded
+        embeddedWallet: WalletInfoCurrentlyEmbedded,
+        options: Traceable
     ): Promise<ConnectedWallet> {
         const connect = (parameters?: ConnectAdditionalRequest): void => {
             setLastSelectedWalletInfo(embeddedWallet);
@@ -810,7 +820,8 @@ export class TonConnectUI {
         }
 
         return await this.waitForWalletConnection({
-            ignoreErrors: false
+            ignoreErrors: false,
+            traceId: options.traceId
         });
     }
 
@@ -821,7 +832,7 @@ export class TonConnectUI {
      * @throws Error if the user cancels the connection process or if the connection process fails.
      * @internal
      */
-    private async connectExternalWallet(): Promise<ConnectedWallet> {
+    private async connectExternalWallet(options: Traceable): Promise<ConnectedWallet> {
         const abortController = new AbortController();
 
         widgetController.openWalletsModal();
@@ -840,7 +851,8 @@ export class TonConnectUI {
 
         return await this.waitForWalletConnection({
             ignoreErrors: true,
-            signal: abortController.signal
+            signal: abortController.signal,
+            traceId: options.traceId
         });
     }
 
@@ -927,7 +939,7 @@ export class TonConnectUI {
     private async waitForSendTransaction(
         options: WaitSendTransactionOptions,
         onRequestSent?: () => void
-    ): Promise<SendTransactionResponse> {
+    ): Promise<OptionalTraceable<SendTransactionResponse>> {
         return new Promise((resolve, reject) => {
             const { transaction, signal } = options;
 
@@ -941,7 +953,7 @@ export class TonConnectUI {
             }
 
             const onTransactionHandler = async (
-                transaction: SendTransactionResponse
+                transaction: OptionalTraceable<SendTransactionResponse>
             ): Promise<void> => {
                 resolve(transaction);
             };
@@ -1193,20 +1205,17 @@ export class TonConnectUI {
     }
 }
 
-type WaitWalletConnectionOptions = {
+type WaitWalletConnectionOptions = Traceable<{
     ignoreErrors?: boolean;
     signal?: AbortSignal | null;
-    traceId?: string;
-};
+}>;
 
-type WaitSendTransactionOptions = {
+type WaitSendTransactionOptions = Traceable<{
     transaction: SendTransactionRequest;
     signal: AbortSignal;
-    traceId?: string;
-};
+}>;
 
-type WaitSignDataOptions = {
+type WaitSignDataOptions = Traceable<{
     data: SignDataPayload;
     signal: AbortSignal;
-    traceId?: string;
-};
+}>;

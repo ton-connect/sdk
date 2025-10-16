@@ -6,6 +6,7 @@ import UAParser from 'ua-parser-js';
 import { InMemoryStorage } from 'src/app/models/in-memory-storage';
 import { TonConnectUIError } from 'src/errors';
 import { logDebug } from 'src/app/utils/log';
+import { setLastOpenedLink } from 'src/app/state/modals-state';
 
 /**
  * Opens a link in a new tab.
@@ -13,6 +14,8 @@ import { logDebug } from 'src/app/utils/log';
  * @param target
  */
 export function openLink(href: string, target = '_self'): void {
+    // TODO: should be extracted to upper layer
+    setLastOpenedLink(href);
     logDebug('openLink', href, target);
     window.open(href, target, 'noopener noreferrer');
 }

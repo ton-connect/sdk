@@ -39,13 +39,16 @@ export function bindEventsTo(
     });
     eventDispatcher.addEventListener('ton-connect-ui-selected-wallet', event => {
         const { detail } = event;
+        console.log(detail);
         analytics.emitConnectionSelectedWallet({
             client_id: detail.client_id || '',
             versions: buildVersionInfo(detail.custom_data),
             main_screen: detail.visible_wallets,
             wallets_menu: detail.wallets_menu,
             trace_id: detail.trace_id ?? undefined,
-            wallet_app_name: detail.wallet_type ?? ''
+            wallet_app_name: detail.wallet_type ?? '',
+            wallet_redirect_method: detail.wallet_redirect_method,
+            wallet_redirect_link: detail.wallet_redirect_link
         });
     });
 

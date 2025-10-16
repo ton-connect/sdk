@@ -14,6 +14,7 @@ import { createAbortController } from 'src/utils/create-abort-controller';
 import { AnalyticsManager } from 'src/analytics/analytics-manager';
 import { Analytics } from 'src/analytics/analytics';
 import { BridgeClientEvent } from 'src/analytics/types';
+import { OptionalTraceable } from 'src/utils/types';
 
 export class BridgeGateway {
     private readonly ssePath = 'events';
@@ -115,12 +116,11 @@ export class BridgeGateway {
         message: Uint8Array,
         receiver: string,
         topic: RpcMethod,
-        options?: {
-            traceId?: string;
+        options?: OptionalTraceable<{
             ttl?: number;
             signal?: AbortSignal;
             attempts?: number;
-        }
+        }>
     ): Promise<void>;
     /** @deprecated use send(message, receiver, topic, options) instead */
     public async send(
@@ -135,11 +135,14 @@ export class BridgeGateway {
         topic: RpcMethod,
         ttlOrOptions?:
             | number
-            | { ttl?: number; signal?: AbortSignal; attempts?: number; traceId?: string }
+            | OptionalTraceable<{ ttl?: number; signal?: AbortSignal; attempts?: number }>
     ): Promise<void> {
         // TODO: remove deprecated method
-        const options: { ttl?: number; signal?: AbortSignal; attempts?: number; traceId?: string } =
-            {};
+        const options: OptionalTraceable<{
+            ttl?: number;
+            signal?: AbortSignal;
+            attempts?: number;
+        }> = {};
         if (typeof ttlOrOptions === 'number') {
             options.ttl = ttlOrOptions;
         } else {
@@ -261,7 +264,7 @@ export class BridgeGateway {
 /**
  * Represents options for creating an event source.
  */
-export type RegisterSessionOptions = {
+export type RegisterSessionOptions = OptionalTraceable<{
     /**
      * Deadline for opening the event source.
      */
@@ -271,17 +274,12 @@ export type RegisterSessionOptions = {
      * Signal to abort the operation.
      */
     signal?: AbortSignal;
-
-    /**
-     * Unique identifier used for tracking a specific user flow.
-     */
-    traceId?: string;
-};
+}>;
 
 /**
  * Configuration for creating an event source.
  */
-export type CreateEventSourceConfig = {
+export type CreateEventSourceConfig = OptionalTraceable<{
     /**
      * URL of the bridge.
      */
@@ -314,11 +312,7 @@ export type CreateEventSourceConfig = {
      * Deadline for opening the event source.
      */
     openingDeadlineMS?: number;
-    /**
-     * Unique identifier used for tracking a specific user flow.
-     */
-    traceId?: string;
-};
+}>;
 
 /**
  * Creates an event source.

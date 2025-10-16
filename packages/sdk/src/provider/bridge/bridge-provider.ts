@@ -7,7 +7,6 @@ import {
     RpcMethod,
     SessionCrypto,
     TonAddressItemReply,
-    WalletEvent,
     WalletMessage,
     WalletResponse
 } from '@tonconnect/protocol';
@@ -23,7 +22,7 @@ import { BridgePartialSession, BridgeSession } from 'src/provider/bridge/models/
 import { HTTPProvider } from 'src/provider/provider';
 import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { IStorage } from 'src/storage/models/storage.interface';
-import { Optional, WithoutId, WithoutIdDistributive } from 'src/utils/types';
+import { Optional, OptionalTraceable, WithoutId } from 'src/utils/types';
 import { PROTOCOL_VERSION } from 'src/resources/protocol';
 import { logDebug, logError } from 'src/utils/log';
 import { encodeTelegramUrlParameters, isTelegramUrl } from 'src/utils/url';
@@ -32,6 +31,8 @@ import { createAbortController } from 'src/utils/create-abort-controller';
 import { AnalyticsManager } from 'src/analytics/analytics-manager';
 import { Analytics } from 'src/analytics/analytics';
 import { BridgeClientEvent } from 'src/analytics/types';
+import { UUIDv7 } from 'src/utils/uuid';
+import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet/traceable-events';
 
 export class BridgeProvider implements HTTPProvider {
     public static async fromStorage(
@@ -59,7 +60,7 @@ export class BridgeProvider implements HTTPProvider {
 
     private readonly pendingRequests = new Map<
         string,
-        (response: WithoutId<WalletResponse<RpcMethod>>) => void
+        (response: TraceableWalletResponse<RpcMethod>) => void
     >();
 
     private session: BridgeSession | BridgePartialSession | null = null;
@@ -68,7 +69,7 @@ export class BridgeProvider implements HTTPProvider {
 
     private pendingGateways: BridgeGateway[] = [];
 
-    private listeners: Array<(e: WithoutIdDistributive<WalletEvent>) => void> = [];
+    private listeners: Array<(e: TraceableWalletEvent) => void> = [];
 
     private readonly defaultOpeningDeadlineMS = 12000;
 
@@ -91,11 +92,10 @@ export class BridgeProvider implements HTTPProvider {
 
     public connect(
         message: ConnectRequest,
-        options?: {
+        options?: OptionalTraceable<{
             openingDeadlineMS?: number;
             signal?: AbortSignal;
-            traceId?: string;
-        }
+        }>
     ): string {
         const abortController = createAbortController(options?.signal);
         this.abortController?.abort();
@@ -149,12 +149,14 @@ export class BridgeProvider implements HTTPProvider {
         return this.generateUniversalLink(universalLink, message);
     }
 
-    public async restoreConnection(options?: {
-        openingDeadlineMS?: number;
-        signal?: AbortSignal;
-        traceId?: string;
-    }): Promise<void> {
-        const traceId = options?.traceId;
+    public async restoreConnection(
+        options?: OptionalTraceable<{
+            openingDeadlineMS?: number;
+            signal?: AbortSignal;
+        }>
+    ): Promise<void> {
+        const traceId = options?.traceId ?? UUIDv7();
+
         const abortController = createAbortController(options?.signal);
         this.abortController?.abort();
         this.abortController = abortController;
@@ -218,7 +220,7 @@ export class BridgeProvider implements HTTPProvider {
         }
 
         // notify listeners about stored connection
-        this.listeners.forEach(listener => listener(storedConnection.connectEvent));
+        this.listeners.forEach(listener => listener({ ...storedConnection.connectEvent, traceId }));
 
         // wait for the connection to be opened
         try {
@@ -243,12 +245,11 @@ export class BridgeProvider implements HTTPProvider {
 
     public sendRequest<T extends RpcMethod>(
         request: WithoutId<AppRequest<T>>,
-        options?: {
-            traceId?: string;
+        options?: OptionalTraceable<{
             attempts?: number;
             onRequestSent?: () => void;
             signal?: AbortSignal;
-        }
+        }>
     ): Promise<WithoutId<WalletResponse<T>>>;
     /** @deprecated use sendRequest(transaction, options) instead */
     public sendRequest<T extends RpcMethod>(
@@ -259,20 +260,18 @@ export class BridgeProvider implements HTTPProvider {
         request: WithoutId<AppRequest<T>>,
         optionsOrOnRequestSent?:
             | (() => void)
-            | {
+            | OptionalTraceable<{
                   attempts?: number;
                   onRequestSent?: () => void;
                   signal?: AbortSignal;
-                  traceId?: string;
-              }
-    ): Promise<WithoutId<WalletResponse<T>>> {
+              }>
+    ): Promise<TraceableWalletResponse<T>> {
         // TODO: remove deprecated method
-        const options: {
+        const options: OptionalTraceable<{
             onRequestSent?: () => void;
             signal?: AbortSignal;
             attempts?: number;
-            traceId?: string;
-        } = {};
+        }> = {};
         if (typeof optionsOrOnRequestSent === 'function') {
             options.onRequestSent = optionsOrOnRequestSent;
         } else {
@@ -281,6 +280,7 @@ export class BridgeProvider implements HTTPProvider {
             options.attempts = optionsOrOnRequestSent?.attempts;
             options.traceId = optionsOrOnRequestSent?.traceId;
         }
+        options.traceId ??= UUIDv7();
 
         return new Promise(async (resolve, reject) => {
             if (!this.gateway || !this.session || !('walletPublicKey' in this.session)) {
@@ -331,7 +331,8 @@ export class BridgeProvider implements HTTPProvider {
         this.gateway = null;
     }
 
-    public async disconnect(options?: { signal?: AbortSignal; traceId?: string }): Promise<void> {
+    public async disconnect(options?: OptionalTraceable<{ signal?: AbortSignal }>): Promise<void> {
+        const traceId = options?.traceId ?? UUIDv7();
         return new Promise(async resolve => {
             let called = false;
             let timeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -356,7 +357,7 @@ export class BridgeProvider implements HTTPProvider {
                         onRequestSent: onRequestSent,
                         signal: abortController.signal,
                         attempts: 1,
-                        traceId: options?.traceId
+                        traceId
                     }
                 );
             } catch (e) {
@@ -375,7 +376,7 @@ export class BridgeProvider implements HTTPProvider {
         });
     }
 
-    public listen(callback: (e: WithoutIdDistributive<WalletEvent>) => void): () => void {
+    public listen(callback: (e: TraceableWalletEvent) => void): () => void {
         this.listeners.push(callback);
         return () => (this.listeners = this.listeners.filter(listener => listener !== callback));
     }
@@ -418,6 +419,7 @@ export class BridgeProvider implements HTTPProvider {
     }
 
     private async gatewayListener(bridgeIncomingMessage: BridgeIncomingMessage): Promise<void> {
+        const traceId = bridgeIncomingMessage.traceId ?? UUIDv7();
         let walletMessage: WalletMessage;
         try {
             walletMessage = JSON.parse(
@@ -456,7 +458,7 @@ export class BridgeProvider implements HTTPProvider {
                 return;
             }
 
-            resolve(walletMessage);
+            resolve({ ...walletMessage, traceId });
             this.pendingRequests.delete(id);
             return;
         }
@@ -488,7 +490,7 @@ export class BridgeProvider implements HTTPProvider {
             await this.removeBridgeAndSession();
         }
 
-        listeners.forEach(listener => listener(walletMessage));
+        listeners.forEach(listener => listener({ ...walletMessage, traceId }));
     }
 
     private async gatewayErrorsListener(e: Event): Promise<void> {
@@ -574,12 +576,12 @@ export class BridgeProvider implements HTTPProvider {
 
     private async openGateways(
         sessionCrypto: SessionCrypto,
-        options?: {
+        options?: OptionalTraceable<{
             openingDeadlineMS?: number;
             signal?: AbortSignal;
-            traceId?: string;
-        }
+        }>
     ): Promise<void> {
+        const traceId = options?.traceId ?? UUIDv7();
         if (Array.isArray(this.walletConnectionSource)) {
             // close all gateways before opening new ones
             this.pendingGateways.map(bridge => bridge.close().catch());
@@ -614,7 +616,7 @@ export class BridgeProvider implements HTTPProvider {
                                 openingDeadlineMS:
                                     options?.openingDeadlineMS ?? this.defaultOpeningDeadlineMS,
                                 signal: _options.signal,
-                                traceId: options?.traceId
+                                traceId
                             });
                         },
                         {
@@ -644,7 +646,7 @@ export class BridgeProvider implements HTTPProvider {
             return await this.gateway.registerSession({
                 openingDeadlineMS: options?.openingDeadlineMS,
                 signal: options?.signal,
-                traceId: options?.traceId
+                traceId
             });
         }
     }

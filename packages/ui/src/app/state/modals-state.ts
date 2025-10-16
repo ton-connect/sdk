@@ -101,3 +101,4 @@ export const [lastVisibleWalletsInfo, setLastVisibleWalletsInfo] = createSignal<
     walletsMenu: 'explicit_wallet',
     wallets: []
 });
+export const [lastOpenedLink, setLastOpenedLink] = createSignal('');

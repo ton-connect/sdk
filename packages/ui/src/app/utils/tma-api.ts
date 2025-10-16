@@ -1,6 +1,7 @@
 import { getWindow, openLinkBlank } from 'src/app/utils/web-api';
 import { TonConnectUIError } from 'src/errors';
 import { logDebug, logError } from 'src/app/utils/log';
+import { setLastOpenedLink } from 'src/app/state/modals-state';
 
 type TmaPlatform = 'android' | 'ios' | 'macos' | 'tdesktop' | 'weba' | 'web' | 'unknown';
 
@@ -137,6 +138,8 @@ export function sendOpenTelegramLink(link: string, fallback?: () => void): void 
     const pathFull = url.pathname + url.search;
 
     if (isIframe() || versionAtLeast('6.1')) {
+        // TODO: should be extracted to upper layer
+        setLastOpenedLink(pathFull);
         postEvent('web_app_open_tg_link', { path_full: pathFull });
     } else {
         openLinkBlank('https://t.me' + pathFull);

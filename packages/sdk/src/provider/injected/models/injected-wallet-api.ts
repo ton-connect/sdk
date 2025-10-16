@@ -8,7 +8,7 @@ import {
     WalletResponse
 } from '@tonconnect/protocol';
 import { WalletInfoDTO } from 'src/models/wallet/wallet-info';
-import { hasProperties, hasProperty } from 'src/utils/types';
+import { hasProperties, hasProperty, OptionalTraceable } from 'src/utils/types';
 
 export interface InjectedWalletApi {
     deviceInfo: DeviceInfo;
@@ -18,10 +18,17 @@ export interface InjectedWalletApi {
     >;
     protocolVersion: number;
     isWalletBrowser: boolean;
-    connect(protocolVersion: number, message: ConnectRequest): Promise<ConnectEvent>;
-    restoreConnection(): Promise<ConnectEvent>;
-    send<T extends RpcMethod>(message: AppRequest<T>): Promise<WalletResponse<T>>;
-    listen(callback: (event: WalletEvent) => void): () => void;
+    connect(
+        protocolVersion: number,
+        message: ConnectRequest,
+        options?: OptionalTraceable
+    ): Promise<OptionalTraceable<ConnectEvent>>;
+    restoreConnection(options?: OptionalTraceable): Promise<OptionalTraceable<ConnectEvent>>;
+    send<T extends RpcMethod>(
+        message: AppRequest<T>,
+        options?: OptionalTraceable
+    ): Promise<WalletResponse<T>>;
+    listen(callback: (event: OptionalTraceable<WalletEvent>) => void): () => void;
 
     /**
      * @deprecated

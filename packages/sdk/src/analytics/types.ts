@@ -96,14 +96,8 @@ export type ConnectionSelectedWallet = TonConnectBaseEvent &
          */
         main_screen: Array<string>;
         wallet_app_name: string;
-        /** TODO not suitable?
-         * wallet_redirect_method
-         * string *
-         * Redirect method: tg_link, external_link
-         * wallet_redirect_link
-         * string *
-         * URL used to open the wallet without client_id
-         */
+        wallet_redirect_method?: 'tg_link' | 'external_link';
+        wallet_redirect_link?: string;
     };
 
 export type ConnectionCompletedEvent = TonConnectBaseEvent &

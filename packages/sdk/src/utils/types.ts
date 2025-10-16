@@ -28,3 +28,6 @@ export function hasProperties<T extends string>(
 export type Dynamic<TObject extends Record<string, unknown>> = {
     [Key in keyof TObject]: TObject[Key] | (() => TObject[Key]);
 };
+
+export type Traceable<T extends {} = {}> = { traceId: string } & T;
+export type OptionalTraceable<T extends {} = {}> = { traceId?: string } & T;

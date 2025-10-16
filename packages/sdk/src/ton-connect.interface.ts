@@ -9,6 +9,7 @@ import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-add
 import { WalletInfo } from 'src/models/wallet/wallet-info';
 import { WalletConnectionSourceJS } from 'src/models/wallet/wallet-connection-source';
 import { SignDataPayload } from '@tonconnect/protocol';
+import { OptionalTraceable } from 'src/utils/types';
 
 export interface ITonConnect {
     /**
@@ -50,32 +51,31 @@ export interface ITonConnect {
      */
     connect<T extends WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[]>(
         wallet: T,
-        options?: {
+        options?: OptionalTraceable<{
             request?: ConnectAdditionalRequest;
-            traceId?: string;
             openingDeadlineMS?: number;
             signal?: AbortSignal;
-        }
+        }>
     ): T extends WalletConnectionSourceJS ? void : string;
     /** @deprecated use connect(wallet, { request, ...options }) instead */
     connect<T extends WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[]>(
         wallet: T,
         request?: ConnectAdditionalRequest,
-        options?: {
+        options?: OptionalTraceable<{
             openingDeadlineMS?: number;
             signal?: AbortSignal;
-            traceId?: string;
-        }
+        }>
     ): T extends WalletConnectionSourceJS ? void : string;
 
     /**
      * Try to restore existing session and reconnect to the corresponding wallet. Call it immediately when your app is loaded.
      */
-    restoreConnection(options?: {
-        openingDeadlineMS?: number;
-        signal?: AbortSignal;
-        traceId?: string;
-    }): Promise<void>;
+    restoreConnection(
+        options?: OptionalTraceable<{
+            openingDeadlineMS?: number;
+            signal?: AbortSignal;
+        }>
+    ): Promise<void>;
 
     /**
      * Pause bridge HTTP connection. Might be helpful, if you want to pause connections while browser tab is unfocused,
@@ -91,7 +91,7 @@ export interface ITonConnect {
     /**
      * Disconnect form thw connected wallet and drop current session.
      */
-    disconnect(options?: { signal?: AbortSignal; traceId?: string }): Promise<void>;
+    disconnect(options?: OptionalTraceable<{ signal?: AbortSignal }>): Promise<void>;
 
     /**
      * Asks connected wallet to sign and send the transaction.
@@ -102,27 +102,25 @@ export interface ITonConnect {
      */
     sendTransaction(
         transaction: SendTransactionRequest,
-        options?: {
-            traceId?: string;
+        options?: OptionalTraceable<{
             onRequestSent?: () => void;
             signal?: AbortSignal;
-        }
-    ): Promise<SendTransactionResponse>;
+        }>
+    ): Promise<OptionalTraceable<SendTransactionResponse>>;
 
     /** @deprecated use sendTransaction(transaction, options) instead */
     sendTransaction(
         transaction: SendTransactionRequest,
         onRequestSent?: () => void
-    ): Promise<SendTransactionResponse>;
+    ): Promise<OptionalTraceable<SendTransactionResponse>>;
 
     signData(
         data: SignDataPayload,
-        options?: {
+        options?: OptionalTraceable<{
             onRequestSent?: () => void;
             signal?: AbortSignal;
-            traceId?: string;
-        }
-    ): Promise<SignDataResponse>;
+        }>
+    ): Promise<OptionalTraceable<SignDataResponse>>;
 
     /**
      * Gets the current session ID if available.

@@ -13,6 +13,7 @@ import {
     WalletInfoInjectable,
     WalletInfoRemote
 } from 'src/models';
+import { isTelegramUrl } from 'src/utils/url';
 
 /**
  * Request TON Connect UI version.
@@ -857,6 +858,16 @@ export type SelectedWalletEvent = {
     wallets_menu: 'explicit_wallet' | 'main_screen' | 'other_wallets';
 
     /**
+     * Redirect method: tg_link, external_link
+     */
+    wallet_redirect_method?: 'tg_link' | 'external_link';
+
+    /**
+     * URL used to open the wallet
+     */
+    wallet_redirect_link?: string;
+
+    /**
      * Wallet type: 'tonkeeper', 'tonhub', etc.
      */
     wallet_type: string | null;
@@ -877,6 +888,7 @@ export function createSelectedWalletEvent(
     visibleWallets: string[],
     lastSelectedWallet: WalletInfoInjectable | WalletInfoRemote | null,
     walletsMenu: 'explicit_wallet' | 'main_screen' | 'other_wallets',
+    redirectLink: string,
     clientId?: string | null,
     traceId?: string | null
 ): SelectedWalletEvent {
@@ -887,6 +899,12 @@ export function createSelectedWalletEvent(
         client_id: clientId ?? null,
         custom_data: version,
         trace_id: traceId ?? null,
+        wallet_redirect_method: redirectLink
+            ? isTelegramUrl(redirectLink)
+                ? 'tg_link'
+                : 'external_link'
+            : undefined,
+        wallet_redirect_link: redirectLink || undefined,
         wallet_type: lastSelectedWallet?.appName ?? null
     };
 }

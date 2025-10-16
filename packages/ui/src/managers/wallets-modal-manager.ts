@@ -1,4 +1,5 @@
 import {
+    lastOpenedLink,
     lastSelectedWalletInfo,
     setLastSelectedWalletInfo,
     walletsModalState
@@ -8,6 +9,7 @@ import {
     ConnectAdditionalRequest,
     isWalletInfoCurrentlyEmbedded,
     ITonConnect,
+    OptionalTraceable,
     WalletInfoCurrentlyEmbedded
 } from '@tonconnect/sdk';
 import { appState } from 'src/app/state/app.state';
@@ -70,6 +72,8 @@ export class WalletsModalManager implements WalletsModal {
      */
     public state: WalletsModalState = walletsModalState();
 
+    private traceId?: string;
+
     constructor(options: WalletsModalManagerCreateOptions) {
         this.connector = options.connector;
         this.tracker = options.tracker;
@@ -82,17 +86,43 @@ export class WalletsModalManager implements WalletsModal {
         });
 
         createEffect(
-            on(lastSelectedWalletInfo, async selectedWallet => {
-                console.log('selectedWallet', selectedWallet);
+            on(lastSelectedWalletInfo, async (selectedWallet, previousWallet) => {
                 const { wallets, walletsMenu } = widgetController.getLastVisibleWallets();
-                const clientId = await this.connector.getSessionId();
-                if (selectedWallet !== null && 'appName' in selectedWallet) {
+                if (selectedWallet && 'appName' in selectedWallet) {
+                    if (
+                        previousWallet &&
+                        'appName' in previousWallet &&
+                        previousWallet.appName === selectedWallet.appName
+                    ) {
+                        return;
+                    }
+
+                    const clientId = await this.connector.getSessionId();
                     this.tracker.trackSelectedWallet(
                         wallets.map(wallet => wallet.name),
                         selectedWallet,
                         walletsMenu,
-                        clientId
-                        // TODO?: traceId
+                        '',
+                        clientId,
+                        this.traceId
+                    );
+                }
+            })
+        );
+
+        createEffect(
+            on(lastOpenedLink, async openedLink => {
+                const { wallets, walletsMenu } = widgetController.getLastVisibleWallets();
+                if (openedLink.includes('ton_addr')) {
+                    const selectedWallet = lastSelectedWalletInfo();
+                    const clientId = await this.connector.getSessionId();
+                    this.tracker.trackSelectedWallet(
+                        wallets.map(wallet => wallet.name),
+                        selectedWallet && 'appName' in selectedWallet ? selectedWallet : null,
+                        walletsMenu,
+                        openedLink,
+                        clientId,
+                        this.traceId
                     );
                 }
             })
@@ -102,7 +132,9 @@ export class WalletsModalManager implements WalletsModal {
     /**
      * Opens the modal window.
      */
-    public async open(): Promise<void> {
+    public async open(options?: OptionalTraceable): Promise<void> {
+        this.traceId = options?.traceId;
+
         this.tracker.trackConnectionStarted();
         const walletsList = await this.connector.getWallets();
         const embeddedWallet = walletsList.find(isWalletInfoCurrentlyEmbedded);
