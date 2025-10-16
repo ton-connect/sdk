@@ -99,7 +99,7 @@ export { TelegramUser } from './environment/models/telegram-user';
 
 export { toUserFriendlyAddress } from './utils/address';
 export { checkRequiredWalletFeatures } from './utils/feature-support';
-export { isTelegramUrl, encodeTelegramUrlParameters } from './utils/url';
+export { isTelegramUrl, encodeTelegramUrlParameters, isConnectUrl } from './utils/url';
 export { enableQaMode, isQaModeEnabled } from './utils/qa-mode';
 
 export { Traceable, OptionalTraceable } from './utils/types';

@@ -7,6 +7,7 @@ import {
 import { createEffect, on } from 'solid-js';
 import {
     ConnectAdditionalRequest,
+    isConnectUrl,
     isWalletInfoCurrentlyEmbedded,
     ITonConnect,
     OptionalTraceable,
@@ -113,7 +114,7 @@ export class WalletsModalManager implements WalletsModal {
         createEffect(
             on(lastOpenedLink, async openedLink => {
                 const { wallets, walletsMenu } = widgetController.getLastVisibleWallets();
-                if (openedLink.includes('ton_addr') || openedLink.includes('ton--5Faddr')) {
+                if (isConnectUrl(openedLink)) {
                     const selectedWallet = lastSelectedWalletInfo();
                     const clientId = await this.connector.getSessionId();
                     this.tracker.trackSelectedWallet(

@@ -19,6 +19,14 @@ export function isTelegramUrl(link: string | undefined): link is string {
     return url.protocol === 'tg:' || url.hostname === 't.me';
 }
 
+export function isConnectUrl(link: string | undefined): link is string {
+    if (!link) {
+        return false;
+    }
+
+    return link.includes('ton_addr') || link.includes('ton--5Faddr');
+}
+
 export function encodeTelegramUrlParameters(parameters: string): string {
     return parameters
         .replaceAll('.', '%2E')
