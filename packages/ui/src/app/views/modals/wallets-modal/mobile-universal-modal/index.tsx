@@ -139,9 +139,15 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
         null
     );
 
-    // TODO: add telegram
     const visibleWallets = createMemo(() => supportedWallets().slice(0, 3), null);
-    setLastVisibleWalletsInfo(visibleWallets());
+    setLastVisibleWalletsInfo(
+        atWalletSupportFeatures()
+            ? [
+                  props.walletsList.find(wallet => wallet.appName === AT_WALLET_APP_NAME)!,
+                  ...visibleWallets()
+              ]
+            : visibleWallets()
+    );
 
     const fourWalletsItem = createMemo(
         () =>
