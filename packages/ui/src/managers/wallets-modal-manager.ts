@@ -113,7 +113,7 @@ export class WalletsModalManager implements WalletsModal {
         createEffect(
             on(lastOpenedLink, async openedLink => {
                 const { wallets, walletsMenu } = widgetController.getLastVisibleWallets();
-                if (openedLink.includes('ton_addr')) {
+                if (openedLink.includes('ton_addr') || openedLink.includes('ton--5Faddr')) {
                     const selectedWallet = lastSelectedWalletInfo();
                     const clientId = await this.connector.getSessionId();
                     this.tracker.trackSelectedWallet(
