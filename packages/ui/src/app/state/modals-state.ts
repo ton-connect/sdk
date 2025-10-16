@@ -94,4 +94,10 @@ export const setLastSelectedWalletInfo = (
 };
 
 export const [action, setAction] = createSignal<Action | null>(null);
-export const [lastVisibleWalletsInfo, setLastVisibleWalletsInfo] = createSignal<UIWalletInfo[]>([]);
+export const [lastVisibleWalletsInfo, setLastVisibleWalletsInfo] = createSignal<{
+    walletsMenu: 'explicit_wallet' | 'main_screen' | 'other_wallets';
+    wallets: UIWalletInfo[];
+}>({
+    walletsMenu: 'explicit_wallet',
+    wallets: []
+});

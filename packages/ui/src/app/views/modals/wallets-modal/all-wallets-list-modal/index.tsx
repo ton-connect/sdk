@@ -57,7 +57,10 @@ export const AllWalletsListModal: Component<DesktopSelectWalletModalProps> = pro
 
     const supportedWallets = (): UIWalletInfo[] =>
         walletsList().filter(wallet => wallet.isSupportRequiredFeatures);
-    setLastVisibleWalletsInfo(supportedWallets());
+    setLastVisibleWalletsInfo({
+        walletsMenu: 'other_wallets',
+        wallets: supportedWallets()
+    });
 
     const unsupportedWallets = (): UIWalletInfo[] =>
         walletsList().filter(wallet => !wallet.isSupportRequiredFeatures);

@@ -8,6 +8,7 @@ import {
     createDisconnectionEvent,
     createRequestVersionEvent,
     createResponseVersionEvent,
+    createSelectedWalletEvent,
     createTransactionSentForSignatureEvent,
     createTransactionSignedEvent,
     createTransactionSigningFailedEvent,
@@ -172,6 +173,19 @@ export class TonConnectUITracker {
     ): void {
         try {
             const event = createWalletModalOpenedEvent(this.version, ...args);
+            this.dispatchUserActionEvent(event);
+        } catch (e) {}
+    }
+
+    /**
+     * Track wallet selected event.
+     * @param args
+     */
+    public trackSelectedWallet(
+        ...args: WithoutVersion<Parameters<typeof createSelectedWalletEvent>>
+    ): void {
+        try {
+            const event = createSelectedWalletEvent(this.version, ...args);
             this.dispatchUserActionEvent(event);
         } catch (e) {}
     }

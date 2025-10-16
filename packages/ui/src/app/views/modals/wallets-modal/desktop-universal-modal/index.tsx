@@ -43,7 +43,10 @@ export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = prop
     );
 
     const visibleWallets = createMemo(() => supportedWallets().slice(0, 3), null);
-    setLastVisibleWalletsInfo(visibleWallets());
+    setLastVisibleWalletsInfo({
+        walletsMenu: 'main_screen',
+        wallets: visibleWallets()
+    });
 
     const fourWalletsItem = createMemo(
         () =>

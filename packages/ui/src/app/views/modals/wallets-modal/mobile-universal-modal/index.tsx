@@ -140,14 +140,15 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
     );
 
     const visibleWallets = createMemo(() => supportedWallets().slice(0, 3), null);
-    setLastVisibleWalletsInfo(
-        atWalletSupportFeatures()
+    setLastVisibleWalletsInfo({
+        walletsMenu: 'main_screen',
+        wallets: atWalletSupportFeatures()
             ? [
                   props.walletsList.find(wallet => wallet.appName === AT_WALLET_APP_NAME)!,
                   ...visibleWallets()
               ]
             : visibleWallets()
-    );
+    });
 
     const fourWalletsItem = createMemo(
         () =>

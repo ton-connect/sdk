@@ -1,6 +1,7 @@
 import { EventDispatcher } from 'src/tracker/event-dispatcher';
 import { ConnectionInfo, SdkActionEvent, Version } from 'src/tracker/types';
 import { Analytics } from 'src/analytics/analytics';
+import { TonConnectEvent } from 'src/analytics/types';
 
 function buildVersionInfo(version: Version): Record<string, string> {
     return {
@@ -25,7 +26,7 @@ function buildTonConnectEvent(detail: ConnectionInfo & { trace_id?: string | nul
 
 export function bindEventsTo(
     eventDispatcher: EventDispatcher<SdkActionEvent>,
-    analytics: Analytics
+    analytics: Analytics<TonConnectEvent>
 ) {
     eventDispatcher.addEventListener('ton-connect-ui-wallet-modal-opened', event => {
         const { detail } = event;
@@ -34,6 +35,17 @@ export function bindEventsTo(
             versions: buildVersionInfo(detail.custom_data),
             main_screen: detail.visible_wallets,
             trace_id: detail.trace_id ?? undefined
+        });
+    });
+    eventDispatcher.addEventListener('ton-connect-ui-selected-wallet', event => {
+        const { detail } = event;
+        analytics.emitConnectionSelectedWallet({
+            client_id: detail.client_id || '',
+            versions: buildVersionInfo(detail.custom_data),
+            main_screen: detail.visible_wallets,
+            wallets_menu: detail.wallets_menu,
+            trace_id: detail.trace_id ?? undefined,
+            wallet_app_name: detail.wallet_type ?? ''
         });
     });
 

@@ -1,5 +1,9 @@
-import { setLastSelectedWalletInfo, walletsModalState } from 'src/app/state/modals-state';
-import { createEffect } from 'solid-js';
+import {
+    lastSelectedWalletInfo,
+    setLastSelectedWalletInfo,
+    walletsModalState
+} from 'src/app/state/modals-state';
+import { createEffect, on } from 'solid-js';
 import {
     ConnectAdditionalRequest,
     isWalletInfoCurrentlyEmbedded,
@@ -76,6 +80,23 @@ export class WalletsModalManager implements WalletsModal {
             this.state = state;
             this.consumers.forEach(consumer => consumer(state));
         });
+
+        createEffect(
+            on(lastSelectedWalletInfo, async selectedWallet => {
+                console.log('selectedWallet', selectedWallet);
+                const { wallets, walletsMenu } = widgetController.getLastVisibleWallets();
+                const clientId = await this.connector.getSessionId();
+                if (selectedWallet !== null && 'appName' in selectedWallet) {
+                    this.tracker.trackSelectedWallet(
+                        wallets.map(wallet => wallet.name),
+                        selectedWallet,
+                        walletsMenu,
+                        clientId
+                        // TODO?: traceId
+                    );
+                }
+            })
+        );
     }
 
     /**

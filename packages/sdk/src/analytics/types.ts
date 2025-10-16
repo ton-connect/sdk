@@ -84,6 +84,28 @@ export type ConnectionStartedEvent = TonConnectBaseEvent &
         main_screen: Array<string>;
     };
 
+export type ConnectionSelectedWallet = TonConnectBaseEvent &
+    Pick<SessionInfo, 'client_id'> & {
+        event_name: 'connection-selected-wallet';
+        /**
+         * One of explicit_wallet, main_screen, other_wallets
+         */
+        wallets_menu: 'explicit_wallet' | 'main_screen' | 'other_wallets';
+        /**
+         * List of the wallets on the main screen.
+         */
+        main_screen: Array<string>;
+        wallet_app_name: string;
+        /** TODO not suitable?
+         * wallet_redirect_method
+         * string *
+         * Redirect method: tg_link, external_link
+         * wallet_redirect_link
+         * string *
+         * URL used to open the wallet without client_id
+         */
+    };
+
 export type ConnectionCompletedEvent = TonConnectBaseEvent &
     WalletInfo &
     SessionInfo & {
@@ -244,6 +266,7 @@ export type JsBridgeError = BaseJsBridgeEvent & {
 
 export type TonConnectEvent =
     | ConnectionStartedEvent
+    | ConnectionSelectedWallet
     | ConnectionCompletedEvent
     | ConnectionErrorEvent
     | DisconnectionEvent

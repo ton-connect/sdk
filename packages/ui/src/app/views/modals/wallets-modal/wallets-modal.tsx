@@ -21,11 +21,7 @@ import {
     useContext
 } from 'solid-js';
 import { ConnectorContext } from 'src/app/state/connector.context';
-import {
-    getWalletsModalIsOpened,
-    lastSelectedWalletInfo,
-    walletsModalState
-} from 'src/app/state/modals-state';
+import { getWalletsModalIsOpened, walletsModalState } from 'src/app/state/modals-state';
 import { H1Styled, LoaderContainerStyled, StyledModal } from './style';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { useI18n } from '@solid-primitives/i18n';
@@ -47,8 +43,6 @@ import { WalletsModalCloseReason } from 'src/models';
 import { DesktopFeatureNotSupportModal } from './feature-not-supoprt-modal';
 import { widgetController } from 'src/app/widget-controller';
 import { ChooseSupportedFeatureWalletsModal } from 'src/models/wallets-modal';
-
-createEffect(() => lastSelectedWalletInfo());
 
 export const WalletsModal: Component = () => {
     const { locale } = useI18n()[1];

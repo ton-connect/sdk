@@ -9,7 +9,9 @@ import {
     SendTransactionRequest,
     SendTransactionResponse,
     SignDataResponse,
-    Wallet
+    Wallet,
+    WalletInfoInjectable,
+    WalletInfoRemote
 } from 'src/models';
 
 /**
@@ -835,6 +837,61 @@ export function createWalletModalOpenedEvent(
 }
 
 /**
+ * Represents the event triggered when the wallet is selected.
+ */
+export type SelectedWalletEvent = {
+    /**
+     * Event type.
+     */
+    type: 'selected-wallet';
+
+    /**
+     * The unique client identifier associated with the session or user.
+     */
+    client_id: string | null;
+
+    /**
+     * A list of wallet identifiers that are currently visible in the modal.
+     */
+    visible_wallets: string[];
+    wallets_menu: 'explicit_wallet' | 'main_screen' | 'other_wallets';
+
+    /**
+     * Wallet type: 'tonkeeper', 'tonhub', etc.
+     */
+    wallet_type: string | null;
+
+    /**
+     * Custom metadata containing versioning or contextual data for the modal.
+     */
+    custom_data: Version;
+
+    /**
+     * Unique identifier used for tracking a specific user flow.
+     */
+    trace_id: string | null;
+};
+
+export function createSelectedWalletEvent(
+    version: Version,
+    visibleWallets: string[],
+    lastSelectedWallet: WalletInfoInjectable | WalletInfoRemote | null,
+    walletsMenu: 'explicit_wallet' | 'main_screen' | 'other_wallets',
+    clientId?: string | null,
+    traceId?: string | null
+): SelectedWalletEvent {
+    return {
+        type: 'selected-wallet',
+        wallets_menu: walletsMenu,
+        visible_wallets: visibleWallets,
+        client_id: clientId ?? null,
+        custom_data: version,
+        trace_id: traceId ?? null,
+        wallet_type: lastSelectedWallet?.appName ?? null
+    };
+}
+
+/**
  * User action events.
  */
 export type SdkActionEvent =
@@ -844,7 +901,8 @@ export type SdkActionEvent =
     | DisconnectionEvent
     | TransactionSigningEvent
     | DataSigningEvent
-    | WalletModalOpenedEvent;
+    | WalletModalOpenedEvent
+    | SelectedWalletEvent;
 
 /**
  * Parameters without version field.

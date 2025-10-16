@@ -41,7 +41,7 @@ export class AnalyticsManager {
     private static readonly BACKOFF_MULTIPLIER = 2;
 
     constructor(options: EventsCollectorOptions = {}) {
-        this.batchTimeoutMs = options.batchTimeoutMs ?? 5000;
+        this.batchTimeoutMs = options.batchTimeoutMs ?? 2000;
         this.currentBatchTimeoutMs = this.batchTimeoutMs;
         this.maxBatchSize = options.maxBatchSize ?? 100;
         this.analyticsUrl = options.analyticsUrl ?? 'https://analytics.ton.org/events';

@@ -360,7 +360,7 @@ export class TonConnectUI {
         const visibleWallets = widgetController.getLastVisibleWallets();
 
         this.tracker.trackWalletModalOpened(
-            visibleWallets.map(wallet => wallet.name),
+            visibleWallets.wallets.map(wallet => wallet.name),
             sessionId,
             options?.traceId
         );
