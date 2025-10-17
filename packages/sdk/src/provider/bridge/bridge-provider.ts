@@ -22,7 +22,7 @@ import { BridgePartialSession, BridgeSession } from 'src/provider/bridge/models/
 import { HTTPProvider } from 'src/provider/provider';
 import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { IStorage } from 'src/storage/models/storage.interface';
-import { Optional, OptionalTraceable, WithoutId } from 'src/utils/types';
+import { Optional, OptionalTraceable, Traceable, WithoutId } from 'src/utils/types';
 import { PROTOCOL_VERSION } from 'src/resources/protocol';
 import { logDebug, logError } from 'src/utils/log';
 import { encodeTelegramUrlParameters, isTelegramUrl } from 'src/utils/url';
@@ -33,6 +33,7 @@ import { Analytics } from 'src/analytics/analytics';
 import { BridgeClientEvent } from 'src/analytics/types';
 import { UUIDv7 } from 'src/utils/uuid';
 import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet/traceable-events';
+import v7 from 'src/utils/uuid/v7';
 
 export class BridgeProvider implements HTTPProvider {
     public static async fromStorage(
@@ -97,6 +98,7 @@ export class BridgeProvider implements HTTPProvider {
             signal?: AbortSignal;
         }>
     ): string {
+        const traceId = options?.traceId ?? v7();
         const abortController = createAbortController(options?.signal);
         this.abortController?.abort();
         this.abortController = abortController;
@@ -130,7 +132,7 @@ export class BridgeProvider implements HTTPProvider {
                             openingDeadlineMS:
                                 options?.openingDeadlineMS ?? this.defaultOpeningDeadlineMS,
                             signal: _options?.signal,
-                            traceId: options?.traceId
+                            traceId
                         }),
                     {
                         attempts: Number.MAX_SAFE_INTEGER,
@@ -146,7 +148,7 @@ export class BridgeProvider implements HTTPProvider {
                 ? this.walletConnectionSource.universalLink
                 : this.standardUniversalLink;
 
-        return this.generateUniversalLink(universalLink, message);
+        return this.generateUniversalLink(universalLink, message, { traceId });
     }
 
     public async restoreConnection(
@@ -532,24 +534,37 @@ export class BridgeProvider implements HTTPProvider {
         await this.connectionStorage.removeConnection();
     }
 
-    private generateUniversalLink(universalLink: string, message: ConnectRequest): string {
+    private generateUniversalLink(
+        universalLink: string,
+        message: ConnectRequest,
+        options: Traceable
+    ): string {
         if (isTelegramUrl(universalLink)) {
-            return this.generateTGUniversalLink(universalLink, message);
+            return this.generateTGUniversalLink(universalLink, message, options);
         }
 
-        return this.generateRegularUniversalLink(universalLink, message);
+        return this.generateRegularUniversalLink(universalLink, message, options);
     }
 
-    private generateRegularUniversalLink(universalLink: string, message: ConnectRequest): string {
+    private generateRegularUniversalLink(
+        universalLink: string,
+        message: ConnectRequest,
+        options: Traceable
+    ): string {
         const url = new URL(universalLink);
         url.searchParams.append('v', PROTOCOL_VERSION.toString());
         url.searchParams.append('id', this.session!.sessionCrypto.sessionId);
+        url.searchParams.append('trace_id', options.traceId);
         url.searchParams.append('r', JSON.stringify(message));
         return url.toString();
     }
 
-    private generateTGUniversalLink(universalLink: string, message: ConnectRequest): string {
-        const urlToWrap = this.generateRegularUniversalLink('about:blank', message);
+    private generateTGUniversalLink(
+        universalLink: string,
+        message: ConnectRequest,
+        options: Traceable
+    ): string {
+        const urlToWrap = this.generateRegularUniversalLink('about:blank', message, options);
         const linkParams = urlToWrap.split('?')[1]!;
 
         const startapp = 'tonconnect-' + encodeTelegramUrlParameters(linkParams);
