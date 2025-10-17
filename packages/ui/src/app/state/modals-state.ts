@@ -21,6 +21,7 @@ type BasicAction = {
     openModal: boolean;
     showNotification: boolean;
     sessionId?: string;
+    traceId: string;
 };
 
 export type ConfirmTransactionAction = BasicAction & {

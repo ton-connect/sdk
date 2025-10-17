@@ -562,22 +562,24 @@ export function redirectToWallet(
  * @param value
  */
 /**
- * Adds a session ID parameter to a universal link for transaction/signData confirmation.
+ * Adds a session ID and traceId parameters to a universal link for transaction/signData confirmation.
  * This is similar to the logic in bridge provider for connection links.
  * @param universalLink The universal link to add session ID to
- * @param sessionId The session ID to add
+ * @param params Contains sessionId and traceId to add
  * @returns The universal link with session ID parameter
  */
-export function addSessionIdToUniversalLink(
+export function enrichUniversalLink(
     universalLink: string,
-    sessionId?: string | null
-): string {
-    if (!sessionId) {
-        return universalLink;
+    params: {
+        sessionId?: string | null;
+        traceId: string;
     }
-
+): string {
     if (!isTelegramUrl(universalLink)) {
-        const newUrl = addQueryParameter(universalLink, 'id', sessionId);
+        let newUrl = addQueryParameter(universalLink, 'trace_id', params.traceId);
+        if (params.sessionId) {
+            newUrl = addQueryParameter(universalLink, 'id', params.sessionId);
+        }
 
         return newUrl;
     }
@@ -589,7 +591,10 @@ export function addSessionIdToUniversalLink(
         directLinkUrl.searchParams.append('startapp', 'tonconnect');
     }
 
-    const newUrl = addQueryParameter(directLinkUrl.toString(), 'id', sessionId);
+    let newUrl = addQueryParameter(directLinkUrl.toString(), 'trace_id', params.traceId);
+    if (params.sessionId) {
+        newUrl = addQueryParameter(universalLink, 'id', params.sessionId);
+    }
 
     const lastParam = newUrl.slice(newUrl.lastIndexOf('&') + 1);
     return (

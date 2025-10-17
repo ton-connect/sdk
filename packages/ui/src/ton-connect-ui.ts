@@ -51,7 +51,7 @@ import { isInTMA, sendExpand } from 'src/app/utils/tma-api';
 import {
     redirectToTelegram,
     redirectToWallet,
-    addSessionIdToUniversalLink
+    enrichUniversalLink
 } from 'src/app/utils/url-strategy-helpers';
 import { SingleWalletModalManager } from 'src/managers/single-wallet-modal-manager';
 import { SingleWalletModal, SingleWalletModalState } from 'src/models/single-wallet-modal';
@@ -490,7 +490,8 @@ export class TonConnectUI {
             showNotification: notifications.includes('before'),
             openModal: modals.includes('before'),
             sent: false,
-            sessionId: sessionId || undefined
+            sessionId: sessionId || undefined,
+            traceId
         });
 
         const abortController = new AbortController();
@@ -505,13 +506,15 @@ export class TonConnectUI {
                 showNotification: notifications.includes('before'),
                 openModal: modals.includes('before'),
                 sent: true,
-                sessionId: sessionId || undefined
+                sessionId: sessionId || undefined,
+                traceId
             });
 
             this.redirectAfterRequestSent({
                 returnStrategy,
                 twaReturnUrl,
-                sessionId: sessionId || undefined
+                sessionId: sessionId || undefined,
+                traceId
             });
 
             let firstClick = true;
@@ -527,7 +530,8 @@ export class TonConnectUI {
                     returnStrategy,
                     twaReturnUrl,
                     forceRedirect,
-                    sessionId: sessionId || undefined
+                    sessionId: sessionId || undefined,
+                    traceId
                 });
             };
 
@@ -560,7 +564,8 @@ export class TonConnectUI {
             widgetController.setAction({
                 name: 'transaction-sent',
                 showNotification: notifications.includes('success'),
-                openModal: modals.includes('success')
+                openModal: modals.includes('success'),
+                traceId
             });
 
             return result;
@@ -575,7 +580,8 @@ export class TonConnectUI {
             widgetController.setAction({
                 name: 'transaction-canceled',
                 showNotification: notifications.includes('error'),
-                openModal: modals.includes('error')
+                openModal: modals.includes('error'),
+                traceId
             });
 
             if (e instanceof TonConnectError) {
@@ -620,7 +626,8 @@ export class TonConnectUI {
             showNotification: notifications.includes('before'),
             openModal: modals.includes('before'),
             signed: false,
-            sessionId: sessionId || undefined
+            sessionId: sessionId || undefined,
+            traceId
         });
 
         const abortController = new AbortController();
@@ -635,13 +642,15 @@ export class TonConnectUI {
                 showNotification: notifications.includes('before'),
                 openModal: modals.includes('before'),
                 signed: true,
-                sessionId: sessionId || undefined
+                sessionId: sessionId || undefined,
+                traceId
             });
 
             this.redirectAfterRequestSent({
                 returnStrategy,
                 twaReturnUrl,
-                sessionId: sessionId || undefined
+                sessionId: sessionId || undefined,
+                traceId
             });
 
             let firstClick = true;
@@ -657,7 +666,8 @@ export class TonConnectUI {
                     returnStrategy,
                     twaReturnUrl,
                     forceRedirect,
-                    sessionId: sessionId || undefined
+                    sessionId: sessionId || undefined,
+                    traceId
                 });
             };
 
@@ -690,7 +700,8 @@ export class TonConnectUI {
             widgetController.setAction({
                 name: 'data-signed',
                 showNotification: notifications.includes('success'),
-                openModal: modals.includes('success')
+                openModal: modals.includes('success'),
+                traceId
             });
 
             return result;
@@ -705,7 +716,8 @@ export class TonConnectUI {
             widgetController.setAction({
                 name: 'sign-data-canceled',
                 showNotification: notifications.includes('error'),
-                openModal: modals.includes('error')
+                openModal: modals.includes('error'),
+                traceId
             });
 
             if (e instanceof TonConnectError) {
@@ -758,23 +770,24 @@ export class TonConnectUI {
         returnStrategy,
         twaReturnUrl,
         forceRedirect,
-        sessionId
-    }: {
+        sessionId,
+        traceId
+    }: Traceable<{
         returnStrategy: ReturnStrategy;
         twaReturnUrl?: `${string}://${string}`;
         forceRedirect?: boolean;
         sessionId?: string;
-    }): void {
+    }>): void {
         if (
             this.walletInfo &&
             'universalLink' in this.walletInfo &&
             (this.walletInfo.openMethod === 'universal-link' ||
                 this.walletInfo.openMethod === 'custom-deeplink')
         ) {
-            const linkWithSessionId = addSessionIdToUniversalLink(
-                this.walletInfo.universalLink,
-                sessionId
-            );
+            const linkWithSessionId = enrichUniversalLink(this.walletInfo.universalLink, {
+                sessionId,
+                traceId
+            });
 
             if (isTelegramUrl(this.walletInfo.universalLink)) {
                 redirectToTelegram(linkWithSessionId, {
