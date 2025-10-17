@@ -10,7 +10,7 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import rng from './rng-browser';
+import { rng } from './rng-browser';
 import { unsafeStringify } from './stringify';
 import { UUIDTypes, Version7Options } from './types';
 
@@ -21,13 +21,13 @@ type V7State = {
 
 const _state: V7State = {};
 
-function v7(options?: Version7Options, buf?: undefined, offset?: number): string;
-function v7<TBuf extends Uint8Array = Uint8Array>(
+export function UUIDv7(options?: Version7Options, buf?: undefined, offset?: number): string;
+export function UUIDv7<TBuf extends Uint8Array = Uint8Array>(
     options: Version7Options | undefined,
     buf: TBuf,
     offset?: number
 ): TBuf;
-function v7<TBuf extends Uint8Array = Uint8Array>(
+export function UUIDv7<TBuf extends Uint8Array = Uint8Array>(
     options?: Version7Options,
     buf?: TBuf,
     offset?: number
@@ -133,5 +133,3 @@ function v7Bytes(rnds: Uint8Array, msecs?: number, seq?: number, buf?: Uint8Arra
 
     return buf;
 }
-
-export default v7;

@@ -10,7 +10,7 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import validate from './validate';
+import { validate } from './validate';
 
 /**
  * Convert array of 16 byte values to UUID string format of the form:
@@ -52,7 +52,7 @@ export function unsafeStringify(arr: Uint8Array, offset = 0): string {
     ).toLowerCase();
 }
 
-function stringify(arr: Uint8Array, offset = 0) {
+export function stringify(arr: Uint8Array, offset = 0) {
     const uuid = unsafeStringify(arr, offset);
 
     // Consistency check for valid UUID.  If this throws, it's likely due to one
@@ -66,5 +66,3 @@ function stringify(arr: Uint8Array, offset = 0) {
 
     return uuid;
 }
-
-export default stringify;

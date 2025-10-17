@@ -31,9 +31,8 @@ import { createAbortController } from 'src/utils/create-abort-controller';
 import { AnalyticsManager } from 'src/analytics/analytics-manager';
 import { Analytics } from 'src/analytics/analytics';
 import { BridgeClientEvent } from 'src/analytics/types';
-import { UUIDv7 } from 'src/utils/uuid';
 import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet/traceable-events';
-import v7 from 'src/utils/uuid/v7';
+import { UUIDv7 } from 'src/utils/uuid';
 
 export class BridgeProvider implements HTTPProvider {
     public static async fromStorage(
@@ -98,7 +97,7 @@ export class BridgeProvider implements HTTPProvider {
             signal?: AbortSignal;
         }>
     ): string {
-        const traceId = options?.traceId ?? v7();
+        const traceId = options?.traceId ?? UUIDv7();
         const abortController = createAbortController(options?.signal);
         this.abortController?.abort();
         this.abortController = abortController;

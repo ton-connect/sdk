@@ -10,8 +10,8 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import native from './native-browser';
-import rng from './rng-browser';
+import { randomUUID } from './native-browser';
+import { rng } from './rng-browser';
 import { unsafeStringify } from './stringify';
 import { UUIDTypes, Version4Options } from './types';
 
@@ -50,19 +50,19 @@ function _v4<TBuf extends Uint8Array = Uint8Array>(
     return unsafeStringify(rnds);
 }
 
-function v4(options?: Version4Options, buf?: undefined, offset?: number): string;
-function v4<TBuf extends Uint8Array = Uint8Array>(
+export function UUIDv4(options?: Version4Options, buf?: undefined, offset?: number): string;
+export function UUIDv4<TBuf extends Uint8Array = Uint8Array>(
     options: Version4Options | undefined,
     buf: TBuf,
     offset?: number
 ): TBuf;
-function v4<TBuf extends Uint8Array = Uint8Array>(
+export function UUIDv4<TBuf extends Uint8Array = Uint8Array>(
     options?: Version4Options,
     buf?: TBuf,
     offset?: number
 ): UUIDTypes<TBuf> {
-    if (native.randomUUID && !buf && !options) {
-        return native.randomUUID();
+    if (randomUUID && !buf && !options) {
+        return randomUUID();
     }
 
     // Putting tail-code that could just go inline here in a separate function
@@ -71,5 +71,3 @@ function v4<TBuf extends Uint8Array = Uint8Array>(
     // REF: https://github.com/uuidjs/uuid/issues/892
     return _v4(options, buf, offset);
 }
-
-export default v4;
