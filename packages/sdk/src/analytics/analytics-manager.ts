@@ -87,6 +87,7 @@ export class AnalyticsManager {
     }
 
     private emit(event: AnalyticsEvent): void {
+        // TODO: visibility
         if (!this.enabled) {
             return;
         }
@@ -227,7 +228,8 @@ export class AnalyticsManager {
             this.currentBatchTimeoutMs *= AnalyticsManager.BACKOFF_MULTIPLIER;
             throw new Error(`Analytics API error: ${status} ${statusText}`);
         } else {
-            this.currentBatchTimeoutMs *= AnalyticsManager.BACKOFF_MULTIPLIER;
+            this.currentBatchTimeoutMs = this.batchTimeoutMs;
+            this.backoff = 1;
             return; // Don't retry
         }
     }
