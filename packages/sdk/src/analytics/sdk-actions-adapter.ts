@@ -39,7 +39,6 @@ export function bindEventsTo(
     });
     eventDispatcher.addEventListener('ton-connect-ui-selected-wallet', event => {
         const { detail } = event;
-        console.log(detail);
         analytics.emitConnectionSelectedWallet({
             client_id: detail.client_id || '',
             versions: buildVersionInfo(detail.custom_data),
