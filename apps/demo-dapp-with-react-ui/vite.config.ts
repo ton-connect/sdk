@@ -10,7 +10,7 @@ export default defineConfig({
         sourcemap: true
     },
     // @ts-ignore
-    base: './',
+    base: '/',
     server: {
         fs: {
             allow: ['../sdk', './']
