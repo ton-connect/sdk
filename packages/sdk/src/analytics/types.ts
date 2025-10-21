@@ -114,7 +114,7 @@ export type ConnectionErrorEvent = TonConnectBaseEvent &
     SessionInfo & {
         event_name: 'connection-error';
 
-        error_code: string;
+        error_code: number;
         error_message: string;
     };
 
@@ -164,7 +164,7 @@ export type TransactionSigningFailedEvent = TonConnectBaseEvent &
              */
             payload: string;
         }[];
-        error_code: string;
+        error_code: number;
         error_message: string;
     };
 
@@ -187,7 +187,7 @@ export type SignDataRequestFailedEvent = TonConnectBaseEvent &
         sign_data_type: 'text' | 'cell' | 'binary';
         sign_data_schema?: string;
         sign_data_value: string;
-        error_code: string;
+        error_code: number;
         error_message: string;
     };
 

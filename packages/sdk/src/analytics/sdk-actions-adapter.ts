@@ -61,7 +61,7 @@ export function bindEventsTo(
         analytics.emitConnectionError({
             client_id: detail.custom_data.client_id || '',
             wallet_id: detail.custom_data.wallet_id || '',
-            error_code: detail.error_code?.toString() ?? '',
+            error_code: detail.error_code ?? 0,
             error_message: detail.error_message,
             trace_id: detail.trace_id ?? undefined
         });
@@ -92,7 +92,7 @@ export function bindEventsTo(
                 payload: message.payload ?? ''
             })),
             error_message: detail.error_message,
-            error_code: detail.error_code?.toString() ?? ''
+            error_code: detail.error_code ?? 0
         });
     });
     eventDispatcher.addEventListener('ton-connect-sign-data-request-initiated', event => {
@@ -122,7 +122,7 @@ export function bindEventsTo(
             sign_data_type: detail.data.type,
             sign_data_value: signDataValue,
             sign_data_schema: signDataSchema,
-            error_code: detail.error_code?.toString() ?? '',
+            error_code: detail.error_code ?? 0,
             error_message: detail.error_message
         });
     });
