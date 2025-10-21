@@ -4,6 +4,7 @@ import eruda from 'eruda';
 
 import React, { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import './index.scss';
 import { runSingleInstance } from './utils/run-single-instance';
@@ -72,7 +73,9 @@ enableMocking().then(() => {
     const root = createRoot(container);
     root.render(
         <StrictMode>
-            <App />
+            <BrowserRouter>
+                <App />
+            </BrowserRouter>
         </StrictMode>
     );
 });

@@ -24,6 +24,7 @@
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-json-view": "^1.21.3",
+    "react-router-dom": "^7.9.4",
     "tweetnacl": "^1.0.3",
     "zod": "^4.0.15"
   },
