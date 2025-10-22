@@ -15,7 +15,7 @@ import { setLastOpenedLink } from 'src/app/state/modals-state';
  */
 export function openLink(href: string, target = '_self'): void {
     // TODO: should be extracted to upper layer
-    setLastOpenedLink(href);
+    setLastOpenedLink({ link: href });
     logDebug('openLink', href, target);
     window.open(href, target, 'noopener noreferrer');
 }

@@ -889,9 +889,14 @@ export function createSelectedWalletEvent(
     lastSelectedWallet: WalletInfoInjectable | WalletInfoRemote | null,
     walletsMenu: 'explicit_wallet' | 'main_screen' | 'other_wallets',
     redirectLink: string,
+    redirectLinkType?: 'tg_link' | 'external_link',
     clientId?: string | null,
     traceId?: string | null
 ): SelectedWalletEvent {
+    let walletRedirectMethod = redirectLinkType;
+    if (!walletRedirectMethod && redirectLink) {
+        walletRedirectMethod = isTelegramUrl(redirectLink) ? 'tg_link' : 'external_link';
+    }
     return {
         type: 'selected-wallet',
         wallets_menu: walletsMenu,
@@ -899,11 +904,7 @@ export function createSelectedWalletEvent(
         client_id: clientId ?? null,
         custom_data: version,
         trace_id: traceId ?? null,
-        wallet_redirect_method: redirectLink
-            ? isTelegramUrl(redirectLink)
-                ? 'tg_link'
-                : 'external_link'
-            : undefined,
+        wallet_redirect_method: walletRedirectMethod,
         wallet_redirect_link: redirectLink || undefined,
         wallet_type: lastSelectedWallet?.appName ?? null
     };

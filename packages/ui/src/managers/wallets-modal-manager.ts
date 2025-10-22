@@ -104,6 +104,7 @@ export class WalletsModalManager implements WalletsModal {
                         selectedWallet,
                         walletsMenu,
                         '',
+                        undefined,
                         clientId,
                         this.traceId
                     );
@@ -114,14 +115,15 @@ export class WalletsModalManager implements WalletsModal {
         createEffect(
             on(lastOpenedLink, async openedLink => {
                 const { wallets, walletsMenu } = widgetController.getLastVisibleWallets();
-                if (isConnectUrl(openedLink)) {
+                if (isConnectUrl(openedLink.link)) {
                     const selectedWallet = lastSelectedWalletInfo();
                     const clientId = await this.connector.getSessionId();
                     this.tracker.trackSelectedWallet(
                         wallets.map(wallet => wallet.name),
                         selectedWallet && 'appName' in selectedWallet ? selectedWallet : null,
                         walletsMenu,
-                        openedLink,
+                        openedLink.link,
+                        openedLink.type,
                         clientId,
                         this.traceId
                     );

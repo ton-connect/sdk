@@ -102,4 +102,9 @@ export const [lastVisibleWalletsInfo, setLastVisibleWalletsInfo] = createSignal<
     walletsMenu: 'explicit_wallet',
     wallets: []
 });
-export const [lastOpenedLink, setLastOpenedLink] = createSignal('');
+export const [lastOpenedLink, setLastOpenedLink] = createSignal<{
+    link: string;
+    type?: 'tg_link' | 'external_link';
+}>({
+    link: ''
+});

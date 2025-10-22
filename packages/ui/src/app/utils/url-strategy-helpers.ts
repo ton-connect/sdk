@@ -578,7 +578,7 @@ export function enrichUniversalLink(
     if (!isTelegramUrl(universalLink)) {
         let newUrl = addQueryParameter(universalLink, 'trace_id', params.traceId);
         if (params.sessionId) {
-            newUrl = addQueryParameter(universalLink, 'id', params.sessionId);
+            newUrl = addQueryParameter(newUrl, 'id', params.sessionId);
         }
 
         return newUrl;
@@ -593,7 +593,7 @@ export function enrichUniversalLink(
 
     let newUrl = addQueryParameter(directLinkUrl.toString(), 'trace_id', params.traceId);
     if (params.sessionId) {
-        newUrl = addQueryParameter(universalLink, 'id', params.sessionId);
+        newUrl = addQueryParameter(newUrl, 'id', params.sessionId);
     }
 
     const lastParam = newUrl.slice(newUrl.lastIndexOf('&') + 1);

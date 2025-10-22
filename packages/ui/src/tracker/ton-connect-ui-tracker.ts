@@ -25,6 +25,7 @@ import {
     Version,
     WithoutVersion
 } from '@tonconnect/sdk';
+import { logError } from 'src/app/utils/log';
 
 export type TonConnectUITrackerOptions = {
     /**
@@ -187,7 +188,9 @@ export class TonConnectUITracker {
         try {
             const event = createSelectedWalletEvent(this.version, ...args);
             this.dispatchUserActionEvent(event);
-        } catch (e) {}
+        } catch (e) {
+            logError(e);
+        }
     }
 
     /**

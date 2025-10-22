@@ -139,7 +139,7 @@ export function sendOpenTelegramLink(link: string, fallback?: () => void): void 
 
     if (isIframe() || versionAtLeast('6.1')) {
         // TODO: should be extracted to upper layer
-        setLastOpenedLink(pathFull);
+        setLastOpenedLink({ link: pathFull, type: 'tg_link' });
         postEvent('web_app_open_tg_link', { path_full: pathFull });
     } else {
         openLinkBlank('https://t.me' + pathFull);
