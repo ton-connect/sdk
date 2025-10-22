@@ -166,8 +166,12 @@ export class AnalyticsManager {
 
     private async processEventsBatch(eventsToSend: AnalyticsEvent[]): Promise<void> {
         logDebug('Sending analytics events...', eventsToSend.length);
-        const response = await this.sendEvents(eventsToSend);
-        this.handleResponse(response);
+        try {
+            const response = await this.sendEvents(eventsToSend);
+            this.handleResponse(response);
+        } catch (err) {
+            this.handleUnknownError(err);
+        }
     }
 
     private handleResponse(response: Response): void {
@@ -178,7 +182,7 @@ export class AnalyticsManager {
         } else if (this.isClientError(status)) {
             this.handleClientError(status, statusText);
         } else if (this.isServerError(status)) {
-            this.handleServerError(status, statusText);
+            this.handleUnknownError({ status, statusText });
         }
     }
 
@@ -226,11 +230,11 @@ export class AnalyticsManager {
         );
     }
 
-    private handleServerError(status: number, statusText: string): void {
+    private handleUnknownError(error: unknown): void {
         if (this.backoff < AnalyticsManager.MAX_BACKOFF_ATTEMPTS) {
             this.backoff++;
             this.currentBatchTimeoutMs *= AnalyticsManager.BACKOFF_MULTIPLIER;
-            throw new Error(`Analytics API error: ${status} ${statusText}`);
+            throw new Error(`Unknown analytics API error: ${error}`);
         } else {
             this.currentBatchTimeoutMs = this.batchTimeoutMs;
             this.backoff = 1;
