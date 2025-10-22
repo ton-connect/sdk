@@ -7,6 +7,7 @@ import { pascalToKebab } from 'src/analytics/utils';
 import { IEnvironment } from 'src/environment/models/environment.interface';
 import { isQaModeEnabled } from 'src/utils/qa-mode';
 import { Dynamic } from 'src/utils/types';
+import { getDocument } from 'src/utils/web-api';
 
 export type EventsCollectorOptions = {
     batchTimeoutMs?: number;
@@ -28,6 +29,8 @@ export class AnalyticsManager {
     private readonly maxBatchSize: number;
     private readonly analyticsUrl: string;
     private enabled: boolean;
+
+    private shouldSend: boolean = true;
 
     private readonly baseEvent: Partial<AnalyticsEvent>;
 
@@ -52,6 +55,8 @@ export class AnalyticsManager {
             version: tonConnectSdkVersion,
             client_environment: options.environment?.getClientEnvironment()
         };
+
+        this.addWindowFocusAndBlurSubscriptions();
     }
 
     scoped<
@@ -87,7 +92,6 @@ export class AnalyticsManager {
     }
 
     private emit(event: AnalyticsEvent): void {
-        // TODO: visibility
         if (!this.enabled) {
             return;
         }
@@ -126,7 +130,7 @@ export class AnalyticsManager {
     }
 
     async flush(): Promise<void> {
-        if (this.isProcessing || this.events.length === 0) {
+        if (this.isProcessing || this.events.length === 0 || !this.shouldSend) {
             return;
         }
 
@@ -236,6 +240,27 @@ export class AnalyticsManager {
 
     private handleTooManyRequests(status: number, statusText: string): void {
         throw new Error(`Analytics API error: ${status} ${statusText}`);
+    }
+
+    private addWindowFocusAndBlurSubscriptions(): void {
+        const document = getDocument();
+        if (!document) {
+            return;
+        }
+
+        try {
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    this.clearTimeout();
+                    this.shouldSend = false;
+                } else {
+                    this.shouldSend = true;
+                    this.scheduleNextFlushIfNeeded();
+                }
+            });
+        } catch (e) {
+            logError('Cannot subscribe to the document.visibilitychange: ', e);
+        }
     }
 
     setEnabled(enabled: boolean): void {
