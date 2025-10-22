@@ -21,7 +21,6 @@ import {
     WithoutVersion
 } from './types';
 import { EventDispatcher } from 'src/tracker/event-dispatcher';
-import { BrowserEventDispatcher } from 'src/tracker/browser-event-dispatcher';
 
 /**
  * Options for the TonConnect tracker.
@@ -29,9 +28,8 @@ import { BrowserEventDispatcher } from 'src/tracker/browser-event-dispatcher';
 export type TonConnectTrackerOptions = {
     /**
      * Event dispatcher to track user actions.
-     * @default new BrowserEventDispatcher()
      */
-    eventDispatcher?: EventDispatcher<SdkActionEvent> | null;
+    eventDispatcher: EventDispatcher<SdkActionEvent>;
     /**
      * TonConnect SDK version.
      */
@@ -99,7 +97,7 @@ export class TonConnectTracker {
     private readonly eventDispatcher: EventDispatcher<SdkActionEvent>;
 
     constructor(options: TonConnectTrackerOptions) {
-        this.eventDispatcher = options?.eventDispatcher ?? new BrowserEventDispatcher();
+        this.eventDispatcher = options?.eventDispatcher;
         this.tonConnectSdkVersion = options.tonConnectSdkVersion;
 
         this.init().catch();

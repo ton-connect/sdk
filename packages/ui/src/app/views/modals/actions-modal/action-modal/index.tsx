@@ -18,7 +18,7 @@ import { isInTMA } from 'src/app/utils/tma-api';
 import {
     redirectToTelegram,
     redirectToWallet,
-    addSessionIdToUniversalLink
+    enrichUniversalLink
 } from 'src/app/utils/url-strategy-helpers';
 
 interface ActionModalProps extends WithDataAttributes {
@@ -90,10 +90,10 @@ export const ActionModal: Component<ActionModalProps> = props => {
         setFirstClick(false);
 
         // Add session ID to universal link if provided
-        const linkWithSessionId = addSessionIdToUniversalLink(
-            universalLink!,
-            currentAction.sessionId
-        );
+        const linkWithSessionId = enrichUniversalLink(universalLink!, {
+            sessionId: currentAction.sessionId,
+            traceId: currentAction.traceId
+        });
 
         if (isTelegramUrl(universalLink)) {
             redirectToTelegram(linkWithSessionId, {

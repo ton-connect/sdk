@@ -4,6 +4,7 @@ import { LastSelectedWalletInfoStorage } from 'src/storage';
 import { ReturnStrategy } from 'src/models';
 import { WalletsModalState } from 'src/models/wallets-modal';
 import { SingleWalletModalState } from 'src/models/single-wallet-modal';
+import { UIWalletInfo } from 'src/app/models/ui-wallet-info';
 
 export type ActionName =
     | 'confirm-transaction'
@@ -20,6 +21,7 @@ type BasicAction = {
     openModal: boolean;
     showNotification: boolean;
     sessionId?: string;
+    traceId: string;
 };
 
 export type ConfirmTransactionAction = BasicAction & {
@@ -93,3 +95,16 @@ export const setLastSelectedWalletInfo = (
 };
 
 export const [action, setAction] = createSignal<Action | null>(null);
+export const [lastVisibleWalletsInfo, setLastVisibleWalletsInfo] = createSignal<{
+    walletsMenu: 'explicit_wallet' | 'main_screen' | 'other_wallets';
+    wallets: UIWalletInfo[];
+}>({
+    walletsMenu: 'explicit_wallet',
+    wallets: []
+});
+export const [lastOpenedLink, setLastOpenedLink] = createSignal<{
+    link: string;
+    type?: 'tg_link' | 'external_link';
+}>({
+    link: ''
+});

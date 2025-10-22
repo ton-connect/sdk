@@ -1,10 +1,10 @@
-import { FeatureName, RequiredFeatures } from '@tonconnect/sdk';
+import { FeatureName, OptionalTraceable, RequiredFeatures } from '@tonconnect/sdk';
 
 export interface WalletsModal {
     /**
      * Open the modal.
      */
-    open: () => void;
+    open: (options?: OptionalTraceable) => void;
 
     /**
      * Close the modal.

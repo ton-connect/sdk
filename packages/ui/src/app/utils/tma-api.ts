@@ -1,6 +1,7 @@
 import { getWindow, openLinkBlank } from 'src/app/utils/web-api';
 import { TonConnectUIError } from 'src/errors';
 import { logDebug, logError } from 'src/app/utils/log';
+import { setLastOpenedLink } from 'src/app/state/modals-state';
 
 type TmaPlatform = 'android' | 'ios' | 'macos' | 'tdesktop' | 'weba' | 'web' | 'unknown';
 
@@ -49,6 +50,38 @@ if (initParams?.tgWebAppVersion) {
 if (!webAppVersion) {
     const window = getWindow();
     webAppVersion = window?.Telegram?.WebApp?.version ?? '6.0';
+}
+
+const initDataRaw = initParams?.tgWebAppData;
+
+type TelegramUser = {
+    id: number;
+    isPremium: boolean;
+};
+
+let telegramUser: TelegramUser | undefined = undefined;
+
+try {
+    if (initDataRaw) {
+        let initData = urlParseQueryString(initDataRaw);
+        let userRaw = initData.user;
+        if (userRaw) {
+            let user = JSON.parse(userRaw);
+            if (typeof user.id === 'number' && typeof user.is_premium === 'boolean') {
+                telegramUser = {
+                    id: user.id,
+                    isPremium: user.is_premium
+                };
+            }
+        }
+    }
+} catch (e) {}
+
+/**
+ * Returns telegram user parsed from telegram initData.
+ */
+export function getTgUser(): TelegramUser | undefined {
+    return telegramUser;
 }
 
 /**
@@ -105,6 +138,8 @@ export function sendOpenTelegramLink(link: string, fallback?: () => void): void 
     const pathFull = url.pathname + url.search;
 
     if (isIframe() || versionAtLeast('6.1')) {
+        // TODO: should be extracted to upper layer
+        setLastOpenedLink({ link: pathFull, type: 'tg_link' });
         postEvent('web_app_open_tg_link', { path_full: pathFull });
     } else {
         openLinkBlank('https://t.me' + pathFull);

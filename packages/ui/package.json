@@ -4,6 +4,7 @@
   "scripts": {
     "start": "vite --host",
     "dev": "vite",
+    "test": "vitest run",
     "build": "tsc --noEmit --emitDeclarationOnly false && vite build && rollup -c rollup.config.mjs && vite build -c vite.cdn-config.ts"
   },
   "repository": {
@@ -55,6 +56,7 @@
     "@types/node": "^24.2.0",
     "@types/ua-parser-js": "^0.7.36",
     "is-plain-object": "^5.0.0",
+    "jsdom": "^27.0.1",
     "qrcode-generator": "^1.4.4",
     "rollup": "^4.46.2",
     "rollup-plugin-dts": "^6.2.1",
@@ -65,7 +67,8 @@
     "solid-transition-group": "^0.3.0",
     "typescript": "^5.9.2",
     "vite": "^7.0.6",
-    "vite-plugin-solid": "^2.11.8"
+    "vite-plugin-solid": "^2.11.8",
+    "vitest": "^3.2.4"
   },
   "typedoc": {
     "entryPoint": "./src/library.ts"

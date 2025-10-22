@@ -24,3 +24,10 @@ export function hasProperties<T extends string>(
 
     return propertyKeys.every(propertyKey => propertyKey in value);
 }
+
+export type Dynamic<TObject extends Record<string, unknown>> = {
+    [Key in keyof TObject]: TObject[Key] | (() => TObject[Key]);
+};
+
+export type Traceable<T extends {} = {}> = { traceId: string } & T;
+export type OptionalTraceable<T extends {} = {}> = { traceId?: string } & T;

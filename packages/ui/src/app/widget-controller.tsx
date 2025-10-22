@@ -3,6 +3,7 @@ import { render } from 'solid-js/web';
 import {
     Action,
     lastSelectedWalletInfo,
+    lastVisibleWalletsInfo,
     setAction,
     setLastSelectedWalletInfo,
     setSingleWalletModalState,
@@ -62,6 +63,7 @@ export const widgetController = {
               openMethod: WalletOpenMethod;
           }
         | null => lastSelectedWalletInfo(),
+    getLastVisibleWallets: () => lastVisibleWalletsInfo(),
     removeSelectedWalletInfo: (): void => setLastSelectedWalletInfo(null),
     renderApp: (root: string, tonConnectUI: TonConnectUI): (() => void) =>
         render(

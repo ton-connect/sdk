@@ -562,24 +562,24 @@ export function redirectToWallet(
  * @param value
  */
 /**
- * Adds a session ID parameter to a universal link for transaction/signData confirmation.
+ * Adds a session ID and traceId parameters to a universal link for transaction/signData confirmation.
  * This is similar to the logic in bridge provider for connection links.
  * @param universalLink The universal link to add session ID to
- * @param sessionId The session ID to add
+ * @param params Contains sessionId and traceId to add
  * @returns The universal link with session ID parameter
  */
-export function addSessionIdToUniversalLink(
+export function enrichUniversalLink(
     universalLink: string,
-    sessionId?: string | null
-): string {
-    if (!sessionId) {
-        return universalLink;
+    params: {
+        sessionId?: string | null;
+        traceId: string;
     }
-
+): string {
     if (!isTelegramUrl(universalLink)) {
-        const newUrl = addQueryParameter(universalLink, 'id', sessionId);
-
-        return newUrl;
+        return addQueryParameters(universalLink, {
+            id: params.sessionId,
+            trace_id: params.traceId
+        });
     }
 
     const directLink = convertToTGDirectLink(universalLink);
@@ -589,18 +589,47 @@ export function addSessionIdToUniversalLink(
         directLinkUrl.searchParams.append('startapp', 'tonconnect');
     }
 
-    const newUrl = addQueryParameter(directLinkUrl.toString(), 'id', sessionId);
+    const telegramParams =
+        '-' + // telegram startapp delimiter
+        encodeTelegramUrlParameters(
+            buildQueryParams({
+                v: '2',
+                id: params.sessionId,
+                trace_id: params.traceId
+            })
+        );
 
-    const lastParam = newUrl.slice(newUrl.lastIndexOf('&') + 1);
-    return (
-        newUrl.slice(0, newUrl.lastIndexOf('&')) + '-v__2-' + encodeTelegramUrlParameters(lastParam)
-    );
+    // link would look like following: /start?startapp=tonconnect-v__2-id__{sessionId}-trace--5Fid__{traceId}
+    return directLinkUrl.toString() + telegramParams;
 }
 
 function addQueryParameter(url: string, key: string, value: string): string {
     const parsed = new URL(url);
     parsed.searchParams.append(key, value);
     return parsed.toString();
+}
+
+function addQueryParameters(
+    url: string,
+    params: Record<string, string | null | undefined>
+): string {
+    const parsed = new URL(url);
+    for (const [key, value] of Object.entries(params)) {
+        if (value !== undefined && value !== null) {
+            parsed.searchParams.append(key, value);
+        }
+    }
+    return parsed.toString();
+}
+
+function buildQueryParams(params: Record<string, string | null | undefined>): string {
+    const url = new URL('https://example.com');
+    for (const [key, value] of Object.entries(params)) {
+        if (value !== undefined && value !== null) {
+            url.searchParams.append(key, value);
+        }
+    }
+    return url.searchParams.toString();
 }
 
 /**
