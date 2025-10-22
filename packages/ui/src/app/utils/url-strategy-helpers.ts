@@ -576,12 +576,10 @@ export function enrichUniversalLink(
     }
 ): string {
     if (!isTelegramUrl(universalLink)) {
-        let newUrl = addQueryParameter(universalLink, 'trace_id', params.traceId);
-        if (params.sessionId) {
-            newUrl = addQueryParameter(newUrl, 'id', params.sessionId);
-        }
-
-        return newUrl;
+        return addQueryParameters(universalLink, {
+            id: params.sessionId,
+            trace_id: params.traceId
+        });
     }
 
     const directLink = convertToTGDirectLink(universalLink);
@@ -591,21 +589,47 @@ export function enrichUniversalLink(
         directLinkUrl.searchParams.append('startapp', 'tonconnect');
     }
 
-    let newUrl = addQueryParameter(directLinkUrl.toString(), 'trace_id', params.traceId);
-    if (params.sessionId) {
-        newUrl = addQueryParameter(newUrl, 'id', params.sessionId);
-    }
+    const telegramParams =
+        '-' + // telegram startapp delimiter
+        encodeTelegramUrlParameters(
+            buildQueryParams({
+                v: '2',
+                id: params.sessionId,
+                trace_id: params.traceId
+            })
+        );
 
-    const lastParam = newUrl.slice(newUrl.lastIndexOf('&') + 1);
-    return (
-        newUrl.slice(0, newUrl.lastIndexOf('&')) + '-v__2-' + encodeTelegramUrlParameters(lastParam)
-    );
+    // link would look like following: /start?startapp=tonconnect-v__2-id__{sessionId}-trace--5Fid__{traceId}
+    return directLinkUrl.toString() + telegramParams;
 }
 
 function addQueryParameter(url: string, key: string, value: string): string {
     const parsed = new URL(url);
     parsed.searchParams.append(key, value);
     return parsed.toString();
+}
+
+function addQueryParameters(
+    url: string,
+    params: Record<string, string | null | undefined>
+): string {
+    const parsed = new URL(url);
+    for (const [key, value] of Object.entries(params)) {
+        if (value !== undefined && value !== null) {
+            parsed.searchParams.append(key, value);
+        }
+    }
+    return parsed.toString();
+}
+
+function buildQueryParams(params: Record<string, string | null | undefined>): string {
+    const url = new URL('https://example.com');
+    for (const [key, value] of Object.entries(params)) {
+        if (value !== undefined && value !== null) {
+            url.searchParams.append(key, value);
+        }
+    }
+    return url.searchParams.toString();
 }
 
 /**
