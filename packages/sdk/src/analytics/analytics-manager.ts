@@ -8,6 +8,7 @@ import { IEnvironment } from 'src/environment/models/environment.interface';
 import { isQaModeEnabled } from 'src/utils/qa-mode';
 import { Dynamic } from 'src/utils/types';
 import { getDocument } from 'src/utils/web-api';
+import { TonConnectError } from 'src/errors';
 
 export type EventsCollectorOptions = {
     batchTimeoutMs?: number;
@@ -226,7 +227,7 @@ export class AnalyticsManager {
         // Don't retry
         logError(
             'Failed to send analytics events:',
-            new Error(`Analytics API error: ${status} ${statusText}`)
+            new TonConnectError(`Analytics API error: ${status} ${statusText}`)
         );
     }
 
@@ -234,7 +235,7 @@ export class AnalyticsManager {
         if (this.backoff < AnalyticsManager.MAX_BACKOFF_ATTEMPTS) {
             this.backoff++;
             this.currentBatchTimeoutMs *= AnalyticsManager.BACKOFF_MULTIPLIER;
-            throw new Error(`Unknown analytics API error: ${error}`);
+            throw new TonConnectError(`Unknown analytics API error: ${error}`);
         } else {
             this.currentBatchTimeoutMs = this.batchTimeoutMs;
             this.backoff = 1;
@@ -243,7 +244,7 @@ export class AnalyticsManager {
     }
 
     private handleTooManyRequests(status: number, statusText: string): void {
-        throw new Error(`Analytics API error: ${status} ${statusText}`);
+        throw new TonConnectError(`Analytics API error: ${status} ${statusText}`);
     }
 
     private addWindowFocusAndBlurSubscriptions(): void {
