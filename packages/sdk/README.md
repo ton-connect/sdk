@@ -247,6 +247,16 @@ try {
 }
 ```
 
+You can pass a custom trace ID to track the transaction through your analytics:
+
+```ts
+const result = await connector.sendTransaction(transaction, {
+    traceId: '019a2a92-a884-7cfc-b1bc-caab18644b6f' // optional, UUIDv7 auto-generated if not provided
+});
+
+console.log(result.traceId); // use this ID to correlate with analytics events
+```
+
 ## Sign data
 
 Sign arbitrary data with the user's wallet. The wallet will display the data to the user for confirmation before signing.
@@ -287,6 +297,16 @@ try {
         console.error('Error:', e);
     }
 }
+```
+
+You can also pass a trace ID to correlate with analytics:
+
+```ts
+const result = await connector.signData(textData, {
+    traceId: '019a2a92-a884-7cfc-b1bc-caab18644b6f' // optional, UUIDv7 auto-generated if not provided
+});
+
+console.log(result.traceId); // use this ID to correlate with analytics events
 ```
 
 #### Binary Format

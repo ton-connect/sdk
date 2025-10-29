@@ -317,6 +317,18 @@ try {
 }
 ```
 
+### Trace ID for analytics
+
+You can pass a custom trace ID to track the transaction through your analytics:
+
+```ts
+const result = await tonConnectUI.sendTransaction(transaction, {
+    traceId: '019a2a92-a884-7cfc-b1bc-caab18644b6f' // optional, UUIDv7 auto-generated if not provided
+});
+
+console.log(result.traceId); // use this ID to correlate with analytics events
+```
+
 `sendTransaction` will automatically render informational modals and notifications. You can change its behaviour:
 
 ```ts
@@ -380,6 +392,16 @@ try {
 } catch (e) {
     console.error('Error:', e);
 }
+```
+
+You can also pass a trace ID to correlate with analytics:
+
+```ts
+const result = await tonConnectUI.signData(textData, {
+    traceId: '019a2a92-a884-7cfc-b1bc-caab18644b6f' // optional, UUIDv7 auto-generated if not provided
+});
+
+console.log(result.traceId); // use this ID to correlate with analytics events
 ```
 
 #### Binary Format
