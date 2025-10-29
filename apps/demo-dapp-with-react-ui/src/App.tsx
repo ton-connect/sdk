@@ -14,7 +14,7 @@ import { TransferUsdt } from './components/TransferUsdt/TransferUsdt';
 function App() {
     return (
         <TonConnectUIProvider
-            manifestUrl="https://sdk-demo-dapp-react-git-feature-analytics-topteam.vercel.app/tonconnect-manifest.json"
+            manifestUrl="https://tonconnect-sdk-demo-dapp.vercel.app/tonconnect-manifest.json"
             uiPreferences={{ theme: THEME.DARK }}
         >
             <div className="app">
