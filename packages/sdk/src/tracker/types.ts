@@ -463,6 +463,11 @@ export type TransactionFullMessage = {
      * Message payload
      */
     payload: string | null;
+
+    /**
+     * Message state init
+     */
+    state_init: string | null;
 };
 
 /**
@@ -514,7 +519,8 @@ function createTransactionFullInfo(
         messages: transaction.messages.map(message => ({
             address: message.address ?? null,
             amount: message.amount ?? null,
-            payload: message.payload ?? null
+            payload: message.payload ?? null,
+            state_init: message.stateInit ?? null
         }))
     };
 }

@@ -163,6 +163,10 @@ export type TransactionSigningFailedEvent = TonConnectBaseEvent &
              * Payload Bag of cells encoded in base64
              */
             payload: string;
+            /**
+             * State init encoded in base64
+             */
+            state_init: string;
         }[];
         error_code: number;
         error_message: string;

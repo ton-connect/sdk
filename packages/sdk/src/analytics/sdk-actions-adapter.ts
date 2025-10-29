@@ -88,7 +88,8 @@ export function bindEventsTo(
             messages: detail.messages.map(message => ({
                 address: message.address ?? '',
                 amount: message.amount ?? '',
-                payload: message.payload ?? ''
+                payload: message.payload ?? '',
+                state_init: message.state_init ?? ''
             })),
             error_message: detail.error_message,
             error_code: detail.error_code ?? 0
