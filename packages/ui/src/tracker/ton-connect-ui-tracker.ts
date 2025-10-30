@@ -8,13 +8,14 @@ import {
     createDisconnectionEvent,
     createRequestVersionEvent,
     createResponseVersionEvent,
+    createSelectedWalletEvent,
     createTransactionSentForSignatureEvent,
     createTransactionSignedEvent,
     createTransactionSigningFailedEvent,
+    createWalletModalOpenedEvent,
     UserActionEvent
 } from './types';
 import {
-    BrowserEventDispatcher,
     createDataSentForSignatureEvent,
     createDataSignedEvent,
     createDataSigningFailedEvent,
@@ -24,13 +25,13 @@ import {
     Version,
     WithoutVersion
 } from '@tonconnect/sdk';
+import { logError } from 'src/app/utils/log';
 
 export type TonConnectUITrackerOptions = {
     /**
      * Event dispatcher to track user actions.
-     * @default new BrowserEventDispatcher()
      */
-    eventDispatcher?: EventDispatcher<UserActionEvent> | null;
+    eventDispatcher: EventDispatcher<UserActionEvent>;
     /**
      * TonConnect UI version.
      */
@@ -98,7 +99,7 @@ export class TonConnectUITracker {
     private readonly eventDispatcher: EventDispatcher<UserActionEvent>;
 
     constructor(options: TonConnectUITrackerOptions) {
-        this.eventDispatcher = options?.eventDispatcher ?? new BrowserEventDispatcher();
+        this.eventDispatcher = options?.eventDispatcher;
         this.tonConnectUiVersion = options.tonConnectUiVersion;
 
         this.init().catch();
@@ -162,6 +163,34 @@ export class TonConnectUITracker {
                 ?.dispatchEvent(`${this.eventPrefix}${eventDetails.type}`, eventDetails)
                 .catch();
         } catch (e) {}
+    }
+
+    /**
+     * Track wallet opened event.
+     * @param args
+     */
+    public trackWalletModalOpened(
+        ...args: WithoutVersion<Parameters<typeof createWalletModalOpenedEvent>>
+    ): void {
+        try {
+            const event = createWalletModalOpenedEvent(this.version, ...args);
+            this.dispatchUserActionEvent(event);
+        } catch (e) {}
+    }
+
+    /**
+     * Track wallet selected event.
+     * @param args
+     */
+    public trackSelectedWallet(
+        ...args: WithoutVersion<Parameters<typeof createSelectedWalletEvent>>
+    ): void {
+        try {
+            const event = createSelectedWalletEvent(this.version, ...args);
+            this.dispatchUserActionEvent(event);
+        } catch (e) {
+            logError(e);
+        }
     }
 
     /**

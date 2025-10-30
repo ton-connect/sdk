@@ -55,9 +55,11 @@ import {
     redirectToTelegram,
     redirectToWallet
 } from 'src/app/utils/url-strategy-helpers';
+import { WalletsModalState } from 'src/models';
 
 export interface DesktopConnectionProps {
     additionalRequest?: ConnectAdditionalRequest;
+    walletsModalState?: WalletsModalState;
     wallet: WalletInfoRemote | (WalletInfoRemote & WalletInfoInjectable);
     onBackClick: () => void;
     backDisabled?: boolean;
@@ -103,7 +105,8 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                     universalLink: props.wallet.universalLink,
                     bridgeUrl: props.wallet.bridgeUrl
                 },
-                props.additionalRequest
+                props.additionalRequest,
+                { traceId: props.walletsModalState?.traceId }
             );
 
             setUniversalLink(universalLink);
@@ -186,7 +189,8 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                 {
                     jsBridgeKey: props.wallet.jsBridgeKey
                 },
-                props.additionalRequest
+                props.additionalRequest,
+                { traceId: props.walletsModalState?.traceId }
             );
         }
     };

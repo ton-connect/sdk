@@ -8,7 +8,7 @@ import {
     TelegramButtonStyled,
     TGImageStyled
 } from './style';
-import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
+import { setLastSelectedWalletInfo, setLastVisibleWalletsInfo } from 'src/app/state/modals-state';
 import { appState } from 'src/app/state/app.state';
 import { IMG } from 'src/app/env/IMG';
 import { supportsMobile } from 'src/app/utils/wallets';
@@ -21,11 +21,14 @@ import { redirectToTelegram, redirectToWallet } from 'src/app/utils/url-strategy
 import { bridgesIsEqual, getUniqueBridges } from 'src/app/utils/bridge';
 import { WalletUlContainer } from 'src/app/components/wallet-item/style';
 import { UIWalletInfo } from 'src/app/models/ui-wallet-info';
+import { WalletsModalState } from 'src/models';
 
 interface MobileUniversalModalProps {
     walletsList: UIWalletInfo[];
 
     additionalRequest: ConnectAdditionalRequest;
+
+    walletModalState: WalletsModalState;
 
     onSelect: (walletInfo: UIWalletInfo) => void;
 
@@ -54,7 +57,11 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
 
     const getUniversalLink = (): string => {
         if (!universalLink()) {
-            setUniversalLink(connector.connect(walletsBridges(), props.additionalRequest));
+            setUniversalLink(
+                connector.connect(walletsBridges(), props.additionalRequest, {
+                    traceId: props.walletModalState.traceId
+                })
+            );
         }
         return universalLink()!;
     };
@@ -107,7 +114,8 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
                 bridgeUrl: atWallet.bridgeUrl,
                 universalLink: atWallet.universalLink
             },
-            props.additionalRequest
+            props.additionalRequest,
+            { traceId: props.walletModalState.traceId }
         );
 
         const forceRedirect = !firstClick();
@@ -140,6 +148,15 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
     );
 
     const visibleWallets = createMemo(() => supportedWallets().slice(0, 3), null);
+    setLastVisibleWalletsInfo({
+        walletsMenu: 'main_screen',
+        wallets: atWalletSupportFeatures()
+            ? [
+                  props.walletsList.find(wallet => wallet.appName === AT_WALLET_APP_NAME)!,
+                  ...visibleWallets()
+              ]
+            : visibleWallets()
+    });
 
     const fourWalletsItem = createMemo(
         () =>

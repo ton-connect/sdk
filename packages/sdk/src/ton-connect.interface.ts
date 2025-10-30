@@ -9,6 +9,7 @@ import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-add
 import { WalletInfo } from 'src/models/wallet/wallet-info';
 import { WalletConnectionSourceJS } from 'src/models/wallet/wallet-connection-source';
 import { SignDataPayload } from '@tonconnect/protocol';
+import { OptionalTraceable } from 'src/utils/types';
 
 export interface ITonConnect {
     /**
@@ -46,20 +47,27 @@ export interface ITonConnect {
      * Generates universal link for an external wallet and subscribes to the wallet's bridge, or sends connect request to the injected wallet.
      * @param wallet wallet's bridge url and universal link for an external wallet or jsBridge key for the injected wallet, or list of bridges urls for creating an universal connection request for the corresponding wallets.
      * @param request (optional) additional request to pass to the wallet while connect (currently only ton_proof is available).
+     * @param options (optional) options
      * @returns universal link if external wallet was passed or void for the injected wallet.
      */
     connect<T extends WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[]>(
         wallet: T,
-        request?: ConnectAdditionalRequest
+        request?: ConnectAdditionalRequest,
+        options?: OptionalTraceable<{
+            openingDeadlineMS?: number;
+            signal?: AbortSignal;
+        }>
     ): T extends WalletConnectionSourceJS ? void : string;
 
     /**
      * Try to restore existing session and reconnect to the corresponding wallet. Call it immediately when your app is loaded.
      */
-    restoreConnection(options?: {
-        openingDeadlineMS?: number;
-        signal?: AbortSignal;
-    }): Promise<void>;
+    restoreConnection(
+        options?: OptionalTraceable<{
+            openingDeadlineMS?: number;
+            signal?: AbortSignal;
+        }>
+    ): Promise<void>;
 
     /**
      * Pause bridge HTTP connection. Might be helpful, if you want to pause connections while browser tab is unfocused,
@@ -75,7 +83,7 @@ export interface ITonConnect {
     /**
      * Disconnect form thw connected wallet and drop current session.
      */
-    disconnect(options?: { signal?: AbortSignal }): Promise<void>;
+    disconnect(options?: OptionalTraceable<{ signal?: AbortSignal }>): Promise<void>;
 
     /**
      * Asks connected wallet to sign and send the transaction.
@@ -86,25 +94,25 @@ export interface ITonConnect {
      */
     sendTransaction(
         transaction: SendTransactionRequest,
-        options?: {
+        options?: OptionalTraceable<{
             onRequestSent?: () => void;
             signal?: AbortSignal;
-        }
-    ): Promise<SendTransactionResponse>;
+        }>
+    ): Promise<OptionalTraceable<SendTransactionResponse>>;
 
     /** @deprecated use sendTransaction(transaction, options) instead */
     sendTransaction(
         transaction: SendTransactionRequest,
         onRequestSent?: () => void
-    ): Promise<SendTransactionResponse>;
+    ): Promise<OptionalTraceable<SendTransactionResponse>>;
 
     signData(
         data: SignDataPayload,
-        options?: {
+        options?: OptionalTraceable<{
             onRequestSent?: () => void;
             signal?: AbortSignal;
-        }
-    ): Promise<SignDataResponse>;
+        }>
+    ): Promise<OptionalTraceable<SignDataResponse>>;
 
     /**
      * Gets the current session ID if available.

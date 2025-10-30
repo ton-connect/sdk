@@ -13,7 +13,11 @@ import {
     openLinkBlank,
     toDeeplink
 } from 'src/app/utils/web-api';
-import { encodeTelegramUrlParameters, isTelegramUrl } from '@tonconnect/sdk';
+import {
+    decodeTelegramUrlParameters,
+    encodeTelegramUrlParameters,
+    isTelegramUrl
+} from '@tonconnect/sdk';
 
 /**
  * Adds a return strategy to a url.
@@ -556,50 +560,72 @@ export function redirectToWallet(
 }
 
 /**
- * Adds a query parameter to a URL.
- * @param url
- * @param key
- * @param value
- */
-/**
- * Adds a session ID parameter to a universal link for transaction/signData confirmation.
+ * Adds a session ID and traceId parameters to a universal link for transaction/signData confirmation.
  * This is similar to the logic in bridge provider for connection links.
  * @param universalLink The universal link to add session ID to
- * @param sessionId The session ID to add
+ * @param params Contains sessionId and traceId to add
  * @returns The universal link with session ID parameter
  */
-export function addSessionIdToUniversalLink(
+export function enrichUniversalLink(
     universalLink: string,
-    sessionId?: string | null
-): string {
-    if (!sessionId) {
-        return universalLink;
+    params: {
+        sessionId?: string | null;
+        traceId: string;
     }
-
+): string {
     if (!isTelegramUrl(universalLink)) {
-        const newUrl = addQueryParameter(universalLink, 'id', sessionId);
-
-        return newUrl;
+        return addQueryParametersIfNotPresented(universalLink, {
+            id: params.sessionId,
+            trace_id: params.traceId
+        });
     }
 
     const directLink = convertToTGDirectLink(universalLink);
     const directLinkUrl = new URL(directLink);
 
-    if (!directLinkUrl.searchParams.has('startapp')) {
-        directLinkUrl.searchParams.append('startapp', 'tonconnect');
-    }
-
-    const newUrl = addQueryParameter(directLinkUrl.toString(), 'id', sessionId);
-
-    const lastParam = newUrl.slice(newUrl.lastIndexOf('&') + 1);
-    return (
-        newUrl.slice(0, newUrl.lastIndexOf('&')) + '-v__2-' + encodeTelegramUrlParameters(lastParam)
+    const previousStartApp = decodeTelegramUrlParameters(
+        directLinkUrl.searchParams.get('startapp') ?? ''
     );
+
+    let searchParams = buildSearchParams(previousStartApp);
+
+    const sessionId = params.sessionId ?? searchParams.get('id');
+    const traceId = params.traceId;
+
+    const orderedKeys = ['tonconnect', 'v', 'id', 'trace_id'];
+    const unorderedParams = searchParams.entries().filter(([key]) => !orderedKeys.includes(key));
+
+    // rebuild search params with proper ordering
+    const startApp = buildQueryParams({
+        tonconnect: '',
+        v: '2',
+        id: sessionId,
+        ...Object.fromEntries(unorderedParams),
+        trace_id: traceId
+    }).replace('=&', '&'); // ensure startapp param looks like "tonconnect&v=2" instead of "tonconnect=&v=2"
+
+    directLinkUrl.searchParams.set('startapp', encodeTelegramUrlParameters(startApp));
+
+    // returns a link like: /start?startapp=tonconnect-v__2-id__{sessionId}-trace--5Fid__{traceId}
+    return directLinkUrl.toString();
 }
 
 function addQueryParameter(url: string, key: string, value: string): string {
     const parsed = new URL(url);
     parsed.searchParams.append(key, value);
+    return parsed.toString();
+}
+
+function addQueryParametersIfNotPresented(
+    url: string,
+    params: Record<string, string | null | undefined>
+): string {
+    const parsed = new URL(url);
+    for (const [key, value] of Object.entries(params)) {
+        if (value !== undefined && value !== null) {
+            parsed.searchParams.set(key, value);
+        }
+    }
     return parsed.toString();
 }
 
@@ -617,6 +643,22 @@ function convertToTGDirectLink(universalLink: string): string {
     }
 
     return url.toString();
+}
+
+function buildSearchParams(search: string = '') {
+    const url = new URL('https://example.com');
+    url.search = search;
+    return url.searchParams;
+}
+
+function buildQueryParams(params: Record<string, string | null | undefined>): string {
+    const searchParams = buildSearchParams();
+    for (const [key, value] of Object.entries(params)) {
+        if (value !== undefined && value !== null) {
+            searchParams.append(key, value);
+        }
+    }
+    return searchParams.toString();
 }
 
 /**

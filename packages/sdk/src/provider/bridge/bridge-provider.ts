@@ -7,7 +7,6 @@ import {
     RpcMethod,
     SessionCrypto,
     TonAddressItemReply,
-    WalletEvent,
     WalletMessage,
     WalletResponse
 } from '@tonconnect/protocol';
@@ -23,22 +22,34 @@ import { BridgePartialSession, BridgeSession } from 'src/provider/bridge/models/
 import { HTTPProvider } from 'src/provider/provider';
 import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { IStorage } from 'src/storage/models/storage.interface';
-import { Optional, WithoutId, WithoutIdDistributive } from 'src/utils/types';
+import { Optional, OptionalTraceable, Traceable, WithoutId } from 'src/utils/types';
 import { PROTOCOL_VERSION } from 'src/resources/protocol';
 import { logDebug, logError } from 'src/utils/log';
 import { encodeTelegramUrlParameters, isTelegramUrl } from 'src/utils/url';
 import { callForSuccess } from 'src/utils/call-for-success';
 import { createAbortController } from 'src/utils/create-abort-controller';
+import { AnalyticsManager } from 'src/analytics/analytics-manager';
+import { Analytics } from 'src/analytics/analytics';
+import { BridgeClientEvent } from 'src/analytics/types';
+import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet/traceable-events';
+import { UUIDv7 } from 'src/utils/uuid';
 
 export class BridgeProvider implements HTTPProvider {
-    public static async fromStorage(storage: IStorage): Promise<BridgeProvider> {
+    public static async fromStorage(
+        storage: IStorage,
+        analyticsManager?: AnalyticsManager
+    ): Promise<BridgeProvider> {
         const bridgeConnectionStorage = new BridgeConnectionStorage(storage);
         const connection = await bridgeConnectionStorage.getHttpConnection();
 
         if (isPendingConnectionHttp(connection)) {
-            return new BridgeProvider(storage, connection.connectionSource);
+            return new BridgeProvider(storage, connection.connectionSource, analyticsManager);
         }
-        return new BridgeProvider(storage, { bridgeUrl: connection.session.bridgeUrl });
+        return new BridgeProvider(
+            storage,
+            { bridgeUrl: connection.session.bridgeUrl },
+            analyticsManager
+        );
     }
 
     public readonly type = 'http';
@@ -49,7 +60,7 @@ export class BridgeProvider implements HTTPProvider {
 
     private readonly pendingRequests = new Map<
         string,
-        (response: WithoutId<WalletResponse<RpcMethod>>) => void
+        (response: TraceableWalletResponse<RpcMethod>) => void
     >();
 
     private session: BridgeSession | BridgePartialSession | null = null;
@@ -58,7 +69,7 @@ export class BridgeProvider implements HTTPProvider {
 
     private pendingGateways: BridgeGateway[] = [];
 
-    private listeners: Array<(e: WithoutIdDistributive<WalletEvent>) => void> = [];
+    private listeners: Array<(e: TraceableWalletEvent) => void> = [];
 
     private readonly defaultOpeningDeadlineMS = 12000;
 
@@ -66,22 +77,27 @@ export class BridgeProvider implements HTTPProvider {
 
     private abortController?: AbortController;
 
+    private readonly analytics?: Analytics<BridgeClientEvent>;
+
     constructor(
         private readonly storage: IStorage,
         private readonly walletConnectionSource:
             | Optional<WalletConnectionSourceHTTP, 'universalLink'>
-            | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[]
+            | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
+        private readonly analyticsManager?: AnalyticsManager
     ) {
         this.connectionStorage = new BridgeConnectionStorage(storage);
+        this.analytics = this.analyticsManager?.scoped();
     }
 
     public connect(
         message: ConnectRequest,
-        options?: {
+        options?: OptionalTraceable<{
             openingDeadlineMS?: number;
             signal?: AbortSignal;
-        }
+        }>
     ): string {
+        const traceId = options?.traceId ?? UUIDv7();
         const abortController = createAbortController(options?.signal);
         this.abortController?.abort();
         this.abortController = abortController;
@@ -114,7 +130,8 @@ export class BridgeProvider implements HTTPProvider {
                         this.openGateways(sessionCrypto, {
                             openingDeadlineMS:
                                 options?.openingDeadlineMS ?? this.defaultOpeningDeadlineMS,
-                            signal: _options?.signal
+                            signal: _options?.signal,
+                            traceId
                         }),
                     {
                         attempts: Number.MAX_SAFE_INTEGER,
@@ -130,13 +147,17 @@ export class BridgeProvider implements HTTPProvider {
                 ? this.walletConnectionSource.universalLink
                 : this.standardUniversalLink;
 
-        return this.generateUniversalLink(universalLink, message);
+        return this.generateUniversalLink(universalLink, message, { traceId });
     }
 
-    public async restoreConnection(options?: {
-        openingDeadlineMS?: number;
-        signal?: AbortSignal;
-    }): Promise<void> {
+    public async restoreConnection(
+        options?: OptionalTraceable<{
+            openingDeadlineMS?: number;
+            signal?: AbortSignal;
+        }>
+    ): Promise<void> {
+        const traceId = options?.traceId ?? UUIDv7();
+
         const abortController = createAbortController(options?.signal);
         this.abortController?.abort();
         this.abortController = abortController;
@@ -168,7 +189,8 @@ export class BridgeProvider implements HTTPProvider {
 
             return await this.openGateways(storedConnection.sessionCrypto, {
                 openingDeadlineMS: openingDeadlineMS,
-                signal: abortController?.signal
+                signal: abortController?.signal,
+                traceId: options?.traceId
             });
         }
 
@@ -190,7 +212,8 @@ export class BridgeProvider implements HTTPProvider {
             this.walletConnectionSource.bridgeUrl,
             storedConnection.session.sessionCrypto.sessionId,
             this.gatewayListener.bind(this),
-            this.gatewayErrorsListener.bind(this)
+            this.gatewayErrorsListener.bind(this),
+            this.analyticsManager
         );
 
         if (abortController.signal.aborted) {
@@ -198,7 +221,7 @@ export class BridgeProvider implements HTTPProvider {
         }
 
         // notify listeners about stored connection
-        this.listeners.forEach(listener => listener(storedConnection.connectEvent));
+        this.listeners.forEach(listener => listener({ ...storedConnection.connectEvent, traceId }));
 
         // wait for the connection to be opened
         try {
@@ -206,7 +229,8 @@ export class BridgeProvider implements HTTPProvider {
                 options =>
                     this.gateway!.registerSession({
                         openingDeadlineMS: openingDeadlineMS,
-                        signal: options.signal
+                        signal: options.signal,
+                        traceId
                     }),
                 {
                     attempts: Number.MAX_SAFE_INTEGER,
@@ -215,18 +239,18 @@ export class BridgeProvider implements HTTPProvider {
                 }
             );
         } catch (e) {
-            await this.disconnect({ signal: abortController.signal });
+            await this.disconnect({ signal: abortController.signal, traceId });
             return;
         }
     }
 
     public sendRequest<T extends RpcMethod>(
         request: WithoutId<AppRequest<T>>,
-        options?: {
+        options?: OptionalTraceable<{
             attempts?: number;
             onRequestSent?: () => void;
             signal?: AbortSignal;
-        }
+        }>
     ): Promise<WithoutId<WalletResponse<T>>>;
     /** @deprecated use sendRequest(transaction, options) instead */
     public sendRequest<T extends RpcMethod>(
@@ -237,21 +261,27 @@ export class BridgeProvider implements HTTPProvider {
         request: WithoutId<AppRequest<T>>,
         optionsOrOnRequestSent?:
             | (() => void)
-            | { attempts?: number; onRequestSent?: () => void; signal?: AbortSignal }
-    ): Promise<WithoutId<WalletResponse<T>>> {
+            | OptionalTraceable<{
+                  attempts?: number;
+                  onRequestSent?: () => void;
+                  signal?: AbortSignal;
+              }>
+    ): Promise<TraceableWalletResponse<T>> {
         // TODO: remove deprecated method
-        const options: {
+        const options: OptionalTraceable<{
             onRequestSent?: () => void;
             signal?: AbortSignal;
             attempts?: number;
-        } = {};
+        }> = {};
         if (typeof optionsOrOnRequestSent === 'function') {
             options.onRequestSent = optionsOrOnRequestSent;
         } else {
             options.onRequestSent = optionsOrOnRequestSent?.onRequestSent;
             options.signal = optionsOrOnRequestSent?.signal;
             options.attempts = optionsOrOnRequestSent?.attempts;
+            options.traceId = optionsOrOnRequestSent?.traceId;
         }
+        options.traceId ??= UUIDv7();
 
         return new Promise(async (resolve, reject) => {
             if (!this.gateway || !this.session || !('walletPublicKey' in this.session)) {
@@ -269,11 +299,23 @@ export class BridgeProvider implements HTTPProvider {
             );
 
             try {
+                this.analytics?.emitBridgeClientMessageSent({
+                    bridge_url: this.gateway.bridgeUrl,
+                    client_id: this.session.sessionCrypto.sessionId,
+                    wallet_id: this.session.walletPublicKey,
+                    message_id: id,
+                    request_type: request.method,
+                    trace_id: options.traceId
+                });
                 await this.gateway.send(
                     encodedRequest,
                     this.session.walletPublicKey,
                     request.method,
-                    { attempts: options?.attempts, signal: options?.signal }
+                    {
+                        attempts: options?.attempts,
+                        signal: options?.signal,
+                        traceId: options.traceId
+                    }
                 );
                 options?.onRequestSent?.();
                 this.pendingRequests.set(id.toString(), resolve);
@@ -290,7 +332,8 @@ export class BridgeProvider implements HTTPProvider {
         this.gateway = null;
     }
 
-    public async disconnect(options?: { signal?: AbortSignal }): Promise<void> {
+    public async disconnect(options?: OptionalTraceable<{ signal?: AbortSignal }>): Promise<void> {
+        const traceId = options?.traceId ?? UUIDv7();
         return new Promise(async resolve => {
             let called = false;
             let timeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -314,7 +357,8 @@ export class BridgeProvider implements HTTPProvider {
                     {
                         onRequestSent: onRequestSent,
                         signal: abortController.signal,
-                        attempts: 1
+                        attempts: 1,
+                        traceId
                     }
                 );
             } catch (e) {
@@ -333,7 +377,7 @@ export class BridgeProvider implements HTTPProvider {
         });
     }
 
-    public listen(callback: (e: WithoutIdDistributive<WalletEvent>) => void): () => void {
+    public listen(callback: (e: TraceableWalletEvent) => void): () => void {
         this.listeners.push(callback);
         return () => (this.listeners = this.listeners.filter(listener => listener !== callback));
     }
@@ -376,14 +420,36 @@ export class BridgeProvider implements HTTPProvider {
     }
 
     private async gatewayListener(bridgeIncomingMessage: BridgeIncomingMessage): Promise<void> {
-        const walletMessage: WalletMessage = JSON.parse(
-            this.session!.sessionCrypto.decrypt(
-                Base64.decode(bridgeIncomingMessage.message).toUint8Array(),
-                hexToByteArray(bridgeIncomingMessage.from)
-            )
-        );
+        const traceId = bridgeIncomingMessage.traceId ?? UUIDv7();
+        let walletMessage: WalletMessage;
+        try {
+            walletMessage = JSON.parse(
+                this.session!.sessionCrypto.decrypt(
+                    Base64.decode(bridgeIncomingMessage.message).toUint8Array(),
+                    hexToByteArray(bridgeIncomingMessage.from)
+                )
+            );
+        } catch (err) {
+            this.analytics?.emitBridgeClientMessageDecodeError({
+                bridge_url: this.session!.bridgeUrl,
+                client_id: this.session!.sessionCrypto.sessionId,
+                wallet_id: bridgeIncomingMessage.from,
+                error_message: String(err),
+                trace_id: bridgeIncomingMessage?.traceId
+            });
+            throw err;
+        }
 
         logDebug('Wallet message received:', walletMessage);
+        const requestType = 'event' in walletMessage ? walletMessage.event : '';
+        this.analytics?.emitBridgeClientMessageReceived({
+            bridge_url: this.session!.bridgeUrl,
+            client_id: this.session!.sessionCrypto.sessionId,
+            wallet_id: bridgeIncomingMessage.from,
+            message_id: String(walletMessage.id),
+            request_type: requestType,
+            trace_id: bridgeIncomingMessage?.traceId
+        });
 
         if (!('event' in walletMessage)) {
             const id = walletMessage.id.toString();
@@ -393,7 +459,7 @@ export class BridgeProvider implements HTTPProvider {
                 return;
             }
 
-            resolve(walletMessage);
+            resolve({ ...walletMessage, traceId });
             this.pendingRequests.delete(id);
             return;
         }
@@ -425,7 +491,7 @@ export class BridgeProvider implements HTTPProvider {
             await this.removeBridgeAndSession();
         }
 
-        listeners.forEach(listener => listener(walletMessage));
+        listeners.forEach(listener => listener({ ...walletMessage, traceId }));
     }
 
     private async gatewayErrorsListener(e: Event): Promise<void> {
@@ -467,24 +533,37 @@ export class BridgeProvider implements HTTPProvider {
         await this.connectionStorage.removeConnection();
     }
 
-    private generateUniversalLink(universalLink: string, message: ConnectRequest): string {
+    private generateUniversalLink(
+        universalLink: string,
+        message: ConnectRequest,
+        options: Traceable
+    ): string {
         if (isTelegramUrl(universalLink)) {
-            return this.generateTGUniversalLink(universalLink, message);
+            return this.generateTGUniversalLink(universalLink, message, options);
         }
 
-        return this.generateRegularUniversalLink(universalLink, message);
+        return this.generateRegularUniversalLink(universalLink, message, options);
     }
 
-    private generateRegularUniversalLink(universalLink: string, message: ConnectRequest): string {
+    private generateRegularUniversalLink(
+        universalLink: string,
+        message: ConnectRequest,
+        options: Traceable
+    ): string {
         const url = new URL(universalLink);
         url.searchParams.append('v', PROTOCOL_VERSION.toString());
         url.searchParams.append('id', this.session!.sessionCrypto.sessionId);
+        url.searchParams.append('trace_id', options.traceId);
         url.searchParams.append('r', JSON.stringify(message));
         return url.toString();
     }
 
-    private generateTGUniversalLink(universalLink: string, message: ConnectRequest): string {
-        const urlToWrap = this.generateRegularUniversalLink('about:blank', message);
+    private generateTGUniversalLink(
+        universalLink: string,
+        message: ConnectRequest,
+        options: Traceable
+    ): string {
+        const urlToWrap = this.generateRegularUniversalLink('about:blank', message, options);
         const linkParams = urlToWrap.split('?')[1]!;
 
         const startapp = 'tonconnect-' + encodeTelegramUrlParameters(linkParams);
@@ -511,11 +590,12 @@ export class BridgeProvider implements HTTPProvider {
 
     private async openGateways(
         sessionCrypto: SessionCrypto,
-        options?: {
+        options?: OptionalTraceable<{
             openingDeadlineMS?: number;
             signal?: AbortSignal;
-        }
+        }>
     ): Promise<void> {
+        const traceId = options?.traceId ?? UUIDv7();
         if (Array.isArray(this.walletConnectionSource)) {
             // close all gateways before opening new ones
             this.pendingGateways.map(bridge => bridge.close().catch());
@@ -527,7 +607,8 @@ export class BridgeProvider implements HTTPProvider {
                     source.bridgeUrl,
                     sessionCrypto.sessionId,
                     () => {},
-                    () => {}
+                    () => {},
+                    this.analyticsManager
                 );
 
                 gateway.setListener(message =>
@@ -548,7 +629,8 @@ export class BridgeProvider implements HTTPProvider {
                             return bridge.registerSession({
                                 openingDeadlineMS:
                                     options?.openingDeadlineMS ?? this.defaultOpeningDeadlineMS,
-                                signal: _options.signal
+                                signal: _options.signal,
+                                traceId
                             });
                         },
                         {
@@ -572,11 +654,13 @@ export class BridgeProvider implements HTTPProvider {
                 this.walletConnectionSource.bridgeUrl,
                 sessionCrypto.sessionId,
                 this.gatewayListener.bind(this),
-                this.gatewayErrorsListener.bind(this)
+                this.gatewayErrorsListener.bind(this),
+                this.analyticsManager
             );
             return await this.gateway.registerSession({
                 openingDeadlineMS: options?.openingDeadlineMS,
-                signal: options?.signal
+                signal: options?.signal,
+                traceId
             });
         }
     }

@@ -32,10 +32,12 @@ import { MobileConnectionQR } from 'src/app/views/modals/wallets-modal/mobile-co
 import { Translation } from 'src/app/components/typography/Translation';
 import { redirectToTelegram, redirectToWallet } from 'src/app/utils/url-strategy-helpers';
 import { copyToClipboard } from 'src/app/utils/copy-to-clipboard';
+import { WalletsModalState } from 'src/models';
 
 export interface MobileConnectionProps {
     additionalRequest?: ConnectAdditionalRequest;
     wallet: WalletInfoRemote;
+    walletModalState?: WalletsModalState;
     onBackClick: () => void;
     backDisabled?: boolean;
     defaultError?: 'missing-features' | 'connection-declined' | 'not-supported' | null;
@@ -67,7 +69,8 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
                 universalLink: props.wallet.universalLink,
                 bridgeUrl: props.wallet.bridgeUrl
             },
-            props.additionalRequest
+            props.additionalRequest,
+            { traceId: props.walletModalState?.traceId }
         )
     );
 

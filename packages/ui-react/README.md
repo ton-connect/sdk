@@ -271,6 +271,18 @@ export const Settings = () => {
 };
 ```
 
+### Trace ID for analytics
+
+You can pass a custom trace ID to track transactions through your analytics:
+
+```tsx
+const result = await tonConnectUI.sendTransaction(myTransaction, {
+    traceId: '019a2a92-a884-7cfc-b1bc-caab18644b6f' // optional, UUIDv7 auto-generated if not provided
+});
+
+console.log(result.traceId); // use this ID to correlate with analytics events
+```
+
 ## Sign data
 
 Sign arbitrary data with the user's wallet. The wallet will display the data to the user for confirmation before signing. Wallet must be connected when you call `signData`, otherwise an error will be thrown.
@@ -317,6 +329,16 @@ export const SignTextData = () => {
 
     return <button onClick={handleSignText}>Sign Text Data</button>;
 };
+```
+
+You can also pass a trace ID to correlate with analytics:
+
+```tsx
+const result = await tonConnectUI.signData(textData, {
+    traceId: '019a2a92-a884-7cfc-b1bc-caab18644b6f' // optional, UUIDv7 auto-generated if not provided
+});
+
+console.log(result.traceId); // use this ID to correlate with analytics events
 ```
 
 #### Binary Format

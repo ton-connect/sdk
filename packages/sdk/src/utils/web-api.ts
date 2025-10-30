@@ -43,6 +43,17 @@ export function getWebPageManifest(): string {
     return '';
 }
 
+export function getOriginWithPath() {
+    const origin = getWindow()?.location?.origin;
+    const path = getWindow()?.location?.pathname;
+
+    if (origin && path) {
+        return origin + path;
+    }
+
+    return '';
+}
+
 /**
  * Returns `localStorage` if it is available. In Safari's private mode, it returns `InMemoryStorage`. In Node.js, it throws an error.
  */

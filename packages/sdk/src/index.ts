@@ -26,7 +26,9 @@ export {
     createDataSignedEvent,
     createRequestVersionEvent,
     createResponseVersionEvent,
-    createVersionInfo
+    createVersionInfo,
+    createWalletModalOpenedEvent,
+    createSelectedWalletEvent
 } from './tracker/types';
 export type {
     AuthType,
@@ -41,7 +43,9 @@ export type {
     ConnectionRestoringCompletedEvent,
     DisconnectionEvent,
     TransactionInfo,
+    TransactionFullInfo,
     TransactionMessage,
+    TransactionFullMessage,
     TransactionSigningEvent,
     TransactionSignedEvent,
     TransactionSentForSignatureEvent,
@@ -53,9 +57,12 @@ export type {
     SdkActionEvent,
     RequestVersionEvent,
     ResponseVersionEvent,
+    WalletModalOpenedEvent,
+    SelectedWalletEvent,
     VersionEvent,
     Version,
-    WithoutVersion
+    WithoutVersion,
+    SessionInfo
 } from './tracker/types';
 export { BrowserEventDispatcher } from './tracker/browser-event-dispatcher';
 export type { TonAddressItem, TonProofItem, ConnectItem } from '@tonconnect/protocol';
@@ -86,7 +93,21 @@ export {
     SEND_TRANSACTION_ERROR_CODES,
     SIGN_DATA_ERROR_CODES
 } from '@tonconnect/protocol';
+
+export { IEnvironment } from './environment/models/environment.interface';
+export { TelegramUser } from './environment/models/telegram-user';
+
 export { toUserFriendlyAddress } from './utils/address';
 export { checkRequiredWalletFeatures } from './utils/feature-support';
-export { isTelegramUrl, encodeTelegramUrlParameters } from './utils/url';
+export {
+    isTelegramUrl,
+    encodeTelegramUrlParameters,
+    decodeTelegramUrlParameters,
+    isConnectUrl
+} from './utils/url';
 export { enableQaMode, isQaModeEnabled } from './utils/qa-mode';
+
+export { Traceable, OptionalTraceable } from './utils/types';
+
+export { UUIDv7 } from './utils/uuid';
+export { Version7Options, UUIDTypes } from './utils/uuid/types';

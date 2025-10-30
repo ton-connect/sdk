@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import * as path from 'path';
 import { defineConfig } from 'vite';
 import solidPlugin from 'vite-plugin-solid';
@@ -60,6 +61,11 @@ export default defineConfig({
                     'ua-parser-js': 'UAParser'
                 }
             }
+        }
+    },
+    test: {
+        typecheck: {
+            tsconfig: './tsconfig.test.json'
         }
     }
 });
