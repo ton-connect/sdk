@@ -590,7 +590,7 @@ export function enrichUniversalLink(
     let searchParams = buildSearchParams(previousStartApp);
 
     const sessionId = params.sessionId ?? searchParams.get('id');
-    const traceId = params.traceId ?? searchParams.get('trace_id');
+    const traceId = params.traceId;
 
     const orderedKeys = ['tonconnect', 'v', 'id', 'trace_id'];
     const unorderedParams = searchParams.entries().filter(([key]) => !orderedKeys.includes(key));
