@@ -589,8 +589,8 @@ export function enrichUniversalLink(
 
     let searchParams = buildSearchParams(previousStartApp);
 
-    const sessionId = searchParams.get('id') ?? params.sessionId;
-    const traceId = searchParams.get('trace_id') ?? params.traceId;
+    const sessionId = params.sessionId ?? searchParams.get('id');
+    const traceId = params.traceId ?? searchParams.get('trace_id');
 
     const orderedKeys = ['tonconnect', 'v', 'id', 'trace_id'];
     const unorderedParams = searchParams.entries().filter(([key]) => !orderedKeys.includes(key));
@@ -600,8 +600,8 @@ export function enrichUniversalLink(
         tonconnect: '',
         v: '2',
         id: sessionId,
-        trace_id: traceId,
-        ...Object.fromEntries(unorderedParams)
+        ...Object.fromEntries(unorderedParams),
+        trace_id: traceId
     }).replace('=&', '&'); // ensure startapp param looks like "tonconnect&v=2" instead of "tonconnect=&v=2"
 
     directLinkUrl.searchParams.set('startapp', encodeTelegramUrlParameters(startApp));
@@ -622,7 +622,7 @@ function addQueryParametersIfNotPresented(
 ): string {
     const parsed = new URL(url);
     for (const [key, value] of Object.entries(params)) {
-        if (value !== undefined && value !== null && !parsed.searchParams.has(key)) {
+        if (value !== undefined && value !== null) {
             parsed.searchParams.set(key, value);
         }
     }
