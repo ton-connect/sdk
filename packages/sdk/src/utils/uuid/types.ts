@@ -12,11 +12,6 @@
 
 export type UUIDTypes<TBuf extends Uint8Array = Uint8Array> = string | TBuf;
 
-export type Version4Options = {
-    random?: Uint8Array;
-    rng?: () => Uint8Array;
-};
-
 export type Version7Options = {
     random?: Uint8Array;
     msecs?: number;

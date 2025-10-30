@@ -104,5 +104,5 @@ export { enableQaMode, isQaModeEnabled } from './utils/qa-mode';
 
 export { Traceable, OptionalTraceable } from './utils/types';
 
-export { UUIDv7, UUIDv4 } from './utils/uuid';
-export { Version4Options, Version7Options, UUIDTypes } from './utils/uuid/types';
+export { UUIDv7 } from './utils/uuid';
+export { Version7Options, UUIDTypes } from './utils/uuid/types';
