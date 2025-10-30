@@ -45,7 +45,7 @@ export function getWebPageManifest(): string {
 
 export function getOriginWithPath() {
     const origin = getWindow()?.location?.origin;
-    const path = getWindow()?.location.pathname;
+    const path = getWindow()?.location?.pathname;
 
     if (origin && path) {
         return origin + path;

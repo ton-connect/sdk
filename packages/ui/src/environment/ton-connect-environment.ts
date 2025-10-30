@@ -6,13 +6,13 @@ export class TonConnectEnvironment implements IEnvironment {
     userAgent = getUserAgent();
 
     getLocale() {
-        return navigator.languages?.[0] || navigator.language || 'en';
+        return navigator.languages?.[0] || navigator.language || 'unknown';
     }
     getBrowser() {
-        return this.userAgent.browser ?? '';
+        return this.userAgent.browser ?? 'unknown';
     }
     getPlatform() {
-        return this.userAgent.os ?? '';
+        return this.userAgent.os ?? 'unknown';
     }
     getTelegramUser() {
         return getTgUser();

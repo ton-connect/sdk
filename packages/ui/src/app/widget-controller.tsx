@@ -13,15 +13,21 @@ import { TonConnectUI } from 'src/ton-connect-ui';
 import App from './App';
 import { WalletInfoWithOpenMethod, WalletOpenMethod } from 'src/models/connected-wallet';
 import { WalletsModalCloseReason } from 'src/models';
-import { WalletInfoRemote, WalletNotSupportFeatureError } from '@tonconnect/sdk';
+import {
+    OptionalTraceable,
+    Traceable,
+    WalletInfoRemote,
+    WalletNotSupportFeatureError
+} from '@tonconnect/sdk';
 
 export const widgetController = {
-    openWalletsModal: (): void =>
+    openWalletsModal: (options?: OptionalTraceable): void =>
         void setTimeout(() =>
-            setWalletsModalState({
+            setWalletsModalState(prev => ({
                 status: 'opened',
+                traceId: options?.traceId ?? prev?.traceId,
                 closeReason: null
-            })
+            }))
         ),
     closeWalletsModal: (reason: WalletsModalCloseReason): void =>
         void setTimeout(() =>
@@ -46,10 +52,14 @@ export const widgetController = {
                 closeReason: reason
             })
         ),
-    openWalletNotSupportFeatureModal: (cause: WalletNotSupportFeatureError['cause']): void =>
+    openWalletNotSupportFeatureModal: (
+        cause: WalletNotSupportFeatureError['cause'],
+        options: Traceable
+    ): void =>
         void setTimeout(() =>
             setWalletsModalState({
                 status: 'opened',
+                traceId: options.traceId,
                 closeReason: null,
                 type: 'wallet-not-support-feature',
                 requiredFeature: cause.requiredFeature

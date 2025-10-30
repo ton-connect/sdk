@@ -73,10 +73,9 @@ export type ChooseSupportedFeatureWalletsModal = {
 /**
  * Modal window state.
  */
-export type WalletsModalState =
-    | WalletModalOpened
-    | WalletModalClosed
-    | ChooseSupportedFeatureWalletsModal;
+export type WalletsModalState = OptionalTraceable<
+    WalletModalOpened | WalletModalClosed | ChooseSupportedFeatureWalletsModal
+>;
 
 /**
  * Modal window close reason.

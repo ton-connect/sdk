@@ -278,14 +278,20 @@ export class TonConnect implements ITonConnect {
                   request?: ConnectAdditionalRequest;
                   openingDeadlineMS?: number;
                   signal?: AbortSignal;
-              }>
+              }>,
+        additionalOptions?: OptionalTraceable<{
+            openingDeadlineMS?: number;
+            signal?: AbortSignal;
+        }>
     ): void | string {
         // TODO: remove deprecated method
         const options: OptionalTraceable<{
             request?: ConnectAdditionalRequest;
             openingDeadlineMS?: number;
             signal?: AbortSignal;
-        }> = {};
+        }> = {
+            ...additionalOptions
+        };
         if (typeof requestOrOptions === 'object' && 'tonProof' in requestOrOptions) {
             options.request = requestOrOptions;
         }

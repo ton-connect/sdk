@@ -15,11 +15,14 @@ import { IMG } from 'src/app/env/IMG';
 
 import { addReturnStrategy } from 'src/app/utils/url-strategy-helpers';
 import { bridgesIsEqual, getUniqueBridges } from 'src/app/utils/bridge';
+import { WalletsModalState } from 'src/models';
 
 interface DesktopUniversalModalProps {
     additionalRequest: ConnectAdditionalRequest;
 
     walletsList: UIWalletInfo[];
+
+    walletModalState: WalletsModalState;
 
     onSelect: (walletInfo: UIWalletInfo) => void;
 
@@ -35,7 +38,11 @@ export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = prop
     });
 
     setLastSelectedWalletInfo({ openMethod: 'qrcode' });
-    const request = createMemo(() => connector.connect(walletsBridges(), props.additionalRequest));
+    const request = createMemo(() =>
+        connector.connect(walletsBridges(), props.additionalRequest, {
+            traceId: props.walletModalState.traceId
+        })
+    );
 
     const supportedWallets = createMemo(
         () => props.walletsList.filter(wallet => wallet.isSupportRequiredFeatures),

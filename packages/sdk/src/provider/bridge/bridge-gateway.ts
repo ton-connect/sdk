@@ -247,17 +247,18 @@ export class BridgeGateway {
             return;
         }
 
-        let bridgeIncomingMessageRaw;
+        let bridgeIncomingMessage: BridgeIncomingMessage;
         try {
-            bridgeIncomingMessageRaw = JSON.parse(e.data);
+            const bridgeIncomingMessageRaw = JSON.parse(e.data);
+            bridgeIncomingMessage = {
+                message: bridgeIncomingMessageRaw.message,
+                from: bridgeIncomingMessageRaw.from,
+                traceId: bridgeIncomingMessageRaw.trace_id
+            };
         } catch (_) {
             throw new TonConnectError(`Bridge message parse failed, message ${e.data}`);
         }
-        this.listener({
-            message: bridgeIncomingMessageRaw.message,
-            from: bridgeIncomingMessageRaw.from,
-            traceId: bridgeIncomingMessageRaw.trace_id
-        });
+        this.listener(bridgeIncomingMessage);
     }
 }
 

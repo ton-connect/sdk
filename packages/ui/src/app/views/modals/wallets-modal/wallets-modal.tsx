@@ -235,6 +235,7 @@ export const WalletsModal: Component = () => {
                                 component={
                                     isMobile() ? MobileConnectionModal : DesktopConnectionModal
                                 }
+                                walletsModalState={walletsModalState()}
                                 wallet={selectedWalletInfo()! as WalletInfoRemote}
                                 additionalRequest={additionalRequest()}
                                 onBackClick={clearSelectedWalletInfo}
@@ -247,6 +248,7 @@ export const WalletsModal: Component = () => {
                                     isMobile() ? MobileUniversalModal : DesktopUniversalModal
                                 }
                                 onSelect={setSelectedWalletInfo}
+                                walletModalState={walletsModalState()}
                                 walletsList={walletsList()!}
                                 additionalRequest={additionalRequest()!}
                                 onSelectAllWallets={onSelectAllWallets}

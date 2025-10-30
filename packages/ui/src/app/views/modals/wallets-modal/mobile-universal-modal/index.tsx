@@ -21,11 +21,14 @@ import { redirectToTelegram, redirectToWallet } from 'src/app/utils/url-strategy
 import { bridgesIsEqual, getUniqueBridges } from 'src/app/utils/bridge';
 import { WalletUlContainer } from 'src/app/components/wallet-item/style';
 import { UIWalletInfo } from 'src/app/models/ui-wallet-info';
+import { WalletsModalState } from 'src/models';
 
 interface MobileUniversalModalProps {
     walletsList: UIWalletInfo[];
 
     additionalRequest: ConnectAdditionalRequest;
+
+    walletModalState: WalletsModalState;
 
     onSelect: (walletInfo: UIWalletInfo) => void;
 
@@ -54,7 +57,11 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
 
     const getUniversalLink = (): string => {
         if (!universalLink()) {
-            setUniversalLink(connector.connect(walletsBridges(), props.additionalRequest));
+            setUniversalLink(
+                connector.connect(walletsBridges(), props.additionalRequest, {
+                    traceId: props.walletModalState.traceId
+                })
+            );
         }
         return universalLink()!;
     };
@@ -107,7 +114,8 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
                 bridgeUrl: atWallet.bridgeUrl,
                 universalLink: atWallet.universalLink
             },
-            props.additionalRequest
+            props.additionalRequest,
+            { traceId: props.walletModalState.traceId }
         );
 
         const forceRedirect = !firstClick();

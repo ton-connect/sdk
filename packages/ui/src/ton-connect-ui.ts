@@ -357,7 +357,8 @@ export class TonConnectUI {
      * Opens the modal window, returns a promise that resolves after the modal window is opened.
      */
     public async openModal(options?: OptionalTraceable): Promise<void> {
-        await this.modal.open(options);
+        const traceId = options?.traceId ?? UUIDv7();
+        await this.modal.open({ traceId });
 
         const sessionId = await this.getSessionId();
         const visibleWallets = widgetController.getLastVisibleWallets();
@@ -447,12 +448,14 @@ export class TonConnectUI {
      * Disconnect wallet and clean localstorage.
      */
     public disconnect(options?: OptionalTraceable): Promise<void> {
+        const traceId = options?.traceId ?? UUIDv7();
+
         this.tracker.trackDisconnection(this.wallet, 'dapp');
 
         widgetController.clearAction();
         widgetController.removeSelectedWalletInfo();
         this.walletInfoStorage.removeWalletInfo();
-        return this.connector.disconnect({ traceId: options?.traceId });
+        return this.connector.disconnect({ traceId });
     }
 
     /**
@@ -572,7 +575,7 @@ export class TonConnectUI {
         } catch (e) {
             if (e instanceof WalletNotSupportFeatureError) {
                 widgetController.clearAction();
-                widgetController.openWalletNotSupportFeatureModal(e.cause);
+                widgetController.openWalletNotSupportFeatureModal(e.cause, { traceId });
 
                 throw e;
             }
@@ -708,7 +711,7 @@ export class TonConnectUI {
         } catch (e) {
             if (e instanceof WalletNotSupportFeatureError) {
                 widgetController.clearAction();
-                widgetController.openWalletNotSupportFeatureModal(e.cause);
+                widgetController.openWalletNotSupportFeatureModal(e.cause, { traceId });
 
                 throw e;
             }
@@ -822,7 +825,9 @@ export class TonConnectUI {
     ): Promise<ConnectedWallet> {
         const connect = (parameters?: ConnectAdditionalRequest): void => {
             setLastSelectedWalletInfo(embeddedWallet);
-            this.connector.connect({ jsBridgeKey: embeddedWallet.jsBridgeKey }, parameters);
+            this.connector.connect({ jsBridgeKey: embeddedWallet.jsBridgeKey }, parameters, {
+                traceId: options.traceId
+            });
         };
 
         const additionalRequest = appState.connectRequestParameters;
@@ -848,7 +853,7 @@ export class TonConnectUI {
     private async connectExternalWallet(options: Traceable): Promise<ConnectedWallet> {
         const abortController = new AbortController();
 
-        widgetController.openWalletsModal();
+        widgetController.openWalletsModal({ traceId: options.traceId });
 
         const unsubscribe = this.onModalStateChange(state => {
             const { status, closeReason } = state;
