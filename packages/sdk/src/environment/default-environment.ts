@@ -2,7 +2,7 @@ import { IEnvironment } from 'src/environment/models/environment.interface';
 
 export class DefaultEnvironment implements IEnvironment {
     getClientEnvironment() {
-        return 'web';
+        return '';
     }
 
     getBrowser() {
@@ -10,7 +10,7 @@ export class DefaultEnvironment implements IEnvironment {
     }
 
     getLocale() {
-        return 'en';
+        return '';
     }
 
     getPlatform() {
