@@ -1,5 +1,67 @@
 # Changelog @tonconnect/ui-react
 
+## 2.4.0-beta.0
+
+### Minor Changes
+
+- 2cbf8a8: feat: add comprehensive analytics tracking system
+    - added tracking for all major TON Connect interactions including connection lifecycle
+      (connection-started, connection-selected-wallet, connection-completed, connection-error),
+      disconnection, transactions (transaction-sent, transaction-signed,
+      transaction-signing-failed), sign data requests, bridge client events
+      (bridge-client-connect-started, bridge-client-connect-established,
+      bridge-client-connect-error, bridge-client-message-sent, bridge-client-message-received,
+      bridge-client-message-decode-error), and JS Bridge events (js-bridge-call, js-bridge-response,
+      js-bridge-error)
+
+- 2cbf8a8: feat: add trace ID support for tracking user flows
+    - added UUIDv7-based trace IDs to aggregate multiple events into a single user flow
+    - trace IDs are automatically generated for all operations and added to links
+    - trace IDs are propagated through the entire connection lifecycle and included in all analytics
+      events
+    - returned response objects now include `traceId` field for correlation with analytics data
+    - `sendTransaction` method now accepts optional `traceId` parameter in options:
+
+    ```typescript
+    const result = await tonConnectUI.sendTransaction(
+        {
+            messages: [
+                {
+                    address: 'Ef9VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVbxn',
+                    amount: '20000000'
+                }
+            ]
+        },
+        {
+            traceId: '019a2a92-a884-7cfc-b1bc-caab18644b6f' // optional, auto-generated if not provided
+        }
+    );
+
+    console.log(result.traceId); // returns trace ID for tracking
+    ```
+
+    - `signData` method now accepts optional `traceId` parameter in options:
+
+    ```typescript
+    const result = await tonConnectUI.signData(
+        {
+            type: 'text',
+            text: 'Hello, TON!'
+        },
+        {
+            traceId: '019a2a92-a884-7cfc-b1bc-caab18644b6f' // optional, auto-generated if not provided
+        }
+    );
+
+    console.log(result.traceId); // returns trace ID for tracking
+    ```
+
+### Patch Changes
+
+- Updated dependencies [2cbf8a8]
+- Updated dependencies [2cbf8a8]
+    - @tonconnect/ui@2.4.0-beta.0
+
 ## 2.3.1
 
 ### Patch Changes
