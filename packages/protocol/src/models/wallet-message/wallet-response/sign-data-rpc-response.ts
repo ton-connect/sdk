@@ -1,4 +1,4 @@
-import { CHAIN } from '../../CHAIN';
+import { ChainId } from '../../CHAIN';
 import { WalletResponseTemplateError } from './wallet-response-template';
 
 export type SignDataRpcResponse = SignDataRpcResponseSuccess | SignDataRpcResponseError;
@@ -15,7 +15,7 @@ export interface SignDataRpcResponseSuccess {
 }
 
 export type SignDataPayload = {
-    network?: CHAIN;
+    network?: ChainId;
     from?: string;
 } & (SignDataPayloadText | SignDataPayloadBinary | SignDataPayloadCell);
 

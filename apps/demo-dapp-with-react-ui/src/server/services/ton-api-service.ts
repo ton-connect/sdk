@@ -3,18 +3,18 @@ import { CHAIN } from '@tonconnect/ui-react';
 import { Buffer } from 'buffer';
 
 export class TonApiService {
-    public static create(client: TonClient4 | CHAIN): TonApiService {
-        if (client === CHAIN.MAINNET) {
+    public static create(client: TonClient4 | CHAIN | string): TonApiService {
+        if (client === CHAIN.MAINNET || client === '-239') {
             client = new TonClient4({
                 endpoint: 'https://mainnet-v4.tonhubapi.com'
             });
         }
-        if (client === CHAIN.TESTNET) {
+        if (client === CHAIN.TESTNET || client === '-3' || typeof client === 'string') {
             client = new TonClient4({
                 endpoint: 'https://testnet-v4.tonhubapi.com'
             });
         }
-        return new TonApiService(client);
+        return new TonApiService(client as TonClient4);
     }
 
     private readonly client: TonClient4;

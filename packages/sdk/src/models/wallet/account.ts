@@ -1,4 +1,4 @@
-import { CHAIN } from '@tonconnect/protocol';
+import { ChainId } from '@tonconnect/protocol';
 
 export interface Account {
     /**
@@ -9,7 +9,7 @@ export interface Account {
     /**
      * User's selected chain.
      */
-    chain: CHAIN;
+    chain: ChainId;
 
     /**
      * Base64 (not url safe) encoded wallet contract stateInit.

@@ -111,3 +111,4 @@ export { Traceable, OptionalTraceable } from './utils/types';
 
 export { UUIDv7 } from './utils/uuid';
 export { Version7Options, UUIDTypes } from './utils/uuid/types';
+export type { ChainId } from '@tonconnect/protocol';
