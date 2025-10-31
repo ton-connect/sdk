@@ -44,7 +44,11 @@ export function TransferUsdt() {
     useEffect(() => {
         if (!wallet || !senderAddress) return;
 
-        const client = new TonClient({ endpoint: endpointByChain[wallet.account.chain] });
+        const endpoint =
+            wallet.account.chain === CHAIN.TESTNET
+                ? endpointByChain[CHAIN.TESTNET]
+                : endpointByChain[CHAIN.MAINNET];
+        const client = new TonClient({ endpoint });
         const owner = Address.parse(senderAddress);
         const masterContract = client.open(JettonMinter.createFromAddress(USDT_MASTER));
 

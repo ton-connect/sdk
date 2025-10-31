@@ -46,6 +46,8 @@ import { Provider } from 'src/provider/provider';
 import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { DefaultStorage } from 'src/storage/default-storage';
 import { ITonConnect } from 'src/ton-connect.interface';
+import { WalletWrongNetworkError } from 'src/errors/wallet/wallet-wrong-network.error';
+import { CHAIN } from '@tonconnect/protocol';
 import { getDocument, getOriginWithPath, getWebPageManifest } from 'src/utils/web-api';
 import { WalletsListManager } from 'src/wallets-list-manager';
 import { OptionalTraceable, Traceable } from 'src/utils/types';
@@ -77,6 +79,7 @@ import { UUIDv7 } from 'src/utils/uuid';
 import { TraceableWalletEvent } from 'src/models/wallet/traceable-events';
 
 export class TonConnect implements ITonConnect {
+    private desiredChainId: string | undefined;
     private static readonly walletsList = new WalletsListManager();
 
     /**
@@ -550,7 +553,16 @@ export class TonConnect implements ITonConnect {
 
         const { validUntil, messages, ...tx } = transaction;
         const from = transaction.from || this.account!.address;
-        const network = transaction.network || this.account!.chain;
+        const network = (transaction.network || this.account!.chain) as CHAIN | undefined;
+
+        if (this.desiredChainId && (network as unknown as string) !== this.desiredChainId) {
+            throw new WalletWrongNetworkError('Wallet connected to a wrong network', {
+                cause: {
+                    expectedChainId: this.desiredChainId,
+                    actualChainId: network as unknown as string
+                }
+            });
+        }
 
         const response = await this.provider!.sendRequest(
             sendTransactionParser.convertToRpcRequest({
@@ -621,7 +633,16 @@ export class TonConnect implements ITonConnect {
         this.tracker.trackDataSentForSignature(this.wallet, data, sessionInfo, traceId);
 
         const from = data.from || this.account!.address;
-        const network = data.network || this.account!.chain;
+        const network = (data.network || this.account!.chain) as CHAIN | undefined;
+
+        if (this.desiredChainId && (network as unknown as string) !== this.desiredChainId) {
+            throw new WalletWrongNetworkError('Wallet connected to a wrong network', {
+                cause: {
+                    expectedChainId: this.desiredChainId,
+                    actualChainId: network as unknown as string
+                }
+            });
+        }
 
         const response = await this.provider!.sendRequest(
             signDataParser.convertToRpcRequest({
@@ -755,6 +776,14 @@ export class TonConnect implements ITonConnect {
         return this.provider.unPause();
     }
 
+    public setDesiredChainId(chainId?: string): void {
+        this.desiredChainId = chainId;
+    }
+
+    public getDesiredChainId(): string | undefined {
+        return this.desiredChainId;
+    }
+
     private addWindowFocusAndBlurSubscriptions(): void {
         const document = getDocument();
         if (!document) {
@@ -856,6 +885,19 @@ export class TonConnect implements ITonConnect {
             }
         };
 
+        // Chain mismatch handling
+        if (this.desiredChainId && wallet.account.chain !== this.desiredChainId) {
+            const expectedChainId = this.desiredChainId as string;
+            const actualChainId = wallet.account.chain as string;
+            this.provider?.disconnect();
+            this.onWalletConnectError(
+                new WalletWrongNetworkError('Wallet connected to a wrong network', {
+                    cause: { expectedChainId, actualChainId }
+                })
+            );
+            return;
+        }
+
         if (tonProofItem) {
             const validationError = validateTonProofItemReply(tonProofItem as unknown);
             let tonProof: TonProofItemReply | undefined = undefined;
@@ -941,7 +983,8 @@ export class TonConnect implements ITonConnect {
     private createConnectRequest(request?: ConnectAdditionalRequest): ConnectRequest {
         const items: ConnectItem[] = [
             {
-                name: 'ton_addr'
+                name: 'ton_addr',
+                ...(this.desiredChainId ? { network: this.desiredChainId } : {})
             }
         ];
 

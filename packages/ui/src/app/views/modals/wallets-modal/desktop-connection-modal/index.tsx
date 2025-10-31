@@ -3,6 +3,7 @@ import {
     isTelegramUrl,
     isWalletInfoCurrentlyInjected,
     WalletMissingRequiredFeaturesError,
+    WalletWrongNetworkError,
     WalletInfoInjectable,
     WalletInfoRemote
 } from '@tonconnect/sdk';
@@ -70,7 +71,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
     const [mode, setMode] = createSignal<'mobile' | 'desktop' | 'extension'>('mobile');
 
     const [connectionErrored, setConnectionErrored] = createSignal<
-        'missing-features' | 'connection-declined' | 'not-supported' | null
+        'missing-features' | 'connection-declined' | 'not-supported' | 'wrong-network' | null
     >(null);
 
     createEffect(() => {
@@ -81,11 +82,32 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
     const [firstClick, setFirstClick] = createSignal(true);
     const connector = useContext(ConnectorContext)!;
 
+    function isWrongNetworkErrorLike(e: unknown): boolean {
+        if (typeof e !== 'object' || e === null) {
+            return false;
+        }
+        const err = e as { name?: string; message?: string; cause?: unknown };
+        const cause =
+            typeof err.cause === 'object' && err.cause !== null
+                ? (err.cause as { expectedChainId?: unknown })
+                : undefined;
+        return (
+            err.name === 'WalletWrongNetworkError' ||
+            (typeof err.message === 'string' && err.message.includes('WalletWrongNetworkError')) ||
+            (cause !== undefined && 'expectedChainId' in cause)
+        );
+    }
+
     const unsubscribe = connector.onStatusChange(
         () => {},
         error => {
             if (error instanceof WalletMissingRequiredFeaturesError) {
                 setConnectionErrored('missing-features');
+                return;
+            }
+
+            if (error instanceof WalletWrongNetworkError || isWrongNetworkErrorLike(error)) {
+                setConnectionErrored('wrong-network');
                 return;
             }
 
@@ -244,6 +266,15 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                                 >
                                     {props.wallet.name} doesn’t support the requested action. Please
                                     connect another wallet that supports it.
+                                </BodyTextStyled>
+                            </Match>
+                            <Match when={connectionErrored() === 'wrong-network'}>
+                                <BodyTextStyled
+                                    translationKey="walletModal.desktopConnectionModal.wrongNetwork"
+                                    translationValues={{ name: props.wallet.name }}
+                                >
+                                    Connected wallet is on a different network. Please switch
+                                    network in {props.wallet.name} and try again.
                                 </BodyTextStyled>
                             </Match>
                         </Switch>

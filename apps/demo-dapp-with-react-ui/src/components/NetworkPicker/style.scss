@@ -1,0 +1,69 @@
+.network-picker {
+  margin: 16px auto 24px;
+  padding: 16px;
+  max-width: 920px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+}
+
+.network-picker__title {
+  color: #b8d4f1;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.network-picker__row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.np-btn {
+  background: #1c5fa4;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.np-btn--active {
+  outline: 2px solid #66aaee;
+}
+
+.np-btn--ghost {
+  background: transparent;
+  border: 1px solid #1c5fa4;
+  color: #1c5fa4;
+}
+
+.np-input {
+  flex: 1;
+  min-width: 260px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #d9e7f7;
+  padding: 8px 10px;
+  border-radius: 8px;
+}
+
+.network-picker__meta {
+  margin-top: 10px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.np-meta-label {
+  color: #8fb8df;
+  margin-right: 6px;
+}
+
+.np-meta-value {
+  color: #d9e7f7;
+}
+
+
