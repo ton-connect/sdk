@@ -1,4 +1,9 @@
-export type WalletConnectionSource = WalletConnectionSourceHTTP | WalletConnectionSourceJS;
+import { DappMetadata } from 'src/models';
+
+export type WalletConnectionSource =
+    | WalletConnectionSourceHTTP
+    | WalletConnectionSourceJS
+    | WalletConnectionSourceWalletConnect;
 
 export interface WalletConnectionSourceHTTP {
     /**
@@ -23,4 +28,15 @@ export function isWalletConnectionSourceJS(
     value: WalletConnectionSource
 ): value is WalletConnectionSourceJS {
     return 'jsBridgeKey' in value;
+}
+
+export interface WalletConnectionSourceWalletConnect {
+    projectId: string;
+    metadata: DappMetadata;
+}
+
+export function isWalletConnectionSourceWalletConnect(
+    value: WalletConnectionSource
+): value is WalletConnectionSourceWalletConnect {
+    return 'projectId' in value && 'metadata' in value;
 }

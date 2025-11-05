@@ -23,10 +23,12 @@
   ],
   "author": "tonconnect",
   "license": "Apache-2.0",
+  "comment": "TODO: remove from deps, to optional or peer",
   "dependencies": {
     "@tonconnect/isomorphic-eventsource": "workspace:*",
     "@tonconnect/isomorphic-fetch": "workspace:*",
-    "@tonconnect/protocol": "workspace:*"
+    "@tonconnect/protocol": "workspace:*",
+    "@reown/appkit-universal-connector": "^1.8.13"
   },
   "files": [
     "lib",

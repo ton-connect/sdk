@@ -43,6 +43,8 @@ export const TonProofDemo = () => {
                     return;
                 }
 
+                console.log('CONNECT', w.connectItems);
+
                 if (w.connectItems?.tonProof && 'proof' in w.connectItems.tonProof) {
                     await TonProofDemoApi.checkProof(w.connectItems.tonProof.proof, w.account);
                 }

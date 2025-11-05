@@ -35,7 +35,7 @@ import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-add
 import { TonConnectOptions } from 'src/models/ton-connect-options';
 import {
     isWalletConnectionSourceJS,
-    WalletConnectionSourceJS
+    isWalletConnectionSourceWalletConnect
 } from 'src/models/wallet/wallet-connection-source';
 import { connectErrorsParser } from 'src/parsers/connect-errors-parser';
 import { sendTransactionParser } from 'src/parsers/send-transaction-parser';
@@ -75,6 +75,7 @@ import { IEnvironment } from 'src/environment/models/environment.interface';
 import { DefaultEnvironment } from 'src/environment/default-environment';
 import { UUIDv7 } from 'src/utils/uuid';
 import { TraceableWalletEvent } from 'src/models/wallet/traceable-events';
+import { WalletConnectProvider } from 'src/provider/wallet-connect/wallet-connect-provider';
 
 export class TonConnect implements ITonConnect {
     private static readonly walletsList = new WalletsListManager();
@@ -257,7 +258,7 @@ export class TonConnect implements ITonConnect {
             openingDeadlineMS?: number;
             signal?: AbortSignal;
         }>
-    ): T extends WalletConnectionSourceJS ? void : string;
+    ): T extends Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[] ? string : void;
     /** @deprecated use connect(wallet, options) instead */
     public connect<
         T extends WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[]
@@ -268,7 +269,7 @@ export class TonConnect implements ITonConnect {
             openingDeadlineMS?: number;
             signal?: AbortSignal;
         }>
-    ): T extends WalletConnectionSourceJS ? void : string;
+    ): T extends Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[] ? string : void;
     // eslint-disable-next-line complexity
     public connect(
         wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
@@ -785,6 +786,8 @@ export class TonConnect implements ITonConnect {
                 wallet.jsBridgeKey,
                 this.analytics
             );
+        } else if (!Array.isArray(wallet) && isWalletConnectionSourceWalletConnect(wallet)) {
+            provider = new WalletConnectProvider(wallet.projectId, wallet.metadata);
         } else {
             provider = new BridgeProvider(this.dappSettings.storage, wallet, this.analytics);
         }
@@ -927,6 +930,7 @@ export class TonConnect implements ITonConnect {
     }
 
     private onWalletDisconnected(scope: 'wallet' | 'dapp', options: Traceable): void {
+        logDebug('Disconnecting', scope, options.traceId);
         const sessionInfo = this.getSessionInfo();
         this.tracker.trackDisconnection(this.wallet, scope, sessionInfo, options?.traceId);
         this.wallet = null;
