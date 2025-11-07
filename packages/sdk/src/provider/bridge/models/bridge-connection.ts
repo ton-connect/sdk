@@ -1,7 +1,7 @@
 import { DeviceInfo, KeyPair, SessionCrypto, TonAddressItemReply } from '@tonconnect/protocol';
 import { BridgeSessionRaw } from 'src/provider/bridge/models/bridge-session-raw';
 import { BridgeSession } from './bridge-session';
-import { WalletConnectionSourceHTTP } from 'src/models';
+import { DappMetadata, WalletConnectionSourceHTTP } from 'src/models';
 import { Optional } from 'src/utils/types';
 
 export const CONNECTION_HTTP_EXPIRATION_TIME = 5 * 60 * 1000;
@@ -9,7 +9,15 @@ export const CONNECTION_HTTP_EXPIRATION_TIME = 5 * 60 * 1000;
 export type BridgeConnection =
     | BridgeConnectionHttp
     | BridgePendingConnectionHttp
-    | BridgeConnectionInjected;
+    | BridgeConnectionInjected
+    | BridgeConnectionWalletConnect;
+
+export interface BridgeConnectionWalletConnect {
+    type: 'wallet-connect';
+    projectKey: string;
+    metadata: DappMetadata;
+    session: unknown;
+}
 
 export interface BridgeConnectionInjected {
     type: 'injected';
@@ -69,4 +77,5 @@ export type BridgePendingConnectionHttpRaw = Omit<BridgePendingConnectionHttp, '
 export type BridgeConnectionRaw =
     | BridgeConnectionHttpRaw
     | BridgePendingConnectionHttpRaw
-    | BridgeConnectionInjected;
+    | BridgeConnectionInjected
+    | BridgeConnectionWalletConnect;

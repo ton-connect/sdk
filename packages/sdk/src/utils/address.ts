@@ -60,6 +60,10 @@ export function isValidRawAddress(address: string): boolean {
     }
 }
 
+export function toRawAddress({ wc, hex }: { wc: number; hex: string }): string {
+    return `${wc}:${hex}`;
+}
+
 /**
  * Parses user-friendly address and returns its components.
  * @param address user-friendly address

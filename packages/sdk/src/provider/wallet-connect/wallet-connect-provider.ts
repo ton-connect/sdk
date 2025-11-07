@@ -14,6 +14,10 @@ import { UniversalConnector, UniversalConnectorConfig } from '@reown/appkit-univ
 import { UUIDv7 } from 'src/utils/uuid';
 import { InternalProvider } from 'src/provider/provider';
 import { DappMetadata } from 'src/models';
+import { IStorage } from 'src/storage/models/storage.interface';
+import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
+import { TonConnectError } from 'src/errors';
+import { parseUserFriendlyAddress, toRawAddress } from 'src/utils/address';
 
 export class WalletConnectProvider implements InternalProvider {
     public readonly type = 'injected';
@@ -22,17 +26,17 @@ export class WalletConnectProvider implements InternalProvider {
 
     private connector: UniversalConnector | undefined = undefined;
 
+    private readonly connectionStorage: BridgeConnectionStorage;
+
     private readonly config: UniversalConnectorConfig;
 
     constructor(
-        // TODO: remove default values
-        private readonly projectKey: string = '9cb446f4a1b697039a23332618d942b0',
-        private readonly metadata: DappMetadata = {
-            name: 'Demo DApp',
-            url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS0uc4aSvQASroq4VfMx30RkZzIX8wiefg3rQ&s',
-            icon: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS0uc4aSvQASroq4VfMx30RkZzIX8wiefg3rQ&s'
-        }
+        private readonly storage: IStorage,
+        private readonly projectKey: string,
+        private readonly metadata: DappMetadata
     ) {
+        this.connectionStorage = new BridgeConnectionStorage(storage);
+
         this.config = {
             networks: [
                 {
@@ -76,8 +80,19 @@ export class WalletConnectProvider implements InternalProvider {
         };
     }
 
+    public static async fromStorage(storage: IStorage): Promise<WalletConnectProvider> {
+        const bridgeConnectionStorage = new BridgeConnectionStorage(storage);
+        // TODO: probably it is better to extract projectKey and metadata from tonconnect setting to allow DApp to change
+        const connection = await bridgeConnectionStorage.getWalletConnectConnection();
+        return new WalletConnectProvider(storage, connection.projectKey, connection.metadata);
+    }
+
     private async initialize(): Promise<UniversalConnector> {
-        return await UniversalConnector.init(this.config);
+        if (!this.connector) {
+            this.connector = await UniversalConnector.init(this.config);
+        }
+
+        return this.connector;
     }
 
     connect(message: ConnectRequest, options?: OptionalTraceable) {
@@ -88,35 +103,140 @@ export class WalletConnectProvider implements InternalProvider {
     async _connect(message: ConnectRequest, options: Traceable) {
         message;
 
-        // TODO fixme
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const namespaces = this.config?.networks.reduce<any>((acc, namespace) => {
-            acc[namespace.namespace] = {
-                ...(namespace || {}),
-                methods: namespace?.methods || [],
-                events: namespace?.events || [],
-                chains: namespace?.chains?.map(chain => chain.caipNetworkId) || []
-            };
+        const connector = await this.initialize();
 
-            return acc;
-        }, {});
-
-        if (!this.connector) {
-            this.connector = await this.initialize();
-        }
-
-        // TODO: this does not opens qr or return any link
-        // console.log('Connecting through this.connector.provider.connect');
-        // await this.connector.provider.connect({
-        //     optionalNamespaces: namespaces
-        // });
-        // console.log('Connected through this.connector.provider.connect');
         console.log('Connecting through this.connector.connect');
-        await this.connector.connect();
+        await connector.connect();
         console.log('Connected through this.connector.connect');
 
-        const session = this.connector.provider.session!;
+        await this.onConnect(connector, options);
+    }
+
+    async restoreConnection(
+        options?: OptionalTraceable<{ openingDeadlineMS?: number; signal?: AbortSignal }>
+    ): Promise<void> {
+        const traceId = options?.traceId ?? UUIDv7();
+
+        await this.disconnect();
+
+        const storedConnection = await this.connectionStorage.getWalletConnectConnection();
+        if (!storedConnection) {
+            return;
+        }
+
+        const connector = await this.initialize();
+        // TODO: fix typing
+
+        console.log('SESSION BEFORE', connector.provider.session);
+        connector.provider.session = storedConnection.session as typeof connector.provider.session;
+
+        await this.onConnect(connector, { traceId });
+    }
+
+    closeConnection(): void {
+        void this.connector?.disconnect();
+    }
+
+    async disconnect(_options?: OptionalTraceable<{ signal?: AbortSignal }>): Promise<void> {
+        await this.connector?.disconnect();
+    }
+
+    sendRequest<T extends RpcMethod>(
+        request: WithoutId<AppRequest<T>>,
+        options?: OptionalTraceable<{
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+            attempts?: number;
+        }>
+    ): Promise<TraceableWalletResponse<T>>;
+
+    sendRequest<T extends RpcMethod>(
+        request: WithoutId<AppRequest<T>>,
+        onRequestSent?: () => void
+    ): Promise<TraceableWalletResponse<T>>;
+    async sendRequest<T extends RpcMethod>(
+        request: WithoutId<AppRequest<T>>,
+        _optionsOrOnRequestSent?:
+            | (() => void)
+            | OptionalTraceable<{
+                  attempts?: number;
+                  onRequestSent?: () => void;
+                  signal?: AbortSignal;
+              }>
+    ): Promise<TraceableWalletResponse<T>> {
+        if (!this.connector) {
+            throw new Error('NOT CONNECTED');
+        }
+
+        // let request: RequestArguments; TODO: export
+        if (request.method === 'sendTransaction') {
+            const { network, ...sendTransactionPayload } = JSON.parse(request.params[0]!);
+            // TODO: extra currencies not supported yet
+            const result = await this.connector?.request(
+                {
+                    method: 'ton_sendMessage',
+                    params: sendTransactionPayload
+                },
+                `ton:${network}`
+            );
+            console.log('Send transaction result', result);
+
+            return {
+                id: '0',
+                traceId: UUIDv7(), // TODO
+                result
+            } as any;
+        } else if (request.method === 'signData') {
+            const { network, ...signDataPayload } = JSON.parse(
+                request.params[0]!
+            ) as SignDataPayload;
+
+            const result = await this.connector.request(
+                {
+                    method: 'ton_signData',
+                    params: signDataPayload
+                },
+                `ton:${network}`
+            );
+            console.log('Sign data result', result);
+            return {
+                id: '0',
+                traceId: UUIDv7(), // TODO
+                result
+            } as any;
+        } else {
+            return {
+                id: '0',
+                error: { code: DISCONNECT_ERROR_CODES.UNKNOWN_ERROR, message: 'Not implemented.' },
+                traceId: ''
+            };
+        }
+
+        // TODO: wait for response
+        return {
+            id: '0',
+            error: { code: DISCONNECT_ERROR_CODES.UNKNOWN_ERROR, message: 'Not implemented.' },
+            traceId: ''
+        };
+    }
+
+    public listen(callback: (e: TraceableWalletEvent) => void): () => void {
+        this.listeners.push(callback);
+        return () => (this.listeners = this.listeners.filter(listener => listener !== callback));
+    }
+
+    private async onConnect(connector: UniversalConnector, options: Traceable) {
+        const session = connector.provider.session!;
         const peer = session.peer;
+
+        const tonNamespace = session.namespaces['ton'];
+        if (!tonNamespace?.accounts?.[0]) {
+            await this.disconnect();
+            throw new TonConnectError('Connection error. No TON accounts connected ');
+        }
+
+        const account = tonNamespace.accounts[0];
+        const [, network, address] = account.split(':', 3);
 
         const payload: {
             items: ConnectItemReply[];
@@ -125,8 +245,9 @@ export class WalletConnectProvider implements InternalProvider {
             items: [
                 {
                     name: 'ton_addr',
-                    address: '0:fc0df8ec68af20331fc7e015a3c1daa540d8593506256826b87d6aa0c78f1670', // TODO
-                    network: CHAIN.MAINNET, // TODO, probably should pass network on connect, would be in protocol in the near future,
+                    // TODO: maybe shoud be raw address by protocol?
+                    address: toRawAddress(parseUserFriendlyAddress(address!)),
+                    network: network as CHAIN, // TODO, probably should pass network on connect, would be in protocol in the near future,
                     publicKey: peer.publicKey,
                     // TODO
                     walletStateInit:
@@ -158,91 +279,20 @@ export class WalletConnectProvider implements InternalProvider {
             }
         };
 
+        await this.storeConnection();
+
         this.listeners.forEach(listener =>
             listener({ event: 'connect', payload, traceId: options.traceId })
         );
     }
 
-    async restoreConnection(
-        _options?: OptionalTraceable<{ openingDeadlineMS?: number; signal?: AbortSignal }>
-    ): Promise<void> {
-        // TODO?
-        // await this._connect();
-    }
-
-    closeConnection(): void {
-        void this.connector?.disconnect();
-    }
-
-    async disconnect(_options?: OptionalTraceable<{ signal?: AbortSignal }>): Promise<void> {
-        await this.connector?.disconnect();
-    }
-
-    sendRequest<T extends RpcMethod>(
-        request: WithoutId<AppRequest<T>>,
-        options?: OptionalTraceable<{
-            onRequestSent?: () => void;
-            signal?: AbortSignal;
-            attempts?: number;
-        }>
-    ): Promise<TraceableWalletResponse<T>>;
-    sendRequest<T extends RpcMethod>(
-        request: WithoutId<AppRequest<T>>,
-        onRequestSent?: () => void
-    ): Promise<TraceableWalletResponse<T>>;
-    async sendRequest<T extends RpcMethod>(
-        request: WithoutId<AppRequest<T>>,
-        _optionsOrOnRequestSent?:
-            | (() => void)
-            | OptionalTraceable<{
-                  attempts?: number;
-                  onRequestSent?: () => void;
-                  signal?: AbortSignal;
-              }>
-    ): Promise<TraceableWalletResponse<T>> {
-        // let request: RequestArguments; TODO: export
-        if (request.method === 'sendTransaction') {
-            const { network, ...sendTransactionPayload } = JSON.parse(request.params[0]!);
-            // TODO: extra currencies not supported yet
-            const result = await this.connector?.request(
-                {
-                    method: 'ton_sendMessage',
-                    params: [JSON.stringify(sendTransactionPayload)]
-                },
-                `ton:${network}`
-            );
-            console.log('Send transaction result', result);
-        } else if (request.method === 'signData') {
-            const { network, ...signDataPayload } = JSON.parse(
-                request.params[0]!
-            ) as SignDataPayload;
-
-            const result = await this.connector?.request(
-                {
-                    method: 'ton_signData',
-                    params: [JSON.stringify(signDataPayload)]
-                },
-                `ton:${network}`
-            );
-            console.log('Sign data result', result);
-        } else {
-            return {
-                id: '0',
-                error: { code: DISCONNECT_ERROR_CODES.UNKNOWN_ERROR, message: 'Not implemented.' },
-                traceId: ''
-            };
-        }
-
-        // TODO: wait for response
-        return {
-            id: '0',
-            error: { code: DISCONNECT_ERROR_CODES.UNKNOWN_ERROR, message: 'Not implemented.' },
-            traceId: ''
-        };
-    }
-
-    public listen(callback: (e: TraceableWalletEvent) => void): () => void {
-        this.listeners.push(callback);
-        return () => (this.listeners = this.listeners.filter(listener => listener !== callback));
+    private storeConnection(): Promise<void> {
+        console.log('STORED');
+        return this.connectionStorage.storeConnection({
+            type: 'wallet-connect',
+            projectKey: this.projectKey,
+            metadata: this.metadata,
+            session: this.connector?.provider.session
+        });
     }
 }

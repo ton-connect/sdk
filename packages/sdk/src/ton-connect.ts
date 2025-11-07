@@ -398,6 +398,9 @@ export class TonConnect implements ITonConnect {
                         this.analytics
                     );
                     break;
+                case 'wallet-connect':
+                    provider = await WalletConnectProvider.fromStorage(this.dappSettings.storage);
+                    break;
                 default:
                     if (embeddedWallet) {
                         provider = this.createProvider(embeddedWallet);
@@ -692,7 +695,7 @@ export class TonConnect implements ITonConnect {
 
         try {
             const connection = await this.bridgeConnectionStorage.getConnection();
-            if (!connection || connection.type === 'injected') {
+            if (!connection || connection.type !== 'http') {
                 return null;
             }
 
@@ -787,7 +790,11 @@ export class TonConnect implements ITonConnect {
                 this.analytics
             );
         } else if (!Array.isArray(wallet) && isWalletConnectionSourceWalletConnect(wallet)) {
-            provider = new WalletConnectProvider(wallet.projectId, wallet.metadata);
+            provider = new WalletConnectProvider(
+                this.dappSettings.storage,
+                wallet.projectId,
+                wallet.metadata
+            );
         } else {
             provider = new BridgeProvider(this.dappSettings.storage, wallet, this.analytics);
         }
