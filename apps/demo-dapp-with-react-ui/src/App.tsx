@@ -11,6 +11,7 @@ import { SignDataTester } from './components/SignDataTester/SignDataTester';
 import { MerkleExample } from './components/MerkleExample/MerkleExample';
 import { FindTransactionDemo } from './components/FindTransactionDemo/FindTransactionDemo';
 import { TransferUsdt } from './components/TransferUsdt/TransferUsdt';
+import { MultiFrame } from './components/MultiFrame/MultiFrame';
 
 function HomePage() {
     return (
@@ -48,6 +49,7 @@ function App() {
                     <Route path="/" element={<HomePage />} />
                     <Route path="/iframe" element={<IframePage />} />
                     <Route path="/iframe/iframe" element={<IframeIframePage />} />
+                    <Route path="/multiframe" element={<MultiFrame />} />
                 </Routes>
             </div>
         </TonConnectUIProvider>
