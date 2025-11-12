@@ -327,7 +327,7 @@ export class TonConnect implements ITonConnect {
                     );
                 }
             }
-            // Store desired network from request (can only be set during connect)
+
             this.desiredChainId = options.request.network;
         } else {
             this.desiredChainId = undefined;
@@ -569,7 +569,7 @@ export class TonConnect implements ITonConnect {
             throw new WalletWrongNetworkError('Wallet connected to a wrong network', {
                 cause: {
                     expectedChainId: this.desiredChainId,
-                    actualChainId: network
+                    actualChainId: String(network)
                 }
             });
         }
@@ -649,7 +649,7 @@ export class TonConnect implements ITonConnect {
             throw new WalletWrongNetworkError('Wallet connected to a wrong network', {
                 cause: {
                     expectedChainId: this.desiredChainId,
-                    actualChainId: network
+                    actualChainId: String(network)
                 }
             });
         }
@@ -887,10 +887,9 @@ export class TonConnect implements ITonConnect {
             }
         };
 
-        // Chain mismatch handling
         if (this.desiredChainId && wallet.account.chain !== this.desiredChainId) {
             const expectedChainId = this.desiredChainId;
-            const actualChainId = wallet.account.chain;
+            const actualChainId = String(wallet.account.chain);
             this.provider?.disconnect();
             this.onWalletConnectError(
                 new WalletWrongNetworkError('Wallet connected to a wrong network', {
@@ -974,7 +973,7 @@ export class TonConnect implements ITonConnect {
         const sessionInfo = this.getSessionInfo();
         this.tracker.trackDisconnection(this.wallet, scope, sessionInfo, options?.traceId);
         this.wallet = null;
-        this.desiredChainId = undefined; // Clear desired network on disconnect
+        this.desiredChainId = undefined;
     }
 
     private checkConnection(): void | never {

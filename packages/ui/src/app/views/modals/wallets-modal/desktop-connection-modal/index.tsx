@@ -82,22 +82,6 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
     const [firstClick, setFirstClick] = createSignal(true);
     const connector = useContext(ConnectorContext)!;
 
-    function isWrongNetworkErrorLike(e: unknown): boolean {
-        if (typeof e !== 'object' || e === null) {
-            return false;
-        }
-        const err = e as { name?: string; message?: string; cause?: unknown };
-        const cause =
-            typeof err.cause === 'object' && err.cause !== null
-                ? (err.cause as { expectedChainId?: unknown })
-                : undefined;
-        return (
-            err.name === 'WalletWrongNetworkError' ||
-            (typeof err.message === 'string' && err.message.includes('WalletWrongNetworkError')) ||
-            (cause !== undefined && 'expectedChainId' in cause)
-        );
-    }
-
     const unsubscribe = connector.onStatusChange(
         () => {},
         error => {
@@ -106,7 +90,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                 return;
             }
 
-            if (error instanceof WalletWrongNetworkError || isWrongNetworkErrorLike(error)) {
+            if (error instanceof WalletWrongNetworkError) {
                 setConnectionErrored('wrong-network');
                 return;
             }
