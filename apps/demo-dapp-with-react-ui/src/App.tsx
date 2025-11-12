@@ -11,13 +11,11 @@ import { SignDataTester } from './components/SignDataTester/SignDataTester';
 import { MerkleExample } from './components/MerkleExample/MerkleExample';
 import { FindTransactionDemo } from './components/FindTransactionDemo/FindTransactionDemo';
 import { TransferUsdt } from './components/TransferUsdt/TransferUsdt';
-import { NetworkPicker } from './components/NetworkPicker/NetworkPicker';
 
 function HomePage() {
     return (
         <div className="app">
             <Header />
-            <NetworkPicker />
             <TxForm />
             <WalletBatchLimitsTester />
             <SignDataTester />

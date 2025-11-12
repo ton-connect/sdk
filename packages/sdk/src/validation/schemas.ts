@@ -165,7 +165,7 @@ export function validateConnectAdditionalRequest(data: unknown): ValidationResul
 
     if (data.network !== undefined) {
         if (typeof data.network !== 'string') {
-            return "Invalid 'network'";
+            return `Invalid 'network': Expected string, got ${typeof data.network}`;
         }
         if (data.network.length === 0) {
             return "Empty 'network'";

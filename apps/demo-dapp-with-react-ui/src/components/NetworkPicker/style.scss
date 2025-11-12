@@ -1,78 +1,42 @@
 .network-picker {
-  margin: 16px auto 24px;
-  padding: 16px;
-  max-width: 920px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-}
-
-.network-picker__title {
+  padding: 10px 16px;
+  padding-right: 36px;
+  background: linear-gradient(135deg, rgba(28, 95, 164, 0.15) 0%, rgba(102, 170, 238, 0.1) 100%);
+  border: 1px solid rgba(102, 170, 238, 0.3);
+  border-radius: 10px;
   color: #b8d4f1;
-  font-weight: 600;
-  margin-bottom: 10px;
-}
-
-.network-picker__row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
-  margin-top: 8px;
-}
-
-.np-btn {
-  background: #1c5fa4;
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.np-btn--active {
-  outline: 2px solid #66aaee;
-}
-
-.np-btn--ghost {
-  background: transparent;
-  border: 1px solid #1c5fa4;
-  color: #1c5fa4;
-}
-
-.np-input {
-  flex: 1;
-  min-width: 260px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #d9e7f7;
-  padding: 8px 10px;
-  border-radius: 8px;
-}
-
-.network-picker__meta {
-  margin-top: 10px;
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.np-meta-label {
-  color: #8fb8df;
-  margin-right: 6px;
-}
-
-.np-meta-value {
-  color: #d9e7f7;
-}
-
-.network-picker__warning {
-  margin-top: 12px;
-  padding: 8px 12px;
-  background: rgba(255, 193, 7, 0.1);
-  border: 1px solid rgba(255, 193, 7, 0.3);
-  border-radius: 8px;
-  color: #ffc107;
   font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  min-width: 150px;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%2366aaee' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  &:hover {
+    border-color: rgba(102, 170, 238, 0.5);
+    background: linear-gradient(135deg, rgba(28, 95, 164, 0.2) 0%, rgba(102, 170, 238, 0.15) 100%);
+    box-shadow: 0 4px 12px rgba(102, 170, 238, 0.2);
+  }
+
+  &:focus {
+    border-color: #66aaee;
+    outline: 2px solid rgba(102, 170, 238, 0.3);
+    outline-offset: 2px;
+    box-shadow: 0 4px 16px rgba(102, 170, 238, 0.3);
+  }
+
+  option {
+    background: #1a1a1a;
+    color: #d9e7f7;
+    padding: 8px;
+  }
+
+  &::-ms-expand {
+    display: none;
+  }
 }
 
