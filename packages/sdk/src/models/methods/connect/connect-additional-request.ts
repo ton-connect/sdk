@@ -1,3 +1,5 @@
+import { ChainId } from '@tonconnect/protocol';
+
 export interface ConnectAdditionalRequest {
     /**
      * Payload for ton_proof
@@ -9,5 +11,5 @@ export interface ConnectAdditionalRequest {
      * If wallet connects with a different chain, the SDK will throw an error and abort connection.
      * Can only be set during connect, not changed afterwards.
      */
-    network?: string;
+    network?: ChainId;
 }
