@@ -47,7 +47,6 @@ import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { DefaultStorage } from 'src/storage/default-storage';
 import { ITonConnect } from 'src/ton-connect.interface';
 import { WalletWrongNetworkError } from 'src/errors/wallet/wallet-wrong-network.error';
-import { CHAIN } from '@tonconnect/protocol';
 import { getDocument, getOriginWithPath, getWebPageManifest } from 'src/utils/web-api';
 import { WalletsListManager } from 'src/wallets-list-manager';
 import { OptionalTraceable, Traceable } from 'src/utils/types';
@@ -287,20 +286,6 @@ export class TonConnect implements ITonConnect {
             signal?: AbortSignal;
         }>
     ): void | string {
-        logDebug('connect called', {
-            requestOrOptions,
-            requestOrOptionsType: typeof requestOrOptions,
-            hasTonProof:
-                requestOrOptions &&
-                typeof requestOrOptions === 'object' &&
-                'tonProof' in requestOrOptions,
-            hasNetwork:
-                requestOrOptions &&
-                typeof requestOrOptions === 'object' &&
-                'network' in requestOrOptions,
-            additionalOptions
-        });
-
         // TODO: remove deprecated method
         const options: OptionalTraceable<{
             request?: ConnectAdditionalRequest;
@@ -315,10 +300,7 @@ export class TonConnect implements ITonConnect {
             requestOrOptions !== null &&
             ('tonProof' in requestOrOptions || 'network' in requestOrOptions)
         ) {
-            options.request = requestOrOptions as ConnectAdditionalRequest;
-            logDebug('Set options.request from requestOrOptions (ConnectAdditionalRequest)', {
-                request: options.request
-            });
+            options.request = requestOrOptions;
         }
         // Check if requestOrOptions is an options object (has openingDeadlineMS, signal, request, or traceId)
         if (
@@ -329,24 +311,10 @@ export class TonConnect implements ITonConnect {
                 'request' in requestOrOptions ||
                 'traceId' in requestOrOptions)
         ) {
-            logDebug('Set options from requestOrOptions (options object)', {
-                previousRequest: options.request,
-                newRequest: requestOrOptions?.request,
-                openingDeadlineMS: requestOrOptions?.openingDeadlineMS,
-                signal: requestOrOptions?.signal,
-                traceId: requestOrOptions?.traceId
-            });
             options.request = requestOrOptions?.request;
             options.openingDeadlineMS = requestOrOptions?.openingDeadlineMS;
             options.signal = requestOrOptions?.signal;
         }
-
-        logDebug('Final options after parsing', {
-            request: options.request,
-            requestNetwork: options.request?.network,
-            openingDeadlineMS: options.openingDeadlineMS,
-            signal: options.signal
-        });
 
         if (options.request) {
             const validationError = validateConnectAdditionalRequest(options.request);
@@ -361,15 +329,7 @@ export class TonConnect implements ITonConnect {
             }
             // Store desired network from request (can only be set during connect)
             this.desiredChainId = options.request.network;
-            logDebug('Setting desiredChainId from connect request', {
-                network: options.request.network,
-                networkType: typeof options.request.network,
-                desiredChainId: this.desiredChainId
-            });
         } else {
-            logDebug('No network in connect request, clearing desiredChainId', {
-                previousDesiredChainId: this.desiredChainId
-            });
             this.desiredChainId = undefined;
         }
 
@@ -603,13 +563,13 @@ export class TonConnect implements ITonConnect {
 
         const { validUntil, messages, ...tx } = transaction;
         const from = transaction.from || this.account!.address;
-        const network = (transaction.network || this.account!.chain) as CHAIN | undefined;
+        const network = transaction.network || this.account!.chain;
 
-        if (this.desiredChainId && (network as unknown as string) !== this.desiredChainId) {
+        if (this.desiredChainId && network !== this.desiredChainId) {
             throw new WalletWrongNetworkError('Wallet connected to a wrong network', {
                 cause: {
                     expectedChainId: this.desiredChainId,
-                    actualChainId: network as unknown as string
+                    actualChainId: network
                 }
             });
         }
@@ -683,13 +643,13 @@ export class TonConnect implements ITonConnect {
         this.tracker.trackDataSentForSignature(this.wallet, data, sessionInfo, traceId);
 
         const from = data.from || this.account!.address;
-        const network = (data.network || this.account!.chain) as CHAIN | undefined;
+        const network = data.network || this.account!.chain;
 
-        if (this.desiredChainId && (network as unknown as string) !== this.desiredChainId) {
+        if (this.desiredChainId && network !== this.desiredChainId) {
             throw new WalletWrongNetworkError('Wallet connected to a wrong network', {
                 cause: {
                     expectedChainId: this.desiredChainId,
-                    actualChainId: network as unknown as string
+                    actualChainId: network
                 }
             });
         }
@@ -733,12 +693,6 @@ export class TonConnect implements ITonConnect {
             throw new WalletNotConnectedError();
         }
 
-        const stackTrace = new Error().stack;
-        logDebug('Disconnect requested', {
-            connected: this.connected,
-            stackTrace: stackTrace?.split('\n').slice(0, 10).join('\n') // First 10 lines of stack
-        });
-
         const abortController = createAbortController(options?.signal);
         const prevAbortController = this.abortController;
         this.abortController = abortController;
@@ -749,9 +703,7 @@ export class TonConnect implements ITonConnect {
 
         const traceId = options?.traceId ?? UUIDv7();
 
-        logDebug('Calling onWalletDisconnected (initiated by dapp)', { traceId });
         this.onWalletDisconnected('dapp', { traceId });
-        logDebug('Calling provider.disconnect', { traceId, provider: this.provider?.type });
         await this.provider?.disconnect({
             signal: abortController.signal,
             traceId
@@ -936,26 +888,9 @@ export class TonConnect implements ITonConnect {
         };
 
         // Chain mismatch handling
-        logDebug('Checking network on connect', {
-            desiredChainId: this.desiredChainId,
-            walletChain: wallet.account.chain,
-            walletChainType: typeof wallet.account.chain,
-            desiredChainIdType: typeof this.desiredChainId,
-            tonAccountItemNetwork: tonAccountItem.network,
-            tonAccountItemNetworkType: typeof tonAccountItem.network,
-            stringComparison: this.desiredChainId
-                ? String(wallet.account.chain) !== String(this.desiredChainId)
-                : 'N/A (no desiredChainId)'
-        });
-
-        if (this.desiredChainId && String(wallet.account.chain) !== String(this.desiredChainId)) {
-            const expectedChainId = String(this.desiredChainId);
-            const actualChainId = String(wallet.account.chain);
-            logDebug('Disconnecting due to network mismatch on connect', {
-                expectedChainId,
-                actualChainId,
-                provider: this.provider?.type
-            });
+        if (this.desiredChainId && wallet.account.chain !== this.desiredChainId) {
+            const expectedChainId = this.desiredChainId;
+            const actualChainId = wallet.account.chain;
             this.provider?.disconnect();
             this.onWalletConnectError(
                 new WalletWrongNetworkError('Wallet connected to a wrong network', {
@@ -1023,21 +958,9 @@ export class TonConnect implements ITonConnect {
 
         const sessionInfo = this.getSessionInfo();
         this.tracker.trackConnectionCompleted(wallet, sessionInfo, options?.traceId);
-
-        logDebug('onWalletConnected completed successfully', {
-            walletAddress: wallet.account.address,
-            walletChain: wallet.account.chain,
-            desiredChainId: this.desiredChainId
-        });
     }
 
     private onWalletConnectError(error: TonConnectError): void {
-        logDebug('onWalletConnectError called', {
-            errorName: error.name,
-            errorMessage: error.message,
-            errorCause: error.cause,
-            stackTrace: new Error().stack?.split('\n').slice(0, 10).join('\n')
-        });
         this.statusChangeErrorSubscriptions.forEach(errorsHandler => errorsHandler(error));
         logDebug(error);
 
@@ -1050,11 +973,6 @@ export class TonConnect implements ITonConnect {
     private onWalletDisconnected(scope: 'wallet' | 'dapp', options: Traceable): void {
         const sessionInfo = this.getSessionInfo();
         this.tracker.trackDisconnection(this.wallet, scope, sessionInfo, options?.traceId);
-        logDebug('onWalletDisconnected', {
-            scope,
-            traceId: options?.traceId,
-            hadWallet: Boolean(this.wallet)
-        });
         this.wallet = null;
         this.desiredChainId = undefined; // Clear desired network on disconnect
     }
@@ -1066,12 +984,6 @@ export class TonConnect implements ITonConnect {
     }
 
     private createConnectRequest(request?: ConnectAdditionalRequest): ConnectRequest {
-        logDebug('Creating connect request', {
-            requestNetwork: request?.network,
-            requestNetworkType: typeof request?.network,
-            desiredChainId: this.desiredChainId
-        });
-
         const items: ConnectItem[] = [
             {
                 name: 'ton_addr',
@@ -1086,16 +998,9 @@ export class TonConnect implements ITonConnect {
             });
         }
 
-        const connectRequest = {
+        return {
             manifestUrl: this.dappSettings.manifestUrl,
             items
         };
-
-        logDebug('Created connect request', {
-            items: connectRequest.items,
-            tonAddrItem: connectRequest.items.find(item => item.name === 'ton_addr')
-        });
-
-        return connectRequest;
     }
 }

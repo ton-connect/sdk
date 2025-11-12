@@ -1,20 +1,20 @@
 import { Address, TonClient4 } from '@ton/ton';
-import { CHAIN } from '@tonconnect/ui-react';
+import { CHAIN, ChainId } from '@tonconnect/ui-react';
 import { Buffer } from 'buffer';
 
 export class TonApiService {
-    public static create(client: TonClient4 | CHAIN | string): TonApiService {
-        if (client === CHAIN.MAINNET || client === '-239') {
+    public static create(client: TonClient4 | ChainId): TonApiService {
+        if (client === CHAIN.MAINNET) {
             client = new TonClient4({
                 endpoint: 'https://mainnet-v4.tonhubapi.com'
             });
         }
-        if (client === CHAIN.TESTNET || client === '-3' || typeof client === 'string') {
+        if (client === CHAIN.TESTNET || typeof client === 'string') {
             client = new TonClient4({
                 endpoint: 'https://testnet-v4.tonhubapi.com'
             });
         }
-        return new TonApiService(client as TonClient4);
+        return new TonApiService(client);
     }
 
     private readonly client: TonClient4;

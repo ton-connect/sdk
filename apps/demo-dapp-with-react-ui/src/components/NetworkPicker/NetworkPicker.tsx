@@ -24,9 +24,6 @@ export function NetworkPicker() {
     }, [desired, tonConnectUI]);
 
     const handleSetDesired = useCallback((newDesired: string | undefined) => {
-        console.debug('[NetworkPicker] Set desired network', {
-            newDesired: String(newDesired)
-        });
         setDesired(newDesired);
     }, []);
 
@@ -94,13 +91,6 @@ export function NetworkPicker() {
                         style={{ marginLeft: 8 }}
                         onClick={async () => {
                             try {
-                                console.debug(
-                                    '[NetworkPicker] Manual disconnect to apply network',
-                                    {
-                                        connectedChainId: String(connectedChainId),
-                                        desired: String(desired)
-                                    }
-                                );
                                 await tonConnectUI.disconnect();
                             } catch {}
                         }}
