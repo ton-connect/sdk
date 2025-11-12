@@ -6,7 +6,8 @@ import {
     isWalletInfoRemote,
     ITonConnect,
     WalletInfoCurrentlyEmbedded,
-    WalletInfoRemote
+    WalletInfoRemote,
+    isQaModeEnabled
 } from '@tonconnect/sdk';
 import { appState } from 'src/app/state/app.state';
 import { widgetController } from 'src/app/widget-controller';
@@ -113,6 +114,10 @@ export class SingleWalletModalManager implements SingleWalletModal {
         }
 
         const error = `Trying to open modal window with unknown wallet "${wallet}".`;
+        if (isQaModeEnabled()) {
+            console.warn(`[QA Mode] ${error} But continuing due to QA mode`);
+            return;
+        }
         this.tracker.trackConnectionError(error);
         throw new TonConnectUIError(error);
     }
