@@ -6,7 +6,8 @@ import {
     DeviceInfo,
     DISCONNECT_ERROR_CODES,
     RpcMethod,
-    SignDataPayload
+    SignDataPayload,
+    TonProofItemReplySuccess
 } from '@tonconnect/protocol';
 import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet/traceable-events';
 import { OptionalTraceable, Traceable, WithoutId } from 'src/utils/types';
@@ -103,21 +104,21 @@ export class WalletConnectProvider implements InternalProvider {
     async _connect(message: ConnectRequest, options: Traceable) {
         const connector = await this.initialize();
 
-        console.log(message.items);
         const tonProof = message.items.find(item => item.name === 'ton_proof');
+
         const authentication = tonProof
             ? [
                   {
-                      domain: 'TODO',
+                      domain: new URL(this.config.metadata.url).hostname,
                       chains: ['ton:-239'],
-                      nonce: tonProof.payload,
-                      uri: 'TODO',
+                      nonce: '',
+                      uri: 'ton_proof',
                       ttl: 0,
-                      statement: 'ton_proof'
+                      statement: tonProof.payload
                   }
               ]
             : undefined;
-        console.log('Connecting through this.connector.connect', { authentication });
+        console.log('Connecting through this.connector.connect');
         await connector.connect({ authentication });
 
         console.log('Connected through this.connector.connect');
@@ -234,6 +235,30 @@ export class WalletConnectProvider implements InternalProvider {
         return () => (this.listeners = this.listeners.filter(listener => listener !== callback));
     }
 
+    private buildTonProof(connector: UniversalConnector): TonProofItemReplySuccess | undefined {
+        const auth = connector.provider.session!.authentication?.[0];
+        const iat = auth?.p?.iat;
+        const statement = auth?.p?.statement;
+
+        if (!iat || !statement) {
+            return;
+        }
+
+        const domain = auth.p.domain;
+        return {
+            name: 'ton_proof',
+            proof: {
+                timestamp: Math.floor(new Date(iat).getTime() / 1000),
+                domain: {
+                    lengthBytes: domain.length,
+                    value: domain
+                },
+                payload: statement,
+                signature: auth.s.s
+            }
+        } as const;
+    }
+
     private async onConnect(connector: UniversalConnector, options: Traceable) {
         const session = connector.provider.session!;
         const peer = session.peer;
@@ -244,12 +269,28 @@ export class WalletConnectProvider implements InternalProvider {
             throw new TonConnectError('Connection error. No TON accounts connected ');
         }
 
-        console.log('AUTH', session.authentication);
-
         const account = tonNamespace.accounts[0];
         const [, network, address] = account.split(':', 3);
 
-        console.log('PROPS', Object.keys(session.sessionProperties as any));
+        const publicKey = session.sessionProperties?.ton_getPublicKey;
+
+        if (!publicKey) {
+            await this.disconnect();
+            throw new TonConnectError(
+                'Connection error. No sessionProperties.ton_getPublicKey provided. '
+            );
+        }
+
+        const stateInit = session.sessionProperties?.ton_getStateInit;
+        if (!stateInit) {
+            await this.disconnect();
+            throw new TonConnectError(
+                'Connection error. No sessionProperties.ton_getStateInit provided. '
+            );
+        }
+
+        const tonProof = this.buildTonProof(connector);
+
         const payload: {
             items: ConnectItemReply[];
             device: DeviceInfo;
@@ -260,24 +301,10 @@ export class WalletConnectProvider implements InternalProvider {
                     // TODO: maybe shoud be raw address by protocol?
                     address: toRawAddress(parseUserFriendlyAddress(address!)),
                     network: network as CHAIN, // TODO, probably should pass network on connect, would be in protocol in the near future,
-                    publicKey: peer.publicKey,
-                    // TODO
-                    walletStateInit:
-                        'e6ccgECFgEAAwQAAgE0AQIBFP8A9KQT9LzyyAsDAFEAAAAAKamjFzQ9VeXB3VooMYjIYZy+03OLkpPWM+SfL27jB85G8eL1QAIBIAQFAgFIBgcE+PKDCNcYINMf0x/THwL4I7vyZO1E0NMf0x/T//QE0VFDuvKhUVG68qIF+QFUEGT5EPKj+AAkpMjLH1JAyx9SMMv/UhD0AMntVPgPAdMHIcAAn2xRkyDXSpbTB9QC+wDoMOAhwAHjACHAAuMAAcADkTDjDQOkyMsfEssfy/8SExQVAubQAdDTAyFxsJJfBOAi10nBIJJfBOAC0x8hghBwbHVnvSKCEGRzdHK9sJJfBeAD+kAwIPpEAcjKB8v/ydDtRNCBAUDXIfQEMFyBAQj0Cm+hMbOSXwfgBdM/yCWCEHBsdWe6kjgw4w0DghBkc3RyupJfBuMNCAkCASAKCwB4AfoA9AQw+CdvIjBQCqEhvvLgUIIQcGx1Z4MesXCAGFAEywUmzxZY+gIZ9ADLaRfLH1Jgyz8gyYBA+wAGAIpQBIEBCPRZMO1E0IEBQNcgyAHPFvQAye1UAXKwjiOCEGRzdHKDHrFwgBhQBcsFUAPPFiP6AhPLassfyz/JgED7AJJfA+ICASAMDQBZvSQrb2omhAgKBrkPoCGEcNQICEekk30pkQzmkD6f+YN4EoAbeBAUiYcVnzGEAgFYDg8AEbjJftRNDXCx+AA9sp37UTQgQFA1yH0BDACyMoHy//J0AGBAQj0Cm+hMYAIBIBARABmtznaiaEAga5Drhf/AABmvHfaiaEAQa5DrhY/AAG7SB/oA1NQi+QAFyMoHFcv/ydB3dIAYyMsFywIizxZQBfoCFMtrEszMyXP7AMhAFIEBCPRR8qcCAHCBAQjXGPoA0z/IVCBHgQEI9FHyp4IQbm90ZXB0gBjIywXLAlAGzxZQBPoCFMtqEssfyz/Jc/sAAgBsgQEI1xj6ANM/MFIkgQEI9Fnyp4IQZHN0cnB0gBjIywXLAlAFzxZQA/oCE8tqyx8Syz/Jc/sAAAr0AMntVA==' // TODO
+                    publicKey,
+                    walletStateInit: stateInit
                 },
-                // TODO
-                {
-                    name: 'ton_proof',
-                    proof: {
-                        timestamp: Date.now(),
-                        domain: {
-                            lengthBytes: 1,
-                            value: 'a'
-                        },
-                        payload: 'a',
-                        signature: 'YW55'
-                    }
-                }
+                ...(tonProof ? [tonProof] : [])
             ],
             device: {
                 appName: peer.metadata.name,
@@ -299,7 +326,6 @@ export class WalletConnectProvider implements InternalProvider {
     }
 
     private storeConnection(): Promise<void> {
-        console.log('STORED');
         return this.connectionStorage.storeConnection({
             type: 'wallet-connect',
             projectKey: this.projectKey,

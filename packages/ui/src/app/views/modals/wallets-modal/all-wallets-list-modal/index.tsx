@@ -98,10 +98,11 @@ export const AllWalletsListModal: Component<DesktopSelectWalletModalProps> = pro
                             // TODO
                             void connector.connect(
                                 {
+                                    // TODO: extract
                                     projectId: '9cb446f4a1b697039a23332618d942b0',
                                     metadata: {
                                         name: 'Demo DApp',
-                                        url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS0uc4aSvQASroq4VfMx30RkZzIX8wiefg3rQ&s',
+                                        url: 'http://localhost:5173',
                                         icon: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS0uc4aSvQASroq4VfMx30RkZzIX8wiefg3rQ&s'
                                     }
                                 },

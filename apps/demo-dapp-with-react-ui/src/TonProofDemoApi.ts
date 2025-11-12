@@ -88,7 +88,7 @@ class TonProofDemoApiService {
     }
 
     private getPayloadToken(payload: string): string | null {
-        return this.payloadTokenCache.get(payload) ?? 'ANY'; // TODO remove
+        return this.payloadTokenCache.get(payload);
     }
 
     async generatePayload(): Promise<ConnectAdditionalRequest | null> {
