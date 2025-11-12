@@ -101,12 +101,25 @@ export class WalletConnectProvider implements InternalProvider {
     }
 
     async _connect(message: ConnectRequest, options: Traceable) {
-        message;
-
         const connector = await this.initialize();
 
-        console.log('Connecting through this.connector.connect');
-        await connector.connect();
+        console.log(message.items);
+        const tonProof = message.items.find(item => item.name === 'ton_proof');
+        const authentication = tonProof
+            ? [
+                  {
+                      domain: 'TODO',
+                      chains: ['ton:-239'],
+                      nonce: tonProof.payload,
+                      uri: 'TODO',
+                      ttl: 0,
+                      statement: 'ton_proof'
+                  }
+              ]
+            : undefined;
+        console.log('Connecting through this.connector.connect', { authentication });
+        await connector.connect({ authentication });
+
         console.log('Connected through this.connector.connect');
 
         await this.onConnect(connector, options);
@@ -115,29 +128,32 @@ export class WalletConnectProvider implements InternalProvider {
     async restoreConnection(
         options?: OptionalTraceable<{ openingDeadlineMS?: number; signal?: AbortSignal }>
     ): Promise<void> {
-        const traceId = options?.traceId ?? UUIDv7();
+        try {
+            console.log('RECONNECTING');
+            const traceId = options?.traceId ?? UUIDv7();
 
-        await this.disconnect();
+            const storedConnection = await this.connectionStorage.getWalletConnectConnection();
+            if (!storedConnection) {
+                return;
+            }
 
-        const storedConnection = await this.connectionStorage.getWalletConnectConnection();
-        if (!storedConnection) {
-            return;
+            const connector = await this.initialize();
+
+            connector.provider.session =
+                storedConnection.session as typeof connector.provider.session;
+
+            await this.onConnect(connector, { traceId });
+        } catch (error) {
+            console.error(error);
         }
-
-        const connector = await this.initialize();
-        // TODO: fix typing
-
-        console.log('SESSION BEFORE', connector.provider.session);
-        connector.provider.session = storedConnection.session as typeof connector.provider.session;
-
-        await this.onConnect(connector, { traceId });
     }
 
     closeConnection(): void {
-        void this.connector?.disconnect();
+        void this?.disconnect();
     }
 
     async disconnect(_options?: OptionalTraceable<{ signal?: AbortSignal }>): Promise<void> {
+        await this.connectionStorage.removeConnection();
         await this.connector?.disconnect();
     }
 
@@ -211,13 +227,6 @@ export class WalletConnectProvider implements InternalProvider {
                 traceId: ''
             };
         }
-
-        // TODO: wait for response
-        return {
-            id: '0',
-            error: { code: DISCONNECT_ERROR_CODES.UNKNOWN_ERROR, message: 'Not implemented.' },
-            traceId: ''
-        };
     }
 
     public listen(callback: (e: TraceableWalletEvent) => void): () => void {
@@ -235,9 +244,12 @@ export class WalletConnectProvider implements InternalProvider {
             throw new TonConnectError('Connection error. No TON accounts connected ');
         }
 
+        console.log('AUTH', session.authentication);
+
         const account = tonNamespace.accounts[0];
         const [, network, address] = account.split(':', 3);
 
+        console.log('PROPS', Object.keys(session.sessionProperties as any));
         const payload: {
             items: ConnectItemReply[];
             device: DeviceInfo;

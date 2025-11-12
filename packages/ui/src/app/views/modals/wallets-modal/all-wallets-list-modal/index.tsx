@@ -32,7 +32,9 @@ export interface DesktopSelectWalletModalProps {
 
 export const AllWalletsListModal: Component<DesktopSelectWalletModalProps> = props => {
     const maxHeight = (): number | undefined => (isMobile() ? undefined : 510);
+
     const connector = appState.connector;
+    const additionalRequest = appState.connectRequestParameters;
 
     const [errorSupportOpened, setErrorSupportOpened] = createSignal<UIWalletInfo | null>(null);
     let timeoutId: null | ReturnType<typeof setTimeout> = null;
@@ -93,14 +95,21 @@ export const AllWalletsListModal: Component<DesktopSelectWalletModalProps> = pro
                             } as any
                         }
                         onClick={() =>
-                            void connector.connect({
-                                projectId: '9cb446f4a1b697039a23332618d942b0',
-                                metadata: {
-                                    name: 'Demo DApp',
-                                    url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS0uc4aSvQASroq4VfMx30RkZzIX8wiefg3rQ&s',
-                                    icon: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS0uc4aSvQASroq4VfMx30RkZzIX8wiefg3rQ&s'
-                                }
-                            })
+                            // TODO
+                            void connector.connect(
+                                {
+                                    projectId: '9cb446f4a1b697039a23332618d942b0',
+                                    metadata: {
+                                        name: 'Demo DApp',
+                                        url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS0uc4aSvQASroq4VfMx30RkZzIX8wiefg3rQ&s',
+                                        icon: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS0uc4aSvQASroq4VfMx30RkZzIX8wiefg3rQ&s'
+                                    }
+                                },
+                                // TODO
+                                additionalRequest?.state === 'ready'
+                                    ? additionalRequest.value
+                                    : undefined
+                            )
                         }
                     />
                 </WalletsUl>

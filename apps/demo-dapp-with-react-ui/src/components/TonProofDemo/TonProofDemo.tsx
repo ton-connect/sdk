@@ -21,7 +21,9 @@ export const TonProofDemo = () => {
 
         const payload = await TonProofDemoApi.generatePayload();
 
+        console.log('TONPROOF', payload);
         if (payload) {
+            console.log('READY');
             tonConnectUI.setConnectRequestParameters({ state: 'ready', value: payload });
         } else {
             tonConnectUI.setConnectRequestParameters(null);
@@ -42,8 +44,6 @@ export const TonProofDemo = () => {
                     setAuthorized(false);
                     return;
                 }
-
-                console.log('CONNECT', w.connectItems);
 
                 if (w.connectItems?.tonProof && 'proof' in w.connectItems.tonProof) {
                     await TonProofDemoApi.checkProof(w.connectItems.tonProof.proof, w.account);
