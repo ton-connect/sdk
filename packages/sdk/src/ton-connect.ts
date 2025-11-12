@@ -565,11 +565,11 @@ export class TonConnect implements ITonConnect {
         const from = transaction.from || this.account!.address;
         const network = transaction.network || this.account!.chain;
 
-        if (this.desiredChainId && network !== this.desiredChainId) {
+        if (this.wallet?.account.chain && network !== this.wallet.account.chain) {
             throw new WalletWrongNetworkError('Wallet connected to a wrong network', {
                 cause: {
-                    expectedChainId: this.desiredChainId,
-                    actualChainId: String(network)
+                    expectedChainId: this.wallet?.account.chain,
+                    actualChainId: network
                 }
             });
         }
@@ -645,11 +645,11 @@ export class TonConnect implements ITonConnect {
         const from = data.from || this.account!.address;
         const network = data.network || this.account!.chain;
 
-        if (this.desiredChainId && network !== this.desiredChainId) {
+        if (this.wallet?.account.chain && network !== this.wallet.account.chain) {
             throw new WalletWrongNetworkError('Wallet connected to a wrong network', {
                 cause: {
-                    expectedChainId: this.desiredChainId,
-                    actualChainId: String(network)
+                    expectedChainId: this.wallet?.account.chain,
+                    actualChainId: network
                 }
             });
         }
