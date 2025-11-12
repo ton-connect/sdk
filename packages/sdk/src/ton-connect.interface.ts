@@ -8,7 +8,7 @@ import {
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
 import { WalletInfo } from 'src/models/wallet/wallet-info';
 import { WalletConnectionSourceJS } from 'src/models/wallet/wallet-connection-source';
-import { SignDataPayload, ChainId } from '@tonconnect/protocol';
+import { SignDataPayload } from '@tonconnect/protocol';
 import { OptionalTraceable } from 'src/utils/types';
 
 export interface ITonConnect {
@@ -119,15 +119,4 @@ export interface ITonConnect {
      * @returns session ID string or null if not available.
      */
     getSessionId(): Promise<string | null>;
-
-    /**
-     * Sets desired chain id to validate on connect. If set and wallet connects on a different chain,
-     * connection will be aborted with an error. Pass undefined to clear.
-     */
-    setDesiredChainId(chainId?: ChainId): void;
-
-    /**
-     * Returns desired chain id if set.
-     */
-    getDesiredChainId(): string | undefined;
 }

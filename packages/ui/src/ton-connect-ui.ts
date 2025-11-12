@@ -59,7 +59,6 @@ import { TonConnectUITracker } from 'src/tracker/ton-connect-ui-tracker';
 import { tonConnectUiVersion } from 'src/constants/version';
 import { ReturnStrategy } from './models';
 import { TonConnectEnvironment } from 'src/environment/ton-connect-environment';
-import { CHAIN } from '@tonconnect/sdk';
 
 export class TonConnectUI {
     public static getWallets(): Promise<WalletInfo[]> {
@@ -155,14 +154,6 @@ export class TonConnectUI {
             ...this.connector.wallet,
             ...this.walletInfo
         };
-    }
-
-    /**
-     * Sets desired chain id to validate on connect. If set and wallet connects on a different chain,
-     * connection will be aborted with an error. Pass undefined to clear.
-     */
-    public setDesiredChainId(chainId?: CHAIN | string): void {
-        this.connector.setDesiredChainId(chainId as string | undefined);
     }
 
     /**

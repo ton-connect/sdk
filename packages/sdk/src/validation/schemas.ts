@@ -158,9 +158,18 @@ export function validateConnectAdditionalRequest(data: unknown): ValidationResul
         return 'Request must be an object';
     }
 
-    const allowedKeys = ['tonProof'];
+    const allowedKeys = ['tonProof', 'network'];
     if (hasExtraProperties(data, allowedKeys)) {
         return 'Request contains extra properties';
+    }
+
+    if (data.network !== undefined) {
+        if (typeof data.network !== 'string') {
+            return "Invalid 'network'";
+        }
+        if (data.network.length === 0) {
+            return "Empty 'network'";
+        }
     }
 
     if (data.tonProof !== undefined) {

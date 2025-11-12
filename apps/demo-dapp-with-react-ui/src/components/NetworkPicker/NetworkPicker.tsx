@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useTonConnectUI, useTonWallet, CHAIN } from '@tonconnect/ui-react';
 import './style.scss';
 
@@ -6,13 +6,29 @@ export function NetworkPicker() {
     const [tonConnectUI] = useTonConnectUI();
     const wallet = useTonWallet();
     const [customChainId, setCustomChainId] = useState('');
-    const [desired, setDesired] = useState<string | undefined>(() =>
-        tonConnectUI.connector.getDesiredChainId()
-    );
+    const [desired, setDesired] = useState<string | undefined>(undefined);
 
     const connectedChainId = wallet?.account?.chain;
     const isMainnet = useMemo(() => desired === CHAIN.MAINNET, [desired]);
     const isTestnet = useMemo(() => desired === CHAIN.TESTNET, [desired]);
+
+    useEffect(() => {
+        tonConnectUI.setConnectRequestParameters(
+            desired
+                ? {
+                      state: 'ready',
+                      value: { network: desired }
+                  }
+                : null
+        );
+    }, [desired, tonConnectUI]);
+
+    const handleSetDesired = useCallback((newDesired: string | undefined) => {
+        console.debug('[NetworkPicker] Set desired network', {
+            newDesired: String(newDesired)
+        });
+        setDesired(newDesired);
+    }, []);
 
     return (
         <div className="network-picker">
@@ -21,8 +37,7 @@ export function NetworkPicker() {
                 <button
                     className={`np-btn ${isMainnet ? 'np-btn--active' : ''}`}
                     onClick={() => {
-                        tonConnectUI.connector.setDesiredChainId(CHAIN.MAINNET);
-                        setDesired(CHAIN.MAINNET);
+                        handleSetDesired(CHAIN.MAINNET);
                     }}
                 >
                     Mainnet
@@ -30,8 +45,7 @@ export function NetworkPicker() {
                 <button
                     className={`np-btn ${isTestnet ? 'np-btn--active' : ''}`}
                     onClick={() => {
-                        tonConnectUI.connector.setDesiredChainId(CHAIN.TESTNET);
-                        setDesired(CHAIN.TESTNET);
+                        handleSetDesired(CHAIN.TESTNET);
                     }}
                 >
                     Testnet
@@ -39,8 +53,7 @@ export function NetworkPicker() {
                 <button
                     className={`np-btn np-btn--ghost ${!desired ? 'np-btn--active' : ''}`}
                     onClick={() => {
-                        tonConnectUI.connector.setDesiredChainId(undefined);
-                        setDesired(undefined);
+                        handleSetDesired(undefined);
                     }}
                 >
                     Clear
@@ -57,8 +70,7 @@ export function NetworkPicker() {
                     className="np-btn"
                     onClick={() => {
                         const next = customChainId || undefined;
-                        tonConnectUI.connector.setDesiredChainId(next);
-                        setDesired(next);
+                        handleSetDesired(next);
                     }}
                 >
                     Set
@@ -74,6 +86,29 @@ export function NetworkPicker() {
                     <span className="np-meta-value">{connectedChainId ?? '—'}</span>
                 </div>
             </div>
+            {wallet && desired && String(connectedChainId) !== String(desired) && (
+                <div className="network-picker__warning">
+                    Network changed. Please reconnect to apply the new network.
+                    <button
+                        className="np-btn"
+                        style={{ marginLeft: 8 }}
+                        onClick={async () => {
+                            try {
+                                console.debug(
+                                    '[NetworkPicker] Manual disconnect to apply network',
+                                    {
+                                        connectedChainId: String(connectedChainId),
+                                        desired: String(desired)
+                                    }
+                                );
+                                await tonConnectUI.disconnect();
+                            } catch {}
+                        }}
+                    >
+                        Reconnect
+                    </button>
+                </div>
+            )}
         </div>
     );
 }
