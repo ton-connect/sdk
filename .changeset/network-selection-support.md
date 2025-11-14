@@ -12,11 +12,6 @@ feat: add network selection support for wallet connections
 - Added `WalletWrongNetworkError` that is thrown when wallet connects to a different network than expected
 - Network validation is performed on connect, `sendTransaction`, and `signData` operations
 - UI modals now display user-friendly error messages when network mismatch occurs
-- Removed `setDesiredChainId` and `getDesiredChainId` methods - network must be set via `setConnectionNetwork()` before connecting
-
-**Breaking changes:**
-- `setDesiredChainId()` and `getDesiredChainId()` methods removed from SDK and UI
-- Network must be specified via `setConnectionNetwork()` method before calling `connect()`
 
 **Usage:**
 
