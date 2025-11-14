@@ -42,3 +42,7 @@ function encodeIncommingHTTPBridgeRequest(encryptedMessage: string, from: string
     return  JSON.parse(decryptedMessage);
 }
 ```
+
+### Network identifiers
+
+The package exports `CHAIN` enum (`MAINNET`, `TESTNET`) and `ChainId` type (`CHAIN | string`) for network identification.

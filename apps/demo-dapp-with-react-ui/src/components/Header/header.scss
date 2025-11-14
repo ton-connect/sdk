@@ -10,6 +10,12 @@ header {
     color: rgba(102,170,238,0.91);
     font-weight: bold;
   }
+
+  .header__controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
 }
 
 @media (max-width: 525px) {

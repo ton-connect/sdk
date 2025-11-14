@@ -430,6 +430,35 @@ connector.connect(
 ```
 Note that you can use `tonProof` only with `connector.connect()` method. This feature is not available in `connector.restoreConnection()`.
 
+### Network selection
+
+You can specify the desired network when connecting to a wallet. If the wallet connects to a different network, the connection will be aborted with a `WalletWrongNetworkError`.
+
+```ts
+import { CHAIN, WalletWrongNetworkError } from '@tonconnect/sdk';
+
+// Connect with network requirement
+connector.connect(
+  walletConnectionSource,
+  {
+    network: CHAIN.MAINNET // or CHAIN.TESTNET, or any custom chainId string
+  }
+);
+
+// Handle network mismatch error
+connector.onStatusChange(
+  wallet => { /* ... */ },
+  error => {
+    if (error instanceof WalletWrongNetworkError) {
+      console.error('Wrong network:', error.cause.expectedChainId, 'vs', error.cause.actualChainId);
+      // UI will display a user-friendly error message
+    }
+  }
+);
+```
+
+Network validation is also performed for `sendTransaction` and `signData` operations if a network was specified during connection.
+
 3. Read a signed result after user approves connection:
 ```ts
 connector.onStatusChange(wallet => {

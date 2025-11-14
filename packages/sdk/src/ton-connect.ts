@@ -46,6 +46,7 @@ import { Provider } from 'src/provider/provider';
 import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { DefaultStorage } from 'src/storage/default-storage';
 import { ITonConnect } from 'src/ton-connect.interface';
+import { WalletWrongNetworkError } from 'src/errors/wallet/wallet-wrong-network.error';
 import { getDocument, getOriginWithPath, getWebPageManifest } from 'src/utils/web-api';
 import { WalletsListManager } from 'src/wallets-list-manager';
 import { OptionalTraceable, Traceable } from 'src/utils/types';
@@ -77,6 +78,7 @@ import { UUIDv7 } from 'src/utils/uuid';
 import { TraceableWalletEvent } from 'src/models/wallet/traceable-events';
 
 export class TonConnect implements ITonConnect {
+    private desiredChainId: string | undefined;
     private static readonly walletsList = new WalletsListManager();
 
     /**
@@ -292,11 +294,18 @@ export class TonConnect implements ITonConnect {
         }> = {
             ...additionalOptions
         };
-        if (typeof requestOrOptions === 'object' && 'tonProof' in requestOrOptions) {
-            options.request = requestOrOptions;
-        }
+        // Check if requestOrOptions is a ConnectAdditionalRequest (has tonProof or network)
         if (
             typeof requestOrOptions === 'object' &&
+            requestOrOptions !== null &&
+            ('tonProof' in requestOrOptions || 'network' in requestOrOptions)
+        ) {
+            options.request = requestOrOptions;
+        }
+        // Check if requestOrOptions is an options object (has openingDeadlineMS, signal, request, or traceId)
+        if (
+            typeof requestOrOptions === 'object' &&
+            requestOrOptions !== null &&
             ('openingDeadlineMS' in requestOrOptions ||
                 'signal' in requestOrOptions ||
                 'request' in requestOrOptions ||
@@ -318,6 +327,10 @@ export class TonConnect implements ITonConnect {
                     );
                 }
             }
+
+            this.desiredChainId = options.request.network;
+        } else {
+            this.desiredChainId = undefined;
         }
 
         if (this.connected) {
@@ -552,6 +565,15 @@ export class TonConnect implements ITonConnect {
         const from = transaction.from || this.account!.address;
         const network = transaction.network || this.account!.chain;
 
+        if (this.wallet?.account.chain && network !== this.wallet.account.chain) {
+            throw new WalletWrongNetworkError('Wallet connected to a wrong network', {
+                cause: {
+                    expectedChainId: this.wallet?.account.chain,
+                    actualChainId: network
+                }
+            });
+        }
+
         const response = await this.provider!.sendRequest(
             sendTransactionParser.convertToRpcRequest({
                 ...tx,
@@ -622,6 +644,15 @@ export class TonConnect implements ITonConnect {
 
         const from = data.from || this.account!.address;
         const network = data.network || this.account!.chain;
+
+        if (this.wallet?.account.chain && network !== this.wallet.account.chain) {
+            throw new WalletWrongNetworkError('Wallet connected to a wrong network', {
+                cause: {
+                    expectedChainId: this.wallet?.account.chain,
+                    actualChainId: network
+                }
+            });
+        }
 
         const response = await this.provider!.sendRequest(
             signDataParser.convertToRpcRequest({
@@ -856,6 +887,18 @@ export class TonConnect implements ITonConnect {
             }
         };
 
+        if (this.desiredChainId && wallet.account.chain !== this.desiredChainId) {
+            const expectedChainId = this.desiredChainId;
+            const actualChainId = String(wallet.account.chain);
+            this.provider?.disconnect();
+            this.onWalletConnectError(
+                new WalletWrongNetworkError('Wallet connected to a wrong network', {
+                    cause: { expectedChainId, actualChainId }
+                })
+            );
+            return;
+        }
+
         if (tonProofItem) {
             const validationError = validateTonProofItemReply(tonProofItem as unknown);
             let tonProof: TonProofItemReply | undefined = undefined;
@@ -930,6 +973,7 @@ export class TonConnect implements ITonConnect {
         const sessionInfo = this.getSessionInfo();
         this.tracker.trackDisconnection(this.wallet, scope, sessionInfo, options?.traceId);
         this.wallet = null;
+        this.desiredChainId = undefined;
     }
 
     private checkConnection(): void | never {
@@ -941,7 +985,8 @@ export class TonConnect implements ITonConnect {
     private createConnectRequest(request?: ConnectAdditionalRequest): ConnectRequest {
         const items: ConnectItem[] = [
             {
-                name: 'ton_addr'
+                name: 'ton_addr',
+                ...(request?.network ? { network: request.network } : {})
             }
         ];
 

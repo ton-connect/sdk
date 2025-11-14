@@ -1,9 +1,8 @@
-import { CHAIN } from '@tonconnect/ui-react';
 import zod from 'zod';
 
 export const CheckProofRequest = zod.object({
     address: zod.string(),
-    network: zod.enum([CHAIN.MAINNET, CHAIN.TESTNET]),
+    network: zod.string(),
     public_key: zod.string(),
     proof: zod.object({
         timestamp: zod.number(),

@@ -1,15 +1,15 @@
 import { Address, TonClient4 } from '@ton/ton';
-import { CHAIN } from '@tonconnect/ui-react';
+import { CHAIN, ChainId } from '@tonconnect/ui-react';
 import { Buffer } from 'buffer';
 
 export class TonApiService {
-    public static create(client: TonClient4 | CHAIN): TonApiService {
+    public static create(client: TonClient4 | ChainId): TonApiService {
         if (client === CHAIN.MAINNET) {
             client = new TonClient4({
                 endpoint: 'https://mainnet-v4.tonhubapi.com'
             });
         }
-        if (client === CHAIN.TESTNET) {
+        if (client === CHAIN.TESTNET || typeof client === 'string') {
             client = new TonClient4({
                 endpoint: 'https://testnet-v4.tonhubapi.com'
             });

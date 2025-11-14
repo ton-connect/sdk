@@ -1,4 +1,10 @@
-import { ConnectAdditionalRequest, isTelegramUrl, WalletInfoRemote } from '@tonconnect/sdk';
+import {
+    ConnectAdditionalRequest,
+    isTelegramUrl,
+    WalletInfoRemote,
+    WalletWrongNetworkError,
+    WalletMissingRequiredFeaturesError
+} from '@tonconnect/sdk';
 import {
     Component,
     createEffect,
@@ -48,7 +54,7 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
     const [firstClick, setFirstClick] = createSignal(true);
     const [showQR, setShowQR] = createSignal(false);
     const [connectionErrored, setConnectionErrored] = createSignal<
-        'missing-features' | 'connection-declined' | 'not-supported' | null
+        'missing-features' | 'connection-declined' | 'not-supported' | 'wrong-network' | null
     >(null);
 
     createEffect(() => {
@@ -58,7 +64,17 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
 
     const unsubscribe = connector.onStatusChange(
         () => {},
-        () => {
+        error => {
+            if (error instanceof WalletMissingRequiredFeaturesError) {
+                setConnectionErrored('missing-features');
+                return;
+            }
+
+            if (error instanceof WalletWrongNetworkError) {
+                setConnectionErrored('wrong-network');
+                return;
+            }
+
             setConnectionErrored(null);
         }
     );

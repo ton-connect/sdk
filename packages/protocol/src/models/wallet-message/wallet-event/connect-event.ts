@@ -1,4 +1,4 @@
-import { CHAIN } from '../../CHAIN';
+import { ChainId } from '../../CHAIN';
 import { DeviceInfo } from '../../device-info';
 
 export type ConnectEvent = ConnectEventSuccess | ConnectEventError;
@@ -36,7 +36,7 @@ export type ConnectItemReply = TonAddressItemReply | TonProofItemReply;
 export interface TonAddressItemReply {
     name: 'ton_addr';
     address: string;
-    network: CHAIN;
+    network: ChainId;
     walletStateInit: string;
     publicKey: string;
 }
