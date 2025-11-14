@@ -295,7 +295,7 @@ export class TonConnect implements ITonConnect {
         }> = {
             ...additionalOptions
         };
-        // Check if requestOrOptions is a ConnectAdditionalRequest (has tonProof)
+
         if (
             typeof requestOrOptions === 'object' &&
             requestOrOptions !== null &&
@@ -303,7 +303,7 @@ export class TonConnect implements ITonConnect {
         ) {
             options.request = requestOrOptions;
         }
-        // Check if requestOrOptions is an options object (has openingDeadlineMS, signal, request, or traceId)
+
         if (
             typeof requestOrOptions === 'object' &&
             requestOrOptions !== null &&
