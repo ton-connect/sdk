@@ -102,8 +102,7 @@ class TonProofDemoApiService {
             return {
                 tonProof: response.payloadTokenHash
             };
-        } catch (err) {
-            console.error('TONPROOF', err);
+        } catch {
             return null;
         }
     }
