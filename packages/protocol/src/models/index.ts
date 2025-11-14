@@ -10,4 +10,4 @@ export {
     SignDataType,
     SignDataFeature
 } from './feature';
-export { CHAIN } from './CHAIN';
+export { CHAIN, ChainId } from './CHAIN';

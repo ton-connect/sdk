@@ -1,4 +1,3 @@
-import { CHAIN } from '@tonconnect/ui-react';
 import zod from 'zod';
 
 const SignDataPayloadText = zod.object({
@@ -31,7 +30,7 @@ const SignDataPayload = zod.union([
 
 export const CheckSignDataRequest = zod.object({
     address: zod.string(),
-    network: zod.enum([CHAIN.MAINNET, CHAIN.TESTNET]),
+    network: zod.string(),
     public_key: zod.string(),
     signature: zod.string(), // base64
     timestamp: zod.number(),

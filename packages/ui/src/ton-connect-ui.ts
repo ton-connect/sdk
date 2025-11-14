@@ -21,7 +21,8 @@ import {
     Wallet,
     WalletInfo,
     WalletNotSupportFeatureError,
-    SessionCrypto
+    SessionCrypto,
+    ChainId
 } from '@tonconnect/sdk';
 import { widgetController } from 'src/app/widget-controller';
 import { TonConnectUIError } from 'src/errors/ton-connect-ui.error';
@@ -322,6 +323,15 @@ export class TonConnectUI {
         if (connectRequestParameters?.state === 'ready' || !connectRequestParameters) {
             this.connectRequestParametersCallback?.(connectRequestParameters?.value);
         }
+    }
+
+    /**
+     * Set desired network for the connection. Can only be set before connecting.
+     * If wallet connects with a different chain, the SDK will throw an error and abort connection.
+     * @param network desired network id (e.g., '-239', '-3', or custom). Pass undefined to allow any network.
+     */
+    public setConnectionNetwork(network?: ChainId): void {
+        this.connector.setConnectionNetwork(network);
     }
 
     /**
