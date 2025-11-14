@@ -51,7 +51,7 @@
     "mobileUniversalModal": {
       "connectYourWallet": "Подключите TON кошелёк",
       "openWalletOnTelegramOrSelect": "Подключите Wallet в Telegram или выберете другое приложение",
-      "openWalletOnTelegram": "Открыть Wallet в Telegram",
+      "openWalletOnTelegram": "Открыть Wallet в Telegram",
       "chooseOtherApplication": "Выберите другое приложение",
       "openLink": "Открыть",
       "scan": "Отсканируйте камерой вашего телефона"
@@ -75,7 +75,7 @@
     "desktopConnectionModal": {
       "scanQR": "Отсканируйте QR-код ниже камерой в приложении {{ name }}, или камерой телефона",
       "continueInExtension": "Откройте браузерное расширение {{ name }}",
-      "dontHaveExtension": "Похоже, у вас не установлено браузерное расширение {{ name }}",
+      "dontHaveExtension": "Похоже, у вас не установлено браузерное расширение {{ name }}",
       "missingFeatures": "Обновите {{ name }}, ваша версия не поддерживает необходимые функции для этого dApp",
       "wrongNetwork": "Подключённый кошелёк находится в другой сети. Пожалуйста, переключите сеть в {{ name }} и попробуйте снова",
       "notSupportedWallet": "{{ name }} не поддерживает запрошенное действие. Пожалуйста, подключите другой кошелёк, который поддерживает это",
@@ -83,7 +83,7 @@
       "updateWallet": "Обновить {{ name }}",
       "chooseAnotherWallet": "Выбрать другой кошелёк",
       "continueOnDesktop": "Откройте {{ name }} на компьютере…",
-      "openWalletOnTelegram": "Открыть Wallet в Telegram",
+      "openWalletOnTelegram": "Открыть Wallet в Telegram",
       "connectionDeclined": "Подключение отклонено"
     },
     "infoModal": {
@@ -117,7 +117,7 @@
     },
     "featureNotSupported": {
       "wallet": {
-        "title": "{{ name }} не поддерживает запрошенное действие",
+        "title": "{{ name }} не поддерживает запрошенное\u00A0действие",
         "description": "Установите поддерживаемый кошелёк из списка ниже, восстановите его с помощью фразы восстановления, затем подключитесь и попробуйте снова.",
         "info": "Узнать, как восстановить кошелёк"
       },
