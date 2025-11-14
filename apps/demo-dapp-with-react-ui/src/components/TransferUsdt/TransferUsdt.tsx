@@ -43,6 +43,7 @@ export function TransferUsdt() {
 
     useEffect(() => {
         if (!wallet || !senderAddress) return;
+        if (![CHAIN.TESTNET, CHAIN.MAINNET].includes(wallet.account.chain as CHAIN)) return;
 
         const endpoint =
             wallet.account.chain === CHAIN.TESTNET
