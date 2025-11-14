@@ -5,20 +5,30 @@ import {
     ConnectRequest,
     DeviceInfo,
     DISCONNECT_ERROR_CODES,
+    DisconnectRpcResponseSuccess,
     RpcMethod,
+    SendTransactionRpcResponseSuccess,
     SignDataPayload,
+    SignDataRpcResponseSuccess,
     TonProofItemReplySuccess
 } from '@tonconnect/protocol';
 import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet/traceable-events';
 import { OptionalTraceable, Traceable, WithoutId } from 'src/utils/types';
-import { UniversalConnector, UniversalConnectorConfig } from '@reown/appkit-universal-connector';
+import type {
+    UniversalConnector,
+    UniversalConnectorConfig
+} from '@reown/appkit-universal-connector';
 import { UUIDv7 } from 'src/utils/uuid';
 import { InternalProvider } from 'src/provider/provider';
-import { DappMetadata } from 'src/models';
 import { IStorage } from 'src/storage/models/storage.interface';
 import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { TonConnectError } from 'src/errors';
 import { parseUserFriendlyAddress, toRawAddress } from 'src/utils/address';
+import {
+    getUniversalConnector,
+    getWalletConnectOptions
+} from 'src/provider/wallet-connect/initialize';
+import { logDebug } from 'src/utils/log';
 
 export class WalletConnectProvider implements InternalProvider {
     public readonly type = 'injected';
@@ -31,29 +41,20 @@ export class WalletConnectProvider implements InternalProvider {
 
     private readonly config: UniversalConnectorConfig;
 
-    constructor(
-        private readonly storage: IStorage,
-        private readonly projectKey: string,
-        private readonly metadata: DappMetadata
-    ) {
+    constructor(storage: IStorage) {
         this.connectionStorage = new BridgeConnectionStorage(storage);
+
+        const { projectId, metadata } = getWalletConnectOptions();
 
         this.config = {
             networks: [
                 {
-                    namespace: 'ton', // CAIP-2 Namespace. In this case: 'ton'
+                    namespace: 'ton',
                     chains: [
-                        // TODO: deal with chains
                         {
                             id: -239,
-
-                            // TODO fixme
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                            chainNamespace: 'ton' as any, // TODO
-
-                            // TODO fixme
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                            caipNetworkId: 'ton:-239' as any, // TODO
+                            chainNamespace: 'ton',
+                            caipNetworkId: 'ton:-239',
                             name: 'TON',
                             nativeCurrency: { name: 'TON', symbol: 'TON', decimals: 9 },
                             rpcUrls: { default: { http: ['https://mainnet.ton.org'] } }
@@ -71,26 +72,18 @@ export class WalletConnectProvider implements InternalProvider {
                     events: [] // Events to be handled by the relay connection
                 }
             ],
-            projectId: this.projectKey,
-            metadata: {
-                url: this.metadata.url,
-                icons: [this.metadata.icon],
-                name: this.metadata.name,
-                description: 'DESCRIPTION'
-            }
+            projectId,
+            metadata
         };
     }
 
     public static async fromStorage(storage: IStorage): Promise<WalletConnectProvider> {
-        const bridgeConnectionStorage = new BridgeConnectionStorage(storage);
-        // TODO: probably it is better to extract projectKey and metadata from tonconnect setting to allow DApp to change
-        const connection = await bridgeConnectionStorage.getWalletConnectConnection();
-        return new WalletConnectProvider(storage, connection.projectKey, connection.metadata);
+        return new WalletConnectProvider(storage);
     }
 
     private async initialize(): Promise<UniversalConnector> {
         if (!this.connector) {
-            this.connector = await UniversalConnector.init(this.config);
+            this.connector = await getUniversalConnector().init(this.config);
         }
 
         return this.connector;
@@ -118,10 +111,10 @@ export class WalletConnectProvider implements InternalProvider {
                   }
               ]
             : undefined;
-        console.log('Connecting through this.connector.connect');
+        logDebug('Connecting through this.connector.connect');
         await connector.connect({ authentication });
 
-        console.log('Connected through this.connector.connect');
+        logDebug('Connected through this.connector.connect');
 
         await this.onConnect(connector, options);
     }
@@ -130,7 +123,7 @@ export class WalletConnectProvider implements InternalProvider {
         options?: OptionalTraceable<{ openingDeadlineMS?: number; signal?: AbortSignal }>
     ): Promise<void> {
         try {
-            console.log('RECONNECTING');
+            logDebug('Restoring WalletConnect connection...');
             const traceId = options?.traceId ?? UUIDv7();
 
             const storedConnection = await this.connectionStorage.getWalletConnectConnection();
@@ -144,6 +137,7 @@ export class WalletConnectProvider implements InternalProvider {
                 storedConnection.session as typeof connector.provider.session;
 
             await this.onConnect(connector, { traceId });
+            logDebug('WalletConnect successfully restored.');
         } catch (error) {
             console.error(error);
         }
@@ -202,7 +196,7 @@ export class WalletConnectProvider implements InternalProvider {
                 id: '0',
                 traceId: UUIDv7(), // TODO
                 result
-            } as any;
+            } as Traceable<SendTransactionRpcResponseSuccess>;
         } else if (request.method === 'signData') {
             const { network, ...signDataPayload } = JSON.parse(
                 request.params[0]!
@@ -215,19 +209,21 @@ export class WalletConnectProvider implements InternalProvider {
                 },
                 `ton:${network}`
             );
-            console.log('Sign data result', result);
+
             return {
                 id: '0',
                 traceId: UUIDv7(), // TODO
                 result
-            } as any;
-        } else {
-            return {
-                id: '0',
-                error: { code: DISCONNECT_ERROR_CODES.UNKNOWN_ERROR, message: 'Not implemented.' },
-                traceId: ''
-            };
+            } as Traceable<SignDataRpcResponseSuccess>;
+        } else if (request.method === 'disconnect') {
+            return { id: '0', traceId: UUIDv7() } as Traceable<DisconnectRpcResponseSuccess>;
         }
+
+        return {
+            id: '0',
+            error: { code: DISCONNECT_ERROR_CODES.UNKNOWN_ERROR, message: 'Not implemented.' },
+            traceId: ''
+        };
     }
 
     public listen(callback: (e: TraceableWalletEvent) => void): () => void {
@@ -328,8 +324,6 @@ export class WalletConnectProvider implements InternalProvider {
     private storeConnection(): Promise<void> {
         return this.connectionStorage.storeConnection({
             type: 'wallet-connect',
-            projectKey: this.projectKey,
-            metadata: this.metadata,
             session: this.connector?.provider.session
         });
     }

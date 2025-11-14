@@ -790,11 +790,7 @@ export class TonConnect implements ITonConnect {
                 this.analytics
             );
         } else if (!Array.isArray(wallet) && isWalletConnectionSourceWalletConnect(wallet)) {
-            provider = new WalletConnectProvider(
-                this.dappSettings.storage,
-                wallet.projectId,
-                wallet.metadata
-            );
+            provider = new WalletConnectProvider(this.dappSettings.storage);
         } else {
             provider = new BridgeProvider(this.dappSettings.storage, wallet, this.analytics);
         }

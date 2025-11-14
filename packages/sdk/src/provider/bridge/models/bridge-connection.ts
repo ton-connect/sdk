@@ -1,7 +1,7 @@
 import { DeviceInfo, KeyPair, SessionCrypto, TonAddressItemReply } from '@tonconnect/protocol';
 import { BridgeSessionRaw } from 'src/provider/bridge/models/bridge-session-raw';
 import { BridgeSession } from './bridge-session';
-import { DappMetadata, WalletConnectionSourceHTTP } from 'src/models';
+import { WalletConnectionSourceHTTP } from 'src/models';
 import { Optional } from 'src/utils/types';
 
 export const CONNECTION_HTTP_EXPIRATION_TIME = 5 * 60 * 1000;
@@ -14,8 +14,6 @@ export type BridgeConnection =
 
 export interface BridgeConnectionWalletConnect {
     type: 'wallet-connect';
-    projectKey: string;
-    metadata: DappMetadata;
     session: unknown;
 }
 

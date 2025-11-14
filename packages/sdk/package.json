@@ -27,8 +27,7 @@
   "dependencies": {
     "@tonconnect/isomorphic-eventsource": "workspace:*",
     "@tonconnect/isomorphic-fetch": "workspace:*",
-    "@tonconnect/protocol": "workspace:*",
-    "@reown/appkit-universal-connector": "^1.8.14"
+    "@tonconnect/protocol": "workspace:*"
   },
   "files": [
     "lib",
@@ -46,6 +45,7 @@
     }
   },
   "devDependencies": {
+    "@reown/appkit-universal-connector": "^1.8.14",
     "@rollup/plugin-replace": "6.0.2",
     "@rollup/plugin-typescript": "^12.1.4",
     "@types/node": "^24.2.0",

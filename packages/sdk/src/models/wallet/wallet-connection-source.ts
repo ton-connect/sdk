@@ -1,5 +1,3 @@
-import { DappMetadata } from 'src/models';
-
 export type WalletConnectionSource =
     | WalletConnectionSourceHTTP
     | WalletConnectionSourceJS
@@ -31,12 +29,11 @@ export function isWalletConnectionSourceJS(
 }
 
 export interface WalletConnectionSourceWalletConnect {
-    projectId: string;
-    metadata: DappMetadata;
+    type: 'wallet-connect';
 }
 
 export function isWalletConnectionSourceWalletConnect(
     value: WalletConnectionSource
 ): value is WalletConnectionSourceWalletConnect {
-    return 'projectId' in value && 'metadata' in value;
+    return 'type' in value && value.type === 'wallet-connect';
 }
