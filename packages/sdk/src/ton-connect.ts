@@ -691,7 +691,7 @@ export class TonConnect implements ITonConnect {
         if (this.connected) {
             throw new TonConnectError('Cannot change network while wallet is connected');
         }
-        this.desiredChainId = network ? String(network) : undefined;
+        this.desiredChainId = network;
     }
 
     /**
@@ -898,7 +898,7 @@ export class TonConnect implements ITonConnect {
 
         if (this.desiredChainId && wallet.account.chain !== this.desiredChainId) {
             const expectedChainId = this.desiredChainId;
-            const actualChainId = String(wallet.account.chain);
+            const actualChainId = wallet.account.chain;
             this.provider?.disconnect();
             this.onWalletConnectError(
                 new WalletWrongNetworkError('Wallet connected to a wrong network', {
