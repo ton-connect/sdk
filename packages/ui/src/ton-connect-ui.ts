@@ -448,7 +448,6 @@ export class TonConnectUI {
      * Disconnect wallet and clean localstorage.
      */
     public disconnect(options?: OptionalTraceable): Promise<void> {
-        console.log(new Error().stack);
         const traceId = options?.traceId ?? UUIDv7();
 
         this.tracker.trackDisconnection(this.wallet, 'dapp');

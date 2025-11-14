@@ -933,7 +933,6 @@ export class TonConnect implements ITonConnect {
     }
 
     private onWalletDisconnected(scope: 'wallet' | 'dapp', options: Traceable): void {
-        logDebug('Disconnecting', scope, options.traceId);
         const sessionInfo = this.getSessionInfo();
         this.tracker.trackDisconnection(this.wallet, scope, sessionInfo, options?.traceId);
         this.wallet = null;

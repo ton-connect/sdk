@@ -1,10 +1,10 @@
+import { sha256 } from '@ton/crypto';
 import { HttpResponseResolver } from 'msw';
 import { CheckProofRequest } from '../dto/check-proof-request-dto';
-import { badRequest, ok } from '../utils/http-utils';
-import { createAuthToken, verifyToken } from '../utils/jwt';
 import { TonApiService } from '../services/ton-api-service';
 import { TonProofService } from '../services/ton-proof-service';
-import { sha256 } from '@ton/crypto';
+import { badRequest, ok } from '../utils/http-utils';
+import { createAuthToken, verifyToken } from '../utils/jwt';
 
 /**
  * Checks the proof and returns an access token.
