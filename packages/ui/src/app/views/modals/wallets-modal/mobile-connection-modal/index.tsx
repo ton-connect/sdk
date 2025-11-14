@@ -208,12 +208,21 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
                                     Connection declined
                                 </BodyTextStyled>
                             </Match>
+                            <Match when={connectionErrored() === 'wrong-network'}>
+                                <BodyTextStyled
+                                    translationKey="walletModal.mobileConnectionModal.wrongNetwork"
+                                    translationValues={{ name: props.wallet.name }}
+                                >
+                                    Connected wallet is on a different network. Please switch
+                                    network in {props.wallet.name} and try again.
+                                </BodyTextStyled>
+                            </Match>
                             <Match when={connectionErrored() === 'not-supported'}>
                                 <BodyTextStyled
                                     translationKey="walletModal.mobileConnectionModal.notSupportedWallet"
                                     translationValues={{ name: props.wallet.name }}
                                 >
-                                    {props.wallet.name} doesn’t support the requested action. Please
+                                    {props.wallet.name} doesn't support the requested action. Please
                                     connect another wallet that supports it.
                                 </BodyTextStyled>
                             </Match>
@@ -241,6 +250,13 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
                                     <Button onClick={() => props.onBackClick()}>
                                         <Translation translationKey="walletModal.mobileConnectionModal.chooseAnotherWallet">
                                             Choose Another Wallet
+                                        </Translation>
+                                    </Button>
+                                </Match>
+                                <Match when={connectionErrored() === 'wrong-network'}>
+                                    <Button leftIcon={<RetryIcon />} onClick={onRetry}>
+                                        <Translation translationKey="common.retry">
+                                            Retry
                                         </Translation>
                                     </Button>
                                 </Match>
