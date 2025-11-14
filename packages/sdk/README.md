@@ -437,15 +437,16 @@ You can specify the desired network before connecting to a wallet using the `set
 ```ts
 import { CHAIN, WalletWrongNetworkError } from '@tonconnect/sdk';
 
-// Set desired network before connecting
 const connector = new TonConnect();
-connector.setConnectionNetwork(CHAIN.MAINNET); // or CHAIN.TESTNET, or any custom chainId string
 
-// Connect wallet
+// Set desired network before connecting, possible values is CHAIN.MAINNET ('-239'), CHAIN.TESTNET ('-3'), or any custom chainId string
+connector.setConnectionNetwork(CHAIN.MAINNET); 
+
+// Or allow any network if needed (default behavior)
+// connector.setConnectionNetwork(undefined);
+
+// And connect wallet
 connector.connect(walletConnectionSource);
-
-// Allow any network (default behavior)
-connector.setConnectionNetwork(undefined);
 
 // Handle network mismatch error
 connector.onStatusChange(
