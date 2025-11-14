@@ -9,7 +9,13 @@ export const CONNECTION_HTTP_EXPIRATION_TIME = 5 * 60 * 1000;
 export type BridgeConnection =
     | BridgeConnectionHttp
     | BridgePendingConnectionHttp
-    | BridgeConnectionInjected;
+    | BridgeConnectionInjected
+    | BridgeConnectionWalletConnect;
+
+export interface BridgeConnectionWalletConnect {
+    type: 'wallet-connect';
+    session: unknown;
+}
 
 export interface BridgeConnectionInjected {
     type: 'injected';
@@ -69,4 +75,5 @@ export type BridgePendingConnectionHttpRaw = Omit<BridgePendingConnectionHttp, '
 export type BridgeConnectionRaw =
     | BridgeConnectionHttpRaw
     | BridgePendingConnectionHttpRaw
-    | BridgeConnectionInjected;
+    | BridgeConnectionInjected
+    | BridgeConnectionWalletConnect;

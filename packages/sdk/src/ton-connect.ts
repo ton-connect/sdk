@@ -35,7 +35,7 @@ import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-add
 import { TonConnectOptions } from 'src/models/ton-connect-options';
 import {
     isWalletConnectionSourceJS,
-    WalletConnectionSourceJS
+    isWalletConnectionSourceWalletConnect
 } from 'src/models/wallet/wallet-connection-source';
 import { connectErrorsParser } from 'src/parsers/connect-errors-parser';
 import { sendTransactionParser } from 'src/parsers/send-transaction-parser';
@@ -75,6 +75,7 @@ import { IEnvironment } from 'src/environment/models/environment.interface';
 import { DefaultEnvironment } from 'src/environment/default-environment';
 import { UUIDv7 } from 'src/utils/uuid';
 import { TraceableWalletEvent } from 'src/models/wallet/traceable-events';
+import { WalletConnectProvider } from 'src/provider/wallet-connect/wallet-connect-provider';
 
 export class TonConnect implements ITonConnect {
     private static readonly walletsList = new WalletsListManager();
@@ -257,7 +258,7 @@ export class TonConnect implements ITonConnect {
             openingDeadlineMS?: number;
             signal?: AbortSignal;
         }>
-    ): T extends WalletConnectionSourceJS ? void : string;
+    ): T extends Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[] ? string : void;
     /** @deprecated use connect(wallet, options) instead */
     public connect<
         T extends WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[]
@@ -268,7 +269,7 @@ export class TonConnect implements ITonConnect {
             openingDeadlineMS?: number;
             signal?: AbortSignal;
         }>
-    ): T extends WalletConnectionSourceJS ? void : string;
+    ): T extends Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[] ? string : void;
     // eslint-disable-next-line complexity
     public connect(
         wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
@@ -396,6 +397,9 @@ export class TonConnect implements ITonConnect {
                         this.dappSettings.storage,
                         this.analytics
                     );
+                    break;
+                case 'wallet-connect':
+                    provider = await WalletConnectProvider.fromStorage(this.dappSettings.storage);
                     break;
                 default:
                     if (embeddedWallet) {
@@ -691,7 +695,7 @@ export class TonConnect implements ITonConnect {
 
         try {
             const connection = await this.bridgeConnectionStorage.getConnection();
-            if (!connection || connection.type === 'injected') {
+            if (!connection || connection.type !== 'http') {
                 return null;
             }
 
@@ -785,6 +789,8 @@ export class TonConnect implements ITonConnect {
                 wallet.jsBridgeKey,
                 this.analytics
             );
+        } else if (!Array.isArray(wallet) && isWalletConnectionSourceWalletConnect(wallet)) {
+            provider = new WalletConnectProvider(this.dappSettings.storage);
         } else {
             provider = new BridgeProvider(this.dappSettings.storage, wallet, this.analytics);
         }

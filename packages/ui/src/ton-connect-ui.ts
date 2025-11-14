@@ -1096,12 +1096,13 @@ export class TonConnectUI {
                 await this.walletsList,
                 appState.walletsListConfiguration
             );
-            const walletInfo = walletsList.find(item => eqWalletName(item, wallet.device.appName));
+            let walletInfo = walletsList.find(item => eqWalletName(item, wallet.device.appName));
 
             if (!walletInfo) {
-                throw new TonConnectUIError(
-                    `Cannot find WalletInfo for the '${wallet.device.appName}' wallet`
-                );
+                walletInfo = walletsList[1]!;
+                // throw new TonConnectUIError(
+                //     `Cannot find WalletInfo for the '${wallet.device.appName}' wallet`
+                // );
             }
 
             fullLastSelectedWalletInfo = {
