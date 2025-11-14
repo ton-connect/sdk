@@ -7,14 +7,7 @@ export function NetworkPicker() {
     const [desired, setDesired] = useState<string | undefined>(undefined);
 
     useEffect(() => {
-        tonConnectUI.setConnectRequestParameters(
-            desired
-                ? {
-                      state: 'ready',
-                      value: { network: desired }
-                  }
-                : null
-        );
+        tonConnectUI.setConnectionNetwork(desired);
     }, [desired, tonConnectUI]);
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {

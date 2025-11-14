@@ -1,3 +1,4 @@
+import { ChainId } from '@tonconnect/protocol';
 import { TonConnectError } from 'src/errors';
 import { Account, Wallet, WalletConnectionSource, WalletConnectionSourceHTTP } from 'src/models';
 import {
@@ -79,6 +80,13 @@ export interface ITonConnect {
      * Unpause bridge HTTP connection if it is paused.
      */
     unPauseConnection(): Promise<void>;
+
+    /**
+     * Set desired network for the connection. Can only be set before connecting.
+     * If wallet connects with a different chain, the SDK will throw an error and abort connection.
+     * @param network desired network id (e.g., '-239', '-3', or custom). Pass undefined to allow any network.
+     */
+    setConnectionNetwork(network?: ChainId): void;
 
     /**
      * Disconnect form thw connected wallet and drop current session.

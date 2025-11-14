@@ -1,4 +1,5 @@
 import {
+    ChainId,
     CONNECT_ITEM_ERROR_CODES,
     ConnectEventSuccess,
     ConnectItem,
@@ -294,11 +295,11 @@ export class TonConnect implements ITonConnect {
         }> = {
             ...additionalOptions
         };
-        // Check if requestOrOptions is a ConnectAdditionalRequest (has tonProof or network)
+        // Check if requestOrOptions is a ConnectAdditionalRequest (has tonProof)
         if (
             typeof requestOrOptions === 'object' &&
             requestOrOptions !== null &&
-            ('tonProof' in requestOrOptions || 'network' in requestOrOptions)
+            'tonProof' in requestOrOptions
         ) {
             options.request = requestOrOptions;
         }
@@ -327,10 +328,6 @@ export class TonConnect implements ITonConnect {
                     );
                 }
             }
-
-            this.desiredChainId = options.request.network;
-        } else {
-            this.desiredChainId = undefined;
         }
 
         if (this.connected) {
@@ -686,6 +683,18 @@ export class TonConnect implements ITonConnect {
     }
 
     /**
+     * Set desired network for the connection. Can only be set before connecting.
+     * If wallet connects with a different chain, the SDK will throw an error and abort connection.
+     * @param network desired network id (e.g., '-239', '-3', or custom). Pass undefined to allow any network.
+     */
+    public setConnectionNetwork(network?: ChainId): void {
+        if (this.connected) {
+            throw new TonConnectError('Cannot change network while wallet is connected');
+        }
+        this.desiredChainId = network ? String(network) : undefined;
+    }
+
+    /**
      * Disconnect form thw connected wallet and drop current session.
      */
     public async disconnect(options?: OptionalTraceable<{ signal?: AbortSignal }>): Promise<void> {
@@ -986,7 +995,7 @@ export class TonConnect implements ITonConnect {
         const items: ConnectItem[] = [
             {
                 name: 'ton_addr',
-                ...(request?.network ? { network: request.network } : {})
+                ...(this.desiredChainId ? { network: this.desiredChainId } : {})
             }
         ];
 

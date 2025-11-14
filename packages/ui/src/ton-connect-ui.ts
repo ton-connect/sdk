@@ -325,6 +325,15 @@ export class TonConnectUI {
     }
 
     /**
+     * Set desired network for the connection. Can only be set before connecting.
+     * If wallet connects with a different chain, the SDK will throw an error and abort connection.
+     * @param network desired network id (e.g., '-239', '-3', or custom). Pass undefined to allow any network.
+     */
+    public setConnectionNetwork(network?: string): void {
+        this.connector.setConnectionNetwork(network);
+    }
+
+    /**
      * Returns available wallets list.
      */
     public async getWallets(): Promise<WalletInfo[]> {

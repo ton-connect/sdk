@@ -944,6 +944,23 @@ tonConnectUI.onStatusChange(wallet => {
     });
 ```
 
+## Network selection
+
+You can specify the desired network before connecting to a wallet using the `setConnectionNetwork()` method. If the wallet connects to a different network, the connection will be aborted with a `WalletWrongNetworkError`.
+
+```ts
+import { CHAIN } from '@tonconnect/ui';
+
+// Set desired network before connecting
+tonConnectUI.setConnectionNetwork(CHAIN.MAINNET); // or CHAIN.TESTNET, or any custom chainId string
+
+// Allow any network (default behavior)
+tonConnectUI.setConnectionNetwork(undefined);
+```
+
+**Important:** 
+- Network must be set before calling `connectWallet()` or opening the wallet selection modal. Attempting to change network while connected will throw an error.
+- Network validation is also performed for `sendTransaction` and `signData` operations if a network was specified.
 
 # Tracking
 
