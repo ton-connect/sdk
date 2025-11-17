@@ -16,17 +16,11 @@ feat: add network selection support for wallet connections
 **Usage:**
 
 ```typescript
-const connector = new TonConnect();
+import { CHAIN } from '@tonconnect/ui';
 
-// Set desired network before connecting, possible values is CHAIN.MAINNET ('-239'), CHAIN.TESTNET ('-3'), or any custom chainId string
-connector.setConnectionNetwork(CHAIN.MAINNET);
+// Set desired network before connecting
+tonConnectUI.setConnectionNetwork(CHAIN.MAINNET); // or CHAIN.TESTNET, or any custom chainId string
 
-// Or allow any network if needed (default behavior)
-// connector.setConnectionNetwork(undefined);
-
-// Connect wallet
-connector.connect(walletConnectionSource);
-
-// If wallet connects to a different network, WalletWrongNetworkError will be thrown
-// UI will display a user-friendly error message
+// Allow any network (default behavior)
+tonConnectUI.setConnectionNetwork(undefined);
 ```
