@@ -10,6 +10,7 @@
     "@tonconnect/ui-react": "2.3.1"
   },
   "changesets": [
+    "network-selection-support",
     "slow-carpets-wait",
     "trace-id-support"
   ]
