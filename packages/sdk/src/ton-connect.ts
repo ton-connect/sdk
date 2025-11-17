@@ -1,4 +1,5 @@
 import {
+    ChainId,
     CONNECT_ITEM_ERROR_CODES,
     ConnectEventSuccess,
     ConnectItem,
@@ -46,6 +47,7 @@ import { Provider } from 'src/provider/provider';
 import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { DefaultStorage } from 'src/storage/default-storage';
 import { ITonConnect } from 'src/ton-connect.interface';
+import { WalletWrongNetworkError } from 'src/errors/wallet/wallet-wrong-network.error';
 import { getDocument, getOriginWithPath, getWebPageManifest } from 'src/utils/web-api';
 import { WalletsListManager } from 'src/wallets-list-manager';
 import { OptionalTraceable, Traceable } from 'src/utils/types';
@@ -77,6 +79,7 @@ import { UUIDv7 } from 'src/utils/uuid';
 import { TraceableWalletEvent } from 'src/models/wallet/traceable-events';
 
 export class TonConnect implements ITonConnect {
+    private desiredChainId: string | undefined;
     private static readonly walletsList = new WalletsListManager();
 
     /**
@@ -292,11 +295,18 @@ export class TonConnect implements ITonConnect {
         }> = {
             ...additionalOptions
         };
-        if (typeof requestOrOptions === 'object' && 'tonProof' in requestOrOptions) {
-            options.request = requestOrOptions;
-        }
+
         if (
             typeof requestOrOptions === 'object' &&
+            requestOrOptions !== null &&
+            'tonProof' in requestOrOptions
+        ) {
+            options.request = requestOrOptions;
+        }
+
+        if (
+            typeof requestOrOptions === 'object' &&
+            requestOrOptions !== null &&
             ('openingDeadlineMS' in requestOrOptions ||
                 'signal' in requestOrOptions ||
                 'request' in requestOrOptions ||
@@ -552,6 +562,15 @@ export class TonConnect implements ITonConnect {
         const from = transaction.from || this.account!.address;
         const network = transaction.network || this.account!.chain;
 
+        if (this.wallet?.account.chain && network !== this.wallet.account.chain) {
+            throw new WalletWrongNetworkError('Wallet connected to a wrong network', {
+                cause: {
+                    expectedChainId: this.wallet?.account.chain,
+                    actualChainId: network
+                }
+            });
+        }
+
         const response = await this.provider!.sendRequest(
             sendTransactionParser.convertToRpcRequest({
                 ...tx,
@@ -623,6 +642,15 @@ export class TonConnect implements ITonConnect {
         const from = data.from || this.account!.address;
         const network = data.network || this.account!.chain;
 
+        if (this.wallet?.account.chain && network !== this.wallet.account.chain) {
+            throw new WalletWrongNetworkError('Wallet connected to a wrong network', {
+                cause: {
+                    expectedChainId: this.wallet?.account.chain,
+                    actualChainId: network
+                }
+            });
+        }
+
         const response = await this.provider!.sendRequest(
             signDataParser.convertToRpcRequest({
                 ...data,
@@ -652,6 +680,18 @@ export class TonConnect implements ITonConnect {
         this.tracker.trackDataSigned(this.wallet, data, result, sessionInfo, traceId);
 
         return { ...result, traceId };
+    }
+
+    /**
+     * Set desired network for the connection. Can only be set before connecting.
+     * If wallet connects with a different chain, the SDK will throw an error and abort connection.
+     * @param network desired network id (e.g., '-239', '-3', or custom). Pass undefined to allow any network.
+     */
+    public setConnectionNetwork(network?: ChainId): void {
+        if (this.connected) {
+            throw new TonConnectError('Cannot change network while wallet is connected');
+        }
+        this.desiredChainId = network;
     }
 
     /**
@@ -856,6 +896,18 @@ export class TonConnect implements ITonConnect {
             }
         };
 
+        if (this.desiredChainId && wallet.account.chain !== this.desiredChainId) {
+            const expectedChainId = this.desiredChainId;
+            const actualChainId = wallet.account.chain;
+            this.provider?.disconnect();
+            this.onWalletConnectError(
+                new WalletWrongNetworkError('Wallet connected to a wrong network', {
+                    cause: { expectedChainId, actualChainId }
+                })
+            );
+            return;
+        }
+
         if (tonProofItem) {
             const validationError = validateTonProofItemReply(tonProofItem as unknown);
             let tonProof: TonProofItemReply | undefined = undefined;
@@ -941,7 +993,8 @@ export class TonConnect implements ITonConnect {
     private createConnectRequest(request?: ConnectAdditionalRequest): ConnectRequest {
         const items: ConnectItem[] = [
             {
-                name: 'ton_addr'
+                name: 'ton_addr',
+                ...(this.desiredChainId ? { network: this.desiredChainId } : {})
             }
         ];
 
