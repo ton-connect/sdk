@@ -982,7 +982,6 @@ export class TonConnect implements ITonConnect {
         const sessionInfo = this.getSessionInfo();
         this.tracker.trackDisconnection(this.wallet, scope, sessionInfo, options?.traceId);
         this.wallet = null;
-        this.desiredChainId = undefined;
     }
 
     private checkConnection(): void | never {
