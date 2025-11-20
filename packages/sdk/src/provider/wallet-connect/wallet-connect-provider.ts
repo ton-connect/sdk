@@ -17,10 +17,6 @@ import {
 } from '@tonconnect/protocol';
 import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet/traceable-events';
 import { OptionalTraceable, Traceable, WithoutId } from 'src/utils/types';
-import type {
-    UniversalConnector,
-    UniversalConnectorConfig
-} from '@reown/appkit-universal-connector';
 import { UUIDv7 } from 'src/utils/uuid';
 import { InternalProvider } from 'src/provider/provider';
 import { IStorage } from 'src/storage/models/storage.interface';
@@ -37,9 +33,13 @@ import {
 } from 'src/provider/wallet-connect/initialize';
 import { logDebug } from 'src/utils/log';
 import { createAbortController } from 'src/utils/create-abort-controller';
+import { WalletConnectMetadata } from 'src/provider/wallet-connect/models/wallet-connect-options';
 
 const DEFAULT_REQUEST_ID = '0';
 const DEFAULT_EVENT_ID = 0;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type UniversalConnector = any;
 
 export class WalletConnectProvider implements InternalProvider {
     public readonly type = 'injected';
@@ -52,7 +52,23 @@ export class WalletConnectProvider implements InternalProvider {
 
     private readonly connectionStorage: BridgeConnectionStorage;
 
-    private readonly config: UniversalConnectorConfig;
+    private readonly config: {
+        projectId: string;
+        metadata: WalletConnectMetadata;
+        networks: {
+            namespace: 'ton';
+            methods: string[];
+            events: [];
+            chains: {
+                id: string | number;
+                chainNamespace: 'ton';
+                caipNetworkId: `ton:${number}`;
+                name: 'TON';
+                nativeCurrency: { name: 'TON'; symbol: 'TON'; decimals: 9 };
+                rpcUrls: { default: { http: [] } };
+            }[];
+        }[];
+    };
 
     constructor(storage: IStorage) {
         this.connectionStorage = new BridgeConnectionStorage(storage);
@@ -493,7 +509,9 @@ export class WalletConnectProvider implements InternalProvider {
                 } as const;
                 logDebug('Wallet message received:', event);
                 this.emit(event);
-            } catch {}
+            } catch (err) {
+                logDebug('Error while deleting session', err);
+            }
         });
 
         const tonProof = options?.includeTonProof ? this.buildTonProof(connector) : undefined;
@@ -502,17 +520,7 @@ export class WalletConnectProvider implements InternalProvider {
             ? toRawAddress(parseUserFriendlyAddress(address!))
             : address!;
 
-        const features: Feature[] = [];
-        if (tonNamespace.methods.includes('ton_sendMessage')) {
-            features.push('SendTransaction', {
-                name: 'SendTransaction',
-                maxMessages: 255,
-                extraCurrencySupported: true
-            });
-        }
-        if (tonNamespace.methods.includes('ton_signData')) {
-            features.push({ name: 'SignData', types: ['text', 'binary', 'cell'] });
-        }
+        const features = this.buildFeatureList(tonNamespace.methods);
 
         const payload: {
             items: ConnectItemReply[];
@@ -532,7 +540,7 @@ export class WalletConnectProvider implements InternalProvider {
                 appName: 'wallet_connect',
                 appVersion: '',
                 maxProtocolVersion: 2,
-                features: [],
+                features,
                 platform: 'browser'
             }
         };
@@ -546,6 +554,21 @@ export class WalletConnectProvider implements InternalProvider {
         this.emit({ event: 'connect', payload, traceId: options.traceId });
 
         await this.storeConnection();
+    }
+
+    private buildFeatureList(methods: string[]) {
+        const features: Feature[] = [];
+        if (methods.includes('ton_sendMessage')) {
+            features.push('SendTransaction', {
+                name: 'SendTransaction',
+                maxMessages: 4,
+                extraCurrencySupported: false
+            });
+        }
+        if (methods.includes('ton_signData')) {
+            features.push({ name: 'SignData', types: ['text', 'binary', 'cell'] });
+        }
+        return features;
     }
 
     private async disconnectWithError(

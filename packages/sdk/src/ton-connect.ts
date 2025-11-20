@@ -428,7 +428,8 @@ export class TonConnect implements ITonConnect {
                         return;
                     }
             }
-        } catch {
+        } catch (err) {
+            logDebug('Provider is not restored', err);
             this.tracker.trackConnectionRestoringError('Provider is not restored', traceId);
             await this.bridgeConnectionStorage.removeConnection();
             provider?.closeConnection();
