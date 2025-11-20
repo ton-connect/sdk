@@ -3,7 +3,8 @@ export type { Wallet } from './wallet';
 export type {
     WalletConnectionSource,
     WalletConnectionSourceHTTP,
-    WalletConnectionSourceJS
+    WalletConnectionSourceJS,
+    WalletConnectionSourceWalletConnect
 } from './wallet-connection-source';
 export {
     WalletInfo,

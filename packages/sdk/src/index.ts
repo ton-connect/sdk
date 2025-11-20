@@ -107,6 +107,15 @@ export {
 } from './utils/url';
 export { enableQaMode, isQaModeEnabled } from './utils/qa-mode';
 
+export {
+    initializeWalletConnect,
+    isWalletConnectInitialized
+} from './provider/wallet-connect/initialize';
+export {
+    WalletConnectMetadata,
+    WalletConnectOptions
+} from './provider/wallet-connect/models/wallet-connect-options';
+
 export { Traceable, OptionalTraceable } from './utils/types';
 
 export { UUIDv7 } from './utils/uuid';

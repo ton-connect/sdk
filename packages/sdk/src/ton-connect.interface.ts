@@ -1,6 +1,12 @@
 import { ChainId } from '@tonconnect/protocol';
 import { TonConnectError } from 'src/errors';
-import { Account, Wallet, WalletConnectionSource, WalletConnectionSourceHTTP } from 'src/models';
+import {
+    Account,
+    Wallet,
+    WalletConnectionSource,
+    WalletConnectionSourceHTTP,
+    WalletConnectionSourceWalletConnect
+} from 'src/models';
 import {
     SendTransactionRequest,
     SendTransactionResponse,
@@ -58,7 +64,11 @@ export interface ITonConnect {
             openingDeadlineMS?: number;
             signal?: AbortSignal;
         }>
-    ): T extends WalletConnectionSourceJS ? void : string;
+    ): T extends WalletConnectionSourceJS
+        ? void
+        : T extends WalletConnectionSourceWalletConnect
+          ? void
+          : string;
 
     /**
      * Try to restore existing session and reconnect to the corresponding wallet. Call it immediately when your app is loaded.

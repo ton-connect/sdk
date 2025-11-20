@@ -8,7 +8,9 @@ import { IMG } from 'src/app/env/IMG';
 import { useI18n } from '@solid-primitives/i18n';
 
 export interface WalletLabeledItemProps extends Styleable {
-    wallet: UIWalletInfo;
+    wallet:
+        | UIWalletInfo
+        | (Pick<UIWalletInfo, 'appName' | 'name' | 'imageUrl'> & { type: 'wallet-connect' });
     onClick: () => void;
 }
 
@@ -22,11 +24,11 @@ export const WalletLabeledItem: Component<WalletLabeledItemProps> = props => {
         if ('isPreferred' in props.wallet && props.wallet.isPreferred) {
             return t('walletItem.recent', {}, 'Recent');
         }
-        if (isWalletInfoCurrentlyInjected(props.wallet)) {
-            return t('walletItem.installed', {}, 'Installed');
-        }
         if (props.wallet.name === 'Tonkeeper') {
             return t('walletItem.popular', {}, 'Popular');
+        }
+        if (!('type' in props.wallet) && isWalletInfoCurrentlyInjected(props.wallet)) {
+            return t('walletItem.installed', {}, 'Installed');
         }
         return undefined;
     };

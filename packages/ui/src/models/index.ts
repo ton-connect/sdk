@@ -18,7 +18,8 @@ export type {
     ConnectedWallet,
     WalletInfoWithOpenMethod,
     WalletOpenMethod,
-    WalletInfoRemoteWithOpenMethod
+    WalletInfoRemoteWithOpenMethod,
+    WalletInfoWalletConnect
 } from './connected-wallet';
 export type { ReturnStrategy } from './return-strategy';
 import type { Property } from 'csstype';
