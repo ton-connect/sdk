@@ -69,7 +69,7 @@ export class WalletConnectProvider implements InternalProvider {
                             caipNetworkId: 'ton:-239',
                             name: 'TON',
                             nativeCurrency: { name: 'TON', symbol: 'TON', decimals: 9 },
-                            rpcUrls: { default: { http: ['https://mainnet.ton.org'] } }
+                            rpcUrls: { default: { http: [] } }
                         },
                         {
                             id: -3,
@@ -77,7 +77,7 @@ export class WalletConnectProvider implements InternalProvider {
                             caipNetworkId: 'ton:-3',
                             name: 'TON',
                             nativeCurrency: { name: 'TON', symbol: 'TON', decimals: 9 },
-                            rpcUrls: { default: { http: ['https://testnet.ton.org'] } }
+                            rpcUrls: { default: { http: [] } }
                         }
                     ],
                     methods: ['ton_sendMessage', 'ton_signData'],
