@@ -14,6 +14,10 @@ export interface WalletLabeledItemProps extends Styleable {
     onClick: () => void;
 }
 
+function isWalletUi(wallet: WalletLabeledItemProps['wallet']): wallet is UIWalletInfo {
+    return !('type' in wallet) || wallet.type !== 'wallet-connect';
+}
+
 export const WalletLabeledItem: Component<WalletLabeledItemProps> = props => {
     const [t] = useI18n();
 
@@ -27,10 +31,11 @@ export const WalletLabeledItem: Component<WalletLabeledItemProps> = props => {
         if (props.wallet.name === 'Tonkeeper') {
             return t('walletItem.popular', {}, 'Popular');
         }
-        // TODO: compare
-        if (!('type' in props.wallet) && isWalletInfoCurrentlyInjected(props.wallet)) {
+
+        if (isWalletUi(props.wallet) && isWalletInfoCurrentlyInjected(props.wallet)) {
             return t('walletItem.installed', {}, 'Installed');
         }
+
         return undefined;
     };
 

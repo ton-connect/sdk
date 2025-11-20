@@ -7,6 +7,7 @@ import {
     DeviceInfo,
     DISCONNECT_ERROR_CODES,
     DisconnectRpcResponseSuccess,
+    Feature,
     RpcMethod,
     SEND_TRANSACTION_ERROR_CODES,
     SendTransactionRpcResponseSuccess,
@@ -171,7 +172,7 @@ export class WalletConnectProvider implements InternalProvider {
         logDebug('Connected through this.connector.connect');
 
         try {
-            await this.onConnect(connector, options);
+            await this.onConnect(connector, { ...options, includeTonProof: true });
         } catch (error) {
             logDebug('WalletConnect onConnect error', error);
             await this.disconnect({ traceId: options.traceId, signal: options.signal });
@@ -205,6 +206,7 @@ export class WalletConnectProvider implements InternalProvider {
             }
 
             await this.onConnect(connector, {
+                includeTonProof: false,
                 traceId,
                 signal: abortController.signal
             });
@@ -437,7 +439,7 @@ export class WalletConnectProvider implements InternalProvider {
 
     private async onConnect(
         connector: UniversalConnector,
-        options: Traceable<{ signal?: AbortSignal }>
+        options: Traceable<{ includeTonProof?: boolean; signal?: AbortSignal }>
     ) {
         if (options.signal?.aborted) {
             logDebug('WalletConnect onConnect aborted');
@@ -494,11 +496,23 @@ export class WalletConnectProvider implements InternalProvider {
             } catch {}
         });
 
-        const tonProof = this.buildTonProof(connector);
+        const tonProof = options?.includeTonProof ? this.buildTonProof(connector) : undefined;
 
         const parsedAddress = isValidUserFriendlyAddress(address!)
             ? toRawAddress(parseUserFriendlyAddress(address!))
             : address!;
+
+        const features: Feature[] = [];
+        if (tonNamespace.methods.includes('ton_sendMessage')) {
+            features.push('SendTransaction', {
+                name: 'SendTransaction',
+                maxMessages: 255,
+                extraCurrencySupported: true
+            });
+        }
+        if (tonNamespace.methods.includes('ton_signData')) {
+            features.push({ name: 'SignData', types: ['text', 'binary', 'cell'] });
+        }
 
         const payload: {
             items: ConnectItemReply[];
@@ -518,11 +532,7 @@ export class WalletConnectProvider implements InternalProvider {
                 appName: 'wallet_connect',
                 appVersion: '',
                 maxProtocolVersion: 2,
-                features: [
-                    'SendTransaction',
-                    { name: 'SendTransaction', maxMessages: 255, extraCurrencySupported: true },
-                    { name: 'SignData', types: ['text', 'binary', 'cell'] }
-                ],
+                features: [],
                 platform: 'browser'
             }
         };
