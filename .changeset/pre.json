@@ -12,6 +12,7 @@
   "changesets": [
     "network-selection-support",
     "slow-carpets-wait",
-    "trace-id-support"
+    "trace-id-support",
+    "wallet-connect-support"
   ]
 }
