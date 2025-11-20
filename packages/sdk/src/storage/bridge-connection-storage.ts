@@ -7,6 +7,7 @@ import {
     BridgeConnectionHttpRaw,
     BridgeConnectionInjected,
     BridgeConnectionRaw,
+    BridgeConnectionWalletConnect,
     BridgePendingConnectionHttp,
     BridgePendingConnectionHttpRaw,
     isExpiredPendingConnectionHttpRaw,
@@ -21,7 +22,7 @@ export class BridgeConnectionStorage {
     constructor(private readonly storage: IStorage) {}
 
     public async storeConnection(connection: BridgeConnection): Promise<void> {
-        if (connection.type === 'injected') {
+        if (connection.type === 'injected' || connection.type === 'wallet-connect') {
             return this.storage.setItem(this.storeKey, JSON.stringify(connection));
         }
 
@@ -64,7 +65,7 @@ export class BridgeConnectionStorage {
 
         const connection: BridgeConnectionRaw = JSON.parse(stored);
 
-        if (connection.type === 'injected') {
+        if (connection.type === 'injected' || connection.type === 'wallet-connect') {
             return connection;
         }
 
@@ -103,9 +104,9 @@ export class BridgeConnectionStorage {
             );
         }
 
-        if (connection.type === 'injected') {
+        if (connection.type !== 'http') {
             throw new TonConnectError(
-                'Trying to read HTTP connection source while injected connection is stored'
+                `Trying to read HTTP connection source while ${connection.type} connection is stored`
             );
         }
 
@@ -120,9 +121,9 @@ export class BridgeConnectionStorage {
             );
         }
 
-        if (connection.type === 'injected') {
+        if (connection.type !== 'http') {
             throw new TonConnectError(
-                'Trying to read HTTP connection source while injected connection is stored'
+                `Trying to read HTTP connection source while ${connection.type} connection is stored`
             );
         }
 
@@ -144,9 +145,26 @@ export class BridgeConnectionStorage {
             );
         }
 
-        if (connection?.type === 'http') {
+        if (connection?.type !== 'injected') {
             throw new TonConnectError(
-                'Trying to read Injected bridge connection source while HTTP connection is stored'
+                `Trying to read Injected bridge connection source while ${connection.type} connection is stored`
+            );
+        }
+
+        return connection;
+    }
+
+    public async getWalletConnectConnection(): Promise<BridgeConnectionWalletConnect> {
+        const connection = await this.getConnection();
+        if (!connection) {
+            throw new TonConnectError(
+                'Trying to read wallet connect bridge connection source while nothing is stored'
+            );
+        }
+
+        if (connection?.type !== 'wallet-connect') {
+            throw new TonConnectError(
+                `Trying to read wallet connect bridge connection source while ${connection.type} connection is stored`
             );
         }
 

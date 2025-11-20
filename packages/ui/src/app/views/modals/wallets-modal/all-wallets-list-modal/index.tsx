@@ -18,6 +18,11 @@ import { animate } from 'src/app/utils/animate';
 import { ErrorIcon, Text } from 'src/app/components';
 import { UIWalletInfo } from 'src/app/models/ui-wallet-info';
 import { setLastVisibleWalletsInfo } from 'src/app/state/modals-state';
+import { appState } from 'src/app/state/app.state';
+import { isInTMA } from 'src/app/utils/tma-api';
+import { isWalletConnectInitialized } from '@tonconnect/sdk';
+import { WALLET_CONNECT_APP_NAME, WALLET_CONNECT_WALLET_NAME } from 'src/app/env/WALLET_CONNECT';
+import { IMG } from 'src/app/env/IMG';
 
 export interface DesktopSelectWalletModalProps {
     walletsList: UIWalletInfo[];
@@ -31,6 +36,16 @@ export interface DesktopSelectWalletModalProps {
 
 export const AllWalletsListModal: Component<DesktopSelectWalletModalProps> = props => {
     const maxHeight = (): number | undefined => (isMobile() ? undefined : 510);
+
+    const connector = appState.connector;
+    const additionalRequest = appState.connectRequestParameters;
+
+    const connectWalletConnect = () => {
+        connector.connect(
+            { type: 'wallet-connect' },
+            additionalRequest?.state === 'ready' ? additionalRequest.value : undefined
+        );
+    };
 
     const [errorSupportOpened, setErrorSupportOpened] = createSignal<UIWalletInfo | null>(null);
     let timeoutId: null | ReturnType<typeof setTimeout> = null;
@@ -81,6 +96,17 @@ export const AllWalletsListModal: Component<DesktopSelectWalletModalProps> = pro
                             </li>
                         )}
                     </For>
+                    <Show when={!isInTMA() && isWalletConnectInitialized()}>
+                        <WalletLabeledItemStyled
+                            wallet={{
+                                type: 'wallet-connect',
+                                name: WALLET_CONNECT_WALLET_NAME,
+                                appName: WALLET_CONNECT_APP_NAME,
+                                imageUrl: IMG.WALLET_CONNECT
+                            }}
+                            onClick={connectWalletConnect}
+                        />
+                    </Show>
                 </WalletsUl>
                 <Show when={unsupportedWallets().length > 0 && props.featureCheckMode !== 'hide'}>
                     <WalletsNotSupportedNotifier>

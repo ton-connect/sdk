@@ -1,4 +1,7 @@
-export type WalletConnectionSource = WalletConnectionSourceHTTP | WalletConnectionSourceJS;
+export type WalletConnectionSource =
+    | WalletConnectionSourceHTTP
+    | WalletConnectionSourceJS
+    | WalletConnectionSourceWalletConnect;
 
 export interface WalletConnectionSourceHTTP {
     /**
@@ -23,4 +26,14 @@ export function isWalletConnectionSourceJS(
     value: WalletConnectionSource
 ): value is WalletConnectionSourceJS {
     return 'jsBridgeKey' in value;
+}
+
+export interface WalletConnectionSourceWalletConnect {
+    type: 'wallet-connect';
+}
+
+export function isWalletConnectionSourceWalletConnect(
+    value: WalletConnectionSource
+): value is WalletConnectionSourceWalletConnect {
+    return 'type' in value && value.type === 'wallet-connect';
 }

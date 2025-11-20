@@ -60,6 +60,12 @@ import { TonConnectUITracker } from 'src/tracker/ton-connect-ui-tracker';
 import { tonConnectUiVersion } from 'src/constants/version';
 import { ReturnStrategy } from './models';
 import { TonConnectEnvironment } from 'src/environment/ton-connect-environment';
+import {
+    WALLET_CONNECT_ABOUT_URL,
+    WALLET_CONNECT_APP_NAME,
+    WALLET_CONNECT_WALLET_NAME
+} from 'src/app/env/WALLET_CONNECT';
+import { IMG } from 'src/app/env/IMG';
 
 export class TonConnectUI {
     public static getWallets(): Promise<WalletInfo[]> {
@@ -1100,8 +1106,19 @@ export class TonConnectUI {
             return null;
         }
 
-        let fullLastSelectedWalletInfo: WalletInfoWithOpenMethod;
         if (!('name' in lastSelectedWalletInfo)) {
+            if (wallet.device.appName === WALLET_CONNECT_APP_NAME) {
+                return {
+                    type: 'wallet-connect',
+                    name: WALLET_CONNECT_WALLET_NAME,
+                    appName: WALLET_CONNECT_APP_NAME,
+                    imageUrl: IMG.WALLET_CONNECT,
+                    aboutUrl: WALLET_CONNECT_ABOUT_URL,
+                    features: wallet.device.features,
+                    platforms: []
+                };
+            }
+
             const walletsList = applyWalletsListConfiguration(
                 await this.walletsList,
                 appState.walletsListConfiguration
@@ -1114,15 +1131,13 @@ export class TonConnectUI {
                 );
             }
 
-            fullLastSelectedWalletInfo = {
+            return {
                 ...walletInfo,
                 ...lastSelectedWalletInfo
             };
-        } else {
-            fullLastSelectedWalletInfo = lastSelectedWalletInfo;
         }
 
-        return fullLastSelectedWalletInfo;
+        return lastSelectedWalletInfo;
     }
 
     private async updateWalletInfo(wallet: Wallet): Promise<void> {

@@ -9,9 +9,7 @@ import {
     SendTransactionRequest,
     SendTransactionResponse,
     SignDataResponse,
-    Wallet,
-    WalletInfoInjectable,
-    WalletInfoRemote
+    Wallet
 } from 'src/models';
 import { isTelegramUrl } from 'src/utils/url';
 
@@ -892,7 +890,7 @@ export type SelectedWalletEvent = {
 export function createSelectedWalletEvent(
     version: Version,
     visibleWallets: string[],
-    lastSelectedWallet: WalletInfoInjectable | WalletInfoRemote | null,
+    lastSelectedWallet: { appName?: string } | null,
     walletsMenu: 'explicit_wallet' | 'main_screen' | 'other_wallets',
     redirectLink: string,
     redirectLinkType?: 'tg_link' | 'external_link',
