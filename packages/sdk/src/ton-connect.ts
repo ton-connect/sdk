@@ -25,6 +25,8 @@ import {
     Wallet,
     WalletConnectionSource,
     WalletConnectionSourceHTTP,
+    WalletConnectionSourceJS,
+    WalletConnectionSourceWalletConnect,
     WalletInfo
 } from 'src/models';
 import {
@@ -261,7 +263,11 @@ export class TonConnect implements ITonConnect {
             openingDeadlineMS?: number;
             signal?: AbortSignal;
         }>
-    ): T extends Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[] ? string : void;
+    ): T extends WalletConnectionSourceJS
+        ? void
+        : T extends WalletConnectionSourceWalletConnect
+          ? void
+          : string;
     /** @deprecated use connect(wallet, options) instead */
     public connect<
         T extends WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[]
@@ -272,7 +278,11 @@ export class TonConnect implements ITonConnect {
             openingDeadlineMS?: number;
             signal?: AbortSignal;
         }>
-    ): T extends Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[] ? string : void;
+    ): T extends WalletConnectionSourceJS
+        ? void
+        : T extends WalletConnectionSourceWalletConnect
+          ? void
+          : string;
     // eslint-disable-next-line complexity
     public connect(
         wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
