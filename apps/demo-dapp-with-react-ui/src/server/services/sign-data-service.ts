@@ -15,7 +15,8 @@ const allowedDomains = [
     'ton-connect.github.io',
     'localhost:5173',
     'localhost',
-    'tonconnect-sdk-demo-dapp.vercel.app'
+    'tonconnect-sdk-demo-dapp.vercel.app',
+    'sdk-demo-dapp-react-git-feature-walletconnect-topteam.vercel.app'
 ];
 const validAuthTime = 15 * 60; // 15 minutes
 

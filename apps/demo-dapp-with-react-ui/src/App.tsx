@@ -53,7 +53,7 @@ function IframeIframePage() {
 function App() {
     return (
         <TonConnectUIProvider
-            manifestUrl="https://tonconnect-sdk-demo-dapp.vercel.app/tonconnect-manifest.json"
+            manifestUrl="https://sdk-demo-dapp-react-git-feature-walletconnect-topteam.vercel.app/tonconnect-manifest.json"
             uiPreferences={{ theme: THEME.DARK }}
         >
             <div>
