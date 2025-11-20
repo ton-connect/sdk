@@ -53,6 +53,15 @@ describe.each([
     {
         address: NON_BOUNCEABLE_WORKCHAIN_TESTNET_ADDRESS,
         expected: { wc: WORKCHAIN, hex: HASH, testOnly: true, isBounceable: false }
+    },
+    {
+        address: 'Ef_lZ1T4NCb2mwkme9h2rJfESCE0W34ma9lWp7-_uY3zXDvq',
+        expected: {
+            wc: MASTERCHAIN,
+            hex: 'e56754f83426f69b09267bd876ac97c44821345b7e266bd956a7bfbfb98df35c',
+            testOnly: false,
+            isBounceable: true
+        }
     }
 ])(`utils/address parseUserFriendlyAddress($address)`, ({ address, expected }) => {
     it(`urlSafeBase64 returns { wc: ${expected.wc}, hex: ${expected.hex}, testOnly: ${expected.testOnly}, isBounceable: ${expected.isBounceable} }`, () => {
