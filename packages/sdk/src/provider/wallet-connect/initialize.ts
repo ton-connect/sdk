@@ -1,4 +1,4 @@
-import { UniversalConnector } from '@reown/appkit-universal-connector';
+import type { UniversalConnector } from '@reown/appkit-universal-connector';
 import { WalletConnectOptions } from 'src/provider/wallet-connect/models/wallet-connect-options';
 import { TonConnectError } from 'src/errors';
 
