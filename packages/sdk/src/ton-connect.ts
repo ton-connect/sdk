@@ -578,11 +578,17 @@ export class TonConnect implements ITonConnect {
         const network = transaction.network || this.account!.chain;
 
         if (this.wallet?.account.chain && network !== this.wallet.account.chain) {
-            throw new WalletWrongNetworkError('Wallet connected to a wrong network', {
-                cause: {
-                    expectedChainId: this.wallet?.account.chain,
-                    actualChainId: network
-                }
+            if (!isQaModeEnabled()) {
+                throw new WalletWrongNetworkError('Wallet connected to a wrong network', {
+                    cause: {
+                        expectedChainId: this.wallet?.account.chain,
+                        actualChainId: network
+                    }
+                });
+            }
+            console.error('Wallet connected to a wrong network', {
+                expectedChainId: this.wallet?.account.chain,
+                actualChainId: network
             });
         }
 
@@ -658,11 +664,17 @@ export class TonConnect implements ITonConnect {
         const network = data.network || this.account!.chain;
 
         if (this.wallet?.account.chain && network !== this.wallet.account.chain) {
-            throw new WalletWrongNetworkError('Wallet connected to a wrong network', {
-                cause: {
-                    expectedChainId: this.wallet?.account.chain,
-                    actualChainId: network
-                }
+            if (!isQaModeEnabled()) {
+                throw new WalletWrongNetworkError('Wallet connected to a wrong network', {
+                    cause: {
+                        expectedChainId: this.wallet?.account.chain,
+                        actualChainId: network
+                    }
+                });
+            }
+            console.error('Wallet connected to a wrong network', {
+                expectedChainId: this.wallet?.account.chain,
+                actualChainId: network
             });
         }
 
