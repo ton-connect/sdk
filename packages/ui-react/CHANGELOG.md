@@ -1,5 +1,11 @@
 # Changelog @tonconnect/ui-react
 
+## 2.4.0-beta.3
+
+### Patch Changes
+
+- @tonconnect/ui@2.4.0-beta.3
+
 ## 2.4.0-beta.2
 
 ### Patch Changes

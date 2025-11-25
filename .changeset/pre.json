@@ -11,6 +11,7 @@
   },
   "changesets": [
     "network-selection-support",
+    "qa-mode-network-validation",
     "slow-carpets-wait",
     "trace-id-support",
     "wallet-connect-support"
