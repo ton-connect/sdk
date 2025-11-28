@@ -33,6 +33,7 @@ import { Analytics } from 'src/analytics/analytics';
 import { BridgeClientEvent } from 'src/analytics/types';
 import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet/traceable-events';
 import { UUIDv7 } from 'src/utils/uuid';
+import { waitForSome } from 'src/utils/promise';
 
 export class BridgeProvider implements HTTPProvider {
     public static async fromStorage(
@@ -74,6 +75,8 @@ export class BridgeProvider implements HTTPProvider {
     private readonly defaultOpeningDeadlineMS = 12000;
 
     private readonly defaultRetryTimeoutMS = 2000;
+
+    private readonly optionalOpenGateways = 3;
 
     private abortController?: AbortController;
 
@@ -618,7 +621,8 @@ export class BridgeProvider implements HTTPProvider {
                 return gateway;
             });
 
-            await Promise.allSettled(
+            // Wait until the specified optional gateways are opened, not necessarily all gateways
+            await waitForSome(
                 this.pendingGateways.map(bridge =>
                     callForSuccess(
                         (_options): Promise<void> => {
@@ -639,7 +643,8 @@ export class BridgeProvider implements HTTPProvider {
                             signal: options?.signal
                         }
                     )
-                )
+                ),
+                this.pendingGateways.length - this.optionalOpenGateways
             );
 
             return;
