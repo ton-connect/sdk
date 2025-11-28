@@ -13,6 +13,7 @@ import { InjectedProvider } from 'src/provider/injected/injected-provider';
 import { logError } from 'src/utils/log';
 import { FALLBACK_WALLETS_LIST } from 'src/resources/fallback-wallets-list';
 import { isQaModeEnabled } from './utils/qa-mode';
+import { TonConnectError } from 'src/errors';
 
 export class WalletsListManager {
     private walletsListDTOCache: Promise<WalletInfoDTO[]> | null = null;
@@ -75,6 +76,22 @@ export class WalletsListManager {
         }
 
         return this.walletsListDTOCache;
+    }
+
+    public async getRemoteWallet(appName: string): Promise<WalletInfoRemote> {
+        const walletsList = await this.getWallets();
+
+        const wallet = walletsList.find(wallet => wallet.appName === appName);
+
+        if (!wallet) {
+            throw new TonConnectError(`Wallet info not found for appName: "${appName}"`);
+        }
+
+        if (!('bridgeUrl' in wallet)) {
+            throw new TonConnectError(`Wallet "${appName}" is not remote`);
+        }
+
+        return wallet;
     }
 
     private async fetchWalletsListFromSource(): Promise<WalletInfoDTO[]> {
