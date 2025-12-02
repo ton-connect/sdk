@@ -48,21 +48,13 @@ export function openDeeplinkWithFallback(href: string, fallback: () => void): vo
         fallback();
     };
     const fallbackTimeout = setTimeout(() => doFallback(), 200);
+    window.addEventListener('blur', () => clearTimeout(fallbackTimeout), { once: true });
 
     // Clear timeout when window loses focus (deep link opened)
     const onBlur = (): void => {
         clearTimeout(fallbackTimeout);
     };
     window.addEventListener('blur', onBlur, { once: true });
-
-    // Also clear timeout when page becomes hidden (deep link opened, especially when browser remembers choice)
-    const onVisibilityChange = (): void => {
-        if (document.visibilityState === 'hidden') {
-            clearTimeout(fallbackTimeout);
-            document.removeEventListener('visibilitychange', onVisibilityChange);
-        }
-    };
-    document.addEventListener('visibilitychange', onVisibilityChange);
 
     openLink(href, '_self');
 }
