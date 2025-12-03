@@ -1,5 +1,5 @@
 import './App.scss';
-import { THEME, TonConnectUIProvider, initializeWalletConnect } from '@tonconnect/ui-react';
+import { THEME, TonConnectUIProvider } from '@tonconnect/ui-react';
 import { Routes, Route } from 'react-router-dom';
 import { Header } from './components/Header/Header';
 import { TxForm } from './components/TxForm/TxForm';
@@ -11,19 +11,6 @@ import { SignDataTester } from './components/SignDataTester/SignDataTester';
 import { MerkleExample } from './components/MerkleExample/MerkleExample';
 import { FindTransactionDemo } from './components/FindTransactionDemo/FindTransactionDemo';
 import { TransferUsdt } from './components/TransferUsdt/TransferUsdt';
-import { UniversalConnector } from '@reown/appkit-universal-connector';
-
-initializeWalletConnect(UniversalConnector, {
-    projectId: '9cb446f4a1b697039a23332618d942b0',
-    metadata: {
-        name: 'Demo DApp',
-        icons: [
-            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS0uc4aSvQASroq4VfMx30RkZzIX8wiefg3rQ&s'
-        ],
-        url: window.location.origin,
-        description: 'Demo DApp'
-    }
-});
 
 function HomePage() {
     return (
@@ -53,7 +40,7 @@ function IframeIframePage() {
 function App() {
     return (
         <TonConnectUIProvider
-            manifestUrl="https://sdk-demo-dapp-react-git-feature-walletconnect-topteam.vercel.app/tonconnect-manifest.json"
+            manifestUrl="https://sdk-demo-dapp-react-git-chore-without-walletconnect-topteam.vercel.app/tonconnect-manifest.json"
             uiPreferences={{ theme: THEME.DARK }}
         >
             <div>
