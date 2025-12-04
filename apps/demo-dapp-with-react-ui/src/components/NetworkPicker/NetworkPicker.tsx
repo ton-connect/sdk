@@ -21,12 +21,7 @@ export function NetworkPicker() {
     };
 
     return (
-        <select
-            className="network-picker"
-            value={desired || ''}
-            onChange={handleChange}
-            title={wallet ? 'Disconnect wallet to change network' : undefined}
-        >
+        <select className="network-picker" value={desired || ''} onChange={handleChange}>
             <option value="">Any Network</option>
             <option value={CHAIN.MAINNET}>Mainnet</option>
             <option value={CHAIN.TESTNET}>Testnet</option>
