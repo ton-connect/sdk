@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useTonConnectUI, useTonWallet, CHAIN } from '@tonconnect/ui-react';
+import { useTonConnectUI, CHAIN } from '@tonconnect/ui-react';
 import './style.scss';
 
 export function NetworkPicker() {
     const [tonConnectUI] = useTonConnectUI();
-    const wallet = useTonWallet();
     const [desired, setDesired] = useState<string | undefined>(undefined);
 
     useEffect(() => {
@@ -13,7 +12,7 @@ export function NetworkPicker() {
         } catch (error) {
             console.warn('Cannot change network while wallet is connected:', error);
         }
-    }, [desired, tonConnectUI, wallet]);
+    }, [desired, tonConnectUI]);
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const value = e.target.value;
