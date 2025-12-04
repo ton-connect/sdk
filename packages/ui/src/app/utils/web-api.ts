@@ -36,12 +36,10 @@ export function openLinkBlank(href: string): void {
  */
 export function openDeeplinkWithFallback(href: string, fallback: () => void): void {
     const doFallback = (): void => {
-        if (
-            isBrowser('safari') ||
-            (isOS('android') && isBrowser('firefox')) ||
-            (isOS('windows') && isBrowser('chrome'))
-        ) {
+        if (isBrowser('safari') || (isOS('android') && isBrowser('firefox')) || isOS('windows')) {
             // Safari does not support fallback to direct link.
+            // Windows does not support fallback to direct link.
+            // Firefox on Android does not support fallback to direct link.
             return;
         }
 
