@@ -21,7 +21,7 @@ export const AddressFlags: React.FC<AddressFlagsProps> = ({ flags, workchain, ch
     }
 
     if (flags.isTestOnly !== null) {
-        blocks.push(flags.isTestOnly ? 'TestOnly' : 'Mainnet flag');
+        blocks.push(flags.isTestOnly ? 'TestOnly' : 'Non-TestOnly');
     }
 
     if (flags.isSidechain !== null && flags.isSidechain) {

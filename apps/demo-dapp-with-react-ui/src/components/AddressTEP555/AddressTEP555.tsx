@@ -6,7 +6,6 @@ import './style.scss';
 
 type AddressData = {
     address: Address;
-    sidechainAddress: Address;
     originalFlags: OriginalFlags;
 };
 
@@ -52,9 +51,7 @@ function parseAddressValue(value: string): AddressData {
         address = Address.parseRaw(trimmed);
     }
 
-    const sidechainAddress = new Address(address.workChain, address.hash, 42);
-
-    return { address, originalFlags, sidechainAddress };
+    return { address, originalFlags };
 }
 
 const examples = [
@@ -69,6 +66,7 @@ const examples = [
 
 export const AddressTEP555 = () => {
     const [value, setValue] = useState('');
+    const [chainIdInput, setChainIdInput] = useState('42');
     const [addressData, setAddressData] = useState<AddressData | null>(null);
     const [error, setError] = useState<string | null>(null);
 
@@ -117,6 +115,16 @@ export const AddressTEP555 = () => {
                     onChange={e => handleChange(e.target.value)}
                     spellCheck={false}
                 />
+                <div className="address-tep-555__chain">
+                    <label className="address-tep-555__input-label">Convert to chainId</label>
+                    <input
+                        className="address-tep-555__input address-tep-555__chain-input"
+                        placeholder="42"
+                        value={chainIdInput}
+                        onChange={e => setChainIdInput(e.target.value)}
+                        spellCheck={false}
+                    />
+                </div>
                 <label className="address-tep-555__input-label">Examples:</label>
                 <div className="address-tep-555__examples">
                     {examples.map(example => (
@@ -134,53 +142,71 @@ export const AddressTEP555 = () => {
 
             {error && <div className="address-tep-555__error">{error}</div>}
 
-            {addressData && (
-                <div className="address-tep-555__result">
-                    <div className="address-tep-555__notice">
-                        Address flags and different representations:
-                    </div>
-                    <AddressFlags
-                        flags={addressData.originalFlags}
-                        workchain={addressData.address.workChain}
-                        chainId={addressData.sidechainAddress.chainId}
-                    />
-                    <AddressRow label="Hex (raw)" value={addressData.address.toRawString()} />
-                    <AddressRow
-                        label="not-testonly · bounceable"
-                        value={addressData.address.toString({ bounceable: true })}
-                    />
-                    <AddressRow
-                        label="not-testOnly · non-bounceable"
-                        value={addressData.address.toString({ bounceable: false })}
-                    />
-                    <AddressRow
-                        label="testonly · bounceable"
-                        value={safeFriendly(addressData.address, {
-                            bounceable: true,
-                            testOnly: true
-                        })}
-                    />
-                    <AddressRow
-                        label="testonly · non-bounceable"
-                        value={safeFriendly(addressData.address, {
-                            bounceable: false,
-                            testOnly: true
-                        })}
-                    />
-                    <AddressRow
-                        label="sidechain 42 · bounceable"
-                        value={safeFriendly(addressData.sidechainAddress, {
-                            bounceable: true
-                        })}
-                    />
-                    <AddressRow
-                        label="sidechain 42 · non-bounceable"
-                        value={safeFriendly(addressData.sidechainAddress, {
-                            bounceable: false
-                        })}
-                    />
-                </div>
-            )}
+            {addressData &&
+                (() => {
+                    const parsedChain = chainIdInput.trim().length ? Number(chainIdInput) : null;
+                    const targetChainId =
+                        Number.isFinite(parsedChain) && !Number.isNaN(parsedChain)
+                            ? parsedChain
+                            : addressData.address.chainId;
+                    const convertedAddress = new Address(
+                        addressData.address.workChain,
+
+                        addressData.address.hash,
+                        targetChainId ?? null
+                    );
+
+                    return (
+                        <div className="address-tep-555__result">
+                            <div className="address-tep-555__notice">
+                                Address flags and different representations:
+                            </div>
+                            <AddressFlags
+                                flags={addressData.originalFlags}
+                                workchain={addressData.address.workChain}
+                                chainId={addressData.address.chainId}
+                            />
+                            <AddressRow
+                                label="Hex (raw)"
+                                value={addressData.address.toRawString()}
+                            />
+                            <AddressRow
+                                label="not-testonly · bounceable"
+                                value={addressData.address.toString({ bounceable: true })}
+                            />
+                            <AddressRow
+                                label="not-testOnly · non-bounceable"
+                                value={addressData.address.toString({ bounceable: false })}
+                            />
+                            <AddressRow
+                                label="testonly · bounceable"
+                                value={safeFriendly(addressData.address, {
+                                    bounceable: true,
+                                    testOnly: true
+                                })}
+                            />
+                            <AddressRow
+                                label="testonly · non-bounceable"
+                                value={safeFriendly(addressData.address, {
+                                    bounceable: false,
+                                    testOnly: true
+                                })}
+                            />
+                            <AddressRow
+                                label={`chainId ${targetChainId ?? 'original'} · bounceable`}
+                                value={safeFriendly(convertedAddress, {
+                                    bounceable: true
+                                })}
+                            />
+                            <AddressRow
+                                label={`chainId ${targetChainId ?? 'original'} · non-bounceable`}
+                                value={safeFriendly(convertedAddress, {
+                                    bounceable: false
+                                })}
+                            />
+                        </div>
+                    );
+                })()}
 
             {!addressData && !error && (
                 <div className="address-tep-555__placeholder">
