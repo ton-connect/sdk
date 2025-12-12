@@ -1,5 +1,11 @@
 # Changelog @tonconnect/sdk
 
+## 3.4.0-beta.4
+
+### Patch Changes
+
+- 3a4d37d: feat: don't cancel transaction when proof has extra properties
+
 ## 3.4.0-beta.3
 
 ### Patch Changes
