@@ -12,7 +12,7 @@
   "dependencies": {
     "@reown/appkit-universal-connector": "^1.8.14",
     "@ton-community/assets-sdk": "0.0.5",
-    "@ton/core": "0.61.0",
+    "@ton/core": "https://github.com/Alejandbel/ton-core/releases/download/v0.63.0/ton-core-0.63.0.tgz",
     "@ton/crypto": "3.3.0",
     "@ton/ton": "15.3.1",
     "@tonconnect/sdk": "workspace:*",
