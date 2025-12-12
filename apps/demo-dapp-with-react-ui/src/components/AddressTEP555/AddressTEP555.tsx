@@ -148,12 +148,12 @@ export const AddressTEP555 = () => {
                     const targetChainId =
                         Number.isFinite(parsedChain) && !Number.isNaN(parsedChain)
                             ? parsedChain
-                            : addressData.address.chainId;
+                            : null;
+
                     const convertedAddress = new Address(
                         addressData.address.workChain,
-
                         addressData.address.hash,
-                        targetChainId ?? null
+                        targetChainId
                     );
 
                     return (
