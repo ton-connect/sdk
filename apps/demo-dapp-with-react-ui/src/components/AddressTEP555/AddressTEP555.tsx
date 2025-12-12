@@ -93,9 +93,8 @@ export const AddressTEP555 = () => {
     return (
         <div className="address-tep-555">
             <div className="address-tep-555__header">
-                <h2>Address representations (TEP-555)</h2>
-                <p>
-                    Paste a TON address to preview its format compatible with{' '}
+                <h2>
+                    Address representations (
                     <a
                         href="https://github.com/ton-blockchain/TEPs/pull/555"
                         target="_blank"
@@ -104,7 +103,9 @@ export const AddressTEP555 = () => {
                     >
                         TEP-555
                     </a>
-                </p>
+                    )
+                </h2>
+                <p>Enter a TON address to see address flags and representations.</p>
             </div>
 
             <div className="address-tep-555__input-container">
@@ -183,7 +184,7 @@ export const AddressTEP555 = () => {
 
             {!addressData && !error && (
                 <div className="address-tep-555__placeholder">
-                    Enter a TON address to see address flags and representations.
+                    Enter a TON address to see its flags and representations.
                 </div>
             )}
         </div>
