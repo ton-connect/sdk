@@ -192,18 +192,22 @@ export const AddressTEP555 = () => {
                                     testOnly: true
                                 })}
                             />
-                            <AddressRow
-                                label={`chainId ${targetChainId ?? 'original'} · bounceable`}
-                                value={safeFriendly(convertedAddress, {
-                                    bounceable: true
-                                })}
-                            />
-                            <AddressRow
-                                label={`chainId ${targetChainId ?? 'original'} · non-bounceable`}
-                                value={safeFriendly(convertedAddress, {
-                                    bounceable: false
-                                })}
-                            />
+                            {targetChainId && (
+                                <>
+                                    <AddressRow
+                                        label={`chainId ${targetChainId} · bounceable`}
+                                        value={safeFriendly(convertedAddress, {
+                                            bounceable: true
+                                        })}
+                                    />
+                                    <AddressRow
+                                        label={`chainId ${targetChainId} · non-bounceable`}
+                                        value={safeFriendly(convertedAddress, {
+                                            bounceable: false
+                                        })}
+                                    />
+                                </>
+                            )}
                         </div>
                     );
                 })()}
