@@ -112,7 +112,7 @@ export class TonConnect implements ITonConnect {
      */
     private readonly tracker: TonConnectTracker;
 
-    private readonly walletsList = new WalletsListManager();
+    private readonly walletsList: WalletsListManager;
 
     private readonly analytics?: AnalyticsManager;
 
@@ -205,7 +205,10 @@ export class TonConnect implements ITonConnect {
             );
         }
 
-        this.bridgeConnectionStorage = new BridgeConnectionStorage(this.dappSettings.storage);
+        this.bridgeConnectionStorage = new BridgeConnectionStorage(
+            this.dappSettings.storage,
+            this.walletsList
+        );
 
         if (!options?.disableAutoPauseConnection) {
             this.addWindowFocusAndBlurSubscriptions();
@@ -408,18 +411,20 @@ export class TonConnect implements ITonConnect {
             switch (bridgeConnectionType) {
                 case 'http':
                     provider = await BridgeProvider.fromStorage(
-                        this.dappSettings.storage,
+                        this.bridgeConnectionStorage,
                         this.analytics
                     );
                     break;
                 case 'injected':
                     provider = await InjectedProvider.fromStorage(
-                        this.dappSettings.storage,
+                        this.bridgeConnectionStorage,
                         this.analytics
                     );
                     break;
                 case 'wallet-connect':
-                    provider = await WalletConnectProvider.fromStorage(this.dappSettings.storage);
+                    provider = await WalletConnectProvider.fromStorage(
+                        this.bridgeConnectionStorage
+                    );
                     break;
                 default:
                     if (embeddedWallet) {
@@ -848,14 +853,14 @@ export class TonConnect implements ITonConnect {
 
         if (!Array.isArray(wallet) && isWalletConnectionSourceJS(wallet)) {
             provider = new InjectedProvider(
-                this.dappSettings.storage,
+                this.bridgeConnectionStorage,
                 wallet.jsBridgeKey,
                 this.analytics
             );
         } else if (!Array.isArray(wallet) && isWalletConnectionSourceWalletConnect(wallet)) {
-            provider = new WalletConnectProvider(this.dappSettings.storage);
+            provider = new WalletConnectProvider(this.bridgeConnectionStorage);
         } else {
-            provider = new BridgeProvider(this.dappSettings.storage, wallet, this.analytics);
+            provider = new BridgeProvider(this.bridgeConnectionStorage, wallet, this.analytics);
         }
 
         provider.listen(this.walletEventsListener.bind(this));
