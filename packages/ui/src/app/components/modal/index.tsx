@@ -1,5 +1,5 @@
 import cn from 'classnames';
-import { Component, createEffect, JSXElement, Show } from 'solid-js';
+import { Component, createEffect, JSXElement, onCleanup, Show } from 'solid-js';
 import { Transition } from 'solid-transition-group';
 import clickOutsideDirective from 'src/app/directives/click-outside';
 import keyPressedDirective from 'src/app/directives/key-pressed';
@@ -17,6 +17,7 @@ import {
 } from './style';
 import { css, useTheme } from 'solid-styled-components';
 import { disableScroll, enableScroll } from 'src/app/utils/web-api';
+import { enableModalInteraction } from 'src/app/utils/fix-external-modals';
 import { WithDataAttributes } from 'src/app/models/with-data-attributes';
 import { useDataAttributes } from 'src/app/hooks/use-data-attributes';
 import { TonConnectBrand } from 'src/app/components';
@@ -45,6 +46,8 @@ export const Modal: Component<ModalProps> = props => {
     createEffect(() => {
         if (props.opened) {
             disableScroll();
+            const cleanupExternalModals = enableModalInteraction();
+            onCleanup(cleanupExternalModals);
         } else {
             enableScroll();
         }
