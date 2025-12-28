@@ -573,6 +573,7 @@ export class BridgeProvider implements HTTPProvider {
 
         const url = new URL(updatedUniversalLink);
         url.searchParams.append('startapp', startapp);
+        url.searchParams.append('mode', 'compact');
         return url.toString();
     }
 
