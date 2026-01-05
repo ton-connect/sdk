@@ -58,7 +58,7 @@ export class AnalyticsManager {
         this.baseEvent = {
             subsystem: 'dapp-sdk',
             version: tonConnectSdkVersion,
-            client_environment: options.environment?.getClientEnvironment(),
+            client_environment: options.environment?.getClientEnvironment?.(),
             ...getStaticConnectionMetrics()
         };
 
