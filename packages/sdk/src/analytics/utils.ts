@@ -95,19 +95,3 @@ export function getDynamicConnectionMetrics(): {
 
     return metrics;
 }
-
-/**
- * Collects all connection metrics (both static and dynamic).
- * @deprecated Use getStaticConnectionMetrics() and getDynamicConnectionMetrics() separately.
- * @returns An object containing connection metrics (TTFB, RTT, network type) or empty object if not available.
- */
-export function getConnectionMetrics(): {
-    conn_ttfb?: number;
-    conn_rtt?: number;
-    conn_network_type?: string;
-} {
-    return {
-        ...getStaticConnectionMetrics(),
-        ...getDynamicConnectionMetrics()
-    };
-}
