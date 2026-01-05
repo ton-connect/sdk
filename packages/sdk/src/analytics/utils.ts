@@ -55,7 +55,7 @@ export function getStaticConnectionMetrics(): {
         // Performance API not available or error occurred
     }
 
-    return Object.keys(metrics).length > 0 ? metrics : {};
+    return metrics;
 }
 
 /**
@@ -93,7 +93,7 @@ export function getDynamicConnectionMetrics(): {
         // Network Information API not available or error occurred
     }
 
-    return Object.keys(metrics).length > 0 ? metrics : {};
+    return metrics;
 }
 
 /**

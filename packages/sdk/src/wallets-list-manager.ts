@@ -23,12 +23,12 @@ export class WalletsListManager {
 
     private readonly walletsListSource: string;
 
-    private readonly onDownloadDurationMeasured?: (duration: number) => void;
+    private readonly onDownloadDurationMeasured?: (duration: number | undefined) => void;
 
     constructor(options?: {
         walletsListSource?: string;
         cacheTTLMs?: number;
-        onDownloadDurationMeasured?: (duration: number) => void;
+        onDownloadDurationMeasured?: (duration: number | undefined) => void;
     }) {
         if (isQaModeEnabled()) {
             this.walletsListSource =
@@ -115,18 +115,13 @@ export class WalletsListManager {
 
             const endTime = performance.now();
             const duration = Math.round(endTime - startTime);
-            if (this.onDownloadDurationMeasured) {
-                this.onDownloadDurationMeasured(duration);
-            }
+            this.onDownloadDurationMeasured?.(duration);
         } catch (e) {
             logError(e);
             walletsList = FALLBACK_WALLETS_LIST;
 
-            const endTime = performance.now();
-            const duration = Math.round(endTime - startTime);
-            if (this.onDownloadDurationMeasured) {
-                this.onDownloadDurationMeasured(duration);
-            }
+            // Set duration to -1 if download failed or fallback was used
+            this.onDownloadDurationMeasured?.(undefined);
         }
 
         return walletsList;

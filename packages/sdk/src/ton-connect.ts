@@ -177,7 +177,7 @@ export class TonConnect implements ITonConnect {
         this.walletsList = new WalletsListManager({
             walletsListSource: options?.walletsListSource,
             cacheTTLMs: options?.walletsListCacheTTLMs,
-            onDownloadDurationMeasured: (duration: number) => {
+            onDownloadDurationMeasured: (duration: number | undefined) => {
                 this.analytics?.setWalletListDownloadDuration(duration);
             }
         });

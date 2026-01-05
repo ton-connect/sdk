@@ -289,7 +289,7 @@ export class AnalyticsManager {
         return this.events.length;
     }
 
-    setWalletListDownloadDuration(duration: number): void {
+    setWalletListDownloadDuration(duration: number | undefined): void {
         this.baseEvent = {
             ...this.baseEvent,
             wallet_list_download_duration: duration
