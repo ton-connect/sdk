@@ -120,7 +120,6 @@ export class WalletsListManager {
             logError(e);
             walletsList = FALLBACK_WALLETS_LIST;
 
-            // Set duration to -1 if download failed or fallback was used
             this.onDownloadDurationMeasured?.(undefined);
         }
 
