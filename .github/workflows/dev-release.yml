@@ -47,7 +47,7 @@ jobs:
         uses: ./.github/actions/build
 
       - name: Run tests
-        run: pnpm test -- --run
+        run: pnpm test
         continue-on-error: false
 
       - name: Extract versions and create tags
