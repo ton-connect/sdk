@@ -169,9 +169,17 @@ export class TonConnect implements ITonConnect {
 
         this.walletsRequiredFeatures = options?.walletsRequiredFeatures;
 
+        this.environment = options?.environment ?? new DefaultEnvironment();
+
+        // TODO: in production ready make flag to enable them?
+        this.analytics = new AnalyticsManager({ environment: this.environment });
+
         this.walletsList = new WalletsListManager({
             walletsListSource: options?.walletsListSource,
-            cacheTTLMs: options?.walletsListCacheTTLMs
+            cacheTTLMs: options?.walletsListCacheTTLMs,
+            onDownloadDurationMeasured: (duration: number | undefined) => {
+                this.analytics?.setWalletListDownloadDuration(duration);
+            }
         });
 
         const eventDispatcher = options?.eventDispatcher ?? new BrowserEventDispatcher();
@@ -179,11 +187,6 @@ export class TonConnect implements ITonConnect {
             eventDispatcher,
             tonConnectSdkVersion: tonConnectSdkVersion
         });
-
-        this.environment = options?.environment ?? new DefaultEnvironment();
-
-        // TODO: in production ready make flag to enable them?
-        this.analytics = new AnalyticsManager({ environment: this.environment });
 
         const telegramUser = this.environment.getTelegramUser();
         bindEventsTo(

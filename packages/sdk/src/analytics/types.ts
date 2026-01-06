@@ -27,6 +27,22 @@ export type BaseEvent = {
      * Network id (-239 for the mainnet and -3 for the testnet). Other values should be rejected.
      */
     network_id?: string;
+    /**
+     * The type of network connection being used (e.g., wifi, 4g, 3g, etc.)
+     */
+    conn_network_type?: string;
+    /**
+     * Estimated effective round-trip time across recently active connections in milliseconds.
+     */
+    conn_rtt?: number;
+    /**
+     * Estimated effective time across recently active connections to first byte in milliseconds.
+     */
+    conn_ttfb?: number;
+    /**
+     * Duration of wallet list download in milliseconds.
+     */
+    wallet_list_download_duration?: number;
 };
 
 export type WalletInfo = {

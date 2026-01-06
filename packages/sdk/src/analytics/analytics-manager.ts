@@ -3,7 +3,11 @@ import { AnalyticsEvent } from './types';
 import { tonConnectSdkVersion } from 'src/constants/version';
 import { UUIDv7 } from 'src/utils/uuid';
 import { Analytics } from 'src/analytics/analytics';
-import { pascalToKebab } from 'src/analytics/utils';
+import {
+    pascalToKebab,
+    getStaticConnectionMetrics,
+    getDynamicConnectionMetrics
+} from 'src/analytics/utils';
 import { IEnvironment } from 'src/environment/models/environment.interface';
 import { isQaModeEnabled } from 'src/utils/qa-mode';
 import { Dynamic } from 'src/utils/types';
@@ -33,7 +37,7 @@ export class AnalyticsManager {
 
     private shouldSend: boolean = true;
 
-    private readonly baseEvent: Partial<AnalyticsEvent>;
+    private baseEvent: Partial<AnalyticsEvent>;
 
     private static readonly HTTP_STATUS = {
         TOO_MANY_REQUESTS: 429,
@@ -54,7 +58,8 @@ export class AnalyticsManager {
         this.baseEvent = {
             subsystem: 'dapp-sdk',
             version: tonConnectSdkVersion,
-            client_environment: options.environment?.getClientEnvironment()
+            client_environment: options.environment?.getClientEnvironment?.(),
+            ...getStaticConnectionMetrics()
         };
 
         this.addWindowFocusAndBlurSubscriptions();
@@ -99,8 +104,11 @@ export class AnalyticsManager {
 
         const traceId = event.trace_id ?? UUIDv7();
 
+        const dynamicMetrics = getDynamicConnectionMetrics();
+
         const enhancedEvent = {
             ...this.baseEvent,
+            ...dynamicMetrics,
             ...event,
             event_id: UUIDv7(),
             client_timestamp: Math.floor(Date.now() / 1000),
@@ -278,5 +286,12 @@ export class AnalyticsManager {
 
     getPendingEventsCount(): number {
         return this.events.length;
+    }
+
+    setWalletListDownloadDuration(duration: number | undefined): void {
+        this.baseEvent = {
+            ...this.baseEvent,
+            wallet_list_download_duration: duration
+        };
     }
 }
