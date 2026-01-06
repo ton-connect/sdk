@@ -60,7 +60,6 @@ export function getStaticConnectionMetrics(): {
 
 /**
  * Collects dynamic connection metrics from the browser's Network Information API.
- * RTT and network type can change over time, so they should be measured at the time of event emission.
  * @returns An object containing dynamic connection metrics (RTT, network type) or empty object if not available.
  */
 export function getDynamicConnectionMetrics(): {
