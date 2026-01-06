@@ -104,7 +104,6 @@ export class AnalyticsManager {
 
         const traceId = event.trace_id ?? UUIDv7();
 
-        // Get dynamic connection metrics at the time of event emission
         const dynamicMetrics = getDynamicConnectionMetrics();
 
         const enhancedEvent = {
