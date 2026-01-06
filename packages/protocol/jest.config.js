@@ -9,11 +9,14 @@ module.exports = {
     transform: {
         '^.+\\.tsx?$': [
             'ts-jest',
-            {tsconfig: './tsconfig.test.json'},
+            {
+                tsconfig: './tsconfig.test.json',
+            },
         ],
     },
     moduleNameMapper: {
-        '^src/(.*)$': '<root-dir>/../../src/$1',
-        'tests/(.*)$': '<root-dir>/../../tests/$1',
+        '^src/(.*)$': '<rootDir>/src/$1',
+        '^tests/(.*)$': '<rootDir>/tests/$1',
     },
+    extensionsToTreatAsEsm: [],
 };
