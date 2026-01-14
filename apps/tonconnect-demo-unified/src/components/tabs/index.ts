@@ -1,0 +1,5 @@
+export { TransactionTab } from "./TransactionTab"
+export { SignDataTab } from "./SignDataTab"
+export { SubscriptionTab } from "./SubscriptionTab"
+export { TonProofTab } from "./TonProofTab"
+export { SettingsTab } from "./SettingsTab"

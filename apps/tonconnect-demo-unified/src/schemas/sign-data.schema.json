@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "oneOf": [
+    {
+      "type": "object",
+      "required": ["type", "text"],
+      "properties": {
+        "type": { "const": "text" },
+        "text": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": ["type", "bytes"],
+      "properties": {
+        "type": { "const": "binary" },
+        "bytes": { "type": "string", "pattern": "^[A-Za-z0-9+/=]*$" }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": ["type", "schema", "cell"],
+      "properties": {
+        "type": { "const": "cell" },
+        "schema": { "type": "string", "minLength": 1 },
+        "cell": { "type": "string", "pattern": "^[A-Za-z0-9+/=]*$" }
+      },
+      "additionalProperties": false
+    }
+  ]
+}
