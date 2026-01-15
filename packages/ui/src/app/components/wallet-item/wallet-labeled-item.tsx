@@ -31,8 +31,7 @@ export const WalletLabeledItem: Component<WalletLabeledItemProps> = props => {
         if (props.wallet.name === 'Tonkeeper') {
             return t('walletItem.popular', {}, 'Popular');
         }
-
-        if (isWalletUi(props.wallet) && isWalletInfoCurrentlyInjected(props.wallet)) {
+        if (!('type' in props.wallet) && isWalletInfoCurrentlyInjected(props.wallet)) {
             return t('walletItem.installed', {}, 'Installed');
         }
 
