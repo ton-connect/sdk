@@ -112,6 +112,17 @@ addEventListener('fetch', function (event) {
     return
   }
 
+  // Bypass event source requests (TonConnect SSE).
+  const url = new URL(event.request.url)
+  if (url.pathname.endsWith('/events')) {
+    return
+  }
+
+  // Bypass cross-origin requests except /api/*
+  if (url.origin !== location.origin && !url.pathname.startsWith('/api')) {
+    return
+  }
+
   const requestId = crypto.randomUUID()
   event.respondWith(handleRequest(event, requestId, requestInterceptedAt))
 })

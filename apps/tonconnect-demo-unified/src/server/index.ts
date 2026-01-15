@@ -6,7 +6,7 @@ export const worker = setupWorker(...handlers);
 export async function startMockServer(): Promise<void> {
   await worker.start({
     onUnhandledRequest: 'bypass',
-    quiet: false
+    quiet: true,
   });
   console.log('[MSW] Mock server started');
 }

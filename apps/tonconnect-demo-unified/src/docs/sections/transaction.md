@@ -28,8 +28,8 @@ Each transaction contains one or more **messages**. Each message specifies:
 
 ```
 DApp → Wallet → Blockchain
-         ↓
-       DApp (result BOC)
+          ↓
+        DApp (result BOC)
 ```
 
 1. DApp sends transaction request via TonConnect
