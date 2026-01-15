@@ -4,6 +4,7 @@ import remarkGfm from "remark-gfm"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ExternalLink, Check } from "lucide-react"
 import { getSectionInfo } from "@/data/field-info"
+import { useDevToolsContext } from "@/context/DevToolsContext"
 
 // Feature lists for each section
 const SECTION_FEATURES: Record<string, string[]> = {
@@ -26,6 +27,7 @@ interface HowItWorksCardProps {
 }
 
 export function HowItWorksCard({ sectionId }: HowItWorksCardProps) {
+  const { docsHidden } = useDevToolsContext()
   const info = getSectionInfo(sectionId)
   const features = SECTION_FEATURES[sectionId] || []
 
@@ -36,7 +38,8 @@ export function HowItWorksCard({ sectionId }: HowItWorksCardProps) {
     return matches?.map(h => h.replace("## ", "")) || []
   }, [info?.content])
 
-  if (!info) return null
+  // Hide if docs are hidden or no info available
+  if (docsHidden || !info) return null
 
   const scrollToHeading = (heading: string) => {
     // Find the heading element and scroll to it
