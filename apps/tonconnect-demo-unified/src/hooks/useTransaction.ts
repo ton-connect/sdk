@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from "react"
-import { useTonConnectUI, useTonWallet, CHAIN } from "@tonconnect/ui-react"
+import { useState, useEffect, useCallback, useMemo } from "react"
+import { useTonConnectUI, useTonWallet, useIsConnectionRestored, CHAIN } from "@tonconnect/ui-react"
 import { toNano, fromNano } from "@ton/core"
 import { toast } from "sonner"
 import { useHistory } from "./useHistory"
@@ -63,6 +63,7 @@ export type PresetKey = keyof typeof PRESETS
 export function useTransaction(showToastBefore = true, showToastSuccess = true, showToastError = true) {
   const [tonConnectUI] = useTonConnectUI()
   const wallet = useTonWallet()
+  const isConnectionRestored = useIsConnectionRestored()
   const history = useHistory()
 
   // Valid until as unix timestamp
@@ -122,6 +123,12 @@ export function useTransaction(showToastBefore = true, showToastSuccess = true, 
     setAmountUnits(prev => ({ ...prev, [index]: unit }))
   }, [])
 
+  // Wallet's network (only after connection is restored to prevent flicker)
+  const walletNetwork = useMemo(
+    () => isConnectionRestored && wallet?.account?.chain ? String(wallet.account.chain) : "",
+    [isConnectionRestored, wallet?.account?.chain]
+  )
+
   // Build request JSON
   useEffect(() => {
     const builtMessages = messages.map((msg) => {
@@ -131,8 +138,7 @@ export function useTransaction(showToastBefore = true, showToastSuccess = true, 
       return m
     })
 
-    // Use wallet's network as fallback
-    const effectiveNetwork = network || (wallet?.account?.chain ? String(wallet.account.chain) : "")
+    const effectiveNetwork = network || walletNetwork
 
     const tx: Record<string, unknown> = {
       validUntil,
@@ -142,7 +148,7 @@ export function useTransaction(showToastBefore = true, showToastSuccess = true, 
     if (from) tx.from = from
 
     setRequestJson(JSON.stringify(tx, null, 2))
-  }, [validUntil, network, from, messages, wallet])
+  }, [validUntil, network, from, messages, walletNetwork])
 
   const loadPreset = (key: PresetKey) => {
     const preset = PRESETS[key]
@@ -371,5 +377,8 @@ export function useTransaction(showToastBefore = true, showToastSuccess = true, 
     // History
     currentWalletAddress,
     loadHistoryToForm,
+    // Connection state (for UI loading states)
+    isConnectionRestored,
+    walletNetwork,
   }
 }

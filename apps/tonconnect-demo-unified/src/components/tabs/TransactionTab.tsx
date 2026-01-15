@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from "react"
-import { useTonWallet } from "@tonconnect/ui-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -17,7 +16,6 @@ import type { AmountUnit, PresetKey } from "@/hooks/useTransaction"
 
 export function TransactionTab() {
   const { modalsBefore, modalsSuccess, modalsError } = useSettingsContext()
-  const wallet = useTonWallet()
   const {
     validUntil, setValidUntil,
     addTimeToValidUntil,
@@ -43,6 +41,8 @@ export function TransactionTab() {
     loadResultToForm,
     currentWalletAddress,
     loadHistoryToForm,
+    isConnectionRestored,
+    walletNetwork,
   } = useTransaction(modalsBefore, modalsSuccess, modalsError)
 
   // Convert PRESETS to array format for FormContainer
@@ -62,13 +62,12 @@ export function TransactionTab() {
   // UI state for payload collapsibles
   const [expandedPayloads, setExpandedPayloads] = useState<Record<number, boolean>>({})
 
-  // Get wallet's network as string
-  const walletNetwork = wallet?.account?.chain ? String(wallet.account.chain) : ""
-
-  // Live countdown timer
-  const [displayTime, setDisplayTime] = useState("")
-  const [hoverTime, setHoverTime] = useState("")
-  const [timerStatus, setTimerStatus] = useState<"ok" | "warning" | "danger" | "expired">("ok")
+  // Live countdown timer (combined state to reduce re-renders)
+  const [timerState, setTimerState] = useState({
+    displayTime: "",
+    hoverTime: "",
+    status: "ok" as "ok" | "warning" | "danger" | "expired"
+  })
   const [isHoveringTimer, setIsHoveringTimer] = useState(false)
 
   useEffect(() => {
@@ -115,24 +114,28 @@ export function TransactionTab() {
       const diff = validUntil - now
 
       if (diff <= 0) {
-        setDisplayTime("Expired")
-        setHoverTime("Expired")
-        setTimerStatus("expired")
+        setTimerState({ displayTime: "Expired", hoverTime: "Expired", status: "expired" })
       } else if (diff < 120) {
         // <2m: countdown + time, danger
-        setDisplayTime(`${diff}s · ${formatCompactTime(validUntil)}`)
-        setHoverTime(`${formatCountdown(diff)} · ${formatFullTime(validUntil)}`)
-        setTimerStatus("danger")
+        setTimerState({
+          displayTime: `${diff}s · ${formatCompactTime(validUntil)}`,
+          hoverTime: `${formatCountdown(diff)} · ${formatFullTime(validUntil)}`,
+          status: "danger"
+        })
       } else if (diff < 600) {
         // 2-10m: just time, warning
-        setDisplayTime(formatCompactTime(validUntil))
-        setHoverTime(`${formatCountdown(diff)} · ${formatFullTime(validUntil)}`)
-        setTimerStatus("warning")
+        setTimerState({
+          displayTime: formatCompactTime(validUntil),
+          hoverTime: `${formatCountdown(diff)} · ${formatFullTime(validUntil)}`,
+          status: "warning"
+        })
       } else {
         // >10m: just time, ok
-        setDisplayTime(formatCompactTime(validUntil))
-        setHoverTime(`${formatCountdown(diff)} · ${formatFullTime(validUntil)}`)
-        setTimerStatus("ok")
+        setTimerState({
+          displayTime: formatCompactTime(validUntil),
+          hoverTime: `${formatCountdown(diff)} · ${formatFullTime(validUntil)}`,
+          status: "ok"
+        })
       }
     }
 
@@ -156,15 +159,17 @@ export function TransactionTab() {
           onMouseLeave={() => setIsHoveringTimer(false)}
         >
           <FieldLabel htmlFor="validUntil" fieldId="validUntil">Valid Until</FieldLabel>
-          <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-mono">
-            <span className={`inline-block w-1.5 h-1.5 rounded-full ${
-              timerStatus === "ok" ? "bg-green-500" :
-              timerStatus === "warning" ? "bg-yellow-500" :
-              timerStatus === "danger" ? "bg-red-500" :
+          <span className={`inline-flex items-center gap-1.5 text-xs sm:text-sm font-mono ${
+            timerState.status === "expired" ? "text-destructive" : "text-muted-foreground"
+          }`}>
+            <span className={`inline-block w-1.5 h-1.5 rounded-full shrink-0 ${
+              timerState.status === "ok" ? "bg-green-500" :
+              timerState.status === "warning" ? "bg-yellow-500" :
+              timerState.status === "danger" ? "bg-red-500" :
               "bg-destructive"
             }`} />
-            <span className={timerStatus === "expired" ? "text-destructive" : "text-muted-foreground"}>
-              {isHoveringTimer ? hoverTime : displayTime}
+            <span className="transition-opacity duration-150">
+              {isHoveringTimer ? timerState.hoverTime : timerState.displayTime}
             </span>
           </span>
         </div>
@@ -188,13 +193,17 @@ export function TransactionTab() {
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <FieldLabel htmlFor="network" fieldId="network" className="text-muted-foreground">Network (optional)</FieldLabel>
-          <Input
-            id="network"
-            value={network || walletNetwork}
-            onChange={(e) => setNetwork(e.target.value)}
-            placeholder={walletNetwork || "e.g. -239 for mainnet"}
-            disabled={!!walletNetwork}
-          />
+          {!isConnectionRestored ? (
+            <div className="h-9 rounded-md border bg-muted animate-pulse" />
+          ) : (
+            <Input
+              id="network"
+              value={network || walletNetwork}
+              onChange={(e) => setNetwork(e.target.value)}
+              placeholder={walletNetwork || "e.g. -239 for mainnet"}
+              disabled={!!walletNetwork}
+            />
+          )}
         </div>
         <div className="space-y-2">
           <FieldLabel htmlFor="from" fieldId="from" className="text-muted-foreground">From (optional)</FieldLabel>
