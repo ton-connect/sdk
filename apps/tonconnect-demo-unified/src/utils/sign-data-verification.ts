@@ -2,22 +2,7 @@ import { Address, Cell, beginCell, loadStateInit, contractAddress } from "@ton/c
 import { sha256 } from "@ton/crypto"
 import nacl from "tweetnacl"
 import crc32 from "crc-32"
-
-// Wallet public key parsers (simplified - supports common wallet types)
-function tryParsePublicKey(stateInit: ReturnType<typeof loadStateInit>): Buffer | null {
-  try {
-    const cs = stateInit.data?.beginParse()
-    if (!cs) return null
-
-    // Try to read public key (most wallets store it in first 256 bits after some header)
-    // This is simplified and may not work for all wallet types
-    cs.loadUint(32) // seqno or similar
-    const publicKey = cs.loadBuffer(32)
-    return publicKey
-  } catch {
-    return null
-  }
-}
+import { tryParsePublicKey } from "@/server/utils/wallet-parsers"
 
 interface SignDataResponse {
   signature: string

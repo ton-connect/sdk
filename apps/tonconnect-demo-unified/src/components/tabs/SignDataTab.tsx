@@ -1,3 +1,4 @@
+import { useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -10,6 +11,7 @@ import { useSettingsContext } from "@/context/SettingsContext"
 import { validateSignDataJson } from "@/utils/validator"
 
 export function SignDataTab() {
+  const resultRef = useRef<HTMLDivElement>(null)
   const { notificationsBefore, notificationsSuccess, notificationsError } = useSettingsContext()
   const {
     dataType, setDataType,
@@ -33,6 +35,17 @@ export function SignDataTab() {
     serverVerificationResult,
     isVerifyingOnServer,
   } = useSignData(notificationsBefore, notificationsSuccess, notificationsError)
+
+  // Scroll to result when it appears
+  useEffect(() => {
+    if (lastResult && resultRef.current) {
+      const rect = resultRef.current.getBoundingClientRect()
+      // Scroll if result is not fully visible
+      if (rect.top < 0 || rect.bottom > window.innerHeight) {
+        resultRef.current.scrollIntoView({ behavior: "smooth", block: "start" })
+      }
+    }
+  }, [lastResult?.id])
 
   const formContent = (
     <>
@@ -109,18 +122,20 @@ export function SignDataTab() {
       />
 
       {lastResult && (
-        <SignDataResultCard
-          result={lastResult}
-          onDismiss={clearResult}
-          onLoadToForm={loadResultToForm}
-          canVerify={canVerify}
-          onVerifyClient={verify}
-          onVerifyServer={verifyOnServer}
-          isVerifyingClient={isVerifying}
-          isVerifyingServer={isVerifyingOnServer}
-          clientResult={verificationResult}
-          serverResult={serverVerificationResult}
-        />
+        <div ref={resultRef} className="scroll-mt-30">
+          <SignDataResultCard
+            result={lastResult}
+            onDismiss={clearResult}
+            onLoadToForm={loadResultToForm}
+            canVerify={canVerify}
+            onVerifyClient={verify}
+            onVerifyServer={verifyOnServer}
+            isVerifyingClient={isVerifying}
+            isVerifyingServer={isVerifyingOnServer}
+            clientResult={verificationResult}
+            serverResult={serverVerificationResult}
+          />
+        </div>
       )}
 
       <HowItWorksCard sectionId="signData" />

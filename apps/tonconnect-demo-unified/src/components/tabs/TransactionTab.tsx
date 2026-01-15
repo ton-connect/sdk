@@ -1,10 +1,11 @@
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { FormContainer } from "@/components/shared/FormContainer"
+import { ResultCard } from "@/components/shared/ResultCard"
 import { HistoryList } from "@/components/shared/HistoryList"
 import { HowItWorksCard } from "@/components/shared/HowItWorksCard"
 import { FieldLabel } from "@/components/shared/FieldLabel"
@@ -61,6 +62,9 @@ export function TransactionTab() {
 
   // UI state for payload collapsibles
   const [expandedPayloads, setExpandedPayloads] = useState<Record<number, boolean>>({})
+
+  // Result scroll ref
+  const resultRef = useRef<HTMLDivElement>(null)
 
   // Live countdown timer (combined state to reduce re-renders)
   const [timerState, setTimerState] = useState({
@@ -148,6 +152,16 @@ export function TransactionTab() {
   const togglePayload = (index: number) => {
     setExpandedPayloads(prev => ({ ...prev, [index]: !prev[index] }))
   }
+
+  // Scroll to result when it appears
+  useEffect(() => {
+    if (lastResult && resultRef.current) {
+      const rect = resultRef.current.getBoundingClientRect()
+      if (rect.top < 0 || rect.bottom > window.innerHeight) {
+        resultRef.current.scrollIntoView({ behavior: "smooth", block: "start" })
+      }
+    }
+  }, [lastResult?.id])
 
   const formContent = (
     <>
@@ -335,10 +349,17 @@ export function TransactionTab() {
         isLoading={isSending}
         presets={presetOptions}
         onPresetSelect={handlePresetSelect}
-        lastResult={lastResult}
-        onClearResult={clearResult}
-        onLoadResult={loadResultToForm}
       />
+
+      {lastResult && (
+        <div ref={resultRef} className="scroll-mt-20">
+          <ResultCard
+            result={lastResult}
+            onDismiss={clearResult}
+            onLoadToForm={loadResultToForm}
+          />
+        </div>
+      )}
 
       <HistoryList
         currentWallet={currentWalletAddress}

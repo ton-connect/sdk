@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from "react"
+import { useState, useEffect, useMemo } from "react"
 import type { ReactNode } from "react"
 import CodeMirror from "@uiw/react-codemirror"
 import { json } from "@codemirror/lang-json"
@@ -12,13 +12,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { JsonViewer } from "./JsonViewer"
-import { ResultCard } from "./ResultCard"
 import { AlertCircle, AlertTriangle, Copy, ChevronDown, RotateCcw, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import { useSettingsContext } from "@/context/SettingsContext"
 import { createTonConnectTheme } from "@/lib/codemirror-theme"
 import type { ValidationResult } from "@/utils/validator"
-import type { OperationResult } from "@/hooks/useTransaction"
 
 export interface PresetOption {
   id: string
@@ -53,11 +51,6 @@ interface FormContainerProps {
   // Presets
   presets?: PresetOption[]
   onPresetSelect?: (presetId: string) => void
-
-  // Result
-  lastResult?: OperationResult | null
-  onClearResult?: () => void
-  onLoadResult?: () => void
 }
 
 function isValidJson(str: string): boolean {
@@ -83,14 +76,10 @@ export function FormContainer({
   isLoading = false,
   presets,
   onPresetSelect,
-  lastResult,
-  onClearResult,
-  onLoadResult,
 }: FormContainerProps) {
   const [mode, setMode] = useState<EditorMode>("form")
   const [editedJson, setEditedJson] = useState(requestJson)
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null)
-  const resultRef = useRef<HTMLDivElement>(null)
 
   const { theme } = useSettingsContext()
 
@@ -112,16 +101,6 @@ export function FormContainer({
       setValidationResult(null) // Clear validation when switching to form
     }
   }, [requestJson, mode])
-
-  // Smart scroll to result when it appears
-  useEffect(() => {
-    if (lastResult && resultRef.current) {
-      const rect = resultRef.current.getBoundingClientRect()
-      if (rect.top > window.innerHeight) {
-        resultRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" })
-      }
-    }
-  }, [lastResult?.id])
 
   // Handle mode switch
   const handleModeChange = (newMode: EditorMode) => {
@@ -400,17 +379,6 @@ export function FormContainer({
           )}
         </CardContent>
       </Card>
-
-      {/* Result Card - ALWAYS visible (regardless of mode) */}
-      {lastResult && (
-        <div ref={resultRef}>
-          <ResultCard
-            result={lastResult}
-            onDismiss={onClearResult}
-            onLoadToForm={onLoadResult}
-          />
-        </div>
-      )}
     </div>
   )
 }
