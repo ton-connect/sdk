@@ -59,8 +59,17 @@ export function useSettings() {
 
   // UI Settings
   const [language, setLanguage] = useState<"en" | "ru">("en")
-  const [theme, setTheme] = useState<ThemeOption>("dark")
+  const [theme, setThemeState] = useState<ThemeOption>(() => {
+    const stored = localStorage.getItem("tonconnect-demo-theme")
+    return (stored as ThemeOption) || "system"
+  })
   const [borderRadius, setBorderRadius] = useState<"s" | "m" | "none">("m")
+
+  // Persist theme to localStorage
+  const setTheme = useCallback((newTheme: ThemeOption) => {
+    setThemeState(newTheme)
+    localStorage.setItem("tonconnect-demo-theme", newTheme)
+  }, [])
 
   // Colors
   const [darkColors, setDarkColors] = useState<ColorsConfig>({

@@ -255,3 +255,12 @@
   animation-timeline: scroll(root);
   animation-range: 0px 100px;
 }
+
+/* Hide scrollbar for horizontal scroll tabs */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

@@ -362,7 +362,7 @@ function HistoryEntryRow({
 export function HistoryList({ currentWallet, onLoadToForm }: HistoryListProps) {
   const history = useHistory()
   const [expanded, setExpanded] = useState<Record<string, boolean>>({})
-  const [sectionOpen, setSectionOpen] = useState(true)
+  const [sectionOpen, setSectionOpen] = useState(false)
 
   const entries = useMemo(() => {
     return currentWallet ? history.getByWallet(currentWallet) : []

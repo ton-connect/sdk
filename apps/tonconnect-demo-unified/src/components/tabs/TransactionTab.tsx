@@ -66,40 +66,73 @@ export function TransactionTab() {
   const walletNetwork = wallet?.account?.chain ? String(wallet.account.chain) : ""
 
   // Live countdown timer
-  const [timeLeft, setTimeLeft] = useState("")
-  const [exactTime, setExactTime] = useState("")
+  const [displayTime, setDisplayTime] = useState("")
+  const [hoverTime, setHoverTime] = useState("")
+  const [timerStatus, setTimerStatus] = useState<"ok" | "warning" | "danger" | "expired">("ok")
   const [isHoveringTimer, setIsHoveringTimer] = useState(false)
 
   useEffect(() => {
+    // Format compact time with smart date context
+    const formatCompactTime = (timestamp: number) => {
+      const date = new Date(timestamp * 1000)
+      const now = new Date()
+      const isToday = date.toDateString() === now.toDateString()
+      const tomorrow = new Date(now)
+      tomorrow.setDate(tomorrow.getDate() + 1)
+      const isTomorrow = date.toDateString() === tomorrow.toDateString()
+
+      const time = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
+
+      if (isToday) return time
+      if (isTomorrow) return `tmrw ${time}`
+      return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ` ${time}`
+    }
+
+    // Format full datetime for hover (local time, ISO-like format)
+    const formatFullTime = (timestamp: number) => {
+      const date = new Date(timestamp * 1000)
+      const year = date.getFullYear()
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const day = String(date.getDate()).padStart(2, '0')
+      const hours = String(date.getHours()).padStart(2, '0')
+      const mins = String(date.getMinutes()).padStart(2, '0')
+      const secs = String(date.getSeconds()).padStart(2, '0')
+      return `${year}-${month}-${day} ${hours}:${mins}:${secs}`
+    }
+
+    // Format countdown as Xh Ym Zs
+    const formatCountdown = (diff: number) => {
+      const hours = Math.floor(diff / 3600)
+      const mins = Math.floor((diff % 3600) / 60)
+      const secs = diff % 60
+      if (hours > 0) return `${hours}h ${mins}m ${secs}s`
+      if (mins > 0) return `${mins}m ${secs}s`
+      return `${secs}s`
+    }
+
     const updateTimer = () => {
       const now = Math.floor(Date.now() / 1000)
       const diff = validUntil - now
 
-      // Exact time (always calculated)
       if (diff <= 0) {
-        setExactTime("Expired")
-      } else {
-        const hours = Math.floor(diff / 3600)
-        const mins = Math.floor((diff % 3600) / 60)
-        const secs = diff % 60
-        if (hours > 0) {
-          setExactTime(`${hours}h ${mins}m ${secs}s`)
-        } else if (mins > 0) {
-          setExactTime(`${mins}m ${secs}s`)
-        } else {
-          setExactTime(`${secs}s`)
-        }
-      }
-
-      // Display time (simplified)
-      if (diff <= 0) {
-        setTimeLeft("Expired")
-      } else if (diff < 60) {
-        setTimeLeft(`${diff}s`)
+        setDisplayTime("Expired")
+        setHoverTime("Expired")
+        setTimerStatus("expired")
+      } else if (diff < 120) {
+        // <2m: countdown + time, danger
+        setDisplayTime(`${diff}s · ${formatCompactTime(validUntil)}`)
+        setHoverTime(`${formatCountdown(diff)} · ${formatFullTime(validUntil)}`)
+        setTimerStatus("danger")
       } else if (diff < 600) {
-        setTimeLeft(`~${Math.ceil(diff / 60)}m`)
+        // 2-10m: just time, warning
+        setDisplayTime(formatCompactTime(validUntil))
+        setHoverTime(`${formatCountdown(diff)} · ${formatFullTime(validUntil)}`)
+        setTimerStatus("warning")
       } else {
-        setTimeLeft("more than 10 min")
+        // >10m: just time, ok
+        setDisplayTime(formatCompactTime(validUntil))
+        setHoverTime(`${formatCountdown(diff)} · ${formatFullTime(validUntil)}`)
+        setTimerStatus("ok")
       }
     }
 
@@ -117,27 +150,37 @@ export function TransactionTab() {
     <>
       {/* Valid Until - unix timestamp with quick buttons */}
       <div className="space-y-2">
-        <div className="flex items-center justify-between">
+        <div
+          className="flex items-center justify-between gap-2 flex-wrap cursor-default"
+          onMouseEnter={() => setIsHoveringTimer(true)}
+          onMouseLeave={() => setIsHoveringTimer(false)}
+        >
           <FieldLabel htmlFor="validUntil" fieldId="validUntil">Valid Until</FieldLabel>
-          <span
-            className={`text-sm font-mono cursor-default ${timeLeft === "Expired" ? "text-destructive" : "text-muted-foreground"}`}
-            onMouseEnter={() => setIsHoveringTimer(true)}
-            onMouseLeave={() => setIsHoveringTimer(false)}
-          >
-            {timeLeft === "Expired" ? "Expired" : `Expires in ${isHoveringTimer ? exactTime : timeLeft}`}
+          <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-mono">
+            <span className={`inline-block w-1.5 h-1.5 rounded-full ${
+              timerStatus === "ok" ? "bg-green-500" :
+              timerStatus === "warning" ? "bg-yellow-500" :
+              timerStatus === "danger" ? "bg-red-500" :
+              "bg-destructive"
+            }`} />
+            <span className={timerStatus === "expired" ? "text-destructive" : "text-muted-foreground"}>
+              {isHoveringTimer ? hoverTime : displayTime}
+            </span>
           </span>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Input
             id="validUntil"
             type="number"
             value={validUntil}
             onChange={(e) => setValidUntil(parseInt(e.target.value) || 0)}
-            className="flex-1 font-mono"
+            className="flex-1 min-w-[120px] font-mono"
           />
-          <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={() => addTimeToValidUntil(60)}>+1m</Button>
-          <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={() => addTimeToValidUntil(300)}>+5m</Button>
-          <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={() => addTimeToValidUntil(600)}>+10m</Button>
+          <div className="flex gap-1">
+            <Button variant="ghost" size="sm" className="h-9 px-2 text-xs" onClick={() => addTimeToValidUntil(60)}>+1m</Button>
+            <Button variant="ghost" size="sm" className="h-9 px-2 text-xs" onClick={() => addTimeToValidUntil(300)}>+5m</Button>
+            <Button variant="ghost" size="sm" className="h-9 px-2 text-xs" onClick={() => addTimeToValidUntil(43200)}>+12h</Button>
+          </div>
         </div>
       </div>
 

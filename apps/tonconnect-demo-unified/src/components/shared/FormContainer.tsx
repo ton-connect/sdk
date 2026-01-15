@@ -228,15 +228,15 @@ export function FormContainer({
     <div className="space-y-4">
       <Card>
         {/* Header: Title + Toggle + Send */}
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 border-b">
+        <CardHeader className="flex flex-col gap-3 border-b sm:flex-row sm:items-center sm:justify-between sm:gap-4">
           <h2 className="text-lg font-semibold">{title}</h2>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap sm:gap-3">
             {/* Presets Dropdown */}
             {presets && presets.length > 0 && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="border">
+                  <Button variant="ghost" size="sm" className="border h-8 px-2 sm:px-3">
                     Presets
                     <ChevronDown className="ml-1 h-4 w-4" />
                   </Button>
@@ -261,7 +261,7 @@ export function FormContainer({
               <Button
                 variant={mode === "form" ? "secondary" : "ghost"}
                 size="sm"
-                className="rounded-r-none border-r-0"
+                className="rounded-r-none border-r-0 h-8 px-2 sm:px-3"
                 onClick={() => handleModeChange("form")}
               >
                 Form
@@ -269,7 +269,7 @@ export function FormContainer({
               <Button
                 variant={mode === "raw" ? "secondary" : "ghost"}
                 size="sm"
-                className="rounded-l-none"
+                className="rounded-l-none h-8 px-2 sm:px-3"
                 onClick={() => handleModeChange("raw")}
               >
                 Raw
@@ -280,9 +280,12 @@ export function FormContainer({
             <Button
               onClick={handleSend}
               disabled={sendDisabled}
+              size="sm"
+              className="h-8 ml-auto sm:ml-0"
             >
               {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-              {submitButtonText}
+              <span className="hidden sm:inline">{submitButtonText}</span>
+              <span className="sm:hidden">Send</span>
             </Button>
           </div>
         </CardHeader>
