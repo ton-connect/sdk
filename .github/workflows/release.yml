@@ -1,0 +1,253 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'packages/**/package.json'
+      - 'package.json'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+      pull-requests: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Read .nvmrc
+        run: echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_ENV
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '${{ env.NVMRC }}'
+          cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Build
+        uses: ./.github/actions/build
+
+      - name: Run tests
+        run: pnpm test
+        continue-on-error: false
+
+      - name: Check for version changes and extract versions
+        id: version_check
+        run: |
+          # Get previous commit on main
+          PREV_COMMIT="${{ github.event.before }}"
+          if [ -z "$PREV_COMMIT" ]; then
+            PREV_COMMIT=$(git rev-parse HEAD~1)
+          fi
+          
+          # Use Node.js script to check version changes
+          PREV_COMMIT="$PREV_COMMIT" node << 'EOF'
+          const fs = require('fs');
+          const { execSync } = require('child_process');
+          
+          const prevCommit = process.env.PREV_COMMIT || 'HEAD~1';
+          const changedPackages = [];
+          let hasBeta = false;
+          let releaseTag = '';
+          
+          // Get all package.json files
+          const packages = [];
+          try {
+            const files = fs.readdirSync('packages');
+            for (const file of files) {
+              const pkgPath = `packages/${file}/package.json`;
+              if (fs.existsSync(pkgPath)) {
+                packages.push(pkgPath);
+              }
+            }
+          } catch (e) {
+            console.error('Error reading packages directory:', e);
+            process.exit(1);
+          }
+          
+          for (const pkgJson of packages) {
+            try {
+              const currentPkg = JSON.parse(fs.readFileSync(pkgJson, 'utf-8'));
+              const pkgName = currentPkg.name;
+              const currentVersion = currentPkg.version;
+              
+              // Try to get previous version from git
+              let prevVersion = '';
+              try {
+                const prevContent = execSync(`git show ${prevCommit}:${pkgJson}`, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'ignore'] });
+                const prevPkg = JSON.parse(prevContent);
+                prevVersion = prevPkg.version || '';
+              } catch (e) {
+                // File might not exist in previous commit, that's ok
+                prevVersion = '';
+              }
+              
+              // Check if version changed
+              if (currentVersion !== prevVersion) {
+                console.log(`Package ${pkgName} version changed: ${prevVersion || '(new)'} -> ${currentVersion}`);
+                
+                changedPackages.push(`${pkgName}@${currentVersion}`);
+                
+                // Check if version contains "beta"
+                if (currentVersion.toLowerCase().includes('beta')) {
+                  hasBeta = true;
+                }
+                
+                // Use first package version for release tag
+                if (!releaseTag) {
+                  releaseTag = `v${currentVersion}`;
+                }
+              }
+            } catch (e) {
+              console.error(`Error processing ${pkgJson}:`, e);
+            }
+          }
+          
+          if (changedPackages.length === 0) {
+            console.log('No version changes detected. Skipping release.');
+            const outputFile = process.env.GITHUB_OUTPUT;
+            fs.appendFileSync(outputFile, `should_release=false\n`);
+            process.exit(0);
+          }
+          
+          // Output results
+          console.log('Changed packages:', changedPackages.join(', '));
+          
+          // Write to GitHub outputs
+          const outputFile = process.env.GITHUB_OUTPUT;
+          fs.appendFileSync(outputFile, `should_release=true\n`);
+          fs.appendFileSync(outputFile, `has_beta=${hasBeta}\n`);
+          fs.appendFileSync(outputFile, `release_tag=${releaseTag}\n`);
+          fs.appendFileSync(outputFile, `changed_packages<<EOF\n${changedPackages.join('\n')}\nEOF\n`);
+          fs.appendFileSync(outputFile, `tags<<EOF\n${changedPackages.join('\n')}\nEOF\n`);
+          EOF
+
+      - name: Create git tags
+        if: steps.version_check.outputs.should_release == 'true'
+        run: |
+          TAGS="${{ steps.version_check.outputs.tags }}"
+          while IFS= read -r tag; do
+            if [ -n "$tag" ]; then
+              echo "Creating tag: $tag"
+              git tag "$tag"
+            fi
+          done <<< "$TAGS"
+          
+          # Also create a release tag
+          if [ -n "${{ steps.version_check.outputs.release_tag }}" ]; then
+            git tag "${{ steps.version_check.outputs.release_tag }}"
+          fi
+
+      - name: Push tags
+        if: steps.version_check.outputs.should_release == 'true'
+        run: |
+          git push origin --tags
+
+      - name: Publish to npm
+        if: steps.version_check.outputs.should_release == 'true'
+        run: |
+          # Configure npm for publishing
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+          
+          # Determine npm tag
+          if [ "${{ steps.version_check.outputs.has_beta }}" == "true" ]; then
+            NPM_TAG="beta"
+          else
+            NPM_TAG="latest"
+          fi
+          
+          echo "Publishing with tag: $NPM_TAG"
+          
+          # Publish each changed package
+          CHANGED_PACKAGES="${{ steps.version_check.outputs.changed_packages }}"
+          while IFS= read -r pkg_version; do
+            if [ -n "$pkg_version" ]; then
+              PKG_NAME=$(echo "$pkg_version" | cut -d'@' -f1)
+              VERSION=$(echo "$pkg_version" | cut -d'@' -f2)
+              
+              # Find package directory
+              for pkg_dir in packages/*; do
+                if [ -d "$pkg_dir" ] && [ -f "$pkg_dir/package.json" ]; then
+                  DIR_PKG_NAME=$(node -p "require('./$pkg_dir/package.json').name")
+                  if [ "$DIR_PKG_NAME" == "$PKG_NAME" ]; then
+                    echo "Publishing $PKG_NAME@$VERSION with tag $NPM_TAG..."
+                    cd "$pkg_dir"
+                    npm publish --access public --tag "$NPM_TAG" --provenance
+                    cd ../..
+                    break
+                  fi
+                fi
+              done
+            fi
+          done <<< "$CHANGED_PACKAGES"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release
+        if: steps.version_check.outputs.should_release == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const changedPackages = `${{ steps.version_check.outputs.changed_packages }}`.trim();
+            const releaseTag = `${{ steps.version_check.outputs.release_tag }}`;
+            const hasBeta = `${{ steps.version_check.outputs.has_beta }}` === 'true';
+            const npmTag = hasBeta ? 'beta' : 'latest';
+            
+            const body = `## Released packages\n\n` +
+              changedPackages.split('\n').map(p => `- \`${p}\``).join('\n') +
+              `\n\nInstall with: \`npm install <package-name>@${npmTag}\``;
+            
+            await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: releaseTag,
+              name: `Release ${releaseTag}`,
+              body: body,
+              prerelease: hasBeta
+            });
+
+      - name: Merge main into develop
+        if: steps.version_check.outputs.should_release == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Fetch all branches
+          git fetch origin
+        
+          if git show-ref --verify --quiet refs/heads/develop; then
+            git checkout develop
+            git pull origin develop || true
+          else
+            git checkout -b develop
+          fi
+          
+          # Merge main into develop
+          git merge origin/main --no-edit
+          
+          # Push to develop
+          git push origin develop
