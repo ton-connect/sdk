@@ -71,9 +71,20 @@ jobs:
               PKG_NAME=$(node -p "require('./$pkg_json').name")
               BASE_VERSION=$(node -p "require('./$pkg_json').version")
               
-              # Remove any existing prerelease suffix and add dev suffix
               CLEAN_VERSION=$(echo $BASE_VERSION | sed 's/-.*$//')
-              DEV_VERSION="${CLEAN_VERSION}-dev.${DATE_SUFFIX}.${SHORT_HASH}"
+              DEV_VERSION=$(node -e "
+                const version = '$CLEAN_VERSION';
+                const parts = version.split('.');
+                if (parts.length >= 2) {
+                  const major = parseInt(parts[0]) || 0;
+                  const minor = parseInt(parts[1]) || 0;
+                  const patch = parts.length > 2 ? parseInt(parts[2]) || 0 : 0;
+                  const newMinor = minor + 1;
+                  console.log(major + '.' + newMinor + '.' + patch + '-dev.' + '$DATE_SUFFIX' + '.' + '$SHORT_HASH');
+                } else {
+                  console.log(version + '-dev.' + '$DATE_SUFFIX' + '.' + '$SHORT_HASH');
+                }
+              ")
               
               echo "Package: $PKG_NAME"
               echo "Base version: $BASE_VERSION"
