@@ -7,9 +7,9 @@ import { useHashTab } from "@/hooks/useHashTab"
 import { useSdkLogs } from "@/hooks/useSdkLogs"
 import { Header } from "./Header"
 import { RpcLogViewer } from "./shared/RpcLogViewer"
-import { TransactionTab, SignDataTab, SubscriptionTab, TonProofTab, SettingsTab, DevToolsTab } from "./tabs"
+import { TransactionTab, SignDataTab, SubscriptionTab, ConnectTab, SettingsTab, DevToolsTab } from "./tabs"
 
-const ALL_TABS = ["transaction", "sign", "subscription", "tonproof", "settings", "devtools"] as const
+const ALL_TABS = ["transaction", "sign", "subscription", "connect", "settings", "devtools"] as const
 const PUBLIC_TABS = ALL_TABS.filter(t => t !== "devtools")
 const DEFAULT_TAB = "transaction"
 
@@ -38,7 +38,7 @@ function DemoContentInner() {
             <TabsTrigger value="transaction" className="shrink-0">Transaction</TabsTrigger>
             <TabsTrigger value="sign" className="shrink-0">Sign Data</TabsTrigger>
             <TabsTrigger value="subscription" className="shrink-0">Subscription</TabsTrigger>
-            <TabsTrigger value="tonproof" className="shrink-0">Ton Proof</TabsTrigger>
+            <TabsTrigger value="connect" className="shrink-0">Connect</TabsTrigger>
             <TabsTrigger value="settings" className="shrink-0">Settings</TabsTrigger>
             {isUnlocked && (
               <TabsTrigger value="devtools" className="shrink-0">DevTools</TabsTrigger>
@@ -57,8 +57,8 @@ function DemoContentInner() {
             <SubscriptionTab />
           </TabsContent>
 
-          <TabsContent value="tonproof">
-            <TonProofTab />
+          <TabsContent value="connect">
+            <ConnectTab />
           </TabsContent>
 
           <TabsContent value="settings">

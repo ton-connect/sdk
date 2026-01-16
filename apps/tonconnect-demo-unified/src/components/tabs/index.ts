@@ -1,6 +1,6 @@
 export { TransactionTab } from "./TransactionTab"
 export { SignDataTab } from "./SignDataTab"
 export { SubscriptionTab } from "./SubscriptionTab"
-export { TonProofTab } from "./TonProofTab"
+export { ConnectTab } from "./ConnectTab"
 export { SettingsTab } from "./SettingsTab"
 export { DevToolsTab } from "./DevToolsTab"

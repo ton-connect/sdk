@@ -33,43 +33,64 @@ export async function generateRandomBytes(): Promise<Buffer> {
   return await getSecureRandomBytes(32);
 }
 
+export interface ProofChecks {
+  publicKeyMatch: boolean
+  addressMatch: boolean
+  domainAllowed: boolean
+  timestampValid: boolean
+  signatureValid: boolean
+}
+
+export interface CheckProofResult {
+  valid: boolean
+  checks: ProofChecks
+  error?: string
+}
+
 export async function checkProof(
   payload: CheckProofPayload,
   getWalletPublicKey: (address: string) => Promise<Buffer | null>
 ): Promise<boolean> {
+  const result = await checkProofDetailed(payload, getWalletPublicKey);
+  return result.valid;
+}
+
+export async function checkProofDetailed(
+  payload: CheckProofPayload,
+  getWalletPublicKey: (address: string) => Promise<Buffer | null>
+): Promise<CheckProofResult> {
+  const checks: ProofChecks = {
+    publicKeyMatch: false,
+    addressMatch: false,
+    domainAllowed: false,
+    timestampValid: false,
+    signatureValid: false
+  };
+
   try {
     const stateInit = loadStateInit(Cell.fromBase64(payload.proof.state_init).beginParse());
 
     // Try to get public key from stateInit first, then from blockchain
-    let publicKey = tryParsePublicKey(stateInit) ?? (await getWalletPublicKey(payload.address));
+    const publicKey = tryParsePublicKey(stateInit) ?? (await getWalletPublicKey(payload.address));
     if (!publicKey) {
-      return false;
+      return { valid: false, checks, error: 'Could not get public key' };
     }
 
     // Check public key matches
     const wantedPublicKey = Buffer.from(payload.public_key, 'hex');
-    if (!publicKey.equals(wantedPublicKey)) {
-      return false;
-    }
+    checks.publicKeyMatch = publicKey.equals(wantedPublicKey);
 
     // Check address matches stateInit
     const wantedAddress = Address.parse(payload.address);
     const address = contractAddress(wantedAddress.workChain, stateInit);
-    if (!address.equals(wantedAddress)) {
-      return false;
-    }
+    checks.addressMatch = address.equals(wantedAddress);
 
     // Check domain is allowed
-    if (!isAllowedDomain(payload.proof.domain.value)) {
-      console.warn('Domain not allowed:', payload.proof.domain.value);
-      return false;
-    }
+    checks.domainAllowed = isAllowedDomain(payload.proof.domain.value);
 
     // Check timestamp
     const now = Math.floor(Date.now() / 1000);
-    if (now - validAuthTime > payload.proof.timestamp) {
-      return false;
-    }
+    checks.timestampValid = now - validAuthTime <= payload.proof.timestamp;
 
     // Build message for verification
     const wc = Buffer.alloc(4);
@@ -102,9 +123,23 @@ export async function checkProof(
     const result = Buffer.from(await sha256(fullMsg));
     const signature = Buffer.from(payload.proof.signature, 'base64');
 
-    return sign.detached.verify(result, signature, publicKey);
+    checks.signatureValid = sign.detached.verify(result, signature, publicKey);
+
+    // Determine overall validity and error message
+    const valid = Object.values(checks).every(Boolean);
+    let error: string | undefined;
+
+    if (!valid) {
+      if (!checks.publicKeyMatch) error = 'Public key mismatch';
+      else if (!checks.addressMatch) error = 'Address mismatch';
+      else if (!checks.domainAllowed) error = 'Domain not allowed';
+      else if (!checks.timestampValid) error = 'Proof expired (older than 15 minutes)';
+      else if (!checks.signatureValid) error = 'Invalid signature';
+    }
+
+    return { valid, checks, error };
   } catch (e) {
     console.error('checkProof error:', e);
-    return false;
+    return { valid: false, checks, error: 'Verification failed' };
   }
 }

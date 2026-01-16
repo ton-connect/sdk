@@ -21,6 +21,12 @@ const signDataDocs = import.meta.glob('../docs/fields/sign-data/*.md', {
   eager: true
 }) as Record<string, string>
 
+const connectDocs = import.meta.glob('../docs/fields/connect/*.md', {
+  query: '?raw',
+  import: 'default',
+  eager: true
+}) as Record<string, string>
+
 // Section-level documentation
 const sectionDocs = import.meta.glob('../docs/sections/*.md', {
   query: '?raw',
@@ -44,9 +50,10 @@ function parseMarkdownWithFrontmatter(content: string): FieldInfo {
 
 export const transactionFields: FieldInfo[] = Object.values(transactionDocs).map(parseMarkdownWithFrontmatter)
 export const signDataFields: FieldInfo[] = Object.values(signDataDocs).map(parseMarkdownWithFrontmatter)
+export const connectFields: FieldInfo[] = Object.values(connectDocs).map(parseMarkdownWithFrontmatter)
 export const sections: FieldInfo[] = Object.values(sectionDocs).map(parseMarkdownWithFrontmatter)
 
-const allFields = [...transactionFields, ...signDataFields]
+const allFields = [...transactionFields, ...signDataFields, ...connectFields]
 
 export function getFieldInfo(fieldId: string): FieldInfo | undefined {
   return allFields.find(f => f.id === fieldId)

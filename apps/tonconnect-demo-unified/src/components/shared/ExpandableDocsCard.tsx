@@ -72,7 +72,7 @@ export function ExpandableDocsCard({ sectionId, steps }: ExpandableDocsCardProps
             prose-strong:text-foreground
             prose-ul:my-2 prose-li:my-0.5
             prose-code:text-xs prose-code:bg-muted prose-code:px-1 prose-code:rounded
-            prose-pre:bg-muted prose-pre:text-xs"
+            prose-pre:bg-muted prose-pre:text-foreground prose-pre:text-xs"
           >
             <ReactMarkdown remarkPlugins={[remarkGfm]}>
               {info.content}
