@@ -4,9 +4,7 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'packages/**/package.json'
-      - 'package.json'
+      - develop
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -20,7 +18,7 @@ jobs:
       packages: write
       id-token: write
       pull-requests: write
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -54,8 +52,10 @@ jobs:
         run: pnpm test
         continue-on-error: false
 
-      - name: Check for version changes and extract versions
+      # --- main: check versions vs npm, reject major bumps ---
+      - name: Check for version changes (main)
         id: version_check
+        if: github.ref == 'refs/heads/main'
         run: |
           node << 'EOF'
           const fs = require('fs');
@@ -134,8 +134,55 @@ jobs:
           fs.appendFileSync(out, `tags<<EOF\n${changedPackages.join('\n')}\nEOF\n`);
           EOF
 
-      - name: Create git tags
-        if: steps.version_check.outputs.should_release == 'true'
+      # --- develop: compute dev versions, update package.json, create tags ---
+      - name: Extract versions and create tags (develop)
+        id: version
+        if: github.ref == 'refs/heads/develop'
+        run: |
+          SHORT_HASH=$(git rev-parse --short HEAD)
+          DATE_SUFFIX=$(date +%Y%m%d%H%M%S)
+          echo "Creating dev versions for packages..."
+          TAGS=""
+          for pkg_json in packages/*/package.json; do
+            if [ -f "$pkg_json" ]; then
+              PKG_NAME=$(node -p "require('./$pkg_json').name")
+              BASE_VERSION=$(node -p "require('./$pkg_json').version")
+              CLEAN_VERSION=$(echo $BASE_VERSION | sed 's/-.*$//')
+              DEV_VERSION=$(node -e "
+                const version = '$CLEAN_VERSION';
+                const parts = version.split('.');
+                if (parts.length >= 2) {
+                  const major = parseInt(parts[0]) || 0;
+                  const minor = parseInt(parts[1]) || 0;
+                  const patch = parts.length > 2 ? parseInt(parts[2]) || 0 : 0;
+                  const newMinor = minor + 1;
+                  console.log(major + '.' + newMinor + '.' + patch + '-dev.' + '$DATE_SUFFIX' + '.' + '$SHORT_HASH');
+                } else {
+                  console.log(version + '-dev.' + '$DATE_SUFFIX' + '.' + '$SHORT_HASH');
+                }
+              ")
+              echo "Package: $PKG_NAME"
+              echo "Base version: $BASE_VERSION"
+              echo "Dev version: $DEV_VERSION"
+              node -e "
+                const fs = require('fs');
+                const pkg = require('./$pkg_json');
+                pkg.version = '$DEV_VERSION';
+                fs.writeFileSync('$pkg_json', JSON.stringify(pkg, null, 2) + '\n');
+              "
+              TAG="${PKG_NAME}@${DEV_VERSION}"
+              TAGS="${TAGS}${TAG}\n"
+              git tag "$TAG"
+            fi
+          done
+          echo "tags<<EOF" >> $GITHUB_OUTPUT
+          echo -e "$TAGS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          echo "short_hash=$SHORT_HASH" >> $GITHUB_OUTPUT
+
+      # --- main: create git tags ---
+      - name: Create git tags (main)
+        if: github.ref == 'refs/heads/main' && steps.version_check.outputs.should_release == 'true'
         run: |
           TAGS="${{ steps.version_check.outputs.tags }}"
           while IFS= read -r tag; do
@@ -144,19 +191,22 @@ jobs:
               git tag "$tag"
             fi
           done <<< "$TAGS"
-          
-          # Also create a release tag
           if [ -n "${{ steps.version_check.outputs.release_tag }}" ]; then
             git tag "${{ steps.version_check.outputs.release_tag }}"
           fi
 
-      - name: Push tags
-        if: steps.version_check.outputs.should_release == 'true'
-        run: |
-          git push origin --tags
+      # --- main: push tags | develop: push tags ---
+      - name: Push tags (main)
+        if: github.ref == 'refs/heads/main' && steps.version_check.outputs.should_release == 'true'
+        run: git push origin --tags
 
-      - name: Publish to npm (OIDC)
-        if: steps.version_check.outputs.should_release == 'true'
+      - name: Push tags (develop)
+        if: github.ref == 'refs/heads/develop'
+        run: git push origin --tags
+
+      # --- main: publish to npm (beta/latest) ---
+      - name: Publish to npm (main)
+        if: github.ref == 'refs/heads/main' && steps.version_check.outputs.should_release == 'true'
         run: |
           npm install -g npm@11.5.1
           if [ "${{ steps.version_check.outputs.has_beta }}" == "true" ]; then
@@ -165,7 +215,6 @@ jobs:
             NPM_TAG="latest"
           fi
           echo "Publishing with tag: $NPM_TAG"
-          
           CHANGED_PACKAGES="${{ steps.version_check.outputs.changed_packages }}"
           while IFS= read -r pkg_version; do
             if [ -n "$pkg_version" ]; then
@@ -186,8 +235,24 @@ jobs:
             fi
           done <<< "$CHANGED_PACKAGES"
 
-      - name: Create GitHub Release
-        if: steps.version_check.outputs.should_release == 'true'
+      # --- develop: publish to npm (dev) ---
+      - name: Publish to npm (develop)
+        if: github.ref == 'refs/heads/develop'
+        run: |
+          npm install -g npm@11.5.1
+          echo "Publishing with tag: dev"
+          for pkg_dir in packages/*; do
+            if [ -d "$pkg_dir" ] && [ -f "$pkg_dir/package.json" ]; then
+              echo "Publishing $pkg_dir..."
+              cd "$pkg_dir"
+              npm publish --access public --tag dev --provenance
+              cd ../..
+            fi
+          done
+
+      # --- main: GitHub Release ---
+      - name: Create GitHub Release (main)
+        if: github.ref == 'refs/heads/main' && steps.version_check.outputs.should_release == 'true'
         uses: actions/github-script@v7
         with:
           script: |
@@ -195,11 +260,9 @@ jobs:
             const releaseTag = `${{ steps.version_check.outputs.release_tag }}`;
             const hasBeta = `${{ steps.version_check.outputs.has_beta }}` === 'true';
             const npmTag = hasBeta ? 'beta' : 'latest';
-            
             const body = `## Released packages\n\n` +
               changedPackages.split('\n').map(p => `- \`${p}\``).join('\n') +
               `\n\nInstall with: \`npm install <package-name>@${npmTag}\``;
-            
             await github.rest.repos.createRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -209,24 +272,54 @@ jobs:
               prerelease: hasBeta
             });
 
-      - name: Merge main into develop
-        if: steps.version_check.outputs.should_release == 'true'
+      # --- main: merge main into develop ---
+      - name: Merge main into develop (main)
+        if: github.ref == 'refs/heads/main' && steps.version_check.outputs.should_release == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          
-          # Fetch all branches
           git fetch origin
-        
           if git show-ref --verify --quiet refs/heads/develop; then
             git checkout develop
             git pull origin develop || true
           else
             git checkout -b develop
           fi
-          
-          # Merge main into develop
           git merge origin/main --no-edit
-          
-          # Push to develop
           git push origin develop
+
+      # --- develop: release notes (log) ---
+      - name: Create Release Notes (develop)
+        if: github.ref == 'refs/heads/develop'
+        run: |
+          echo "# Dev Release $(date +%Y-%m-%d)" > release_notes.md
+          echo "" >> release_notes.md
+          echo "## Commit: ${{ steps.version.outputs.short_hash }}" >> release_notes.md
+          echo "" >> release_notes.md
+          echo "## Published packages:" >> release_notes.md
+          echo "" >> release_notes.md
+          echo "${{ steps.version.outputs.tags }}" >> release_notes.md
+          echo "" >> release_notes.md
+          echo "Install with:" >> release_notes.md
+          echo '```bash' >> release_notes.md
+          echo "npm install <package-name>@dev" >> release_notes.md
+          echo '```' >> release_notes.md
+          cat release_notes.md
+
+      # --- develop: comment on commit ---
+      - name: Comment on commits (develop)
+        if: github.ref == 'refs/heads/develop'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const tags = `${{ steps.version.outputs.tags }}`.trim();
+            const shortHash = `${{ steps.version.outputs.short_hash }}`;
+            const body = `🚀 **Dev Release Published**\n\n` +
+              `Published packages:\n\n${tags.split('\n').map(t => `- \`${t}\``).join('\n')}\n\n` +
+              `Install with: \`npm install <package-name>@dev\``;
+            github.rest.repos.createCommitComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha,
+              body: body
+            });

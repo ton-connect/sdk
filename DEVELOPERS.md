@@ -74,7 +74,7 @@ When develop has accumulated changes ready for release:
 ### 3. Merge into main and Release workflow
 
 - After review, the PR is merged into **main**.
-- A push to main that changes `packages/**/package.json` triggers the **Release** workflow.
+- A push to **main** triggers the **Release** workflow (which also runs on **develop**; behaviour depends on the branch).
 
 ### 4. What the Release workflow does
 
@@ -101,7 +101,7 @@ After a successful Release workflow, **develop** is automatically updated with a
 
 ## Dev release
 
-- **Trigger:** every **push to develop**.
+- **Trigger:** every **push to develop** (same **Release** workflow file; behaviour is dev-specific on this branch).
 - **Behavior:** for each package, the version is set to `(current minor+1).X.X-dev.DATE.HASH` and published to npm with the **`dev`** tag.
 - No PR into main is required. A dev release is produced on every commit to develop.
 
@@ -122,7 +122,7 @@ develop  ◄── PRs (features, fixes)
    │                      │
    │                      └── merge main ──► develop
    │
-   └── push ──► Dev Release workflow (publish @dev on every commit)
+   └── push ──► Release workflow, dev path (publish @dev on every commit)
 ```
 
 ---
