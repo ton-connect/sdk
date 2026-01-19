@@ -129,4 +129,3 @@ The documentation for this package is generated using [typedoc](https://typedoc.
 ## React Native Compatibility
 
 Please note that the package is currently not compatible with React Native. This issue is expected to be addressed in future updates.
-
