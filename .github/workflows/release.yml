@@ -169,24 +169,26 @@ jobs:
       - name: Publish to npm
         if: steps.version_check.outputs.should_release == 'true'
         run: |
-          # Configure npm for publishing
+          if [ -z "${{ secrets.NPM_TOKEN }}" ]; then
+            echo "::error::NPM_TOKEN is not set. Add it in Settings → Secrets and variables → Actions to publish to npm."
+            exit 1
+          fi
+          
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
           
-          # Determine npm tag
           if [ "${{ steps.version_check.outputs.has_beta }}" == "true" ]; then
             NPM_TAG="beta"
           else
             NPM_TAG="latest"
           fi
-          
           echo "Publishing with tag: $NPM_TAG"
           
-          # Publish each changed package
           CHANGED_PACKAGES="${{ steps.version_check.outputs.changed_packages }}"
           while IFS= read -r pkg_version; do
             if [ -n "$pkg_version" ]; then
-              PKG_NAME=$(echo "$pkg_version" | cut -d'@' -f1)
-              VERSION=$(echo "$pkg_version" | cut -d'@' -f2)
+              # @scope/name@version → split on last @
+              VERSION="${pkg_version##*@}"
+              PKG_NAME="${pkg_version%@*}"
               
               # Find package directory
               for pkg_dir in packages/*; do

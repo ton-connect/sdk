@@ -119,7 +119,11 @@ jobs:
 
       - name: Publish to npm
         run: |
-          # Configure npm for publishing
+          if [ -z "${{ secrets.NPM_TOKEN }}" ]; then
+            echo "::error::NPM_TOKEN is not set. Add it in Settings → Secrets and variables → Actions to publish to npm."
+            exit 1
+          fi
+          
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
           
           # Publish each package with dev tag
