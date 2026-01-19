@@ -117,30 +117,18 @@ jobs:
         run: |
           git push origin --tags
 
-      - name: Publish to npm
+      - name: Publish to npm (OIDC)
         run: |
-          if [ -z "${{ secrets.NPM_TOKEN }}" ]; then
-            echo "::error::NPM_TOKEN is not set. Add it in Settings → Secrets and variables → Actions to publish to npm."
-            exit 1
-          fi
-          
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-          
-          # Publish each package with dev tag
+          npm install -g npm@11.5.1
+          echo "Publishing with tag: dev (OIDC, no NPM_TOKEN)"
           for pkg_dir in packages/*; do
             if [ -d "$pkg_dir" ] && [ -f "$pkg_dir/package.json" ]; then
               echo "Publishing $pkg_dir..."
               cd "$pkg_dir"
-              
-              # Publish with dev tag (not latest)
               npm publish --access public --tag dev --provenance
-              
               cd ../..
             fi
           done
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create Release Notes
         run: |
