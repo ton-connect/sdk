@@ -11,6 +11,7 @@ import { SignDataTester } from './components/SignDataTester/SignDataTester';
 import { MerkleExample } from './components/MerkleExample/MerkleExample';
 import { FindTransactionDemo } from './components/FindTransactionDemo/FindTransactionDemo';
 import { TransferUsdt } from './components/TransferUsdt/TransferUsdt';
+import { IntentsUrlDemo } from './components/IntentsUrlDemo/IntentsUrlDemo';
 import { UniversalConnector } from '@reown/appkit-universal-connector';
 
 initializeWalletConnect(UniversalConnector, {
@@ -59,6 +60,7 @@ function App() {
             <div>
                 <Routes>
                     <Route path="/" element={<HomePage />} />
+                    <Route path="/intents-url-demo" element={<IntentsUrlDemo />} />
                     <Route path="/iframe" element={<IframePage />} />
                     <Route path="/iframe/iframe" element={<IframeIframePage />} />
                 </Routes>

@@ -4,17 +4,41 @@ header {
   justify-content: space-between;
   padding: 10px 25px;
 
-  > span {
+  .header__title {
     font-size: 30px;
     line-height: 34px;
     color: rgba(102,170,238,0.91);
     font-weight: bold;
+
+    a {
+      color: rgba(102,170,238,0.91);
+      text-decoration: none;
+      transition: opacity 0.2s ease-in-out;
+
+      &:hover {
+        opacity: 0.8;
+      }
+    }
   }
 
   .header__controls {
     display: flex;
     align-items: center;
     gap: 12px;
+  }
+
+  .header__link {
+    color: rgba(184, 212, 241, 0.9);
+    text-decoration: none;
+    font-size: 15px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+
+    &:hover {
+      background-color: rgba(102, 170, 238, 0.2);
+      color: rgba(102, 170, 238, 0.91);
+    }
   }
 }
 
