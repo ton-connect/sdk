@@ -1171,9 +1171,19 @@ export class TonConnectUI {
         return rootId;
     }
 
-    private checkButtonRootExist(buttonRootId: string | null | undefined): void | never {
+    private checkButtonRootExist(buttonRootId: string | string[] | null | undefined): void | never {
         if (buttonRootId == null) {
             return;
+        }
+
+        if (Array.isArray(buttonRootId)) {
+            for (const buttonId of buttonRootId) {
+                if (document.getElementById(buttonId)) {
+                    return;
+                }
+            }
+
+            throw new TonConnectUIError(`${buttonRootId} element not found in the document.`);
         }
 
         if (!document.getElementById(buttonRootId)) {
