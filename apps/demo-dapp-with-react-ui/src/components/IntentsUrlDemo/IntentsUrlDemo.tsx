@@ -1,11 +1,12 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import ReactJson from 'react-json-view';
+import { Address, beginCell, toNano } from '@ton/core';
 import {
     IntentRequest,
     IntentItem,
     SignDataPayload,
     ConnectRequest,
-    ConnectItem,
     createTransactionIntent,
     createSignDataIntent,
     createActionIntent,
@@ -15,14 +16,15 @@ import {
     createTextSignDataPayload,
     createBinarySignDataPayload,
     createCellSignDataPayload,
-    generateIntentUrlInlineWithEncoding,
+    generateIntentUrlInlineWithEncoding
 } from './index';
 import './style.scss';
 
 type IntentType = 'txIntent' | 'signIntent' | 'actionIntent';
 
 const defaultClientPubKey = '365c43da7eeb2ac071c3b4da695ff8b03f055d79e5cc8aac4fef72e86e638956';
-const defaultManifestUrl = 'https://tonconnect-demo-dapp-with-react-ui.vercel.app/tonconnect-manifest.vercel.json';
+const defaultManifestUrl =
+    'https://tonconnect-demo-dapp-with-react-ui.vercel.app/tonconnect-manifest.vercel.json';
 const defaultAddress = 'UQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJKZ';
 const defaultAmount = '20000000';
 
@@ -65,7 +67,7 @@ const defaultState: State = {
     signDataCell: '',
     signDataManifestUrl: '',
     actionUrl: 'https://example.com/dex?action=swap',
-    showBothEncodings: true,
+    showBothEncodings: true
 };
 
 function serializeState(state: State): string {
@@ -85,6 +87,7 @@ export function IntentsUrlDemo() {
     const [state, setState] = useState<State>(defaultState);
     const [generatedUrlBase64, setGeneratedUrlBase64] = useState<string>('');
     const [generatedUrlEncodeURI, setGeneratedUrlEncodeURI] = useState<string>('');
+    const [rawIntent, setRawIntent] = useState<IntentRequest | null>(null);
     const isInitializing = useRef(true);
 
     // Load state from URL on mount
@@ -102,7 +105,7 @@ export function IntentsUrlDemo() {
     // Update URL whenever state changes (but not when initializing from URL)
     useEffect(() => {
         if (isInitializing.current) return;
-        
+
         const encoded = serializeState(state);
         const currentEncoded = searchParams.get('state');
         if (currentEncoded !== encoded) {
@@ -111,6 +114,47 @@ export function IntentsUrlDemo() {
             setSearchParams(newParams, { replace: true });
         }
     }, [state, searchParams, setSearchParams]);
+
+    // Helper function to normalize addresses using Address.parse().toString()
+    const normalizeAddress = useCallback((address: string): string => {
+        if (!address) return address;
+        try {
+            return Address.parse(address).toString();
+        } catch {
+            // If parsing fails, return original address
+            return address;
+        }
+    }, []);
+
+    // Helper function to normalize transaction items with addresses
+    const normalizeTransactionItems = useCallback(
+        (items: IntentItem[]): IntentItem[] => {
+            return items.map(item => {
+                if (item.t === 'ton') {
+                    return {
+                        ...item,
+                        a: normalizeAddress(item.a)
+                    };
+                } else if (item.t === 'jetton') {
+                    return {
+                        ...item,
+                        ma: normalizeAddress(item.ma),
+                        d: normalizeAddress(item.d),
+                        ...(item.rd && { rd: normalizeAddress(item.rd) })
+                    };
+                } else if (item.t === 'nft') {
+                    return {
+                        ...item,
+                        na: normalizeAddress(item.na),
+                        no: normalizeAddress(item.no),
+                        ...(item.rd && { rd: normalizeAddress(item.rd) })
+                    };
+                }
+                return item;
+            });
+        },
+        [normalizeAddress]
+    );
 
     // Auto-generate URLs whenever relevant state changes
     useEffect(() => {
@@ -122,22 +166,23 @@ export function IntentsUrlDemo() {
                           ...(state.includeTonAddr ? [{ name: 'ton_addr' as const }] : []),
                           ...(state.includeTonProof
                               ? [{ name: 'ton_proof' as const, payload: state.tonProofPayload }]
-                              : []),
-                      ],
+                              : [])
+                      ]
                   }
                 : undefined;
 
             const options = {
                 ...(connectRequest && { connectRequest }),
-                ...(state.network && { network: state.network }),
+                ...(state.network && { network: state.network })
             };
 
             let intent: IntentRequest;
 
             if (state.intentType === 'txIntent') {
-                intent = createTransactionIntent(state.clientPubKey, state.transactionItems, {
+                const normalizedItems = normalizeTransactionItems(state.transactionItems);
+                intent = createTransactionIntent('0', normalizedItems, {
                     ...options,
-                    ...(state.validUntil && { validUntil: state.validUntil }),
+                    ...(state.validUntil && { validUntil: state.validUntil })
                 });
             } else if (state.intentType === 'signIntent') {
                 let payload: SignDataPayload;
@@ -146,19 +191,31 @@ export function IntentsUrlDemo() {
                 } else if (state.signDataPayloadType === 'binary') {
                     payload = createBinarySignDataPayload(state.signDataBinary);
                 } else {
-                    payload = createCellSignDataPayload(state.signDataCellSchema, state.signDataCell);
+                    payload = createCellSignDataPayload(
+                        state.signDataCellSchema,
+                        state.signDataCell
+                    );
                 }
 
-                intent = createSignDataIntent(state.clientPubKey, payload, {
+                intent = createSignDataIntent('0', payload, {
                     ...options,
-                    ...(state.signDataManifestUrl && { manifestUrl: state.signDataManifestUrl }),
+                    ...(state.signDataManifestUrl && { manifestUrl: state.signDataManifestUrl })
                 });
             } else {
-                intent = createActionIntent(state.clientPubKey, state.actionUrl, options);
+                intent = createActionIntent('0', state.actionUrl, options);
             }
 
-            const urlBase64 = generateIntentUrlInlineWithEncoding(state.clientPubKey, intent, 'base64url');
-            const urlEncodeURI = generateIntentUrlInlineWithEncoding(state.clientPubKey, intent, 'encodeURI');
+            setRawIntent(intent);
+            const urlBase64 = generateIntentUrlInlineWithEncoding(
+                state.clientPubKey,
+                intent,
+                'base64url'
+            );
+            const urlEncodeURI = generateIntentUrlInlineWithEncoding(
+                state.clientPubKey,
+                intent,
+                'encodeURI'
+            );
             setGeneratedUrlBase64(urlBase64);
             setGeneratedUrlEncodeURI(urlEncodeURI);
         } catch (error) {
@@ -166,7 +223,7 @@ export function IntentsUrlDemo() {
             setGeneratedUrlBase64(errorMsg);
             setGeneratedUrlEncodeURI(errorMsg);
         }
-    }, [state]);
+    }, [state, normalizeTransactionItems]);
 
     const updateState = useCallback((updates: Partial<State>) => {
         setState(prev => ({ ...prev, ...updates }));
@@ -183,7 +240,7 @@ export function IntentsUrlDemo() {
                 newItem = createNftTransferItem(defaultAddress, defaultAddress);
             }
             updateState({
-                transactionItems: [...state.transactionItems, newItem],
+                transactionItems: [...state.transactionItems, newItem]
             });
         },
         [state.transactionItems, updateState]
@@ -192,7 +249,7 @@ export function IntentsUrlDemo() {
     const removeTransactionItem = useCallback(
         (index: number) => {
             updateState({
-                transactionItems: state.transactionItems.filter((_, i) => i !== index),
+                transactionItems: state.transactionItems.filter((_, i) => i !== index)
             });
         },
         [state.transactionItems, updateState]
@@ -211,9 +268,174 @@ export function IntentsUrlDemo() {
         navigator.clipboard.writeText(text);
     }, []);
 
+    // Template functions based on gen.ts
+    const loadTemplate = useCallback(
+        (templateName: string) => {
+            const tonProofPayload =
+                'dc61a65e1c975398e5f22afae15e4d8de936ea0bf897a56a770da71a96ff10f9';
+            const clientPubKey = '365c43da7eeb2ac071c3b4da695ff8b03f055d79e5cc8aac4fef72e86e638956';
+            const manifestUrl =
+                'https://tonconnect-demo-dapp-with-react-ui.vercel.app/tonconnect-manifest.vercel.json';
+
+            const cell = beginCell()
+                .storeUint(0, 256)
+                .storeUint(0, 256)
+                .storeUint(0, 256)
+                .storeUint(0, 255)
+                .endCell()
+                .toBoc()
+                .toString('base64');
+
+            const address = Address.parse(
+                '-1:5555555555555555555555555555555555555555555555555555555555555555'
+            ).toString();
+            const amount = toNano(1).toString();
+
+            const baseFields = {
+                includeConnectRequest: true,
+                includeTonAddr: true,
+                includeTonProof: true,
+                tonProofPayload,
+                manifestUrl,
+                clientPubKey
+            };
+            switch (templateName) {
+                case 'tonTransfer':
+                    updateState({
+                        intentType: 'txIntent',
+                        transactionItems: [createTonTransferItem(address, amount)],
+                        validUntil: Math.ceil(Date.now() / 1000) + 3600,
+                        network: '-239',
+                        ...baseFields
+                    });
+                    break;
+                case 'tonJettonTransfer':
+                    updateState({
+                        intentType: 'txIntent',
+                        transactionItems: [
+                            createTonTransferItem(address, amount),
+                            createJettonTransferItem(address, amount, address)
+                        ],
+                        validUntil: Math.ceil(Date.now() / 1000) + 3600,
+                        network: '-239',
+                        ...baseFields
+                    });
+                    break;
+                case 'jettonTransfer':
+                    updateState({
+                        intentType: 'txIntent',
+                        transactionItems: [createJettonTransferItem(address, amount, address)],
+                        validUntil: Math.ceil(Date.now() / 1000) + 3600,
+                        network: '-239',
+                        ...baseFields
+                    });
+                    break;
+                case 'jetton2Transfer':
+                    updateState({
+                        intentType: 'txIntent',
+                        transactionItems: [
+                            createJettonTransferItem(address, amount, address),
+                            createJettonTransferItem(address, amount, address)
+                        ],
+                        validUntil: Math.ceil(Date.now() / 1000) + 3600,
+                        network: '-239',
+                        ...baseFields
+                    });
+                    break;
+                case 'jettonWithPayload':
+                    updateState({
+                        intentType: 'txIntent',
+                        transactionItems: [
+                            createJettonTransferItem(address, amount, address, {
+                                forwardPayload: cell
+                            })
+                        ],
+                        validUntil: Math.ceil(Date.now() / 1000) + 3600,
+                        network: '-239',
+                        ...baseFields
+                    });
+                    break;
+                case 'nftTransfer':
+                    updateState({
+                        intentType: 'txIntent',
+                        transactionItems: [createNftTransferItem(address, address)],
+                        validUntil: Math.ceil(Date.now() / 1000) + 3600,
+                        network: '-239',
+                        ...baseFields
+                    });
+                    break;
+                case 'signDataText':
+                    updateState({
+                        intentType: 'signIntent',
+                        signDataPayloadType: 'text',
+                        signDataText: 's'.repeat(395),
+                        network: '-239',
+                        ...baseFields
+                    });
+                    break;
+                case 'signDataBinary':
+                    updateState({
+                        intentType: 'signIntent',
+                        signDataPayloadType: 'binary',
+                        signDataBinary:
+                            'hRGGfQ/I0EgFGLbDRcmiE6xUjd7bld5oT1dsq8aZvI8wjlXW/8AoJCfmVCQs/AO+Lwe7J/+DOBTan5jOVsHugrIe60Mm5b8fuBjlJDffbTTlPUppDRMgueoaAWXEVEgWjGg+Oj3mkrKB95iUIlYuZUfSXOwjwz5agwOsObl5ZoHZCVmPNlJLULoTyMRDUCWRuXHURWny5hJHtFiR+3g3Zfc4LJrBsxUqvivO4l4fJVHwa4uGw6110sRGmxHV9YbTUhgnY+4yRwE40p0LZwCme2tj7KWsUpqXRwtX7WVkQ1awMEEE6GqjXg5BCo4WJKytSZkLX1RmnTUvJF+b/804QyOf2IIFy+tG3zldvCI0Qz4l4D24pPC830qPwvHNCVTv0v85IhAn',
+                        network: '-239',
+                        ...baseFields
+                    });
+                    break;
+                case 'signDataCell':
+                    updateState({
+                        intentType: 'signIntent',
+                        signDataPayloadType: 'cell',
+                        signDataCellSchema: 'a'.repeat(100),
+                        signDataCell: cell,
+                        network: '-239',
+                        ...baseFields
+                    });
+                    break;
+                case 'actionIntent':
+                    updateState({
+                        intentType: 'actionIntent',
+                        actionUrl: 'a'.repeat(428),
+                        ...baseFields
+                    });
+                    break;
+            }
+        },
+        [updateState, state.tonProofPayload]
+    );
+
     return (
         <div className="intents-url-demo">
             <h3>Dynamic Intent URL Builder</h3>
+
+            <div className="intents-url-demo__section">
+                <label>
+                    <span>Templates:</span>
+                    <div className="intents-url-demo__templates">
+                        <button onClick={() => loadTemplate('tonTransfer')}>TON Transfer</button>
+                        <button onClick={() => loadTemplate('tonJettonTransfer')}>
+                            TON + Jetton
+                        </button>
+                        <button onClick={() => loadTemplate('jettonTransfer')}>
+                            Jetton Transfer
+                        </button>
+                        <button onClick={() => loadTemplate('jetton2Transfer')}>
+                            2 Jetton Transfer
+                        </button>
+                        <button onClick={() => loadTemplate('jettonWithPayload')}>
+                            Jetton with 1023 bit 1 cell payload
+                        </button>
+                        <button onClick={() => loadTemplate('nftTransfer')}>NFT Transfer</button>
+                        <button onClick={() => loadTemplate('signDataText')}>SignData Text</button>
+                        <button onClick={() => loadTemplate('signDataBinary')}>
+                            SignData Binary
+                        </button>
+                        <button onClick={() => loadTemplate('signDataCell')}>SignData Cell</button>
+                        <button onClick={() => loadTemplate('actionIntent')}>Action Intent</button>
+                    </div>
+                </label>
+            </div>
 
             <div className="intents-url-demo__section">
                 <label>
@@ -221,7 +443,7 @@ export function IntentsUrlDemo() {
                     <input
                         type="text"
                         value={state.clientPubKey}
-                        onChange={(e) => updateState({ clientPubKey: e.target.value })}
+                        onChange={e => updateState({ clientPubKey: e.target.value })}
                         placeholder="Enter client public key"
                     />
                 </label>
@@ -232,7 +454,7 @@ export function IntentsUrlDemo() {
                     <span>Intent Type:</span>
                     <select
                         value={state.intentType}
-                        onChange={(e) => updateState({ intentType: e.target.value as IntentType })}
+                        onChange={e => updateState({ intentType: e.target.value as IntentType })}
                     >
                         <option value="txIntent">Transaction Intent</option>
                         <option value="signIntent">Sign Data Intent</option>
@@ -247,7 +469,7 @@ export function IntentsUrlDemo() {
                     <input
                         type="text"
                         value={state.network}
-                        onChange={(e) => updateState({ network: e.target.value })}
+                        onChange={e => updateState({ network: e.target.value })}
                         placeholder="e.g., -239 (mainnet), -3 (testnet), or leave empty"
                     />
                 </label>
@@ -258,7 +480,7 @@ export function IntentsUrlDemo() {
                     <input
                         type="checkbox"
                         checked={state.includeConnectRequest}
-                        onChange={(e) => updateState({ includeConnectRequest: e.target.checked })}
+                        onChange={e => updateState({ includeConnectRequest: e.target.checked })}
                     />
                     <span>Include Connect Request</span>
                 </label>
@@ -271,7 +493,7 @@ export function IntentsUrlDemo() {
                         <input
                             type="text"
                             value={state.manifestUrl}
-                            onChange={(e) => updateState({ manifestUrl: e.target.value })}
+                            onChange={e => updateState({ manifestUrl: e.target.value })}
                             placeholder="Manifest URL"
                         />
                     </label>
@@ -279,7 +501,7 @@ export function IntentsUrlDemo() {
                         <input
                             type="checkbox"
                             checked={state.includeTonAddr}
-                            onChange={(e) => updateState({ includeTonAddr: e.target.checked })}
+                            onChange={e => updateState({ includeTonAddr: e.target.checked })}
                         />
                         <span>Include ton_addr</span>
                     </label>
@@ -287,7 +509,7 @@ export function IntentsUrlDemo() {
                         <input
                             type="checkbox"
                             checked={state.includeTonProof}
-                            onChange={(e) => updateState({ includeTonProof: e.target.checked })}
+                            onChange={e => updateState({ includeTonProof: e.target.checked })}
                         />
                         <span>Include ton_proof</span>
                     </label>
@@ -297,7 +519,7 @@ export function IntentsUrlDemo() {
                             <input
                                 type="text"
                                 value={state.tonProofPayload}
-                                onChange={(e) => updateState({ tonProofPayload: e.target.value })}
+                                onChange={e => updateState({ tonProofPayload: e.target.value })}
                                 placeholder="Ton proof payload"
                             />
                         </label>
@@ -312,16 +534,22 @@ export function IntentsUrlDemo() {
                         <input
                             type="number"
                             value={state.validUntil}
-                            onChange={(e) => updateState({ validUntil: Number(e.target.value) })}
+                            onChange={e => updateState({ validUntil: Number(e.target.value) })}
                         />
                     </label>
                     <div className="intents-url-demo__items">
                         <div className="intents-url-demo__items-header">
                             <span>Transaction Items:</span>
                             <div className="intents-url-demo__buttons">
-                                <button onClick={() => addTransactionItem('ton')}>Add TON Transfer</button>
-                                <button onClick={() => addTransactionItem('jetton')}>Add Jetton Transfer</button>
-                                <button onClick={() => addTransactionItem('nft')}>Add NFT Transfer</button>
+                                <button onClick={() => addTransactionItem('ton')}>
+                                    Add TON Transfer
+                                </button>
+                                <button onClick={() => addTransactionItem('jetton')}>
+                                    Add Jetton Transfer
+                                </button>
+                                <button onClick={() => addTransactionItem('nft')}>
+                                    Add NFT Transfer
+                                </button>
                             </div>
                         </div>
                         {state.transactionItems.map((item, index) => (
@@ -329,7 +557,7 @@ export function IntentsUrlDemo() {
                                 key={index}
                                 item={item}
                                 index={index}
-                                onUpdate={(updatedItem) => updateTransactionItem(index, updatedItem)}
+                                onUpdate={updatedItem => updateTransactionItem(index, updatedItem)}
                                 onRemove={() => removeTransactionItem(index)}
                             />
                         ))}
@@ -343,8 +571,13 @@ export function IntentsUrlDemo() {
                         <span>Payload Type:</span>
                         <select
                             value={state.signDataPayloadType}
-                            onChange={(e) =>
-                                updateState({ signDataPayloadType: e.target.value as 'text' | 'binary' | 'cell' })
+                            onChange={e =>
+                                updateState({
+                                    signDataPayloadType: e.target.value as
+                                        | 'text'
+                                        | 'binary'
+                                        | 'cell'
+                                })
                             }
                         >
                             <option value="text">Text</option>
@@ -357,7 +590,7 @@ export function IntentsUrlDemo() {
                             <span>Text:</span>
                             <textarea
                                 value={state.signDataText}
-                                onChange={(e) => updateState({ signDataText: e.target.value })}
+                                onChange={e => updateState({ signDataText: e.target.value })}
                                 placeholder="Enter text to sign"
                                 rows={3}
                             />
@@ -368,7 +601,7 @@ export function IntentsUrlDemo() {
                             <span>Binary (Base64):</span>
                             <textarea
                                 value={state.signDataBinary}
-                                onChange={(e) => updateState({ signDataBinary: e.target.value })}
+                                onChange={e => updateState({ signDataBinary: e.target.value })}
                                 placeholder="Enter base64 encoded bytes"
                                 rows={3}
                             />
@@ -380,7 +613,9 @@ export function IntentsUrlDemo() {
                                 <span>Schema:</span>
                                 <textarea
                                     value={state.signDataCellSchema}
-                                    onChange={(e) => updateState({ signDataCellSchema: e.target.value })}
+                                    onChange={e =>
+                                        updateState({ signDataCellSchema: e.target.value })
+                                    }
                                     placeholder="TL-B schema"
                                     rows={2}
                                 />
@@ -389,7 +624,7 @@ export function IntentsUrlDemo() {
                                 <span>Cell (Base64):</span>
                                 <textarea
                                     value={state.signDataCell}
-                                    onChange={(e) => updateState({ signDataCell: e.target.value })}
+                                    onChange={e => updateState({ signDataCell: e.target.value })}
                                     placeholder="Base64 encoded BoC"
                                     rows={3}
                                 />
@@ -401,7 +636,7 @@ export function IntentsUrlDemo() {
                         <input
                             type="text"
                             value={state.signDataManifestUrl}
-                            onChange={(e) => updateState({ signDataManifestUrl: e.target.value })}
+                            onChange={e => updateState({ signDataManifestUrl: e.target.value })}
                             placeholder="Manifest URL"
                         />
                     </label>
@@ -415,7 +650,7 @@ export function IntentsUrlDemo() {
                         <input
                             type="text"
                             value={state.actionUrl}
-                            onChange={(e) => updateState({ actionUrl: e.target.value })}
+                            onChange={e => updateState({ actionUrl: e.target.value })}
                             placeholder="Action URL"
                         />
                     </label>
@@ -427,11 +662,30 @@ export function IntentsUrlDemo() {
                     <input
                         type="checkbox"
                         checked={state.showBothEncodings}
-                        onChange={(e) => updateState({ showBothEncodings: e.target.checked })}
+                        onChange={e => updateState({ showBothEncodings: e.target.checked })}
                     />
                     <span>Show both encoding methods</span>
                 </label>
             </div>
+
+            {rawIntent && (
+                <div className="intents-url-demo__result">
+                    <div className="intents-url-demo__result-header">
+                        <span>Raw Intent Data (before serialization):</span>
+                    </div>
+                    <div className="intents-url-demo__raw-intent">
+                        <ReactJson
+                            src={rawIntent}
+                            name={false}
+                            theme="ocean"
+                            collapsed={false}
+                            displayDataTypes={false}
+                            displayObjectSize={false}
+                            enableClipboard={true}
+                        />
+                    </div>
+                </div>
+            )}
 
             {(generatedUrlBase64 || generatedUrlEncodeURI) && (
                 <div className="intents-url-demo__results">
@@ -444,10 +698,14 @@ export function IntentsUrlDemo() {
                                         <span className="intents-url-demo__result-length">
                                             Length: {generatedUrlBase64.length}
                                         </span>
-                                        <button onClick={() => copyToClipboard(generatedUrlBase64)}>Copy</button>
+                                        <button onClick={() => copyToClipboard(generatedUrlBase64)}>
+                                            Copy
+                                        </button>
                                     </div>
                                 </div>
-                                <div className="intents-url-demo__result-url">{generatedUrlBase64}</div>
+                                <div className="intents-url-demo__result-url">
+                                    {generatedUrlBase64}
+                                </div>
                             </div>
                             <div className="intents-url-demo__result">
                                 <div className="intents-url-demo__result-header">
@@ -456,10 +714,16 @@ export function IntentsUrlDemo() {
                                         <span className="intents-url-demo__result-length">
                                             Length: {generatedUrlEncodeURI.length}
                                         </span>
-                                        <button onClick={() => copyToClipboard(generatedUrlEncodeURI)}>Copy</button>
+                                        <button
+                                            onClick={() => copyToClipboard(generatedUrlEncodeURI)}
+                                        >
+                                            Copy
+                                        </button>
                                     </div>
                                 </div>
-                                <div className="intents-url-demo__result-url">{generatedUrlEncodeURI}</div>
+                                <div className="intents-url-demo__result-url">
+                                    {generatedUrlEncodeURI}
+                                </div>
                             </div>
                         </>
                     ) : (
@@ -470,7 +734,9 @@ export function IntentsUrlDemo() {
                                     <span className="intents-url-demo__result-length">
                                         Length: {generatedUrlBase64.length}
                                     </span>
-                                    <button onClick={() => copyToClipboard(generatedUrlBase64)}>Copy</button>
+                                    <button onClick={() => copyToClipboard(generatedUrlBase64)}>
+                                        Copy
+                                    </button>
                                 </div>
                             </div>
                             <div className="intents-url-demo__result-url">{generatedUrlBase64}</div>
@@ -502,7 +768,7 @@ function TransactionItemEditor({ item, index, onUpdate, onRemove }: TransactionI
                     <input
                         type="text"
                         value={item.a}
-                        onChange={(e) => onUpdate({ ...item, a: e.target.value })}
+                        onChange={e => onUpdate({ ...item, a: e.target.value })}
                     />
                 </label>
                 <label>
@@ -510,7 +776,7 @@ function TransactionItemEditor({ item, index, onUpdate, onRemove }: TransactionI
                     <input
                         type="text"
                         value={item.am}
-                        onChange={(e) => onUpdate({ ...item, am: e.target.value })}
+                        onChange={e => onUpdate({ ...item, am: e.target.value })}
                     />
                 </label>
                 <label>
@@ -518,7 +784,7 @@ function TransactionItemEditor({ item, index, onUpdate, onRemove }: TransactionI
                     <input
                         type="text"
                         value={item.p || ''}
-                        onChange={(e) => onUpdate({ ...item, p: e.target.value || undefined })}
+                        onChange={e => onUpdate({ ...item, p: e.target.value || undefined })}
                     />
                 </label>
                 <label>
@@ -526,7 +792,7 @@ function TransactionItemEditor({ item, index, onUpdate, onRemove }: TransactionI
                     <input
                         type="text"
                         value={item.si || ''}
-                        onChange={(e) => onUpdate({ ...item, si: e.target.value || undefined })}
+                        onChange={e => onUpdate({ ...item, si: e.target.value || undefined })}
                     />
                 </label>
             </div>
@@ -545,7 +811,7 @@ function TransactionItemEditor({ item, index, onUpdate, onRemove }: TransactionI
                     <input
                         type="text"
                         value={item.ma}
-                        onChange={(e) => onUpdate({ ...item, ma: e.target.value })}
+                        onChange={e => onUpdate({ ...item, ma: e.target.value })}
                     />
                 </label>
                 <label>
@@ -553,7 +819,7 @@ function TransactionItemEditor({ item, index, onUpdate, onRemove }: TransactionI
                     <input
                         type="text"
                         value={item.ja}
-                        onChange={(e) => onUpdate({ ...item, ja: e.target.value })}
+                        onChange={e => onUpdate({ ...item, ja: e.target.value })}
                     />
                 </label>
                 <label>
@@ -561,7 +827,7 @@ function TransactionItemEditor({ item, index, onUpdate, onRemove }: TransactionI
                     <input
                         type="text"
                         value={item.d}
-                        onChange={(e) => onUpdate({ ...item, d: e.target.value })}
+                        onChange={e => onUpdate({ ...item, d: e.target.value })}
                     />
                 </label>
                 <label>
@@ -569,7 +835,12 @@ function TransactionItemEditor({ item, index, onUpdate, onRemove }: TransactionI
                     <input
                         type="number"
                         value={item.qi || ''}
-                        onChange={(e) => onUpdate({ ...item, qi: e.target.value ? Number(e.target.value) : undefined })}
+                        onChange={e =>
+                            onUpdate({
+                                ...item,
+                                qi: e.target.value ? Number(e.target.value) : undefined
+                            })
+                        }
                     />
                 </label>
                 <label>
@@ -577,7 +848,7 @@ function TransactionItemEditor({ item, index, onUpdate, onRemove }: TransactionI
                     <input
                         type="text"
                         value={item.rd || ''}
-                        onChange={(e) => onUpdate({ ...item, rd: e.target.value || undefined })}
+                        onChange={e => onUpdate({ ...item, rd: e.target.value || undefined })}
                     />
                 </label>
                 <label>
@@ -585,7 +856,7 @@ function TransactionItemEditor({ item, index, onUpdate, onRemove }: TransactionI
                     <input
                         type="text"
                         value={item.cp || ''}
-                        onChange={(e) => onUpdate({ ...item, cp: e.target.value || undefined })}
+                        onChange={e => onUpdate({ ...item, cp: e.target.value || undefined })}
                     />
                 </label>
                 <label>
@@ -593,7 +864,7 @@ function TransactionItemEditor({ item, index, onUpdate, onRemove }: TransactionI
                     <input
                         type="text"
                         value={item.fta || ''}
-                        onChange={(e) => onUpdate({ ...item, fta: e.target.value || undefined })}
+                        onChange={e => onUpdate({ ...item, fta: e.target.value || undefined })}
                     />
                 </label>
                 <label>
@@ -601,7 +872,7 @@ function TransactionItemEditor({ item, index, onUpdate, onRemove }: TransactionI
                     <input
                         type="text"
                         value={item.fp || ''}
-                        onChange={(e) => onUpdate({ ...item, fp: e.target.value || undefined })}
+                        onChange={e => onUpdate({ ...item, fp: e.target.value || undefined })}
                     />
                 </label>
             </div>
@@ -620,7 +891,7 @@ function TransactionItemEditor({ item, index, onUpdate, onRemove }: TransactionI
                     <input
                         type="text"
                         value={item.na}
-                        onChange={(e) => onUpdate({ ...item, na: e.target.value })}
+                        onChange={e => onUpdate({ ...item, na: e.target.value })}
                     />
                 </label>
                 <label>
@@ -628,7 +899,7 @@ function TransactionItemEditor({ item, index, onUpdate, onRemove }: TransactionI
                     <input
                         type="text"
                         value={item.no}
-                        onChange={(e) => onUpdate({ ...item, no: e.target.value })}
+                        onChange={e => onUpdate({ ...item, no: e.target.value })}
                     />
                 </label>
                 <label>
@@ -636,7 +907,12 @@ function TransactionItemEditor({ item, index, onUpdate, onRemove }: TransactionI
                     <input
                         type="number"
                         value={item.qi || ''}
-                        onChange={(e) => onUpdate({ ...item, qi: e.target.value ? Number(e.target.value) : undefined })}
+                        onChange={e =>
+                            onUpdate({
+                                ...item,
+                                qi: e.target.value ? Number(e.target.value) : undefined
+                            })
+                        }
                     />
                 </label>
                 <label>
@@ -644,7 +920,7 @@ function TransactionItemEditor({ item, index, onUpdate, onRemove }: TransactionI
                     <input
                         type="text"
                         value={item.rd || ''}
-                        onChange={(e) => onUpdate({ ...item, rd: e.target.value || undefined })}
+                        onChange={e => onUpdate({ ...item, rd: e.target.value || undefined })}
                     />
                 </label>
                 <label>
@@ -652,7 +928,7 @@ function TransactionItemEditor({ item, index, onUpdate, onRemove }: TransactionI
                     <input
                         type="text"
                         value={item.cp || ''}
-                        onChange={(e) => onUpdate({ ...item, cp: e.target.value || undefined })}
+                        onChange={e => onUpdate({ ...item, cp: e.target.value || undefined })}
                     />
                 </label>
                 <label>
@@ -660,7 +936,7 @@ function TransactionItemEditor({ item, index, onUpdate, onRemove }: TransactionI
                     <input
                         type="text"
                         value={item.fta || ''}
-                        onChange={(e) => onUpdate({ ...item, fta: e.target.value || undefined })}
+                        onChange={e => onUpdate({ ...item, fta: e.target.value || undefined })}
                     />
                 </label>
                 <label>
@@ -668,7 +944,7 @@ function TransactionItemEditor({ item, index, onUpdate, onRemove }: TransactionI
                     <input
                         type="text"
                         value={item.fp || ''}
-                        onChange={(e) => onUpdate({ ...item, fp: e.target.value || undefined })}
+                        onChange={e => onUpdate({ ...item, fp: e.target.value || undefined })}
                     />
                 </label>
             </div>

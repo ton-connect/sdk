@@ -6,11 +6,11 @@ export type ConnectRequest = {
 export type ConnectItem = TonAddressItem | TonProofItem;
 
 export type TonAddressItem = {
-    name: "ton_addr";
+    name: 'ton_addr';
 };
 
 export type TonProofItem = {
-    name: "ton_proof";
+    name: 'ton_proof';
     payload: string;
 };
 
@@ -98,16 +98,12 @@ export type IntentRequest =
     | MakeSignDataIntentRequest
     | MakeSendActionIntentRequest;
 
-
 /**
  * Converts a base64 string to base64url format
  * Base64URL uses - and _ instead of + and /, and removes padding
  */
 function toBase64Url(base64: string): string {
-    return base64
-        .replace(/\+/g, '-')
-        .replace(/\//g, '_')
-        .replace(/=/g, '');
+    return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 }
 
 /**
@@ -119,19 +115,17 @@ function base64UrlEncode(str: string): string {
     return toBase64Url(base64);
 }
 
-export function urlSafeJsonStringify(obj: any): string {
+export function urlSafeJsonStringify(obj: unknown): string {
     return base64UrlEncode(JSON.stringify(obj));
 }
 
-export function urlSafeJsonStringifyBase64Url(obj: any): string {
+export function urlSafeJsonStringifyBase64Url(obj: unknown): string {
     return base64UrlEncode(JSON.stringify(obj));
 }
 
-export function urlSafeJsonStringifyEncodeURI(obj: any): string {
+export function urlSafeJsonStringifyEncodeURI(obj: unknown): string {
     return encodeURIComponent(JSON.stringify(obj));
 }
-
-
 
 export function generateIntentUrlWithStorage(
     clientPubKey: string,
@@ -141,19 +135,16 @@ export function generateIntentUrlWithStorage(
     const params = new URLSearchParams({
         id: clientPubKey,
         pk: walletPk,
-        get_url: getUrl,
+        get_url: getUrl
     });
     return `tc://intent?${params.toString()}`;
 }
 
-export function generateIntentUrlInline(
-    clientPubKey: string,
-    intent: IntentRequest
-): string {
+export function generateIntentUrlInline(clientPubKey: string, intent: IntentRequest): string {
     const data = urlSafeJsonStringify(intent);
     const params = new URLSearchParams({
         id: clientPubKey,
-        r: data,
+        r: data
     });
     return `tc://intent_inline?${params.toString()}`;
 }
@@ -163,12 +154,13 @@ export function generateIntentUrlInlineWithEncoding(
     intent: IntentRequest,
     encoding: 'base64url' | 'encodeURI'
 ): string {
-    const data = encoding === 'base64url' 
-        ? urlSafeJsonStringifyBase64Url(intent)
-        : urlSafeJsonStringifyEncodeURI(intent);
+    const data =
+        encoding === 'base64url'
+            ? urlSafeJsonStringifyBase64Url(intent)
+            : urlSafeJsonStringifyEncodeURI(intent);
     const params = new URLSearchParams({
         id: clientPubKey,
-        r: data,
+        r: data
     });
     return `tc://intent_inline?${params.toString()}`;
 }
@@ -188,7 +180,7 @@ export function createTransactionIntent(
         ...(options?.connectRequest && { c: options.connectRequest }),
         ...(options?.validUntil && { vu: options.validUntil }),
         ...(options?.network && { n: options.network }),
-        i: items,
+        i: items
     };
 }
 
@@ -196,7 +188,7 @@ export function createSignDataIntent(
     id: string,
     payload: SignDataPayload,
     options?: {
-        manifestUrl?: string,
+        manifestUrl?: string;
         connectRequest?: ConnectRequest;
         network?: string;
     }
@@ -207,10 +199,9 @@ export function createSignDataIntent(
         ...(options?.connectRequest && { c: options.connectRequest }),
         ...(options?.network && { n: options.network }),
         ...(options?.manifestUrl && { mu: options.manifestUrl }),
-        p: payload,
+        p: payload
     };
 }
-
 
 export function createActionIntent(
     id: string,
@@ -223,7 +214,7 @@ export function createActionIntent(
         id,
         m: 'actionIntent',
         ...(options?.connectRequest && { c: options.connectRequest }),
-        a: actionUrl,
+        a: actionUrl
     };
 }
 
@@ -242,10 +233,9 @@ export function createTonTransferItem(
         am: amount,
         ...(options?.payload && { p: options.payload }),
         ...(options?.stateInit && { si: options.stateInit }),
-        ...(options?.extraCurrency && { ec: options.extraCurrency }),
+        ...(options?.extraCurrency && { ec: options.extraCurrency })
     };
 }
-
 
 export function createJettonTransferItem(
     masterAddress: string,
@@ -268,7 +258,7 @@ export function createJettonTransferItem(
         ...(options?.responseDestination && { rd: options.responseDestination }),
         ...(options?.customPayload && { cp: options.customPayload }),
         ...(options?.forwardTonAmount && { fta: options.forwardTonAmount }),
-        ...(options?.forwardPayload && { fp: options.forwardPayload }),
+        ...(options?.forwardPayload && { fp: options.forwardPayload })
     };
 }
 
@@ -291,102 +281,28 @@ export function createNftTransferItem(
         ...(options?.responseDestination && { rd: options.responseDestination }),
         ...(options?.customPayload && { cp: options.customPayload }),
         ...(options?.forwardTonAmount && { fta: options.forwardTonAmount }),
-        ...(options?.forwardPayload && { fp: options.forwardPayload }),
+        ...(options?.forwardPayload && { fp: options.forwardPayload })
     };
 }
 
 export function createTextSignDataPayload(text: string): TextSignDataPayload {
     return {
         type: 'text',
-        text,
+        text
     };
 }
 
 export function createBinarySignDataPayload(bytes: string): BinarySignDataPayload {
     return {
         type: 'binary',
-        bytes,
+        bytes
     };
 }
 
-
-export function createCellSignDataPayload(
-    schema: string,
-    cell: string
-): CellSignDataPayload {
+export function createCellSignDataPayload(schema: string, cell: string): CellSignDataPayload {
     return {
         type: 'cell',
         schema,
-        cell,
+        cell
     };
 }
-
-
-export const examples = {
-    simpleTonTransfer: (clientPubKey: string) => {
-        const intent = createTransactionIntent(
-            '123',
-            [
-                createTonTransferItem(
-                    'UQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJKZ',
-                    '20000000'
-                ),
-            ],
-            {
-                validUntil: 1764424242,
-                network: '-239',
-            }
-        );
-        return generateIntentUrlInline(clientPubKey, intent);
-    },
-
-    /**
-     * Example: Generate URL for jetton transfer
-     */
-    jettonTransfer: (clientPubKey: string) => {
-        const intent = createTransactionIntent(
-            '124',
-            [
-                createJettonTransferItem(
-                    'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
-                    '1000000',
-                    'UQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJKZ',
-                    {
-                        forwardTonAmount: '10000000',
-                    }
-                ),
-            ],
-            {
-                validUntil: 1764424242,
-                network: '-3',
-            }
-        );
-        return generateIntentUrlInline(clientPubKey, intent);
-    },
-
-    /**
-     * Example: Generate URL for sign data intent
-     */
-    signData: (clientPubKey: string) => {
-        const intent = createSignDataIntent(
-            '125',
-            createTextSignDataPayload('Confirm email update to user@example.com'),
-            {
-                manifestUrl: 'https://example.com/tonconnect-manifest.json',
-                network: '-239',
-            }
-        );
-        return generateIntentUrlInline(clientPubKey, intent);
-    },
-
-    /**
-     * Example: Generate URL for action intent
-     */
-    actionIntent: (clientPubKey: string) => {
-        const intent = createActionIntent(
-            '126',
-            'https://example.com/dex?action=swap'
-        );
-        return generateIntentUrlInline(clientPubKey, intent);
-    },
-};
