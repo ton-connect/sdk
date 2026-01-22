@@ -3,12 +3,13 @@ import { EventDispatcher } from 'src/tracker/event-dispatcher';
 import { SdkActionEvent } from 'src/tracker/types';
 import { RequiredFeatures } from './wallet';
 import { IEnvironment } from 'src/environment/models/environment.interface';
+import { AnalyticsMode } from 'src/analytics/analytics-manager';
 
 export interface AnalyticsSettings {
     /**
      * @default 'telemetry'
      */
-    mode?: 'off' | 'telemetry' | 'full';
+    mode?: AnalyticsMode;
 }
 
 /**
