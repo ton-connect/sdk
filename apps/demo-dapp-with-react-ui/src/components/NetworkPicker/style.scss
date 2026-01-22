@@ -29,6 +29,21 @@
     box-shadow: 0 4px 16px rgba(102, 170, 238, 0.3);
   }
 
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    background: linear-gradient(135deg, rgba(28, 95, 164, 0.08) 0%, rgba(102, 170, 238, 0.05) 100%);
+    border-color: rgba(102, 170, 238, 0.15);
+    color: rgba(184, 212, 241, 0.6);
+    box-shadow: none;
+
+    &:hover {
+      border-color: rgba(102, 170, 238, 0.15);
+      background: linear-gradient(135deg, rgba(28, 95, 164, 0.08) 0%, rgba(102, 170, 238, 0.05) 100%);
+      box-shadow: none;
+    }
+  }
+
   option {
     background: #1a1a1a;
     color: #d9e7f7;

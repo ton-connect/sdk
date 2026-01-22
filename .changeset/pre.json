@@ -10,7 +10,9 @@
     "@tonconnect/ui-react": "2.3.1"
   },
   "changesets": [
+    "fix-deeplink-fallback",
     "network-selection-support",
+    "proof-validation-reducing",
     "qa-mode-network-validation",
     "slow-carpets-wait",
     "trace-id-support",
