@@ -7,6 +7,7 @@ import {
     isWalletInfoCurrentlyEmbedded,
     WalletInfoCurrentlyEmbedded,
     WalletInfoCurrentlyInjected,
+    isWalletInfoRemote,
     WalletInfoBase
 } from 'src/models/wallet/wallet-info';
 import { InjectedProvider } from 'src/provider/injected/injected-provider';
@@ -87,7 +88,7 @@ export class WalletsListManager {
             throw new TonConnectError(`Wallet info not found for appName: "${appName}"`);
         }
 
-        if (!('bridgeUrl' in wallet)) {
+        if (!isWalletInfoRemote(wallet)) {
             throw new TonConnectError(`Wallet "${appName}" is not remote`);
         }
 
