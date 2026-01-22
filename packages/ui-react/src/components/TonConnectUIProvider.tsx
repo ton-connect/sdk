@@ -6,7 +6,7 @@ import {
     UIPreferences,
     WalletsListConfiguration
 } from '@tonconnect/ui';
-import type { ITonConnect, RequiredFeatures } from '@tonconnect/ui';
+import type { ITonConnect, RequiredFeatures, AnalyticsSettings } from '@tonconnect/ui';
 import { isClientSide } from '../utils/web';
 
 export const TonConnectUIContext = createContext<TonConnectUI | null>(null);
@@ -80,6 +80,11 @@ export interface TonConnectUIProviderPropsBase {
      * @default true
      */
     enableAndroidBackHandler?: boolean;
+
+    /**
+     * Analytics configuration forwarded to the underlying TonConnect SDK instance.
+     */
+    analytics?: AnalyticsSettings;
 }
 
 let tonConnectUI: TonConnectUI | null = null;

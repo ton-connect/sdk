@@ -35,7 +35,7 @@ import {
     SignDataResponse
 } from 'src/models/methods';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
-import { TonConnectOptions } from 'src/models/ton-connect-options';
+import { AnalyticsSettings, TonConnectOptions } from 'src/models/ton-connect-options';
 import {
     isWalletConnectionSourceJS,
     isWalletConnectionSourceWalletConnect
@@ -73,6 +73,8 @@ import { isQaModeEnabled } from './utils/qa-mode';
 import { normalizeBase64 } from './utils/base64';
 import { AnalyticsManager } from 'src/analytics/analytics-manager';
 import { BrowserEventDispatcher } from 'src/tracker/browser-event-dispatcher';
+import { EventDispatcher } from 'src/tracker/event-dispatcher';
+import { SdkActionEvent } from 'src/tracker/types';
 import { bindEventsTo } from 'src/analytics/sdk-actions-adapter';
 import { BridgePartialSession, BridgeSession } from 'src/provider/bridge/models/bridge-session';
 import { IEnvironment } from 'src/environment/models/environment.interface';
@@ -114,7 +116,7 @@ export class TonConnect implements ITonConnect {
 
     private readonly walletsList = new WalletsListManager();
 
-    private readonly analytics?: AnalyticsManager;
+    private analytics?: AnalyticsManager;
 
     private readonly environment: IEnvironment;
 
@@ -182,22 +184,7 @@ export class TonConnect implements ITonConnect {
 
         this.environment = options?.environment ?? new DefaultEnvironment();
 
-        // TODO: in production ready make flag to enable them?
-        this.analytics = new AnalyticsManager({ environment: this.environment });
-
-        const telegramUser = this.environment.getTelegramUser();
-        bindEventsTo(
-            eventDispatcher,
-            this.analytics.scoped({
-                locale: this.environment.getLocale(),
-                browser: this.environment.getBrowser(),
-                platform: this.environment.getPlatform(),
-                tg_id: telegramUser?.id,
-                tma_is_premium: telegramUser?.isPremium,
-                manifest_json_url: manifestUrl,
-                origin_url: getOriginWithPath
-            })
-        );
+        this.initAnalytics(manifestUrl, eventDispatcher, options);
 
         if (!this.dappSettings.manifestUrl) {
             throw new DappMetadataError(
@@ -839,6 +826,42 @@ export class TonConnect implements ITonConnect {
         } catch (e) {
             logError('Cannot subscribe to the document.visibilitychange: ', e);
         }
+    }
+
+    private initAnalytics(
+        manifestUrl: string,
+        eventDispatcher: EventDispatcher<SdkActionEvent>,
+        options?: TonConnectOptions
+    ): void {
+        const analyticsSettings: AnalyticsSettings | undefined = options?.analytics;
+        const mode = analyticsSettings?.mode ?? 'telemetry';
+
+        if (mode === 'off') {
+            return;
+        }
+
+        const analytics = new AnalyticsManager({
+            environment: this.environment,
+            mode
+        });
+        this.analytics = analytics;
+
+        const telegramUser = this.environment.getTelegramUser();
+
+        const sharedAnalyticsData: Parameters<typeof analytics.scoped>[0] = {
+            browser: this.environment.getBrowser(),
+            platform: this.environment.getPlatform(),
+            manifest_json_url: manifestUrl,
+            origin_url: getOriginWithPath,
+            locale: this.environment.getLocale()
+        };
+
+        if (telegramUser) {
+            sharedAnalyticsData.tg_id = telegramUser.id;
+            sharedAnalyticsData.tma_is_premium = telegramUser.isPremium;
+        }
+
+        bindEventsTo(eventDispatcher, analytics.scoped(sharedAnalyticsData));
     }
 
     private createProvider(
