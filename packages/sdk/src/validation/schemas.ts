@@ -332,11 +332,6 @@ export function validateTonProofItemReply(data: unknown): ValidationResult {
             return "Invalid 'proof' object";
         }
 
-        const allowedProofKeys = ['timestamp', 'domain', 'payload', 'signature'];
-        if (hasExtraProperties(proof, allowedProofKeys)) {
-            return 'ton_proof item contains extra properties';
-        }
-
         if (!isValidNumber(proof.timestamp)) {
             return "Invalid 'proof.timestamp'";
         }
