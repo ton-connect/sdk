@@ -279,7 +279,9 @@ export function ConnectTab() {
     hasProof,
     isAuthenticated,
 
-    events,
+    operations,
+    clearOperations,
+    deleteOperation,
 
     isGeneratingPayload,
     isConnecting,
@@ -553,7 +555,11 @@ export function ConnectTab() {
       </div>
 
       {/* Connection Events */}
-      <ConnectionEventsCard events={events} />
+      <ConnectionEventsCard
+        operations={operations}
+        onClear={clearOperations}
+        onDelete={deleteOperation}
+      />
 
       {/* How It Works */}
       <HowItWorksCard sectionId="connect" />

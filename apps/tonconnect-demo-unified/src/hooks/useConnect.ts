@@ -2,6 +2,8 @@ import { useState, useCallback, useRef, useEffect } from "react"
 import { useTonConnectUI, useTonWallet } from "@tonconnect/ui-react"
 import type { Wallet } from "@tonconnect/ui-react"
 import { toast } from "sonner"
+import { useConnectionHistory } from "./useConnectionHistory"
+import type { ConnectionRequest, ConnectionResponse, ConnectionOperation } from "@/types/connection-events"
 
 // Step result for tracking request/response
 export interface StepResult {
@@ -13,27 +15,23 @@ export interface StepResult {
   error?: string
 }
 
-// Wallet event for history
-export interface WalletEvent {
-  id: string
-  timestamp: number
-  type: 'connected' | 'disconnected' | 'reconnected'
-  walletName?: string
-  address?: string
-}
+// Re-export ConnectionOperation for external use
+export type { ConnectionOperation }
 
 export function useConnect() {
   const [tonConnectUI] = useTonConnectUI()
   const wallet = useTonWallet()
+
+  // Connection history (persisted to localStorage)
+  const connectionHistory = useConnectionHistory()
 
   // Refs
   const payloadTokenRef = useRef<string | null>(null)
   const expectingProofRef = useRef(false)
   const prevWalletRef = useRef<Wallet | null>(null)
   const initializedRef = useRef(false)
-
-  // Events history (in memory, lost on reload)
-  const [events, setEvents] = useState<WalletEvent[]>([])
+  const lastRequestRef = useRef<ConnectionRequest | null>(null)
+  const disconnectInitiatorRef = useRef<'dapp' | 'wallet'>('wallet')
 
   // Last full wallet response
   const [lastWalletResponse, setLastWalletResponse] = useState<unknown>(null)
@@ -55,15 +53,33 @@ export function useConnect() {
   const hasProof = wallet?.connectItems?.tonProof && !('error' in wallet.connectItems.tonProof)
   const isAuthenticated = verifyResult?.status === 'success'
 
-  // Add event to history
-  const addEvent = useCallback((type: WalletEvent['type'], walletName?: string, address?: string) => {
-    setEvents(prev => [...prev, {
-      id: crypto.randomUUID(),
-      timestamp: Date.now(),
-      type,
-      walletName,
-      address
-    }])
+  // Extract wallet snapshot for operation log
+  const extractWalletSnapshot = useCallback((w: Wallet): ConnectionResponse['wallet'] => {
+    const tonProof = w.connectItems?.tonProof
+    const hasProofData = tonProof && !('error' in tonProof)
+    const proofData = hasProofData ? tonProof.proof : null
+
+    return {
+      account: {
+        address: w.account.address,
+        chain: w.account.chain,
+        publicKey: w.account.publicKey,
+        walletStateInit: w.account.walletStateInit
+      },
+      device: {
+        appName: w.device.appName,
+        appVersion: w.device.appVersion,
+        platform: w.device.platform,
+        features: w.device.features || []  // Preserve raw features, format at display time
+      },
+      provider: w.provider as 'http' | 'injected',
+      tonProof: proofData ? {
+        timestamp: proofData.timestamp,
+        domain: proofData.domain.value,
+        payload: proofData.payload,
+        signature: proofData.signature
+      } : undefined
+    }
   }, [])
 
   // ========== STEP 1: Generate Payload ==========
@@ -130,26 +146,43 @@ export function useConnect() {
     const prevWallet = prevWalletRef.current
 
     if (!prevWallet && wallet) {
-      // Connected
-      const response = {
+      // Connected - log the operation with request/response
+      const rawResponse = {
         account: wallet.account,
         device: wallet.device,
-        connectItems: wallet.connectItems
+        connectItems: wallet.connectItems,
+        provider: wallet.provider
       }
-      setLastWalletResponse(response)
+      setLastWalletResponse(rawResponse)
 
-      if (expectingProofRef.current) {
-        // Connected with proof expected
-        addEvent('connected', wallet.device.appName, wallet.account.address)
-        expectingProofRef.current = false
-      } else {
-        // Simple connect
-        addEvent('connected', wallet.device.appName, wallet.account.address)
-      }
+      connectionHistory.addOperation({
+        timestamp: Date.now(),
+        type: 'connect',
+        request: lastRequestRef.current,
+        response: {
+          success: true,
+          wallet: extractWalletSnapshot(wallet)
+        },
+        rawRequest: lastRequestRef.current,
+        rawResponse
+      })
+
+      expectingProofRef.current = false
+      lastRequestRef.current = null
       setIsConnecting(false)
     } else if (prevWallet && !wallet) {
-      // Disconnected
-      addEvent('disconnected')
+      // Disconnected - log with previous wallet info
+      connectionHistory.addOperation({
+        timestamp: Date.now(),
+        type: 'disconnect',
+        request: null,
+        response: null,
+        initiator: disconnectInitiatorRef.current,
+        previousAddress: prevWallet.account.address,
+        previousWalletName: prevWallet.device.appName
+      })
+
+      disconnectInitiatorRef.current = 'wallet' // Reset to default
       setLastWalletResponse(null)
       // Clear TonProof-related state and regenerate payload for next connection
       setVerifyResult(null)
@@ -157,20 +190,34 @@ export function useConnect() {
       generatePayload()
     } else if (prevWallet && wallet && prevWallet.account.address !== wallet.account.address) {
       // Reconnected to different wallet
-      const response = {
+      const rawResponse = {
         account: wallet.account,
         device: wallet.device,
-        connectItems: wallet.connectItems
+        connectItems: wallet.connectItems,
+        provider: wallet.provider
       }
-      setLastWalletResponse(response)
-      addEvent('reconnected', wallet.device.appName, wallet.account.address)
+      setLastWalletResponse(rawResponse)
+
+      connectionHistory.addOperation({
+        timestamp: Date.now(),
+        type: 'connect',
+        request: lastRequestRef.current,
+        response: {
+          success: true,
+          wallet: extractWalletSnapshot(wallet)
+        },
+        rawRequest: lastRequestRef.current,
+        rawResponse
+      })
+
+      lastRequestRef.current = null
       // Clear TonProof-related state on reconnect
       setVerifyResult(null)
       setAccountResult(null)
     }
 
     prevWalletRef.current = wallet
-  }, [wallet, addEvent, generatePayload])
+  }, [wallet, generatePayload, connectionHistory, extractWalletSnapshot])
 
   // ========== SIMPLE CONNECT ==========
 
@@ -186,13 +233,33 @@ export function useConnect() {
     tonConnectUI.setConnectRequestParameters(null)
     expectingProofRef.current = false
 
+    // Save request for operation log
+    lastRequestRef.current = {
+      items: ['ton_addr']
+    }
+
     try {
       await tonConnectUI.openModal()
     } catch (error) {
       setIsConnecting(false)
+      // Log failed connection attempt
+      connectionHistory.addOperation({
+        timestamp: Date.now(),
+        type: 'connect',
+        request: lastRequestRef.current,
+        response: {
+          success: false,
+          error: {
+            code: 0,
+            message: error instanceof Error ? error.message : 'Connection failed'
+          }
+        },
+        rawRequest: lastRequestRef.current
+      })
+      lastRequestRef.current = null
       toast.error(error instanceof Error ? error.message : 'Connection failed')
     }
-  }, [tonConnectUI, wallet])
+  }, [tonConnectUI, wallet, connectionHistory])
 
   // ========== STEP 2: Connect with Proof ==========
 
@@ -219,14 +286,35 @@ export function useConnect() {
       })
     }
 
+    // Save request for operation log
+    lastRequestRef.current = {
+      items: ['ton_addr', 'ton_proof'],
+      payload: payloadResponse?.payloadTokenHash
+    }
+
     try {
       await tonConnectUI.openModal()
     } catch (error) {
       setIsConnecting(false)
       expectingProofRef.current = false
+      // Log failed connection attempt
+      connectionHistory.addOperation({
+        timestamp: Date.now(),
+        type: 'connect',
+        request: lastRequestRef.current,
+        response: {
+          success: false,
+          error: {
+            code: 0,
+            message: error instanceof Error ? error.message : 'Connection failed'
+          }
+        },
+        rawRequest: lastRequestRef.current
+      })
+      lastRequestRef.current = null
       toast.error(error instanceof Error ? error.message : 'Connection failed')
     }
-  }, [tonConnectUI, wallet, payloadResult])
+  }, [tonConnectUI, wallet, payloadResult, connectionHistory])
 
   // ========== DISCONNECT ==========
 
@@ -236,9 +324,13 @@ export function useConnect() {
       return
     }
 
+    // Mark that dApp initiated the disconnect
+    disconnectInitiatorRef.current = 'dapp'
+
     try {
       await tonConnectUI.disconnect()
     } catch (error) {
+      disconnectInitiatorRef.current = 'wallet' // Reset on error
       toast.error(error instanceof Error ? error.message : 'Disconnect failed')
     }
   }, [tonConnectUI, wallet])
@@ -409,8 +501,10 @@ export function useConnect() {
     hasProof,
     isAuthenticated,
 
-    // Events
-    events,
+    // Connection operations log
+    operations: connectionHistory.operations,
+    clearOperations: connectionHistory.clearAll,
+    deleteOperation: connectionHistory.deleteOperation,
     lastWalletResponse,
 
     // Loading states
