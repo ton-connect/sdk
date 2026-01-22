@@ -81,7 +81,9 @@ export class WalletsListManager {
         let walletsList: WalletInfoDTO[] = [];
 
         try {
-            const walletsResponse = await fetch(this.walletsListSource);
+            const walletsResponse = await fetch(this.walletsListSource, {
+                referrer: ''
+            });
             walletsList = await walletsResponse.json();
 
             if (!Array.isArray(walletsList)) {
