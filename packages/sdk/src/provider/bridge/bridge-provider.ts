@@ -624,7 +624,7 @@ export class BridgeProvider implements HTTPProvider {
             // Wait until the specified optional gateways are opened, not necessarily all gateways
             const gatewaysToWaitFor = Math.max(
                 this.pendingGateways.length - this.optionalOpenGateways,
-                this.optionalOpenGateways
+                1
             );
 
             await waitForSome(

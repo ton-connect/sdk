@@ -7,21 +7,21 @@ export async function waitForSome<T>(
         throw new RangeError('count cannot be greater than the number of promises');
     }
 
-    return new Promise(resolve => {
-        const results: PromiseSettledResult<T>[] = [];
-        let settledCount = 0;
+    const results: PromiseSettledResult<T>[] = new Array(promises.length);
+    let settledCount = 0;
 
-        for (const p of promises) {
+    return new Promise(resolve => {
+        promises.forEach((p, index) => {
             Promise.resolve(p)
                 .then(value => ({ status: 'fulfilled' as const, value }))
                 .catch(reason => ({ status: 'rejected' as const, reason }))
                 .then(result => {
-                    results.push(result);
+                    results[index] = result;
                     settledCount++;
                     if (settledCount === count) {
                         resolve(results);
                     }
                 });
-        }
+        });
     });
 }
