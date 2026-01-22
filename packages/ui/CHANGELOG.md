@@ -1,5 +1,13 @@
 # Changelog @tonconnect/ui
 
+## 2.4.0-beta.4
+
+### Patch Changes
+
+- 7490f7e: fix: adjust deeplink fallback behavior on Windows
+- Updated dependencies [3a4d37d]
+    - @tonconnect/sdk@3.4.0-beta.4
+
 ## 2.4.0-beta.3
 
 ### Patch Changes
