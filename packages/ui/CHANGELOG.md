@@ -1,5 +1,22 @@
 # Changelog @tonconnect/ui
 
+## 2.4.0-beta.6
+
+### Minor Changes
+
+- 3964cf3: feat: add analytics settings and performance metrics
+    - Added analytics settings with telemetry mode configuration
+    - Added RTT (Round Trip Time) measurement
+    - Added TTFB (Time To First Byte) measurement
+    - Added wallet list download duration tracking
+
+    These metrics help monitor SDK performance and user experience.
+
+### Patch Changes
+
+- Updated dependencies [3964cf3]
+    - @tonconnect/sdk@3.4.0-beta.6
+
 ## 2.4.0-beta.5
 
 ### Minor Changes
