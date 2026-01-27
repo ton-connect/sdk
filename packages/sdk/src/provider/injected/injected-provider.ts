@@ -12,7 +12,6 @@ import {
 } from 'src/provider/injected/models/injected-wallet-api';
 import { InternalProvider } from 'src/provider/provider';
 import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
-import { IStorage } from 'src/storage/models/storage.interface';
 import { OptionalTraceable, Traceable, WithoutId } from 'src/utils/types';
 import { getWindow, getWindowEntries } from 'src/utils/web-api';
 import { PROTOCOL_VERSION } from 'src/resources/protocol';
@@ -34,11 +33,10 @@ export class InjectedProvider<T extends string = string> implements InternalProv
     private static window = getWindow();
 
     public static async fromStorage(
-        storage: IStorage,
+        storage: BridgeConnectionStorage,
         analyticsManager?: AnalyticsManager
     ): Promise<InjectedProvider> {
-        const bridgeConnectionStorage = new BridgeConnectionStorage(storage);
-        const connection = await bridgeConnectionStorage.getInjectedConnection();
+        const connection = await storage.getInjectedConnection();
         return new InjectedProvider(storage, connection.jsBridgeKey, analyticsManager);
     }
 
@@ -97,8 +95,6 @@ export class InjectedProvider<T extends string = string> implements InternalProv
 
     private injectedWallet: InjectedWalletApi;
 
-    private readonly connectionStorage: BridgeConnectionStorage;
-
     private listenSubscriptions = false;
 
     private listeners: Array<(e: TraceableWalletEvent) => void> = [];
@@ -108,7 +104,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
     >;
 
     constructor(
-        storage: IStorage,
+        private readonly connectionStorage: BridgeConnectionStorage,
         private readonly injectedWalletKey: T,
         analyticsManager?: AnalyticsManager
     ) {
@@ -117,7 +113,6 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             throw new WalletNotInjectedError();
         }
 
-        this.connectionStorage = new BridgeConnectionStorage(storage);
         this.injectedWallet = window[injectedWalletKey]!.tonconnect!;
 
         if (analyticsManager) {
