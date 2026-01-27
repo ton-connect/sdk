@@ -25,7 +25,13 @@ export class WalletsListManager {
 
     private readonly walletsListSource: string;
 
-    constructor(options?: { walletsListSource?: string; cacheTTLMs?: number }) {
+    private readonly onDownloadDurationMeasured?: (duration: number | undefined) => void;
+
+    constructor(options?: {
+        walletsListSource?: string;
+        cacheTTLMs?: number;
+        onDownloadDurationMeasured?: (duration: number | undefined) => void;
+    }) {
         if (isQaModeEnabled()) {
             this.walletsListSource =
                 'https://raw.githubusercontent.com/ton-connect/wallets-list-staging/refs/heads/main/wallets-v2.json';
@@ -35,6 +41,7 @@ export class WalletsListManager {
         }
 
         this.cacheTTLMs = options?.cacheTTLMs;
+        this.onDownloadDurationMeasured = options?.onDownloadDurationMeasured;
     }
 
     public async getWallets(): Promise<WalletInfo[]> {
@@ -97,6 +104,7 @@ export class WalletsListManager {
 
     private async fetchWalletsListFromSource(): Promise<WalletInfoDTO[]> {
         let walletsList: WalletInfoDTO[] = [];
+        const startTime = performance.now();
 
         try {
             const walletsResponse = await fetch(this.walletsListSource);
@@ -122,9 +130,15 @@ export class WalletsListManager {
 
                 walletsList = walletsList.filter(wallet => this.isCorrectWalletConfigDTO(wallet));
             }
+
+            const endTime = performance.now();
+            const duration = Math.round(endTime - startTime);
+            this.onDownloadDurationMeasured?.(duration);
         } catch (e) {
             logError(e);
             walletsList = FALLBACK_WALLETS_LIST;
+
+            this.onDownloadDurationMeasured?.(undefined);
         }
 
         return walletsList;
