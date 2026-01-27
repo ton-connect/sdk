@@ -21,6 +21,12 @@ export {
     SIGN_DATA_ERROR_CODES
 } from './sign-data-rpc-response';
 export {
+    SignMessageRpcResponse,
+    SignMessageRpcResponseSuccess,
+    SignMessageRpcResponseError,
+    SIGN_MESSAGE_ERROR_CODES
+} from './sign-message-rpc-response';
+export {
     DisconnectRpcResponse,
     DisconnectRpcResponseSuccess,
     DisconnectRpcResponseError,

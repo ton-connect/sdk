@@ -99,6 +99,10 @@ export function validateSendTransactionRequest(data: unknown): ValidationResult 
     return null;
 }
 
+export function validateSignMessageRequest(data: unknown): ValidationResult {
+    return validateSendTransactionRequest(data);
+}
+
 function validateTransactionMessage(message: unknown, index: number): ValidationResult {
     if (!isValidObject(message)) {
         return `Message at index ${index} must be an object`;
