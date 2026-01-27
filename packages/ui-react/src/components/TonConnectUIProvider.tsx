@@ -39,6 +39,10 @@ export interface TonConnectUIProviderPropsWithConnector {
 export interface TonConnectUIProviderPropsWithInstance {
     /**
      * TonConnectUI instance. Can be helpful if TonConnectUI instance is used outside of React context.
+     *
+     * Note: TonConnect UI works as a singleton.
+     * If you pass a custom instance, it will be stored in the global singleton
+     * and reused by the library.
      */
     instance: TonConnectUI;
 }
@@ -117,10 +121,10 @@ const TonConnectUIProvider: FunctionComponent<TonConnectUIProviderProps> = ({
         }
 
         if ('instance' in options) {
-            return options.instance;
+            tonConnectUI = options.instance;
+        } else {
+            tonConnectUI = new TonConnectUI(options);
         }
-
-        tonConnectUI = new TonConnectUI(options);
 
         return tonConnectUI;
     });
