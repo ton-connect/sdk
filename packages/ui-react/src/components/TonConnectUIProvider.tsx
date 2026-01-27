@@ -112,13 +112,15 @@ const TonConnectUIProvider: FunctionComponent<TonConnectUIProviderProps> = ({
             return null;
         }
 
+        if (tonConnectUI !== null) {
+            return tonConnectUI;
+        }
+
         if ('instance' in options) {
             return options.instance;
         }
 
-        if (tonConnectUI === null) {
-            tonConnectUI = new TonConnectUI(options);
-        }
+        tonConnectUI = new TonConnectUI(options);
 
         return tonConnectUI;
     });
