@@ -1,5 +1,25 @@
 # Changelog @tonconnect/sdk
 
+## 3.4.0-beta.5
+
+### Minor Changes
+
+- 3964cf3: feat: add analytics settings and performance metrics
+    - Added analytics settings with telemetry mode configuration
+    - Added RTT (Round Trip Time) measurement
+    - Added TTFB (Time To First Byte) measurement
+    - Added wallet list download duration tracking
+
+    These metrics help monitor SDK performance and user experience.
+
+### Patch Changes
+
+- 3964cf3: feat: improve bridge connection and loading performance
+    - Actualized wallet bridges with updated connection handling
+    - Improved loading performance by not waiting for all gateways to open
+    - Added minimum gateway connection threshold for faster initialization
+    - Enhanced error handling for bridge connections
+
 ## 3.4.0-beta.4
 
 ### Patch Changes
