@@ -5,6 +5,8 @@ const STORAGE_KEYS = {
   ERUDA: 'devtools:eruda',
   RPC_LOGS: 'devtools:rpc-logs',
   DOCS_HIDDEN: 'devtools:docs-hidden',
+  SHOW_DEPRECATED: 'devtools:show-deprecated',
+  SHOW_EXPERIMENTAL: 'devtools:show-experimental',
   UNLOCKED: 'devtools:unlocked',
 } as const
 
@@ -32,6 +34,16 @@ export function useDevTools() {
   // Docs hidden state
   const [docsHidden, setDocsHiddenState] = useState(() => {
     return localStorage.getItem(STORAGE_KEYS.DOCS_HIDDEN) === 'true'
+  })
+
+  // Show deprecated options state
+  const [showDeprecated, setShowDeprecatedState] = useState(() => {
+    return localStorage.getItem(STORAGE_KEYS.SHOW_DEPRECATED) === 'true'
+  })
+
+  // Show experimental features state
+  const [showExperimental, setShowExperimentalState] = useState(() => {
+    return localStorage.getItem(STORAGE_KEYS.SHOW_EXPERIMENTAL) === 'true'
   })
 
   // Unlock DevTools (called from secret tap)
@@ -91,6 +103,26 @@ export function useDevTools() {
     setDocsHiddenState(hidden)
   }, [])
 
+  // Set Show Deprecated
+  const setShowDeprecated = useCallback((enabled: boolean) => {
+    if (enabled) {
+      localStorage.setItem(STORAGE_KEYS.SHOW_DEPRECATED, 'true')
+    } else {
+      localStorage.removeItem(STORAGE_KEYS.SHOW_DEPRECATED)
+    }
+    setShowDeprecatedState(enabled)
+  }, [])
+
+  // Set Show Experimental
+  const setShowExperimental = useCallback((enabled: boolean) => {
+    if (enabled) {
+      localStorage.setItem(STORAGE_KEYS.SHOW_EXPERIMENTAL, 'true')
+    } else {
+      localStorage.removeItem(STORAGE_KEYS.SHOW_EXPERIMENTAL)
+    }
+    setShowExperimentalState(enabled)
+  }, [])
+
   // Initialize eruda on mount if enabled
   useEffect(() => {
     if (erudaEnabled) {
@@ -104,6 +136,8 @@ export function useDevTools() {
     localStorage.removeItem(STORAGE_KEYS.ERUDA)
     localStorage.removeItem(STORAGE_KEYS.RPC_LOGS)
     localStorage.removeItem(STORAGE_KEYS.DOCS_HIDDEN)
+    localStorage.removeItem(STORAGE_KEYS.SHOW_DEPRECATED)
+    localStorage.removeItem(STORAGE_KEYS.SHOW_EXPERIMENTAL)
     localStorage.removeItem(STORAGE_KEYS.UNLOCKED)
     window.location.reload()
   }, [])
@@ -120,6 +154,10 @@ export function useDevTools() {
     setRpcLogsEnabled,
     docsHidden,
     setDocsHidden,
+    showDeprecated,
+    setShowDeprecated,
+    showExperimental,
+    setShowExperimental,
     resetAll,
   }
 }

@@ -16,6 +16,10 @@ export function DevToolsTab() {
     setRpcLogsEnabled,
     docsHidden,
     setDocsHidden,
+    showDeprecated,
+    setShowDeprecated,
+    showExperimental,
+    setShowExperimental,
     lockDevTools,
     resetAll,
   } = useDevToolsContext()
@@ -185,10 +189,11 @@ export function DevToolsTab() {
             </div>
           </CardContent>
         </Card>
+
       </div>
 
-      {/* Actions & Info */}
-      <div className="grid gap-6 md:grid-cols-2">
+      {/* Actions, Info & Deprecated */}
+      <div className="grid gap-6 md:grid-cols-[1fr_1fr_auto]">
         <Card>
           <CardHeader>
             <CardTitle>Actions</CardTitle>
@@ -227,8 +232,48 @@ export function DevToolsTab() {
                 <li>devtools:eruda: {localStorage.getItem('devtools:eruda') ?? 'null'}</li>
                 <li>devtools:rpc-logs: {localStorage.getItem('devtools:rpc-logs') ?? 'null'}</li>
                 <li>devtools:docs-hidden: {localStorage.getItem('devtools:docs-hidden') ?? 'null'}</li>
+                <li>devtools:show-deprecated: {localStorage.getItem('devtools:show-deprecated') ?? 'null'}</li>
+                <li>devtools:show-experimental: {localStorage.getItem('devtools:show-experimental') ?? 'null'}</li>
                 <li>devtools:unlocked: {localStorage.getItem('devtools:unlocked') ?? 'null'}</li>
               </ul>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-yellow-500" />
+              Deprecated / Experimental
+            </CardTitle>
+            <CardDescription>Show hidden options in Settings</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label htmlFor="showDeprecated">Deprecated</Label>
+                <p className="text-xs text-muted-foreground">
+                  skipRedirectToWallet
+                </p>
+              </div>
+              <Switch
+                id="showDeprecated"
+                checked={showDeprecated}
+                onCheckedChange={setShowDeprecated}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <Label htmlFor="showExperimental">Experimental</Label>
+                <p className="text-xs text-muted-foreground">
+                  Configuration Export
+                </p>
+              </div>
+              <Switch
+                id="showExperimental"
+                checked={showExperimental}
+                onCheckedChange={setShowExperimental}
+              />
             </div>
           </CardContent>
         </Card>

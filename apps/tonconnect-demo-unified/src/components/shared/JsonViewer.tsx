@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react"
 import CodeMirror from "@uiw/react-codemirror"
 import { json } from "@codemirror/lang-json"
+import { javascript } from "@codemirror/lang-javascript"
 import { EditorView } from "@codemirror/view"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -25,6 +26,8 @@ interface JsonViewerProps {
   inlineThreshold?: number
   /** Allow collapsing (default true) */
   collapsible?: boolean
+  /** Language for syntax highlighting (default json) */
+  language?: "json" | "typescript"
 }
 
 export function JsonViewer({
@@ -34,6 +37,7 @@ export function JsonViewer({
   maxHeight = 200,
   inlineThreshold = 80,
   collapsible = true,
+  language = "json",
 }: JsonViewerProps) {
   const [expanded, setExpanded] = useState(defaultExpanded)
   const { theme } = useSettingsContext()
@@ -48,8 +52,26 @@ export function JsonViewer({
 
   const codemirrorTheme = useMemo(() => createTonConnectTheme(isDark), [isDark])
 
-  // Parse and format JSON
+  // Language extension for syntax highlighting
+  const langExtension = useMemo(() => {
+    return language === "typescript"
+      ? javascript({ jsx: true, typescript: true })
+      : json()
+  }, [language])
+
+  // Parse and format content
   const { formatted, lineCount, isShort } = useMemo(() => {
+    // For TypeScript/JS, don't try to parse as JSON
+    if (language === "typescript") {
+      const lines = jsonString.split("\n")
+      return {
+        formatted: jsonString,
+        lineCount: lines.length,
+        isShort: false, // Never show inline for code
+      }
+    }
+
+    // For JSON, try to parse and pretty-print
     try {
       const parsed = JSON.parse(jsonString)
       const formatted = JSON.stringify(parsed, null, 2)
@@ -62,7 +84,7 @@ export function JsonViewer({
     } catch {
       return { formatted: jsonString, lineCount: 1, isShort: jsonString.length <= inlineThreshold }
     }
-  }, [jsonString, inlineThreshold])
+  }, [jsonString, inlineThreshold, language])
 
   const copyToClipboard = async (e: React.MouseEvent) => {
     e.stopPropagation() // Don't toggle collapsible
@@ -126,7 +148,7 @@ export function JsonViewer({
         <CodeMirror
           value={formatted}
           extensions={[
-            json(),
+            langExtension,
             EditorView.editable.of(false),
             ...codemirrorTheme,
           ]}
@@ -145,7 +167,7 @@ export function JsonViewer({
     )
   }
 
-  // Long JSON - collapsible with CodeMirror
+  // Long content - collapsible with CodeMirror
   return (
     <Collapsible open={expanded} onOpenChange={setExpanded}>
       <div className="flex items-center justify-between">
@@ -176,7 +198,7 @@ export function JsonViewer({
         <CodeMirror
           value={formatted}
           extensions={[
-            json(),
+            langExtension,
             EditorView.editable.of(false),
             ...codemirrorTheme,
           ]}

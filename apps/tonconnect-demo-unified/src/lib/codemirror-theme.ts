@@ -14,6 +14,12 @@ const palette = {
     number: "#d19a66",
     boolean: "#56b6c2",
     null: "#c678dd",
+    // JSX specific
+    tagName: "#e06c75",
+    attributeName: "#d19a66",
+    angleBracket: "#abb2bf",
+    className: "#e5c07b",
+    function: "#61afef",
   },
   light: {
     background: "#ffffff",
@@ -25,6 +31,12 @@ const palette = {
     number: "#c18401",
     boolean: "#0184bc",
     null: "#a626a4",
+    // JSX specific
+    tagName: "#e45649",
+    attributeName: "#986801",
+    angleBracket: "#383a42",
+    className: "#c18401",
+    function: "#4078f2",
   },
 }
 
@@ -81,6 +93,7 @@ function createHighlightStyle(isDark: boolean) {
   const colors = isDark ? palette.dark : palette.light
 
   return HighlightStyle.define([
+    // General
     { tag: tags.keyword, color: colors.accent },
     { tag: tags.string, color: colors.string },
     { tag: tags.number, color: colors.number },
@@ -90,6 +103,16 @@ function createHighlightStyle(isDark: boolean) {
     { tag: tags.punctuation, color: colors.textSecondary },
     { tag: tags.bracket, color: colors.text },
     { tag: tags.comment, color: colors.textSecondary, fontStyle: "italic" },
+    // JSX/TSX
+    { tag: tags.tagName, color: colors.tagName },
+    { tag: tags.attributeName, color: colors.attributeName },
+    { tag: tags.angleBracket, color: colors.angleBracket },
+    { tag: tags.className, color: colors.className },
+    { tag: tags.function(tags.variableName), color: colors.function },
+    { tag: tags.definition(tags.variableName), color: colors.function },
+    // TypeScript
+    { tag: tags.typeName, color: colors.className },
+    { tag: tags.namespace, color: colors.className },
   ])
 }
 

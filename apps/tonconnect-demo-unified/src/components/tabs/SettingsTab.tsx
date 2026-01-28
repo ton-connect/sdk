@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -6,9 +7,14 @@ import { Switch } from "@/components/ui/switch"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useSettingsContext } from "@/context/SettingsContext"
+import { useDevToolsContext } from "@/context/DevToolsContext"
 import { NetworkPicker } from "@/components/NetworkPicker"
-import { RotateCcw } from "lucide-react"
-import type { ThemeOption, ColorsConfig, FeaturesMode } from "@/hooks/useSettings"
+import { FieldLabel } from "@/components/shared/FieldLabel"
+import { JsonViewer } from "@/components/shared/JsonViewer"
+import { TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { RotateCcw, AlertTriangle, Copy } from "lucide-react"
+import { toast } from "sonner"
+import type { ThemeOption, LanguageOption, ColorsConfig, FeaturesMode, ExportFormat } from "@/hooks/useSettings"
 
 function ColorInput({
   label,
@@ -100,6 +106,9 @@ function ColorsCard({
 
 export function SettingsTab() {
   const {
+    manifestUrl, setManifestUrl,
+    buildConfiguration,
+    formatConfiguration,
     language, setLanguage,
     theme, setTheme,
     borderRadius, setBorderRadius,
@@ -113,14 +122,19 @@ export function SettingsTab() {
     notificationsSuccess, setNotificationsSuccess,
     notificationsError, setNotificationsError,
     returnStrategy, setReturnStrategy,
-    skipRedirect, setSkipRedirect,
     twaReturnUrl, setTwaReturnUrl,
+    skipRedirect, setSkipRedirect,
     enableAndroidBackHandler, setEnableAndroidBackHandler,
     featuresMode, setFeaturesMode,
     minMessages, setMinMessages,
     extraCurrencyRequired, setExtraCurrencyRequired,
     signDataTypes, setSignDataTypes,
   } = useSettingsContext()
+
+  const { showDeprecated, showExperimental } = useDevToolsContext()
+  const [showFullConfig, setShowFullConfig] = useState(false)
+  const [exportFormat, setExportFormat] = useState<ExportFormat>("json")
+  const [includeDeprecatedInExport, setIncludeDeprecatedInExport] = useState(false)
 
   const handleSignDataTypeChange = (type: string, checked: boolean) => {
     if (checked) {
@@ -132,6 +146,24 @@ export function SettingsTab() {
 
   return (
     <div className="space-y-6">
+      {/* Manifest URL */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            Manifest URL
+            <FieldLabel fieldId="manifestUrl">{""}</FieldLabel>
+          </CardTitle>
+          <CardDescription>Your dApp manifest for wallet identification</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          <Input
+            value={manifestUrl}
+            onChange={(e) => setManifestUrl(e.target.value)}
+            placeholder="https://your-app.com/tonconnect-manifest.json"
+          />
+        </CardContent>
+      </Card>
+
       {/* Row 1: Connection Settings + Modals + Notifications */}
       <div className="grid gap-6 md:grid-cols-3">
         <Card>
@@ -249,9 +281,10 @@ export function SettingsTab() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="language">Language</Label>
-              <Select value={language} onValueChange={(v) => setLanguage(v as "en" | "ru")}>
+              <Select value={language} onValueChange={(v) => setLanguage(v as LanguageOption)}>
                 <SelectTrigger id="language"><SelectValue /></SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="system">System (auto-detect)</SelectItem>
                   <SelectItem value="en">English</SelectItem>
                   <SelectItem value="ru">Русский</SelectItem>
                 </SelectContent>
@@ -295,17 +328,6 @@ export function SettingsTab() {
                 <SelectContent>
                   <SelectItem value="back">Back</SelectItem>
                   <SelectItem value="none">None</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="skipRedirect">Skip Redirect to Wallet</Label>
-              <Select value={skipRedirect} onValueChange={(v) => setSkipRedirect(v as "never" | "always" | "ios")}>
-                <SelectTrigger id="skipRedirect"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ios">iOS only</SelectItem>
-                  <SelectItem value="never">Never</SelectItem>
-                  <SelectItem value="always">Always</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -372,6 +394,119 @@ export function SettingsTab() {
           />
         </div>
       </div>
+
+      {/* Deprecated Options - only shown when enabled in DevTools */}
+      {showDeprecated && (
+        <Card className="border-yellow-500/50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-yellow-500">
+              <AlertTriangle className="h-5 w-5" />
+              Deprecated Options
+            </CardTitle>
+            <CardDescription>
+              These options are deprecated and may be removed in future SDK versions
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="skipRedirect">Skip Redirect to Wallet</Label>
+              <Select value={skipRedirect} onValueChange={(v) => setSkipRedirect(v as "never" | "always" | "ios")}>
+                <SelectTrigger id="skipRedirect"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ios">iOS only</SelectItem>
+                  <SelectItem value="never">Never</SelectItem>
+                  <SelectItem value="always">Always</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Deprecated: SDK now auto-detects for TWA connections. In TMA this is always forced to "never".
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Configuration Export - Experimental */}
+      {showExperimental && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle>Configuration Export</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {/* Combined controls: Tabs + Options */}
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <TabsList className="h-9">
+                <TabsTrigger
+                  value="json"
+                  className="text-xs px-3"
+                  onClick={() => setExportFormat("json")}
+                  data-state={exportFormat === "json" ? "active" : "inactive"}
+                >
+                  JSON
+                </TabsTrigger>
+                <TabsTrigger
+                  value="react"
+                  className="text-xs px-3"
+                  onClick={() => setExportFormat("react")}
+                  data-state={exportFormat === "react" ? "active" : "inactive"}
+                >
+                  React
+                </TabsTrigger>
+                <TabsTrigger
+                  value="vanilla"
+                  className="text-xs px-3"
+                  onClick={() => setExportFormat("vanilla")}
+                  data-state={exportFormat === "vanilla" ? "active" : "inactive"}
+                >
+                  Vanilla JS
+                </TabsTrigger>
+              </TabsList>
+
+              <div className="flex items-center gap-3">
+                <label className="flex items-center gap-1.5 cursor-pointer">
+                  <Checkbox
+                    id="showFullConfig"
+                    checked={showFullConfig}
+                    onCheckedChange={(checked) => setShowFullConfig(!!checked)}
+                  />
+                  <span className="text-xs text-muted-foreground">All</span>
+                </label>
+                {showDeprecated && (
+                  <label className="flex items-center gap-1.5 cursor-pointer">
+                    <Checkbox
+                      id="includeDeprecated"
+                      checked={includeDeprecatedInExport}
+                      onCheckedChange={(checked) => setIncludeDeprecatedInExport(!!checked)}
+                    />
+                    <span className="text-xs text-yellow-500">Deprecated</span>
+                  </label>
+                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 px-2 gap-1"
+                  onClick={async () => {
+                    const content = formatConfiguration(buildConfiguration(showFullConfig, includeDeprecatedInExport), exportFormat)
+                    await navigator.clipboard.writeText(content)
+                    toast.success("Copied to clipboard")
+                  }}
+                >
+                  <Copy className="h-3 w-3" />
+                  <span className="text-xs">Copy</span>
+                </Button>
+              </div>
+            </div>
+
+            <JsonViewer
+              title=""
+              json={formatConfiguration(buildConfiguration(showFullConfig, includeDeprecatedInExport), exportFormat)}
+              collapsible={false}
+              maxHeight={400}
+              language={exportFormat === "json" ? "json" : "typescript"}
+            />
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }
