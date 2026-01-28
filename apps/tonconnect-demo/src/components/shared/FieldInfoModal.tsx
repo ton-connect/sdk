@@ -23,7 +23,7 @@ export function FieldInfoModal({ open, onOpenChange, info }: FieldInfoModalProps
           <p className="text-sm text-muted-foreground">{info.summary}</p>
         </DialogHeader>
 
-        <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-muted prose-pre:text-foreground prose-li:text-muted-foreground prose-th:text-foreground prose-td:text-muted-foreground">
+        <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-muted prose-pre:text-foreground prose-pre:overflow-x-auto prose-li:text-muted-foreground prose-th:text-foreground prose-td:text-muted-foreground">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{info.content}</ReactMarkdown>
         </div>
 

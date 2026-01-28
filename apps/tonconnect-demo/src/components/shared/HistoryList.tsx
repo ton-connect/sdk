@@ -199,11 +199,11 @@ function HistoryEntryRow({
   }, [hash, entry.network])
 
   return (
-    <div className="rounded-lg border bg-card">
+    <div className="rounded-none border-x-0 sm:rounded-lg sm:border bg-card">
       {/* Collapsed row - clickable header */}
       <button
         onClick={onToggle}
-        className="w-full flex items-center gap-3 p-3 text-left hover:bg-muted/50 transition-colors"
+        className="w-full flex items-center gap-3 px-4 py-3 sm:p-3 text-left hover:bg-muted/50 transition-colors"
       >
         {expanded ? (
           <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -239,7 +239,7 @@ function HistoryEntryRow({
 
       {/* Expanded content */}
       {expanded && (
-        <div className="border-t p-4 space-y-4">
+        <div className="border-t px-4 py-4 sm:p-4 space-y-4">
           {/* 2-column layout for Request / Response+Hash */}
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
             {/* Left column: Request */}
@@ -385,7 +385,7 @@ export function HistoryList({ currentWallet, onLoadToForm }: HistoryListProps) {
   return (
     <Collapsible open={sectionOpen} onOpenChange={setSectionOpen}>
       {/* Section header */}
-      <div className="flex items-center justify-between py-2">
+      <div className="flex items-center justify-between py-2 px-4 sm:px-0">
         <CollapsibleTrigger className="flex items-center gap-2 text-sm font-medium hover:text-foreground text-muted-foreground">
           {sectionOpen ? (
             <ChevronDown className="h-4 w-4" />

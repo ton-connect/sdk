@@ -122,7 +122,7 @@ export function HowItWorksCard({ sectionId }: HowItWorksCardProps) {
           </div>
 
           {/* RIGHT: Full markdown content */}
-          <div className="prose prose-sm dark:prose-invert max-w-none
+          <div className="prose prose-sm dark:prose-invert max-w-none min-w-0
             prose-headings:scroll-mt-4
             prose-h2:text-base prose-h2:font-semibold prose-h2:mt-6 prose-h2:mb-3 prose-h2:pb-2 prose-h2:border-b prose-h2:first:mt-0
             prose-p:text-muted-foreground prose-p:my-2 prose-p:leading-relaxed
@@ -131,7 +131,7 @@ export function HowItWorksCard({ sectionId }: HowItWorksCardProps) {
             prose-ol:my-2 prose-ol:text-muted-foreground prose-ol:space-y-1
             prose-li:my-0
             prose-code:text-xs prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-normal prose-code:before:content-none prose-code:after:content-none
-            prose-pre:bg-muted prose-pre:text-foreground prose-pre:text-xs prose-pre:p-3 prose-pre:my-3
+            prose-pre:bg-muted prose-pre:text-foreground prose-pre:text-xs prose-pre:p-3 prose-pre:my-3 prose-pre:overflow-x-auto
             prose-a:text-primary prose-a:no-underline hover:prose-a:underline"
           >
             <ReactMarkdown

@@ -218,11 +218,11 @@ function OperationRow({ operation, onDelete }: OperationRowProps) {
   }
 
   return (
-    <div className="rounded-lg border bg-card overflow-hidden">
+    <div className="rounded-none border-x-0 sm:rounded-lg sm:border bg-card overflow-hidden">
       {/* Collapsed Header */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center gap-2 p-3 text-left hover:bg-muted/50 transition-colors"
+        className="w-full flex items-center gap-2 px-4 py-3 sm:p-3 text-left hover:bg-muted/50 transition-colors"
       >
         {expanded ? (
           <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -291,7 +291,7 @@ function OperationRow({ operation, onDelete }: OperationRowProps) {
 
       {/* Expanded Content - VERTICAL LAYOUT */}
       {expanded && (
-        <div className="border-t p-4 space-y-4">
+        <div className="border-t px-4 py-4 sm:p-4 space-y-4">
 
           {/* REQUESTED Section - only for connect */}
           {config.showRequested && operation.request && (
@@ -510,7 +510,7 @@ export function ConnectionEventsCard({
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between px-4 sm:px-0">
         <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
           <ChevronRight className={cn(
             "h-4 w-4 transition-transform duration-200",

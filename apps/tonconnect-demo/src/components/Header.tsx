@@ -48,6 +48,14 @@ export function Header() {
     { value: "dark", icon: Moon, label: "Dark" },
   ]
 
+  const currentThemeIndex = themes.findIndex(t => t.value === theme)
+  const CurrentIcon = themes[currentThemeIndex]?.icon || Monitor
+
+  const cycleTheme = useCallback(() => {
+    const nextIndex = (currentThemeIndex + 1) % themes.length
+    setTheme(themes[nextIndex].value)
+  }, [currentThemeIndex, setTheme])
+
   return (
     <header className="header-animated sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
       <div className="header-content mx-auto max-w-7xl px-4 md:px-8 flex items-center justify-between gap-3">
@@ -58,25 +66,32 @@ export function Header() {
           >
             TonConnect Demo
           </h1>
-          <p className="header-subtitle text-xs sm:text-sm text-muted-foreground">
+          <p className="header-subtitle text-sm text-muted-foreground hidden sm:block">
             Test and demonstrate wallet integration
           </p>
         </div>
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-          {/* Theme toggle - compact segmented */}
-          <div className="header-button flex rounded-md border bg-muted/50 p-0.5">
+          {/* Theme toggle - single button on mobile, segmented on desktop */}
+          <button
+            onClick={cycleTheme}
+            title={`Theme: ${themes[currentThemeIndex]?.label}`}
+            className="sm:hidden flex items-center justify-center h-8 w-8 rounded-md border bg-muted/50 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <CurrentIcon className="h-4 w-4" />
+          </button>
+          <div className="header-button hidden sm:flex rounded-md border bg-muted/50 p-0.5">
             {themes.map(({ value, icon: Icon, label }) => (
               <button
                 key={value}
                 onClick={() => setTheme(value)}
                 title={label}
-                className={`flex items-center justify-center h-7 w-7 sm:h-8 sm:w-8 rounded-sm transition-colors ${
+                className={`flex items-center justify-center h-8 w-8 rounded-sm transition-colors ${
                   theme === value
                     ? "bg-background text-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <Icon className="h-4 w-4" />
               </button>
             ))}
           </div>

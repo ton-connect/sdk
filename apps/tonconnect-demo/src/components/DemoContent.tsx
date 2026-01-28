@@ -32,9 +32,9 @@ function DemoContentInner() {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="mx-auto max-w-7xl px-4 md:px-8 pt-6 pb-8">
+      <main className="mx-auto max-w-7xl sm:px-4 md:px-8 pt-6 pb-8">
         <Tabs value={tab} onValueChange={setTab} className="space-y-6">
-          <TabsList className={`flex w-full overflow-x-auto md:grid scrollbar-hide ${isUnlocked ? 'md:grid-cols-6' : 'md:grid-cols-5'}`}>
+          <TabsList className={`flex w-full overflow-x-auto md:grid scrollbar-hide px-4 sm:px-0 ${isUnlocked ? 'md:grid-cols-6' : 'md:grid-cols-5'}`}>
             <TabsTrigger value="transaction" className="shrink-0">Transaction</TabsTrigger>
             <TabsTrigger value="sign" className="shrink-0">Sign Data</TabsTrigger>
             <TabsTrigger value="subscription" className="shrink-0">Subscription</TabsTrigger>

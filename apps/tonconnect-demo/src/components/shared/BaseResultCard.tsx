@@ -40,7 +40,7 @@ export function BaseResultCard({
   responseViewerProps = {},
 }: BaseResultCardProps) {
   return (
-    <div className="rounded-lg border bg-muted/30 overflow-hidden animate-in fade-in-50 slide-in-from-bottom-2">
+    <div className="rounded-none border-x-0 sm:rounded-lg sm:border bg-muted/30 overflow-hidden animate-in fade-in-50 slide-in-from-bottom-2">
       {/* Header: timestamp + dismiss */}
       <div className="flex items-center justify-between px-4 py-3 border-b">
         <span className="text-sm text-muted-foreground font-mono">
@@ -57,7 +57,7 @@ export function BaseResultCard({
       {statusBar}
 
       {/* Content: 2-column layout on desktop */}
-      <div className="grid gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+      <div className="grid gap-4 px-4 py-4 sm:p-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         {/* Left column: Request Sent */}
         <div className="space-y-4 min-w-0 overflow-hidden">
           <JsonViewer
