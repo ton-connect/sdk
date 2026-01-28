@@ -10,6 +10,7 @@
     "@tonconnect/ui-react": "2.3.1"
   },
   "changesets": [
+    "analytics-fix",
     "analytics-settings-and-metrics",
     "bridge-improvements",
     "custom-tonconnect-ui-instance",

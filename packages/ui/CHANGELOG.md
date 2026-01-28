@@ -1,5 +1,12 @@
 # Changelog @tonconnect/ui
 
+## 2.4.0-beta.7
+
+### Patch Changes
+
+- Updated dependencies [36dbff1]
+    - @tonconnect/sdk@3.4.0-beta.7
+
 ## 2.4.0-beta.6
 
 ### Minor Changes
