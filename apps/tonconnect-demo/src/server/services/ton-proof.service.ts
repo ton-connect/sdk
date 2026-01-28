@@ -8,6 +8,7 @@ const tonProofPrefix = 'ton-proof-item-v2/';
 const tonConnectPrefix = 'ton-connect';
 
 // For demo - allow any domain (in production you should whitelist specific domains)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const isAllowedDomain = (_domain: string): boolean => {
   return true;
 };

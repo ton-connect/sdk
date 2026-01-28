@@ -192,10 +192,11 @@ function OperationRow({ operation, onDelete }: OperationRowProps) {
   const config = SECTION_CONFIG[operation.type]
 
   // Format features using the shared utility
+  const features = wallet?.device.features
   const formattedFeatures = useMemo(() => {
-    if (!wallet?.device.features) return []
-    return processFeatures(wallet.device.features)
-  }, [wallet?.device.features])
+    if (!features) return []
+    return processFeatures(features)
+  }, [features])
 
   // Determine icon and color
   let Icon = Plug

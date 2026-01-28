@@ -93,7 +93,8 @@ export function useHistory() {
 
   const clearWallet = useCallback((walletAddress: string) => {
     setStore(prev => {
-      const { [walletAddress]: _, ...rest } = prev.entries
+      const { [walletAddress]: _removed, ...rest } = prev.entries
+      void _removed // intentionally unused
       return { entries: rest }
     })
   }, [])

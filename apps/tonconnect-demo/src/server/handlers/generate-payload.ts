@@ -15,7 +15,7 @@ export const generatePayloadHandler = http.post('/api/generate_payload', async (
       payloadToken,
       payloadTokenHash
     });
-  } catch (e) {
+  } catch {
     return HttpResponse.json(
       { error: 'Failed to generate payload' },
       { status: 500 }

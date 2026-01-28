@@ -161,6 +161,7 @@ export function TransactionTab() {
         resultRef.current.scrollIntoView({ behavior: "smooth", block: "start" })
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- trigger only on new result id
   }, [lastResult?.id])
 
   const formContent = (

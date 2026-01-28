@@ -36,7 +36,7 @@ export function validateTransactionJson(json: string): ValidationResult {
       valid: !!valid,
       errors: formatErrors(validateTransaction.errors),
     }
-  } catch (error) {
+  } catch {
     return {
       valid: false,
       errors: [{ path: "/", message: "Invalid JSON syntax" }],
@@ -57,7 +57,7 @@ export function validateSignDataJson(json: string): ValidationResult {
       valid: !!valid,
       errors: formatErrors(validateSignData.errors),
     }
-  } catch (error) {
+  } catch {
     return {
       valid: false,
       errors: [{ path: "/", message: "Invalid JSON syntax" }],

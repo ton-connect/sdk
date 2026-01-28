@@ -38,11 +38,12 @@ export function HowItWorksCard({ sectionId }: HowItWorksCardProps) {
   const features = SECTION_FEATURES[sectionId] || []
 
   // Extract h2 headings from markdown for navigation
+  const content = info?.content
   const headings = useMemo(() => {
-    if (!info?.content) return []
-    const matches = info.content.match(/^## (.+)$/gm)
+    if (!content) return []
+    const matches = content.match(/^## (.+)$/gm)
     return matches?.map(h => h.replace("## ", "")) || []
-  }, [info?.content])
+  }, [content])
 
   // Hide if docs are hidden or no info available
   if (docsHidden || !info) return null
