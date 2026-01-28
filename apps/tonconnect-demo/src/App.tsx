@@ -5,7 +5,7 @@ import { DemoContent } from '@/components/DemoContent'
 function App() {
   return (
     <DevToolsProvider>
-      <TonConnectUIProvider manifestUrl={`${window.location.origin}/tonconnect-manifest.json`}>
+      <TonConnectUIProvider manifestUrl={`${window.location.origin}${import.meta.env.BASE_URL}tonconnect-manifest.json`}>
         <DemoContent />
       </TonConnectUIProvider>
     </DevToolsProvider>

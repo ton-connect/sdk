@@ -25,7 +25,7 @@ export default [
   
   // Ignore patterns
   {
-    ignores: ['**/*.js', '**/node_modules/**', '**/dist/**', '**/lib/**', '**/types/**'],
+    ignores: ['**/*.js', '**/node_modules/**', '**/dist/**', '**/lib/**', '**/types/**', 'apps/tonconnect-demo/**'],
   },
 
   // Base JavaScript configuration

@@ -11,9 +11,13 @@ if (localStorage.getItem('devtools:qa-mode') === 'true') {
 }
 
 async function startApp() {
-  // Start MSW mock server
-  const { startMockServer } = await import('./server')
-  await startMockServer()
+  // Start MSW mock server (non-blocking - app works without it)
+  try {
+    const { startMockServer } = await import('./server')
+    await startMockServer()
+  } catch (e) {
+    console.warn('[MSW] Failed to start mock server:', e)
+  }
 
   createRoot(document.getElementById('root')!).render(
     <StrictMode>

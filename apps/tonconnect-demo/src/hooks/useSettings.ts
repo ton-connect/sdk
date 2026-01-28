@@ -86,7 +86,7 @@ export function useSettings() {
 
   // Manifest URL (for configuration export)
   const [manifestUrl, setManifestUrl] = useState(
-    "https://ton-connect.github.io/demo-dapp-with-react-ui/tonconnect-manifest.json"
+    `${window.location.origin}${import.meta.env.BASE_URL}tonconnect-manifest.json`
   )
 
   // UI Settings
