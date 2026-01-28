@@ -1,5 +1,11 @@
 # Changelog @tonconnect/sdk
 
+## 3.4.0-beta.7
+
+### Patch Changes
+
+- 36dbff1: fix: fix double analytics creation due to a merge request
+
 ## 3.4.0-beta.6
 
 ### Minor Changes
