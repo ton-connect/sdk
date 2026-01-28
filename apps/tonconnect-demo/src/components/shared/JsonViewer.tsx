@@ -11,8 +11,8 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import { Copy, ChevronRight, ChevronDown } from "lucide-react"
-import { toast } from "sonner"
 import { useSettingsContext } from "@/context/SettingsContext"
+import { copyToClipboard } from "@/utils/clipboard"
 import { createTonConnectTheme } from "@/lib/codemirror-theme"
 
 interface JsonViewerProps {
@@ -86,14 +86,9 @@ export function JsonViewer({
     }
   }, [jsonString, inlineThreshold, language])
 
-  const copyToClipboard = async (e: React.MouseEvent) => {
+  const handleCopy = async (e: React.MouseEvent) => {
     e.stopPropagation() // Don't toggle collapsible
-    try {
-      await navigator.clipboard.writeText(formatted)
-      toast.success("Copied to clipboard")
-    } catch {
-      toast.error("Failed to copy")
-    }
+    await copyToClipboard(formatted)
   }
 
   // Calculate height: line-height ~18px + padding
@@ -113,7 +108,7 @@ export function JsonViewer({
           <Button
             variant="ghost"
             size="sm"
-            onClick={copyToClipboard}
+            onClick={handleCopy}
             className="h-6 px-2 gap-1"
           >
             <Copy className="h-3 w-3" />
@@ -137,7 +132,7 @@ export function JsonViewer({
             <Button
               variant="ghost"
               size="sm"
-              onClick={copyToClipboard}
+              onClick={handleCopy}
               className="h-6 px-2 gap-1"
             >
               <Copy className="h-3 w-3" />
@@ -187,7 +182,7 @@ export function JsonViewer({
         <Button
           variant="ghost"
           size="sm"
-          onClick={copyToClipboard}
+          onClick={handleCopy}
           className="h-6 px-2 gap-1"
         >
           <Copy className="h-3 w-3" />

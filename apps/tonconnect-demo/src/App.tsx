@@ -5,7 +5,7 @@ import { DemoContent } from '@/components/DemoContent'
 function App() {
   return (
     <DevToolsProvider>
-      <TonConnectUIProvider manifestUrl="https://ton-connect.github.io/demo-dapp-with-react-ui/tonconnect-manifest.json">
+      <TonConnectUIProvider manifestUrl={`${window.location.origin}/tonconnect-manifest.json`}>
         <DemoContent />
       </TonConnectUIProvider>
     </DevToolsProvider>

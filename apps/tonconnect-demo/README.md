@@ -1,6 +1,6 @@
-# TonConnect Demo Unified
+# TonConnect Demo
 
-A unified demo application for testing and demonstrating TonConnect wallet integration features.
+A demo application for testing and demonstrating TonConnect wallet integration features.
 
 ## Features
 
@@ -17,11 +17,24 @@ A unified demo application for testing and demonstrating TonConnect wallet integ
 pnpm install
 
 # Start development server
-pnpm dev --filter tonconnect-demo-unified
+pnpm dev --filter tonconnect-demo
 
 # Build for production
-pnpm build --filter tonconnect-demo-unified
+VITE_APP_URL=https://your-domain.com pnpm build --filter tonconnect-demo
 ```
+
+## Deployment
+
+The `tonconnect-manifest.json` is generated at build time based on the `VITE_APP_URL` environment variable.
+
+```bash
+# Local build
+VITE_APP_URL=https://your-domain.com pnpm build --filter tonconnect-demo
+
+# Or set in CI/CD environment variables (Vercel, GitHub Actions, etc.)
+```
+
+If `VITE_APP_URL` is not set, it defaults to `http://localhost:5173`.
 
 ## DevTools
 

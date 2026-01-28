@@ -23,16 +23,15 @@ import {
   Check
 } from "lucide-react"
 import { useState } from "react"
-import { toast } from "sonner"
+import { copyToClipboard } from "@/utils/clipboard"
 
 // Inline copy button for text flow
 function InlineCopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false)
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(text)
+    await copyToClipboard(text)
     setCopied(true)
-    toast.success("Copied to clipboard")
     setTimeout(() => setCopied(false), 2000)
   }
 
@@ -85,11 +84,6 @@ function CheckMark({ valid }: { valid: boolean }) {
 }
 
 function WalletResponseDisplay({ proof, address, publicKey, checks, payloadToken }: WalletResponseDisplayProps) {
-  const copyToClipboard = async (text: string) => {
-    await navigator.clipboard.writeText(text)
-    toast.success("Copied to clipboard")
-  }
-
   return (
     <div className="space-y-2 text-xs">
       <div className="font-medium text-muted-foreground">Wallet Response</div>

@@ -1,18 +1,13 @@
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Copy, ExternalLink } from "lucide-react"
-import { toast } from "sonner"
 import { getExplorerUrl } from "@/utils/explorer-utils"
+import { copyToClipboard } from "@/utils/clipboard"
 
 interface TransactionDetailsProps {
   boc: string
   hash: string | null
   network: "mainnet" | "testnet"
-}
-
-function copyToClipboard(text: string) {
-  navigator.clipboard.writeText(text)
-  toast.success("Copied to clipboard")
 }
 
 export function TransactionDetails({ boc, hash, network }: TransactionDetailsProps) {
