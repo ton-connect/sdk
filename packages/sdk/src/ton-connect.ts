@@ -173,9 +173,6 @@ export class TonConnect implements ITonConnect {
 
         this.environment = options?.environment ?? new DefaultEnvironment();
 
-        // TODO: in production ready make flag to enable them?
-        this.analytics = new AnalyticsManager({ environment: this.environment });
-
         this.walletsList = new WalletsListManager({
             walletsListSource: options?.walletsListSource,
             cacheTTLMs: options?.walletsListCacheTTLMs,
@@ -848,6 +845,7 @@ export class TonConnect implements ITonConnect {
     ): void {
         const analyticsSettings: AnalyticsSettings | undefined = options?.analytics;
         const mode = analyticsSettings?.mode ?? 'telemetry';
+        console.log('MODE', mode);
 
         if (mode === 'off') {
             return;
