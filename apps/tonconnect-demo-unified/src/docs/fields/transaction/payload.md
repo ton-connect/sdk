@@ -4,7 +4,7 @@ name: Payload
 summary: Message body sent to recipient contract.
 links:
   - title: Cell & BoC
-    url: https://docs.ton.org/develop/data-formats/cell-boc
+    url: https://docs.ton.org/foundations/serialization/boc
 ---
 
 ## Purpose

@@ -6,7 +6,7 @@ links:
   - title: TonConnect Spec
     url: https://github.com/ton-blockchain/ton-connect/blob/main/requests-responses.md
   - title: Wallet Contracts
-    url: https://docs.ton.org/v3/documentation/smart-contracts/contracts-specs/wallet-contracts
+    url: https://docs.ton.org/standard/wallets/comparison
 ---
 
 ## How it works

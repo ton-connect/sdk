@@ -4,7 +4,7 @@ name: Address
 summary: Recipient address in TON format.
 links:
   - title: TON Addresses
-    url: https://docs.ton.org/learn/overviews/addresses
+    url: https://docs.ton.org/foundations/addresses/formats
 ---
 
 ## Format

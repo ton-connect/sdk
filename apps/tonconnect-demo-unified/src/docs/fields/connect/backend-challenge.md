@@ -4,7 +4,7 @@ name: Backend Challenge
 summary: Server-generated random data for wallet to sign.
 links:
   - title: TonProof Spec
-    url: https://github.com/ton-blockchain/ton-connect/blob/main/requests-responses.md#tonproof
+    url: https://github.com/ton-blockchain/ton-connect/blob/main/requests-responses.md#address-proof-signature-ton_proof
 ---
 
 ## What it is

@@ -4,7 +4,7 @@ name: Simple Connection
 summary: Connect wallet without cryptographic proof of ownership.
 links:
   - title: TON Connect Overview
-    url: https://docs.ton.org/v3/guidelines/ton-connect/overview
+    url: https://docs.ton.org/ecosystem/ton-connect/overview
 ---
 
 ## Purpose

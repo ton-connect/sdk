@@ -3,8 +3,8 @@ id: verifyProof
 name: Verify Proof
 summary: Backend cryptographic verification of wallet signature.
 links:
-  - title: Verification Algorithm
-    url: https://docs.ton.org/v3/guidelines/ton-connect/guidelines/ton-proof#how-to-check-ton-proof-on-server-side
+  - title: TonProof Specification
+    url: https://github.com/ton-blockchain/ton-connect/blob/main/requests-responses.md#address-proof-signature-ton_proof
 ---
 
 ## What happens

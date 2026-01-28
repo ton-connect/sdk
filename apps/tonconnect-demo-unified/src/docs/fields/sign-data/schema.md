@@ -4,7 +4,7 @@ name: Schema
 summary: TL-B schema describing cell structure.
 links:
   - title: TL-B Language
-    url: https://docs.ton.org/develop/data-formats/tl-b-language
+    url: https://docs.ton.org/languages/tl-b/overview
 ---
 
 ## Purpose

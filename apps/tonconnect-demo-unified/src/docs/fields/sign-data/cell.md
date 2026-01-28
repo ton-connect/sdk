@@ -4,7 +4,7 @@ name: Cell
 summary: Structured blockchain data (BOC) for signing.
 links:
   - title: Cell & BoC
-    url: https://docs.ton.org/develop/data-formats/cell-boc
+    url: https://docs.ton.org/foundations/serialization/boc
 ---
 
 Base64-encoded BOC (Bag of Cells). Requires TL-B schema for wallet to parse and display structure.

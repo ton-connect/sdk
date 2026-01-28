@@ -4,7 +4,7 @@ name: Amount
 summary: Transfer amount in nanotons.
 links:
   - title: Transaction Fees
-    url: https://docs.ton.org/v3/documentation/smart-contracts/transaction-fees/fees
+    url: https://docs.ton.org/contract-dev/gas
 ---
 
 ## Conversion

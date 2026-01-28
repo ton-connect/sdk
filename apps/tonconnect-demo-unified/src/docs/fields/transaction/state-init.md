@@ -4,7 +4,7 @@ name: State Init
 summary: Contract initialization for deployment.
 links:
   - title: Contract Deployment
-    url: https://docs.ton.org/develop/smart-contracts/deploy
+    url: https://docs.ton.org/foundations/status
 ---
 
 ## Purpose

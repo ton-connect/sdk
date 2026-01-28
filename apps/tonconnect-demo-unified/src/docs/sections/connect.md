@@ -3,8 +3,8 @@ id: connect
 name: Wallet Connection
 summary: Connect wallets with optional TonProof for cryptographic ownership verification.
 links:
-  - title: TonProof Guide
-    url: https://docs.ton.org/v3/guidelines/ton-connect/guidelines/ton-proof
+  - title: TonProof Specification
+    url: https://github.com/ton-blockchain/ton-connect/blob/main/requests-responses.md#address-proof-signature-ton_proof
   - title: Protocol Spec
     url: https://github.com/ton-blockchain/ton-connect/blob/main/requests-responses.md
   - title: Demo Backend (Go)

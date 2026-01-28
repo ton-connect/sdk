@@ -4,9 +4,9 @@ name: Transaction Request
 summary: Request the connected wallet to sign and broadcast a transaction to the TON blockchain.
 links:
   - title: Sending Messages Guide
-    url: https://docs.ton.org/v3/guidelines/ton-connect/guidelines/sending-messages
+    url: https://docs.ton.org/ecosystem/ton-connect/dapp
   - title: Protocol Spec
-    url: https://github.com/ton-blockchain/ton-connect/blob/main/requests-responses.md#sendtransaction
+    url: https://github.com/ton-blockchain/ton-connect/blob/main/requests-responses.md#sign-and-send-transaction
 ---
 
 ## What it does

@@ -4,9 +4,9 @@ name: TonProof
 summary: Cryptographic proof of wallet ownership using Ed25519 signature.
 links:
   - title: TonProof Specification
-    url: https://github.com/ton-blockchain/ton-connect/blob/main/requests-responses.md#tonproof
-  - title: Verification Guide
-    url: https://docs.ton.org/v3/guidelines/ton-connect/guidelines/ton-proof
+    url: https://github.com/ton-blockchain/ton-connect/blob/main/requests-responses.md#address-proof-signature-ton_proof
+  - title: Demo Backend (Go)
+    url: https://github.com/ton-connect/demo-dapp-backend
 ---
 
 ## Purpose

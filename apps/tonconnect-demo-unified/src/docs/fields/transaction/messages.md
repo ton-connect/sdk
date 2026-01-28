@@ -4,9 +4,9 @@ name: Messages
 summary: Array of outgoing messages. Min 1, max depends on wallet.
 links:
   - title: Wallet Contracts
-    url: https://docs.ton.org/v3/documentation/smart-contracts/contracts-specs/wallet-contracts
+    url: https://docs.ton.org/standard/wallets/comparison
   - title: Transaction Fees
-    url: https://docs.ton.org/v3/documentation/smart-contracts/transaction-fees/fees
+    url: https://docs.ton.org/contract-dev/gas
 ---
 
 ## Limits
