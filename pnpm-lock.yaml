@@ -71,6 +71,12 @@ importers:
       '@reown/appkit-universal-connector':
         specifier: ^1.8.14
         version: 1.8.14(@types/react@19.1.9)(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@19.1.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(ws@7.5.10(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.0.15)
+      '@ton-api/client':
+        specifier: ^0.4.0
+        version: 0.4.0(@ton/core@0.61.0(@ton/crypto@3.3.0))
+      '@ton-api/ton-adapter':
+        specifier: ^0.4.1
+        version: 0.4.1(@ton-api/client@0.4.0(@ton/core@0.61.0(@ton/crypto@3.3.0)))(@ton/core@0.61.0(@ton/crypto@3.3.0))
       '@ton-community/assets-sdk':
         specifier: 0.0.5
         version: 0.0.5(@ton/core@0.61.0(@ton/crypto@3.3.0))(@ton/crypto@3.3.0)(@ton/ton@15.3.1(@ton/core@0.61.0(@ton/crypto@3.3.0))(@ton/crypto@3.3.0))
@@ -2900,6 +2906,17 @@ packages:
   '@swc/types@0.1.23':
     resolution: {integrity: sha512-u1iIVZV9Q0jxY+yM2vw/hZGDNudsN85bBpTqzAQ9rzkxW9D+e3aEM4Han+ow518gSewkXgjmEK0BD79ZcNVgPw==}
 
+  '@ton-api/client@0.4.0':
+    resolution: {integrity: sha512-k3d6RzNWRDEZpVa9Gig2kHqp74tGvaK/imkjb08RIGxn+wKC7Yv5g98GnXEHf3srRkjtRCG0Nnjx8EsasOMJkw==}
+    peerDependencies:
+      '@ton/core': '>=0.59.0'
+
+  '@ton-api/ton-adapter@0.4.1':
+    resolution: {integrity: sha512-snvd49M2PnDiIgMyeeIpGPTWI7ECnRYz4qIcFplv/mmYvV+6OiNM4UtHOplAh7sGR1JY1xBf+HP+RJ8qzCN2Hw==}
+    peerDependencies:
+      '@ton-api/client': ^0.4.0
+      '@ton/core': '>=0.60.1'
+
   '@ton-community/assets-sdk@0.0.5':
     resolution: {integrity: sha512-ayu+wVO2497L+O1x2QFZSX3dTQjsfh0ae6wb1ENIGgpjVVXsnPUQJ8s4YTwYTlrC3O1ghltkMCHhtxlaRvS9oA==}
     hasBin: true
@@ -4043,6 +4060,9 @@ packages:
 
   core-js-compat@3.45.0:
     resolution: {integrity: sha512-gRoVMBawZg0OnxaVv3zpqLLxaHmsubEGyTnqdpI/CEBvX4JadI1dMSHxagThprYRtSVbuQxvi6iUatdPxohHpA==}
+
+  core-js-pure@3.48.0:
+    resolution: {integrity: sha512-1slJgk89tWC51HQ1AEqG+s2VuwpTRr8ocu4n20QUcH1v9lAN0RXen0Q0AABa/DK1I7RrNWLucplOHMx8hfTGTw==}
 
   cosmiconfig@7.1.0:
     resolution: {integrity: sha512-AdmX6xUzdNASswsFtmwSt7Vj8po9IuqXm0UXz7QKPuEUmPB4XyjGfaAr2PSuELMwkRMVH1EpIkX5bTZGRB3eCA==}
@@ -11524,6 +11544,16 @@ snapshots:
       '@swc/counter': 0.1.3
     optional: true
 
+  '@ton-api/client@0.4.0(@ton/core@0.61.0(@ton/crypto@3.3.0))':
+    dependencies:
+      '@ton/core': 0.61.0(@ton/crypto@3.3.0)
+      core-js-pure: 3.48.0
+
+  '@ton-api/ton-adapter@0.4.1(@ton-api/client@0.4.0(@ton/core@0.61.0(@ton/crypto@3.3.0)))(@ton/core@0.61.0(@ton/crypto@3.3.0))':
+    dependencies:
+      '@ton-api/client': 0.4.0(@ton/core@0.61.0(@ton/crypto@3.3.0))
+      '@ton/core': 0.61.0(@ton/crypto@3.3.0)
+
   '@ton-community/assets-sdk@0.0.5(@ton/core@0.61.0(@ton/crypto@3.3.0))(@ton/crypto@3.3.0)(@ton/ton@15.3.1(@ton/core@0.61.0(@ton/crypto@3.3.0))(@ton/crypto@3.3.0))':
     dependencies:
       '@aws-sdk/client-s3': 3.859.0
@@ -13098,6 +13128,8 @@ snapshots:
     dependencies:
       browserslist: 4.25.1
     optional: true
+
+  core-js-pure@3.48.0: {}
 
   cosmiconfig@7.1.0:
     dependencies:

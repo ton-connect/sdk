@@ -3,6 +3,7 @@ import { beginCell } from '@ton/ton';
 import ReactJson, { InteractionProps } from 'react-json-view';
 import './style.scss';
 import { SendTransactionRequest, useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
+import { SignMessageResponse } from '@tonconnect/sdk';
 import { TonProofDemoApi } from '../../TonProofDemoApi';
 import { CHAIN } from '@tonconnect/ui-react';
 
@@ -33,6 +34,8 @@ export function TxForm() {
     const [txResult, setTxResult] = useState<object | null>(null);
     const [loading, setLoading] = useState(false);
     const [waitingTx, setWaitingTx] = useState(false);
+    const [signLoading, setSignLoading] = useState(false);
+    const [signResult, setSignResult] = useState<SignMessageResponse | null>(null);
 
     const wallet = useTonWallet();
     const [tonConnectUi] = useTonConnectUI();
@@ -57,6 +60,22 @@ export function TxForm() {
             }
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleSignMessage = async () => {
+        setSignResult(null);
+        setSignLoading(true);
+        try {
+            const signedMessage = await tonConnectUi.signMessage(tx);
+            setSignResult(signedMessage);
+        } catch (error) {
+            console.error('Error signing message:', error);
+            setSignResult({
+                error: error instanceof Error ? error.message : 'Unknown error'
+            } as unknown as SignMessageResponse);
+        } finally {
+            setSignLoading(false);
         }
     };
 
@@ -112,9 +131,17 @@ export function TxForm() {
             )}
 
             {wallet ? (
-                <button onClick={handleSendTx} disabled={loading || waitingTx}>
-                    {loading ? 'Sending...' : 'Send transaction'}
-                </button>
+                <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
+                    <button onClick={handleSendTx} disabled={loading || waitingTx}>
+                        {loading ? 'Sending...' : 'Send transaction'}
+                    </button>
+                    <button
+                        onClick={handleSignMessage}
+                        disabled={signLoading || loading || waitingTx}
+                    >
+                        {signLoading ? 'Signing...' : 'Sign transaction'}
+                    </button>
+                </div>
             ) : (
                 <button onClick={() => tonConnectUi.openModal()}>
                     Connect wallet to send the transaction
@@ -126,6 +153,15 @@ export function TxForm() {
                     <div className="find-transaction-demo__json-label">Transaction</div>
                     <div className="find-transaction-demo__json-view">
                         <ReactJson src={txResult} name={false} theme="ocean" collapsed={false} />
+                    </div>
+                </>
+            )}
+
+            {signResult && (
+                <>
+                    <div className="find-transaction-demo__json-label">Signed Message</div>
+                    <div className="find-transaction-demo__json-view">
+                        <ReactJson src={signResult} name={false} theme="ocean" collapsed={false} />
                     </div>
                 </>
             )}
