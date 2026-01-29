@@ -64,6 +64,25 @@ const connector = new TonConnect({
 });
 ```
 
+## Analytics
+
+You can configure analytics collection when creating the connector:
+
+```ts
+const connector = new TonConnect({
+    manifestUrl: 'https://myApp.com/tonconnect-manifest.json',
+    analytics: { mode: 'off' } // or 'telemetry' (default), 'full'
+});
+```
+
+**Analytics modes:**
+
+| Mode                    | Description                                                |
+|-------------------------|------------------------------------------------------------|
+| **off**                 | Analytics turned off. No events are collected or sent.     |
+| **telemetry** (default) | Analytics used for technical research and issue debugging. |
+| **full**                | Full analytics events.                                     |
+
 ## Subscribe to the connection status changes
 ```js
 const unsubscribe = connector.onStatusChange(
