@@ -5,6 +5,7 @@ import {
     ConnectItem,
     ConnectRequest,
     SendTransactionRpcResponseSuccess,
+    SignMessageRpcResponseSuccess,
     SignDataPayload,
     SignDataRpcResponseSuccess,
     TonAddressItemReply,
@@ -32,7 +33,9 @@ import {
 import {
     SendTransactionRequest,
     SendTransactionResponse,
-    SignDataResponse
+    SignDataResponse,
+    SignMessageRequest,
+    SignMessageResponse
 } from 'src/models/methods';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
 import { AnalyticsSettings, TonConnectOptions } from 'src/models/ton-connect-options';
@@ -43,6 +46,7 @@ import {
 import { connectErrorsParser } from 'src/parsers/connect-errors-parser';
 import { sendTransactionParser } from 'src/parsers/send-transaction-parser';
 import { signDataParser } from 'src/parsers/sign-data-parser';
+import { signMessageParser } from 'src/parsers/sign-message-parser';
 import { BridgeProvider } from 'src/provider/bridge/bridge-provider';
 import { InjectedProvider } from 'src/provider/injected/injected-provider';
 import { Provider } from 'src/provider/provider';
@@ -65,6 +69,7 @@ import { TonConnectTracker } from 'src/tracker/ton-connect-tracker';
 import { tonConnectSdkVersion } from 'src/constants/version';
 import {
     validateSendTransactionRequest,
+    validateSignMessageRequest,
     validateSignDataPayload,
     validateConnectAdditionalRequest,
     validateTonProofItemReply
@@ -625,6 +630,125 @@ export class TonConnect implements ITonConnect {
             response as SendTransactionRpcResponseSuccess
         );
         this.tracker.trackTransactionSigned(this.wallet, transaction, result, sessionInfo, traceId);
+        return { ...result, traceId: response.traceId };
+    }
+
+    /**
+     * Asks connected wallet to sign the message.
+     * @param message message to sign.
+     * @param options (optional) onRequestSent will be called after the request was sent to the wallet and signal for the message abort.
+     * @returns signed message boc.
+     * If user rejects message, method will throw the corresponding error.
+     */
+    public async signMessage(
+        message: SignMessageRequest,
+        optionsOrOnRequestSent?:
+            | OptionalTraceable<{
+                  onRequestSent?: () => void;
+                  signal?: AbortSignal;
+              }>
+            | (() => void)
+    ): Promise<Traceable<SignMessageResponse>> {
+        // TODO: remove deprecated method
+        const options: OptionalTraceable<{
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+        }> = {};
+        if (typeof optionsOrOnRequestSent === 'function') {
+            options.onRequestSent = optionsOrOnRequestSent;
+        } else {
+            options.onRequestSent = optionsOrOnRequestSent?.onRequestSent;
+            options.signal = optionsOrOnRequestSent?.signal;
+            options.traceId = optionsOrOnRequestSent?.traceId;
+        }
+
+        // Validate message
+        const validationError = validateSignMessageRequest(message);
+        if (validationError) {
+            if (isQaModeEnabled()) {
+                console.error('SignMessageRequest validation failed: ' + validationError);
+            } else {
+                throw new TonConnectError(
+                    'SignMessageRequest validation failed: ' + validationError
+                );
+            }
+        }
+
+        const abortController = createAbortController(options?.signal);
+        if (abortController.signal.aborted) {
+            throw new TonConnectError('Message signing was aborted');
+        }
+
+        this.checkConnection();
+
+        const requiredMessagesNumber = message.messages.length;
+        const requireExtraCurrencies = message.messages.some(
+            m => m.extraCurrency && Object.keys(m.extraCurrency).length > 0
+        );
+        checkSendTransactionSupport(this.wallet!.device.features, {
+            requiredMessagesNumber,
+            requireExtraCurrencies
+        });
+
+        //const sessionInfo = this.getSessionInfo();
+        const traceId = options?.traceId ?? UUIDv7();
+        // this.tracker.trackTransactionSentForSignature(this.wallet, message, sessionInfo, traceId);
+
+        const { validUntil, messages, ...msg } = message;
+        const from = message.from || this.account!.address;
+        const network = message.network || this.account!.chain;
+
+        if (this.wallet?.account.chain && network !== this.wallet.account.chain) {
+            if (!isQaModeEnabled()) {
+                throw new WalletWrongNetworkError('Wallet connected to a wrong network', {
+                    cause: {
+                        expectedChainId: this.wallet?.account.chain,
+                        actualChainId: network
+                    }
+                });
+            }
+            console.error('Wallet connected to a wrong network', {
+                expectedChainId: this.wallet?.account.chain,
+                actualChainId: network
+            });
+        }
+
+        const response = await this.provider!.sendRequest(
+            signMessageParser.convertToRpcRequest({
+                ...msg,
+                from,
+                network,
+                valid_until: validUntil,
+                messages: messages.map(({ extraCurrency, payload, stateInit, ...m }) => ({
+                    ...m,
+                    payload: normalizeBase64(payload),
+                    stateInit: normalizeBase64(stateInit),
+                    extra_currency: extraCurrency
+                }))
+            }),
+            {
+                onRequestSent: options.onRequestSent,
+                signal: abortController.signal,
+                traceId
+            }
+        );
+
+        if (signMessageParser.isError(response)) {
+            // this.tracker.trackTransactionSigningFailed(
+            //     this.wallet,
+            //     message,
+            //     response.error.message,
+            //     response.error.code,
+            //     sessionInfo,
+            //     traceId
+            // );
+            return signMessageParser.parseAndThrowError(response);
+        }
+
+        const result = signMessageParser.convertFromRpcResponse(
+            response as SignMessageRpcResponseSuccess
+        );
+        // this.tracker.trackTransactionSigned(this.wallet, message, result, sessionInfo, traceId);
         return { ...result, traceId: response.traceId };
     }
 
