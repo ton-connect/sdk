@@ -41,6 +41,18 @@
       bridge-client-connect-error, bridge-client-message-sent, bridge-client-message-received,
       bridge-client-message-decode-error), and JS Bridge events (js-bridge-call, js-bridge-response,
       js-bridge-error)
+    - analytics mode can be configured via `analytics` prop: **off** (disabled), **telemetry** (events for technical research, default), **full** (full analytics)
+
+    **Usage (React):**
+
+    ```tsx
+    <TonConnectUIProvider
+        manifestUrl="https://<YOUR_APP_URL>/tonconnect-manifest.json"
+        analytics={{ mode: 'off' }}
+    >
+        { /* Your app */ }
+    </TonConnectUIProvider>
+    ```
 
 - 2cbf8a8: feat: add trace ID support for tracking user flows
     - added UUIDv7-based trace IDs to aggregate multiple events into a single user flow
@@ -186,6 +198,18 @@
       bridge-client-connect-error, bridge-client-message-sent, bridge-client-message-received,
       bridge-client-message-decode-error), and JS Bridge events (js-bridge-call, js-bridge-response,
       js-bridge-error)
+    - analytics mode can be configured via `analytics` prop: **off** (disabled), **telemetry** (events for technical research, default), **full** (full analytics)
+
+    **Usage (React):**
+
+    ```tsx
+    <TonConnectUIProvider
+        manifestUrl="https://<YOUR_APP_URL>/tonconnect-manifest.json"
+        analytics={{ mode: 'off' }}
+    >
+        { /* Your app */ }
+    </TonConnectUIProvider>
+    ```
 
 - 2cbf8a8: feat: add trace ID support for tracking user flows
     - added UUIDv7-based trace IDs to aggregate multiple events into a single user flow
