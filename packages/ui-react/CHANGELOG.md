@@ -6,7 +6,7 @@
 
 - 3964cf3: feat: add support for custom TonConnectUI instance in TonConnectUIProvider
 
-    Added optional `tonConnectUI` prop to `TonConnectUIProvider` to allow passing a pre-initialized
+    Added optional `instance` prop to `TonConnectUIProvider` to allow passing a pre-initialized
     TonConnectUI instance. This enables:
     - Sharing a single instance between multiple parts of the application
     - Initializing with custom logic before passing it to the provider
@@ -25,7 +25,7 @@
 
     function App() {
       return (
-        <TonConnectUIProvider tonConnectUI={tonConnectUI}>
+        <TonConnectUIProvider instance={tonConnectUI}>
           {/* Your app */}
         </TonConnectUIProvider>
       );
