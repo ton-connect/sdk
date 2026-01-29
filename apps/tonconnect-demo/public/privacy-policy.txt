@@ -1,0 +1,10 @@
+This is a demonstration file for the TonConnect manifest.
+
+In a real application, this file may contain your Privacy Policy, for example:
+- What data you collect
+- How you use and store this data
+- User rights
+- etc.
+
+The privacyPolicyUrl field in tonconnect-manifest.json points to this file.
+Wallets may display this link to users during connection.

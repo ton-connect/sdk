@@ -1,0 +1,10 @@
+This is a demonstration file for the TonConnect manifest.
+
+In a real application, this file may contain your Terms of Use, for example:
+- Service description and usage rules
+- User responsibilities
+- Liability limitations
+- etc.
+
+The termsOfUseUrl field in tonconnect-manifest.json points to this file.
+Wallets may display this link to users during connection.

@@ -1,0 +1,103 @@
+name: Deploy Demo
+
+on:
+  push:
+    branches:
+      - '**'
+  delete:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pages-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    if: github.event_name != 'delete'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Set environment variables
+        env:
+          BRANCH: ${{ github.ref_name }}
+          REPO_NAME: ${{ github.event.repository.name }}
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          # Base path: /repo/ for main, /repo/branch/ for other branches
+          if [ "$BRANCH" = "main" ]; then
+            BASE_PATH="/${REPO_NAME}/"
+            DEST_DIR="."
+          else
+            BASE_PATH="/${REPO_NAME}/${BRANCH}/"
+            DEST_DIR="${BRANCH}"
+          fi
+
+          # Full URL for manifest
+          APP_URL="https://${OWNER}.github.io${BASE_PATH}"
+
+          echo "VITE_BASE_PATH=${BASE_PATH}" >> $GITHUB_ENV
+          echo "VITE_APP_URL=${APP_URL}" >> $GITHUB_ENV
+          echo "DEST_DIR=${DEST_DIR}" >> $GITHUB_ENV
+
+          echo "Building for: ${APP_URL}"
+          echo "Destination: ${DEST_DIR}"
+
+      - name: Build demo
+        run: pnpm build --filter tonconnect-demo
+        env:
+          VITE_APP_URL: ${{ env.VITE_APP_URL }}
+          VITE_BASE_PATH: ${{ env.VITE_BASE_PATH }}
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./apps/tonconnect-demo/dist
+          destination_dir: ${{ env.DEST_DIR }}
+          keep_files: true
+
+  cleanup:
+    if: github.event_name == 'delete' && github.event.ref_type == 'branch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+        continue-on-error: true
+
+      - name: Remove stale deployment
+        env:
+          BRANCH: ${{ github.event.ref }}
+        run: |
+          # Skip if gh-pages doesn't exist or branch dir doesn't exist
+          if [ ! -d "$BRANCH" ]; then
+            echo "No deployment found for branch: $BRANCH"
+            exit 0
+          fi
+
+          # Don't delete root
+          if [ "$BRANCH" = "." ] || [ "$BRANCH" = "" ]; then
+            echo "Skipping invalid branch name"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          rm -rf "$BRANCH"
+          git add -A
+          git commit -m "Cleanup: remove deployment for deleted branch $BRANCH" || echo "No changes to commit"
+          git push origin gh-pages
