@@ -243,7 +243,8 @@ export class TonConnectUI {
                 manifestUrl: options.manifestUrl,
                 eventDispatcher,
                 walletsRequiredFeatures: options.walletsRequiredFeatures,
-                environment: new TonConnectEnvironment()
+                environment: new TonConnectEnvironment(),
+                analytics: options.analytics
             });
         } else {
             throw new TonConnectUIError(

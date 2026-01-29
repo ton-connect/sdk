@@ -1,4 +1,4 @@
-import { createContext, FunctionComponent, memo, ReactNode } from 'react';
+import { createContext, FunctionComponent, memo, ReactNode, useState } from 'react';
 import {
     ActionConfiguration,
     Locales,
@@ -6,15 +6,20 @@ import {
     UIPreferences,
     WalletsListConfiguration
 } from '@tonconnect/ui';
-import type { ITonConnect, RequiredFeatures } from '@tonconnect/ui';
+import type { ITonConnect, RequiredFeatures, AnalyticsSettings } from '@tonconnect/ui';
 import { isClientSide } from '../utils/web';
 
 export const TonConnectUIContext = createContext<TonConnectUI | null>(null);
 
 export type TonConnectUIProviderProps = {
     children: ReactNode;
-} & Partial<TonConnectUIProviderPropsBase> &
-    Partial<TonConnectUIProviderPropsWithManifest | TonConnectUIProviderPropsWithConnector>;
+} & (
+    | Partial<
+          TonConnectUIProviderPropsBase &
+              (TonConnectUIProviderPropsWithManifest | TonConnectUIProviderPropsWithConnector)
+      >
+    | TonConnectUIProviderPropsWithInstance
+);
 
 export interface TonConnectUIProviderPropsWithManifest {
     /**
@@ -29,6 +34,17 @@ export interface TonConnectUIProviderPropsWithConnector {
      * TonConnect instance. Can be helpful if you use custom ITonConnect implementation, or use both of @tonconnect/sdk and @tonconnect/ui in your app.
      */
     connector: ITonConnect;
+}
+
+export interface TonConnectUIProviderPropsWithInstance {
+    /**
+     * TonConnectUI instance. Can be helpful if TonConnectUI instance is used outside of React context.
+     *
+     * Note: TonConnect UI works as a singleton.
+     * If you pass a custom instance, it will be stored in the global singleton
+     * and reused by the library.
+     */
+    instance: TonConnectUI;
 }
 
 export interface TonConnectUIProviderPropsBase {
@@ -80,6 +96,11 @@ export interface TonConnectUIProviderPropsBase {
      * @default true
      */
     enableAndroidBackHandler?: boolean;
+
+    /**
+     * Analytics configuration forwarded to the underlying TonConnect SDK instance.
+     */
+    analytics?: AnalyticsSettings;
 }
 
 let tonConnectUI: TonConnectUI | null = null;
@@ -95,12 +116,26 @@ const TonConnectUIProvider: FunctionComponent<TonConnectUIProviderProps> = ({
     children,
     ...options
 }) => {
-    if (isClientSide() && !tonConnectUI) {
-        tonConnectUI = new TonConnectUI(options);
-    }
+    const [uiInstance] = useState<TonConnectUI | null>(() => {
+        if (!isClientSide()) {
+            return null;
+        }
+
+        if (tonConnectUI !== null) {
+            return tonConnectUI;
+        }
+
+        if ('instance' in options) {
+            tonConnectUI = options.instance;
+        } else {
+            tonConnectUI = new TonConnectUI(options);
+        }
+
+        return tonConnectUI;
+    });
 
     return (
-        <TonConnectUIContext.Provider value={tonConnectUI}>{children}</TonConnectUIContext.Provider>
+        <TonConnectUIContext.Provider value={uiInstance}>{children}</TonConnectUIContext.Provider>
     );
 };
 

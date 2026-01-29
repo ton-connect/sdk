@@ -3,19 +3,25 @@ import { AnalyticsEvent } from './types';
 import { tonConnectSdkVersion } from 'src/constants/version';
 import { UUIDv7 } from 'src/utils/uuid';
 import { Analytics } from 'src/analytics/analytics';
-import { pascalToKebab } from 'src/analytics/utils';
+import {
+    pascalToKebab,
+    getStaticConnectionMetrics,
+    getDynamicConnectionMetrics
+} from 'src/analytics/utils';
 import { IEnvironment } from 'src/environment/models/environment.interface';
 import { isQaModeEnabled } from 'src/utils/qa-mode';
 import { Dynamic } from 'src/utils/types';
 import { getDocument } from 'src/utils/web-api';
 import { TonConnectError } from 'src/errors';
 
+export type AnalyticsMode = 'off' | 'telemetry' | 'full';
+
 export type EventsCollectorOptions = {
     batchTimeoutMs?: number;
     maxBatchSize?: number;
     analyticsUrl?: string;
-    enabled?: boolean;
     environment?: IEnvironment;
+    mode?: AnalyticsMode;
 };
 
 export class AnalyticsManager {
@@ -29,11 +35,12 @@ export class AnalyticsManager {
     private readonly batchTimeoutMs: number;
     private readonly maxBatchSize: number;
     private readonly analyticsUrl: string;
-    private enabled: boolean;
 
     private shouldSend: boolean = true;
 
-    private readonly baseEvent: Partial<AnalyticsEvent>;
+    private baseEvent: Partial<AnalyticsEvent>;
+
+    public readonly mode: AnalyticsMode;
 
     private static readonly HTTP_STATUS = {
         TOO_MANY_REQUESTS: 429,
@@ -44,17 +51,26 @@ export class AnalyticsManager {
     private static readonly MAX_BACKOFF_ATTEMPTS = 5;
     private static readonly BACKOFF_MULTIPLIER = 2;
 
+    private static readonly FULL_MODE_FIELDS = [
+        'user_id',
+        'tg_id',
+        'locale',
+        'tma_is_premium'
+    ] as const;
+
     constructor(options: EventsCollectorOptions = {}) {
         this.batchTimeoutMs = options.batchTimeoutMs ?? 2000;
         this.currentBatchTimeoutMs = this.batchTimeoutMs;
         this.maxBatchSize = options.maxBatchSize ?? 100;
         this.analyticsUrl = options.analyticsUrl ?? 'https://analytics.ton.org/events';
-        this.enabled = options.enabled ?? true;
+
+        this.mode = options.mode ?? 'telemetry';
 
         this.baseEvent = {
             subsystem: 'dapp-sdk',
             version: tonConnectSdkVersion,
-            client_environment: options.environment?.getClientEnvironment()
+            client_environment: options.environment?.getClientEnvironment?.(),
+            ...getStaticConnectionMetrics()
         };
 
         this.addWindowFocusAndBlurSubscriptions();
@@ -93,24 +109,30 @@ export class AnalyticsManager {
     }
 
     private emit(event: AnalyticsEvent): void {
-        if (!this.enabled) {
+        if (this.mode === 'off') {
             return;
         }
 
         const traceId = event.trace_id ?? UUIDv7();
 
+        const dynamicMetrics = getDynamicConnectionMetrics();
+
         const enhancedEvent = {
             ...this.baseEvent,
+            ...dynamicMetrics,
             ...event,
             event_id: UUIDv7(),
             client_timestamp: Math.floor(Date.now() / 1000),
             trace_id: traceId
         } as const;
 
+        const filteredEvent =
+            this.mode === 'telemetry' ? this.filterFullModeFields(enhancedEvent) : enhancedEvent;
+
         if (isQaModeEnabled()) {
-            logDebug(enhancedEvent);
+            logDebug(filteredEvent);
         }
-        this.events.push(enhancedEvent);
+        this.events.push(filteredEvent);
 
         if (this.events.length >= this.maxBatchSize) {
             void this.flush();
@@ -268,15 +290,42 @@ export class AnalyticsManager {
         }
     }
 
-    setEnabled(enabled: boolean): void {
-        this.enabled = enabled;
-    }
-
-    isEnabled(): boolean {
-        return this.enabled;
+    getMode(): AnalyticsMode {
+        return this.mode;
     }
 
     getPendingEventsCount(): number {
         return this.events.length;
+    }
+
+    private filterFullModeFields(event: AnalyticsEvent): AnalyticsEvent {
+        const filtered = { ...event } as Partial<AnalyticsEvent> & Record<string, unknown>;
+
+        for (const field of AnalyticsManager.FULL_MODE_FIELDS) {
+            delete filtered[field];
+        }
+
+        // wallet_address is kept for error events, removed for non-error events
+        const eventName = 'event_name' in event ? String(event.event_name) : '';
+        const isErrorEvent =
+            'error_code' in event ||
+            'error_message' in event ||
+            eventName.includes('error') ||
+            eventName === 'connection-error' ||
+            eventName === 'transaction-signing-failed' ||
+            eventName === 'sign-data-request-failed';
+
+        if (!isErrorEvent && 'wallet_address' in filtered) {
+            delete filtered.wallet_address;
+        }
+
+        return filtered as AnalyticsEvent;
+    }
+
+    setWalletListDownloadDuration(duration: number | undefined): void {
+        this.baseEvent = {
+            ...this.baseEvent,
+            wallet_list_download_duration: duration
+        };
     }
 }

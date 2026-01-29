@@ -15,11 +15,16 @@ import {
     isPendingConnectionHttpRaw
 } from 'src/provider/bridge/models/bridge-connection';
 import { IStorage } from 'src/storage/models/storage.interface';
+import { logDebug } from 'src/utils/log';
+import { WalletsListManager } from 'src/wallets-list-manager';
 
 export class BridgeConnectionStorage {
     private readonly storeKey = 'ton-connect-storage_bridge-connection';
 
-    constructor(private readonly storage: IStorage) {}
+    constructor(
+        public readonly storage: IStorage,
+        private readonly walletsListManager: WalletsListManager
+    ) {}
 
     public async storeConnection(connection: BridgeConnection): Promise<void> {
         if (connection.type === 'injected' || connection.type === 'wallet-connect') {
@@ -58,42 +63,47 @@ export class BridgeConnectionStorage {
     }
 
     public async getConnection(): Promise<BridgeConnection | null> {
-        const stored = await this.storage.getItem(this.storeKey);
-        if (!stored) {
-            return null;
-        }
+        try {
+            const stored = await this.storage.getItem(this.storeKey);
+            if (!stored) {
+                return null;
+            }
 
-        const connection: BridgeConnectionRaw = JSON.parse(stored);
+            const connection: BridgeConnectionRaw = JSON.parse(stored);
 
-        if (connection.type === 'injected' || connection.type === 'wallet-connect') {
-            return connection;
-        }
+            if (connection.type === 'injected' || connection.type === 'wallet-connect') {
+                return connection;
+            }
 
-        if (!isPendingConnectionHttpRaw(connection)) {
-            const sessionCrypto = new SessionCrypto(connection.session.sessionKeyPair);
+            if (!isPendingConnectionHttpRaw(connection)) {
+                const sessionCrypto = new SessionCrypto(connection.session.sessionKeyPair);
+                return await this.actualizeBridgeConnection({
+                    type: 'http',
+                    connectEvent: connection.connectEvent,
+                    lastWalletEventId: connection.lastWalletEventId,
+                    nextRpcRequestId: connection.nextRpcRequestId,
+                    session: {
+                        sessionCrypto,
+                        bridgeUrl: connection.session.bridgeUrl,
+                        walletPublicKey: connection.session.walletPublicKey
+                    }
+                });
+            }
+
+            if (isExpiredPendingConnectionHttpRaw(connection)) {
+                await this.removeConnection();
+                return null;
+            }
+
             return {
                 type: 'http',
-                connectEvent: connection.connectEvent,
-                lastWalletEventId: connection.lastWalletEventId,
-                nextRpcRequestId: connection.nextRpcRequestId,
-                session: {
-                    sessionCrypto,
-                    bridgeUrl: connection.session.bridgeUrl,
-                    walletPublicKey: connection.session.walletPublicKey
-                }
+                sessionCrypto: new SessionCrypto(connection.sessionCrypto),
+                connectionSource: connection.connectionSource
             };
-        }
-
-        if (isExpiredPendingConnectionHttpRaw(connection)) {
-            await this.removeConnection();
+        } catch (err) {
+            logDebug('Error retrieving connection', err);
             return null;
         }
-
-        return {
-            type: 'http',
-            sessionCrypto: new SessionCrypto(connection.sessionCrypto),
-            connectionSource: connection.connectionSource
-        };
     }
 
     public async getHttpConnection(): Promise<BridgeConnectionHttp | BridgePendingConnectionHttp> {
@@ -213,5 +223,33 @@ export class BridgeConnectionStorage {
         }
 
         return 0;
+    }
+
+    private async actualizeBridgeConnection(
+        connection: BridgeConnectionHttp
+    ): Promise<BridgeConnectionHttp> {
+        try {
+            const appName = connection.connectEvent.payload.device.appName;
+            const wallet = await this.walletsListManager.getRemoteWallet(appName);
+
+            if (wallet.bridgeUrl === connection.session.bridgeUrl) {
+                return connection;
+            }
+
+            const actualizedConnection = {
+                ...connection,
+                session: {
+                    ...connection.session,
+                    bridgeUrl: wallet.bridgeUrl
+                }
+            } satisfies BridgeConnectionHttp;
+
+            await this.storeConnection(actualizedConnection);
+
+            return actualizedConnection;
+        } catch (error) {
+            logDebug('Failed to actualize bridge connection', error);
+            return connection;
+        }
     }
 }

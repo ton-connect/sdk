@@ -10,7 +10,12 @@
     "@tonconnect/ui-react": "2.3.1"
   },
   "changesets": [
+    "analytics-fix",
+    "analytics-settings-and-metrics",
+    "bridge-improvements",
+    "custom-tonconnect-ui-instance",
     "fix-deeplink-fallback",
+    "fix-init-params-session-storage",
     "network-selection-support",
     "proof-validation-reducing",
     "qa-mode-network-validation",

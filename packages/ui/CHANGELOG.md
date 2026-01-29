@@ -1,5 +1,53 @@
 # Changelog @tonconnect/ui
 
+## 2.4.0-beta.7
+
+### Patch Changes
+
+- Updated dependencies [36dbff1]
+    - @tonconnect/sdk@3.4.0-beta.7
+
+## 2.4.0-beta.6
+
+### Minor Changes
+
+- 3964cf3: feat: add analytics settings and performance metrics
+    - Added analytics settings with telemetry mode configuration
+    - Added RTT (Round Trip Time) measurement
+    - Added TTFB (Time To First Byte) measurement
+    - Added wallet list download duration tracking
+
+    These metrics help monitor SDK performance and user experience.
+
+### Patch Changes
+
+- Updated dependencies [3964cf3]
+    - @tonconnect/sdk@3.4.0-beta.6
+
+## 2.4.0-beta.5
+
+### Minor Changes
+
+- 3964cf3: feat: add analytics settings and performance metrics
+    - Added analytics settings with telemetry mode configuration
+    - Added RTT (Round Trip Time) measurement
+    - Added TTFB (Time To First Byte) measurement
+    - Added wallet list download duration tracking
+
+    These metrics help monitor SDK performance and user experience.
+
+### Patch Changes
+
+- 3964cf3: fix: save init params in session storage to prevent invalid params after location change
+  or reload
+
+    Fixes issue where init params become invalid after page reload or location change by persisting
+    them in session storage.
+
+- Updated dependencies [3964cf3]
+- Updated dependencies [3964cf3]
+    - @tonconnect/sdk@3.4.0-beta.5
+
 ## 2.4.0-beta.4
 
 ### Patch Changes
