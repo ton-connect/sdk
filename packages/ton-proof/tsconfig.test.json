@@ -1,0 +1,12 @@
+{
+    "extends": "../../tsconfig.base.json",
+    "compilerOptions": {
+        "target": "ESNext",
+        "outDir": "./dist-tests",
+        "baseUrl": "./",
+        "paths": {
+            "src/*": ["./src/*"],
+            "tests/*": ["./tests/*"]
+        }
+    },
+}
