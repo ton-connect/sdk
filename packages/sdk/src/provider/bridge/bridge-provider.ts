@@ -643,6 +643,33 @@ export class BridgeProvider implements HTTPProvider {
         return url.toString();
     }
 
+    /**
+     * Opens gateways for intent to listen for connect events.
+     * Similar to openGateways but doesn't require a full connection setup.
+     */
+    public async openGatewaysForIntent(
+        sessionCrypto: SessionCrypto,
+        options?: Traceable
+    ): Promise<void> {
+        const traceId = options?.traceId ?? UUIDv7();
+
+        // Set session for intent
+        this.session = {
+            sessionCrypto,
+            bridgeUrl:
+                'bridgeUrl' in this.walletConnectionSource &&
+                !Array.isArray(this.walletConnectionSource)
+                    ? this.walletConnectionSource.bridgeUrl
+                    : ''
+        };
+
+        // Open gateways to listen for events
+        await this.openGateways(sessionCrypto, {
+            openingDeadlineMS: this.defaultOpeningDeadlineMS,
+            traceId
+        });
+    }
+
     private async openGateways(
         sessionCrypto: SessionCrypto,
         options?: OptionalTraceable<{

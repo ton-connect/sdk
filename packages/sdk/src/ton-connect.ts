@@ -142,6 +142,8 @@ export class TonConnect implements ITonConnect {
 
     private provider: Provider | null = null;
 
+    private intentProvider: BridgeProvider | null = null;
+
     private statusChangeSubscriptions: ((walletInfo: Wallet | null) => void)[] = [];
 
     private statusChangeErrorSubscriptions: ((err: TonConnectError) => void)[] = [];
@@ -1321,47 +1323,64 @@ export class TonConnect implements ITonConnect {
     ): Promise<string> {
         const traceId = options?.traceId ?? UUIDv7();
 
+        let bridgeProvider: BridgeProvider;
+        let sessionCrypto: SessionCrypto;
+        let walletConnectionSource:
+            | WalletConnectionSourceHTTP
+            | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[];
+
         // If wallet universal link is provided, use it directly
         if (options?.walletUniversalLink) {
-            const bridgeProvider = new BridgeProvider(
-                this.bridgeConnectionStorage,
-                { universalLink: options.walletUniversalLink, bridgeUrl: '' },
-                this.analytics
-            );
-            // Create a temporary session for intent
-            const sessionCrypto = new SessionCrypto();
-            const sessionId = sessionCrypto.sessionId;
-            return bridgeProvider.generateIntentUniversalLink(
-                options.walletUniversalLink,
-                intent,
-                { traceId },
-                sessionId
-            );
-        }
+            walletConnectionSource = { universalLink: options.walletUniversalLink, bridgeUrl: '' };
+        } else {
+            // Otherwise, get the first available wallet
+            const wallets = await this.walletsList.getWallets();
+            const httpWallet = wallets.find(w => 'universalLink' in w && 'bridgeUrl' in w);
 
-        // Otherwise, get the first available wallet
-        const wallets = await this.walletsList.getWallets();
-        const httpWallet = wallets.find(w => 'universalLink' in w && 'bridgeUrl' in w);
+            if (!httpWallet || !('universalLink' in httpWallet) || !('bridgeUrl' in httpWallet)) {
+                throw new TonConnectError('No HTTP wallet available for intent generation');
+            }
 
-        if (!httpWallet || !('universalLink' in httpWallet) || !('bridgeUrl' in httpWallet)) {
-            throw new TonConnectError('No HTTP wallet available for intent generation');
-        }
-
-        const bridgeProvider = new BridgeProvider(
-            this.bridgeConnectionStorage,
-            {
+            walletConnectionSource = {
                 universalLink: httpWallet.universalLink,
                 bridgeUrl: httpWallet.bridgeUrl
-            },
+            };
+        }
+
+        bridgeProvider = new BridgeProvider(
+            this.bridgeConnectionStorage,
+            walletConnectionSource,
             this.analytics
         );
 
         // Create a temporary session for intent
-        const sessionCrypto = new SessionCrypto();
+        sessionCrypto = new SessionCrypto();
         const sessionId = sessionCrypto.sessionId;
 
+        // Store connection as pending (similar to connect flow)
+        await this.bridgeConnectionStorage.storeConnection({
+            type: 'http',
+            connectionSource: walletConnectionSource,
+            sessionCrypto
+        });
+
+        // Open gateways to listen for connect events
+        await bridgeProvider.openGatewaysForIntent(sessionCrypto, { traceId });
+
+        // Store intent provider to keep it alive and listen for events
+        this.intentProvider?.closeConnection();
+        this.intentProvider = bridgeProvider;
+
+        // Subscribe to wallet events to handle connect event
+        bridgeProvider.listen(this.walletEventsListener.bind(this));
+
+        const universalLink =
+            'universalLink' in walletConnectionSource && walletConnectionSource.universalLink
+                ? walletConnectionSource.universalLink
+                : 'tc://';
+
         return bridgeProvider.generateIntentUniversalLink(
-            httpWallet.universalLink,
+            universalLink,
             intent,
             { traceId },
             sessionId
