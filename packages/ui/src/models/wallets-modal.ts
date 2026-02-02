@@ -75,7 +75,12 @@ export type ChooseSupportedFeatureWalletsModal = {
  */
 export type WalletsModalState = OptionalTraceable<
     WalletModalOpened | WalletModalClosed | ChooseSupportedFeatureWalletsModal
->;
+> & {
+    /**
+     * Optional intent link for displaying QR code directly
+     */
+    intentLink?: string;
+};
 
 /**
  * Modal window close reason.

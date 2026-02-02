@@ -9,7 +9,12 @@ import {
     SignDataPayload,
     SignDataRpcResponseSuccess,
     TonAddressItemReply,
-    TonProofItemReply
+    TonProofItemReply,
+    MakeSendTransactionIntentRequest as ProtocolMakeSendTransactionIntentRequest,
+    MakeSignDataIntentRequest as ProtocolMakeSignDataIntentRequest,
+    MakeSignMessageIntentRequest as ProtocolMakeSignMessageIntentRequest,
+    MakeSendActionIntentRequest as ProtocolMakeSendActionIntentRequest,
+    SessionCrypto
 } from '@tonconnect/protocol';
 import { DappMetadataError } from 'src/errors/dapp/dapp-metadata.error';
 import { ManifestContentErrorError } from 'src/errors/protocol/events/connect/manifest-content-error.error';
@@ -35,7 +40,11 @@ import {
     SendTransactionResponse,
     SignDataResponse,
     SignMessageRequest,
-    SignMessageResponse
+    SignMessageResponse,
+    MakeSendTransactionIntentRequest,
+    MakeSignDataIntentRequest,
+    MakeSignMessageIntentRequest,
+    MakeSendActionIntentRequest
 } from 'src/models/methods';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
 import { AnalyticsSettings, TonConnectOptions } from 'src/models/ton-connect-options';
@@ -1195,5 +1204,167 @@ export class TonConnect implements ITonConnect {
             manifestUrl: this.dappSettings.manifestUrl,
             items
         };
+    }
+
+    /**
+     * Generates a universal link for a send transaction intent.
+     * This allows users to complete transactions without being connected to the wallet.
+     * @param intent transaction intent request.
+     * @param options (optional) options including traceId and wallet universal link.
+     * @returns universal link that can be opened in a wallet or displayed as QR code.
+     */
+    public async makeSendTransactionIntent(
+        intent: MakeSendTransactionIntentRequest,
+        options?: OptionalTraceable<{ walletUniversalLink?: string }>
+    ): Promise<string> {
+        return this.generateIntentUniversalLink(
+            {
+                id: intent.id,
+                m: 'txIntent' as const,
+                c: intent.c,
+                vu: intent.vu,
+                n: intent.n,
+                i: intent.i
+            } as ProtocolMakeSendTransactionIntentRequest,
+            options
+        );
+    }
+
+    /**
+     * Generates a universal link for a sign data intent.
+     * This allows users to sign data without being connected to the wallet.
+     * @param intent sign data intent request.
+     * @param options (optional) options including traceId and wallet universal link.
+     * @returns universal link that can be opened in a wallet or displayed as QR code.
+     */
+    public async makeSignDataIntent(
+        intent: MakeSignDataIntentRequest,
+        options?: OptionalTraceable<{ walletUniversalLink?: string }>
+    ): Promise<string> {
+        // Build protocol request: if mu is not provided but c.manifestUrl exists,
+        // don't include mu in JSON (wallet will extract it from c.manifestUrl)
+        const protocolIntent: ProtocolMakeSignDataIntentRequest = {
+            id: intent.id,
+            m: 'signIntent' as const,
+            c: intent.c,
+            n: intent.n,
+            p: intent.p
+        };
+
+        // Only include mu if it's explicitly provided (not extracted from c)
+        if (intent.mu) {
+            protocolIntent.mu = intent.mu;
+        } else if (!intent.c?.manifestUrl) {
+            throw new TonConnectError(
+                'manifestUrl (mu) is required for sign data intent. Either provide mu directly or include it in ConnectRequest (c.manifestUrl)'
+            );
+        }
+        // If mu is not provided but c.manifestUrl exists, don't include mu in JSON
+        // Wallet will extract manifestUrl from c.manifestUrl
+
+        return this.generateIntentUniversalLink(protocolIntent, options);
+    }
+
+    /**
+     * Generates a universal link for a sign message intent.
+     * This allows users to sign messages without being connected to the wallet.
+     * @param intent sign message intent request.
+     * @param options (optional) options including traceId and wallet universal link.
+     * @returns universal link that can be opened in a wallet or displayed as QR code.
+     */
+    public async makeSignMessageIntent(
+        intent: MakeSignMessageIntentRequest,
+        options?: OptionalTraceable<{ walletUniversalLink?: string }>
+    ): Promise<string> {
+        return this.generateIntentUniversalLink(
+            {
+                id: intent.id,
+                m: 'signMsg' as const,
+                c: intent.c,
+                vu: intent.vu,
+                n: intent.n,
+                i: intent.i
+            } as ProtocolMakeSignMessageIntentRequest,
+            options
+        );
+    }
+
+    /**
+     * Generates a universal link for a send action intent.
+     * This allows users to complete actions via a dynamic action URL without being connected to the wallet.
+     * @param intent action intent request.
+     * @param options (optional) options including traceId and wallet universal link.
+     * @returns universal link that can be opened in a wallet or displayed as QR code.
+     */
+    public async makeSendActionIntent(
+        intent: MakeSendActionIntentRequest,
+        options?: OptionalTraceable<{ walletUniversalLink?: string }>
+    ): Promise<string> {
+        return this.generateIntentUniversalLink(
+            {
+                id: intent.id,
+                m: 'actionIntent' as const,
+                c: intent.c,
+                a: intent.a
+            } as ProtocolMakeSendActionIntentRequest,
+            options
+        );
+    }
+
+    private async generateIntentUniversalLink(
+        intent:
+            | ProtocolMakeSendTransactionIntentRequest
+            | ProtocolMakeSignDataIntentRequest
+            | ProtocolMakeSignMessageIntentRequest
+            | ProtocolMakeSendActionIntentRequest,
+        options?: OptionalTraceable<{ walletUniversalLink?: string }>
+    ): Promise<string> {
+        const traceId = options?.traceId ?? UUIDv7();
+
+        // If wallet universal link is provided, use it directly
+        if (options?.walletUniversalLink) {
+            const bridgeProvider = new BridgeProvider(
+                this.bridgeConnectionStorage,
+                { universalLink: options.walletUniversalLink, bridgeUrl: '' },
+                this.analytics
+            );
+            // Create a temporary session for intent
+            const sessionCrypto = new SessionCrypto();
+            const sessionId = sessionCrypto.sessionId;
+            return bridgeProvider.generateIntentUniversalLink(
+                options.walletUniversalLink,
+                intent,
+                { traceId },
+                sessionId
+            );
+        }
+
+        // Otherwise, get the first available wallet
+        const wallets = await this.walletsList.getWallets();
+        const httpWallet = wallets.find(w => 'universalLink' in w && 'bridgeUrl' in w);
+
+        if (!httpWallet || !('universalLink' in httpWallet) || !('bridgeUrl' in httpWallet)) {
+            throw new TonConnectError('No HTTP wallet available for intent generation');
+        }
+
+        const bridgeProvider = new BridgeProvider(
+            this.bridgeConnectionStorage,
+            {
+                universalLink: httpWallet.universalLink,
+                bridgeUrl: httpWallet.bridgeUrl
+            },
+            this.analytics
+        );
+
+        // Create a temporary session for intent
+        const sessionCrypto = new SessionCrypto();
+        const sessionId = sessionCrypto.sessionId;
+
+        return bridgeProvider.generateIntentUniversalLink(
+            httpWallet.universalLink,
+            intent,
+            { traceId },
+            sessionId
+        );
     }
 }

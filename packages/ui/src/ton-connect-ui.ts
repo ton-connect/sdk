@@ -8,7 +8,11 @@ import {
     SignDataResponse,
     Traceable,
     UUIDv7,
-    WalletInfoCurrentlyEmbedded
+    WalletInfoCurrentlyEmbedded,
+    MakeSendTransactionIntentRequest,
+    MakeSignDataIntentRequest,
+    MakeSignMessageIntentRequest,
+    MakeSendActionIntentRequest
 } from '@tonconnect/sdk';
 import {
     isTelegramUrl,
@@ -27,6 +31,7 @@ import {
     ChainId
 } from '@tonconnect/sdk';
 import { widgetController } from 'src/app/widget-controller';
+import { setWalletsModalState } from 'src/app/state/modals-state';
 import { TonConnectUIError } from 'src/errors/ton-connect-ui.error';
 import { TonConnectUiCreateOptions } from 'src/models/ton-connect-ui-create-options';
 import { PreferredWalletStorage, WalletInfoStorage } from 'src/storage';
@@ -1426,6 +1431,99 @@ export class TonConnectUI {
             twaReturnUrl,
             skipRedirectToWallet
         };
+    }
+
+    /**
+     * Generates a universal link for a send transaction intent and opens a modal with QR code.
+     * This allows users to complete transactions without being connected to the wallet.
+     * @param intent transaction intent request.
+     * @param options (optional) options including traceId and wallet universal link.
+     * @returns universal link that can be opened in a wallet or displayed as QR code.
+     */
+    public async makeSendTransactionIntent(
+        intent: MakeSendTransactionIntentRequest,
+        options?: OptionalTraceable<{ walletUniversalLink?: string }>
+    ): Promise<string> {
+        const universalLink = await this.connector.makeSendTransactionIntent(intent, options);
+        // Open wallets modal with intent link
+        void setTimeout(() => {
+            setWalletsModalState(prev => ({
+                status: 'opened',
+                traceId: options?.traceId ?? prev?.traceId,
+                closeReason: null,
+                intentLink: universalLink
+            }));
+        });
+        return universalLink;
+    }
+
+    /**
+     * Generates a universal link for a sign data intent and opens a modal with QR code.
+     * This allows users to sign data without being connected to the wallet.
+     * @param intent sign data intent request.
+     * @param options (optional) options including traceId and wallet universal link.
+     * @returns universal link that can be opened in a wallet or displayed as QR code.
+     */
+    public async makeSignDataIntent(
+        intent: MakeSignDataIntentRequest,
+        options?: OptionalTraceable<{ walletUniversalLink?: string }>
+    ): Promise<string> {
+        const universalLink = await this.connector.makeSignDataIntent(intent, options);
+        void setTimeout(() => {
+            setWalletsModalState(prev => ({
+                status: 'opened',
+                traceId: options?.traceId ?? prev?.traceId,
+                closeReason: null,
+                intentLink: universalLink
+            }));
+        });
+        return universalLink;
+    }
+
+    /**
+     * Generates a universal link for a sign message intent and opens a modal with QR code.
+     * This allows users to sign messages without being connected to the wallet.
+     * @param intent sign message intent request.
+     * @param options (optional) options including traceId and wallet universal link.
+     * @returns universal link that can be opened in a wallet or displayed as QR code.
+     */
+    public async makeSignMessageIntent(
+        intent: MakeSignMessageIntentRequest,
+        options?: OptionalTraceable<{ walletUniversalLink?: string }>
+    ): Promise<string> {
+        const universalLink = await this.connector.makeSignMessageIntent(intent, options);
+        void setTimeout(() => {
+            setWalletsModalState(prev => ({
+                status: 'opened',
+                traceId: options?.traceId ?? prev?.traceId,
+                closeReason: null,
+                intentLink: universalLink
+            }));
+        });
+        return universalLink;
+    }
+
+    /**
+     * Generates a universal link for a send action intent and opens a modal with QR code.
+     * This allows users to complete actions via a dynamic action URL without being connected to the wallet.
+     * @param intent action intent request.
+     * @param options (optional) options including traceId and wallet universal link.
+     * @returns universal link that can be opened in a wallet or displayed as QR code.
+     */
+    public async makeSendActionIntent(
+        intent: MakeSendActionIntentRequest,
+        options?: OptionalTraceable<{ walletUniversalLink?: string }>
+    ): Promise<string> {
+        const universalLink = await this.connector.makeSendActionIntent(intent, options);
+        void setTimeout(() => {
+            setWalletsModalState(prev => ({
+                status: 'opened',
+                traceId: options?.traceId ?? prev?.traceId,
+                closeReason: null,
+                intentLink: universalLink
+            }));
+        });
+        return universalLink;
     }
 }
 

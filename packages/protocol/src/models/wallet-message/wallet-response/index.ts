@@ -36,3 +36,27 @@ export {
     WalletResponseTemplateError,
     WalletResponseTemplateSuccess
 } from './wallet-response-template';
+export {
+    MakeSendTransactionIntentRpcResponse,
+    MakeSendTransactionIntentRpcResponseSuccess,
+    MakeSendTransactionIntentRpcResponseError,
+    MAKE_SEND_TRANSACTION_INTENT_ERROR_CODES
+} from './make-send-transaction-intent-rpc-response';
+export {
+    MakeSignDataIntentRpcResponse,
+    MakeSignDataIntentRpcResponseSuccess,
+    MakeSignDataIntentRpcResponseError
+} from './make-sign-data-intent-rpc-response';
+export {
+    MakeSignMessageIntentRpcResponse,
+    MakeSignMessageIntentRpcResponseSuccess,
+    MakeSignMessageIntentRpcResponseError,
+    MAKE_SIGN_MESSAGE_INTENT_ERROR_CODES
+} from './make-sign-message-intent-rpc-response';
+export {
+    MakeSendActionIntentRpcResponse,
+    MakeSendActionIntentRpcResponseSuccess,
+    MakeSendActionIntentRpcResponseError,
+    MAKE_SEND_ACTION_INTENT_ERROR_CODES
+} from './make-send-action-intent-rpc-response';
+export { IntentResponses } from './wallet-response';

@@ -1,5 +1,5 @@
 import { ConnectAdditionalRequest, isWalletInfoRemote } from '@tonconnect/sdk';
-import { Component, createMemo, createSignal, For, Show } from 'solid-js';
+import { Component, createEffect, createMemo, createSignal, For, Show } from 'solid-js';
 import { AtWalletIcon, FourWalletsItem, QRIcon, WalletItem } from 'src/app/components';
 import {
     H1Styled,
@@ -18,6 +18,7 @@ import { TonConnectUIError } from 'src/errors';
 import { MobileUniversalQR } from './mobile-universal-qr';
 import { Translation } from 'src/app/components/typography/Translation';
 import { redirectToTelegram, redirectToWallet } from 'src/app/utils/url-strategy-helpers';
+import { openDeeplinkWithFallback, openLinkBlank } from 'src/app/utils/web-api';
 import { bridgesIsEqual, getUniqueBridges } from 'src/app/utils/bridge';
 import { WalletUlContainer } from 'src/app/components/wallet-item/style';
 import { UIWalletInfo } from 'src/app/models/ui-wallet-info';
@@ -56,6 +57,11 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
     );
 
     const getUniversalLink = (): string => {
+        // If intentLink is provided, use it directly
+        if (props.walletModalState.intentLink) {
+            return props.walletModalState.intentLink;
+        }
+        // Otherwise, generate link using connector
         if (!universalLink()) {
             setUniversalLink(
                 connector.connect(walletsBridges(), props.additionalRequest, {
@@ -83,11 +89,25 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
     };
 
     const onSelectUniversal = (): void => {
+        const link = getUniversalLink();
+        // For tc:// intent links, use openDeeplinkWithFallback
+        if (link.startsWith('tc://')) {
+            openDeeplinkWithFallback(link, () => {
+                try {
+                    openLinkBlank(link);
+                } catch (e) {
+                    // Fallback to copy
+                    onCopy();
+                }
+            });
+            return;
+        }
+
         const forceRedirect = !firstClick();
         setFirstClick(false);
 
         redirectToWallet(
-            getUniversalLink(),
+            link,
             undefined,
             {
                 returnStrategy: appState.returnStrategy,
@@ -135,6 +155,16 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
         });
     };
 
+    // Auto-show QR if intentLink is provided
+    createEffect(() => {
+        if (props.walletModalState.intentLink && !showQR()) {
+            setShowQR(true);
+            setLastSelectedWalletInfo({
+                openMethod: 'qrcode'
+            });
+        }
+    });
+
     const onCloseQR = (): void => {
         setShowQR(false);
         setLastSelectedWalletInfo({
@@ -175,12 +205,21 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
                     isCopiedShown={isCopiedShown()}
                     onOpenLink={onSelectUniversal}
                     onCopy={onCopy}
+                    isIntent={!!props.walletModalState.intentLink}
                 />
             </Show>
             <Show when={!showQR()}>
                 <StyledLeftActionButton icon={<QRIcon />} onClick={onOpenQR} />
-                <H1Styled translationKey="walletModal.mobileUniversalModal.connectYourWallet">
-                    Connect your TON wallet
+                <H1Styled
+                    translationKey={
+                        props.walletModalState.intentLink
+                            ? 'walletModal.mobileUniversalModal.connectYourWalletIntent'
+                            : 'walletModal.mobileUniversalModal.connectYourWallet'
+                    }
+                >
+                    {props.walletModalState.intentLink
+                        ? 'Complete in wallet'
+                        : 'Connect your TON wallet'}
                 </H1Styled>
                 <Show when={atWalletSupportFeatures()}>
                     <H2Styled

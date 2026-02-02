@@ -66,7 +66,16 @@ export type {
     SessionInfo
 } from './tracker/types';
 export { BrowserEventDispatcher } from './tracker/browser-event-dispatcher';
-export type { TonAddressItem, TonProofItem, ConnectItem } from '@tonconnect/protocol';
+export type {
+    TonAddressItem,
+    TonProofItem,
+    ConnectItem,
+    ConnectRequest,
+    IntentItem,
+    SendTonItem,
+    SendJettonItem,
+    SendNftItem
+} from '@tonconnect/protocol';
 export {
     CHAIN,
     ConnectEventSuccess,

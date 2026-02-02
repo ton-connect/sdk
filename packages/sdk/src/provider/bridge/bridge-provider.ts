@@ -8,7 +8,12 @@ import {
     SessionCrypto,
     TonAddressItemReply,
     WalletMessage,
-    WalletResponse
+    WalletResponse,
+    MakeSendTransactionIntentRequest,
+    MakeSignDataIntentRequest,
+    MakeSignMessageIntentRequest,
+    MakeSendActionIntentRequest,
+    AppMessage
 } from '@tonconnect/protocol';
 import { TonConnectError } from 'src/errors/ton-connect.error';
 import { WalletConnectionSourceHTTP } from 'src/models/wallet/wallet-connection-source';
@@ -545,12 +550,17 @@ export class BridgeProvider implements HTTPProvider {
 
     private generateRegularUniversalLink(
         universalLink: string,
-        message: ConnectRequest,
-        options: Traceable
+        message: ConnectRequest | AppMessage,
+        options: Traceable,
+        sessionId?: string
     ): string {
         const url = new URL(universalLink);
         url.searchParams.append('v', PROTOCOL_VERSION.toString());
-        url.searchParams.append('id', this.session!.sessionCrypto.sessionId);
+        if (sessionId) {
+            url.searchParams.append('id', sessionId);
+        } else if (this.session) {
+            url.searchParams.append('id', this.session.sessionCrypto.sessionId);
+        }
         url.searchParams.append('trace_id', options.traceId);
         url.searchParams.append('r', JSON.stringify(message));
         return url.toString();
@@ -558,10 +568,16 @@ export class BridgeProvider implements HTTPProvider {
 
     private generateTGUniversalLink(
         universalLink: string,
-        message: ConnectRequest,
-        options: Traceable
+        message: ConnectRequest | AppMessage,
+        options: Traceable,
+        sessionId?: string
     ): string {
-        const urlToWrap = this.generateRegularUniversalLink('about:blank', message, options);
+        const urlToWrap = this.generateRegularUniversalLink(
+            'about:blank',
+            message,
+            options,
+            sessionId
+        );
         const linkParams = urlToWrap.split('?')[1]!;
 
         const startapp = 'tonconnect-' + encodeTelegramUrlParameters(linkParams);
@@ -572,6 +588,47 @@ export class BridgeProvider implements HTTPProvider {
         const url = new URL(updatedUniversalLink);
         url.searchParams.append('startapp', startapp);
         return url.toString();
+    }
+
+    /**
+     * Generates a universal link for a send transaction intent.
+     * Works without an established session.
+     * Uses tc://intent_inline format for intents.
+     */
+    public generateIntentUniversalLink(
+        _universalLink: string, // Not used for intents, kept for API compatibility
+        intent:
+            | MakeSendTransactionIntentRequest
+            | MakeSignDataIntentRequest
+            | MakeSignMessageIntentRequest
+            | MakeSendActionIntentRequest,
+        options: Traceable,
+        sessionId?: string
+    ): string {
+        // For intents, use tc://intent_inline format
+        // Use provided sessionId or generate a new one
+        const finalSessionId =
+            sessionId || (this.session ? this.session.sessionCrypto.sessionId : UUIDv7());
+
+        // Encode intent as base64url (URL-safe base64 without padding)
+        const intentJson = JSON.stringify(intent);
+        // Use standard base64 first, then convert to base64url format
+        const intentBase64 = Base64.encode(intentJson, false); // false = standard base64
+        // Convert to base64url: replace + with -, / with _, and remove padding
+        const intentBase64Url = intentBase64
+            .replace(/\+/g, '-')
+            .replace(/\//g, '_')
+            .replace(/=/g, '');
+
+        // Build URL using URLSearchParams (as in feature/intents-demo branch)
+        // Note: URLSearchParams will encode the base64url string, but that's acceptable for tc:// links
+        const params = new URLSearchParams({
+            id: finalSessionId,
+            trace_id: options.traceId,
+            r: intentBase64Url
+        });
+
+        return `tc://intent_inline?${params.toString()}`;
     }
 
     // TODO: Remove this method after all dApps and the wallets-list.json have been updated

@@ -12,7 +12,11 @@ import {
     SendTransactionResponse,
     SignDataResponse,
     SignMessageRequest,
-    SignMessageResponse
+    SignMessageResponse,
+    MakeSendTransactionIntentRequest,
+    MakeSignDataIntentRequest,
+    MakeSignMessageIntentRequest,
+    MakeSendActionIntentRequest
 } from 'src/models/methods';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
 import { WalletInfo } from 'src/models/wallet/wallet-info';
@@ -154,4 +158,52 @@ export interface ITonConnect {
      * @returns session ID string or null if not available.
      */
     getSessionId(): Promise<string | null>;
+
+    /**
+     * Generates a universal link for a send transaction intent.
+     * This allows users to complete transactions without being connected to the wallet.
+     * @param intent transaction intent request.
+     * @param options (optional) options including traceId and wallet universal link.
+     * @returns universal link that can be opened in a wallet or displayed as QR code.
+     */
+    makeSendTransactionIntent(
+        intent: MakeSendTransactionIntentRequest,
+        options?: OptionalTraceable<{ walletUniversalLink?: string }>
+    ): Promise<string>;
+
+    /**
+     * Generates a universal link for a sign data intent.
+     * This allows users to sign data without being connected to the wallet.
+     * @param intent sign data intent request.
+     * @param options (optional) options including traceId and wallet universal link.
+     * @returns universal link that can be opened in a wallet or displayed as QR code.
+     */
+    makeSignDataIntent(
+        intent: MakeSignDataIntentRequest,
+        options?: OptionalTraceable<{ walletUniversalLink?: string }>
+    ): Promise<string>;
+
+    /**
+     * Generates a universal link for a sign message intent.
+     * This allows users to sign messages without being connected to the wallet.
+     * @param intent sign message intent request.
+     * @param options (optional) options including traceId and wallet universal link.
+     * @returns universal link that can be opened in a wallet or displayed as QR code.
+     */
+    makeSignMessageIntent(
+        intent: MakeSignMessageIntentRequest,
+        options?: OptionalTraceable<{ walletUniversalLink?: string }>
+    ): Promise<string>;
+
+    /**
+     * Generates a universal link for a send action intent.
+     * This allows users to complete actions via a dynamic action URL without being connected to the wallet.
+     * @param intent action intent request.
+     * @param options (optional) options including traceId and wallet universal link.
+     * @returns universal link that can be opened in a wallet or displayed as QR code.
+     */
+    makeSendActionIntent(
+        intent: MakeSendActionIntentRequest,
+        options?: OptionalTraceable<{ walletUniversalLink?: string }>
+    ): Promise<string>;
 }
