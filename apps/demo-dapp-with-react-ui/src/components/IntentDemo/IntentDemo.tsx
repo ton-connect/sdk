@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ReactJson from 'react-json-view';
 import './style.scss';
 import { useTonConnectUI } from '@tonconnect/ui-react';
@@ -7,6 +7,7 @@ import {
     IntentItem,
     MakeSignDataIntentRequest
 } from '@tonconnect/sdk';
+import { TonProofDemoApi } from '../../TonProofDemoApi';
 
 const defaultIntentItem: IntentItem = {
     t: 'ton',
@@ -17,6 +18,7 @@ const defaultIntentItem: IntentItem = {
 export function IntentDemo() {
     const [loading, setLoading] = useState(false);
     const [intentResult, setIntentResult] = useState<string | null>(null);
+    const [intentResponse, setIntentResponse] = useState<Record<string, unknown> | null>(null);
     const [intentRequest, setIntentRequest] = useState<MakeSendTransactionIntentRequest>({
         id: `intent-${Date.now()}`,
         i: [defaultIntentItem],
@@ -25,8 +27,43 @@ export function IntentDemo() {
 
     const [tonConnectUI] = useTonConnectUI();
 
+    useEffect(() => {
+        const generateProof = async () => {
+            const payload = await TonProofDemoApi.generatePayload();
+            if (payload?.tonProof) {
+                // Set intent connect request parameters: include connect with ton_proof
+                tonConnectUI.setIntentConnectRequestParameters?.({
+                    includeConnect: true,
+                    includeTonProof: true,
+                    tonProofPayload: payload.tonProof
+                });
+            } else {
+                // If no payload, still include connect but without ton_proof
+                tonConnectUI.setIntentConnectRequestParameters?.({
+                    includeConnect: true,
+                    includeTonProof: false
+                });
+            }
+        };
+        generateProof();
+    }, [tonConnectUI]);
+
+    // Listen for intent responses
+    useEffect(() => {
+        const unsubscribe = tonConnectUI.onIntentResponse?.(
+            (response: { result?: unknown; error?: unknown; id: string; traceId?: string }) => {
+                setIntentResponse(response);
+            }
+        );
+
+        return () => {
+            unsubscribe?.();
+        };
+    }, [tonConnectUI]);
+
     const handleMakeSendTransactionIntent = async () => {
         setIntentResult(null);
+        setIntentResponse(null);
         setLoading(true);
         try {
             const universalLink = await tonConnectUI.makeSendTransactionIntent(intentRequest);
@@ -41,6 +78,7 @@ export function IntentDemo() {
 
     const handleMakeSignDataIntent = async () => {
         setIntentResult(null);
+        setIntentResponse(null);
         setLoading(true);
         try {
             const signDataIntent: MakeSignDataIntentRequest = {
@@ -102,6 +140,15 @@ export function IntentDemo() {
                         <div style={{ wordBreak: 'break-all', color: '#66aaee' }}>
                             {intentResult}
                         </div>
+                    </div>
+                </>
+            )}
+
+            {intentResponse && (
+                <>
+                    <div className="find-transaction-demo__json-label">Intent Result</div>
+                    <div className="find-transaction-demo__json-view">
+                        <ReactJson theme="ocean" src={intentResponse} collapsed={false} />
                     </div>
                 </>
             )}
