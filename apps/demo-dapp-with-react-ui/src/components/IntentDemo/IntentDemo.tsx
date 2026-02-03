@@ -5,7 +5,9 @@ import { useTonConnectUI } from '@tonconnect/ui-react';
 import {
     MakeSendTransactionIntentRequest,
     IntentItem,
-    MakeSignDataIntentRequest
+    MakeSignDataIntentRequest,
+    MakeSignMessageIntentRequest,
+    SendJettonItem
 } from '@tonconnect/sdk';
 import { TonProofDemoApi } from '../../TonProofDemoApi';
 
@@ -13,6 +15,13 @@ const defaultIntentItem: IntentItem = {
     t: 'ton',
     a: 'EQCKWpx7cNMpvmcN5ObM5lLUZHZRFKqYA4xmw9jOry0ZsF9M',
     am: '5000000'
+};
+
+const defaultUsdtItem: SendJettonItem = {
+    t: 'jetton',
+    ma: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs', // USDT master address
+    ja: '100000', // 0.1 USDT (6 decimals: 100000 = 0.1 USDT)
+    d: 'UQCi2rD7uYZwvg7Oy3LCD1Q6Uolz5Ns5oEFULLhYKssb9amR' // destination address
 };
 
 export function IntentDemo() {
@@ -99,6 +108,73 @@ export function IntentDemo() {
         }
     };
 
+    const handleMakeSignMessageIntent = async () => {
+        setIntentResult(null);
+        setIntentResponse(null);
+        setLoading(true);
+        try {
+            const signMessageIntent: MakeSignMessageIntentRequest = {
+                id: `sign-msg-intent-${Date.now()}`,
+                i: intentRequest.i,
+                vu: intentRequest.vu,
+                n: intentRequest.n
+            };
+            const universalLink = await tonConnectUI.makeSignMessageIntent(signMessageIntent);
+            setIntentResult(universalLink);
+        } catch (error) {
+            console.error('Error creating sign message intent:', error);
+            setIntentResult(error instanceof Error ? error.message : 'Unknown error');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleMakeUsdtTransferIntent = async () => {
+        setIntentResult(null);
+        setIntentResponse(null);
+        setLoading(true);
+        try {
+            // Create USDT transfer intent with USDT parameters
+            const usdtIntent: MakeSendTransactionIntentRequest = {
+                id: `usdt-intent-${Date.now()}`,
+                i: [defaultUsdtItem],
+                vu: intentRequest.vu || Math.floor(Date.now() / 1000) + 600,
+                n: intentRequest.n,
+                c: intentRequest.c
+            };
+            const universalLink = await tonConnectUI.makeSendTransactionIntent(usdtIntent);
+            setIntentResult(universalLink);
+        } catch (error) {
+            console.error('Error creating USDT transfer intent:', error);
+            setIntentResult(error instanceof Error ? error.message : 'Unknown error');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleMakeSignMessageUsdtIntent = async () => {
+        setIntentResult(null);
+        setIntentResponse(null);
+        setLoading(true);
+        try {
+            // Create sign message USDT intent with USDT parameters
+            const signMessageUsdtIntent: MakeSignMessageIntentRequest = {
+                id: `sign-msg-usdt-intent-${Date.now()}`,
+                i: [defaultUsdtItem],
+                vu: intentRequest.vu || Math.floor(Date.now() / 1000) + 600,
+                n: intentRequest.n,
+                c: intentRequest.c
+            };
+            const universalLink = await tonConnectUI.makeSignMessageIntent(signMessageUsdtIntent);
+            setIntentResult(universalLink);
+        } catch (error) {
+            console.error('Error creating sign message USDT intent:', error);
+            setIntentResult(error instanceof Error ? error.message : 'Unknown error');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="intent-demo">
             <h3>Transaction Intent (works without connected wallet)</h3>
@@ -130,6 +206,15 @@ export function IntentDemo() {
                 </button>
                 <button onClick={handleMakeSignDataIntent} disabled={loading}>
                     {loading ? 'Creating intent...' : 'Create Sign Data Intent'}
+                </button>
+                <button onClick={handleMakeSignMessageIntent} disabled={loading}>
+                    {loading ? 'Creating intent...' : 'Create Sign Message Intent'}
+                </button>
+                <button onClick={handleMakeUsdtTransferIntent} disabled={loading}>
+                    {loading ? 'Creating intent...' : 'Create USDT Transfer Intent'}
+                </button>
+                <button onClick={handleMakeSignMessageUsdtIntent} disabled={loading}>
+                    {loading ? 'Creating intent...' : 'Create Sign Message USDT Intent'}
                 </button>
             </div>
 
