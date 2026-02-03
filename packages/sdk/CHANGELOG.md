@@ -1,5 +1,11 @@
 # Changelog @tonconnect/sdk
 
+## 3.4.1
+
+### Patch Changes
+
+- 1a2b61f: Removed additional property with traceId
+
 ## 3.4.0
 
 ### Minor Changes
