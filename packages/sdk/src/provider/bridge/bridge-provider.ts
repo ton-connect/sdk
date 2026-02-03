@@ -73,6 +73,8 @@ export class BridgeProvider implements HTTPProvider {
 
     private listeners: Array<(e: TraceableWalletEvent) => void> = [];
 
+    private intentResponseCallback?: (response: TraceableWalletResponse<RpcMethod>) => void;
+
     private readonly defaultOpeningDeadlineMS = 12000;
 
     private readonly defaultRetryTimeoutMS = 2000;
@@ -385,6 +387,12 @@ export class BridgeProvider implements HTTPProvider {
         return () => (this.listeners = this.listeners.filter(listener => listener !== callback));
     }
 
+    public setIntentResponseCallback(
+        callback: (response: TraceableWalletResponse<RpcMethod>) => void
+    ): void {
+        this.intentResponseCallback = callback;
+    }
+
     public pause(): void {
         this.gateway?.pause();
         this.pendingGateways.forEach(bridge => bridge.pause());
@@ -458,7 +466,16 @@ export class BridgeProvider implements HTTPProvider {
             const id = walletMessage.id.toString();
             const resolve = this.pendingRequests.get(id);
             if (!resolve) {
-                logDebug(`Response id ${id} doesn't match any request's id`);
+                // Check if this is an intent response (id starts with "intent-" or "sign-intent-")
+                if (id.startsWith('intent-') || id.startsWith('sign-intent-')) {
+                    logDebug('Intent response received:', walletMessage);
+                    // Emit intent response event
+                    if (this.intentResponseCallback) {
+                        this.intentResponseCallback({ ...walletMessage, traceId });
+                    }
+                } else {
+                    logDebug(`Response id ${id} doesn't match any request's id`);
+                }
                 return;
             }
 
@@ -513,6 +530,12 @@ export class BridgeProvider implements HTTPProvider {
         const tonAddrItem: TonAddressItemReply = connectEvent.payload.items.find(
             item => item.name === 'ton_addr'
         ) as TonAddressItemReply;
+
+        // Log connect event items to verify ton_proof is present
+        logDebug(
+            'Connect event items:',
+            connectEvent.payload.items.map(item => item.name)
+        );
 
         const connectEventToSave: BridgeConnectionHttp['connectEvent'] = {
             ...connectEvent,
@@ -611,6 +634,7 @@ export class BridgeProvider implements HTTPProvider {
             sessionId || (this.session ? this.session.sessionCrypto.sessionId : UUIDv7());
 
         // Encode intent as base64url (URL-safe base64 without padding)
+        logDebug('Generating intent universal link with intent:', JSON.stringify(intent, null, 2));
         const intentJson = JSON.stringify(intent);
         // Use standard base64 first, then convert to base64url format
         const intentBase64 = Base64.encode(intentJson, false); // false = standard base64

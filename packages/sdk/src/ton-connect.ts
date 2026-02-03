@@ -14,7 +14,8 @@ import {
     MakeSignDataIntentRequest as ProtocolMakeSignDataIntentRequest,
     MakeSignMessageIntentRequest as ProtocolMakeSignMessageIntentRequest,
     MakeSendActionIntentRequest as ProtocolMakeSendActionIntentRequest,
-    SessionCrypto
+    SessionCrypto,
+    RpcMethod
 } from '@tonconnect/protocol';
 import { DappMetadataError } from 'src/errors/dapp/dapp-metadata.error';
 import { ManifestContentErrorError } from 'src/errors/protocol/events/connect/manifest-content-error.error';
@@ -27,6 +28,7 @@ import {
 } from 'src/errors/wallet';
 import {
     Account,
+    isWalletInfoRemote,
     RequiredFeatures,
     Wallet,
     WalletConnectionSource,
@@ -94,7 +96,7 @@ import { BridgePartialSession, BridgeSession } from 'src/provider/bridge/models/
 import { IEnvironment } from 'src/environment/models/environment.interface';
 import { DefaultEnvironment } from 'src/environment/default-environment';
 import { UUIDv7 } from 'src/utils/uuid';
-import { TraceableWalletEvent } from 'src/models/wallet/traceable-events';
+import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet/traceable-events';
 import { WalletConnectProvider } from 'src/provider/wallet-connect/wallet-connect-provider';
 
 export class TonConnect implements ITonConnect {
@@ -1031,8 +1033,10 @@ export class TonConnect implements ITonConnect {
     }
 
     private walletEventsListener(e: TraceableWalletEvent): void {
+        logDebug('walletEventsListener received event:', e.event, e);
         switch (e.event) {
             case 'connect':
+                logDebug('Processing connect event for intent');
                 this.onWalletConnected(e.payload, { traceId: e.traceId });
                 break;
             case 'connect_error':
@@ -1046,8 +1050,49 @@ export class TonConnect implements ITonConnect {
                 this.onWalletConnectError(walletError);
                 break;
             case 'disconnect':
+                logDebug('Processing disconnect event for intent', e);
                 this.onWalletDisconnected('wallet', { traceId: e.traceId });
         }
+    }
+
+    private intentResponseSubscriptions: Array<
+        (response: TraceableWalletResponse<RpcMethod>) => void
+    > = [];
+
+    private handleIntentResponse(response: TraceableWalletResponse<RpcMethod>): void {
+        logDebug('Intent response received:', response);
+        this.intentResponseSubscriptions.forEach(callback => callback(response));
+    }
+
+    /**
+     * Subscribe to intent response events.
+     * This allows you to receive responses from intents (e.g., transaction results, sign data results).
+     * @param callback will be called when an intent response is received.
+     * @returns unsubscribe function.
+     */
+    public onIntentResponse(
+        callback: (response: {
+            result?: unknown;
+            error?: unknown;
+            id: string;
+            traceId?: string;
+        }) => void
+    ): () => void {
+        const wrappedCallback = (response: TraceableWalletResponse<RpcMethod>) => {
+            callback({
+                result: 'result' in response ? response.result : undefined,
+                error: 'error' in response ? response.error : undefined,
+                id: response.id.toString(),
+                traceId: response.traceId
+            });
+        };
+        this.intentResponseSubscriptions.push(wrappedCallback);
+        return () => {
+            const index = this.intentResponseSubscriptions.indexOf(wrappedCallback);
+            if (index > -1) {
+                this.intentResponseSubscriptions.splice(index, 1);
+            }
+        };
     }
 
     private onWalletConnected(
@@ -1072,6 +1117,10 @@ export class TonConnect implements ITonConnect {
         );
 
         if (!hasRequiredFeatures) {
+            logDebug('Wallet missing required features, disconnecting', {
+                features: connectEvent.device.features,
+                required: this.walletsRequiredFeatures
+            });
             this.provider?.disconnect();
             this.onWalletConnectError(
                 new WalletMissingRequiredFeaturesError(
@@ -1319,65 +1368,61 @@ export class TonConnect implements ITonConnect {
             | ProtocolMakeSignDataIntentRequest
             | ProtocolMakeSignMessageIntentRequest
             | ProtocolMakeSendActionIntentRequest,
-        options?: OptionalTraceable<{ walletUniversalLink?: string }>
+        options?: OptionalTraceable
     ): Promise<string> {
         const traceId = options?.traceId ?? UUIDv7();
 
-        let bridgeProvider: BridgeProvider;
-        let sessionCrypto: SessionCrypto;
+        const wallets = await this.walletsList.getWallets();
+        const httpWallets = wallets.filter(w => isWalletInfoRemote(w));
+
+        if (httpWallets.length === 0) {
+            throw new TonConnectError('No HTTP wallet available for intent generation');
+        }
+
         let walletConnectionSource:
             | WalletConnectionSourceHTTP
             | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[];
 
-        // If wallet universal link is provided, use it directly
-        if (options?.walletUniversalLink) {
-            walletConnectionSource = { universalLink: options.walletUniversalLink, bridgeUrl: '' };
-        } else {
-            // Otherwise, get the first available wallet
-            const wallets = await this.walletsList.getWallets();
-            const httpWallet = wallets.find(w => 'universalLink' in w && 'bridgeUrl' in w);
-
-            if (!httpWallet || !('universalLink' in httpWallet) || !('bridgeUrl' in httpWallet)) {
-                throw new TonConnectError('No HTTP wallet available for intent generation');
+        const seen = new Set<string>();
+        const bridges: Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[] = [];
+        for (const w of httpWallets) {
+            if (!seen.has(w.bridgeUrl)) {
+                seen.add(w.bridgeUrl);
+                bridges.push({ bridgeUrl: w.bridgeUrl });
             }
-
-            walletConnectionSource = {
-                universalLink: httpWallet.universalLink,
-                bridgeUrl: httpWallet.bridgeUrl
-            };
         }
+        walletConnectionSource = bridges;
 
-        bridgeProvider = new BridgeProvider(
+        const bridgeProvider = new BridgeProvider(
             this.bridgeConnectionStorage,
             walletConnectionSource,
             this.analytics
         );
 
-        // Create a temporary session for intent
-        sessionCrypto = new SessionCrypto();
+        const sessionCrypto = new SessionCrypto();
         const sessionId = sessionCrypto.sessionId;
 
-        // Store connection as pending (similar to connect flow)
         await this.bridgeConnectionStorage.storeConnection({
             type: 'http',
             connectionSource: walletConnectionSource,
             sessionCrypto
         });
 
-        // Open gateways to listen for connect events
-        await bridgeProvider.openGatewaysForIntent(sessionCrypto, { traceId });
+        void bridgeProvider.openGatewaysForIntent(sessionCrypto, { traceId }).catch(error => {
+            logDebug('Failed to open gateways for intent', error);
+        });
 
-        // Store intent provider to keep it alive and listen for events
+        // Treat connect via intent as a real HTTP session: use the same provider and listener pipeline.
+        this.provider?.closeConnection();
+        this.provider = bridgeProvider;
+
         this.intentProvider?.closeConnection();
         this.intentProvider = bridgeProvider;
 
-        // Subscribe to wallet events to handle connect event
         bridgeProvider.listen(this.walletEventsListener.bind(this));
+        bridgeProvider.setIntentResponseCallback(this.handleIntentResponse.bind(this));
 
-        const universalLink =
-            'universalLink' in walletConnectionSource && walletConnectionSource.universalLink
-                ? walletConnectionSource.universalLink
-                : 'tc://';
+        const universalLink = 'tc://';
 
         return bridgeProvider.generateIntentUniversalLink(
             universalLink,

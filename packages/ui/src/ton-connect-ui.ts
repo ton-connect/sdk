@@ -2,6 +2,8 @@ import {
     Account,
     BrowserEventDispatcher,
     ConnectAdditionalRequest,
+    ConnectRequest,
+    ConnectItem,
     OptionalTraceable,
     RequiredFeatures,
     SignDataPayload,
@@ -92,6 +94,8 @@ export class TonConnectUI {
     private walletInfo: WalletInfoWithOpenMethod | null = null;
 
     private systemThemeChangeUnsubscribe: (() => void) | null = null;
+
+    private intentResponseUnsubscribe: (() => void) | null = null;
 
     private actionsConfiguration?: ActionConfiguration;
 
@@ -322,6 +326,13 @@ export class TonConnectUI {
         });
 
         widgetController.renderApp(rootId, this);
+
+        // Subscribe to intent responses to close modal automatically
+        this.intentResponseUnsubscribe = this.connector.onIntentResponse(() => {
+            void setTimeout(() => {
+                widgetController.closeWalletsModal('wallet-selected');
+            });
+        });
     }
 
     /**
@@ -337,6 +348,27 @@ export class TonConnectUI {
         if (connectRequestParameters?.state === 'ready' || !connectRequestParameters) {
             this.connectRequestParametersCallback?.(connectRequestParameters?.value);
         }
+    }
+
+    /**
+     * Configure connect request parameters for intents.
+     * @param options - Configuration options:
+     *   - `includeConnect`: if true, intents will include a connect request
+     *   - `includeTonProof`: if true and includeConnect is true, ton_proof will be included in the connect request
+     *   - `tonProofPayload`: optional payload for ton_proof (if not provided, will be generated automatically)
+     * @param options - Or null/undefined to disable connect request in intents.
+     */
+    public setIntentConnectRequestParameters(
+        options:
+            | {
+                  includeConnect: boolean;
+                  includeTonProof?: boolean;
+                  tonProofPayload?: string;
+              }
+            | null
+            | undefined
+    ): void {
+        setAppState({ intentConnectRequestParameters: options });
     }
 
     /**
@@ -375,6 +407,23 @@ export class TonConnectUI {
                 callback(wallet);
             }
         }, errorsHandler);
+    }
+
+    /**
+     * Subscribe to intent response events.
+     * This allows you to receive responses from intents (e.g., transaction results, sign data results).
+     * @param callback will be called when an intent response is received.
+     * @returns unsubscribe function.
+     */
+    public onIntentResponse(
+        callback: (response: {
+            result?: unknown;
+            error?: unknown;
+            id: string;
+            traceId?: string;
+        }) => void
+    ): () => void {
+        return this.connector.onIntentResponse(callback);
     }
 
     /**
@@ -1444,14 +1493,27 @@ export class TonConnectUI {
         intent: MakeSendTransactionIntentRequest,
         options?: OptionalTraceable<{ walletUniversalLink?: string }>
     ): Promise<string> {
-        const universalLink = await this.connector.makeSendTransactionIntent(intent, options);
+        // Merge intent with connect request parameters if available
+        const intentWithConnect = await this.mergeIntentWithConnectRequest(intent);
+        // Debug: log the merged intent to verify ton_proof is included
+        if (intentWithConnect.c) {
+            console.debug('[TON_CONNECT_UI] Intent with connect request:', {
+                manifestUrl: intentWithConnect.c.manifestUrl,
+                items: intentWithConnect.c.items
+            });
+        }
+        const universalLink = await this.connector.makeSendTransactionIntent(
+            intentWithConnect,
+            options
+        );
         // Open wallets modal with intent link
         void setTimeout(() => {
             setWalletsModalState(prev => ({
                 status: 'opened',
                 traceId: options?.traceId ?? prev?.traceId,
                 closeReason: null,
-                intentLink: universalLink
+                intentLink: universalLink,
+                isIntent: true
             }));
         });
         return universalLink;
@@ -1468,13 +1530,16 @@ export class TonConnectUI {
         intent: MakeSignDataIntentRequest,
         options?: OptionalTraceable<{ walletUniversalLink?: string }>
     ): Promise<string> {
-        const universalLink = await this.connector.makeSignDataIntent(intent, options);
+        // Merge intent with connect request parameters if available
+        const intentWithConnect = await this.mergeIntentWithConnectRequest(intent);
+        const universalLink = await this.connector.makeSignDataIntent(intentWithConnect, options);
         void setTimeout(() => {
             setWalletsModalState(prev => ({
                 status: 'opened',
                 traceId: options?.traceId ?? prev?.traceId,
                 closeReason: null,
-                intentLink: universalLink
+                intentLink: universalLink,
+                isIntent: true
             }));
         });
         return universalLink;
@@ -1491,13 +1556,19 @@ export class TonConnectUI {
         intent: MakeSignMessageIntentRequest,
         options?: OptionalTraceable<{ walletUniversalLink?: string }>
     ): Promise<string> {
-        const universalLink = await this.connector.makeSignMessageIntent(intent, options);
+        // Merge intent with connect request parameters if available
+        const intentWithConnect = await this.mergeIntentWithConnectRequest(intent);
+        const universalLink = await this.connector.makeSignMessageIntent(
+            intentWithConnect,
+            options
+        );
         void setTimeout(() => {
             setWalletsModalState(prev => ({
                 status: 'opened',
                 traceId: options?.traceId ?? prev?.traceId,
                 closeReason: null,
-                intentLink: universalLink
+                intentLink: universalLink,
+                isIntent: true
             }));
         });
         return universalLink;
@@ -1514,16 +1585,86 @@ export class TonConnectUI {
         intent: MakeSendActionIntentRequest,
         options?: OptionalTraceable<{ walletUniversalLink?: string }>
     ): Promise<string> {
-        const universalLink = await this.connector.makeSendActionIntent(intent, options);
+        // Merge intent with connect request parameters if available
+        const intentWithConnect = await this.mergeIntentWithConnectRequest(intent);
+        const universalLink = await this.connector.makeSendActionIntent(intentWithConnect, options);
         void setTimeout(() => {
             setWalletsModalState(prev => ({
                 status: 'opened',
                 traceId: options?.traceId ?? prev?.traceId,
                 closeReason: null,
-                intentLink: universalLink
+                intentLink: universalLink,
+                isIntent: true
             }));
         });
         return universalLink;
+    }
+
+    /**
+     * Merges intent with connect request parameters from appState if available.
+     * @private
+     */
+    private async mergeIntentWithConnectRequest<T extends { c?: ConnectRequest }>(
+        intent: T
+    ): Promise<T> {
+        // Use unwrap to get the current value from SolidJS store
+        const currentAppState = unwrap(appState);
+        const intentParams = currentAppState.intentConnectRequestParameters;
+
+        // If connect is not needed, return intent as-is
+        if (!intentParams || !intentParams.includeConnect) {
+            return intent;
+        }
+
+        // Get manifestUrl from existing c, or from window.location.origin
+        const existingC = intent.c;
+        let manifestUrl = existingC?.manifestUrl;
+        if (!manifestUrl) {
+            const origin = typeof window !== 'undefined' ? window.location.origin : '';
+            if (origin) {
+                manifestUrl = `${origin}/tonconnect-manifest.json`;
+            }
+        }
+
+        // Build items array: always include ton_addr
+        const items: ConnectItem[] = [{ name: 'ton_addr' }];
+
+        // Add ton_proof if needed
+        if (intentParams.includeTonProof) {
+            // Use provided payload or get from connectRequestParameters
+            let tonProofPayload = intentParams.tonProofPayload;
+            if (!tonProofPayload) {
+                const connectParams = currentAppState.connectRequestParameters;
+                if (
+                    connectParams &&
+                    connectParams.state === 'ready' &&
+                    connectParams.value?.tonProof
+                ) {
+                    tonProofPayload = connectParams.value.tonProof;
+                }
+            }
+
+            if (tonProofPayload) {
+                items.push({
+                    name: 'ton_proof',
+                    payload: tonProofPayload
+                });
+                console.debug('[TON_CONNECT_UI] Added ton_proof to intent:', {
+                    payload: tonProofPayload.substring(0, 20) + '...'
+                });
+            } else {
+                console.warn('[TON_CONNECT_UI] includeTonProof is true but no payload found');
+            }
+        }
+
+        // Set c with manifestUrl and items
+        return {
+            ...intent,
+            c: {
+                manifestUrl: manifestUrl || '',
+                items
+            }
+        } as T;
     }
 }
 

@@ -11,6 +11,11 @@ export type AppState = {
     language: Locales;
     walletsListConfiguration: WalletsListConfiguration | {};
     connectRequestParameters?: Loadable<ConnectAdditionalRequest> | null;
+    intentConnectRequestParameters?: {
+        includeConnect: boolean;
+        includeTonProof?: boolean;
+        tonProofPayload?: string;
+    } | null;
     returnStrategy: ReturnStrategy;
     twaReturnUrl: `${string}://${string}` | undefined;
     preferredWalletAppName: string | undefined;

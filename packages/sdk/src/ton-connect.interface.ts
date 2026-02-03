@@ -206,4 +206,19 @@ export interface ITonConnect {
         intent: MakeSendActionIntentRequest,
         options?: OptionalTraceable<{ walletUniversalLink?: string }>
     ): Promise<string>;
+
+    /**
+     * Subscribe to intent response events.
+     * This allows you to receive responses from intents (e.g., transaction results, sign data results).
+     * @param callback will be called when an intent response is received.
+     * @returns unsubscribe function.
+     */
+    onIntentResponse(
+        callback: (response: {
+            result?: unknown;
+            error?: unknown;
+            id: string;
+            traceId?: string;
+        }) => void
+    ): () => void;
 }
