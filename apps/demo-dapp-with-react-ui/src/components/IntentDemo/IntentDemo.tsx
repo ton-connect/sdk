@@ -83,7 +83,7 @@ export function IntentDemo() {
         try {
             const signDataIntent: MakeSignDataIntentRequest = {
                 id: `sign-intent-${Date.now()}`,
-                mu: 'https://tonconnect-sdk-demo-dapp.vercel.app/tonconnect-manifest.json',
+                mu: 'https://sdk-demo-dapp-react-git-feat-intent-transactions-topteam.vercel.app/tonconnect-manifest.json',
                 p: {
                     type: 'text',
                     text: 'Sign this message to confirm your identity'
