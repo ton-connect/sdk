@@ -1,5 +1,12 @@
 # Changelog @tonconnect/ui
 
+## 2.4.1
+
+### Patch Changes
+
+- Updated dependencies [1a2b61f]
+    - @tonconnect/sdk@3.4.1
+
 ## 2.4.0
 
 ### Minor Changes
