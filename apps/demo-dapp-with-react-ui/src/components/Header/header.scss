@@ -16,6 +16,17 @@ header {
     align-items: center;
     gap: 12px;
   }
+
+  .header__link {
+    color: rgba(102, 170, 238, 0.91);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
 }
 
 @media (max-width: 525px) {

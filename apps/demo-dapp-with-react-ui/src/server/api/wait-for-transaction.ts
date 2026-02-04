@@ -63,7 +63,11 @@ export const waitForTransactionResolver: HttpResponseResolver = async ({ request
             return notFound({ error: 'Transaction not found' });
         }
 
-        return ok({ transaction: { ...transaction, hash: transaction.hash().toString('base64') } });
+        const hashB64 = transaction.hash().toString('base64');
+        const hashHex = transaction.hash().toString('hex');
+        return ok({
+            transaction: { ...transaction, hash: hashB64, hashHex }
+        });
     } catch (e) {
         return badRequest({ error: 'Invalid request', trace: e instanceof Error ? e.message : e });
     }
