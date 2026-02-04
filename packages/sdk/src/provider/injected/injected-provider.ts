@@ -136,9 +136,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
                 js_bridge_method: 'restoreConnection',
                 trace_id: traceId
             });
-            const connectEvent = await this.injectedWallet.restoreConnection({
-                traceId
-            });
+            const connectEvent = await this.injectedWallet.restoreConnection();
             this.analytics?.emitJsBridgeResponse({
                 js_bridge_method: 'restoreConnection',
                 trace_id: traceId
@@ -252,9 +250,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
         this.analytics?.emitJsBridgeCall({
             js_bridge_method: 'send'
         });
-        const result = this.injectedWallet.send<T>({ ...request, id } as AppRequest<T>, {
-            traceId: options.traceId
-        });
+        const result = this.injectedWallet.send<T>({ ...request, id } as AppRequest<T>);
         result
             .then(response => {
                 this.analytics?.emitJsBridgeResponse({
@@ -288,9 +284,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
                 js_bridge_method: 'connect',
                 trace_id: traceId
             });
-            const connectEvent = await this.injectedWallet.connect(protocolVersion, message, {
-                traceId
-            });
+            const connectEvent = await this.injectedWallet.connect(protocolVersion, message);
             this.analytics?.emitJsBridgeResponse({
                 js_bridge_method: 'connect'
             });
