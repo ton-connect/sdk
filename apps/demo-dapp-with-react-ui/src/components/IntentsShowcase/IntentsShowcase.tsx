@@ -61,6 +61,7 @@ const AFTER_STEPS: Array<
     { num: 2, title: 'Approve in wallet', desc: "Single approval and you're done" }
 ];
 
+// eslint-disable-next-line complexity
 export function IntentsShowcase() {
     const [beforeSending, setBeforeSending] = useState(false);
     const [intentSending, setIntentSending] = useState(false);
