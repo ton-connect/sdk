@@ -72,8 +72,11 @@ export function IntentsShowcase() {
     const [showGaslessFlow, setShowGaslessFlow] = useState(false);
     const [beforeTxResult, setBeforeTxResult] = useState<{ hashHex: string } | null>(null);
     const [afterTxResult, setAfterTxResult] = useState<{ hashHex: string } | null>(null);
+    const [gaslessTxResult, setGaslessTxResult] = useState<{ hashHex: string } | null>(null);
     const [beforeWaitingTx, setBeforeWaitingTx] = useState(false);
     const [afterWaitingTx, setAfterWaitingTx] = useState(false);
+    const [gaslessSending, setGaslessSending] = useState(false);
+    const [gaslessComplete, setGaslessComplete] = useState(false);
 
     const afterFlowRef = useRef<HTMLElement>(null);
     const wallet = useTonWallet();
@@ -270,13 +273,24 @@ export function IntentsShowcase() {
         }
 
         const pk = await ta.accounts.getAccountPublicKey(msg.info.dest as Address);
-        ta.gasless
-            .gaslessSend({
-                walletPublicKey: pk.publicKey,
-                boc: internalMsg
-            })
-            .then(() => console.log('A gasless transfer sent!'))
-            .catch(error => console.error(error.message));
+        const GASLESS_RETRIES = 5;
+        let lastError: unknown;
+        for (let attempt = 1; attempt <= GASLESS_RETRIES; attempt++) {
+            try {
+                await ta.gasless.gaslessSend({
+                    walletPublicKey: pk.publicKey,
+                    boc: internalMsg
+                });
+                setGaslessComplete(true);
+                setGaslessSending(false);
+                return;
+            } catch (error) {
+                lastError = error;
+                console.error(`Gasless send attempt ${attempt}/${GASLESS_RETRIES}:`, error);
+            }
+        }
+        console.error('Gasless send failed after', GASLESS_RETRIES, 'attempts:', lastError);
+        setGaslessSending(false);
 
         async function printConfigAndReturnRelayAddress(): Promise<Address> {
             const cfg = await ta.gasless.gaslessConfig();
@@ -290,7 +304,10 @@ export function IntentsShowcase() {
     };
 
     const handleGasless = () => {
-        handleSendGasless();
+        setGaslessSending(true);
+        setGaslessTxResult(null);
+        setGaslessComplete(false);
+        handleSendGasless().catch(() => setGaslessSending(false));
     };
 
     const handleBeforeSend = async () => {
@@ -684,9 +701,44 @@ export function IntentsShowcase() {
                                     type="button"
                                     className="intents-showcase__step-btn intents-showcase__step-btn--accent"
                                     onClick={handleGasless}
+                                    disabled={gaslessSending}
                                 >
-                                    Run gasless
+                                    {gaslessSending ? 'Sending…' : 'Run gasless'}
                                 </button>
+                                {gaslessComplete && (
+                                    <div className="intents-showcase__result">
+                                        <div className="intents-showcase__explorer intents-showcase__explorer--row">
+                                            <span className="intents-showcase__result-success">
+                                                Transaction confirmed
+                                            </span>
+                                            {gaslessTxResult?.hashHex ? (
+                                                <a
+                                                    href={getExplorerTransactionUrl(
+                                                        gaslessTxResult.hashHex
+                                                    )}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="intents-showcase__explorer-link"
+                                                >
+                                                    Show transaction →
+                                                </a>
+                                            ) : (
+                                                wallet?.account?.address && (
+                                                    <a
+                                                        href={getExplorerAddressUrl(
+                                                            wallet.account.address
+                                                        )}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="intents-showcase__explorer-link"
+                                                    >
+                                                        View wallet on TonViewer →
+                                                    </a>
+                                                )
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
                             </section>
                         </div>
                     </div>
