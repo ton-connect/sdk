@@ -7,7 +7,6 @@ import { Address, Cell, loadMessage, MessageRelaxed, storeMessageRelaxed, toNano
 import { TonProofDemoApi } from '../../TonProofDemoApi';
 import './showcase.scss';
 import { TonApiClient } from '@ton-api/client';
-import { ContractAdapter } from '@ton-api/ton-adapter';
 import { SendJettonItem } from '@tonconnect/ui-react';
 
 function getExplorerAddressUrl(address: string): string {
@@ -62,6 +61,7 @@ const AFTER_STEPS: Array<
     { num: 2, title: 'Approve in wallet', desc: "Single approval and you're done" }
 ];
 
+// eslint-disable-next-line complexity
 export function IntentsShowcase() {
     const [beforeSending, setBeforeSending] = useState(false);
     const [intentSending, setIntentSending] = useState(false);
@@ -161,7 +161,6 @@ export function IntentsShowcase() {
         const ta = new TonApiClient({
             baseUrl: 'https://tonapi.io'
         });
-        const provider = new ContractAdapter(ta);
 
         const OP_CODES = {
             TK_RELAYER_FEE: 0x878da6e3,
@@ -172,7 +171,6 @@ export function IntentsShowcase() {
 
         const amountUSDT = toNano(0.0001);
 
-        const workchain = 0;
         const fakeAddress = Address.parse('UQAHIrW23uWY7KOOYz6axu7WlBdA8iGwncI_Y8ZTWZA43yXF');
         const fakePk = Buffer.from(
             '90ebbb5085987419e62eb4f9f1fe30eaf3b39059738258320a4dc2b8fca586a0',
@@ -207,7 +205,7 @@ export function IntentsShowcase() {
         function patloadToIntent(p: Cell): SendJettonItem {
             const c = p.beginParse();
             c.skip(32);
-            const qi = c.loadUintBig(64);
+            c.skip(64);
             const ja = c.loadCoins();
             const d = c.loadAddress();
             const rd = c.loadMaybeAddress();
@@ -217,7 +215,6 @@ export function IntentsShowcase() {
                 t: 'jetton',
                 ma: USDT_MASTER.toString(),
                 ja: ja.toString(),
-                qi: qi.toString() as unknown as number,
                 d: d.toString(),
                 rd: rd?.toString(),
                 fta: fta.toString()
@@ -272,7 +269,7 @@ export function IntentsShowcase() {
             msg = loadMessageRelaxed(internalMsg.asSlice());
         }
 
-        const pk = await ta.accounts.getAccountPublicKey(msg.info.dest as any);
+        const pk = await ta.accounts.getAccountPublicKey(msg.info.dest as Address);
         ta.gasless
             .gaslessSend({
                 walletPublicKey: pk.publicKey,
