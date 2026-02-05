@@ -286,6 +286,7 @@ export function IntentsShowcase() {
                 setGaslessSending(false);
                 return;
             } catch (error) {
+                await new Promise(resolve => setTimeout(resolve, 1000));
                 lastError = error;
                 console.error(`Gasless send attempt ${attempt}/${GASLESS_RETRIES}:`, error);
             }
