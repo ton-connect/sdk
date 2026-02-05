@@ -274,7 +274,7 @@ export function IntentsShowcase() {
         }
 
         const pk = await ta.accounts.getAccountPublicKey(msg.info.dest as Address);
-        const GASLESS_RETRIES = 5;
+        const GASLESS_RETRIES = 15;
         let lastError: unknown;
         for (let attempt = 1; attempt <= GASLESS_RETRIES; attempt++) {
             try {
