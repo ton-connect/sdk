@@ -224,6 +224,11 @@ $ease-in-out-smooth: cubic-bezier(0.65, 0, 0.35, 1);
             background: linear-gradient(165deg, rgba(0, 152, 234, 0.1) 0%, transparent 55%);
         }
     }
+
+    &--gasless {
+        border-color: rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.03);
+    }
 }
 
 .intents-showcase__transition {

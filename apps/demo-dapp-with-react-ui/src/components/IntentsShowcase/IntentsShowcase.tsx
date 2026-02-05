@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { beginCell } from '@ton/ton';
-import { Link } from 'react-router-dom';
 import { CHAIN, useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { SendTransactionRequest } from '@tonconnect/ui-react';
 import { IntentItem, MakeSendTransactionIntentRequest } from '@tonconnect/sdk';
@@ -68,6 +67,7 @@ export function IntentsShowcase() {
     const [beforeSendClicked, setBeforeSendClicked] = useState(false);
     const [intentSendClicked, setIntentSendClicked] = useState(false);
     const [showAfterFlow, setShowAfterFlow] = useState(false);
+    const [showGaslessFlow, setShowGaslessFlow] = useState(false);
     const [beforeTxResult, setBeforeTxResult] = useState<{ hashHex: string } | null>(null);
     const [afterTxResult, setAfterTxResult] = useState<{ hashHex: string } | null>(null);
     const [beforeWaitingTx, setBeforeWaitingTx] = useState(false);
@@ -134,7 +134,7 @@ export function IntentsShowcase() {
         void tonConnectUI.disconnect();
     };
 
-    const carouselIndex = showAfterFlow ? 1 : 0;
+    const carouselIndex = showGaslessFlow ? 2 : showAfterFlow ? 1 : 0;
 
     const handleShowAfterFlow = () => {
         setShowAfterFlow(true);
@@ -142,6 +142,18 @@ export function IntentsShowcase() {
 
     const handleBackToBefore = () => {
         setShowAfterFlow(false);
+    };
+
+    const handleShowGaslessFlow = () => {
+        setShowGaslessFlow(true);
+    };
+
+    const handleBackFromGasless = () => {
+        setShowGaslessFlow(false);
+    };
+
+    const handleGasless = () => {
+        // TODO: implement gasless flow
     };
 
     const handleBeforeSend = async () => {
@@ -169,14 +181,10 @@ export function IntentsShowcase() {
             const transaction = await tonConnectUI.sendTransaction(defaultTx);
             setBeforeComplete(true);
             if (transaction?.boc && wallet?.account?.chain !== undefined) {
-                const network =
-                    wallet.account.chain === CHAIN.TESTNET ? 'testnet' : 'mainnet';
+                const network = wallet.account.chain === CHAIN.TESTNET ? 'testnet' : 'mainnet';
                 setBeforeWaitingTx(true);
                 try {
-                    const tx = await TonProofDemoApi.waitForTransaction(
-                        transaction.boc,
-                        network
-                    );
+                    const tx = await TonProofDemoApi.waitForTransaction(transaction.boc, network);
                     if (tx?.hashHex) setBeforeTxResult({ hashHex: tx.hashHex });
                 } catch {
                     // wait failed, still show complete
@@ -214,7 +222,7 @@ export function IntentsShowcase() {
         try {
             await tonConnectUI.makeSendTransactionIntent({
                 ...defaultIntentRequest,
-                id: `intent-showcase-${Date.now()}`
+                id: Date.now().toString()
             });
         } catch (e) {
             console.error('Intent send failed:', e);
@@ -231,9 +239,6 @@ export function IntentsShowcase() {
         <div className="intents-showcase">
             <header className="intents-showcase__header">
                 <div className="intents-showcase__header-left">
-                    <Link to="/" className="intents-showcase__back">
-                        ← Back to demo
-                    </Link>
                     <span className="intents-showcase__logo">TON Connect · Intents</span>
                 </div>
                 {wallet && (
@@ -268,241 +273,295 @@ export function IntentsShowcase() {
                         style={{ transform: `translateX(-${carouselIndex * 100}%)` }}
                     >
                         <div className="intents-showcase__carousel-slide">
-                    <section className="intents-showcase__flow intents-showcase__flow--before intents-showcase__flow--enter">
-                        <h2 className="intents-showcase__flow-title">
-                            <span className="intents-showcase__flow-badge">Before</span>
-                            How it was
-                        </h2>
-                        <p className="intents-showcase__flow-desc">
-                            Five steps, two wallet approvals
-                        </p>
-                        <ol className="intents-showcase__steps">
-                            {BEFORE_STEPS.map((step, index) => {
-                                const done = beforeStepDone[index];
-                                return (
-                                    <li
-                                        key={step.num}
-                                        className={`intents-showcase__step intents-showcase__step--i-${step.num} ${done ? 'intents-showcase__step--done' : ''}`}
-                                    >
-                                        <div className="intents-showcase__step-track">
-                                            <span
-                                                className={`intents-showcase__step-num ${done ? 'intents-showcase__step-num--done' : ''}`}
-                                                aria-hidden
+                            <section className="intents-showcase__flow intents-showcase__flow--before intents-showcase__flow--enter">
+                                <h2 className="intents-showcase__flow-title">
+                                    <span className="intents-showcase__flow-badge">Before</span>
+                                    How it was
+                                </h2>
+                                <p className="intents-showcase__flow-desc">
+                                    Five steps, two wallet approvals
+                                </p>
+                                <ol className="intents-showcase__steps">
+                                    {BEFORE_STEPS.map((step, index) => {
+                                        const done = beforeStepDone[index];
+                                        return (
+                                            <li
+                                                key={step.num}
+                                                className={`intents-showcase__step intents-showcase__step--i-${step.num} ${done ? 'intents-showcase__step--done' : ''}`}
                                             >
-                                                {done ? (
-                                                    <span className="intents-showcase__step-check">
-                                                        ✓
+                                                <div className="intents-showcase__step-track">
+                                                    <span
+                                                        className={`intents-showcase__step-num ${done ? 'intents-showcase__step-num--done' : ''}`}
+                                                        aria-hidden
+                                                    >
+                                                        {done ? (
+                                                            <span className="intents-showcase__step-check">
+                                                                ✓
+                                                            </span>
+                                                        ) : (
+                                                            step.num
+                                                        )}
                                                     </span>
-                                                ) : (
-                                                    step.num
-                                                )}
-                                            </span>
-                                            {step.num < BEFORE_STEPS.length && (
+                                                    {step.num < BEFORE_STEPS.length && (
+                                                        <div
+                                                            className={`intents-showcase__step-connector ${done ? 'intents-showcase__step-connector--filled' : ''}`}
+                                                            aria-hidden
+                                                        />
+                                                    )}
+                                                </div>
+                                                <div className="intents-showcase__step-content">
+                                                    <strong>{step.title}</strong>
+                                                    <span>{step.desc}</span>
+                                                    {step.action === 'connect' &&
+                                                        wallet?.account?.address && (
+                                                            <div className="intents-showcase__wallet-address">
+                                                                {formatAddressDisplay(
+                                                                    wallet.account.address
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                    {step.action === 'connect' && !wallet && (
+                                                        <button
+                                                            type="button"
+                                                            className="intents-showcase__step-btn"
+                                                            onClick={handleConnect}
+                                                        >
+                                                            Connect wallet
+                                                        </button>
+                                                    )}
+                                                    {step.action === 'send' && (
+                                                        <button
+                                                            type="button"
+                                                            className="intents-showcase__step-btn"
+                                                            onClick={handleBeforeSend}
+                                                            disabled={!wallet || beforeSending}
+                                                        >
+                                                            {beforeSending
+                                                                ? 'Sending…'
+                                                                : 'Submit payment'}
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </li>
+                                        );
+                                    })}
+                                </ol>
+                                {beforeComplete && (
+                                    <div className="intents-showcase__result">
+                                        {beforeWaitingTx && (
+                                            <div className="intents-showcase__result-waiting-wrap">
                                                 <div
-                                                    className={`intents-showcase__step-connector ${done ? 'intents-showcase__step-connector--filled' : ''}`}
+                                                    className="intents-showcase__loader"
                                                     aria-hidden
                                                 />
-                                            )}
-                                        </div>
-                                        <div className="intents-showcase__step-content">
-                                            <strong>{step.title}</strong>
-                                            <span>{step.desc}</span>
-                                            {step.action === 'connect' &&
-                                                wallet?.account?.address && (
-                                                    <div className="intents-showcase__wallet-address">
-                                                        {formatAddressDisplay(
-                                                            wallet.account.address
-                                                        )}
-                                                    </div>
-                                                )}
-                                            {step.action === 'connect' && !wallet && (
-                                                <button
-                                                    type="button"
-                                                    className="intents-showcase__step-btn"
-                                                    onClick={handleConnect}
+                                                <p className="intents-showcase__result-waiting">
+                                                    Waiting for transaction to appear on chain…
+                                                </p>
+                                            </div>
+                                        )}
+                                        {!beforeWaitingTx && beforeTxResult && (
+                                            <div className="intents-showcase__explorer intents-showcase__explorer--row">
+                                                <span className="intents-showcase__result-success">
+                                                    Transaction confirmed
+                                                </span>
+                                                <a
+                                                    href={getExplorerTransactionUrl(
+                                                        beforeTxResult.hashHex
+                                                    )}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="intents-showcase__explorer-link"
                                                 >
-                                                    Connect wallet
-                                                </button>
-                                            )}
-                                            {step.action === 'send' && (
-                                                <button
-                                                    type="button"
-                                                    className="intents-showcase__step-btn"
-                                                    onClick={handleBeforeSend}
-                                                    disabled={!wallet || beforeSending}
+                                                    Show transaction →
+                                                </a>
+                                            </div>
+                                        )}
+                                        {!beforeWaitingTx && !beforeTxResult && explorerUrl && (
+                                            <div className="intents-showcase__explorer">
+                                                <a
+                                                    href={explorerUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="intents-showcase__explorer-link"
                                                 >
-                                                    {beforeSending ? 'Sending…' : 'Submit payment'}
-                                                </button>
-                                            )}
-                                        </div>
-                                    </li>
-                                );
-                            })}
-                        </ol>
-                        {beforeComplete && (
-                            <div className="intents-showcase__result">
-                                {beforeWaitingTx && (
-                                    <div className="intents-showcase__result-waiting-wrap">
-                                        <div className="intents-showcase__loader" aria-hidden />
-                                        <p className="intents-showcase__result-waiting">
-                                            Waiting for transaction to appear on chain…
-                                        </p>
+                                                    Show transaction →
+                                                </a>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
-                                {!beforeWaitingTx && beforeTxResult && (
-                                    <div className="intents-showcase__explorer intents-showcase__explorer--row">
-                                        <span className="intents-showcase__result-success">
-                                            Transaction confirmed
-                                        </span>
-                                        <a
-                                            href={getExplorerTransactionUrl(
-                                                beforeTxResult.hashHex
-                                            )}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="intents-showcase__explorer-link"
+                                {beforeComplete && (
+                                    <div className="intents-showcase__transition">
+                                        <button
+                                            type="button"
+                                            className="intents-showcase__transition-btn"
+                                            onClick={handleShowAfterFlow}
                                         >
-                                            Show transaction →
-                                        </a>
+                                            See how it is with Intents →
+                                        </button>
                                     </div>
                                 )}
-                                {!beforeWaitingTx && !beforeTxResult && explorerUrl && (
-                                    <div className="intents-showcase__explorer">
-                                        <a
-                                            href={explorerUrl}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="intents-showcase__explorer-link"
-                                        >
-                                            Show transaction →
-                                        </a>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                        {beforeComplete && (
-                            <div className="intents-showcase__transition">
-                                <button
-                                    type="button"
-                                    className="intents-showcase__transition-btn"
-                                    onClick={handleShowAfterFlow}
-                                >
-                                    See how it is with Intents →
-                                </button>
-                            </div>
-                        )}
-                    </section>
+                            </section>
                         </div>
 
                         {beforeComplete && (
-                        <div className="intents-showcase__carousel-slide">
-                            <button
-                                type="button"
-                                className="intents-showcase__back-btn"
-                                onClick={handleBackToBefore}
-                            >
-                                ← Back
-                            </button>
-                        <section
-                            ref={afterFlowRef}
-                            className="intents-showcase__flow intents-showcase__flow--after intents-showcase__flow--reveal"
-                        >
-                            <h2 className="intents-showcase__flow-title">
-                                <span className="intents-showcase__flow-badge intents-showcase__flow-badge--now">
-                                    Now
-                                </span>
-                                How it is with Intents
-                            </h2>
-                            <p className="intents-showcase__flow-desc">Two steps, one approval</p>
-                            <ol className="intents-showcase__steps">
-                                {AFTER_STEPS.map((step, index) => {
-                                    const done = afterStepDone[index];
-                                    return (
-                                        <li
-                                            key={step.num}
-                                            className={`intents-showcase__step intents-showcase__step--i-${step.num} ${done ? 'intents-showcase__step--done' : ''}`}
-                                        >
-                                            <div className="intents-showcase__step-track intents-showcase__step-track--accent">
-                                                <span
-                                                    className={`intents-showcase__step-num intents-showcase__step-num--accent ${done ? 'intents-showcase__step-num--done' : ''}`}
-                                                    aria-hidden
+                            <div className="intents-showcase__carousel-slide">
+                                <button
+                                    type="button"
+                                    className="intents-showcase__back-btn"
+                                    onClick={handleBackToBefore}
+                                >
+                                    ← Back
+                                </button>
+                                <section
+                                    ref={afterFlowRef}
+                                    className="intents-showcase__flow intents-showcase__flow--after intents-showcase__flow--reveal"
+                                >
+                                    <h2 className="intents-showcase__flow-title">
+                                        <span className="intents-showcase__flow-badge intents-showcase__flow-badge--now">
+                                            Now
+                                        </span>
+                                        How it is with Intents
+                                    </h2>
+                                    <p className="intents-showcase__flow-desc">
+                                        Two steps, one approval
+                                    </p>
+                                    <ol className="intents-showcase__steps">
+                                        {AFTER_STEPS.map((step, index) => {
+                                            const done = afterStepDone[index];
+                                            return (
+                                                <li
+                                                    key={step.num}
+                                                    className={`intents-showcase__step intents-showcase__step--i-${step.num} ${done ? 'intents-showcase__step--done' : ''}`}
                                                 >
-                                                    {done ? (
-                                                        <span className="intents-showcase__step-check">
-                                                            ✓
+                                                    <div className="intents-showcase__step-track intents-showcase__step-track--accent">
+                                                        <span
+                                                            className={`intents-showcase__step-num intents-showcase__step-num--accent ${done ? 'intents-showcase__step-num--done' : ''}`}
+                                                            aria-hidden
+                                                        >
+                                                            {done ? (
+                                                                <span className="intents-showcase__step-check">
+                                                                    ✓
+                                                                </span>
+                                                            ) : (
+                                                                step.num
+                                                            )}
                                                         </span>
-                                                    ) : (
-                                                        step.num
-                                                    )}
-                                                </span>
-                                                {step.num < AFTER_STEPS.length && (
+                                                        {step.num < AFTER_STEPS.length && (
+                                                            <div
+                                                                className={`intents-showcase__step-connector intents-showcase__step-connector--accent ${done ? 'intents-showcase__step-connector--filled' : ''}`}
+                                                                aria-hidden
+                                                            />
+                                                        )}
+                                                    </div>
+                                                    <div className="intents-showcase__step-content">
+                                                        <strong>{step.title}</strong>
+                                                        <span>{step.desc}</span>
+                                                        {step.action === 'sendIntent' &&
+                                                            !afterComplete && (
+                                                                <button
+                                                                    type="button"
+                                                                    className="intents-showcase__step-btn intents-showcase__step-btn--accent"
+                                                                    onClick={handleIntentSend}
+                                                                    disabled={intentSending}
+                                                                >
+                                                                    {intentSending
+                                                                        ? 'Opening…'
+                                                                        : 'Send'}
+                                                                </button>
+                                                            )}
+                                                    </div>
+                                                </li>
+                                            );
+                                        })}
+                                    </ol>
+                                    {afterComplete && (
+                                        <div className="intents-showcase__result">
+                                            {afterWaitingTx && (
+                                                <div className="intents-showcase__result-waiting-wrap">
                                                     <div
-                                                        className={`intents-showcase__step-connector intents-showcase__step-connector--accent ${done ? 'intents-showcase__step-connector--filled' : ''}`}
+                                                        className="intents-showcase__loader intents-showcase__loader--accent"
                                                         aria-hidden
                                                     />
-                                                )}
-                                            </div>
-                                            <div className="intents-showcase__step-content">
-                                                <strong>{step.title}</strong>
-                                                <span>{step.desc}</span>
-                                                {step.action === 'sendIntent' && !afterComplete && (
-                                                    <button
-                                                        type="button"
-                                                        className="intents-showcase__step-btn intents-showcase__step-btn--accent"
-                                                        onClick={handleIntentSend}
-                                                        disabled={intentSending}
+                                                    <p className="intents-showcase__result-waiting">
+                                                        Waiting for transaction to appear on chain…
+                                                    </p>
+                                                </div>
+                                            )}
+                                            {!afterWaitingTx && afterTxResult && (
+                                                <div className="intents-showcase__explorer intents-showcase__explorer--row">
+                                                    <span className="intents-showcase__result-success">
+                                                        Transaction confirmed
+                                                    </span>
+                                                    <a
+                                                        href={getExplorerTransactionUrl(
+                                                            afterTxResult.hashHex
+                                                        )}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="intents-showcase__explorer-link"
                                                     >
-                                                        {intentSending ? 'Opening…' : 'Send'}
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </li>
-                                    );
-                                })}
-                            </ol>
-                            {afterComplete && (
-                                <div className="intents-showcase__result">
-                                    {afterWaitingTx && (
-                                        <div className="intents-showcase__result-waiting-wrap">
-                                            <div className="intents-showcase__loader intents-showcase__loader--accent" aria-hidden />
-                                            <p className="intents-showcase__result-waiting">
-                                                Waiting for transaction to appear on chain…
-                                            </p>
+                                                        Show transaction →
+                                                    </a>
+                                                </div>
+                                            )}
+                                            {!afterWaitingTx && !afterTxResult && explorerUrl && (
+                                                <div className="intents-showcase__explorer">
+                                                    <a
+                                                        href={explorerUrl}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="intents-showcase__explorer-link"
+                                                    >
+                                                        Show transaction →
+                                                    </a>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
-                                    {!afterWaitingTx && afterTxResult && (
-                                        <div className="intents-showcase__explorer intents-showcase__explorer--row">
-                                            <span className="intents-showcase__result-success">
-                                                Transaction confirmed
-                                            </span>
-                                            <a
-                                                href={getExplorerTransactionUrl(
-                                                    afterTxResult.hashHex
-                                                )}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="intents-showcase__explorer-link"
-                                            >
-                                                Show transaction →
-                                            </a>
-                                        </div>
-                                    )}
-                                    {!afterWaitingTx && !afterTxResult && explorerUrl && (
-                                        <div className="intents-showcase__explorer">
-                                            <a
-                                                href={explorerUrl}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="intents-showcase__explorer-link"
-                                            >
-                                                Show transaction →
-                                            </a>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </section>
-                        </div>
+                                </section>
+                                {!showGaslessFlow && (
+                                    <div className="intents-showcase__transition">
+                                        <button
+                                            type="button"
+                                            className="intents-showcase__transition-btn"
+                                            onClick={handleShowGaslessFlow}
+                                        >
+                                            Try Gasless →
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {beforeComplete && (
+                            <div className="intents-showcase__carousel-slide">
+                                <button
+                                    type="button"
+                                    className="intents-showcase__back-btn"
+                                    onClick={handleBackFromGasless}
+                                >
+                                    ← Back
+                                </button>
+                                <section className="intents-showcase__flow intents-showcase__flow--gasless">
+                                    <h2 className="intents-showcase__flow-title">
+                                        <span className="intents-showcase__flow-badge intents-showcase__flow-badge--now">
+                                            Gasless
+                                        </span>
+                                        Gasless transactions
+                                    </h2>
+                                    <p className="intents-showcase__flow-desc">
+                                        Send without paying gas — implement your flow here.
+                                    </p>
+                                    <button
+                                        type="button"
+                                        className="intents-showcase__step-btn intents-showcase__step-btn--accent"
+                                        onClick={handleGasless}
+                                    >
+                                        Run gasless
+                                    </button>
+                                </section>
+                            </div>
                         )}
                     </div>
                 </div>
