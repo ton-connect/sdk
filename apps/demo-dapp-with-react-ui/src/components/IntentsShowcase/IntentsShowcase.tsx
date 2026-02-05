@@ -1,11 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
-import { beginCell } from '@ton/ton';
+import { beginCell, internal, loadMessageRelaxed, Message } from '@ton/ton';
 import { CHAIN, useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { SendTransactionRequest } from '@tonconnect/ui-react';
 import { IntentItem, MakeSendTransactionIntentRequest } from '@tonconnect/sdk';
-import { Address, toNano } from '@ton/core';
+import { Address, Cell, loadMessage, MessageRelaxed, storeMessageRelaxed, toNano } from '@ton/core';
 import { TonProofDemoApi } from '../../TonProofDemoApi';
 import './showcase.scss';
+import { TonApiClient } from '@ton-api/client';
+import { ContractAdapter } from '@ton-api/ton-adapter';
+import { SendJettonItem } from '@tonconnect/ui-react';
 
 function getExplorerAddressUrl(address: string): string {
     return `https://tonviewer.com/address/${address}`;
@@ -152,8 +155,145 @@ export function IntentsShowcase() {
         setShowGaslessFlow(false);
     };
 
+    const handleSendGasless = async () => {
+        const USDT_MASTER = Address.parse('EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs');
+
+        const ta = new TonApiClient({
+            baseUrl: 'https://tonapi.io'
+        });
+        const provider = new ContractAdapter(ta);
+
+        const OP_CODES = {
+            TK_RELAYER_FEE: 0x878da6e3,
+            JETTON_TRANSFER: 0xf8a7ea5
+        };
+
+        const BASE_JETTON_SEND_AMOUNT = toNano(0.05);
+
+        const amountUSDT = toNano(0.0001);
+
+        const workchain = 0;
+        const fakeAddress = Address.parse('UQAHIrW23uWY7KOOYz6axu7WlBdA8iGwncI_Y8ZTWZA43yXF');
+        const fakePk = Buffer.from(
+            '90ebbb5085987419e62eb4f9f1fe30eaf3b39059738258320a4dc2b8fca586a0',
+            'hex'
+        );
+
+        const fakeJettonWalletAddressResult = await ta.blockchain.execGetMethodForBlockchainAccount(
+            USDT_MASTER,
+            'get_wallet_address',
+            {
+                args: [fakeAddress.toRawString()]
+            }
+        );
+        console.log('jettonWalletAddressResult', fakeJettonWalletAddressResult);
+        const fakeJettonWalletUsdt = Address.parse(
+            fakeJettonWalletAddressResult.decoded.jetton_wallet_address
+        );
+
+        const relayerAddress = await printConfigAndReturnRelayAddress();
+
+        const tetherTransferPayload = beginCell()
+            .storeUint(OP_CODES.JETTON_TRANSFER, 32)
+            .storeUint(0, 64)
+            .storeCoins(amountUSDT)
+            .storeAddress(Address.parse('UQBSzBN6cnxDwDjn_IQXqgU8OJXUMcol9pxyL-yLkpKzYpKR'))
+            .storeAddress(relayerAddress)
+            .storeBit(false)
+            .storeCoins(1n)
+            .storeMaybeRef(undefined)
+            .endCell();
+
+        function patloadToIntent(p: Cell): SendJettonItem {
+            const c = p.beginParse();
+            c.skip(32);
+            const qi = c.loadUintBig(64);
+            const ja = c.loadCoins();
+            const d = c.loadAddress();
+            const rd = c.loadMaybeAddress();
+            c.skip(1);
+            const fta = c.loadCoins();
+            return {
+                t: 'jetton',
+                ma: USDT_MASTER.toString(),
+                ja: ja.toString(),
+                qi: qi.toString() as unknown as number,
+                d: d.toString(),
+                rd: rd?.toString(),
+                fta: fta.toString()
+            };
+        }
+
+        const messageToEstimate = beginCell()
+            .storeWritable(
+                storeMessageRelaxed(
+                    internal({
+                        to: fakeJettonWalletUsdt,
+                        bounce: true,
+                        value: BASE_JETTON_SEND_AMOUNT,
+                        body: tetherTransferPayload
+                    })
+                )
+            )
+            .endCell();
+
+        const params = await ta.gasless.gaslessEstimate(USDT_MASTER, {
+            walletAddress: fakeAddress,
+            walletPublicKey: fakePk.toString('hex'),
+            messages: [{ boc: messageToEstimate }]
+        });
+
+        console.log('Estimated transfer:', params);
+
+        console.log('BOC');
+        await tonConnectUI.makeSignMessageIntent({
+            id: `intent-${Date.now().toString()}`,
+            i: params.messages.map(m => ({
+                ...patloadToIntent(m.payload!),
+                si: m.stateInit?.toBoc()?.toString('base64')
+            }))
+        });
+
+        const internalBoc: string = await new Promise((resolve, reject) => {
+            tonConnectUI.onIntentResponse(({ result, error }) => {
+                if (result) resolve(result as string);
+                else reject(error);
+            });
+        });
+        console.log('BOC REC', internalBoc);
+
+        const internalMsg = Cell.fromBase64(internalBoc);
+
+        let msg: Message | MessageRelaxed;
+        try {
+            msg = loadMessage(internalMsg.asSlice());
+        } catch (e) {
+            console.error(e);
+            msg = loadMessageRelaxed(internalMsg.asSlice());
+        }
+
+        const pk = await ta.accounts.getAccountPublicKey(msg.info.dest as any);
+        ta.gasless
+            .gaslessSend({
+                walletPublicKey: pk.publicKey,
+                boc: internalMsg
+            })
+            .then(() => console.log('A gasless transfer sent!'))
+            .catch(error => console.error(error.message));
+
+        async function printConfigAndReturnRelayAddress(): Promise<Address> {
+            const cfg = await ta.gasless.gaslessConfig();
+
+            console.log('Available jettons for gasless transfer');
+            console.log(cfg.gasJettons.map(gasJetton => gasJetton.masterId));
+
+            console.log(`Relay address to send fees to: ${cfg.relayAddress}`);
+            return cfg.relayAddress;
+        }
+    };
+
     const handleGasless = () => {
-        // TODO: implement gasless flow
+        handleSendGasless();
     };
 
     const handleBeforeSend = async () => {
@@ -215,15 +355,12 @@ export function IntentsShowcase() {
         };
 
         const defaultIntentRequest: MakeSendTransactionIntentRequest = {
-            id: Date.now().toString(),
+            id: `intent-${Date.now()}`,
             i: [defaultIntentItem],
             vu: Math.ceil(Date.now() / 1000) + 10000
         };
         try {
-            await tonConnectUI.makeSendTransactionIntent({
-                ...defaultIntentRequest,
-                id: Date.now().toString()
-            });
+            await tonConnectUI.makeSendTransactionIntent(defaultIntentRequest);
         } catch (e) {
             console.error('Intent send failed:', e);
         } finally {
