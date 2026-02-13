@@ -63,7 +63,7 @@ import { InjectedProvider } from 'src/provider/injected/injected-provider';
 import { Provider } from 'src/provider/provider';
 import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { DefaultStorage } from 'src/storage/default-storage';
-import { ITonConnect } from 'src/ton-connect.interface';
+import { ITonConnect, IntentUniversalLinkOptions } from 'src/ton-connect.interface';
 import { WalletWrongNetworkError } from 'src/errors/wallet/wallet-wrong-network.error';
 import { getDocument, getOriginWithPath, getWebPageManifest } from 'src/utils/web-api';
 import { WalletsListManager } from 'src/wallets-list-manager';
@@ -98,10 +98,12 @@ import { DefaultEnvironment } from 'src/environment/default-environment';
 import { UUIDv7 } from 'src/utils/uuid';
 import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet/traceable-events';
 import { WalletConnectProvider } from 'src/provider/wallet-connect/wallet-connect-provider';
+import { Base64, hexToByteArray } from '@tonconnect/protocol';
 
 export class TonConnect implements ITonConnect {
     private desiredChainId: string | undefined;
     private static readonly walletsList = new WalletsListManager();
+    private readonly objectStorageBaseUrl: string;
 
     /**
      * Check if specified wallet is injected and available to use with the app.
@@ -219,6 +221,10 @@ export class TonConnect implements ITonConnect {
             this.dappSettings.storage,
             this.walletsList
         );
+
+        this.objectStorageBaseUrl =
+            options?.objectStorageBaseUrl ??
+            'https://ton-connect-bridge-v3-staging.tapps.ninja/objects';
 
         if (!options?.disableAutoPauseConnection) {
             this.addWindowFocusAndBlurSubscriptions();
@@ -1266,7 +1272,7 @@ export class TonConnect implements ITonConnect {
      */
     public async makeSendTransactionIntent(
         intent: MakeSendTransactionIntentRequest,
-        options?: OptionalTraceable<{ walletUniversalLink?: string }>
+        options?: IntentUniversalLinkOptions
     ): Promise<string> {
         return this.generateIntentUniversalLink(
             {
@@ -1290,7 +1296,7 @@ export class TonConnect implements ITonConnect {
      */
     public async makeSignDataIntent(
         intent: MakeSignDataIntentRequest,
-        options?: OptionalTraceable<{ walletUniversalLink?: string }>
+        options?: IntentUniversalLinkOptions
     ): Promise<string> {
         // Build protocol request: if mu is not provided but c.manifestUrl exists,
         // don't include mu in JSON (wallet will extract it from c.manifestUrl)
@@ -1325,7 +1331,7 @@ export class TonConnect implements ITonConnect {
      */
     public async makeSignMessageIntent(
         intent: MakeSignMessageIntentRequest,
-        options?: OptionalTraceable<{ walletUniversalLink?: string }>
+        options?: IntentUniversalLinkOptions
     ): Promise<string> {
         return this.generateIntentUniversalLink(
             {
@@ -1349,7 +1355,7 @@ export class TonConnect implements ITonConnect {
      */
     public async makeSendActionIntent(
         intent: MakeSendActionIntentRequest,
-        options?: OptionalTraceable<{ walletUniversalLink?: string }>
+        options?: IntentUniversalLinkOptions
     ): Promise<string> {
         return this.generateIntentUniversalLink(
             {
@@ -1368,10 +1374,26 @@ export class TonConnect implements ITonConnect {
             | ProtocolMakeSignDataIntentRequest
             | ProtocolMakeSignMessageIntentRequest
             | ProtocolMakeSendActionIntentRequest,
-        options?: OptionalTraceable
+        options?: IntentUniversalLinkOptions
     ): Promise<string> {
         const traceId = options?.traceId ?? UUIDv7();
+        const intentTransport = options?.intentTransport ?? 'inline_url';
 
+        if (intentTransport === 'object_storage') {
+            return this.generateObjectStorageIntentLink(intent, traceId, options);
+        }
+
+        return this.generateInlineIntentLink(intent, traceId);
+    }
+
+    private async generateInlineIntentLink(
+        intent:
+            | ProtocolMakeSendTransactionIntentRequest
+            | ProtocolMakeSignDataIntentRequest
+            | ProtocolMakeSignMessageIntentRequest
+            | ProtocolMakeSendActionIntentRequest,
+        traceId: string
+    ): Promise<string> {
         const wallets = await this.walletsList.getWallets();
         const httpWallets = wallets.filter(w => isWalletInfoRemote(w));
 
@@ -1430,5 +1452,187 @@ export class TonConnect implements ITonConnect {
             { traceId },
             sessionId
         );
+    }
+
+    private async generateObjectStorageIntentLink(
+        intent:
+            | ProtocolMakeSendTransactionIntentRequest
+            | ProtocolMakeSignDataIntentRequest
+            | ProtocolMakeSignMessageIntentRequest
+            | ProtocolMakeSendActionIntentRequest,
+        traceId: string,
+        options?: IntentUniversalLinkOptions
+    ): Promise<string> {
+        const { sessionCrypto, sessionId, objectStorageBaseUrl } =
+            await this.prepareObjectStorageSessionAndUrl(traceId, options);
+        const ttl = this.computeObjectStorageTtl(intent, options);
+
+        const intentJson = JSON.stringify(intent);
+
+        // Generate ephemeral wallet key pair for this intent and encrypt payload
+        const walletCrypto = new SessionCrypto();
+        const walletKeyPair = walletCrypto.stringifyKeypair();
+        const walletPublicKeyBytes = hexToByteArray(walletKeyPair.publicKey);
+        const encryptedPayload = sessionCrypto.encrypt(intentJson, walletPublicKeyBytes);
+        const intentBase64 = Base64.encode(encryptedPayload, false); // standard base64
+
+        const url = new URL(objectStorageBaseUrl);
+        url.searchParams.set('ttl', ttl.toString());
+
+        const response = await fetch(url.toString(), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain; charset=UTF-8'
+            },
+            body: intentBase64
+        });
+
+        if (!response.ok) {
+            throw new TonConnectError(
+                `Failed to store intent in object storage: HTTP ${response.status}`
+            );
+        }
+
+        const rawBody = await response.text();
+
+        const getUrl = this.extractGetUrlFromStorageResponse(rawBody);
+
+        if (!getUrl) {
+            throw new TonConnectError(
+                'Invalid object storage response: "get_url" field is missing or not a string'
+            );
+        }
+
+        const params = new URLSearchParams({
+            id: sessionId,
+            pk: walletKeyPair.secretKey,
+            trace_id: traceId,
+            get_url: getUrl
+        });
+
+        return `tc://intent?${params.toString()}`;
+    }
+
+    private async prepareObjectStorageSessionAndUrl(
+        traceId: string,
+        options?: IntentUniversalLinkOptions
+    ): Promise<{
+        sessionCrypto: SessionCrypto;
+        sessionId: string;
+        objectStorageBaseUrl: string;
+    }> {
+        const wallets = await this.walletsList.getWallets();
+        const httpWallets = wallets.filter(w => isWalletInfoRemote(w));
+
+        if (httpWallets.length === 0) {
+            throw new TonConnectError('No HTTP wallet available for intent generation');
+        }
+
+        let walletConnectionSource:
+            | WalletConnectionSourceHTTP
+            | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[];
+
+        const seen = new Set<string>();
+        const bridges: Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[] = [];
+        for (const w of httpWallets) {
+            if (!seen.has(w.bridgeUrl)) {
+                seen.add(w.bridgeUrl);
+                bridges.push({ bridgeUrl: w.bridgeUrl });
+            }
+        }
+        walletConnectionSource = bridges;
+
+        const bridgeProvider = new BridgeProvider(
+            this.bridgeConnectionStorage,
+            walletConnectionSource,
+            this.analytics
+        );
+
+        const sessionCrypto = new SessionCrypto();
+        const sessionId = sessionCrypto.sessionId;
+
+        await this.bridgeConnectionStorage.storeConnection({
+            type: 'http',
+            connectionSource: walletConnectionSource,
+            sessionCrypto
+        });
+
+        void bridgeProvider.openGatewaysForIntent(sessionCrypto, { traceId }).catch(error => {
+            logDebug('Failed to open gateways for intent', error);
+        });
+
+        // Treat connect via intent as a real HTTP session: use the same provider and listener pipeline.
+        this.provider?.closeConnection();
+        this.provider = bridgeProvider;
+
+        this.intentProvider?.closeConnection();
+        this.intentProvider = bridgeProvider;
+
+        bridgeProvider.listen(this.walletEventsListener.bind(this));
+        bridgeProvider.setIntentResponseCallback(this.handleIntentResponse.bind(this));
+
+        const objectStorageBaseUrl = options?.objectStorageBaseUrl ?? this.objectStorageBaseUrl;
+        if (!objectStorageBaseUrl) {
+            throw new TonConnectError(
+                'objectStorageBaseUrl is required when intentTransport is "object_storage"'
+            );
+        }
+
+        return { sessionCrypto, sessionId, objectStorageBaseUrl };
+    }
+
+    private computeObjectStorageTtl(
+        intent:
+            | ProtocolMakeSendTransactionIntentRequest
+            | ProtocolMakeSignDataIntentRequest
+            | ProtocolMakeSignMessageIntentRequest
+            | ProtocolMakeSendActionIntentRequest,
+        options?: IntentUniversalLinkOptions
+    ): number {
+        // Derive TTL from intent.vu when possible, otherwise fall back to provided/default TTL.
+        // Object storage implementations SHOULD support at least 300 seconds TTL, but may enforce a hard upper limit.
+        // To avoid HTTP 400 from storage when TTL exceeds its hard limit, we clamp TTL to a safe default (300s)
+        // unless the caller explicitly overrides it via objectStorageTtlSeconds.
+        const nowSeconds = Math.floor(Date.now() / 1000);
+        const defaultTtl = options?.objectStorageTtlSeconds ?? 300;
+        const intentWithVu = intent as { vu?: number };
+        let ttl = defaultTtl;
+        if (typeof intentWithVu.vu === 'number' && intentWithVu.vu > nowSeconds) {
+            const diff = intentWithVu.vu - nowSeconds;
+            ttl = Math.min(defaultTtl, Math.max(1, diff));
+        }
+
+        return ttl;
+    }
+
+    private extractGetUrlFromStorageResponse(rawBody: string): string | null {
+        if (!rawBody) {
+            return null;
+        }
+
+        const trimmed = rawBody.trim();
+        if (!trimmed) {
+            return null;
+        }
+
+        // Try JSON first (supports both {"get_url": "..."} and "\"https://...\"")
+        try {
+            const parsed = JSON.parse(trimmed) as unknown;
+            if (
+                parsed &&
+                typeof parsed === 'object' &&
+                'get_url' in parsed &&
+                typeof (parsed as { get_url: unknown }).get_url === 'string'
+            ) {
+                return (parsed as { get_url: string }).get_url;
+            }
+            if (typeof parsed === 'string' && parsed) {
+                return parsed;
+            }
+        } catch {
+            // Not JSON, fall through and treat as plain URL
+        }
+
+        return trimmed || null;
     }
 }

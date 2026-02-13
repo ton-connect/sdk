@@ -34,6 +34,10 @@ export function IntentDemo() {
         vu: Math.floor(Date.now() / 1000) + 600
     });
 
+    const [intentTransport, setIntentTransport] = useState<'inline_url' | 'object_storage'>(
+        'inline_url'
+    );
+
     const [tonConnectUI] = useTonConnectUI();
 
     useEffect(() => {
@@ -70,12 +74,19 @@ export function IntentDemo() {
         };
     }, [tonConnectUI]);
 
+    const buildIntentOptions = () => ({
+        intentTransport: intentTransport as 'inline_url' | 'object_storage'
+    });
+
     const handleMakeSendTransactionIntent = async () => {
         setIntentResult(null);
         setIntentResponse(null);
         setLoading(true);
         try {
-            const universalLink = await tonConnectUI.makeSendTransactionIntent(intentRequest);
+            const universalLink = await tonConnectUI.makeSendTransactionIntent(
+                intentRequest,
+                buildIntentOptions()
+            );
             setIntentResult(universalLink);
         } catch (error) {
             console.error('Error creating intent:', error);
@@ -98,7 +109,10 @@ export function IntentDemo() {
                     text: 'Sign this message to confirm your identity'
                 }
             };
-            const universalLink = await tonConnectUI.makeSignDataIntent(signDataIntent);
+            const universalLink = await tonConnectUI.makeSignDataIntent(
+                signDataIntent,
+                buildIntentOptions()
+            );
             setIntentResult(universalLink);
         } catch (error) {
             console.error('Error creating sign data intent:', error);
@@ -119,7 +133,10 @@ export function IntentDemo() {
                 vu: intentRequest.vu,
                 n: intentRequest.n
             };
-            const universalLink = await tonConnectUI.makeSignMessageIntent(signMessageIntent);
+            const universalLink = await tonConnectUI.makeSignMessageIntent(
+                signMessageIntent,
+                buildIntentOptions()
+            );
             setIntentResult(universalLink);
         } catch (error) {
             console.error('Error creating sign message intent:', error);
@@ -142,7 +159,10 @@ export function IntentDemo() {
                 n: intentRequest.n,
                 c: intentRequest.c
             };
-            const universalLink = await tonConnectUI.makeSendTransactionIntent(usdtIntent);
+            const universalLink = await tonConnectUI.makeSendTransactionIntent(
+                usdtIntent,
+                buildIntentOptions()
+            );
             setIntentResult(universalLink);
         } catch (error) {
             console.error('Error creating USDT transfer intent:', error);
@@ -165,7 +185,10 @@ export function IntentDemo() {
                 n: intentRequest.n,
                 c: intentRequest.c
             };
-            const universalLink = await tonConnectUI.makeSignMessageIntent(signMessageUsdtIntent);
+            const universalLink = await tonConnectUI.makeSignMessageIntent(
+                signMessageUsdtIntent,
+                buildIntentOptions()
+            );
             setIntentResult(universalLink);
         } catch (error) {
             console.error('Error creating sign message USDT intent:', error);
@@ -181,6 +204,29 @@ export function IntentDemo() {
             <div className="intent-demo__info">
                 Intents allow users to complete transactions without being connected to the wallet.
                 The QR code modal will open automatically.
+            </div>
+
+            <div className="intent-demo__toggle">
+                <label>
+                    <input
+                        type="radio"
+                        name="intentTransport"
+                        value="inline_url"
+                        checked={intentTransport === 'inline_url'}
+                        onChange={() => setIntentTransport('inline_url')}
+                    />
+                    Inline URL (tc://intent_inline)
+                </label>
+                <label>
+                    <input
+                        type="radio"
+                        name="intentTransport"
+                        value="object_storage"
+                        checked={intentTransport === 'object_storage'}
+                        onChange={() => setIntentTransport('object_storage')}
+                    />
+                    Object Storage (tc://intent + get_url)
+                </label>
             </div>
 
             <div className="intent-demo__request">

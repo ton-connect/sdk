@@ -6,6 +6,7 @@ export { TonConnect as default } from './ton-connect';
 export { WalletsListManager } from './wallets-list-manager';
 export { ITonConnect } from './ton-connect.interface';
 export type { AnalyticsSettings } from './models/ton-connect-options';
+export type { IntentUniversalLinkOptions } from './ton-connect.interface';
 export type {
     EventDispatcher,
     RemoveTonConnectPrefix,

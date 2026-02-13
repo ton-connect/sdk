@@ -24,6 +24,13 @@ import { WalletConnectionSourceJS } from 'src/models/wallet/wallet-connection-so
 import { SignDataPayload } from '@tonconnect/protocol';
 import { OptionalTraceable } from 'src/utils/types';
 
+export type IntentUniversalLinkOptions = OptionalTraceable<{
+    walletUniversalLink?: string;
+    intentTransport?: 'inline_url' | 'object_storage';
+    objectStorageBaseUrl?: string;
+    objectStorageTtlSeconds?: number;
+}>;
+
 export interface ITonConnect {
     /**
      * Shows if the wallet is connected right now.
@@ -168,7 +175,7 @@ export interface ITonConnect {
      */
     makeSendTransactionIntent(
         intent: MakeSendTransactionIntentRequest,
-        options?: OptionalTraceable<{ walletUniversalLink?: string }>
+        options?: IntentUniversalLinkOptions
     ): Promise<string>;
 
     /**
@@ -180,7 +187,7 @@ export interface ITonConnect {
      */
     makeSignDataIntent(
         intent: MakeSignDataIntentRequest,
-        options?: OptionalTraceable<{ walletUniversalLink?: string }>
+        options?: IntentUniversalLinkOptions
     ): Promise<string>;
 
     /**
@@ -192,7 +199,7 @@ export interface ITonConnect {
      */
     makeSignMessageIntent(
         intent: MakeSignMessageIntentRequest,
-        options?: OptionalTraceable<{ walletUniversalLink?: string }>
+        options?: IntentUniversalLinkOptions
     ): Promise<string>;
 
     /**
@@ -204,7 +211,7 @@ export interface ITonConnect {
      */
     makeSendActionIntent(
         intent: MakeSendActionIntentRequest,
-        options?: OptionalTraceable<{ walletUniversalLink?: string }>
+        options?: IntentUniversalLinkOptions
     ): Promise<string>;
 
     /**

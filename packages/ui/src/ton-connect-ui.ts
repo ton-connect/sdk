@@ -36,6 +36,13 @@ import { widgetController } from 'src/app/widget-controller';
 import { setWalletsModalState } from 'src/app/state/modals-state';
 import { TonConnectUIError } from 'src/errors/ton-connect-ui.error';
 import { TonConnectUiCreateOptions } from 'src/models/ton-connect-ui-create-options';
+
+type IntentUniversalLinkOptions = OptionalTraceable<{
+    walletUniversalLink?: string;
+    intentTransport?: 'inline_url' | 'object_storage';
+    objectStorageBaseUrl?: string;
+    objectStorageTtlSeconds?: number;
+}>;
 import { PreferredWalletStorage, WalletInfoStorage } from 'src/storage';
 import {
     createMacrotaskAsync,
@@ -1491,7 +1498,7 @@ export class TonConnectUI {
      */
     public async makeSendTransactionIntent(
         intent: MakeSendTransactionIntentRequest,
-        options?: OptionalTraceable<{ walletUniversalLink?: string }>
+        options?: IntentUniversalLinkOptions
     ): Promise<string> {
         // Merge intent with connect request parameters if available
         const intentWithConnect = await this.mergeIntentWithConnectRequest(intent);
@@ -1528,7 +1535,7 @@ export class TonConnectUI {
      */
     public async makeSignDataIntent(
         intent: MakeSignDataIntentRequest,
-        options?: OptionalTraceable<{ walletUniversalLink?: string }>
+        options?: IntentUniversalLinkOptions
     ): Promise<string> {
         // Merge intent with connect request parameters if available
         const intentWithConnect = await this.mergeIntentWithConnectRequest(intent);
@@ -1554,7 +1561,7 @@ export class TonConnectUI {
      */
     public async makeSignMessageIntent(
         intent: MakeSignMessageIntentRequest,
-        options?: OptionalTraceable<{ walletUniversalLink?: string }>
+        options?: IntentUniversalLinkOptions
     ): Promise<string> {
         // Merge intent with connect request parameters if available
         const intentWithConnect = await this.mergeIntentWithConnectRequest(intent);
@@ -1583,7 +1590,7 @@ export class TonConnectUI {
      */
     public async makeSendActionIntent(
         intent: MakeSendActionIntentRequest,
-        options?: OptionalTraceable<{ walletUniversalLink?: string }>
+        options?: IntentUniversalLinkOptions
     ): Promise<string> {
         // Merge intent with connect request parameters if available
         const intentWithConnect = await this.mergeIntentWithConnectRequest(intent);
