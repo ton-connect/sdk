@@ -7,7 +7,6 @@ This document outlines the necessary steps to configure your development environ
 1. [Installation](#installation)
 2. [Setting Up Your Development Environment](#setting-up-your-development-environment)
 3. [Publishing Releases](#publishing-releases)
-   - [Publish a Version](#publish-a-version)
 4. [Additional Information](#additional-information)
 
 # Installation
@@ -36,75 +35,102 @@ pnpm build
 
 # Publishing Releases
 
-The release process is divided into distinct stages to ensure a smooth and error-free deployment. Initially, a beta version of the package is released and the demo applications are accordingly updated. This is followed by rigorous testing of the demo app to verify that the beta version operates as intended. Upon successful completion of the testing phase, the final step is to publish the release version.
+## Branches
 
-1. [Publish a Version](#publish-a-version)
+| Branch | Purpose |
+|--------|---------|
+| **develop** | Main development branch. All pull requests are opened into develop. |
+| **main** | Production. Only release PRs are merged into main. |
 
-## Publish a Version
+---
 
-Whether you're publishing a beta version or a new release, the process consists of several common steps with slight variations depending on the version type.
+## Beta and production releases
 
-> TODO: automate this process with a plugin.
+Beta (`2.4.0-beta.1`) and production (`2.4.0`) use the same process. The only differences are the versions in `package.json` and the npm tag used by CI (`beta` or `latest`).
 
-### Step-by-step guide
+### 1. Development in develop
 
-#### 1. Update Versions
+- All features and fixes are merged into **develop** via PRs.
+- Do not open PRs into main (except release PRs; see below).
 
-Update the version of the packages in the following order, one at a time:
+### 2. Preparing a release branch
 
- 1. `@tonconnect/isomorphic-eventsource`
- 2. `@tonconnect/isomorphic-fetch`
- 3. `@tonconnect/protocol`
- 4. `@tonconnect/sdk`
- 5. `@tonconnect/ui`
- 6. `@tonconnect/ui-react`
+When develop has accumulated changes ready for release:
 
-Only update the packages that have changes or are below another package in this list that has changes. If a package has no changes and is above a package with changes, it does not need to be updated.
+1. **Branch off from develop** into a release-tagged branch, for example:
+   - `release/2.4.0-beta.1` — for beta
+   - `release/2.4.0` — for stable
 
-If a package depends on another, update the dependency version and make a "chore" commit before moving on to the next package.
+2. **Create a commit that bumps versions** only for packages that actually changed.  
+   Order (when dependencies apply):  
+   `@tonconnect/isomorphic-eventsource` → `@tonconnect/isomorphic-fetch` → `@tonconnect/protocol` → `@tonconnect/sdk` → `@tonconnect/ui` → `@tonconnect/ui-react`.
 
-We use `changesets` to manage versions. It automatically updates all affected packages, so you only need to select packages that were updated, all dependencies will receive updates automatically.
+   You can use `pnpm changeset add` and `pnpm changeset version` (for beta, run `pnpm changeset pre enter beta` first; when done, `pnpm changeset pre exit`).
 
-For example, if changes were made in `@tonconnect/ui`, you should run `pnpm changeset add`, select `@tonconnect/ui`, choose type of the version update(MAJOR.MINOR.PATCH) and write changelog. After you are done with `add` command, you need to run `pnpm changeset version`, which will update `package.json` and `CHANGELOG.md` for relevant packages. `@tonconnect/ui-react` will be updated automatically.
-For beta version you need to run `pnpm changeset pre enter beta` before executing `add` and `version` commands. After you're done with releasing beta tag, you can exit pre mode by running `pnpm changeset pre exit`
+   > See [changesets](https://github.com/changesets/changesets/blob/main/docs/adding-a-changeset.md) for more.
 
-> Note: Follow this [link](https://github.com/changesets/changesets/blob/main/docs/adding-a-changeset.md) to learn more about `changesets`.
+3. **Open a PR** from `release/X.Y.Z` (or `release/X.Y.Z-beta.N`) **into main**.
 
-#### 2. Build Packages
+### 3. Merge into main and Release workflow
 
-After updating the version, build all packages:
+- After review, the PR is merged into **main**.
+- A push to **main** triggers the **Release** workflow (which also runs on **develop**; behaviour depends on the branch).
 
-```shell
-pnpm build
+### 4. What the Release workflow does
+
+1. **Compare with npm**  
+   For each package, the repo version is compared to the version on npm (`npm view <pkg> version`).  
+   - If **all versions match npm** — no release is performed; the job finishes.
+
+2. **Major version check**  
+   If a package’s **major version in the repo is higher than on npm**, the job fails.  
+   **Major releases are done only manually**, not through this CI.
+
+3. **If there are differences and the major has not been increased:**  
+   - Lint, build, tests  
+   - Create git tags  
+   - Publish to npm (OIDC; tag `beta` or `latest` based on the version)  
+   - Create a GitHub Release  
+   - **Merge main into develop**
+
+### 5. Result
+
+After a successful Release workflow, **develop** is automatically updated with all commits from **main**. Development then continues in develop.
+
+---
+
+## Dev release
+
+- **Trigger:** every **push to develop** (same **Release** workflow file; behaviour is dev-specific on this branch).
+- **Behavior:** for each package, the version is set to `(current minor+1).X.X-dev.DATE.HASH` and published to npm with the **`dev`** tag.
+- No PR into main is required. A dev release is produced on every commit to develop.
+
+Install with: `npm install <package>@dev`.
+
+---
+
+## Flow diagram
+
+```
+develop  ◄── PRs (features, fixes)
+   │
+   ├── release/X.Y.Z-beta.N  (branch from develop + version bumps)
+   │         │
+   │         └── PR ──► main
+   │                      │
+   │                      ├── Release workflow: checks, publish to npm, GitHub Release
+   │                      │
+   │                      └── merge main ──► develop
+   │
+   └── push ──► Release workflow, dev path (publish @dev on every commit)
 ```
 
-#### 3. Publish Version
+---
 
-Next, publish the version of the package. For `@tonconnect/ui`:
+## Limits
 
-- For a beta version:
-  ```shell
-  cd packages/ui && pnpm publish --access=public --tag=beta
-  ```
-- For a new release:
-  ```shell
-  cd packages/ui && pnpm publish --access=public
-  ```
-- You can publish all updated packages by running:
-  ```shell
-  pnpm publish -r --access=public
-  ```
-
-> Note: The `--tag=beta` is used to publish the package with the `beta` tag to prevent accidental installation of the beta version.
-
-#### 4. Push Changes
-
-After publishing the version of `@tonconnect/ui`, push the commit and tags:
-
-```shell
- git push origin HEAD
- git push origin --tags
-```
+- **Major versions** are not allowed in the Release workflow. The job fails if the major is increased. Major releases are done manually.
+- The **first publish** of a new package to npm is done manually (Trusted Publishers only apply to packages that already exist).
 
 # Additional Information
 
@@ -129,4 +155,3 @@ The documentation for this package is generated using [typedoc](https://typedoc.
 ## React Native Compatibility
 
 Please note that the package is currently not compatible with React Native. This issue is expected to be addressed in future updates.
-
