@@ -1,6 +1,7 @@
 import {
     Account,
     BrowserEventDispatcher,
+    checkRequiredWalletFeatures,
     ConnectAdditionalRequest,
     OptionalTraceable,
     RequiredFeatures,
@@ -43,7 +44,6 @@ import { Action, setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { ActionConfiguration, StrictActionConfiguration } from 'src/models/action-configuration';
 import { ConnectedWallet, WalletInfoWithOpenMethod } from 'src/models/connected-wallet';
 import { applyWalletsListConfiguration, eqWalletName } from 'src/app/utils/wallets';
-import { uniq } from 'src/app/utils/array';
 import { Loadable } from 'src/models/loadable';
 import { WalletsModalManager } from 'src/managers/wallets-modal-manager';
 import { TransactionModalManager } from 'src/managers/transaction-modal-manager';
@@ -66,6 +66,9 @@ import {
     WALLET_CONNECT_WALLET_NAME
 } from 'src/app/env/WALLET_CONNECT';
 import { IMG } from 'src/app/env/IMG';
+import { uniq } from 'src/app/utils/array';
+import { AT_WALLET_APP_NAME } from 'src/app/env/AT_WALLET_APP_NAME';
+import { logError } from 'src/app/utils/log';
 
 export class TonConnectUI {
     public static getWallets(): Promise<WalletInfo[]> {
@@ -285,7 +288,7 @@ export class TonConnectUI {
 
         this.walletsList = this.getWallets();
 
-        this.walletsList.then(list => preloadImages(uniq(list.map(item => item.imageUrl))));
+        this.preloadImages();
 
         const rootId = this.normalizeWidgetRoot(options?.widgetRootId);
 
@@ -1180,6 +1183,39 @@ export class TonConnectUI {
         if (!document.getElementById(buttonRootId)) {
             throw new TonConnectUIError(`${buttonRootId} element not found in the document.`);
         }
+    }
+
+    private preloadImages() {
+        this.walletsList
+            .then(wallets => {
+                const preferredName = this.preferredWalletStorage.getPreferredWalletAppName();
+                const preferredWallet = preferredName
+                    ? wallets.find(w => w.appName === preferredName)
+                    : undefined;
+
+                const atWallet = wallets.find(w => w.appName === AT_WALLET_APP_NAME);
+
+                const candidateWallets = [preferredWallet, atWallet, ...wallets.slice(0, 3)].filter(
+                    wallet => wallet !== undefined
+                );
+
+                const requiredFeatures = this.walletsRequiredFeatures;
+
+                const walletsToPreload = candidateWallets.filter(
+                    wallet =>
+                        !requiredFeatures ||
+                        checkRequiredWalletFeatures(wallet.features ?? [], requiredFeatures)
+                );
+
+                const imagesToPreload = uniq([
+                    IMG.TON,
+                    IMG.TG,
+                    ...walletsToPreload.map(w => w.imageUrl)
+                ]);
+
+                preloadImages(imagesToPreload);
+            })
+            .catch(logError);
     }
 
     // eslint-disable-next-line complexity
