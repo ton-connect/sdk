@@ -53,7 +53,13 @@ function IframeIframePage() {
 function App() {
     return (
         <TonConnectUIProvider
-            manifestUrl="https://tonconnect-sdk-demo-dapp.vercel.app/tonconnect-manifest.json"
+            manifest={{
+                url: 'https://tonconnect-sdk-demo-dapp.vercel.app/',
+                name: 'Demo Dapp with React UI',
+                iconUrl: 'https://tonconnect-sdk-demo-dapp.vercel.app/apple-touch-icon.png',
+                termsOfUseUrl: 'https://tonconnect-sdk-demo-dapp.vercel.app/terms-of-use.txt',
+                privacyPolicyUrl: 'https://tonconnect-sdk-demo-dapp.vercel.app/privacy-policy.txt'
+            }}
             uiPreferences={{ theme: THEME.DARK }}
         >
             <div>

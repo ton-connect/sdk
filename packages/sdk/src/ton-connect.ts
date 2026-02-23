@@ -82,6 +82,7 @@ import { DefaultEnvironment } from 'src/environment/default-environment';
 import { UUIDv7 } from 'src/utils/uuid';
 import { TraceableWalletEvent } from 'src/models/wallet/traceable-events';
 import { WalletConnectProvider } from 'src/provider/wallet-connect/wallet-connect-provider';
+import { sha256 } from 'sha.js';
 
 export class TonConnect implements ITonConnect {
     private desiredChainId: string | undefined;
@@ -162,8 +163,36 @@ export class TonConnect implements ITonConnect {
         this.statusChangeSubscriptions.forEach(callback => callback(this._wallet));
     }
 
+    private buildManifestUrl(manifest?: {
+        url: string; // required
+        name: string; // required
+        iconUrl: string; // required
+        termsOfUseUrl?: string; // optional
+        privacyPolicyUrl?: string; // optional
+    }) {
+        if (!manifest) {
+            return;
+        }
+
+        const body = JSON.stringify(manifest);
+
+        fetch(`https://ton-connect-bridge-v3-staging.tapps.ninja/objects?ttl=300`, {
+            method: 'POST',
+            body
+        })
+            .catch(console.error)
+            .then(() => console.log('SUCESS!!'));
+
+        const hash = new sha256().update(body).digest('hex');
+        console.log(`https://ton-connect-bridge-v3-staging.tapps.ninja/objects/${hash}`);
+        return `https://ton-connect-bridge-v3-staging.tapps.ninja/objects/${hash}`;
+    }
+
     constructor(options?: TonConnectOptions) {
-        const manifestUrl = options?.manifestUrl || getWebPageManifest();
+        const manifestUrl =
+            options?.manifestUrl ||
+            this.buildManifestUrl(options?.manifest) ||
+            getWebPageManifest();
         this.dappSettings = {
             manifestUrl,
             storage: options?.storage || new DefaultStorage()

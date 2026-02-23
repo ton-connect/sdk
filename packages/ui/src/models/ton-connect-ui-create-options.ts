@@ -4,7 +4,8 @@ import { UserActionEvent } from 'src/tracker/types';
 
 export type TonConnectUiCreateOptions =
     | TonConnectUiOptionsWithConnector
-    | TonConnectUiOptionsWithManifest;
+    | TonConnectUiOptionsWithManifest
+    | TonConnectUiOptionsWithManifestObject;
 
 export interface TonConnectUiOptionsWithManifest extends TonConnectUiCreateOptionsBase {
     /**
@@ -12,6 +13,16 @@ export interface TonConnectUiOptionsWithManifest extends TonConnectUiCreateOptio
      * If not passed, manifest from `${window.location.origin}/tonconnect-manifest.json` will be taken.
      */
     manifestUrl?: string;
+}
+
+export interface TonConnectUiOptionsWithManifestObject extends TonConnectUiCreateOptionsBase {
+    manifest?: {
+        url: string; // required
+        name: string; // required
+        iconUrl: string; // required
+        termsOfUseUrl?: string; // optional
+        privacyPolicyUrl?: string; // optional
+    };
 }
 
 export interface TonConnectUiOptionsWithConnector extends TonConnectUiCreateOptionsBase {

@@ -16,7 +16,11 @@ export type TonConnectUIProviderProps = {
 } & (
     | Partial<
           TonConnectUIProviderPropsBase &
-              (TonConnectUIProviderPropsWithManifest | TonConnectUIProviderPropsWithConnector)
+              (
+                  | TonConnectUIProviderPropsWithManifest
+                  | TonConnectUIProviderPropsWithConnector
+                  | TonConnectUIProviderPropsWithManifestObject
+              )
       >
     | TonConnectUIProviderPropsWithInstance
 );
@@ -27,6 +31,16 @@ export interface TonConnectUIProviderPropsWithManifest {
      * If not passed, manifest from `${window.location.origin}/tonconnect-manifest.json` will be taken.
      */
     manifestUrl: string;
+}
+
+export interface TonConnectUIProviderPropsWithManifestObject {
+    manifest: {
+        url: string; // required
+        name: string; // required
+        iconUrl: string; // required
+        termsOfUseUrl?: string; // optional
+        privacyPolicyUrl?: string; // optional
+    };
 }
 
 export interface TonConnectUIProviderPropsWithConnector {

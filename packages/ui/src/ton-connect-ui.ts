@@ -239,7 +239,13 @@ export class TonConnectUI {
         } else if (options && 'manifestUrl' in options && options.manifestUrl) {
             this.connector = new TonConnect({
                 manifestUrl: options.manifestUrl,
-                eventDispatcher,
+                walletsRequiredFeatures: options.walletsRequiredFeatures,
+                environment: new TonConnectEnvironment(),
+                analytics: options.analytics
+            });
+        } else if (options && 'manifest' in options && options.manifest) {
+            this.connector = new TonConnect({
+                manifest: options.manifest,
                 walletsRequiredFeatures: options.walletsRequiredFeatures,
                 environment: new TonConnectEnvironment(),
                 analytics: options.analytics

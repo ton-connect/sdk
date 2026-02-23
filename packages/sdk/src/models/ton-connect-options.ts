@@ -22,6 +22,14 @@ export interface TonConnectOptions {
      */
     manifestUrl?: string;
 
+    manifest?: {
+        url: string; // required
+        name: string; // required
+        iconUrl: string; // required
+        termsOfUseUrl?: string; // optional
+        privacyPolicyUrl?: string; // optional
+    };
+
     /**
      * Storage to save protocol data. For browser default is `localStorage`. If you use SDK with nodeJS, you have to specify this field.
      */
