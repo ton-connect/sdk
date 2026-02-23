@@ -205,17 +205,15 @@ jobs:
           echo "Publishing with npm tag: $NPM_TAG"
           while IFS= read -r pkg_version; do
             [ -z "$pkg_version" ] && continue
-            VERSION="${pkg_version##*@}"
             PKG_NAME="${pkg_version%@*}"
-            for pkg_dir in packages/*/; do
-              [ -f "${pkg_dir}package.json" ] || continue
-              DIR_PKG_NAME=$(node -p "require('./${pkg_dir}package.json').name")
-              if [ "$DIR_PKG_NAME" = "$PKG_NAME" ]; then
-                echo "Publishing $PKG_NAME@$VERSION ($NPM_TAG)..."
-                (cd "$pkg_dir" && npm publish --access public --tag "$NPM_TAG" --provenance)
-                break
-              fi
-            done
+            echo "Publishing $PKG_NAME ($NPM_TAG)..."
+            pnpm publish \
+              --filter="$PKG_NAME" \
+              --access=public \
+              --publish-branch=main \
+              --tag="$NPM_TAG" \
+              --provenance \
+              --verbose
           done <<< "${{ steps.version_check.outputs.changed_packages }}"
 
       # ── develop: publish to npm (dev) ─────────────────────────────────────
@@ -223,13 +221,20 @@ jobs:
         if: github.ref == 'refs/heads/develop'
         run: |
           echo "Publishing with npm tag: dev"
-          for pkg_dir in packages/*/; do
-            [ -f "${pkg_dir}package.json" ] || continue
-            PRIVATE=$(node -p "require('./${pkg_dir}package.json').private || false")
+          for pkg_json in packages/*/package.json; do
+            [ -f "$pkg_json" ] || continue
+            PRIVATE=$(node -p "require('./$pkg_json').private || false")
             [ "$PRIVATE" = "true" ] && continue
-            PKG_NAME=$(node -p "require('./${pkg_dir}package.json').name")
+            PKG_NAME=$(node -p "require('./$pkg_json').name")
             echo "Publishing $PKG_NAME..."
-            (cd "$pkg_dir" && npm publish --access public --tag dev --provenance)
+            pnpm publish \
+              --filter="$PKG_NAME" \
+              --access=public \
+              --publish-branch=develop \
+              --tag=dev \
+              --no-git-checks \
+              --provenance \
+              --verbose
           done
 
       # ── main: GitHub Release ───────────────────────────────────────────────
