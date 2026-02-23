@@ -1,5 +1,11 @@
 # Changelog @tonconnect/ui
 
+## 2.4.2
+
+### Patch Changes
+
+- b9d0441: Remove unsupported in old browsers iterator helpers
+
 ## 2.4.1
 
 ### Patch Changes
