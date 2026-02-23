@@ -2,13 +2,17 @@ name: Test build
 
 on:
   push:
+    branches-ignore:
+      - main
+      - develop
+  pull_request:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Read .nvmrc
         run: echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_ENV
@@ -21,11 +25,17 @@ jobs:
           node-version: '${{ env.NVMRC }}'
           cache: 'pnpm'
 
-      - name: Set up dependencies
-        run: pnpm i --frozen-lockfile
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
 
       - name: Build
         uses: ./.github/actions/build
+
+      - name: Test
+        run: pnpm test
 
       - name: Build docs
         run: pnpm generateDocs

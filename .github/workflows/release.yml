@@ -26,6 +26,11 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
       - name: Read .nvmrc
         run: echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_ENV
 
@@ -50,9 +55,8 @@ jobs:
 
       - name: Run tests
         run: pnpm test
-        continue-on-error: false
 
-      # --- main: check versions vs npm, reject major bumps ---
+      # ── main: compare each package with npm, block major bumps ────────────
       - name: Check for version changes (main)
         id: version_check
         if: github.ref == 'refs/heads/main'
@@ -60,73 +64,68 @@ jobs:
           node << 'EOF'
           const fs = require('fs');
           const { execSync } = require('child_process');
-          
+
           function getMajor(v) {
             const m = /^(\d+)/.exec(String(v));
             return m ? parseInt(m[1], 10) : 0;
           }
-          
+
           const changedPackages = [];
           let hasBeta = false;
           let releaseTag = '';
-          
-          const packages = [];
-          try {
-            const files = fs.readdirSync('packages');
-            for (const file of files) {
-              const pkgPath = `packages/${file}/package.json`;
-              if (fs.existsSync(pkgPath)) packages.push(pkgPath);
-            }
-          } catch (e) {
-            console.error('Error reading packages directory:', e);
-            process.exit(1);
+
+          const pkgPaths = [];
+          for (const dir of fs.readdirSync('packages')) {
+            const p = `packages/${dir}/package.json`;
+            if (fs.existsSync(p)) pkgPaths.push(p);
           }
-          
-          for (const pkgJson of packages) {
+
+          for (const pkgJson of pkgPaths) {
+            const pkg = JSON.parse(fs.readFileSync(pkgJson, 'utf-8'));
+            const { name, version: current, private: isPrivate } = pkg;
+
+            if (isPrivate) {
+              console.log(`  ${name}: private, skip`);
+              continue;
+            }
+
+            let npmVersion = '';
             try {
-              const pkg = JSON.parse(fs.readFileSync(pkgJson, 'utf-8'));
-              const name = pkg.name;
-              const current = pkg.version;
-              
-              let npmVersion = '';
-              try {
-                npmVersion = execSync(`npm view ${name} version`, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'ignore'] }).trim();
-              } catch (e) {
-                npmVersion = '';
-              }
-              
-              if (current === npmVersion) {
-                console.log(`  ${name}: ${current} (same as npm, skip)`);
-                continue;
-              }
-              
-              if (npmVersion) {
-                const curMajor = getMajor(current);
-                const npmMajor = getMajor(npmVersion);
-                if (curMajor > npmMajor) {
-                  console.error(`::error::Major version bump is not allowed in CI. Release majors manually. Package: ${name}, npm: ${npmVersion}, current: ${current}`);
-                  process.exit(1);
-                }
-              }
-              
-              console.log(`  ${name}: ${npmVersion || '(new)'} -> ${current}`);
-              changedPackages.push(`${name}@${current}`);
-              if (current.toLowerCase().includes('beta')) hasBeta = true;
-              if (!releaseTag) releaseTag = `v${current}`;
-            } catch (e) {
-              console.error(`Error processing ${pkgJson}:`, e);
-              process.exit(1);
+              npmVersion = execSync(`npm view ${name} version`, {
+                encoding: 'utf-8',
+                stdio: ['pipe', 'pipe', 'ignore']
+              }).trim();
+            } catch (_) {}
+
+            if (current === npmVersion) {
+              console.log(`  ${name}: ${current} (same as npm, skip)`);
+              continue;
             }
+
+            if (npmVersion) {
+              if (getMajor(current) > getMajor(npmVersion)) {
+                console.error(
+                  `::error::Major version bump is not allowed in CI. ` +
+                  `Release majors manually. Package: ${name}, npm: ${npmVersion}, current: ${current}`
+                );
+                process.exit(1);
+              }
+            }
+
+            console.log(`  ${name}: ${npmVersion || '(new)'} -> ${current}`);
+            changedPackages.push(`${name}@${current}`);
+            if (current.toLowerCase().includes('beta')) hasBeta = true;
+            if (!releaseTag) releaseTag = `v${current}`;
           }
-          
+
+          const out = process.env.GITHUB_OUTPUT;
           if (changedPackages.length === 0) {
             console.log('All package versions match npm. Skipping release.');
-            fs.appendFileSync(process.env.GITHUB_OUTPUT, `should_release=false\n`);
+            fs.appendFileSync(out, `should_release=false\n`);
             process.exit(0);
           }
-          
+
           console.log('Changed packages:', changedPackages.join(', '));
-          const out = process.env.GITHUB_OUTPUT;
           fs.appendFileSync(out, `should_release=true\n`);
           fs.appendFileSync(out, `has_beta=${hasBeta}\n`);
           fs.appendFileSync(out, `release_tag=${releaseTag}\n`);
@@ -134,7 +133,7 @@ jobs:
           fs.appendFileSync(out, `tags<<EOF\n${changedPackages.join('\n')}\nEOF\n`);
           EOF
 
-      # --- develop: compute dev versions, update package.json, create tags ---
+      # ── develop: compute dev versions (next minor + dev.DATE.HASH) ─────────
       - name: Extract versions and create tags (develop)
         id: version
         if: github.ref == 'refs/heads/develop'
@@ -144,58 +143,52 @@ jobs:
           echo "Creating dev versions for packages..."
           TAGS=""
           for pkg_json in packages/*/package.json; do
-            if [ -f "$pkg_json" ]; then
-              PKG_NAME=$(node -p "require('./$pkg_json').name")
-              BASE_VERSION=$(node -p "require('./$pkg_json').version")
-              CLEAN_VERSION=$(echo $BASE_VERSION | sed 's/-.*$//')
-              DEV_VERSION=$(node -e "
-                const version = '$CLEAN_VERSION';
-                const parts = version.split('.');
-                if (parts.length >= 2) {
-                  const major = parseInt(parts[0]) || 0;
-                  const minor = parseInt(parts[1]) || 0;
-                  const patch = parts.length > 2 ? parseInt(parts[2]) || 0 : 0;
-                  const newMinor = minor + 1;
-                  console.log(major + '.' + newMinor + '.' + patch + '-dev.' + '$DATE_SUFFIX' + '.' + '$SHORT_HASH');
-                } else {
-                  console.log(version + '-dev.' + '$DATE_SUFFIX' + '.' + '$SHORT_HASH');
-                }
-              ")
-              echo "Package: $PKG_NAME"
-              echo "Base version: $BASE_VERSION"
-              echo "Dev version: $DEV_VERSION"
-              node -e "
-                const fs = require('fs');
-                const pkg = require('./$pkg_json');
-                pkg.version = '$DEV_VERSION';
-                fs.writeFileSync('$pkg_json', JSON.stringify(pkg, null, 2) + '\n');
-              "
-              TAG="${PKG_NAME}@${DEV_VERSION}"
-              TAGS="${TAGS}${TAG}\n"
-              git tag "$TAG"
+            [ -f "$pkg_json" ] || continue
+
+            PRIVATE=$(node -p "require('./$pkg_json').private || false")
+            if [ "$PRIVATE" = "true" ]; then
+              echo "Skipping private package: $pkg_json"
+              continue
             fi
+
+            PKG_NAME=$(node -p "require('./$pkg_json').name")
+            BASE_VERSION=$(node -p "require('./$pkg_json').version")
+            # Strip any pre-release suffix to get clean semver base
+            CLEAN_VERSION=$(echo "$BASE_VERSION" | sed 's/-.*$//')
+            DEV_VERSION=$(node -e "
+              const [major, minor = 0, patch = 0] = '$CLEAN_VERSION'.split('.').map(Number);
+              console.log(major + '.' + (minor + 1) + '.' + patch + '-dev.' + '$DATE_SUFFIX' + '.' + '$SHORT_HASH');
+            ")
+            echo "  $PKG_NAME: $BASE_VERSION -> $DEV_VERSION"
+
+            # Write dev version into package.json for publish
+            node -e "
+              const fs = require('fs');
+              const pkg = JSON.parse(fs.readFileSync('$pkg_json', 'utf-8'));
+              pkg.version = '$DEV_VERSION';
+              fs.writeFileSync('$pkg_json', JSON.stringify(pkg, null, 2) + '\n');
+            "
+
+            TAG="${PKG_NAME}@${DEV_VERSION}"
+            TAGS="${TAGS}${TAG}\n"
+            git tag "$TAG"
           done
           echo "tags<<EOF" >> $GITHUB_OUTPUT
-          echo -e "$TAGS" >> $GITHUB_OUTPUT
+          printf "%b" "$TAGS" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
           echo "short_hash=$SHORT_HASH" >> $GITHUB_OUTPUT
 
-      # --- main: create git tags ---
+      # ── main: create git tags ──────────────────────────────────────────────
       - name: Create git tags (main)
         if: github.ref == 'refs/heads/main' && steps.version_check.outputs.should_release == 'true'
         run: |
-          TAGS="${{ steps.version_check.outputs.tags }}"
           while IFS= read -r tag; do
-            if [ -n "$tag" ]; then
-              echo "Creating tag: $tag"
-              git tag "$tag"
-            fi
-          done <<< "$TAGS"
-          if [ -n "${{ steps.version_check.outputs.release_tag }}" ]; then
-            git tag "${{ steps.version_check.outputs.release_tag }}"
-          fi
+            [ -n "$tag" ] && git tag "$tag"
+          done <<< "${{ steps.version_check.outputs.tags }}"
+          RELEASE_TAG="${{ steps.version_check.outputs.release_tag }}"
+          [ -n "$RELEASE_TAG" ] && git tag "$RELEASE_TAG"
 
-      # --- main: push tags | develop: push tags ---
+      # ── push tags ─────────────────────────────────────────────────────────
       - name: Push tags (main)
         if: github.ref == 'refs/heads/main' && steps.version_check.outputs.should_release == 'true'
         run: git push origin --tags
@@ -204,53 +197,42 @@ jobs:
         if: github.ref == 'refs/heads/develop'
         run: git push origin --tags
 
-      # --- main: publish to npm (beta/latest) ---
+      # ── main: publish to npm (beta / latest) ──────────────────────────────
       - name: Publish to npm (main)
         if: github.ref == 'refs/heads/main' && steps.version_check.outputs.should_release == 'true'
         run: |
-          npm install -g npm@11.5.1
-          if [ "${{ steps.version_check.outputs.has_beta }}" == "true" ]; then
-            NPM_TAG="beta"
-          else
-            NPM_TAG="latest"
-          fi
-          echo "Publishing with tag: $NPM_TAG"
-          CHANGED_PACKAGES="${{ steps.version_check.outputs.changed_packages }}"
+          NPM_TAG=$( [ "${{ steps.version_check.outputs.has_beta }}" = "true" ] && echo "beta" || echo "latest" )
+          echo "Publishing with npm tag: $NPM_TAG"
           while IFS= read -r pkg_version; do
-            if [ -n "$pkg_version" ]; then
-              VERSION="${pkg_version##*@}"
-              PKG_NAME="${pkg_version%@*}"
-              for pkg_dir in packages/*; do
-                if [ -d "$pkg_dir" ] && [ -f "$pkg_dir/package.json" ]; then
-                  DIR_PKG_NAME=$(node -p "require('./$pkg_dir/package.json').name")
-                  if [ "$DIR_PKG_NAME" = "$PKG_NAME" ]; then
-                    echo "Publishing $PKG_NAME@$VERSION with tag $NPM_TAG..."
-                    cd "$pkg_dir"
-                    npm publish --access public --tag "$NPM_TAG" --provenance
-                    cd ../..
-                    break
-                  fi
-                fi
-              done
-            fi
-          done <<< "$CHANGED_PACKAGES"
+            [ -z "$pkg_version" ] && continue
+            VERSION="${pkg_version##*@}"
+            PKG_NAME="${pkg_version%@*}"
+            for pkg_dir in packages/*/; do
+              [ -f "${pkg_dir}package.json" ] || continue
+              DIR_PKG_NAME=$(node -p "require('./${pkg_dir}package.json').name")
+              if [ "$DIR_PKG_NAME" = "$PKG_NAME" ]; then
+                echo "Publishing $PKG_NAME@$VERSION ($NPM_TAG)..."
+                (cd "$pkg_dir" && npm publish --access public --tag "$NPM_TAG" --provenance)
+                break
+              fi
+            done
+          done <<< "${{ steps.version_check.outputs.changed_packages }}"
 
-      # --- develop: publish to npm (dev) ---
+      # ── develop: publish to npm (dev) ─────────────────────────────────────
       - name: Publish to npm (develop)
         if: github.ref == 'refs/heads/develop'
         run: |
-          npm install -g npm@11.5.1
-          echo "Publishing with tag: dev"
-          for pkg_dir in packages/*; do
-            if [ -d "$pkg_dir" ] && [ -f "$pkg_dir/package.json" ]; then
-              echo "Publishing $pkg_dir..."
-              cd "$pkg_dir"
-              npm publish --access public --tag dev --provenance
-              cd ../..
-            fi
+          echo "Publishing with npm tag: dev"
+          for pkg_dir in packages/*/; do
+            [ -f "${pkg_dir}package.json" ] || continue
+            PRIVATE=$(node -p "require('./${pkg_dir}package.json').private || false")
+            [ "$PRIVATE" = "true" ] && continue
+            PKG_NAME=$(node -p "require('./${pkg_dir}package.json').name")
+            echo "Publishing $PKG_NAME..."
+            (cd "$pkg_dir" && npm publish --access public --tag dev --provenance)
           done
 
-      # --- main: GitHub Release ---
+      # ── main: GitHub Release ───────────────────────────────────────────────
       - name: Create GitHub Release (main)
         if: github.ref == 'refs/heads/main' && steps.version_check.outputs.should_release == 'true'
         uses: actions/github-script@v7
@@ -260,66 +242,81 @@ jobs:
             const releaseTag = `${{ steps.version_check.outputs.release_tag }}`;
             const hasBeta = `${{ steps.version_check.outputs.has_beta }}` === 'true';
             const npmTag = hasBeta ? 'beta' : 'latest';
-            const body = `## Released packages\n\n` +
-              changedPackages.split('\n').map(p => `- \`${p}\``).join('\n') +
+            const body =
+              `## Released packages\n\n` +
+              changedPackages.split('\n').filter(Boolean).map(p => `- \`${p}\``).join('\n') +
               `\n\nInstall with: \`npm install <package-name>@${npmTag}\``;
             await github.rest.repos.createRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
               tag_name: releaseTag,
               name: `Release ${releaseTag}`,
-              body: body,
+              body,
               prerelease: hasBeta
             });
 
-      # --- main: merge main into develop ---
-      - name: Merge main into develop (main)
+      # ── main: merge main back into develop ────────────────────────────────
+      - name: Merge main into develop
         if: github.ref == 'refs/heads/main' && steps.version_check.outputs.should_release == 'true'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git fetch origin
-          if git show-ref --verify --quiet refs/heads/develop; then
-            git checkout develop
-            git pull origin develop || true
-          else
-            git checkout -b develop
-          fi
-          git merge origin/main --no-edit
-          git push origin develop
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { execSync } = require('child_process');
 
-      # --- develop: release notes (log) ---
-      - name: Create Release Notes (develop)
-        if: github.ref == 'refs/heads/develop'
-        run: |
-          echo "# Dev Release $(date +%Y-%m-%d)" > release_notes.md
-          echo "" >> release_notes.md
-          echo "## Commit: ${{ steps.version.outputs.short_hash }}" >> release_notes.md
-          echo "" >> release_notes.md
-          echo "## Published packages:" >> release_notes.md
-          echo "" >> release_notes.md
-          echo "${{ steps.version.outputs.tags }}" >> release_notes.md
-          echo "" >> release_notes.md
-          echo "Install with:" >> release_notes.md
-          echo '```bash' >> release_notes.md
-          echo "npm install <package-name>@dev" >> release_notes.md
-          echo '```' >> release_notes.md
-          cat release_notes.md
+            execSync('git fetch origin', { stdio: 'inherit' });
 
-      # --- develop: comment on commit ---
-      - name: Comment on commits (develop)
+            // Ensure local develop tracks origin/develop
+            try {
+              execSync('git checkout -B develop origin/develop', { stdio: 'inherit' });
+            } catch (_) {
+              execSync('git checkout -b develop', { stdio: 'inherit' });
+            }
+
+            try {
+              execSync('git merge origin/main --no-edit', { stdio: 'inherit' });
+              execSync('git push origin develop', { stdio: 'inherit' });
+              console.log('✅ Merged main into develop successfully.');
+            } catch (mergeErr) {
+              console.log('⚠️ Merge conflict detected — aborting merge and opening a PR instead.');
+              try { execSync('git merge --abort', { stdio: 'inherit' }); } catch (_) {}
+
+              // Reset to origin/develop to have a clean base for the PR
+              execSync('git checkout -B develop origin/develop', { stdio: 'inherit' });
+
+              const branchName = `ci/merge-main-into-develop-${context.sha.slice(0, 7)}`;
+              execSync(`git checkout -b ${branchName}`, { stdio: 'inherit' });
+              execSync('git merge origin/main --no-edit --strategy-option theirs', { stdio: 'inherit' });
+              execSync(`git push origin ${branchName}`, { stdio: 'inherit' });
+
+              const pr = await github.rest.pulls.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `chore: merge main into develop after release`,
+                body: `Automatic back-merge of \`main\` into \`develop\` after release.\n\nAuto-merge had conflicts — please review and merge.`,
+                head: branchName,
+                base: 'develop'
+              });
+              console.log(`PR created: ${pr.data.html_url}`);
+            }
+
+      # ── develop: annotate commit with published packages ──────────────────
+      - name: Comment on commit (develop)
         if: github.ref == 'refs/heads/develop'
         uses: actions/github-script@v7
         with:
           script: |
             const tags = `${{ steps.version.outputs.tags }}`.trim();
             const shortHash = `${{ steps.version.outputs.short_hash }}`;
-            const body = `🚀 **Dev Release Published**\n\n` +
-              `Published packages:\n\n${tags.split('\n').map(t => `- \`${t}\``).join('\n')}\n\n` +
-              `Install with: \`npm install <package-name>@dev\``;
-            github.rest.repos.createCommitComment({
+            if (!tags) return;
+            const body =
+              `🚀 **Dev Release Published** (commit \`${shortHash}\`)\n\n` +
+              `Published packages:\n` +
+              tags.split('\n').filter(Boolean).map(t => `- \`${t}\``).join('\n') +
+              `\n\nInstall with: \`npm install <package-name>@dev\``;
+            await github.rest.repos.createCommitComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               commit_sha: context.sha,
-              body: body
+              body
             });
