@@ -5,6 +5,7 @@ export { IStorage } from './storage/models/storage.interface';
 export { TonConnect as default } from './ton-connect';
 export { WalletsListManager } from './wallets-list-manager';
 export { ITonConnect } from './ton-connect.interface';
+export type { AnalyticsSettings } from './models/ton-connect-options';
 export type {
     EventDispatcher,
     RemoveTonConnectPrefix,
@@ -106,6 +107,7 @@ export {
     isConnectUrl
 } from './utils/url';
 export { enableQaMode, isQaModeEnabled } from './utils/qa-mode';
+export type { AnalyticsMode } from './analytics/analytics-manager';
 
 export {
     initializeWalletConnect,

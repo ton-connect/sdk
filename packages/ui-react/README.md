@@ -118,6 +118,27 @@ You can also specify preferred wallet features to prioritize wallets that will b
 
 This will gently recommend wallets with richer functionality by placing them higher in the list, but all wallets remain available for selection.
 
+### Analytics
+
+You can configure analytics collection via the `analytics` prop:
+
+```tsx
+<TonConnectUIProvider
+    manifestUrl="https://<YOUR_APP_URL>/tonconnect-manifest.json"
+    analytics={{ mode: 'off' }}
+>
+    { /* Your app */ }
+</TonConnectUIProvider>
+```
+
+**Analytics modes:**
+
+| Mode                    | Description                                                |
+|-------------------------|------------------------------------------------------------|
+| **off**                 | Analytics turned off. No events are collected or sent.     |
+| **telemetry** (default) | Analytics used for technical research and issue debugging. |
+| **full**                | Full analytics events.                                     |
+
 ## Add TonConnect Button
 TonConnect Button is universal UI component for initializing connection. After wallet is connected it transforms to a wallet menu.
 It is recommended to place it in the top right corner of your app.

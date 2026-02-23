@@ -19,7 +19,6 @@ import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet
 import { OptionalTraceable, Traceable, WithoutId } from 'src/utils/types';
 import { UUIDv7 } from 'src/utils/uuid';
 import { InternalProvider } from 'src/provider/provider';
-import { IStorage } from 'src/storage/models/storage.interface';
 import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { TonConnectError } from 'src/errors';
 import {
@@ -50,8 +49,6 @@ export class WalletConnectProvider implements InternalProvider {
 
     private abortController?: AbortController;
 
-    private readonly connectionStorage: BridgeConnectionStorage;
-
     private readonly config: {
         projectId: string;
         metadata: WalletConnectMetadata;
@@ -70,9 +67,7 @@ export class WalletConnectProvider implements InternalProvider {
         }[];
     };
 
-    constructor(storage: IStorage) {
-        this.connectionStorage = new BridgeConnectionStorage(storage);
-
+    constructor(private readonly connectionStorage: BridgeConnectionStorage) {
         const { projectId, metadata } = getWalletConnectOptions();
 
         this.config = {
@@ -106,7 +101,9 @@ export class WalletConnectProvider implements InternalProvider {
         };
     }
 
-    public static async fromStorage(storage: IStorage): Promise<WalletConnectProvider> {
+    public static async fromStorage(
+        storage: BridgeConnectionStorage
+    ): Promise<WalletConnectProvider> {
         return new WalletConnectProvider(storage);
     }
 

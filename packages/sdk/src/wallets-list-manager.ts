@@ -7,12 +7,14 @@ import {
     isWalletInfoCurrentlyEmbedded,
     WalletInfoCurrentlyEmbedded,
     WalletInfoCurrentlyInjected,
+    isWalletInfoRemote,
     WalletInfoBase
 } from 'src/models/wallet/wallet-info';
 import { InjectedProvider } from 'src/provider/injected/injected-provider';
 import { logError } from 'src/utils/log';
 import { FALLBACK_WALLETS_LIST } from 'src/resources/fallback-wallets-list';
 import { isQaModeEnabled } from './utils/qa-mode';
+import { TonConnectError } from 'src/errors';
 
 export class WalletsListManager {
     private walletsListDTOCache: Promise<WalletInfoDTO[]> | null = null;
@@ -23,7 +25,13 @@ export class WalletsListManager {
 
     private readonly walletsListSource: string;
 
-    constructor(options?: { walletsListSource?: string; cacheTTLMs?: number }) {
+    private readonly onDownloadDurationMeasured?: (duration: number | undefined) => void;
+
+    constructor(options?: {
+        walletsListSource?: string;
+        cacheTTLMs?: number;
+        onDownloadDurationMeasured?: (duration: number | undefined) => void;
+    }) {
         if (isQaModeEnabled()) {
             this.walletsListSource =
                 'https://raw.githubusercontent.com/ton-connect/wallets-list-staging/refs/heads/main/wallets-v2.json';
@@ -33,6 +41,7 @@ export class WalletsListManager {
         }
 
         this.cacheTTLMs = options?.cacheTTLMs;
+        this.onDownloadDurationMeasured = options?.onDownloadDurationMeasured;
     }
 
     public async getWallets(): Promise<WalletInfo[]> {
@@ -77,8 +86,25 @@ export class WalletsListManager {
         return this.walletsListDTOCache;
     }
 
+    public async getRemoteWallet(appName: string): Promise<WalletInfoRemote> {
+        const walletsList = await this.getWallets();
+
+        const wallet = walletsList.find(wallet => wallet.appName === appName);
+
+        if (!wallet) {
+            throw new TonConnectError(`Wallet info not found for appName: "${appName}"`);
+        }
+
+        if (!isWalletInfoRemote(wallet)) {
+            throw new TonConnectError(`Wallet "${appName}" is not remote`);
+        }
+
+        return wallet;
+    }
+
     private async fetchWalletsListFromSource(): Promise<WalletInfoDTO[]> {
         let walletsList: WalletInfoDTO[] = [];
+        const startTime = performance.now();
 
         try {
             const walletsResponse = await fetch(this.walletsListSource);
@@ -104,9 +130,15 @@ export class WalletsListManager {
 
                 walletsList = walletsList.filter(wallet => this.isCorrectWalletConfigDTO(wallet));
             }
+
+            const endTime = performance.now();
+            const duration = Math.round(endTime - startTime);
+            this.onDownloadDurationMeasured?.(duration);
         } catch (e) {
             logError(e);
             walletsList = FALLBACK_WALLETS_LIST;
+
+            this.onDownloadDurationMeasured?.(undefined);
         }
 
         return walletsList;

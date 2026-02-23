@@ -2,7 +2,7 @@ import { Locales } from 'src/models/locales';
 import { UIPreferences } from 'src/models/ui-preferences';
 import { WalletsListConfiguration } from 'src/models/wallets-list-configuration';
 import { ActionConfiguration } from 'src/models/action-configuration';
-import { RequiredFeatures } from '@tonconnect/sdk';
+import { AnalyticsSettings, RequiredFeatures } from '@tonconnect/sdk';
 
 export interface TonConnectUiOptions {
     /**
@@ -47,4 +47,9 @@ export interface TonConnectUiOptions {
      * @default true
      */
     enableAndroidBackHandler?: boolean;
+
+    /**
+     * Analytics configuration forwarded to the underlying TonConnect SDK instance.
+     */
+    analytics?: AnalyticsSettings;
 }

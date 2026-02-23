@@ -20,14 +20,10 @@ export interface InjectedWalletApi {
     isWalletBrowser: boolean;
     connect(
         protocolVersion: number,
-        message: ConnectRequest,
-        options?: OptionalTraceable
+        message: ConnectRequest
     ): Promise<OptionalTraceable<ConnectEvent>>;
-    restoreConnection(options?: OptionalTraceable): Promise<OptionalTraceable<ConnectEvent>>;
-    send<T extends RpcMethod>(
-        message: AppRequest<T>,
-        options?: OptionalTraceable
-    ): Promise<WalletResponse<T>>;
+    restoreConnection(): Promise<OptionalTraceable<ConnectEvent>>;
+    send<T extends RpcMethod>(message: AppRequest<T>): Promise<WalletResponse<T>>;
     listen(callback: (event: OptionalTraceable<WalletEvent>) => void): () => void;
 
     /**
