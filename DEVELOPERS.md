@@ -61,8 +61,8 @@ When develop has accumulated changes ready for release:
    - `release/2.4.0-beta.1` — for beta
    - `release/2.4.0` — for stable
 
-2. **Create a commit that bumps versions** only for packages that actually changed.  
-   Order (when dependencies apply):  
+2. **Create a commit that bumps versions** only for packages that actually changed.
+   Order (when dependencies apply):
    `@tonconnect/isomorphic-eventsource` → `@tonconnect/isomorphic-fetch` → `@tonconnect/protocol` → `@tonconnect/sdk` → `@tonconnect/ui` → `@tonconnect/ui-react`.
 
    You can use `pnpm changeset add` and `pnpm changeset version` (for beta, run `pnpm changeset pre enter beta` first; when done, `pnpm changeset pre exit`).
@@ -76,34 +76,41 @@ When develop has accumulated changes ready for release:
 - After review, the PR is merged into **main**.
 - A push to **main** triggers the **Release** workflow (which also runs on **develop**; behaviour depends on the branch).
 
-### 4. What the Release workflow does
+### 4. What the Release workflow does (main path)
 
-1. **Compare with npm**  
-   For each package, the repo version is compared to the version on npm (`npm view <pkg> version`).  
-   - If **all versions match npm** — no release is performed; the job finishes.
+1. **Lint → Build → Test** — run first; if any step fails the release is aborted.
 
-2. **Major version check**  
-   If a package’s **major version in the repo is higher than on npm**, the job fails.  
-   **Major releases are done only manually**, not through this CI.
+2. **Compare versions with npm**
+   For each non-private package, the local version is compared to `npm view <pkg> version`.
+   - If **all versions already match npm** — nothing to release, job exits cleanly.
 
-3. **If there are differences and the major has not been increased:**  
-   - Lint, build, tests  
-   - Create git tags  
-   - Publish to npm (OIDC; tag `beta` or `latest` based on the version)  
-   - Create a GitHub Release  
-   - **Merge main into develop**
+3. **Major version guard**
+   If any package's major is higher than on npm the job **fails**.
+   Major releases are always done manually.
+
+4. **If there are new versions and no major bump:**
+   - Create and push git tags (`<pkg>@<version>` per package + `v<version>` root tag)
+   - Publish to npm via `pnpm publish --provenance` (GitHub Trusted Publishing / OIDC — no token needed)
+     - version contains `beta` → npm tag **`beta`**
+     - otherwise → npm tag **`latest`**
+   - Create a GitHub Release (marked as pre-release when beta)
+   - **Auto-merge `main` → `develop`** to pull the bumped versions back.
+     If the merge has conflicts, a PR `ci/merge-main-into-develop-{hash}` is opened automatically instead of failing.
 
 ### 5. Result
 
-After a successful Release workflow, **develop** is automatically updated with all commits from **main**. Development then continues in develop.
+After a successful release **develop** is automatically up-to-date with `main`. Development continues in `develop`.
 
 ---
 
 ## Dev release
 
-- **Trigger:** every **push to develop** (same **Release** workflow file; behaviour is dev-specific on this branch).
-- **Behavior:** for each package, the version is set to `(current minor+1).X.X-dev.DATE.HASH` and published to npm with the **`dev`** tag.
-- No PR into main is required. A dev release is produced on every commit to develop.
+- **Trigger:** every push to `develop` (same `release.yml`, dev-specific path).
+- **Version format:** `{major}.{minor+1}.{patch}-dev.{YYYYMMDDHHMMSS}.{short-hash}`
+  Example: current `2.4.0` → published as `2.5.0-dev.20260223143000.a1b2c3d`
+- Published via `pnpm publish --tag dev --provenance` (GitHub Trusted Publishing / OIDC — no token needed).
+- Private packages are skipped automatically.
+- A commit comment is posted listing all published packages.
 
 Install with: `npm install <package>@dev`.
 
@@ -112,25 +119,43 @@ Install with: `npm install <package>@dev`.
 ## Flow diagram
 
 ```
-develop  ◄── PRs (features, fixes)
-   │
-   ├── release/X.Y.Z-beta.N  (branch from develop + version bumps)
-   │         │
-   │         └── PR ──► main
-   │                      │
-   │                      ├── Release workflow: checks, publish to npm, GitHub Release
-   │                      │
-   │                      └── merge main ──► develop
-   │
-   └── push ──► Release workflow, dev path (publish @dev on every commit)
+feature/fix branches
+   └── PR ──► develop
+                │  (test-build.yml: lint + build + test on every PR / non-release push)
+                │
+                ├── push ──► release.yml  [develop path]
+                │             ├── lint + build + test
+                │             ├── version: {major}.{minor+1}.{patch}-dev.{DATE}.{HASH}
+                │             ├── git tags  →  push tags
+                │             ├── pnpm publish --tag dev --provenance
+                │             └── commit comment with published packages
+                │
+                ├── release/X.Y.Z[-beta.N]   (branch off develop, bump versions, open PR)
+                │         │
+                │         └── PR ──► main
+                │                      │
+                │                      └── push ──► release.yml  [main path]
+                │                                    ├── lint + build + test
+                │                                    ├── compare versions with npm
+                │                                    │     all match?  → skip
+                │                                    │     major bump? → fail
+                │                                    ├── git tags  →  push tags
+                │                                    ├── pnpm publish --provenance
+                │                                    │     beta in version → --tag beta
+                │                                    │     otherwise       → --tag latest
+                │                                    ├── GitHub Release (prerelease if beta)
+                │                                    └── auto-merge main ──► develop
+                │                                          conflict? → open PR instead
+                │
+                ◄──────────── auto-merge / PR after release ──────────────────────────┘
 ```
 
 ---
 
 ## Limits
 
-- **Major versions** are not allowed in the Release workflow. The job fails if the major is increased. Major releases are done manually.
-- The **first publish** of a new package to npm is done manually (Trusted Publishers only apply to packages that already exist).
+- **Major versions** are not allowed via CI. If the major is bumped the Release workflow fails. Do major releases manually.
+- The **first publish** of a brand-new package must be done manually — npm Trusted Publishing only works for packages that already exist on the registry.
 
 # Additional Information
 
