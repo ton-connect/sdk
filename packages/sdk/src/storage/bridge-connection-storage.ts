@@ -248,7 +248,9 @@ export class BridgeConnectionStorage {
 
             return actualizedConnection;
         } catch (error) {
-            logDebug('Failed to actualize bridge connection', error);
+            // If wallet is not found (e.g., for intents or unknown wallets),
+            // return connection as-is without actualizing
+            logDebug('Failed to actualize bridge connection, using connection as-is', error);
             return connection;
         }
     }

@@ -49,16 +49,18 @@
     "loading": "Кошельки загружаются",
     "wallets": "Кошельки",
     "mobileUniversalModal": {
-      "connectYourWallet": "Подключите TON кошелёк",
-      "openWalletOnTelegramOrSelect": "Подключите Wallet в Telegram или выберете другое приложение",
+      "connectYourWallet": "Подключите TON кошелёк",
+      "connectYourWalletIntent": "Выполните в кошельке",
+      "openWalletOnTelegramOrSelect": "Подключите Wallet в Telegram или выберете другое приложение",
       "openWalletOnTelegram": "Открыть Wallet в Telegram",
       "chooseOtherApplication": "Выберите другое приложение",
       "openLink": "Открыть",
-      "scan": "Отсканируйте камерой вашего телефона"
+      "scan": "Отсканируйте камерой вашего телефона"
     },
     "desktopUniversalModal": {
       "connectYourWallet": "Подключите TON кошелёк",
-      "scan": "Отсканируйте QR-код камерой вашего телефона",
+      "connectYourWalletIntent": "Выполните в кошельке",
+      "scan": "Отсканируйте QR-код камерой вашего телефона",
       "availableWallets": "Доступные кошельки"
     },
     "mobileConnectionModal": {

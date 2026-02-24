@@ -5,10 +5,17 @@ import {
     ConnectItem,
     ConnectRequest,
     SendTransactionRpcResponseSuccess,
+    SignMessageRpcResponseSuccess,
     SignDataPayload,
     SignDataRpcResponseSuccess,
     TonAddressItemReply,
-    TonProofItemReply
+    TonProofItemReply,
+    MakeSendTransactionIntentRequest as ProtocolMakeSendTransactionIntentRequest,
+    MakeSignDataIntentRequest as ProtocolMakeSignDataIntentRequest,
+    MakeSignMessageIntentRequest as ProtocolMakeSignMessageIntentRequest,
+    MakeSendActionIntentRequest as ProtocolMakeSendActionIntentRequest,
+    SessionCrypto,
+    RpcMethod
 } from '@tonconnect/protocol';
 import { DappMetadataError } from 'src/errors/dapp/dapp-metadata.error';
 import { ManifestContentErrorError } from 'src/errors/protocol/events/connect/manifest-content-error.error';
@@ -21,6 +28,7 @@ import {
 } from 'src/errors/wallet';
 import {
     Account,
+    isWalletInfoRemote,
     RequiredFeatures,
     Wallet,
     WalletConnectionSource,
@@ -32,7 +40,13 @@ import {
 import {
     SendTransactionRequest,
     SendTransactionResponse,
-    SignDataResponse
+    SignDataResponse,
+    SignMessageRequest,
+    SignMessageResponse,
+    MakeSendTransactionIntentRequest,
+    MakeSignDataIntentRequest,
+    MakeSignMessageIntentRequest,
+    MakeSendActionIntentRequest
 } from 'src/models/methods';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
 import { AnalyticsSettings, TonConnectOptions } from 'src/models/ton-connect-options';
@@ -43,6 +57,7 @@ import {
 import { connectErrorsParser } from 'src/parsers/connect-errors-parser';
 import { sendTransactionParser } from 'src/parsers/send-transaction-parser';
 import { signDataParser } from 'src/parsers/sign-data-parser';
+import { signMessageParser } from 'src/parsers/sign-message-parser';
 import { BridgeProvider } from 'src/provider/bridge/bridge-provider';
 import { InjectedProvider } from 'src/provider/injected/injected-provider';
 import { Provider } from 'src/provider/provider';
@@ -65,6 +80,7 @@ import { TonConnectTracker } from 'src/tracker/ton-connect-tracker';
 import { tonConnectSdkVersion } from 'src/constants/version';
 import {
     validateSendTransactionRequest,
+    validateSignMessageRequest,
     validateSignDataPayload,
     validateConnectAdditionalRequest,
     validateTonProofItemReply
@@ -80,7 +96,7 @@ import { BridgePartialSession, BridgeSession } from 'src/provider/bridge/models/
 import { IEnvironment } from 'src/environment/models/environment.interface';
 import { DefaultEnvironment } from 'src/environment/default-environment';
 import { UUIDv7 } from 'src/utils/uuid';
-import { TraceableWalletEvent } from 'src/models/wallet/traceable-events';
+import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet/traceable-events';
 import { WalletConnectProvider } from 'src/provider/wallet-connect/wallet-connect-provider';
 
 export class TonConnect implements ITonConnect {
@@ -127,6 +143,8 @@ export class TonConnect implements ITonConnect {
     private _wallet: Wallet | null = null;
 
     private provider: Provider | null = null;
+
+    private intentProvider: BridgeProvider | null = null;
 
     private statusChangeSubscriptions: ((walletInfo: Wallet | null) => void)[] = [];
 
@@ -628,6 +646,125 @@ export class TonConnect implements ITonConnect {
         return { ...result, traceId: response.traceId };
     }
 
+    /**
+     * Asks connected wallet to sign the message.
+     * @param message message to sign.
+     * @param options (optional) onRequestSent will be called after the request was sent to the wallet and signal for the message abort.
+     * @returns signed message boc.
+     * If user rejects message, method will throw the corresponding error.
+     */
+    public async signMessage(
+        message: SignMessageRequest,
+        optionsOrOnRequestSent?:
+            | OptionalTraceable<{
+                  onRequestSent?: () => void;
+                  signal?: AbortSignal;
+              }>
+            | (() => void)
+    ): Promise<Traceable<SignMessageResponse>> {
+        // TODO: remove deprecated method
+        const options: OptionalTraceable<{
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+        }> = {};
+        if (typeof optionsOrOnRequestSent === 'function') {
+            options.onRequestSent = optionsOrOnRequestSent;
+        } else {
+            options.onRequestSent = optionsOrOnRequestSent?.onRequestSent;
+            options.signal = optionsOrOnRequestSent?.signal;
+            options.traceId = optionsOrOnRequestSent?.traceId;
+        }
+
+        // Validate message
+        const validationError = validateSignMessageRequest(message);
+        if (validationError) {
+            if (isQaModeEnabled()) {
+                console.error('SignMessageRequest validation failed: ' + validationError);
+            } else {
+                throw new TonConnectError(
+                    'SignMessageRequest validation failed: ' + validationError
+                );
+            }
+        }
+
+        const abortController = createAbortController(options?.signal);
+        if (abortController.signal.aborted) {
+            throw new TonConnectError('Message signing was aborted');
+        }
+
+        this.checkConnection();
+
+        const requiredMessagesNumber = message.messages.length;
+        const requireExtraCurrencies = message.messages.some(
+            m => m.extraCurrency && Object.keys(m.extraCurrency).length > 0
+        );
+        checkSendTransactionSupport(this.wallet!.device.features, {
+            requiredMessagesNumber,
+            requireExtraCurrencies
+        });
+
+        //const sessionInfo = this.getSessionInfo();
+        const traceId = options?.traceId ?? UUIDv7();
+        // this.tracker.trackTransactionSentForSignature(this.wallet, message, sessionInfo, traceId);
+
+        const { validUntil, messages, ...msg } = message;
+        const from = message.from || this.account!.address;
+        const network = message.network || this.account!.chain;
+
+        if (this.wallet?.account.chain && network !== this.wallet.account.chain) {
+            if (!isQaModeEnabled()) {
+                throw new WalletWrongNetworkError('Wallet connected to a wrong network', {
+                    cause: {
+                        expectedChainId: this.wallet?.account.chain,
+                        actualChainId: network
+                    }
+                });
+            }
+            console.error('Wallet connected to a wrong network', {
+                expectedChainId: this.wallet?.account.chain,
+                actualChainId: network
+            });
+        }
+
+        const response = await this.provider!.sendRequest(
+            signMessageParser.convertToRpcRequest({
+                ...msg,
+                from,
+                network,
+                valid_until: validUntil,
+                messages: messages.map(({ extraCurrency, payload, stateInit, ...m }) => ({
+                    ...m,
+                    payload: normalizeBase64(payload),
+                    stateInit: normalizeBase64(stateInit),
+                    extra_currency: extraCurrency
+                }))
+            }),
+            {
+                onRequestSent: options.onRequestSent,
+                signal: abortController.signal,
+                traceId
+            }
+        );
+
+        if (signMessageParser.isError(response)) {
+            // this.tracker.trackTransactionSigningFailed(
+            //     this.wallet,
+            //     message,
+            //     response.error.message,
+            //     response.error.code,
+            //     sessionInfo,
+            //     traceId
+            // );
+            return signMessageParser.parseAndThrowError(response);
+        }
+
+        const result = signMessageParser.convertFromRpcResponse(
+            response as SignMessageRpcResponseSuccess
+        );
+        // this.tracker.trackTransactionSigned(this.wallet, message, result, sessionInfo, traceId);
+        return { ...result, traceId: response.traceId };
+    }
+
     public async signData(
         data: SignDataPayload,
         options?: OptionalTraceable<{
@@ -896,8 +1033,10 @@ export class TonConnect implements ITonConnect {
     }
 
     private walletEventsListener(e: TraceableWalletEvent): void {
+        logDebug('walletEventsListener received event:', e.event, e);
         switch (e.event) {
             case 'connect':
+                logDebug('Processing connect event for intent');
                 this.onWalletConnected(e.payload, { traceId: e.traceId });
                 break;
             case 'connect_error':
@@ -911,8 +1050,49 @@ export class TonConnect implements ITonConnect {
                 this.onWalletConnectError(walletError);
                 break;
             case 'disconnect':
+                logDebug('Processing disconnect event for intent', e);
                 this.onWalletDisconnected('wallet', { traceId: e.traceId });
         }
+    }
+
+    private intentResponseSubscriptions: Array<
+        (response: TraceableWalletResponse<RpcMethod>) => void
+    > = [];
+
+    private handleIntentResponse(response: TraceableWalletResponse<RpcMethod>): void {
+        logDebug('Intent response received:', response);
+        this.intentResponseSubscriptions.forEach(callback => callback(response));
+    }
+
+    /**
+     * Subscribe to intent response events.
+     * This allows you to receive responses from intents (e.g., transaction results, sign data results).
+     * @param callback will be called when an intent response is received.
+     * @returns unsubscribe function.
+     */
+    public onIntentResponse(
+        callback: (response: {
+            result?: unknown;
+            error?: unknown;
+            id: string;
+            traceId?: string;
+        }) => void
+    ): () => void {
+        const wrappedCallback = (response: TraceableWalletResponse<RpcMethod>) => {
+            callback({
+                result: 'result' in response ? response.result : undefined,
+                error: 'error' in response ? response.error : undefined,
+                id: response.id.toString(),
+                traceId: response.traceId
+            });
+        };
+        this.intentResponseSubscriptions.push(wrappedCallback);
+        return () => {
+            const index = this.intentResponseSubscriptions.indexOf(wrappedCallback);
+            if (index > -1) {
+                this.intentResponseSubscriptions.splice(index, 1);
+            }
+        };
     }
 
     private onWalletConnected(
@@ -937,6 +1117,10 @@ export class TonConnect implements ITonConnect {
         );
 
         if (!hasRequiredFeatures) {
+            logDebug('Wallet missing required features, disconnecting', {
+                features: connectEvent.device.features,
+                required: this.walletsRequiredFeatures
+            });
             this.provider?.disconnect();
             this.onWalletConnectError(
                 new WalletMissingRequiredFeaturesError(
@@ -1071,5 +1255,180 @@ export class TonConnect implements ITonConnect {
             manifestUrl: this.dappSettings.manifestUrl,
             items
         };
+    }
+
+    /**
+     * Generates a universal link for a send transaction intent.
+     * This allows users to complete transactions without being connected to the wallet.
+     * @param intent transaction intent request.
+     * @param options (optional) options including traceId and wallet universal link.
+     * @returns universal link that can be opened in a wallet or displayed as QR code.
+     */
+    public async makeSendTransactionIntent(
+        intent: MakeSendTransactionIntentRequest,
+        options?: OptionalTraceable<{ walletUniversalLink?: string }>
+    ): Promise<string> {
+        return this.generateIntentUniversalLink(
+            {
+                id: intent.id,
+                m: 'txIntent' as const,
+                c: intent.c,
+                vu: intent.vu,
+                n: intent.n,
+                i: intent.i
+            } as ProtocolMakeSendTransactionIntentRequest,
+            options
+        );
+    }
+
+    /**
+     * Generates a universal link for a sign data intent.
+     * This allows users to sign data without being connected to the wallet.
+     * @param intent sign data intent request.
+     * @param options (optional) options including traceId and wallet universal link.
+     * @returns universal link that can be opened in a wallet or displayed as QR code.
+     */
+    public async makeSignDataIntent(
+        intent: MakeSignDataIntentRequest,
+        options?: OptionalTraceable<{ walletUniversalLink?: string }>
+    ): Promise<string> {
+        // Build protocol request: if mu is not provided but c.manifestUrl exists,
+        // don't include mu in JSON (wallet will extract it from c.manifestUrl)
+        const protocolIntent: ProtocolMakeSignDataIntentRequest = {
+            id: intent.id,
+            m: 'signIntent' as const,
+            c: intent.c,
+            n: intent.n,
+            p: intent.p
+        };
+
+        // Only include mu if it's explicitly provided (not extracted from c)
+        if (intent.mu) {
+            protocolIntent.mu = intent.mu;
+        } else if (!intent.c?.manifestUrl) {
+            throw new TonConnectError(
+                'manifestUrl (mu) is required for sign data intent. Either provide mu directly or include it in ConnectRequest (c.manifestUrl)'
+            );
+        }
+        // If mu is not provided but c.manifestUrl exists, don't include mu in JSON
+        // Wallet will extract manifestUrl from c.manifestUrl
+
+        return this.generateIntentUniversalLink(protocolIntent, options);
+    }
+
+    /**
+     * Generates a universal link for a sign message intent.
+     * This allows users to sign messages without being connected to the wallet.
+     * @param intent sign message intent request.
+     * @param options (optional) options including traceId and wallet universal link.
+     * @returns universal link that can be opened in a wallet or displayed as QR code.
+     */
+    public async makeSignMessageIntent(
+        intent: MakeSignMessageIntentRequest,
+        options?: OptionalTraceable<{ walletUniversalLink?: string }>
+    ): Promise<string> {
+        return this.generateIntentUniversalLink(
+            {
+                id: intent.id,
+                m: 'signMsg' as const,
+                c: intent.c,
+                vu: intent.vu,
+                n: intent.n,
+                i: intent.i
+            } as ProtocolMakeSignMessageIntentRequest,
+            options
+        );
+    }
+
+    /**
+     * Generates a universal link for a send action intent.
+     * This allows users to complete actions via a dynamic action URL without being connected to the wallet.
+     * @param intent action intent request.
+     * @param options (optional) options including traceId and wallet universal link.
+     * @returns universal link that can be opened in a wallet or displayed as QR code.
+     */
+    public async makeSendActionIntent(
+        intent: MakeSendActionIntentRequest,
+        options?: OptionalTraceable<{ walletUniversalLink?: string }>
+    ): Promise<string> {
+        return this.generateIntentUniversalLink(
+            {
+                id: intent.id,
+                m: 'actionIntent' as const,
+                c: intent.c,
+                a: intent.a
+            } as ProtocolMakeSendActionIntentRequest,
+            options
+        );
+    }
+
+    private async generateIntentUniversalLink(
+        intent:
+            | ProtocolMakeSendTransactionIntentRequest
+            | ProtocolMakeSignDataIntentRequest
+            | ProtocolMakeSignMessageIntentRequest
+            | ProtocolMakeSendActionIntentRequest,
+        options?: OptionalTraceable
+    ): Promise<string> {
+        const traceId = options?.traceId ?? UUIDv7();
+
+        const wallets = await this.walletsList.getWallets();
+        const httpWallets = wallets.filter(w => isWalletInfoRemote(w));
+
+        if (httpWallets.length === 0) {
+            throw new TonConnectError('No HTTP wallet available for intent generation');
+        }
+
+        let walletConnectionSource:
+            | WalletConnectionSourceHTTP
+            | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[];
+
+        const seen = new Set<string>();
+        const bridges: Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[] = [];
+        for (const w of httpWallets) {
+            if (!seen.has(w.bridgeUrl)) {
+                seen.add(w.bridgeUrl);
+                bridges.push({ bridgeUrl: w.bridgeUrl });
+            }
+        }
+        walletConnectionSource = bridges;
+
+        const bridgeProvider = new BridgeProvider(
+            this.bridgeConnectionStorage,
+            walletConnectionSource,
+            this.analytics
+        );
+
+        const sessionCrypto = new SessionCrypto();
+        const sessionId = sessionCrypto.sessionId;
+
+        await this.bridgeConnectionStorage.storeConnection({
+            type: 'http',
+            connectionSource: walletConnectionSource,
+            sessionCrypto
+        });
+
+        void bridgeProvider.openGatewaysForIntent(sessionCrypto, { traceId }).catch(error => {
+            logDebug('Failed to open gateways for intent', error);
+        });
+
+        // Treat connect via intent as a real HTTP session: use the same provider and listener pipeline.
+        this.provider?.closeConnection();
+        this.provider = bridgeProvider;
+
+        this.intentProvider?.closeConnection();
+        this.intentProvider = bridgeProvider;
+
+        bridgeProvider.listen(this.walletEventsListener.bind(this));
+        bridgeProvider.setIntentResponseCallback(this.handleIntentResponse.bind(this));
+
+        const universalLink = 'tc://';
+
+        return bridgeProvider.generateIntentUniversalLink(
+            universalLink,
+            intent,
+            { traceId },
+            sessionId
+        );
     }
 }

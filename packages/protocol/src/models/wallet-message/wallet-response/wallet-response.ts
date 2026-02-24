@@ -5,9 +5,29 @@ import {
 } from './send-transaction-rpc-response';
 import { SignDataRpcResponseError, SignDataRpcResponseSuccess } from './sign-data-rpc-response';
 import {
+    SignMessageRpcResponseError,
+    SignMessageRpcResponseSuccess
+} from './sign-message-rpc-response';
+import {
     DisconnectRpcResponseError,
     DisconnectRpcResponseSuccess
 } from './disconnect-rpc-response';
+import {
+    MakeSendTransactionIntentRpcResponseError,
+    MakeSendTransactionIntentRpcResponseSuccess
+} from './make-send-transaction-intent-rpc-response';
+import {
+    MakeSignDataIntentRpcResponseError,
+    MakeSignDataIntentRpcResponseSuccess
+} from './make-sign-data-intent-rpc-response';
+import {
+    MakeSignMessageIntentRpcResponseError,
+    MakeSignMessageIntentRpcResponseSuccess
+} from './make-sign-message-intent-rpc-response';
+import {
+    MakeSendActionIntentRpcResponseError,
+    MakeSendActionIntentRpcResponseSuccess
+} from './make-send-action-intent-rpc-response';
 
 export type RpcResponses = {
     sendTransaction: {
@@ -20,9 +40,33 @@ export type RpcResponses = {
         success: SignDataRpcResponseSuccess;
     };
 
+    signMessage: {
+        error: SignMessageRpcResponseError;
+        success: SignMessageRpcResponseSuccess;
+    };
+
     disconnect: {
         error: DisconnectRpcResponseError;
         success: DisconnectRpcResponseSuccess;
+    };
+};
+
+export type IntentResponses = {
+    txIntent: {
+        error: MakeSendTransactionIntentRpcResponseError;
+        success: MakeSendTransactionIntentRpcResponseSuccess;
+    };
+    signIntent: {
+        error: MakeSignDataIntentRpcResponseError;
+        success: MakeSignDataIntentRpcResponseSuccess;
+    };
+    signMsg: {
+        error: MakeSignMessageIntentRpcResponseError;
+        success: MakeSignMessageIntentRpcResponseSuccess;
+    };
+    actionIntent: {
+        error: MakeSendActionIntentRpcResponseError;
+        success: MakeSendActionIntentRpcResponseSuccess;
     };
 };
 

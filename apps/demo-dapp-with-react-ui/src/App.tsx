@@ -11,6 +11,7 @@ import { SignDataTester } from './components/SignDataTester/SignDataTester';
 import { MerkleExample } from './components/MerkleExample/MerkleExample';
 import { FindTransactionDemo } from './components/FindTransactionDemo/FindTransactionDemo';
 import { TransferUsdt } from './components/TransferUsdt/TransferUsdt';
+import { IntentDemo } from './components/IntentDemo/IntentDemo';
 import { UniversalConnector } from '@reown/appkit-universal-connector';
 
 initializeWalletConnect(UniversalConnector, {
@@ -29,6 +30,7 @@ function HomePage() {
     return (
         <div className="app">
             <Header />
+            <IntentDemo />
             <TxForm />
             <WalletBatchLimitsTester />
             <SignDataTester />
@@ -53,7 +55,7 @@ function IframeIframePage() {
 function App() {
     return (
         <TonConnectUIProvider
-            manifestUrl="https://tonconnect-sdk-demo-dapp.vercel.app/tonconnect-manifest.json"
+            manifestUrl="https://sdk-demo-dapp-react-git-feat-intent-transactions-topteam.vercel.app/tonconnect-manifest.json"
             uiPreferences={{ theme: THEME.DARK }}
         >
             <div>
