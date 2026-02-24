@@ -12,6 +12,13 @@ import {
     SendTransactionResponse,
     SignDataResponse
 } from 'src/models/methods';
+import {
+    SendTransactionIntentRequest,
+    SignDataIntentRequest,
+    SignMessageIntentRequest,
+    SendActionIntentRequest,
+    IntentUrlOptions
+} from 'src/models/methods/intents';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
 import { WalletInfo } from 'src/models/wallet/wallet-info';
 import { WalletConnectionSourceJS } from 'src/models/wallet/wallet-connection-source';
@@ -137,4 +144,39 @@ export interface ITonConnect {
      * @returns session ID string or null if not available.
      */
     getSessionId(): Promise<string | null>;
+
+    /**
+     * Builds a deep link URL for Send Transaction Intent.
+     * @param transaction transaction to sign.
+     * @param options optional connect request, object storage, ttl.
+     * @returns tc://intent or tc://intent_inline URL string.
+     */
+    makeSendTransactionIntentUrl(
+        transaction: SendTransactionIntentRequest,
+        options?: IntentUrlOptions
+    ): string;
+
+    /**
+     * Builds a deep link URL for Sign Data Intent.
+     * @param data data to sign.
+     * @param options optional connect request, object storage, ttl.
+     * @returns tc://intent or tc://intent_inline URL string.
+     */
+    makeSignDataIntentUrl(data: SignDataIntentRequest, options?: IntentUrlOptions): string;
+
+    /**
+     * Builds a deep link URL for Sign Message Intent.
+     * @param message message to sign.
+     * @param options optional connect request, object storage, ttl.
+     * @returns tc://intent or tc://intent_inline URL string.
+     */
+    makeSignMessageIntentUrl(message: SignMessageIntentRequest, options?: IntentUrlOptions): string;
+
+    /**
+     * Builds a deep link URL for Send Action Intent.
+     * @param action actionUrl to be called by the wallet.
+     * @param options optional connect request, object storage, etc.
+     * @returns tc://intent or tc://intent_inline URL string.
+     */
+    makeSendActionIntentUrl(action: SendActionIntentRequest, options?: IntentUrlOptions): string;
 }

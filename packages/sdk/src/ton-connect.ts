@@ -34,6 +34,13 @@ import {
     SendTransactionResponse,
     SignDataResponse
 } from 'src/models/methods';
+import {
+    SendTransactionIntentRequest,
+    SignDataIntentRequest,
+    SignMessageIntentRequest,
+    SendActionIntentRequest,
+    IntentUrlOptions
+} from 'src/models/methods/intents';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
 import { AnalyticsSettings, TonConnectOptions } from 'src/models/ton-connect-options';
 import {
@@ -759,6 +766,38 @@ export class TonConnect implements ITonConnect {
         } catch {
             return null;
         }
+    }
+
+    /** @internal Intents: stub until implementation. */
+    public makeSendTransactionIntentUrl(
+        _transaction: SendTransactionIntentRequest,
+        _options?: IntentUrlOptions
+    ): string {
+        throw new TonConnectError('makeSendTransactionIntentUrl is not implemented yet');
+    }
+
+    /** @internal Intents: stub until implementation. */
+    public makeSignDataIntentUrl(
+        _data: SignDataIntentRequest,
+        _options?: IntentUrlOptions
+    ): string {
+        throw new TonConnectError('makeSignDataIntentUrl is not implemented yet');
+    }
+
+    /** @internal Intents: stub until implementation. */
+    public makeSignMessageIntentUrl(
+        _message: SignMessageIntentRequest,
+        _options?: IntentUrlOptions
+    ): string {
+        throw new TonConnectError('makeSignMessageIntentUrl is not implemented yet');
+    }
+
+    /** @internal Intents: stub until implementation. */
+    public makeSendActionIntentUrl(
+        _action: SendActionIntentRequest,
+        _options?: IntentUrlOptions
+    ): string {
+        throw new TonConnectError('makeSendActionIntentUrl is not implemented yet');
     }
 
     private getSessionInfo(): { clientId: string | null; walletId: string | null } | null {
