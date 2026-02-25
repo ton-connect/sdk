@@ -10,7 +10,8 @@ import {
 import {
     SendTransactionRequest,
     SendTransactionResponse,
-    SignDataResponse
+    SignDataResponse,
+    SignMessageResponse
 } from 'src/models/methods';
 import {
     SendTransactionIntentRequest,
@@ -138,6 +139,14 @@ export interface ITonConnect {
             signal?: AbortSignal;
         }>
     ): Promise<OptionalTraceable<SignDataResponse>>;
+
+    signMessage(
+        message: SendTransactionRequest,
+        options?: OptionalTraceable<{
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+        }>
+    ): Promise<OptionalTraceable<SignMessageResponse>>;
 
     /**
      * Gets the current session ID if available.

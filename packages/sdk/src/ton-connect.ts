@@ -32,7 +32,8 @@ import {
 import {
     SendTransactionRequest,
     SendTransactionResponse,
-    SignDataResponse
+    SignDataResponse,
+    SignMessageResponse
 } from 'src/models/methods';
 import {
     SendTransactionIntentRequest,
@@ -701,6 +702,16 @@ export class TonConnect implements ITonConnect {
         this.tracker.trackDataSigned(this.wallet, data, result, sessionInfo, traceId);
 
         return { ...result, traceId };
+    }
+
+    public async signMessage(
+        _message: SendTransactionRequest,
+        _options?: OptionalTraceable<{
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+        }>
+    ): Promise<Traceable<SignMessageResponse>> {
+        throw new TonConnectError('signMessage is not implemented yet');
     }
 
     /**
