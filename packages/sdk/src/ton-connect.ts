@@ -224,7 +224,7 @@ export class TonConnect implements ITonConnect {
 
         this.objectStorageBaseUrl =
             options?.objectStorageBaseUrl ??
-            'https://ton-connect-bridge-v3-staging.tapps.ninja/objects';
+            'https://ton-connect-bridge-v3-staging.tapps.ninja/store';
 
         if (!options?.disableAutoPauseConnection) {
             this.addWindowFocusAndBlurSubscriptions();
