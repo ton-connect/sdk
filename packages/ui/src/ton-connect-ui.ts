@@ -22,7 +22,12 @@ import {
     WalletInfo,
     WalletNotSupportFeatureError,
     SessionCrypto,
-    ChainId
+    ChainId,
+    SendTransactionIntentRequest,
+    SignDataIntentRequest,
+    SignMessageIntentRequest,
+    SendActionIntentRequest,
+    IntentUrlOptions
 } from '@tonconnect/sdk';
 import { widgetController } from 'src/app/widget-controller';
 import { TonConnectUIError } from 'src/errors/ton-connect-ui.error';
@@ -66,6 +71,8 @@ import {
     WALLET_CONNECT_WALLET_NAME
 } from 'src/app/env/WALLET_CONNECT';
 import { IMG } from 'src/app/env/IMG';
+
+type TonConnectUIIntentOptions = ActionConfiguration & OptionalTraceable<IntentUrlOptions>;
 
 export class TonConnectUI {
     public static getWallets(): Promise<WalletInfo[]> {
@@ -827,6 +834,50 @@ export class TonConnectUI {
                 );
             }
         }
+    }
+
+    /**
+     * Sends the transaction via intent flow and returns signed transaction.
+     * If wallet is not connected, opens modal and shows intent QR/link.
+     */
+    public async sendTransactionIntent(
+        _tx: SendTransactionIntentRequest,
+        _options?: TonConnectUIIntentOptions
+    ): Promise<OptionalTraceable<SendTransactionResponse>> {
+        throw new TonConnectUIError('sendTransactionIntent is not implemented yet.');
+    }
+
+    /**
+     * Signs data via intent flow and returns the signature.
+     * If wallet is not connected, opens modal and shows intent QR/link.
+     */
+    public async signDataIntent(
+        _data: SignDataIntentRequest,
+        _options?: TonConnectUIIntentOptions
+    ): Promise<OptionalTraceable<SignDataResponse>> {
+        throw new TonConnectUIError('signDataIntent is not implemented yet.');
+    }
+
+    /**
+     * Signs message via intent flow and returns signed message BoC.
+     * If wallet is not connected, opens modal and shows intent QR/link.
+     */
+    public async signMessageIntent(
+        _message: SignMessageIntentRequest,
+        _options?: TonConnectUIIntentOptions
+    ): Promise<OptionalTraceable<SendTransactionResponse>> {
+        throw new TonConnectUIError('signMessageIntent is not implemented yet.');
+    }
+
+    /**
+     * Sends action intent and returns result of underlying sendTransaction or signData.
+     * If wallet is not connected, opens modal and shows intent QR/link.
+     */
+    public async sendActionIntent(
+        _action: SendActionIntentRequest,
+        _options?: TonConnectUIIntentOptions
+    ): Promise<OptionalTraceable<SendTransactionResponse | SignDataResponse>> {
+        throw new TonConnectUIError('sendActionIntent is not implemented yet.');
     }
 
     /**

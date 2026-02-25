@@ -100,6 +100,8 @@ export {
     SIGN_DATA_ERROR_CODES
 } from '@tonconnect/protocol';
 
+export type { SignMessageResponse } from './models/methods/sign-message/sign-message-response';
+
 export { IEnvironment } from './environment/models/environment.interface';
 export { TelegramUser } from './environment/models/telegram-user';
 
