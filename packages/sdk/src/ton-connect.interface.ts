@@ -155,37 +155,50 @@ export interface ITonConnect {
     getSessionId(): Promise<string | null>;
 
     /**
-     * Builds a deep link URL for Send Transaction Intent.
-     * @param transaction transaction to sign.
-     * @param options optional connect request, object storage, ttl.
-     * @returns tc://intent or tc://intent_inline URL string.
+     * Sends transaction via intent flow.
+     * @param transaction transaction to send.
+     * @param options optional connect request, abort signal, trace id and URL callback.
+     * @returns signed transaction boc that allows you to find the transaction in the blockchain.
+     * If user rejects transaction, method will throw the corresponding error.
      */
-    makeSendTransactionIntentUrl(
+    sendTransactionIntent(
         transaction: SendTransactionIntentRequest,
-        options?: IntentUrlOptions
-    ): string;
+        options?: OptionalTraceable<IntentUrlOptions>
+    ): Promise<OptionalTraceable<SendTransactionResponse>>;
 
     /**
-     * Builds a deep link URL for Sign Data Intent.
+     * Signs data via intent flow.
      * @param data data to sign.
-     * @param options optional connect request, object storage, ttl.
-     * @returns tc://intent or tc://intent_inline URL string.
+     * @param options optional connect request, abort signal, trace id and URL callback.
+     * @returns signature and related metadata.
+     * If user rejects signing, method will throw the corresponding error.
      */
-    makeSignDataIntentUrl(data: SignDataIntentRequest, options?: IntentUrlOptions): string;
+    signDataIntent(
+        data: SignDataIntentRequest,
+        options?: OptionalTraceable<IntentUrlOptions>
+    ): Promise<OptionalTraceable<SignDataResponse>>;
 
     /**
-     * Builds a deep link URL for Sign Message Intent.
+     * Signs message via intent flow.
      * @param message message to sign.
-     * @param options optional connect request, object storage, ttl.
-     * @returns tc://intent or tc://intent_inline URL string.
+     * @param options optional connect request, abort signal, trace id and URL callback.
+     * @returns signed message boc.
+     * If user rejects signing, method will throw the corresponding error.
      */
-    makeSignMessageIntentUrl(message: SignMessageIntentRequest, options?: IntentUrlOptions): string;
+    signMessageIntent(
+        message: SignMessageIntentRequest,
+        options?: OptionalTraceable<IntentUrlOptions>
+    ): Promise<OptionalTraceable<SignMessageResponse>>;
 
     /**
-     * Builds a deep link URL for Send Action Intent.
+     * Sends action intent.
      * @param action actionUrl to be called by the wallet.
-     * @param options optional connect request, object storage, etc.
-     * @returns tc://intent or tc://intent_inline URL string.
+     * @param options optional connect request, abort signal, trace id and URL callback.
+     * @returns result of underlying sendTransaction or signData operation.
+     * If user rejects action, method will throw the corresponding error.
      */
-    makeSendActionIntentUrl(action: SendActionIntentRequest, options?: IntentUrlOptions): string;
+    sendActionIntent(
+        action: SendActionIntentRequest,
+        options?: OptionalTraceable<IntentUrlOptions>
+    ): Promise<OptionalTraceable<SendTransactionResponse | SignDataResponse>>;
 }

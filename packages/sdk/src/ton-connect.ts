@@ -780,35 +780,35 @@ export class TonConnect implements ITonConnect {
     }
 
     /** @internal Intents: stub until implementation. */
-    public makeSendTransactionIntentUrl(
+    public async sendTransactionIntent(
         _transaction: SendTransactionIntentRequest,
-        _options?: IntentUrlOptions
-    ): string {
-        throw new TonConnectError('makeSendTransactionIntentUrl is not implemented yet');
+        _options?: OptionalTraceable<IntentUrlOptions>
+    ): Promise<Traceable<SendTransactionResponse>> {
+        throw new TonConnectError('sendTransactionIntent is not implemented yet');
     }
 
     /** @internal Intents: stub until implementation. */
-    public makeSignDataIntentUrl(
+    public async signDataIntent(
         _data: SignDataIntentRequest,
-        _options?: IntentUrlOptions
-    ): string {
-        throw new TonConnectError('makeSignDataIntentUrl is not implemented yet');
+        _options?: OptionalTraceable<IntentUrlOptions>
+    ): Promise<Traceable<SignDataResponse>> {
+        throw new TonConnectError('signDataIntent is not implemented yet');
     }
 
     /** @internal Intents: stub until implementation. */
-    public makeSignMessageIntentUrl(
+    public async signMessageIntent(
         _message: SignMessageIntentRequest,
-        _options?: IntentUrlOptions
-    ): string {
-        throw new TonConnectError('makeSignMessageIntentUrl is not implemented yet');
+        _options?: OptionalTraceable<IntentUrlOptions>
+    ): Promise<Traceable<SignMessageResponse>> {
+        throw new TonConnectError('signMessageIntent is not implemented yet');
     }
 
     /** @internal Intents: stub until implementation. */
-    public makeSendActionIntentUrl(
+    public async sendActionIntent(
         _action: SendActionIntentRequest,
-        _options?: IntentUrlOptions
-    ): string {
-        throw new TonConnectError('makeSendActionIntentUrl is not implemented yet');
+        _options?: OptionalTraceable<IntentUrlOptions>
+    ): Promise<Traceable<SendTransactionResponse | SignDataResponse>> {
+        throw new TonConnectError('sendActionIntent is not implemented yet');
     }
 
     private getSessionInfo(): { clientId: string | null; walletId: string | null } | null {
