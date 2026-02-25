@@ -1,5 +1,5 @@
 import { Address, beginCell, Cell, contractAddress, loadStateInit } from '@ton/core';
-import { sha256 } from '@ton/crypto';
+import { sha256, sha256_sync } from '@ton/crypto';
 import { Buffer } from 'buffer';
 import nacl from 'tweetnacl';
 import crc32 from 'crc-32';
@@ -80,15 +80,24 @@ export class SignDataService {
             }
 
             // Create hash based on payload type
-            const finalHash =
+            let finalHash =
                 signDataPayload.type === 'cell'
                     ? this.createCellHash(signDataPayload, parsedAddr, domain, timestamp)
                     : await this.createTextBinaryHash(
-                          signDataPayload,
-                          parsedAddr,
-                          domain,
-                          timestamp
-                      );
+                        signDataPayload,
+                        parsedAddr,
+                        domain,
+                        timestamp
+                    );
+
+            if (payload.network === '662387') {
+                const tl = Buffer.alloc(8);
+                tl.writeInt32LE(0x71b34ee1);
+                tl.writeInt32LE(662387, 4);
+                const prefix = sha256_sync(tl);
+
+                finalHash = Buffer.concat([prefix, finalHash]);
+            }
 
             // Verify Ed25519 signature
             const isValid = nacl.sign.detached.verify(

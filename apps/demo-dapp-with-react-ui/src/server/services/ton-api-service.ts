@@ -13,9 +13,12 @@ export class TonApiService {
                 endpoint: 'https://testnet-v4.tonhubapi.com'
             });
         } else if (typeof client === 'string') {
-            throw new Error(
-                `Unknown network: ${client}. Only ${CHAIN.MAINNET} and ${CHAIN.TESTNET} are supported.`
-            );
+            // throw new Error(
+            //     `Unknown network: ${client}. Only ${CHAIN.MAINNET} and ${CHAIN.TESTNET} are supported.`
+            // );
+            client = new TonClient4({
+                endpoint: 'https://testnet-v4.tonhubapi.com'
+            });
         }
         return new TonApiService(client);
     }

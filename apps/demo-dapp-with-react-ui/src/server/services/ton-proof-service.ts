@@ -1,4 +1,4 @@
-import { getSecureRandomBytes, sha256 } from '@ton/crypto';
+import { getSecureRandomBytes, sha256, sha256_sync } from '@ton/crypto';
 import { Address, Cell, contractAddress, loadStateInit } from '@ton/ton';
 import { Buffer } from 'buffer';
 import { sign } from 'tweetnacl';
@@ -105,14 +105,22 @@ export class TonProofService {
 
             const msgHash = Buffer.from(await sha256(msg));
 
-            // signature = Ed25519Sign(privkey, sha256(0xffff ++ utf8_encode("ton-connect") ++ sha256(message)))
+            // signature = Ed25519Sign(privkey, domain_prefix ++ sha256(0xffff ++ utf8_encode("ton-connect") ++ sha256(message)))
             const fullMsg = Buffer.concat([
                 Buffer.from([0xff, 0xff]),
                 Buffer.from(tonConnectPrefix),
                 msgHash
             ]);
 
-            const result = Buffer.from(await sha256(fullMsg));
+            let result = Buffer.from(await sha256(fullMsg));
+            if (payload.network === '662387') {
+                const tl = Buffer.alloc(8);
+                tl.writeInt32LE(0x71b34ee1);
+                tl.writeInt32LE(662387, 4);
+                const prefix = sha256_sync(tl);
+
+                result = Buffer.concat([prefix, result]);
+            }
 
             return sign.detached.verify(result, message.signature, publicKey);
         } catch (e) {
