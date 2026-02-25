@@ -12,7 +12,8 @@ export interface SendTransactionIntentItemTon {
 export interface SendTransactionIntentItemJetton {
     type: 'jetton';
     jettonMasterAddress: string;
-    amount: string;
+    jettonAmount: string;
+    attachedTon?: string;
     destination: string;
     responseDestination?: string;
     customPayload?: string;
@@ -23,6 +24,7 @@ export interface SendTransactionIntentItemJetton {
 
 export interface SendTransactionIntentItemNft {
     type: 'nft';
+    attachedTon?: string;
     nftAddress: string;
     newOwnerAddress: string;
     responseDestination?: string;
