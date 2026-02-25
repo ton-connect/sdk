@@ -224,7 +224,7 @@ export class TonConnect implements ITonConnect {
 
         this.objectStorageBaseUrl =
             options?.objectStorageBaseUrl ??
-            'https://ton-connect-bridge-v3-staging.tapps.ninja/store';
+            'https://ton-connect-bridge-v3-staging.tapps.ninja/objects';
 
         if (!options?.disableAutoPauseConnection) {
             this.addWindowFocusAndBlurSubscriptions();
@@ -1482,7 +1482,7 @@ export class TonConnect implements ITonConnect {
         const response = await fetch(url.toString(), {
             method: 'POST',
             headers: {
-                'Content-Type': 'text/plain; charset=UTF-8'
+                'content-type': 'text/plain'
             },
             body: intentBase64
         });
