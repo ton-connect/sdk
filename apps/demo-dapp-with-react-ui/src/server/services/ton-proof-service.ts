@@ -1,9 +1,9 @@
 import { getSecureRandomBytes, sha256 } from '@ton/crypto';
-import { Address, Cell, contractAddress, loadStateInit } from '@ton/ton';
+import { Address, Cell, contractAddress, domainSignVerify, loadStateInit } from '@ton/ton';
 import { Buffer } from 'buffer';
-import { sign } from 'tweetnacl';
 import { CheckProofRequestDto } from '../dto/check-proof-request-dto';
 import { tryParsePublicKey } from '../wrappers/wallets-data';
+import { getDomain } from '../utils/domain';
 
 const tonProofPrefix = 'ton-proof-item-v2/';
 const tonConnectPrefix = 'ton-connect';
@@ -105,16 +105,21 @@ export class TonProofService {
 
             const msgHash = Buffer.from(await sha256(msg));
 
-            // signature = Ed25519Sign(privkey, sha256(0xffff ++ utf8_encode("ton-connect") ++ sha256(message)))
+            // signature = Ed25519Sign(privkey, domain_prefix ++ sha256(0xffff ++ utf8_encode("ton-connect") ++ sha256(message)))
             const fullMsg = Buffer.concat([
                 Buffer.from([0xff, 0xff]),
                 Buffer.from(tonConnectPrefix),
                 msgHash
             ]);
 
-            const result = Buffer.from(await sha256(fullMsg));
+            let data = Buffer.from(await sha256(fullMsg));
 
-            return sign.detached.verify(result, message.signature, publicKey);
+            return domainSignVerify({
+                data,
+                signature: message.signature,
+                publicKey,
+                domain: getDomain(payload.network)
+            });
         } catch (e) {
             return false;
         }

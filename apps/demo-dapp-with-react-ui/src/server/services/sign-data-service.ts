@@ -1,7 +1,6 @@
 import { Address, beginCell, Cell, contractAddress, loadStateInit } from '@ton/core';
 import { sha256 } from '@ton/crypto';
 import { Buffer } from 'buffer';
-import nacl from 'tweetnacl';
 import crc32 from 'crc-32';
 import {
     CheckSignDataRequestDto,
@@ -10,6 +9,8 @@ import {
     SignDataPayload
 } from '../dto/check-sign-data-request-dto';
 import { tryParsePublicKey } from '../wrappers/wallets-data';
+import { domainSignVerify } from '@ton/ton';
+import { getDomain } from '../utils/domain';
 
 const allowedDomains = [
     'ton-connect.github.io',
@@ -80,7 +81,7 @@ export class SignDataService {
             }
 
             // Create hash based on payload type
-            const finalHash =
+            let finalHash =
                 signDataPayload.type === 'cell'
                     ? this.createCellHash(signDataPayload, parsedAddr, domain, timestamp)
                     : await this.createTextBinaryHash(
@@ -91,11 +92,12 @@ export class SignDataService {
                       );
 
             // Verify Ed25519 signature
-            const isValid = nacl.sign.detached.verify(
-                new Uint8Array(finalHash),
-                new Uint8Array(Buffer.from(signature, 'base64')),
-                new Uint8Array(publicKey)
-            );
+            const isValid = domainSignVerify({
+                data: finalHash,
+                signature: Buffer.from(signature, 'base64'),
+                publicKey,
+                domain: getDomain(payload.network)
+            });
 
             return isValid;
         } catch (e) {
