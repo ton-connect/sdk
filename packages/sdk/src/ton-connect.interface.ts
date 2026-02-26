@@ -13,6 +13,12 @@ import {
     SignDataResponse,
     SignMessageResponse
 } from 'src/models/methods';
+import type {
+    SendTransactionIntentResponse,
+    SignDataIntentResponse,
+    SignMessageIntentResponse,
+    SendActionIntentResponse
+} from 'src/models/methods/intents';
 import {
     SendTransactionIntentRequest,
     SignDataIntentRequest,
@@ -164,7 +170,7 @@ export interface ITonConnect {
     sendTransactionIntent(
         transaction: SendTransactionIntentRequest,
         options?: OptionalTraceable<IntentUrlOptions>
-    ): Promise<OptionalTraceable<SendTransactionResponse>>;
+    ): Promise<OptionalTraceable<SendTransactionIntentResponse>>;
 
     /**
      * Signs data via intent flow.
@@ -176,7 +182,7 @@ export interface ITonConnect {
     signDataIntent(
         data: SignDataIntentRequest,
         options?: OptionalTraceable<IntentUrlOptions>
-    ): Promise<OptionalTraceable<SignDataResponse>>;
+    ): Promise<OptionalTraceable<SignDataIntentResponse>>;
 
     /**
      * Signs message via intent flow.
@@ -188,17 +194,17 @@ export interface ITonConnect {
     signMessageIntent(
         message: SignMessageIntentRequest,
         options?: OptionalTraceable<IntentUrlOptions>
-    ): Promise<OptionalTraceable<SignMessageResponse>>;
+    ): Promise<OptionalTraceable<SignMessageIntentResponse>>;
 
     /**
      * Sends action intent.
      * @param action actionUrl to be called by the wallet.
      * @param options optional connect request, abort signal, trace id and URL callback.
-     * @returns result of underlying sendTransaction or signData operation.
+     * @returns result of underlying sendTransaction, signData or signMessage operation.
      * If user rejects action, method will throw the corresponding error.
      */
     sendActionIntent(
         action: SendActionIntentRequest,
         options?: OptionalTraceable<IntentUrlOptions>
-    ): Promise<OptionalTraceable<SendTransactionResponse | SignDataResponse>>;
+    ): Promise<OptionalTraceable<SendActionIntentResponse>>;
 }

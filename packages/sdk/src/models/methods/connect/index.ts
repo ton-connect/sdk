@@ -1,1 +1,1 @@
-export { ConnectAdditionalRequest } from './connect-additional-request';
+export type { ConnectAdditionalRequest } from './connect-additional-request';

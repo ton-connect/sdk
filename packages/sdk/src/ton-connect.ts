@@ -35,6 +35,12 @@ import {
     SignDataResponse,
     SignMessageResponse
 } from 'src/models/methods';
+import type {
+    SendTransactionIntentResponse,
+    SignDataIntentResponse,
+    SignMessageIntentResponse,
+    SendActionIntentResponse
+} from 'src/models/methods/intents';
 import {
     SendTransactionIntentRequest,
     SignDataIntentRequest,
@@ -783,7 +789,7 @@ export class TonConnect implements ITonConnect {
     public async sendTransactionIntent(
         _transaction: SendTransactionIntentRequest,
         _options?: OptionalTraceable<IntentUrlOptions>
-    ): Promise<Traceable<SendTransactionResponse>> {
+    ): Promise<Traceable<SendTransactionIntentResponse>> {
         throw new TonConnectError('sendTransactionIntent is not implemented yet');
     }
 
@@ -791,7 +797,7 @@ export class TonConnect implements ITonConnect {
     public async signDataIntent(
         _data: SignDataIntentRequest,
         _options?: OptionalTraceable<IntentUrlOptions>
-    ): Promise<Traceable<SignDataResponse>> {
+    ): Promise<Traceable<SignDataIntentResponse>> {
         throw new TonConnectError('signDataIntent is not implemented yet');
     }
 
@@ -799,7 +805,7 @@ export class TonConnect implements ITonConnect {
     public async signMessageIntent(
         _message: SignMessageIntentRequest,
         _options?: OptionalTraceable<IntentUrlOptions>
-    ): Promise<Traceable<SignMessageResponse>> {
+    ): Promise<Traceable<SignMessageIntentResponse>> {
         throw new TonConnectError('signMessageIntent is not implemented yet');
     }
 
@@ -807,7 +813,7 @@ export class TonConnect implements ITonConnect {
     public async sendActionIntent(
         _action: SendActionIntentRequest,
         _options?: OptionalTraceable<IntentUrlOptions>
-    ): Promise<Traceable<SendTransactionResponse | SignDataResponse>> {
+    ): Promise<Traceable<SendActionIntentResponse>> {
         throw new TonConnectError('sendActionIntent is not implemented yet');
     }
 

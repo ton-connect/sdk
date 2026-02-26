@@ -72,7 +72,8 @@ import {
 } from 'src/app/env/WALLET_CONNECT';
 import { IMG } from 'src/app/env/IMG';
 
-type TonConnectUIIntentOptions = ActionConfiguration & OptionalTraceable<IntentUrlOptions>;
+type TonConnectUIIntentOptions = ActionConfiguration &
+    OptionalTraceable<Omit<IntentUrlOptions, 'signal' | 'onIntentUrlReady'>>;
 
 export class TonConnectUI {
     public static getWallets(): Promise<WalletInfo[]> {
