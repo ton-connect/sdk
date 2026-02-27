@@ -33,17 +33,17 @@ import { isInTMA } from 'src/app/utils/tma-api';
 import {
     redirectToTelegram,
     redirectToWallet,
-    enrichUniversalLink,
-    buildWalletIntentLink
+    enrichUniversalLink
 } from 'src/app/utils/url-strategy-helpers';
 import { WalletsContainerStyled } from 'src/app/views/modals/wallets-modal/desktop-universal-modal/style';
 import { widgetController } from 'src/app/widget-controller';
-import { openLinkBlank } from 'src/app/utils/web-api';
 import type { UIWalletInfo } from 'src/app/models/ui-wallet-info';
+import { buildWalletIntentLink } from 'src/app/utils/url-strategy-helpers';
 
 interface IntentWalletsSectionProps {
     intentUrl: string | undefined;
     tonConnectUI: { getWallets: () => Promise<WalletInfo[]> } | null | undefined;
+    onWalletSelected?: (wallet: UIWalletInfo) => void;
 }
 
 const IntentWalletsSection: Component<IntentWalletsSectionProps> = props => {
@@ -64,15 +64,16 @@ const IntentWalletsSection: Component<IntentWalletsSectionProps> = props => {
             .slice(0, 4)
     );
 
-    const onOpenWallet = (wallet: UIWalletInfo, url: string): void => {
-        if (!url) {
+    const onOpenWallet = (wallet: UIWalletInfo): void => {
+        if (!props.intentUrl) {
             return;
         }
-        const link = buildWalletIntentLink(wallet as { universalLink?: string }, url);
-        openLinkBlank(link);
+        props.onWalletSelected?.(wallet);
     };
 
     const onOpenAllWallets = (): void => {
+        // Close intent action modal and open the standard wallets modal on the all-wallets tab
+        widgetController.clearAction();
         widgetController.openWalletsModal({ initialTab: 'all-wallets' });
     };
 
@@ -87,7 +88,7 @@ const IntentWalletsSection: Component<IntentWalletsSectionProps> = props => {
                         <li>
                             <WalletLabeledItem
                                 wallet={wallet}
-                                onClick={() => onOpenWallet(wallet, props.intentUrl!)}
+                                onClick={() => onOpenWallet(wallet)}
                             />
                         </li>
                     )}
@@ -166,6 +167,7 @@ export const ActionModal: Component<ActionModalProps> = props => {
     const [signed, setSigned] = createSignal(false);
     const [canceled, setCanceled] = createSignal(false);
     const [intentUrl, setIntentUrl] = createSignal<string | undefined>();
+    const [selectedWallet, setSelectedWallet] = createSignal<UIWalletInfo | null>(null);
 
     createEffect(() => {
         const currentAction = action();
@@ -226,10 +228,31 @@ export const ActionModal: Component<ActionModalProps> = props => {
         }
     };
 
+    const intentQrUrl = (): string | undefined => {
+        if (!intentUrl()) {
+            return undefined;
+        }
+        const wallet = selectedWallet();
+        if (!wallet || !('universalLink' in wallet) || !wallet.universalLink) {
+            return intentUrl()!;
+        }
+        return buildWalletIntentLink(
+            { universalLink: wallet.universalLink } as { universalLink?: string },
+            intentUrl()!
+        );
+    };
+
     return (
         <ActionModalStyled {...dataAttrs}>
-            <Show when={!intentUrl()} fallback={<QRCode sourceUrl={intentUrl()!} />}>
-                {props.icon}
+            <Show
+                when={intentQrUrl()}
+                fallback={
+                    <Show when={!intentUrl()} fallback={<QRCode sourceUrl={intentUrl()!} />}>
+                        {props.icon}
+                    </Show>
+                }
+            >
+                <QRCode sourceUrl={intentQrUrl()!} imageUrl={selectedWallet()?.imageUrl} />
             </Show>
             <Show when={intentUrl()}>
                 <IntentScanH2Styled translationKey="walletModal.desktopUniversalModal.scan">
@@ -247,6 +270,7 @@ export const ActionModal: Component<ActionModalProps> = props => {
             <IntentWalletsSection
                 intentUrl={intentUrl()}
                 tonConnectUI={tonConnectUI ?? undefined}
+                onWalletSelected={wallet => setSelectedWallet(wallet)}
             />
             <Show
                 when={
