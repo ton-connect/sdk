@@ -67,6 +67,12 @@ export interface WalletInfoRemote extends WalletInfoBase {
      * Url of the wallet's implementation of the [HTTP bridge]{@link https://github.com/ton-connect/docs/blob/main/bridge.md#http-bridge}.
      */
     bridgeUrl: string;
+
+    /**
+     * Optional URL for intent object storage (POST with text/plain body, returns get_url).
+     * When intent payload does not fit in URL, SDK uses this or default bridge storage.
+     */
+    objectStorageUrl?: string;
 }
 
 /**
@@ -140,6 +146,7 @@ export interface WalletInfoDTO {
 
     deepLink?: string;
     bridge: (WalletInfoBridgeRemoteDTO | WalletInfoBridgeInjectedDTO)[];
+    object_storage_url?: string;
 }
 
 export interface WalletInfoBridgeRemoteDTO {

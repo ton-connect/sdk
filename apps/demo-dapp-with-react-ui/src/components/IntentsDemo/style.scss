@@ -1,0 +1,194 @@
+.intents-demo {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 20px;
+  align-items: center;
+  margin-top: 60px;
+  padding: 20px;
+
+  h3 {
+    color: white;
+    opacity: 0.9;
+    font-size: 26px;
+    margin-bottom: 4px;
+  }
+}
+
+.intents-demo__subtitle {
+  color: white;
+  opacity: 0.7;
+  font-size: 16px;
+  margin: 0 0 12px 0;
+  text-align: center;
+}
+
+.intents-demo__layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  width: 100%;
+  max-width: 1100px;
+}
+
+.intents-demo__connect-scenario {
+  width: 100%;
+  max-width: 1100px;
+}
+
+.intents-demo__connect-hint {
+  color: white;
+  opacity: 0.7;
+  font-size: 14px;
+  margin: 0 0 12px 0;
+  line-height: 1.4;
+}
+
+.intents-demo__connect-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.intents-demo__status {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.intents-demo__status--connected {
+  color: rgba(102, 200, 150, 0.95);
+}
+
+.intents-demo__status--disconnected {
+  color: rgba(255, 180, 80, 0.95);
+}
+
+.intents-demo__column {
+  flex: 1;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.intents-demo__column--right {
+  max-width: 520px;
+}
+
+.intents-demo__card {
+  background: rgba(24, 32, 48, 0.98);
+  border-radius: 14px;
+  box-shadow: 0 2px 12px 0 rgba(16, 22, 31, 0.13);
+  padding: 16px 18px;
+}
+
+.intents-demo__section-title {
+  color: white;
+  opacity: 0.85;
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.intents-demo__controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.intents-demo__row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.intents-demo__label {
+  display: block;
+  color: white;
+  opacity: 0.7;
+  font-size: 13px;
+  margin-bottom: 2px;
+}
+
+.intents-demo__row input[type='text'],
+.intents-demo__row input[type='number'] {
+  width: 100%;
+  max-width: 420px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(0, 0, 0, 0.18);
+  color: #ffffff;
+  font-size: 13px;
+}
+
+.intents-demo__row input:disabled {
+  opacity: 0.5;
+}
+
+.intents-demo__checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  opacity: 0.8;
+  font-size: 14px;
+}
+
+.intents-demo__hint {
+  color: white;
+  opacity: 0.6;
+  font-size: 12px;
+}
+
+.intents-demo__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.intents-demo button {
+  border: none;
+  padding: 7px 15px;
+  border-radius: 15px;
+  cursor: pointer;
+
+  background-color: rgba(102,170,238,0.91);
+  color: white;
+  font-size: 14px;
+  line-height: 18px;
+
+  transition: transform 0.1s ease-in-out;
+}
+
+.intents-demo button:hover {
+  transform: scale(1.03);
+}
+
+.intents-demo button:active {
+  transform: scale(0.97);
+}
+
+.intents-demo__wallet-label {
+  color: white;
+  opacity: 0.75;
+  font-size: 13px;
+}
+
+.intents-demo__wallet-label--disconnected {
+  color: rgba(102,170,238,0.91);
+}
+
+.intents-demo__json {
+  margin-top: 10px;
+}
+
+.intents-demo__placeholder {
+  margin-top: 10px;
+  color: white;
+  opacity: 0.6;
+  font-size: 13px;
+}
+
