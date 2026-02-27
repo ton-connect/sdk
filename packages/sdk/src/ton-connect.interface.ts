@@ -173,7 +173,9 @@ export interface ITonConnect {
      * Builds a full ConnectRequest for use in intent options (e.g. from UI).
      * Merges manifest from connector config with optional additional request (tonProof etc).
      */
-    getConnectRequestForIntent(additionalRequest?: ConnectAdditionalRequest): import('@tonconnect/protocol').ConnectRequest;
+    getConnectRequestForIntent(
+        additionalRequest?: ConnectAdditionalRequest
+    ): import('@tonconnect/protocol').ConnectRequest;
 
     /**
      * Sends transaction via intent flow.

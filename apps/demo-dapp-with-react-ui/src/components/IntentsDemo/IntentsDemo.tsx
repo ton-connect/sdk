@@ -18,7 +18,7 @@ export function IntentsDemo() {
     const [lastIntentResult, setLastIntentResult] = useState<any | null>(null);
 
     const commonOptions = {
-        modals: ['before'] as const,
+        modals: ['before'] as ('before' | 'success' | 'error')[],
         notifications: ['before', 'success', 'error'] as ('before' | 'success' | 'error')[]
     };
 
