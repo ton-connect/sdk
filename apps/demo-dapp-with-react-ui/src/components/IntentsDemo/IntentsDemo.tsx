@@ -18,8 +18,8 @@ export function IntentsDemo() {
     const [lastIntentResult, setLastIntentResult] = useState<any | null>(null);
 
     const commonOptions = {
-        modals: 'all' as const,
-        notifications: ['before'] as ('before' | 'success' | 'error')[]
+        modals: ['before'] as const,
+        notifications: ['before', 'success', 'error'] as ('before' | 'success' | 'error')[]
     };
 
     useEffect(() => {
