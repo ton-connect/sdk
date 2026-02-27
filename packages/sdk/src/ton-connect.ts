@@ -54,6 +54,7 @@ import {
     isWalletConnectionSourceJS,
     isWalletConnectionSourceWalletConnect
 } from 'src/models/wallet/wallet-connection-source';
+import { isWalletInfoRemote } from 'src/models/wallet/wallet-info';
 import { connectErrorsParser } from 'src/parsers/connect-errors-parser';
 import { sendTransactionParser } from 'src/parsers/send-transaction-parser';
 import { signDataParser } from 'src/parsers/sign-data-parser';
@@ -94,8 +95,50 @@ import { BridgePartialSession, BridgeSession } from 'src/provider/bridge/models/
 import { IEnvironment } from 'src/environment/models/environment.interface';
 import { DefaultEnvironment } from 'src/environment/default-environment';
 import { UUIDv7 } from 'src/utils/uuid';
-import { TraceableWalletEvent } from 'src/models/wallet/traceable-events';
+import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet/traceable-events';
+import type { RpcMethod } from '@tonconnect/protocol';
+import type { HTTPProvider } from 'src/provider/provider';
 import { WalletConnectProvider } from 'src/provider/wallet-connect/wallet-connect-provider';
+import {
+    buildInlineIntentUrl,
+    encodeConnectRequestForUrl,
+    serializeSendActionIntent,
+    serializeSendTransactionIntent,
+    serializeSignDataIntent,
+    serializeSignMessageIntent
+} from 'src/intents/serializer';
+
+const DEFAULT_OBJECT_STORAGE_URL = 'https://ton-connect-bridge-v3-staging.tapps.ninja/objects';
+const MAX_INLINE_INTENT_URL_LENGTH = 1023;
+
+function isFullConnectRequest(
+    x: ConnectAdditionalRequest | ConnectRequest | undefined
+): x is ConnectRequest {
+    return (
+        x !== undefined &&
+        typeof x === 'object' &&
+        'manifestUrl' in x &&
+        'items' in x &&
+        Array.isArray((x as ConnectRequest).items)
+    );
+}
+
+function resolveIntentConnectRequest(
+    options: OptionalTraceable<IntentUrlOptions> | undefined,
+    createConnectRequest: (additional?: ConnectAdditionalRequest) => ConnectRequest
+): ConnectRequest | undefined {
+    if (options?.excludeConnect) {
+        return undefined;
+    }
+    if (options?.connectRequest && isFullConnectRequest(options.connectRequest)) {
+        return options.connectRequest;
+    }
+    const additional =
+        options?.connectRequest && !isFullConnectRequest(options.connectRequest)
+            ? options.connectRequest
+            : undefined;
+    return createConnectRequest(additional);
+}
 
 export class TonConnect implements ITonConnect {
     private desiredChainId: string | undefined;
@@ -127,6 +170,27 @@ export class TonConnect implements ITonConnect {
      * @private
      */
     private readonly tracker: TonConnectTracker;
+
+    private intentResponseSubscriptions: Array<
+        (response: { id: string; result?: unknown; error?: unknown; traceId: string }) => void
+    > = [];
+
+    public onIntentResponse(
+        callback: (response: {
+            id: string;
+            result?: unknown;
+            error?: unknown;
+            traceId: string;
+        }) => void
+    ): () => void {
+        this.intentResponseSubscriptions.push(callback);
+
+        return () => {
+            this.intentResponseSubscriptions = this.intentResponseSubscriptions.filter(
+                existing => existing !== callback
+            );
+        };
+    }
 
     private readonly walletsList = new WalletsListManager();
 
@@ -785,36 +849,322 @@ export class TonConnect implements ITonConnect {
         }
     }
 
-    /** @internal Intents: stub until implementation. */
+    /**
+     * POST intent payload to object storage (API: POST with text/plain body, ttl in query).
+     * Returns the URL where the wallet can GET the payload.
+     */
+    private async storeIntentPayloadInObjectStorage(
+        objectStorageUrl: string,
+        payload: object,
+        ttl: number | undefined,
+        signal: AbortSignal
+    ): Promise<string> {
+        const url = new URL(objectStorageUrl);
+        if (typeof ttl === 'number' && ttl > 0) {
+            url.searchParams.set('ttl', String(ttl));
+        }
+        const response = await fetch(url.toString(), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain; charset=UTF-8'
+            },
+            body: JSON.stringify(payload),
+            signal
+        });
+        const data = (await response.json()) as { get_url?: string; url?: string };
+        const getUrl = data.get_url ?? data.url;
+        if (!getUrl || typeof getUrl !== 'string') {
+            throw new TonConnectError('Invalid response from intent object storage');
+        }
+        return getUrl;
+    }
+
+    /**
+     * Resolves object storage URL for intent: options override, then first from wallet list, then default.
+     */
+    private async resolveObjectStorageUrl(
+        options: OptionalTraceable<IntentUrlOptions> | undefined
+    ): Promise<string> {
+        if (options?.objectStorageUrl) {
+            return options.objectStorageUrl;
+        }
+        const wallets = await TonConnect.getWallets();
+        for (const w of wallets) {
+            if (isWalletInfoRemote(w) && w.objectStorageUrl) {
+                return w.objectStorageUrl;
+            }
+        }
+        return DEFAULT_OBJECT_STORAGE_URL;
+    }
+
     public async sendTransactionIntent(
-        _transaction: SendTransactionIntentRequest,
-        _options?: OptionalTraceable<IntentUrlOptions>
+        transaction: SendTransactionIntentRequest,
+        options?: OptionalTraceable<IntentUrlOptions>
     ): Promise<Traceable<SendTransactionIntentResponse>> {
-        throw new TonConnectError('sendTransactionIntent is not implemented yet');
+        const abortController = createAbortController(options?.signal);
+        if (abortController.signal.aborted) {
+            throw new TonConnectError('sendTransactionIntent was aborted');
+        }
+
+        const traceId = options?.traceId ?? UUIDv7();
+        const sessionInfo = this.getSessionInfo();
+        const clientId = sessionInfo?.clientId ?? traceId;
+
+        const connectRequest = resolveIntentConnectRequest(
+            options,
+            this.createConnectRequest.bind(this)
+        );
+
+        const payload = serializeSendTransactionIntent(transaction, {
+            id: clientId,
+            connectRequest
+        });
+
+        const inlineUrl = buildInlineIntentUrl(payload);
+        const useObjectStorage = inlineUrl.length > MAX_INLINE_INTENT_URL_LENGTH;
+
+        if (useObjectStorage) {
+            const objectStorageUrl = await this.resolveObjectStorageUrl(options);
+            const getUrl = await this.storeIntentPayloadInObjectStorage(
+                objectStorageUrl,
+                payload,
+                options?.ttl,
+                abortController.signal
+            );
+
+            const search = new URLSearchParams();
+            search.set('get_url', getUrl);
+            search.set('id', clientId);
+            if (connectRequest !== undefined) {
+                search.set('c', encodeConnectRequestForUrl(connectRequest));
+            }
+
+            const url = `tc://intent?${search.toString()}`;
+            options?.onIntentUrlReady?.(url);
+        } else {
+            options?.onIntentUrlReady?.(inlineUrl);
+        }
+
+        return await this.waitForIntentResultOrPending<SendTransactionIntentResponse>(clientId, {
+            signal: abortController.signal,
+            traceId,
+            mapResult: result => {
+                if (typeof result === 'string') {
+                    return { boc: result };
+                }
+
+                if (
+                    !result ||
+                    typeof result !== 'object' ||
+                    typeof (result as { boc?: unknown }).boc !== 'string'
+                ) {
+                    throw new TonConnectError(
+                        'Wallet returned an invalid transaction intent result'
+                    );
+                }
+
+                return result as SendTransactionIntentResponse;
+            }
+        });
     }
 
-    /** @internal Intents: stub until implementation. */
     public async signDataIntent(
-        _data: SignDataIntentRequest,
-        _options?: OptionalTraceable<IntentUrlOptions>
+        data: SignDataIntentRequest,
+        options?: OptionalTraceable<IntentUrlOptions>
     ): Promise<Traceable<SignDataIntentResponse>> {
-        throw new TonConnectError('signDataIntent is not implemented yet');
+        const abortController = createAbortController(options?.signal);
+        if (abortController.signal.aborted) {
+            throw new TonConnectError('signDataIntent was aborted');
+        }
+
+        const traceId = options?.traceId ?? UUIDv7();
+        const sessionInfo = this.getSessionInfo();
+        const clientId = sessionInfo?.clientId ?? traceId;
+
+        const connectRequest = resolveIntentConnectRequest(
+            options,
+            this.createConnectRequest.bind(this)
+        );
+
+        const payload = serializeSignDataIntent(data, {
+            id: clientId,
+            connectRequest,
+            manifestUrl: this.dappSettings.manifestUrl
+        });
+
+        const inlineUrl = buildInlineIntentUrl(payload);
+        const useObjectStorage = inlineUrl.length > MAX_INLINE_INTENT_URL_LENGTH;
+
+        if (useObjectStorage) {
+            const objectStorageUrl = await this.resolveObjectStorageUrl(options);
+            const getUrl = await this.storeIntentPayloadInObjectStorage(
+                objectStorageUrl,
+                payload,
+                options?.ttl,
+                abortController.signal
+            );
+
+            const search = new URLSearchParams();
+            search.set('get_url', getUrl);
+            search.set('id', clientId);
+            if (connectRequest !== undefined) {
+                search.set('c', encodeConnectRequestForUrl(connectRequest));
+            }
+
+            const url = `tc://intent?${search.toString()}`;
+            options?.onIntentUrlReady?.(url);
+        } else {
+            options?.onIntentUrlReady?.(inlineUrl);
+        }
+
+        return await this.waitForIntentResultOrPending<SignDataIntentResponse>(clientId, {
+            signal: abortController.signal,
+            traceId,
+            mapResult: result => {
+                if (!result || typeof result !== 'object') {
+                    throw new TonConnectError('Wallet returned an invalid sign-data intent result');
+                }
+
+                return result as SignDataIntentResponse;
+            }
+        });
     }
 
-    /** @internal Intents: stub until implementation. */
     public async signMessageIntent(
-        _message: SignMessageIntentRequest,
-        _options?: OptionalTraceable<IntentUrlOptions>
+        message: SignMessageIntentRequest,
+        options?: OptionalTraceable<IntentUrlOptions>
     ): Promise<Traceable<SignMessageIntentResponse>> {
-        throw new TonConnectError('signMessageIntent is not implemented yet');
+        const abortController = createAbortController(options?.signal);
+        if (abortController.signal.aborted) {
+            throw new TonConnectError('signMessageIntent was aborted');
+        }
+
+        const traceId = options?.traceId ?? UUIDv7();
+        const sessionInfo = this.getSessionInfo();
+        const clientId = sessionInfo?.clientId ?? traceId;
+
+        const connectRequest = resolveIntentConnectRequest(
+            options,
+            this.createConnectRequest.bind(this)
+        );
+
+        const payload = serializeSignMessageIntent(message, {
+            id: clientId,
+            connectRequest
+        });
+
+        const inlineUrl = buildInlineIntentUrl(payload);
+        const useObjectStorage = inlineUrl.length > MAX_INLINE_INTENT_URL_LENGTH;
+
+        if (useObjectStorage) {
+            const objectStorageUrl = await this.resolveObjectStorageUrl(options);
+            const getUrl = await this.storeIntentPayloadInObjectStorage(
+                objectStorageUrl,
+                payload,
+                options?.ttl,
+                abortController.signal
+            );
+
+            const search = new URLSearchParams();
+            search.set('get_url', getUrl);
+            search.set('id', clientId);
+            if (connectRequest !== undefined) {
+                search.set('c', encodeConnectRequestForUrl(connectRequest));
+            }
+
+            const url = `tc://intent?${search.toString()}`;
+            options?.onIntentUrlReady?.(url);
+        } else {
+            options?.onIntentUrlReady?.(inlineUrl);
+        }
+
+        return await this.waitForIntentResultOrPending<SignMessageIntentResponse>(clientId, {
+            signal: abortController.signal,
+            traceId,
+            mapResult: result => {
+                if (typeof result === 'string') {
+                    return { internalBoc: result };
+                }
+
+                if (
+                    !result ||
+                    typeof result !== 'object' ||
+                    typeof (result as { internalBoc?: unknown }).internalBoc !== 'string'
+                ) {
+                    throw new TonConnectError(
+                        'Wallet returned an invalid sign-message intent result'
+                    );
+                }
+
+                return result as SignMessageIntentResponse;
+            }
+        });
     }
 
-    /** @internal Intents: stub until implementation. */
     public async sendActionIntent(
-        _action: SendActionIntentRequest,
-        _options?: OptionalTraceable<IntentUrlOptions>
+        action: SendActionIntentRequest,
+        options?: OptionalTraceable<IntentUrlOptions>
     ): Promise<Traceable<SendActionIntentResponse>> {
-        throw new TonConnectError('sendActionIntent is not implemented yet');
+        const abortController = createAbortController(options?.signal);
+        if (abortController.signal.aborted) {
+            throw new TonConnectError('sendActionIntent was aborted');
+        }
+
+        const traceId = options?.traceId ?? UUIDv7();
+        const sessionInfo = this.getSessionInfo();
+        const clientId = sessionInfo?.clientId ?? traceId;
+
+        const connectRequest = resolveIntentConnectRequest(
+            options,
+            this.createConnectRequest.bind(this)
+        );
+
+        const payload = serializeSendActionIntent(action, {
+            id: clientId,
+            connectRequest
+        });
+
+        const inlineUrl = buildInlineIntentUrl(payload);
+        const useObjectStorage = inlineUrl.length > MAX_INLINE_INTENT_URL_LENGTH;
+
+        if (useObjectStorage) {
+            const objectStorageUrl = await this.resolveObjectStorageUrl(options);
+            const getUrl = await this.storeIntentPayloadInObjectStorage(
+                objectStorageUrl,
+                payload,
+                options?.ttl,
+                abortController.signal
+            );
+
+            const search = new URLSearchParams();
+            search.set('get_url', getUrl);
+            search.set('id', clientId);
+            if (connectRequest !== undefined) {
+                search.set('c', encodeConnectRequestForUrl(connectRequest));
+            }
+
+            const url = `tc://intent?${search.toString()}`;
+            options?.onIntentUrlReady?.(url);
+        } else {
+            options?.onIntentUrlReady?.(inlineUrl);
+        }
+
+        return await this.waitForIntentResultOrPending<SendActionIntentResponse>(clientId, {
+            signal: abortController.signal,
+            traceId,
+            mapResult: result => {
+                if (typeof result === 'string') {
+                    // For action intents with string result, assume it is a signed transaction BOC
+                    return { boc: result } as SendActionIntentResponse;
+                }
+
+                if (!result || typeof result !== 'object') {
+                    throw new TonConnectError('Wallet returned an invalid action intent result');
+                }
+
+                return result as SendActionIntentResponse;
+            }
+        });
     }
 
     private getSessionInfo(): { clientId: string | null; walletId: string | null } | null {
@@ -840,6 +1190,145 @@ export class TonConnect implements ITonConnect {
         } catch {
             return null;
         }
+    }
+
+    private intentResponseListener(response: TraceableWalletResponse<RpcMethod>): void {
+        const id = String((response as { id?: string | number }).id ?? '');
+        const traceId = (response as { traceId?: string }).traceId ?? UUIDv7();
+
+        const payload: { id: string; result?: unknown; error?: unknown; traceId: string } = {
+            id,
+            traceId
+        };
+
+        if ('result' in response) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (payload as any).result = (response as { result?: unknown }).result;
+        }
+
+        if ('error' in response) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (payload as any).error = (response as { error?: unknown }).error;
+        }
+
+        this.intentResponseSubscriptions.forEach(callback => callback(payload));
+    }
+
+    private waitForIntentResult<TResponse extends {}>(
+        clientId: string,
+        options: {
+            signal?: AbortSignal;
+            traceId: string;
+            mapResult: (result: unknown) => TResponse;
+        }
+    ): Promise<Traceable<TResponse>> {
+        const { signal, traceId, mapResult } = options;
+
+        return new Promise<Traceable<TResponse>>((resolve, reject) => {
+            if (signal?.aborted) {
+                reject(new TonConnectError('Intent request was aborted'));
+                return;
+            }
+
+            const unsubscribe = this.onIntentResponse(payload => {
+                if (!payload.id || payload.id !== clientId) {
+                    return;
+                }
+
+                cleanup();
+
+                if (payload.error) {
+                    const message =
+                        typeof (payload.error as { message?: string })?.message === 'string'
+                            ? (payload.error as { message?: string }).message
+                            : 'Wallet returned an error for intent';
+
+                    reject(new TonConnectError(message));
+                    return;
+                }
+
+                if (payload.result === undefined) {
+                    reject(new TonConnectError('Wallet returned an invalid intent result'));
+                    return;
+                }
+
+                try {
+                    const mapped = mapResult(payload.result);
+
+                    resolve({
+                        ...mapped,
+                        traceId
+                    });
+                } catch (e) {
+                    if (e instanceof TonConnectError) {
+                        reject(e);
+                    } else {
+                        reject(new TonConnectError('Wallet returned an invalid intent result'));
+                    }
+                }
+            });
+
+            const onAbort = (): void => {
+                cleanup();
+                reject(new TonConnectError('Intent request was aborted'));
+            };
+
+            const cleanup = (): void => {
+                unsubscribe();
+                signal?.removeEventListener('abort', onAbort);
+            };
+
+            if (signal) {
+                signal.addEventListener('abort', onAbort);
+            }
+        });
+    }
+
+    /**
+     * Waits for intent result: prefers resolving via bridge pending request (registerPendingIntent)
+     * so the response id matches and no "orphan" path is used; falls back to onIntentResponse subscription.
+     */
+    private async waitForIntentResultOrPending<TResponse extends {}>(
+        clientId: string,
+        options: {
+            signal?: AbortSignal;
+            traceId: string;
+            mapResult: (result: unknown) => TResponse;
+        }
+    ): Promise<Traceable<TResponse>> {
+        if (this.provider?.type === 'http' && 'registerPendingIntent' in this.provider) {
+            const response = await (this.provider as BridgeProvider).registerPendingIntent(
+                clientId,
+                { signal: options.signal, traceId: options.traceId }
+            );
+
+            const raw = response as { result?: unknown; error?: unknown; traceId?: string };
+
+            if (raw.error) {
+                const message =
+                    typeof (raw.error as { message?: string })?.message === 'string'
+                        ? (raw.error as { message?: string }).message
+                        : 'Wallet returned an error for intent';
+                throw new TonConnectError(message);
+            }
+
+            if (raw.result === undefined) {
+                throw new TonConnectError('Wallet returned an invalid intent result');
+            }
+
+            try {
+                const mapped = options.mapResult(raw.result);
+                const traceId = raw.traceId ?? options.traceId;
+                return { ...mapped, traceId };
+            } catch (e) {
+                if (e instanceof TonConnectError) {
+                    throw e;
+                }
+                throw new TonConnectError('Wallet returned an invalid intent result');
+            }
+        }
+
+        return await this.waitForIntentResult<TResponse>(clientId, options);
     }
 
     /**
@@ -938,6 +1427,14 @@ export class TonConnect implements ITonConnect {
         }
 
         provider.listen(this.walletEventsListener.bind(this));
+        if ((provider as HTTPProvider).type === 'http' && 'onOrphanResponse' in provider) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (provider as any).onOrphanResponse(
+                this.intentResponseListener.bind(this) as (
+                    response: TraceableWalletResponse<RpcMethod>
+                ) => void
+            );
+        }
         return provider;
     }
 
@@ -1117,5 +1614,15 @@ export class TonConnect implements ITonConnect {
             manifestUrl: this.dappSettings.manifestUrl,
             items
         };
+    }
+
+    /**
+     * Builds a full ConnectRequest for use in intent URLs (e.g. from UI layer).
+     * Use this when you need to pass connectRequest into intent options.
+     */
+    public getConnectRequestForIntent(
+        additionalRequest?: ConnectAdditionalRequest
+    ): ConnectRequest {
+        return this.createConnectRequest(additionalRequest);
     }
 }

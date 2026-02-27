@@ -3,6 +3,7 @@ import { THEME, TonConnectUIProvider, initializeWalletConnect } from '@tonconnec
 import { Routes, Route } from 'react-router-dom';
 import { Header } from './components/Header/Header';
 import { TxForm } from './components/TxForm/TxForm';
+import { IntentsDemo } from './components/IntentsDemo/IntentsDemo';
 import { Footer } from './components/Footer/Footer';
 import { TonProofDemo } from './components/TonProofDemo/TonProofDemo';
 import { CreateJettonDemo } from './components/CreateJettonDemo/CreateJettonDemo';
@@ -30,6 +31,7 @@ function HomePage() {
         <div className="app">
             <Header />
             <TxForm />
+            <IntentsDemo />
             <WalletBatchLimitsTester />
             <SignDataTester />
             <TransferUsdt />

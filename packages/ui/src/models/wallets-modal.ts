@@ -74,7 +74,12 @@ export type ChooseSupportedFeatureWalletsModal = {
  * Modal window state.
  */
 export type WalletsModalState = OptionalTraceable<
-    WalletModalOpened | WalletModalClosed | ChooseSupportedFeatureWalletsModal
+    (WalletModalOpened | WalletModalClosed | ChooseSupportedFeatureWalletsModal) & {
+        /**
+         * Initial tab to open in wallets modal (used by intents to jump to all wallets list).
+         */
+        initialTab?: 'universal' | 'all-wallets';
+    }
 >;
 
 /**

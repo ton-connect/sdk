@@ -8,8 +8,7 @@ export type {
 export type { SignDataIntentRequest } from './sign-data-intent-request';
 export type { SignMessageIntentRequest } from './sign-message-intent-request';
 export type { SendActionIntentRequest } from './send-action-intent-request';
-export type { IntentUrlOptions } from './intent-url-options';
-
+export type { IntentUrlOptions, ConnectRequestForIntent } from './intent-url-options';
 
 export type { SendTransactionResponse as SendTransactionIntentResponse } from '../send-transaction';
 export type { SignDataResponse as SignDataIntentResponse } from '../sign-data';

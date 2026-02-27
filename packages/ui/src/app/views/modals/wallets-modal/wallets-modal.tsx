@@ -49,9 +49,11 @@ export const WalletsModal: Component = () => {
     createEffect(() => locale(appState.language));
 
     createEffect(() => {
+        const state = walletsModalState();
         if (getWalletsModalIsOpened()) {
             updateIsMobile();
             refetchWallets();
+            setSelectedTab(state.initialTab ?? 'universal');
         } else {
             setSelectedWalletInfo(null);
             setSelectedTab('universal');

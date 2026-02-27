@@ -64,6 +64,15 @@ export interface ITonConnect {
         errorsHandler?: (err: TonConnectError) => void
     ): () => void;
 
+    onIntentResponse(
+        callback: (response: {
+            id: string;
+            result?: unknown;
+            error?: unknown;
+            traceId: string;
+        }) => void
+    ): () => void;
+
     /**
      * Generates universal link for an external wallet and subscribes to the wallet's bridge, or sends connect request to the injected wallet.
      * @param wallet wallet's bridge url and universal link for an external wallet or jsBridge key for the injected wallet, or list of bridges urls for creating an universal connection request for the corresponding wallets.
@@ -159,6 +168,12 @@ export interface ITonConnect {
      * @returns session ID string or null if not available.
      */
     getSessionId(): Promise<string | null>;
+
+    /**
+     * Builds a full ConnectRequest for use in intent options (e.g. from UI).
+     * Merges manifest from connector config with optional additional request (tonProof etc).
+     */
+    getConnectRequestForIntent(additionalRequest?: ConnectAdditionalRequest): import('@tonconnect/protocol').ConnectRequest;
 
     /**
      * Sends transaction via intent flow.

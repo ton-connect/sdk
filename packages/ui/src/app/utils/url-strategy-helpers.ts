@@ -616,6 +616,26 @@ function addQueryParameter(url: string, key: string, value: string): string {
     return parsed.toString();
 }
 
+/**
+ * Builds a wallet-specific link that opens the intent URL in the given wallet.
+ * Uses the wallet's universal link with an optional `url` parameter for the intent.
+ */
+export function buildWalletIntentLink(
+    wallet: { universalLink?: string },
+    intentUrl: string
+): string {
+    if (!wallet.universalLink) {
+        return intentUrl;
+    }
+    try {
+        const parsed = new URL(wallet.universalLink);
+        parsed.searchParams.set('url', intentUrl);
+        return parsed.toString();
+    } catch {
+        return intentUrl;
+    }
+}
+
 function addQueryParametersIfNotPresented(
     url: string,
     params: Record<string, string | null | undefined>
