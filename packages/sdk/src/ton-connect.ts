@@ -868,18 +868,24 @@ export class TonConnect implements ITonConnect {
         signal: AbortSignal
     ): Promise<string> {
         const url = new URL(objectStorageUrl);
-        if (typeof ttl === 'number' && ttl > 0) {
-            url.searchParams.set('ttl', String(ttl));
-        }
+        // Use explicit TTL for remote object storage; default to 300 seconds when not provided.
+        const effectiveTtl = typeof ttl === 'number' && ttl > 0 ? ttl : 300;
+        url.searchParams.set('ttl', String(effectiveTtl));
         const response = await fetch(url.toString(), {
             method: 'POST',
             headers: {
-                'Content-Type': 'text/plain; charset=UTF-8'
+                'Content-Type': 'text/plain'
             },
             body: JSON.stringify(payload),
             signal
         });
-        const data = (await response.json()) as { get_url?: string; url?: string };
+        let data: { get_url?: string; url?: string };
+        try {
+            data = (await response.json()) as { get_url?: string; url?: string };
+            console.log(data);
+        } catch {
+            throw new TonConnectError('Invalid response from intent object storage');
+        }
         const getUrl = data.get_url ?? data.url;
         if (!getUrl || typeof getUrl !== 'string') {
             throw new TonConnectError('Invalid response from intent object storage');
@@ -932,23 +938,28 @@ export class TonConnect implements ITonConnect {
         const useObjectStorage = inlineUrl.length > MAX_INLINE_INTENT_URL_LENGTH;
 
         if (useObjectStorage) {
-            const objectStorageUrl = await this.resolveObjectStorageUrl(options);
-            const getUrl = await this.storeIntentPayloadInObjectStorage(
-                objectStorageUrl,
-                payload,
-                options?.ttl,
-                abortController.signal
-            );
+            try {
+                const objectStorageUrl = await this.resolveObjectStorageUrl(options);
+                const getUrl = await this.storeIntentPayloadInObjectStorage(
+                    objectStorageUrl,
+                    payload,
+                    options?.ttl,
+                    abortController.signal
+                );
 
-            const search = new URLSearchParams();
-            search.set('get_url', getUrl);
-            search.set('id', clientId);
-            if (connectRequest !== undefined) {
-                search.set('c', encodeConnectRequestForUrl(connectRequest));
+                const search = new URLSearchParams();
+                search.set('get_url', getUrl);
+                search.set('id', clientId);
+                if (connectRequest !== undefined) {
+                    search.set('c', encodeConnectRequestForUrl(connectRequest));
+                }
+
+                const url = `tc://intent?${search.toString()}`;
+                options?.onIntentUrlReady?.(url);
+            } catch {
+                // Fallback to inline intent URL if object storage is unavailable or misconfigured.
+                options?.onIntentUrlReady?.(inlineUrl);
             }
-
-            const url = `tc://intent?${search.toString()}`;
-            options?.onIntentUrlReady?.(url);
         } else {
             options?.onIntentUrlReady?.(inlineUrl);
         }
@@ -1004,23 +1015,27 @@ export class TonConnect implements ITonConnect {
         const useObjectStorage = inlineUrl.length > MAX_INLINE_INTENT_URL_LENGTH;
 
         if (useObjectStorage) {
-            const objectStorageUrl = await this.resolveObjectStorageUrl(options);
-            const getUrl = await this.storeIntentPayloadInObjectStorage(
-                objectStorageUrl,
-                payload,
-                options?.ttl,
-                abortController.signal
-            );
+            try {
+                const objectStorageUrl = await this.resolveObjectStorageUrl(options);
+                const getUrl = await this.storeIntentPayloadInObjectStorage(
+                    objectStorageUrl,
+                    payload,
+                    options?.ttl,
+                    abortController.signal
+                );
 
-            const search = new URLSearchParams();
-            search.set('get_url', getUrl);
-            search.set('id', clientId);
-            if (connectRequest !== undefined) {
-                search.set('c', encodeConnectRequestForUrl(connectRequest));
+                const search = new URLSearchParams();
+                search.set('get_url', getUrl);
+                search.set('id', clientId);
+                if (connectRequest !== undefined) {
+                    search.set('c', encodeConnectRequestForUrl(connectRequest));
+                }
+
+                const url = `tc://intent?${search.toString()}`;
+                options?.onIntentUrlReady?.(url);
+            } catch {
+                options?.onIntentUrlReady?.(inlineUrl);
             }
-
-            const url = `tc://intent?${search.toString()}`;
-            options?.onIntentUrlReady?.(url);
         } else {
             options?.onIntentUrlReady?.(inlineUrl);
         }
@@ -1065,23 +1080,27 @@ export class TonConnect implements ITonConnect {
         const useObjectStorage = inlineUrl.length > MAX_INLINE_INTENT_URL_LENGTH;
 
         if (useObjectStorage) {
-            const objectStorageUrl = await this.resolveObjectStorageUrl(options);
-            const getUrl = await this.storeIntentPayloadInObjectStorage(
-                objectStorageUrl,
-                payload,
-                options?.ttl,
-                abortController.signal
-            );
+            try {
+                const objectStorageUrl = await this.resolveObjectStorageUrl(options);
+                const getUrl = await this.storeIntentPayloadInObjectStorage(
+                    objectStorageUrl,
+                    payload,
+                    options?.ttl,
+                    abortController.signal
+                );
 
-            const search = new URLSearchParams();
-            search.set('get_url', getUrl);
-            search.set('id', clientId);
-            if (connectRequest !== undefined) {
-                search.set('c', encodeConnectRequestForUrl(connectRequest));
+                const search = new URLSearchParams();
+                search.set('get_url', getUrl);
+                search.set('id', clientId);
+                if (connectRequest !== undefined) {
+                    search.set('c', encodeConnectRequestForUrl(connectRequest));
+                }
+
+                const url = `tc://intent?${search.toString()}`;
+                options?.onIntentUrlReady?.(url);
+            } catch {
+                options?.onIntentUrlReady?.(inlineUrl);
             }
-
-            const url = `tc://intent?${search.toString()}`;
-            options?.onIntentUrlReady?.(url);
         } else {
             options?.onIntentUrlReady?.(inlineUrl);
         }
@@ -1136,23 +1155,27 @@ export class TonConnect implements ITonConnect {
         const useObjectStorage = inlineUrl.length > MAX_INLINE_INTENT_URL_LENGTH;
 
         if (useObjectStorage) {
-            const objectStorageUrl = await this.resolveObjectStorageUrl(options);
-            const getUrl = await this.storeIntentPayloadInObjectStorage(
-                objectStorageUrl,
-                payload,
-                options?.ttl,
-                abortController.signal
-            );
+            try {
+                const objectStorageUrl = await this.resolveObjectStorageUrl(options);
+                const getUrl = await this.storeIntentPayloadInObjectStorage(
+                    objectStorageUrl,
+                    payload,
+                    options?.ttl,
+                    abortController.signal
+                );
 
-            const search = new URLSearchParams();
-            search.set('get_url', getUrl);
-            search.set('id', clientId);
-            if (connectRequest !== undefined) {
-                search.set('c', encodeConnectRequestForUrl(connectRequest));
+                const search = new URLSearchParams();
+                search.set('get_url', getUrl);
+                search.set('id', clientId);
+                if (connectRequest !== undefined) {
+                    search.set('c', encodeConnectRequestForUrl(connectRequest));
+                }
+
+                const url = `tc://intent?${search.toString()}`;
+                options?.onIntentUrlReady?.(url);
+            } catch {
+                options?.onIntentUrlReady?.(inlineUrl);
             }
-
-            const url = `tc://intent?${search.toString()}`;
-            options?.onIntentUrlReady?.(url);
         } else {
             options?.onIntentUrlReady?.(inlineUrl);
         }

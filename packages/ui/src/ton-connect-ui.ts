@@ -904,37 +904,9 @@ export class TonConnectUI {
 
         await this.ensureBridgeListeningForIntent(traceId);
 
-        const sessionId = await this.getSessionId();
-
         const { notifications, modals } = this.getModalsAndNotificationsConfiguration(options);
 
-        widgetController.setAction({
-            name: 'confirm-transaction',
-            showNotification: false,
-            openModal: true,
-            sent: false,
-            sessionId: sessionId || undefined,
-            traceId
-        });
-
         const abortController = new AbortController();
-
-        void this.waitForWalletConnection({
-            ignoreErrors: true,
-            signal: abortController.signal,
-            traceId
-        }).catch(() => {});
-
-        const unsubscribe = this.onTransactionModalStateChange(currentAction => {
-            if (currentAction?.openModal) {
-                return;
-            }
-
-            unsubscribe();
-            if (!currentAction) {
-                abortController.abort();
-            }
-        });
 
         try {
             const intentOptions = this.getIntentOptionsWithConnectRequest(options);
@@ -943,15 +915,7 @@ export class TonConnectUI {
                 signal: abortController.signal,
                 traceId,
                 onIntentUrlReady: url => {
-                    widgetController.setAction({
-                        name: 'confirm-transaction',
-                        showNotification: false,
-                        openModal: true,
-                        sent: false,
-                        sessionId: sessionId || undefined,
-                        traceId,
-                        intentUrl: url
-                    });
+                    this.modal.openIntent({ traceId, intentUrl: url });
                 }
             });
 
@@ -971,8 +935,6 @@ export class TonConnectUI {
                 traceId
             });
             throw e;
-        } finally {
-            unsubscribe();
         }
     }
 
@@ -988,37 +950,9 @@ export class TonConnectUI {
 
         await this.ensureBridgeListeningForIntent(traceId);
 
-        const sessionId = await this.getSessionId();
-
         const { notifications, modals } = this.getModalsAndNotificationsConfiguration(options);
 
-        widgetController.setAction({
-            name: 'confirm-sign-data',
-            showNotification: false,
-            openModal: true,
-            signed: false,
-            sessionId: sessionId || undefined,
-            traceId
-        });
-
         const abortController = new AbortController();
-
-        void this.waitForWalletConnection({
-            ignoreErrors: true,
-            signal: abortController.signal,
-            traceId
-        }).catch(() => {});
-
-        const unsubscribe = this.onTransactionModalStateChange(currentAction => {
-            if (currentAction?.openModal) {
-                return;
-            }
-
-            unsubscribe();
-            if (!currentAction) {
-                abortController.abort();
-            }
-        });
 
         try {
             const intentOptions = this.getIntentOptionsWithConnectRequest(options);
@@ -1027,15 +961,7 @@ export class TonConnectUI {
                 signal: abortController.signal,
                 traceId,
                 onIntentUrlReady: url => {
-                    widgetController.setAction({
-                        name: 'confirm-sign-data',
-                        showNotification: false,
-                        openModal: true,
-                        signed: false,
-                        sessionId: sessionId || undefined,
-                        traceId,
-                        intentUrl: url
-                    });
+                    this.modal.openIntent({ traceId, intentUrl: url });
                 }
             });
 
@@ -1055,8 +981,6 @@ export class TonConnectUI {
                 traceId
             });
             throw e;
-        } finally {
-            unsubscribe();
         }
     }
 
@@ -1072,37 +996,9 @@ export class TonConnectUI {
 
         await this.ensureBridgeListeningForIntent(traceId);
 
-        const sessionId = await this.getSessionId();
-
         const { notifications, modals } = this.getModalsAndNotificationsConfiguration(options);
 
-        widgetController.setAction({
-            name: 'confirm-transaction',
-            showNotification: false,
-            openModal: true,
-            sent: false,
-            sessionId: sessionId || undefined,
-            traceId
-        });
-
         const abortController = new AbortController();
-
-        void this.waitForWalletConnection({
-            ignoreErrors: true,
-            signal: abortController.signal,
-            traceId
-        }).catch(() => {});
-
-        const unsubscribe = this.onTransactionModalStateChange(currentAction => {
-            if (currentAction?.openModal) {
-                return;
-            }
-
-            unsubscribe();
-            if (!currentAction) {
-                abortController.abort();
-            }
-        });
 
         try {
             const intentOptions = this.getIntentOptionsWithConnectRequest(options);
@@ -1111,15 +1007,7 @@ export class TonConnectUI {
                 signal: abortController.signal,
                 traceId,
                 onIntentUrlReady: url => {
-                    widgetController.setAction({
-                        name: 'confirm-transaction',
-                        showNotification: false,
-                        openModal: true,
-                        sent: false,
-                        sessionId: sessionId || undefined,
-                        traceId,
-                        intentUrl: url
-                    });
+                    this.modal.openIntent({ traceId, intentUrl: url });
                 }
             });
 
@@ -1139,8 +1027,6 @@ export class TonConnectUI {
                 traceId
             });
             throw e;
-        } finally {
-            unsubscribe();
         }
     }
 
@@ -1156,37 +1042,9 @@ export class TonConnectUI {
 
         await this.ensureBridgeListeningForIntent(traceId);
 
-        const sessionId = await this.getSessionId();
-
         const { notifications, modals } = this.getModalsAndNotificationsConfiguration(options);
 
-        widgetController.setAction({
-            name: 'confirm-transaction',
-            showNotification: false,
-            openModal: true,
-            sent: false,
-            sessionId: sessionId || undefined,
-            traceId
-        });
-
         const abortController = new AbortController();
-
-        void this.waitForWalletConnection({
-            ignoreErrors: true,
-            signal: abortController.signal,
-            traceId
-        }).catch(() => {});
-
-        const unsubscribe = this.onTransactionModalStateChange(currentAction => {
-            if (currentAction?.openModal) {
-                return;
-            }
-
-            unsubscribe();
-            if (!currentAction) {
-                abortController.abort();
-            }
-        });
 
         try {
             const intentOptions = this.getIntentOptionsWithConnectRequest(options);
@@ -1195,15 +1053,7 @@ export class TonConnectUI {
                 signal: abortController.signal,
                 traceId,
                 onIntentUrlReady: url => {
-                    widgetController.setAction({
-                        name: 'confirm-transaction',
-                        showNotification: false,
-                        openModal: true,
-                        sent: false,
-                        sessionId: sessionId || undefined,
-                        traceId,
-                        intentUrl: url
-                    });
+                    this.modal.openIntent({ traceId, intentUrl: url });
                 }
             });
 
@@ -1223,8 +1073,6 @@ export class TonConnectUI {
                 traceId
             });
             throw e;
-        } finally {
-            unsubscribe();
         }
     }
 
