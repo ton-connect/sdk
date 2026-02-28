@@ -1,11 +1,28 @@
 import { useEffect, useState } from 'react';
 import { useTonConnectUI, useTonWallet, CHAIN } from '@tonconnect/ui-react';
-import { TonClient, JettonWallet } from '@ton/ton';
-import { Address, beginCell, fromNano, toNano } from '@ton/core';
+import {
+    TonClient,
+    JettonWallet,
+    internal,
+    WalletContractV5R1,
+    loadMessageRelaxed
+} from '@ton/ton';
+import {
+    Address,
+    beginCell,
+    fromNano,
+    storeMessage,
+    storeMessageRelaxed,
+    toNano,
+    external,
+    Cell
+} from '@ton/core';
 import { JettonMinter, storeJettonTransferMessage } from '@ton-community/assets-sdk';
 import './style.scss';
 import { retry } from '../../server/utils/transactions-utils';
 import { formatUnits, parseUnits } from '../../utils/units';
+import { TonApiClient } from '@ton-api/client';
+import { ContractAdapter } from '@ton-api/ton-adapter';
 
 const USDT_MASTER = Address.parse('EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs');
 const USDT_DECIMALS = 6;
@@ -127,6 +144,151 @@ export function TransferUsdt() {
         });
     };
 
+    const handleSendGasless = async () => {
+        const ta = new TonApiClient({
+            baseUrl: 'https://tonapi.io'
+        });
+        const provider = new ContractAdapter(ta);
+
+        const OP_CODES = {
+            TK_RELAYER_FEE: 0x878da6e3,
+            JETTON_TRANSFER: 0xf8a7ea5
+        };
+
+        const BASE_JETTON_SEND_AMOUNT = toNano(0.05);
+        if (!wallet) {
+            tonConnectUi.openModal();
+            return;
+        }
+
+        if (!destination || !senderAddress || !jettonWallet) {
+            return;
+        }
+
+        const amountUSDT = parseUnits(amount, USDT_DECIMALS);
+
+        if (!(amountUSDT > 0)) {
+            return;
+        }
+
+        const workchain = 0;
+        const walletV5 = WalletContractV5R1.create({
+            workchain,
+            publicKey: Buffer.from(wallet.account.publicKey!, 'hex')
+        });
+        const contract = provider.open(walletV5);
+
+        const jettonWalletAddressResult = await ta.blockchain.execGetMethodForBlockchainAccount(
+            USDT_MASTER,
+            'get_wallet_address',
+            {
+                args: [walletV5.address.toRawString()]
+            }
+        );
+        console.log('jettonWalletAddressResult', jettonWalletAddressResult);
+        const jettonWalletUsdt = Address.parse(
+            jettonWalletAddressResult.decoded.jetton_wallet_address
+        );
+
+        // we use USDt in this example,
+        // so we just print all supported gas jettons and get the relay address.
+        // we have to send excess to the relay address in order to make a transfer cheaper.
+        const relayerAddress = await printConfigAndReturnRelayAddress();
+
+        // Create payload for jetton transfer
+        const tetherTransferPayload = beginCell()
+            .storeUint(OP_CODES.JETTON_TRANSFER, 32)
+            .storeUint(0, 64)
+            .storeCoins(amountUSDT) // 1 USDT
+            .storeAddress(Address.parse(destination)) // address for receiver
+            .storeAddress(relayerAddress) // address for excesses
+            .storeBit(false)
+            .storeCoins(1n)
+            .storeMaybeRef(undefined)
+            .endCell();
+
+        const messageToEstimate = beginCell()
+            .storeWritable(
+                storeMessageRelaxed(
+                    internal({
+                        to: jettonWalletUsdt,
+                        bounce: true,
+                        value: BASE_JETTON_SEND_AMOUNT,
+                        body: tetherTransferPayload
+                    })
+                )
+            )
+            .endCell();
+
+        const params = await ta.gasless.gaslessEstimate(USDT_MASTER, {
+            walletAddress: walletV5.address,
+            walletPublicKey: walletV5.publicKey.toString('hex'),
+            messages: [{ boc: messageToEstimate }]
+        });
+
+        console.log('Estimated transfer:', params);
+
+        const { boc: internalBoc } = await tonConnectUi.signMessage({
+            validUntil: Math.ceil(Date.now() / 1000) + 5 * 60,
+            messages: params.messages.map(message => ({
+                address: message.address.toString(),
+                amount: message.amount,
+                stateInit: message.stateInit?.toBoc()?.toString('base64'),
+                payload: message.payload?.toBoc()?.toString('base64')
+            }))
+        });
+
+        // const tetherTransferForSend = walletV5.createTransfer({
+        //     seqno,
+        //     authType: 'internal',
+        //     timeout: Math.ceil(Date.now() / 1000) + 5 * 60,
+        //     secretKey: keyPair.secretKey,
+        //     sendMode: SendMode.PAY_GAS_SEPARATELY + SendMode.IGNORE_ERRORS,
+        //     messages: params.messages.map(message =>
+        //         internal({
+        //             to: message.address,
+        //             value: BigInt(message.amount),
+        //             body: message.payload
+        //         })
+        //     )
+        // });
+
+        const internalMsg = Cell.fromBase64(internalBoc);
+
+        const msg = loadMessageRelaxed(internalMsg.asSlice());
+
+        const seqno = await contract.getSeqno();
+        const extMessage = beginCell()
+            .storeWritable(
+                storeMessage(
+                    external({
+                        to: contract.address,
+                        init: seqno === 0 ? contract.init : undefined,
+                        body: msg.body
+                    })
+                )
+            )
+            .endCell();
+
+        ta.gasless
+            .gaslessSend({
+                walletPublicKey: walletV5.publicKey.toString('hex'),
+                boc: extMessage
+            })
+            .then(() => console.log('A gasless transfer sent!'))
+            .catch(error => console.error(error.message));
+
+        async function printConfigAndReturnRelayAddress(): Promise<Address> {
+            const cfg = await ta.gasless.gaslessConfig();
+
+            console.log('Available jettons for gasless transfer');
+            console.log(cfg.gasJettons.map(gasJetton => gasJetton.masterId));
+
+            console.log(`Relay address to send fees to: ${cfg.relayAddress}`);
+            return cfg.relayAddress;
+        }
+    };
+
     const loader = (
         <span
             className="loader"
@@ -169,9 +331,14 @@ export function TransferUsdt() {
             </div>
 
             {wallet ? (
-                <button onClick={handleSend} disabled={loading}>
-                    {loading ? 'Loading wallet info...' : 'Send USDT'}
-                </button>
+                <>
+                    <button onClick={handleSend} disabled={loading}>
+                        {loading ? 'Loading wallet info...' : 'Send USDT'}
+                    </button>
+                    <button onClick={handleSendGasless} disabled={loading}>
+                        {loading ? 'Loading wallet info...' : 'Send Gasless'}
+                    </button>
+                </>
             ) : (
                 <button onClick={() => tonConnectUi.openModal()}>
                     Connect wallet to send USDT
