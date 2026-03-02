@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 
 /**
  * Use it to get access to the open/close modal functions.
- * Intent-specific helpers like `openIntent` are not exposed here.
  */
 export function useTonConnectModal(): Omit<WalletsModal, 'onStateChange' | 'openIntent'> {
     const [tonConnectUI] = useTonConnectUI();

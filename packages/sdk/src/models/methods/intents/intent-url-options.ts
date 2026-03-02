@@ -1,6 +1,7 @@
+import { ConnectRequest } from '@tonconnect/protocol';
 import { ConnectAdditionalRequest } from '../connect';
 
-export type ConnectRequestForIntent = import('@tonconnect/protocol').ConnectRequest;
+export type ConnectRequestForIntent = ConnectRequest;
 
 /**
  * Options when sending an operation via intent.

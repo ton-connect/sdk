@@ -1,3 +1,9 @@
+import {
+    SendTransactionIntentResponse,
+    SignDataIntentResponse,
+    SignMessageIntentResponse
+} from '..';
+
 export type {
     SendTransactionIntentRequest,
     SendTransactionIntentItem,
@@ -14,6 +20,6 @@ export type { SendTransactionResponse as SendTransactionIntentResponse } from '.
 export type { SignDataResponse as SignDataIntentResponse } from '../sign-data';
 export type { SignMessageResponse as SignMessageIntentResponse } from '../sign-message';
 export type SendActionIntentResponse =
-    | import('../send-transaction').SendTransactionResponse
-    | import('../sign-data').SignDataResponse
-    | import('../sign-message').SignMessageResponse;
+    | SendTransactionIntentResponse
+    | SignDataIntentResponse
+    | SignMessageIntentResponse;

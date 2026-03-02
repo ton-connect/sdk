@@ -1,5 +1,5 @@
 import { styled } from 'solid-styled-components';
-import { Button, H1, H2, LoaderIcon, Text } from 'src/app/components';
+import { Button, H1, LoaderIcon, Text } from 'src/app/components';
 
 export const ActionModalStyled = styled.div`
     display: flex;
@@ -33,15 +33,4 @@ export const LoaderIconStyled = styled(LoaderIcon)`
 
 export const ButtonStyled = styled(Button)`
     margin-top: 32px;
-`;
-
-export const IntentScanH2Styled = styled(H2)`
-    max-width: 320px;
-    margin-top: 2px;
-    margin-bottom: 8px;
-`;
-
-export const IntentWalletsH2Styled = styled(H2)`
-    margin-top: 24px;
-    margin-bottom: 16px;
 `;

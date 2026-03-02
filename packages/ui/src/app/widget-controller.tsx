@@ -23,7 +23,6 @@ import {
 export const widgetController = {
     openWalletsModal: (
         options?: OptionalTraceable & {
-            initialTab?: 'universal' | 'all-wallets';
             mode?: 'connect' | 'intent';
             intentUrl?: string;
         }
@@ -34,8 +33,7 @@ export const widgetController = {
                 traceId: options?.traceId ?? prev?.traceId,
                 closeReason: null,
                 mode: options?.mode ?? prev?.mode ?? 'connect',
-                intentUrl: options?.intentUrl ?? prev?.intentUrl,
-                initialTab: options?.initialTab ?? prev?.initialTab
+                intentUrl: options?.intentUrl ?? prev?.intentUrl
             }))
         ),
     closeWalletsModal: (reason: WalletsModalCloseReason): void =>
