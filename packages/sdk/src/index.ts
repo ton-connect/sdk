@@ -66,7 +66,12 @@ export type {
     SessionInfo
 } from './tracker/types';
 export { BrowserEventDispatcher } from './tracker/browser-event-dispatcher';
-export type { TonAddressItem, TonProofItem, ConnectItem } from '@tonconnect/protocol';
+export type {
+    TonAddressItem,
+    TonProofItem,
+    ConnectItem,
+    ConnectRequest
+} from '@tonconnect/protocol';
 export {
     CHAIN,
     ConnectEventSuccess,
@@ -94,6 +99,8 @@ export {
     SEND_TRANSACTION_ERROR_CODES,
     SIGN_DATA_ERROR_CODES
 } from '@tonconnect/protocol';
+
+export type { SignMessageResponse } from './models/methods/sign-message/sign-message-response';
 
 export { IEnvironment } from './environment/models/environment.interface';
 export { TelegramUser } from './environment/models/telegram-user';

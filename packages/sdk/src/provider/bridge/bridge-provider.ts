@@ -90,6 +90,38 @@ export class BridgeProvider implements HTTPProvider {
         this.analytics = this.analyticsManager?.scoped();
     }
 
+    public registerPendingIntent(
+        clientId: string,
+        options?: OptionalTraceable<{ signal?: AbortSignal }>
+    ): Promise<TraceableWalletResponse<RpcMethod>> {
+        return new Promise((resolve, reject) => {
+            const onFulfill = (response: TraceableWalletResponse<RpcMethod>): void => {
+                cleanup();
+                resolve(response);
+            };
+
+            const onAbort = (): void => {
+                cleanup();
+                reject(new TonConnectError('Intent request was aborted'));
+            };
+
+            const cleanup = (): void => {
+                this.pendingRequests.delete(clientId);
+                options?.signal?.removeEventListener('abort', onAbort);
+            };
+
+            this.pendingRequests.set(clientId, onFulfill);
+
+            if (options?.signal) {
+                if (options.signal.aborted) {
+                    onAbort();
+                    return;
+                }
+                options.signal.addEventListener('abort', onAbort);
+            }
+        });
+    }
+
     public connect(
         message: ConnectRequest,
         options?: OptionalTraceable<{
@@ -440,6 +472,7 @@ export class BridgeProvider implements HTTPProvider {
             throw err;
         }
 
+        logDebug('Pending requests:', this.pendingRequests);
         logDebug('Wallet message received:', walletMessage);
         const requestType = 'event' in walletMessage ? walletMessage.event : '';
         this.analytics?.emitBridgeClientMessageReceived({

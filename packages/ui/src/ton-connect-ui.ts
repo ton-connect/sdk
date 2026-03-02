@@ -6,6 +6,7 @@ import {
     RequiredFeatures,
     SignDataPayload,
     SignDataResponse,
+    SignMessageResponse,
     Traceable,
     UUIDv7,
     WalletInfoCurrentlyEmbedded
@@ -22,7 +23,13 @@ import {
     WalletInfo,
     WalletNotSupportFeatureError,
     SessionCrypto,
-    ChainId
+    ChainId,
+    SendTransactionIntentRequest,
+    SignDataIntentRequest,
+    SignMessageIntentRequest,
+    SendActionIntentRequest,
+    IntentUrlOptions,
+    SendActionIntentResponse
 } from '@tonconnect/sdk';
 import { widgetController } from 'src/app/widget-controller';
 import { TonConnectUIError } from 'src/errors/ton-connect-ui.error';
@@ -54,6 +61,7 @@ import {
     redirectToWallet,
     enrichUniversalLink
 } from 'src/app/utils/url-strategy-helpers';
+import { getUniqueBridgesFromWalletInfo } from 'src/app/utils/bridge';
 import { SingleWalletModalManager } from 'src/managers/single-wallet-modal-manager';
 import { SingleWalletModal, SingleWalletModalState } from 'src/models/single-wallet-modal';
 import { TonConnectUITracker } from 'src/tracker/ton-connect-ui-tracker';
@@ -66,6 +74,20 @@ import {
     WALLET_CONNECT_WALLET_NAME
 } from 'src/app/env/WALLET_CONNECT';
 import { IMG } from 'src/app/env/IMG';
+
+type TonConnectUIIntentOptions = ActionConfiguration &
+    OptionalTraceable<Omit<IntentUrlOptions, 'signal' | 'onIntentUrlReady'>>;
+
+function isFullConnectRequest(x: unknown): boolean {
+    return (
+        x !== undefined &&
+        typeof x === 'object' &&
+        x !== null &&
+        'manifestUrl' in x &&
+        'items' in x &&
+        Array.isArray((x as { items: unknown }).items)
+    );
+}
 
 export class TonConnectUI {
     public static getWallets(): Promise<WalletInfo[]> {
@@ -826,6 +848,231 @@ export class TonConnectUI {
                     () => {}
                 );
             }
+        }
+    }
+
+    private async ensureBridgeListeningForIntent(traceId: string): Promise<void> {
+        if (this.connector.connected) {
+            return;
+        }
+        const wallets = await this.getWallets();
+        const bridges = getUniqueBridgesFromWalletInfo(wallets);
+        if (bridges.length === 0) {
+            return;
+        }
+        try {
+            this.connector.connect(bridges, undefined, { traceId });
+        } catch {
+            // e.g. WalletAlreadyConnectedError if state changed
+        }
+    }
+
+    private getIntentOptionsWithConnectRequest(
+        options?: TonConnectUIIntentOptions
+    ): TonConnectUIIntentOptions | undefined {
+        if (options?.excludeConnect) {
+            return options;
+        }
+        if (options?.connectRequest && isFullConnectRequest(options.connectRequest)) {
+            return options;
+        }
+        const fromAppState =
+            appState.connectRequestParameters?.state === 'ready'
+                ? appState.connectRequestParameters.value
+                : undefined;
+        const fromOptions =
+            options?.connectRequest && !isFullConnectRequest(options.connectRequest)
+                ? options.connectRequest
+                : undefined;
+        const mergedAdditional: ConnectAdditionalRequest = {
+            ...fromAppState,
+            ...fromOptions
+        };
+        const connectRequest = this.connector.getConnectRequestForIntent(mergedAdditional);
+        return { ...options, connectRequest };
+    }
+
+    /**
+     * Sends the transaction via intent flow and returns signed transaction.
+     * If wallet is not connected, opens modal and shows intent QR/link.
+     */
+    public async sendTransactionIntent(
+        tx: SendTransactionIntentRequest,
+        options?: TonConnectUIIntentOptions
+    ): Promise<OptionalTraceable<SendTransactionResponse>> {
+        const traceId = options?.traceId ?? UUIDv7();
+
+        await this.ensureBridgeListeningForIntent(traceId);
+
+        const { notifications, modals } = this.getModalsAndNotificationsConfiguration(options);
+
+        const abortController = new AbortController();
+
+        try {
+            const intentOptions = this.getIntentOptionsWithConnectRequest(options);
+            const result = await this.connector.sendTransactionIntent(tx, {
+                ...intentOptions,
+                signal: abortController.signal,
+                traceId,
+                onIntentUrlReady: url => {
+                    this.modal.openIntent({ traceId, intentUrl: url });
+                }
+            });
+
+            widgetController.setAction({
+                name: 'transaction-sent',
+                showNotification: notifications.includes('success'),
+                openModal: modals.includes('success'),
+                traceId
+            });
+
+            return result;
+        } catch (e) {
+            widgetController.setAction({
+                name: 'transaction-canceled',
+                showNotification: notifications.includes('error'),
+                openModal: modals.includes('error'),
+                traceId
+            });
+            throw e;
+        }
+    }
+
+    /**
+     * Signs data via intent flow and returns the signature.
+     * If wallet is not connected, opens modal and shows intent QR/link.
+     */
+    public async signDataIntent(
+        data: SignDataIntentRequest,
+        options?: TonConnectUIIntentOptions
+    ): Promise<OptionalTraceable<SignDataResponse>> {
+        const traceId = options?.traceId ?? UUIDv7();
+
+        await this.ensureBridgeListeningForIntent(traceId);
+
+        const { notifications, modals } = this.getModalsAndNotificationsConfiguration(options);
+
+        const abortController = new AbortController();
+
+        try {
+            const intentOptions = this.getIntentOptionsWithConnectRequest(options);
+            const result = await this.connector.signDataIntent(data, {
+                ...intentOptions,
+                signal: abortController.signal,
+                traceId,
+                onIntentUrlReady: url => {
+                    this.modal.openIntent({ traceId, intentUrl: url });
+                }
+            });
+
+            widgetController.setAction({
+                name: 'data-signed',
+                showNotification: notifications.includes('success'),
+                openModal: modals.includes('success'),
+                traceId
+            });
+
+            return result;
+        } catch (e) {
+            widgetController.setAction({
+                name: 'sign-data-canceled',
+                showNotification: notifications.includes('error'),
+                openModal: modals.includes('error'),
+                traceId
+            });
+            throw e;
+        }
+    }
+
+    /**
+     * Signs message via intent flow and returns signed message BoC.
+     * If wallet is not connected, opens modal and shows intent QR/link.
+     */
+    public async signMessageIntent(
+        message: SignMessageIntentRequest,
+        options?: TonConnectUIIntentOptions
+    ): Promise<OptionalTraceable<SignMessageResponse>> {
+        const traceId = options?.traceId ?? UUIDv7();
+
+        await this.ensureBridgeListeningForIntent(traceId);
+
+        const { notifications, modals } = this.getModalsAndNotificationsConfiguration(options);
+
+        const abortController = new AbortController();
+
+        try {
+            const intentOptions = this.getIntentOptionsWithConnectRequest(options);
+            const result = await this.connector.signMessageIntent(message, {
+                ...intentOptions,
+                signal: abortController.signal,
+                traceId,
+                onIntentUrlReady: url => {
+                    this.modal.openIntent({ traceId, intentUrl: url });
+                }
+            });
+
+            widgetController.setAction({
+                name: 'transaction-sent',
+                showNotification: notifications.includes('success'),
+                openModal: modals.includes('success'),
+                traceId
+            });
+
+            return result;
+        } catch (e) {
+            widgetController.setAction({
+                name: 'transaction-canceled',
+                showNotification: notifications.includes('error'),
+                openModal: modals.includes('error'),
+                traceId
+            });
+            throw e;
+        }
+    }
+
+    /**
+     * Sends action intent and returns result of underlying sendTransaction or signData.
+     * If wallet is not connected, opens modal and shows intent QR/link.
+     */
+    public async sendActionIntent(
+        action: SendActionIntentRequest,
+        options?: TonConnectUIIntentOptions
+    ): Promise<OptionalTraceable<SendActionIntentResponse>> {
+        const traceId = options?.traceId ?? UUIDv7();
+
+        await this.ensureBridgeListeningForIntent(traceId);
+
+        const { notifications, modals } = this.getModalsAndNotificationsConfiguration(options);
+
+        const abortController = new AbortController();
+
+        try {
+            const intentOptions = this.getIntentOptionsWithConnectRequest(options);
+            const result = await this.connector.sendActionIntent(action, {
+                ...intentOptions,
+                signal: abortController.signal,
+                traceId,
+                onIntentUrlReady: url => {
+                    this.modal.openIntent({ traceId, intentUrl: url });
+                }
+            });
+
+            widgetController.setAction({
+                name: 'transaction-sent',
+                showNotification: notifications.includes('success'),
+                openModal: modals.includes('success'),
+                traceId
+            });
+
+            return result;
+        } catch (e) {
+            widgetController.setAction({
+                name: 'transaction-canceled',
+                showNotification: notifications.includes('error'),
+                openModal: modals.includes('error'),
+                traceId
+            });
+            throw e;
         }
     }
 

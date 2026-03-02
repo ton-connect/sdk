@@ -159,6 +159,32 @@ export class WalletsModalManager implements WalletsModal {
     }
 
     /**
+     * Opens the modal window in intent mode with a pre-built intent URL.
+     * Used by intent flow to reuse the same wallets UI but with different URLs.
+     */
+    public async openIntent(options: { traceId: string; intentUrl: string }): Promise<void> {
+        if (isInTMA()) {
+            sendExpand();
+        }
+
+        widgetController.openWalletsModal({
+            traceId: options.traceId,
+            mode: 'intent',
+            intentUrl: options.intentUrl
+        });
+
+        return new Promise<void>(resolve => {
+            const unsubscribe = this.onStateChange(state => {
+                const { status } = state;
+                if (status === 'opened') {
+                    unsubscribe();
+                    resolve();
+                }
+            });
+        });
+    }
+
+    /**
      * Closes the modal window.
      * @default 'action-cancelled'
      */

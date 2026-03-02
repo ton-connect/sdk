@@ -21,12 +21,19 @@ import {
 } from '@tonconnect/sdk';
 
 export const widgetController = {
-    openWalletsModal: (options?: OptionalTraceable): void =>
+    openWalletsModal: (
+        options?: OptionalTraceable & {
+            mode?: 'connect' | 'intent';
+            intentUrl?: string;
+        }
+    ): void =>
         void setTimeout(() =>
             setWalletsModalState(prev => ({
                 status: 'opened',
                 traceId: options?.traceId ?? prev?.traceId,
-                closeReason: null
+                closeReason: null,
+                mode: options?.mode ?? prev?.mode ?? 'connect',
+                intentUrl: options?.intentUrl ?? prev?.intentUrl
             }))
         ),
     closeWalletsModal: (reason: WalletsModalCloseReason): void =>

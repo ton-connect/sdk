@@ -7,6 +7,11 @@ export interface WalletsModal {
     open: (options?: OptionalTraceable) => void;
 
     /**
+     * Open the modal in intent mode with a pre-built intent URL.
+     */
+    openIntent: (options: { traceId: string; intentUrl: string }) => void;
+
+    /**
      * Close the modal.
      * @default 'action-cancelled'
      */
@@ -74,7 +79,17 @@ export type ChooseSupportedFeatureWalletsModal = {
  * Modal window state.
  */
 export type WalletsModalState = OptionalTraceable<
-    WalletModalOpened | WalletModalClosed | ChooseSupportedFeatureWalletsModal
+    (WalletModalOpened | WalletModalClosed | ChooseSupportedFeatureWalletsModal) & {
+        /**
+         * Mode of the wallets modal: regular connect flow or intent flow.
+         * In intent mode, QR and links are built from intentUrl instead of connect URL.
+         */
+        mode?: 'connect' | 'intent';
+        /**
+         * Intent URL to be used for QR / wallet-specific links in intent mode.
+         */
+        intentUrl?: string;
+    }
 >;
 
 /**

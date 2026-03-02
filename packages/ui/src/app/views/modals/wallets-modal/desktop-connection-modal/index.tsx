@@ -54,7 +54,8 @@ import { Translation } from 'src/app/components/typography/Translation';
 import {
     addReturnStrategy,
     redirectToTelegram,
-    redirectToWallet
+    redirectToWallet,
+    buildWalletIntentLink
 } from 'src/app/utils/url-strategy-helpers';
 import { WalletsModalState } from 'src/models';
 
@@ -81,6 +82,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
     const [universalLink, setUniversalLink] = createSignal<string | undefined>();
     const [firstClick, setFirstClick] = createSignal(true);
     const connector = useContext(ConnectorContext)!;
+    const isIntentMode = props.walletsModalState?.mode === 'intent';
 
     const unsubscribe = connector.onStatusChange(
         () => {},
@@ -104,9 +106,21 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
     onCleanup(unsubscribe);
 
     const generateUniversalLink = (): void => {
+        if (isIntentMode) {
+            if (!props.walletsModalState?.intentUrl) {
+                return;
+            }
+            const link = buildWalletIntentLink(
+                { universalLink: props.wallet.universalLink },
+                props.walletsModalState.intentUrl
+            );
+            setUniversalLink(link);
+            return;
+        }
+
         // TODO: prevent double generation of universal link later and remove try-catch
         try {
-            const universalLink = connector.connect(
+            const link = connector.connect(
                 {
                     universalLink: props.wallet.universalLink,
                     bridgeUrl: props.wallet.bridgeUrl
@@ -115,7 +129,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                 { traceId: props.walletsModalState?.traceId }
             );
 
-            setUniversalLink(universalLink);
+            setUniversalLink(link);
         } catch (e) {}
     };
 

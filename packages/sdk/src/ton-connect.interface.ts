@@ -10,8 +10,22 @@ import {
 import {
     SendTransactionRequest,
     SendTransactionResponse,
-    SignDataResponse
+    SignDataResponse,
+    SignMessageResponse
 } from 'src/models/methods';
+import type {
+    SendTransactionIntentResponse,
+    SignDataIntentResponse,
+    SignMessageIntentResponse,
+    SendActionIntentResponse
+} from 'src/models/methods/intents';
+import {
+    SendTransactionIntentRequest,
+    SignDataIntentRequest,
+    SignMessageIntentRequest,
+    SendActionIntentRequest,
+    IntentUrlOptions
+} from 'src/models/methods/intents';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
 import { WalletInfo } from 'src/models/wallet/wallet-info';
 import { WalletConnectionSourceJS } from 'src/models/wallet/wallet-connection-source';
@@ -48,6 +62,15 @@ export interface ITonConnect {
     onStatusChange(
         callback: (walletInfo: Wallet | null) => void,
         errorsHandler?: (err: TonConnectError) => void
+    ): () => void;
+
+    onIntentResponse(
+        callback: (response: {
+            id: string;
+            result?: unknown;
+            error?: unknown;
+            traceId: string;
+        }) => void
     ): () => void;
 
     /**
@@ -132,9 +155,73 @@ export interface ITonConnect {
         }>
     ): Promise<OptionalTraceable<SignDataResponse>>;
 
+    signMessage(
+        message: SendTransactionRequest,
+        options?: OptionalTraceable<{
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+        }>
+    ): Promise<OptionalTraceable<SignMessageResponse>>;
+
     /**
      * Gets the current session ID if available.
      * @returns session ID string or null if not available.
      */
     getSessionId(): Promise<string | null>;
+
+    /**
+     * Builds a full ConnectRequest for use in intent options (e.g. from UI).
+     * Merges manifest from connector config with optional additional request (tonProof etc).
+     */
+    getConnectRequestForIntent(
+        additionalRequest?: ConnectAdditionalRequest
+    ): import('@tonconnect/protocol').ConnectRequest;
+
+    /**
+     * Sends transaction via intent flow.
+     * @param transaction transaction to send.
+     * @param options optional connect request, abort signal, trace id and URL callback.
+     * @returns signed transaction boc that allows you to find the transaction in the blockchain.
+     * If user rejects transaction, method will throw the corresponding error.
+     */
+    sendTransactionIntent(
+        transaction: SendTransactionIntentRequest,
+        options?: OptionalTraceable<IntentUrlOptions>
+    ): Promise<OptionalTraceable<SendTransactionIntentResponse>>;
+
+    /**
+     * Signs data via intent flow.
+     * @param data data to sign.
+     * @param options optional connect request, abort signal, trace id and URL callback.
+     * @returns signature and related metadata.
+     * If user rejects signing, method will throw the corresponding error.
+     */
+    signDataIntent(
+        data: SignDataIntentRequest,
+        options?: OptionalTraceable<IntentUrlOptions>
+    ): Promise<OptionalTraceable<SignDataIntentResponse>>;
+
+    /**
+     * Signs message via intent flow.
+     * @param message message to sign.
+     * @param options optional connect request, abort signal, trace id and URL callback.
+     * @returns signed message boc.
+     * If user rejects signing, method will throw the corresponding error.
+     */
+    signMessageIntent(
+        message: SignMessageIntentRequest,
+        options?: OptionalTraceable<IntentUrlOptions>
+    ): Promise<OptionalTraceable<SignMessageIntentResponse>>;
+
+    /**
+     * Sends action intent.
+     * @param action actionUrl to be called by the wallet.
+     * @param options optional connect request, abort signal, trace id and URL callback.
+     * @returns result of underlying sendTransaction, signData or signMessage operation.
+     * If user rejects action, method will throw the corresponding error.
+     */
+    sendActionIntent(
+        action: SendActionIntentRequest,
+        options?: OptionalTraceable<IntentUrlOptions>
+    ): Promise<OptionalTraceable<SendActionIntentResponse>>;
 }
