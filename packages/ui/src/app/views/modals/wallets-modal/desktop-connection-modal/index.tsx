@@ -106,7 +106,6 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
     onCleanup(unsubscribe);
 
     const generateUniversalLink = (): void => {
-        // In intent mode we don't call connector.connect, we build wallet-specific intent link instead.
         if (isIntentMode) {
             if (!props.walletsModalState?.intentUrl) {
                 return;

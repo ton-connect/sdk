@@ -13,11 +13,8 @@ import {
 type HexChainId = string;
 
 interface BaseIntentPayload {
-    // Optional client/App id. Can be omitted according to the latest spec updates.
     id?: string;
-    // m: method
     m: 'txIntent' | 'signIntent' | 'signMsg' | 'actionIntent';
-    // optional embedded connect request
     c?: ConnectRequest;
 }
 

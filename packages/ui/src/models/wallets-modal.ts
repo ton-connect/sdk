@@ -89,10 +89,6 @@ export type WalletsModalState = OptionalTraceable<
          * Intent URL to be used for QR / wallet-specific links in intent mode.
          */
         intentUrl?: string;
-        /**
-         * Initial tab to open in wallets modal (used by intents to jump to all wallets list).
-         */
-        initialTab?: 'universal' | 'all-wallets';
     }
 >;
 
