@@ -1,4 +1,16 @@
-import { ChainId, ConnectRequest, SignDataPayload } from '@tonconnect/protocol';
+import {
+    BaseIntentPayload,
+    ConnectRequest,
+    IntentItem,
+    // TODO: raw request?
+    SendActionIntentRequest as MakeSendActionIntentRequest,
+    SendTransactionIntentRequest as MakeSendTransactionIntentRequest,
+    SignDataIntentRequest as MakeSignDataIntentRequest,
+    SignMessageIntentRequest as MakeSignMessageIntentRequest,
+    SendJettonItem,
+    SendNftItem,
+    SendTonItem
+} from '@tonconnect/protocol';
 import {
     SendTransactionIntentRequest,
     SendTransactionIntentItem,
@@ -10,83 +22,9 @@ import {
     SendActionIntentRequest
 } from 'src/models/methods/intents';
 
-type HexChainId = string;
-
-interface BaseIntentPayload {
-    id?: string;
-    m: 'txIntent' | 'signIntent' | 'signMsg' | 'actionIntent';
-    c?: ConnectRequest;
-}
-
-interface MakeSendTransactionIntentRequest extends BaseIntentPayload {
-    m: 'txIntent';
-    vu?: number;
-    n?: HexChainId;
-    i: IntentItem[];
-}
-
-interface MakeSignDataIntentRequest extends BaseIntentPayload {
-    m: 'signIntent';
-    n?: HexChainId;
-    mu: string;
-    p: SignDataPayload;
-}
-
-interface MakeSignMessageIntentRequest extends BaseIntentPayload {
-    m: 'signMsg';
-    vu?: number;
-    n?: HexChainId;
-    i: IntentItem[];
-}
-
-interface MakeSendActionIntentRequest extends BaseIntentPayload {
-    m: 'actionIntent';
-    a: string;
-}
-
-type IntentItem = SendTonItem | SendJettonItem | SendNftItem;
-
-interface SendTonItem {
-    t: 'ton';
-    a: string;
-    am: string;
-    p?: string;
-    si?: string;
-    ec?: Record<string, string>;
-}
-
-interface SendJettonItem {
-    t: 'jetton';
-    ma: string;
-    qi?: number;
-    ja: string;
-    d: string;
-    am?: string;
-    rd?: string;
-    cp?: string;
-    fta?: string;
-    fp?: string;
-}
-
-interface SendNftItem {
-    t: 'nft';
-    na: string;
-    qi?: number;
-    no: string;
-    am?: string;
-    rd?: string;
-    cp?: string;
-    fta?: string;
-    fp?: string;
-}
-
 interface CommonSerializeParams {
-    id?: string;
+    id: string;
     connectRequest?: ConnectRequest;
-}
-
-function toHexChainId(chainId: ChainId | undefined): HexChainId | undefined {
-    return chainId !== undefined ? chainId.toString() : undefined;
 }
 
 function mapTonItem(item: SendTransactionIntentItemTon): SendTonItem {
@@ -149,7 +87,7 @@ export function serializeSendTransactionIntent(
         m: 'txIntent',
         c: params.connectRequest,
         vu: tx.validUntil,
-        n: toHexChainId(tx.network),
+        n: tx.network,
         i: tx.items.map(mapIntentItem)
     };
 }
@@ -162,7 +100,7 @@ export function serializeSignDataIntent(
         id: params.id,
         m: 'signIntent',
         c: params.connectRequest,
-        n: toHexChainId(req.network),
+        n: req.network,
         mu: params.manifestUrl,
         p: req.payload
     };
@@ -177,7 +115,7 @@ export function serializeSignMessageIntent(
         m: 'signMsg',
         c: params.connectRequest,
         vu: req.validUntil,
-        n: toHexChainId(req.network),
+        n: req.network,
         i: req.items.map(mapIntentItem)
     };
 }

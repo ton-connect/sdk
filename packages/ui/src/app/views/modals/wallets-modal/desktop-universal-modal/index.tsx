@@ -8,7 +8,11 @@ import {
 } from './style';
 import { ConnectAdditionalRequest } from '@tonconnect/sdk';
 import { appState } from 'src/app/state/app.state';
-import { setLastSelectedWalletInfo, setLastVisibleWalletsInfo } from 'src/app/state/modals-state';
+import {
+    setLastSelectedWalletInfo,
+    setLastVisibleWalletsInfo,
+    walletsModalState
+} from 'src/app/state/modals-state';
 import { FourWalletsItem, H1, WalletLabeledItem } from 'src/app/components';
 import { UIWalletInfo } from 'src/app/models/ui-wallet-info';
 import { IMG } from 'src/app/env/IMG';
@@ -40,7 +44,11 @@ export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = prop
 
     const request = createMemo(() => {
         if (isIntentMode) {
-            return props.walletModalState.intentUrl ?? null;
+            // TODO: generic method, somehow refactor state or smth
+            return connector.signDataIntent(walletsBridges(), walletsModalState().intent!, {
+                traceId: props.walletModalState.traceId,
+                connectRequest: props.additionalRequest
+            });
         }
 
         return connector.connect(walletsBridges(), props.additionalRequest, {

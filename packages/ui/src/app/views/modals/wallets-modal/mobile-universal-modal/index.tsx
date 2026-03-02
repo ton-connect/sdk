@@ -8,7 +8,11 @@ import {
     TelegramButtonStyled,
     TGImageStyled
 } from './style';
-import { setLastSelectedWalletInfo, setLastVisibleWalletsInfo } from 'src/app/state/modals-state';
+import {
+    setLastSelectedWalletInfo,
+    setLastVisibleWalletsInfo,
+    walletsModalState
+} from 'src/app/state/modals-state';
 import { appState } from 'src/app/state/app.state';
 import { IMG } from 'src/app/env/IMG';
 import { supportsMobile } from 'src/app/utils/wallets';
@@ -17,11 +21,7 @@ import { copyToClipboard } from 'src/app/utils/copy-to-clipboard';
 import { TonConnectUIError } from 'src/errors';
 import { MobileUniversalQR } from './mobile-universal-qr';
 import { Translation } from 'src/app/components/typography/Translation';
-import {
-    redirectToTelegram,
-    redirectToWallet,
-    buildWalletIntentLink
-} from 'src/app/utils/url-strategy-helpers';
+import { redirectToTelegram, redirectToWallet } from 'src/app/utils/url-strategy-helpers';
 import { bridgesIsEqual, getUniqueBridges } from 'src/app/utils/bridge';
 import { WalletUlContainer } from 'src/app/components/wallet-item/style';
 import { UIWalletInfo } from 'src/app/models/ui-wallet-info';
@@ -62,7 +62,12 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
     const getUniversalLink = (): string => {
         // In intent mode we always use the prebuilt intent URL instead of connect URL.
         if (props.walletModalState.mode === 'intent') {
-            return props.walletModalState.intentUrl ?? '';
+            setUniversalLink(
+                connector.signDataIntent(walletsBridges(), walletsModalState().intent!, {
+                    traceId: props.walletModalState.traceId,
+                    connectRequest: props.additionalRequest
+                }) as string
+            );
         }
 
         if (!universalLink()) {
@@ -122,10 +127,17 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
         setFirstClick(false);
 
         const link =
-            props.walletModalState.mode === 'intent' && props.walletModalState.intentUrl
-                ? buildWalletIntentLink(
-                      { universalLink: atWallet.universalLink },
-                      props.walletModalState.intentUrl
+            props.walletModalState.mode === 'intent'
+                ? connector.signDataIntent(
+                      {
+                          bridgeUrl: atWallet.bridgeUrl,
+                          universalLink: atWallet.universalLink
+                      },
+                      walletsModalState().intent!,
+                      {
+                          traceId: props.walletModalState.traceId,
+                          connectRequest: props.additionalRequest
+                      }
                   )
                 : connector.connect(
                       {
@@ -136,7 +148,8 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
                       { traceId: props.walletModalState.traceId }
                   );
 
-        redirectToTelegram(link, {
+        // TODO: fix types
+        redirectToTelegram(link as string, {
             returnStrategy: appState.returnStrategy,
             twaReturnUrl: appState.twaReturnUrl,
             forceRedirect: forceRedirect
@@ -246,40 +259,7 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
                                 <WalletItem
                                     icon={wallet.imageUrl}
                                     name={wallet.name}
-                                    onClick={() => {
-                                        if (
-                                            props.walletModalState.mode === 'intent' &&
-                                            props.walletModalState.intentUrl
-                                        ) {
-                                            const forceRedirect = !firstClick();
-                                            setFirstClick(false);
-
-                                            const { universalLink } = wallet as UIWalletInfo & {
-                                                universalLink?: string;
-                                            };
-                                            const link = buildWalletIntentLink(
-                                                { universalLink },
-                                                props.walletModalState.intentUrl
-                                            );
-
-                                            redirectToWallet(
-                                                link,
-                                                undefined,
-                                                {
-                                                    returnStrategy: appState.returnStrategy,
-                                                    forceRedirect
-                                                },
-                                                (method: 'universal-link' | 'custom-deeplink') => {
-                                                    setLastSelectedWalletInfo({
-                                                        ...wallet,
-                                                        openMethod: method
-                                                    });
-                                                }
-                                            );
-                                        } else {
-                                            props.onSelect(wallet);
-                                        }
-                                    }}
+                                    onClick={() => props.onSelect(wallet)}
                                 />
                             </li>
                         )}

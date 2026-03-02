@@ -1,4 +1,9 @@
-import { FeatureName, OptionalTraceable, RequiredFeatures } from '@tonconnect/sdk';
+import {
+    FeatureName,
+    OptionalTraceable,
+    RequiredFeatures,
+    SignDataIntentRequest
+} from '@tonconnect/sdk';
 
 export interface WalletsModal {
     /**
@@ -9,7 +14,8 @@ export interface WalletsModal {
     /**
      * Open the modal in intent mode with a pre-built intent URL.
      */
-    openIntent: (options: { traceId: string; intentUrl: string }) => void;
+    // TODO: another types
+    openIntent: (options: { traceId: string; intent: SignDataIntentRequest }) => void;
 
     /**
      * Close the modal.
@@ -88,7 +94,7 @@ export type WalletsModalState = OptionalTraceable<
         /**
          * Intent URL to be used for QR / wallet-specific links in intent mode.
          */
-        intentUrl?: string;
+        intent?: SignDataIntentRequest;
     }
 >;
 

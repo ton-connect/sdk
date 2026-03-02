@@ -13,6 +13,8 @@ export interface WalletConnectionSourceHTTP {
      * Url of the wallet's implementation of the [HTTP bridge]{@link https://github.com/ton-connect/docs/blob/main/bridge.md#http-bridge}.
      */
     bridgeUrl: string;
+
+    objectStorageUrl?: string; // TODO should be passed when clicked on specific wallet
 }
 
 export interface WalletConnectionSourceJS {

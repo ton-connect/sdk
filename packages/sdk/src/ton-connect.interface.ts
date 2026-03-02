@@ -15,7 +15,6 @@ import {
 } from 'src/models/methods';
 import type {
     SendTransactionIntentResponse,
-    SignDataIntentResponse,
     SignMessageIntentResponse,
     SendActionIntentResponse
 } from 'src/models/methods/intents';
@@ -64,14 +63,7 @@ export interface ITonConnect {
         errorsHandler?: (err: TonConnectError) => void
     ): () => void;
 
-    onIntentResponse(
-        callback: (response: {
-            id: string;
-            result?: unknown;
-            error?: unknown;
-            traceId: string;
-        }) => void
-    ): () => void;
+    onIntentResponse(callback: (response: SignDataResponse) => void): () => void;
 
     /**
      * Generates universal link for an external wallet and subscribes to the wallet's bridge, or sends connect request to the injected wallet.
@@ -170,14 +162,6 @@ export interface ITonConnect {
     getSessionId(): Promise<string | null>;
 
     /**
-     * Builds a full ConnectRequest for use in intent options (e.g. from UI).
-     * Merges manifest from connector config with optional additional request (tonProof etc).
-     */
-    getConnectRequestForIntent(
-        additionalRequest?: ConnectAdditionalRequest
-    ): import('@tonconnect/protocol').ConnectRequest;
-
-    /**
      * Sends transaction via intent flow.
      * @param transaction transaction to send.
      * @param options optional connect request, abort signal, trace id and URL callback.
@@ -189,17 +173,11 @@ export interface ITonConnect {
         options?: OptionalTraceable<IntentUrlOptions>
     ): Promise<OptionalTraceable<SendTransactionIntentResponse>>;
 
-    /**
-     * Signs data via intent flow.
-     * @param data data to sign.
-     * @param options optional connect request, abort signal, trace id and URL callback.
-     * @returns signature and related metadata.
-     * If user rejects signing, method will throw the corresponding error.
-     */
     signDataIntent(
+        wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
         data: SignDataIntentRequest,
         options?: OptionalTraceable<IntentUrlOptions>
-    ): Promise<OptionalTraceable<SignDataIntentResponse>>;
+    ): string | void;
 
     /**
      * Signs message via intent flow.

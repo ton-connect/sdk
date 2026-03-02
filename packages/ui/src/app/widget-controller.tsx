@@ -15,6 +15,7 @@ import { WalletInfoWithOpenMethod, WalletOpenMethod } from 'src/models/connected
 import { WalletsModalCloseReason } from 'src/models';
 import {
     OptionalTraceable,
+    SignDataIntentRequest,
     Traceable,
     WalletInfoRemote,
     WalletNotSupportFeatureError
@@ -24,7 +25,7 @@ export const widgetController = {
     openWalletsModal: (
         options?: OptionalTraceable & {
             mode?: 'connect' | 'intent';
-            intentUrl?: string;
+            intent?: SignDataIntentRequest;
         }
     ): void =>
         void setTimeout(() =>
@@ -33,7 +34,7 @@ export const widgetController = {
                 traceId: options?.traceId ?? prev?.traceId,
                 closeReason: null,
                 mode: options?.mode ?? prev?.mode ?? 'connect',
-                intentUrl: options?.intentUrl ?? prev?.intentUrl
+                intent: options?.intent ?? prev?.intent
             }))
         ),
     closeWalletsModal: (reason: WalletsModalCloseReason): void =>

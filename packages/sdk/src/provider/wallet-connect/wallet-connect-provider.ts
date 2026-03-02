@@ -100,6 +100,10 @@ export class WalletConnectProvider implements InternalProvider {
             metadata
         };
     }
+    onIntent(_listener: (response: unknown) => void): void {
+        // TODO?
+        throw new Error('Method not implemented.');
+    }
 
     public static async fromStorage(
         storage: BridgeConnectionStorage

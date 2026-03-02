@@ -11,6 +11,7 @@ import {
     isWalletInfoCurrentlyEmbedded,
     ITonConnect,
     OptionalTraceable,
+    SignDataIntentRequest,
     Traceable,
     UUIDv7,
     WalletInfoCurrentlyEmbedded
@@ -162,7 +163,10 @@ export class WalletsModalManager implements WalletsModal {
      * Opens the modal window in intent mode with a pre-built intent URL.
      * Used by intent flow to reuse the same wallets UI but with different URLs.
      */
-    public async openIntent(options: { traceId: string; intentUrl: string }): Promise<void> {
+    public async openIntent(options: {
+        traceId: string;
+        intent: SignDataIntentRequest;
+    }): Promise<void> {
         if (isInTMA()) {
             sendExpand();
         }
@@ -170,7 +174,7 @@ export class WalletsModalManager implements WalletsModal {
         widgetController.openWalletsModal({
             traceId: options.traceId,
             mode: 'intent',
-            intentUrl: options.intentUrl
+            intent: options.intent
         });
 
         return new Promise<void>(resolve => {

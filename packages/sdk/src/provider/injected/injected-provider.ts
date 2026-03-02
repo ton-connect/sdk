@@ -3,6 +3,7 @@ import {
     AppRequest,
     ConnectEventError,
     ConnectRequest,
+    IntentRequest,
     RpcMethod,
     WalletResponse
 } from '@tonconnect/protocol';
@@ -123,8 +124,12 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             });
         }
     }
+    onIntent(_listener: (response: unknown) => void): void {
+        // TODO: use in connect (rename connect to makeIntent or smth)
+        throw new Error('Method not implemented.');
+    }
 
-    public connect(message: ConnectRequest, options?: OptionalTraceable): void {
+    public connect(message: ConnectRequest | IntentRequest, options?: OptionalTraceable): void {
         this._connect(PROTOCOL_VERSION, message, options);
     }
 
@@ -271,7 +276,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
 
     private async _connect(
         protocolVersion: number,
-        message: ConnectRequest,
+        message: ConnectRequest | IntentRequest,
         options?: OptionalTraceable
     ): Promise<void> {
         const traceId = options?.traceId ?? UUIDv7();
@@ -284,7 +289,10 @@ export class InjectedProvider<T extends string = string> implements InternalProv
                 js_bridge_method: 'connect',
                 trace_id: traceId
             });
-            const connectEvent = await this.injectedWallet.connect(protocolVersion, message);
+            const connectEvent = await this.injectedWallet.connect(
+                protocolVersion,
+                message as unknown as ConnectRequest
+            );
             this.analytics?.emitJsBridgeResponse({
                 js_bridge_method: 'connect'
             });
