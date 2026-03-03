@@ -38,7 +38,8 @@ import {
 import type {
     SendTransactionIntentResponse,
     SignMessageIntentResponse,
-    SendActionIntentResponse
+    SendActionIntentResponse,
+    IntentResponse
 } from 'src/models/methods/intents';
 import {
     SendTransactionIntentRequest,
@@ -129,7 +130,7 @@ export class TonConnect implements ITonConnect {
     private readonly tracker: TonConnectTracker;
 
     // TODO: refactor. Add every response, map them, etc
-    public onIntentResponse(callback: (response: SignDataResponse) => void): () => void {
+    public onIntentResponse(callback: (response: IntentResponse) => void): () => void {
         // TODO: map request
         this.provider?.onIntent(callback as unknown as (a: unknown) => void);
         return () => {};
