@@ -844,10 +844,42 @@ export class TonConnectUI {
      * If wallet is not connected, opens modal and shows intent QR/link.
      */
     public async sendTransactionIntent(
-        _tx: SendTransactionIntentRequest,
-        _options?: TonConnectUIIntentOptions
+        intent: SendTransactionIntentRequest,
+        options?: TonConnectUIIntentOptions
     ): Promise<OptionalTraceable<SendTransactionResponse>> {
-        throw new Error('Not implemented');
+        const traceId = options?.traceId ?? UUIDv7();
+
+        const { notifications, modals } = this.getModalsAndNotificationsConfiguration(options);
+
+        try {
+            // Reuse intent modal flow for transaction intents.
+            this.modal.openIntent({ traceId, intent: intent as unknown as SignDataIntentRequest });
+
+            // TODO add abort, think of how to dedup
+            const intentResponse = (await new Promise<OptionalTraceable<SendTransactionResponse>>(
+                resolve =>
+                    this.connector.onIntentResponse(response =>
+                        resolve(response as OptionalTraceable<SendTransactionResponse>)
+                    )
+            )) as OptionalTraceable<SendTransactionResponse>;
+
+            widgetController.setAction({
+                name: 'transaction-sent',
+                showNotification: notifications.includes('success'),
+                openModal: modals.includes('success'),
+                traceId
+            });
+
+            return intentResponse;
+        } catch (e) {
+            widgetController.setAction({
+                name: 'transaction-canceled',
+                showNotification: notifications.includes('error'),
+                openModal: modals.includes('error'),
+                traceId
+            });
+            throw e;
+        }
     }
 
     /**
