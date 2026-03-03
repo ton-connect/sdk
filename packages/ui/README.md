@@ -89,6 +89,24 @@ const tonConnectUI = new TonConnectUI({
 
 This will highlight wallets that support sending multiple messages and extra currencies, but won’t hide those that don’t. Use this to gently recommend more feature-rich wallets without excluding others.
 
+### Analytics
+
+You can configure analytics collection when creating TonConnectUI:
+
+```ts
+const tonConnectUI = new TonConnectUI({
+    manifestUrl: 'https://<YOUR_APP_URL>/tonconnect-manifest.json',
+    analytics: { mode: 'off' } // or 'telemetry' (default), 'full'
+});
+```
+
+**Analytics modes:**
+
+| Mode                    | Description                                                |
+|-------------------------|------------------------------------------------------------|
+| **off**                 | Analytics turned off. No events are collected or sent.     |
+| **telemetry** (default) | Analytics used for technical research and issue debugging. |
+| **full**                | Full analytics events.                                     |
 
 See all available options:
 

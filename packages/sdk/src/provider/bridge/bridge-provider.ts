@@ -21,7 +21,6 @@ import { BridgeIncomingMessage } from 'src/provider/bridge/models/bridge-incommi
 import { BridgePartialSession, BridgeSession } from 'src/provider/bridge/models/bridge-session';
 import { HTTPProvider } from 'src/provider/provider';
 import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
-import { IStorage } from 'src/storage/models/storage.interface';
 import { Optional, OptionalTraceable, Traceable, WithoutId } from 'src/utils/types';
 import { PROTOCOL_VERSION } from 'src/resources/protocol';
 import { logDebug, logError } from 'src/utils/log';
@@ -33,14 +32,14 @@ import { Analytics } from 'src/analytics/analytics';
 import { BridgeClientEvent } from 'src/analytics/types';
 import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet/traceable-events';
 import { UUIDv7 } from 'src/utils/uuid';
+import { waitForSome } from 'src/utils/promise';
 
 export class BridgeProvider implements HTTPProvider {
     public static async fromStorage(
-        storage: IStorage,
+        storage: BridgeConnectionStorage,
         analyticsManager?: AnalyticsManager
     ): Promise<BridgeProvider> {
-        const bridgeConnectionStorage = new BridgeConnectionStorage(storage);
-        const connection = await bridgeConnectionStorage.getHttpConnection();
+        const connection = await storage.getHttpConnection();
 
         if (isPendingConnectionHttp(connection)) {
             return new BridgeProvider(storage, connection.connectionSource, analyticsManager);
@@ -55,8 +54,6 @@ export class BridgeProvider implements HTTPProvider {
     public readonly type = 'http';
 
     private readonly standardUniversalLink = 'tc://';
-
-    private readonly connectionStorage: BridgeConnectionStorage;
 
     private readonly pendingRequests = new Map<
         string,
@@ -75,18 +72,19 @@ export class BridgeProvider implements HTTPProvider {
 
     private readonly defaultRetryTimeoutMS = 2000;
 
+    private readonly optionalOpenGateways = 3;
+
     private abortController?: AbortController;
 
     private readonly analytics?: Analytics<BridgeClientEvent>;
 
     constructor(
-        private readonly storage: IStorage,
+        private readonly connectionStorage: BridgeConnectionStorage,
         private readonly walletConnectionSource:
             | Optional<WalletConnectionSourceHTTP, 'universalLink'>
             | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
         private readonly analyticsManager?: AnalyticsManager
     ) {
-        this.connectionStorage = new BridgeConnectionStorage(storage);
         this.analytics = this.analyticsManager?.scoped();
     }
 
@@ -208,7 +206,7 @@ export class BridgeProvider implements HTTPProvider {
         }
 
         this.gateway = new BridgeGateway(
-            this.storage,
+            this.connectionStorage.storage,
             this.walletConnectionSource.bridgeUrl,
             storedConnection.session.sessionCrypto.sessionId,
             this.gatewayListener.bind(this),
@@ -603,7 +601,7 @@ export class BridgeProvider implements HTTPProvider {
             // open new gateways
             this.pendingGateways = this.walletConnectionSource.map(source => {
                 const gateway = new BridgeGateway(
-                    this.storage,
+                    this.connectionStorage.storage,
                     source.bridgeUrl,
                     sessionCrypto.sessionId,
                     () => {},
@@ -618,7 +616,13 @@ export class BridgeProvider implements HTTPProvider {
                 return gateway;
             });
 
-            await Promise.allSettled(
+            // Wait until the specified optional gateways are opened, not necessarily all gateways
+            const gatewaysToWaitFor = Math.max(
+                this.pendingGateways.length - this.optionalOpenGateways,
+                1
+            );
+
+            await waitForSome(
                 this.pendingGateways.map(bridge =>
                     callForSuccess(
                         (_options): Promise<void> => {
@@ -639,7 +643,8 @@ export class BridgeProvider implements HTTPProvider {
                             signal: options?.signal
                         }
                     )
-                )
+                ),
+                gatewaysToWaitFor
             );
 
             return;
@@ -650,7 +655,7 @@ export class BridgeProvider implements HTTPProvider {
             }
 
             this.gateway = new BridgeGateway(
-                this.storage,
+                this.connectionStorage.storage,
                 this.walletConnectionSource.bridgeUrl,
                 sessionCrypto.sessionId,
                 this.gatewayListener.bind(this),

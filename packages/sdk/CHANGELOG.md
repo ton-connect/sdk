@@ -1,5 +1,193 @@
 # Changelog @tonconnect/sdk
 
+## 3.4.1
+
+### Patch Changes
+
+- 1a2b61f: Removed additional property with traceId
+
+## 3.4.0
+
+### Minor Changes
+
+- 3964cf3: feat: add analytics settings and performance metrics
+    - Added analytics settings with telemetry mode configuration
+    - Added RTT (Round Trip Time) measurement
+    - Added TTFB (Time To First Byte) measurement
+    - Added wallet list download duration tracking
+
+    These metrics help monitor SDK performance and user experience.
+
+- afcdd9b: feat: add network selection support for wallet connections
+    - Added `ChainId` type in `@tonconnect/protocol` to support arbitrary network identifiers
+      (extends `CHAIN` enum with string)
+    - Added `setConnectionNetwork()` method in SDK and UI to specify desired network before
+      connecting
+    - Added `network` field to `TonAddressItem` in connect requests to inform wallet about desired
+      network
+    - Added `WalletWrongNetworkError` that is thrown when wallet connects to a different network
+      than expected
+    - Network validation is performed on connect, `sendTransaction`, and `signData` operations
+    - UI modals now display user-friendly error messages when network mismatch occurs
+
+    **Usage:**
+
+    ```typescript
+    import { CHAIN } from '@tonconnect/ui';
+
+    // Set desired network before connecting
+    tonConnectUI.setConnectionNetwork(CHAIN.MAINNET); // or CHAIN.TESTNET, or any custom chainId string
+
+    // Allow any network (default behavior)
+    tonConnectUI.setConnectionNetwork(undefined);
+    ```
+
+- 2cbf8a8: feat: add comprehensive analytics tracking system
+    - added tracking for all major TON Connect interactions including connection lifecycle
+      (connection-started, connection-selected-wallet, connection-completed, connection-error),
+      disconnection, transactions (transaction-sent, transaction-signed,
+      transaction-signing-failed), sign data requests, bridge client events
+      (bridge-client-connect-started, bridge-client-connect-established,
+      bridge-client-connect-error, bridge-client-message-sent, bridge-client-message-received,
+      bridge-client-message-decode-error), and JS Bridge events (js-bridge-call, js-bridge-response,
+      js-bridge-error)
+
+- 2cbf8a8: feat: add trace ID support for tracking user flows
+    - added UUIDv7-based trace IDs to aggregate multiple events into a single user flow
+    - trace IDs are automatically generated for all operations and added to links
+    - trace IDs are propagated through the entire connection lifecycle and included in all analytics
+      events
+    - returned response objects now include `traceId` field for correlation with analytics data
+    - `sendTransaction` method now accepts optional `traceId` parameter in options:
+
+    ```typescript
+    const result = await tonConnectUI.sendTransaction(
+        {
+            messages: [
+                {
+                    address: 'Ef9VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVbxn',
+                    amount: '20000000'
+                }
+            ]
+        },
+        {
+            traceId: '019a2a92-a884-7cfc-b1bc-caab18644b6f' // optional, auto-generated if not provided
+        }
+    );
+
+    console.log(result.traceId); // returns trace ID for tracking
+    ```
+
+    - `signData` method now accepts optional `traceId` parameter in options:
+
+    ```typescript
+    const result = await tonConnectUI.signData(
+        {
+            type: 'text',
+            text: 'Hello, TON!'
+        },
+        {
+            traceId: '019a2a92-a884-7cfc-b1bc-caab18644b6f' // optional, auto-generated if not provided
+        }
+    );
+
+    console.log(result.traceId); // returns trace ID for tracking
+    ```
+
+- 7493b12: feat: add WalletConnect integration support
+
+    Use `initializeWalletConnect()` to enable WalletConnect in your app.
+
+    **Usage:**
+
+    ```typescript
+    import { initializeWalletConnect } from '@tonconnect/sdk';
+    import { UniversalConnector } from '@reown/appkit-universal-connector';
+
+    initializeWalletConnect(UniversalConnector, {
+        projectId: 'YOUR_PROJECT_ID',
+        metadata: {
+            name: 'My DApp',
+            description: 'My awesome DApp',
+            url: 'https://mydapp.com',
+            icons: ['https://mydapp.com/icon.png']
+        }
+    });
+    ```
+
+    Get your project ID at https://dashboard.reown.com/
+
+### Patch Changes
+
+- 36dbff1: fix: fix double analytics creation due to a merge request
+- 3964cf3: feat: improve bridge connection and loading performance
+    - Actualized wallet bridges with updated connection handling
+    - Improved loading performance by not waiting for all gateways to open
+    - Added minimum gateway connection threshold for faster initialization
+    - Enhanced error handling for bridge connections
+
+- 3a4d37d: feat: don't cancel transaction when proof has extra properties
+- 3d6f982: fix: allow network mismatch in QA mode during wallet connection
+    - Network validation during wallet connection now respects QA mode
+    - When QA mode is enabled, network mismatches during connection are logged to console instead of
+      throwing `WalletWrongNetworkError`
+    - This allows testing with wallets connected to different networks without errors
+    - Network validation in `sendTransaction` and `signData` already respected QA mode, now
+      connection validation is consistent
+
+    **Usage:**
+
+    ```typescript
+    import { enableQaMode } from '@tonconnect/ui-react';
+
+    // Enable QA mode to bypass network validation
+    enableQaMode();
+
+    // Now you can connect to wallets on any network without errors
+    // Network mismatches will be logged to console instead
+    ```
+
+- Updated dependencies [afcdd9b]
+    - @tonconnect/protocol@2.4.0
+
+## 3.4.0-beta.7
+
+### Patch Changes
+
+- 36dbff1: fix: fix double analytics creation due to a merge request
+
+## 3.4.0-beta.6
+
+### Minor Changes
+
+- 3964cf3: feat: add analytics settings and performance metrics
+    - Added analytics settings with telemetry mode configuration
+    - Added RTT (Round Trip Time) measurement
+    - Added TTFB (Time To First Byte) measurement
+    - Added wallet list download duration tracking
+
+    These metrics help monitor SDK performance and user experience.
+
+## 3.4.0-beta.5
+
+### Minor Changes
+
+- 3964cf3: feat: add analytics settings and performance metrics
+    - Added analytics settings with telemetry mode configuration
+    - Added RTT (Round Trip Time) measurement
+    - Added TTFB (Time To First Byte) measurement
+    - Added wallet list download duration tracking
+
+    These metrics help monitor SDK performance and user experience.
+
+### Patch Changes
+
+- 3964cf3: feat: improve bridge connection and loading performance
+    - Actualized wallet bridges with updated connection handling
+    - Improved loading performance by not waiting for all gateways to open
+    - Added minimum gateway connection threshold for faster initialization
+    - Enhanced error handling for bridge connections
+
 ## 3.4.0-beta.4
 
 ### Patch Changes

@@ -34,6 +34,18 @@ try {
     initParams = urlParseHashParams(locationHash);
 } catch (e) {}
 
+try {
+    const launchParamsStorageKey = 'ton-connect-session_storage_launchParams';
+    if (Object.entries(initParams).length > 0) {
+        sessionStorage.setItem(launchParamsStorageKey, JSON.stringify(initParams));
+    } else {
+        const savedInitParams = sessionStorage.getItem(launchParamsStorageKey);
+        if (savedInitParams) {
+            initParams = JSON.parse(savedInitParams);
+        }
+    }
+} catch (e) {}
+
 let tmaPlatform: TmaPlatform = 'unknown';
 if (initParams?.tgWebAppPlatform) {
     tmaPlatform = (initParams.tgWebAppPlatform as TmaPlatform) ?? 'unknown';
