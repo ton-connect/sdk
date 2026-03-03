@@ -862,8 +862,6 @@ export class TonConnectUI {
 
         const { notifications, modals } = this.getModalsAndNotificationsConfiguration(options);
 
-        const abortController = new AbortController();
-
         try {
             this.modal.openIntent({ traceId, intent });
 
@@ -896,10 +894,37 @@ export class TonConnectUI {
      * If wallet is not connected, opens modal and shows intent QR/link.
      */
     public async signMessageIntent(
-        _message: SignMessageIntentRequest,
-        _options?: TonConnectUIIntentOptions
+        intent: SignMessageIntentRequest,
+        options?: TonConnectUIIntentOptions
     ): Promise<OptionalTraceable<SignMessageResponse>> {
-        throw new Error('Not implemented');
+        const traceId = options?.traceId ?? UUIDv7();
+
+        const { notifications, modals } = this.getModalsAndNotificationsConfiguration(options);
+
+        try {
+            this.modal.openIntent({ traceId, intent });
+
+            const intentResponse = await new Promise(resolve =>
+                this.connector.onIntentResponse(resolve)
+            );
+
+            widgetController.setAction({
+                name: 'data-signed',
+                showNotification: notifications.includes('success'),
+                openModal: modals.includes('success'),
+                traceId
+            });
+
+            return intentResponse as SignMessageResponse;
+        } catch (e) {
+            widgetController.setAction({
+                name: 'sign-data-canceled',
+                showNotification: notifications.includes('error'),
+                openModal: modals.includes('error'),
+                traceId
+            });
+            throw e;
+        }
     }
 
     /**
