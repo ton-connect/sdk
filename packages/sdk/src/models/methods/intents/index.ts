@@ -1,6 +1,9 @@
 import {
+    SendTransactionIntentRequest,
     SendTransactionIntentResponse,
+    SignDataIntentRequest,
     SignDataIntentResponse,
+    SignMessageIntentRequest,
     SignMessageIntentResponse
 } from '..';
 
@@ -23,3 +26,8 @@ export type SendActionIntentResponse =
     | SendTransactionIntentResponse
     | SignDataIntentResponse
     | SignMessageIntentResponse;
+
+export type IntentRequest =
+    | SendTransactionIntentRequest
+    | SignDataIntentRequest
+    | SignMessageIntentRequest;

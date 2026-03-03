@@ -1,5 +1,6 @@
 import {
     FeatureName,
+    IntentRequest,
     OptionalTraceable,
     RequiredFeatures,
     SignDataIntentRequest
@@ -14,8 +15,7 @@ export interface WalletsModal {
     /**
      * Open the modal in intent mode with a pre-built intent URL.
      */
-    // TODO: another types
-    openIntent: (options: { traceId: string; intent: SignDataIntentRequest }) => void;
+    openIntent: (options: { traceId: string; intent: IntentRequest }) => void;
 
     /**
      * Close the modal.
