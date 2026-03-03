@@ -7,11 +7,11 @@ import {
 import { createEffect, on } from 'solid-js';
 import {
     ConnectAdditionalRequest,
+    IntentRequest,
     isConnectUrl,
     isWalletInfoCurrentlyEmbedded,
     ITonConnect,
     OptionalTraceable,
-    SignDataIntentRequest,
     Traceable,
     UUIDv7,
     WalletInfoCurrentlyEmbedded
@@ -163,10 +163,7 @@ export class WalletsModalManager implements WalletsModal {
      * Opens the modal window in intent mode with a pre-built intent URL.
      * Used by intent flow to reuse the same wallets UI but with different URLs.
      */
-    public async openIntent(options: {
-        traceId: string;
-        intent: SignDataIntentRequest;
-    }): Promise<void> {
+    public async openIntent(options: { traceId: string; intent: IntentRequest }): Promise<void> {
         if (isInTMA()) {
             sendExpand();
         }

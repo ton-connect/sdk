@@ -16,7 +16,8 @@ import {
 import type {
     SendTransactionIntentResponse,
     SignMessageIntentResponse,
-    SendActionIntentResponse
+    SendActionIntentResponse,
+    IntentResponse
 } from 'src/models/methods/intents';
 import {
     SendTransactionIntentRequest,
@@ -63,7 +64,7 @@ export interface ITonConnect {
         errorsHandler?: (err: TonConnectError) => void
     ): () => void;
 
-    onIntentResponse(callback: (response: SignDataResponse) => void): () => void;
+    onIntentResponse(callback: (response: IntentResponse) => void): () => void;
 
     /**
      * Generates universal link for an external wallet and subscribes to the wallet's bridge, or sends connect request to the injected wallet.
