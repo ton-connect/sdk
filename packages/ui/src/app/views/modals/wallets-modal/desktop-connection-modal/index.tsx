@@ -219,13 +219,31 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
         setMode('extension');
         if (isWalletInfoCurrentlyInjected(props.wallet)) {
             setLastSelectedWalletInfo(props.wallet);
-            connector.connect(
-                {
-                    jsBridgeKey: props.wallet.jsBridgeKey
-                },
-                props.additionalRequest,
-                { traceId: props.walletsModalState?.traceId }
-            );
+
+            if (isIntentMode) {
+                const state = walletsModalState();
+                const intent = state.intent!;
+                const intentType = state.intentType!;
+
+                buildIntentLink(
+                    connector,
+                    { jsBridgeKey: props.wallet.jsBridgeKey },
+                    intentType,
+                    intent,
+                    {
+                        traceId: props.walletsModalState?.traceId,
+                        connectRequest: props.additionalRequest
+                    }
+                );
+            } else {
+                connector.connect(
+                    {
+                        jsBridgeKey: props.wallet.jsBridgeKey
+                    },
+                    props.additionalRequest,
+                    { traceId: props.walletsModalState?.traceId }
+                );
+            }
         }
     };
 
