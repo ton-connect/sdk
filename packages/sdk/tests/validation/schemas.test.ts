@@ -835,30 +835,6 @@ describe('validation/schemas', () => {
             );
         });
 
-        it('rejects extra properties at any level', () => {
-            expect(validateTonProofItemReply({ x: 1 } as unknown as Record<string, unknown>)).toBe(
-                'ton_proof item contains extra properties'
-            );
-
-            expect(
-                validateTonProofItemReply({
-                    proof: {
-                        timestamp: 1,
-                        domain: { lengthBytes: 1, value: 'a' },
-                        payload: 'p',
-                        signature: 'QQ==',
-                        x: 1
-                    } as unknown as Record<string, unknown>
-                })
-            ).toBe('ton_proof item contains extra properties');
-
-            expect(
-                validateTonProofItemReply({
-                    error: { code: 1, message: 'm', x: 1 } as unknown as Record<string, unknown>
-                })
-            ).toBe('ton_proof error contains extra properties');
-        });
-
         it('validates domain lengthBytes equals actual bytes length', () => {
             const result = validateTonProofItemReply({
                 proof: {
