@@ -1,4 +1,8 @@
-import { ConnectAdditionalRequest, isWalletInfoRemote } from '@tonconnect/sdk';
+import {
+    ConnectAdditionalRequest,
+    isWalletInfoRemote,
+    SignDataIntentRequest
+} from '@tonconnect/sdk';
 import { Component, createMemo, createSignal, For, Show } from 'solid-js';
 import { AtWalletIcon, FourWalletsItem, QRIcon, WalletItem } from 'src/app/components';
 import {
@@ -63,10 +67,14 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
         // In intent mode we always use the prebuilt intent URL instead of connect URL.
         if (props.walletModalState.mode === 'intent') {
             setUniversalLink(
-                connector.signDataIntent(walletsBridges(), walletsModalState().intent!, {
-                    traceId: props.walletModalState.traceId,
-                    connectRequest: props.additionalRequest
-                }) as string
+                connector.signDataIntent(
+                    walletsBridges(),
+                    walletsModalState().intent! as unknown as SignDataIntentRequest,
+                    {
+                        traceId: props.walletModalState.traceId,
+                        connectRequest: props.additionalRequest
+                    }
+                ) as string
             );
         }
 
@@ -133,7 +141,8 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
                           bridgeUrl: atWallet.bridgeUrl,
                           universalLink: atWallet.universalLink
                       },
-                      walletsModalState().intent!,
+                      walletsModalState()
+                          .intent! as unknown as import('@tonconnect/sdk').SignDataIntentRequest,
                       {
                           traceId: props.walletModalState.traceId,
                           connectRequest: props.additionalRequest

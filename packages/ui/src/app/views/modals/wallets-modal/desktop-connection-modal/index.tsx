@@ -5,7 +5,8 @@ import {
     WalletMissingRequiredFeaturesError,
     WalletWrongNetworkError,
     WalletInfoInjectable,
-    WalletInfoRemote
+    WalletInfoRemote,
+    SignDataIntentRequest
 } from '@tonconnect/sdk';
 import {
     Component,
@@ -112,7 +113,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                     universalLink: props.wallet.universalLink,
                     bridgeUrl: props.wallet.bridgeUrl
                 },
-                walletsModalState().intent!,
+                walletsModalState().intent! as unknown as SignDataIntentRequest,
                 {
                     traceId: props.walletsModalState?.traceId,
                     connectRequest: props.additionalRequest

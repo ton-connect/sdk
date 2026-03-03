@@ -6,7 +6,7 @@ import {
     QRCodeStyled,
     WalletsContainerStyled
 } from './style';
-import { ConnectAdditionalRequest } from '@tonconnect/sdk';
+import { ConnectAdditionalRequest, SignDataIntentRequest } from '@tonconnect/sdk';
 import { appState } from 'src/app/state/app.state';
 import {
     setLastSelectedWalletInfo,
@@ -45,10 +45,14 @@ export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = prop
     const request = createMemo(() => {
         if (isIntentMode) {
             // TODO: generic method, somehow refactor state or smth
-            return connector.signDataIntent(walletsBridges(), walletsModalState().intent!, {
-                traceId: props.walletModalState.traceId,
-                connectRequest: props.additionalRequest
-            });
+            return connector.signDataIntent(
+                walletsBridges(),
+                walletsModalState().intent! as unknown as SignDataIntentRequest,
+                {
+                    traceId: props.walletModalState.traceId,
+                    connectRequest: props.additionalRequest
+                }
+            );
         }
 
         return connector.connect(walletsBridges(), props.additionalRequest, {
