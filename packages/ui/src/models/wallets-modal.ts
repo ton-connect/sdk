@@ -9,7 +9,11 @@ export interface WalletsModal {
     /**
      * Open the modal in intent mode with a pre-built intent URL.
      */
-    openIntent: (options: { traceId: string; intent: IntentRequest }) => void;
+    openIntent: (options: {
+        traceId: string;
+        intent: IntentRequest;
+        intentType: IntentType;
+    }) => void;
 
     /**
      * Close the modal.
@@ -89,8 +93,14 @@ export type WalletsModalState = OptionalTraceable<
          * Intent payload to be used for QR / wallet-specific links in intent mode.
          */
         intent?: IntentRequest;
+        /**
+         * Type of the intent payload used in intent mode.
+         */
+        intentType?: IntentType;
     }
 >;
+
+export type IntentType = 'sendTransaction' | 'signData' | 'signMessage' | 'sendAction';
 
 /**
  * Modal window close reason.

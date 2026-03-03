@@ -5,8 +5,7 @@ import {
     WalletMissingRequiredFeaturesError,
     WalletWrongNetworkError,
     WalletInfoInjectable,
-    WalletInfoRemote,
-    SignDataIntentRequest
+    WalletInfoRemote
 } from '@tonconnect/sdk';
 import {
     Component,
@@ -58,6 +57,7 @@ import {
     redirectToWallet
 } from 'src/app/utils/url-strategy-helpers';
 import { WalletsModalState } from 'src/models';
+import { buildIntentLink } from 'src/app/utils/intent-link';
 
 export interface DesktopConnectionProps {
     additionalRequest?: ConnectAdditionalRequest;
@@ -107,20 +107,28 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
 
     const generateUniversalLink = (): void => {
         if (isIntentMode) {
-            // TODO: fix types
-            const link = connector.signDataIntent(
-                {
-                    universalLink: props.wallet.universalLink,
-                    bridgeUrl: props.wallet.bridgeUrl
-                },
-                walletsModalState().intent! as unknown as SignDataIntentRequest,
-                {
-                    traceId: props.walletsModalState?.traceId,
-                    connectRequest: props.additionalRequest
-                }
-            ) as string;
+            const state = walletsModalState();
+            const intent = state.intent!;
+            const intentType = state.intentType!;
 
-            setUniversalLink(link);
+            const walletSource = {
+                universalLink: props.wallet.universalLink,
+                bridgeUrl: props.wallet.bridgeUrl
+            };
+
+            const commonOptions = {
+                traceId: props.walletsModalState?.traceId,
+                connectRequest: props.additionalRequest
+            };
+
+            const link = buildIntentLink(
+                connector,
+                walletSource,
+                intentType,
+                intent,
+                commonOptions
+            );
+            setUniversalLink(link as string);
             return;
         }
 

@@ -852,8 +852,11 @@ export class TonConnectUI {
         const { notifications, modals } = this.getModalsAndNotificationsConfiguration(options);
 
         try {
-            // Reuse intent modal flow for transaction intents.
-            this.modal.openIntent({ traceId, intent: intent as unknown as SignDataIntentRequest });
+            this.modal.openIntent({
+                traceId,
+                intent: intent,
+                intentType: 'sendTransaction'
+            });
 
             // TODO add abort, think of how to dedup
             const intentResponse = (await new Promise<OptionalTraceable<SendTransactionResponse>>(
@@ -895,7 +898,7 @@ export class TonConnectUI {
         const { notifications, modals } = this.getModalsAndNotificationsConfiguration(options);
 
         try {
-            this.modal.openIntent({ traceId, intent });
+            this.modal.openIntent({ traceId, intent, intentType: 'signData' });
 
             // TODO add abort, think of how to dedup
             const intentResponse = await new Promise(resolve =>
@@ -934,7 +937,7 @@ export class TonConnectUI {
         const { notifications, modals } = this.getModalsAndNotificationsConfiguration(options);
 
         try {
-            this.modal.openIntent({ traceId, intent });
+            this.modal.openIntent({ traceId, intent, intentType: 'signMessage' });
 
             const intentResponse = await new Promise(resolve =>
                 this.connector.onIntentResponse(resolve)
@@ -973,7 +976,7 @@ export class TonConnectUI {
 
         try {
             // Reuse intent modal flow for generic action intents.
-            this.modal.openIntent({ traceId, intent });
+            this.modal.openIntent({ traceId, intent, intentType: 'sendAction' });
 
             const intentResponse = await new Promise<OptionalTraceable<SendActionIntentResponse>>(
                 resolve =>

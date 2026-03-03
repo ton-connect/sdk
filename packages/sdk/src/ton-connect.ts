@@ -4,6 +4,7 @@ import {
     ConnectEventSuccess,
     ConnectItem,
     ConnectRequest,
+    IntentRequest as ProtocolIntentRequest,
     SendTransactionRpcResponseSuccess,
     SignDataPayload,
     SignDataRpcResponseSuccess,
@@ -35,12 +36,7 @@ import {
     SignDataResponse,
     SignMessageResponse
 } from 'src/models/methods';
-import type {
-    SendTransactionIntentResponse,
-    SignMessageIntentResponse,
-    SendActionIntentResponse,
-    IntentResponse
-} from 'src/models/methods/intents';
+import type { IntentResponse } from 'src/models/methods/intents';
 import {
     SendTransactionIntentRequest,
     SignDataIntentRequest,
@@ -96,7 +92,12 @@ import { DefaultEnvironment } from 'src/environment/default-environment';
 import { UUIDv7 } from 'src/utils/uuid';
 import { TraceableWalletEvent } from 'src/models/wallet/traceable-events';
 import { WalletConnectProvider } from 'src/provider/wallet-connect/wallet-connect-provider';
-import { serializeSignDataIntent } from 'src/intents/serializer';
+import {
+    serializeSendActionIntent,
+    serializeSendTransactionIntent,
+    serializeSignDataIntent,
+    serializeSignMessageIntent
+} from 'src/intents/serializer';
 
 export class TonConnect implements ITonConnect {
     private desiredChainId: string | undefined;
@@ -129,11 +130,25 @@ export class TonConnect implements ITonConnect {
      */
     private readonly tracker: TonConnectTracker;
 
-    // TODO: refactor. Add every response, map them, etc
+    private intentResponseSubscriptions: ((response: IntentResponse) => void)[] = [];
+
+    private readonly handleProviderIntentResponse = (response: unknown): void => {
+        const typed = response as IntentResponse;
+        this.intentResponseSubscriptions.forEach(callback => callback(typed));
+    };
+
     public onIntentResponse(callback: (response: IntentResponse) => void): () => void {
-        // TODO: map request
-        this.provider?.onIntent(callback as unknown as (a: unknown) => void);
-        return () => {};
+        this.intentResponseSubscriptions.push(callback);
+
+        if (this.provider) {
+            this.provider.onIntent(this.handleProviderIntentResponse);
+        }
+
+        return () => {
+            this.intentResponseSubscriptions = this.intentResponseSubscriptions.filter(
+                cb => cb !== callback
+            );
+        };
     }
 
     private readonly walletsList: WalletsListManager;
@@ -801,33 +816,46 @@ export class TonConnect implements ITonConnect {
         }
     }
 
-    public async sendTransactionIntent(
-        _transaction: SendTransactionIntentRequest,
-        _options?: OptionalTraceable<IntentUrlOptions>
-    ): Promise<Traceable<SendTransactionIntentResponse>> {
-        throw new Error('Method not implemented.');
+    public sendTransactionIntent(
+        wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
+        transaction: SendTransactionIntentRequest,
+        options?: OptionalTraceable<IntentUrlOptions>
+    ): string | void {
+        return this.sendIntentWithProvider(
+            'sendTransactionIntent',
+            wallet,
+            transaction,
+            options,
+            (req, params) => serializeSendTransactionIntent(req, params)
+        );
     }
 
-    // maybe generic method? that accept all intents
-    public signDataIntent(
+    private sendIntentWithProvider<TIntentRequest>(
+        methodName:
+            | 'sendTransactionIntent'
+            | 'signDataIntent'
+            | 'signMessageIntent'
+            | 'sendActionIntent',
         wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
-        data: SignDataIntentRequest,
-        options?: OptionalTraceable<IntentUrlOptions>
+        data: TIntentRequest,
+        options: OptionalTraceable<IntentUrlOptions> | undefined,
+        buildIntent: (
+            data: TIntentRequest,
+            params: { id: string; connectRequest?: ConnectRequest }
+        ) => ProtocolIntentRequest
     ): string | void {
         const abortController = createAbortController(options?.signal);
         if (abortController.signal.aborted) {
-            throw new TonConnectError('signDataIntent was aborted');
+            throw new TonConnectError(`${methodName} was aborted`);
         }
 
         const traceId = options?.traceId ?? UUIDv7();
 
-        // TODO: if connected dont build
         const connectRequest = this.createConnectRequest(options?.connectRequest);
 
-        const intentRequest = serializeSignDataIntent(data, {
+        const intentRequest = buildIntent(data, {
             id: '0', // not this id. Should be formed in bridge. leave for now. This is why 2 intents in a row not working
-            connectRequest,
-            manifestUrl: this.dappSettings.manifestUrl
+            connectRequest
         });
 
         this.provider?.closeConnection();
@@ -844,18 +872,51 @@ export class TonConnect implements ITonConnect {
         });
     }
 
-    public async signMessageIntent(
-        _message: SignMessageIntentRequest,
-        _options?: OptionalTraceable<IntentUrlOptions>
-    ): Promise<Traceable<SignMessageIntentResponse>> {
-        throw new Error('Method not implemented.');
+    public signDataIntent(
+        wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
+        data: SignDataIntentRequest,
+        options?: OptionalTraceable<IntentUrlOptions>
+    ): string | void {
+        return this.sendIntentWithProvider(
+            'signDataIntent',
+            wallet,
+            data,
+            options,
+            (req, params) => {
+                return serializeSignDataIntent(req, {
+                    ...params,
+                    manifestUrl: this.dappSettings.manifestUrl
+                });
+            }
+        );
     }
 
-    public async sendActionIntent(
-        _action: SendActionIntentRequest,
-        _options?: OptionalTraceable<IntentUrlOptions>
-    ): Promise<Traceable<SendActionIntentResponse>> {
-        throw new Error('Method not implemented.');
+    public signMessageIntent(
+        wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
+        message: SignMessageIntentRequest,
+        options?: OptionalTraceable<IntentUrlOptions>
+    ): string | void {
+        return this.sendIntentWithProvider(
+            'signMessageIntent',
+            wallet,
+            message,
+            options,
+            (req, params) => serializeSignMessageIntent(req, params)
+        );
+    }
+
+    public sendActionIntent(
+        wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
+        action: SendActionIntentRequest,
+        options?: OptionalTraceable<IntentUrlOptions>
+    ): string | void {
+        return this.sendIntentWithProvider(
+            'sendActionIntent',
+            wallet,
+            action,
+            options,
+            (req, params) => serializeSendActionIntent(req, params)
+        );
     }
 
     private getSessionInfo(): { clientId: string | null; walletId: string | null } | null {
@@ -979,6 +1040,7 @@ export class TonConnect implements ITonConnect {
         }
 
         provider.listen(this.walletEventsListener.bind(this));
+        provider.onIntent(this.handleProviderIntentResponse);
         return provider;
     }
 

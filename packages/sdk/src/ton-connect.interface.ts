@@ -13,12 +13,7 @@ import {
     SignDataResponse,
     SignMessageResponse
 } from 'src/models/methods';
-import type {
-    SendTransactionIntentResponse,
-    SignMessageIntentResponse,
-    SendActionIntentResponse,
-    IntentResponse
-} from 'src/models/methods/intents';
+import type { IntentResponse } from 'src/models/methods/intents';
 import {
     SendTransactionIntentRequest,
     SignDataIntentRequest,
@@ -164,15 +159,15 @@ export interface ITonConnect {
 
     /**
      * Sends transaction via intent flow.
+     * @param wallet target wallet connection source or list of HTTP bridge URLs.
      * @param transaction transaction to send.
-     * @param options optional connect request, abort signal, trace id and URL callback.
-     * @returns signed transaction boc that allows you to find the transaction in the blockchain.
-     * If user rejects transaction, method will throw the corresponding error.
+     * @param options optional connect request, abort signal and trace id.
      */
     sendTransactionIntent(
+        wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
         transaction: SendTransactionIntentRequest,
         options?: OptionalTraceable<IntentUrlOptions>
-    ): Promise<OptionalTraceable<SendTransactionIntentResponse>>;
+    ): string | void;
 
     signDataIntent(
         wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
@@ -182,25 +177,25 @@ export interface ITonConnect {
 
     /**
      * Signs message via intent flow.
+     * @param wallet target wallet connection source or list of HTTP bridge URLs.
      * @param message message to sign.
-     * @param options optional connect request, abort signal, trace id and URL callback.
-     * @returns signed message boc.
-     * If user rejects signing, method will throw the corresponding error.
+     * @param options optional connect request, abort signal and trace id.
      */
     signMessageIntent(
+        wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
         message: SignMessageIntentRequest,
         options?: OptionalTraceable<IntentUrlOptions>
-    ): Promise<OptionalTraceable<SignMessageIntentResponse>>;
+    ): string | void;
 
     /**
      * Sends action intent.
+     * @param wallet target wallet connection source or list of HTTP bridge URLs.
      * @param action actionUrl to be called by the wallet.
-     * @param options optional connect request, abort signal, trace id and URL callback.
-     * @returns result of underlying sendTransaction, signData or signMessage operation.
-     * If user rejects action, method will throw the corresponding error.
+     * @param options optional connect request, abort signal and trace id.
      */
     sendActionIntent(
+        wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
         action: SendActionIntentRequest,
         options?: OptionalTraceable<IntentUrlOptions>
-    ): Promise<OptionalTraceable<SendActionIntentResponse>>;
+    ): string | void;
 }

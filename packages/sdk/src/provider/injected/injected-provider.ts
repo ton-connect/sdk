@@ -99,6 +99,8 @@ export class InjectedProvider<T extends string = string> implements InternalProv
     private listenSubscriptions = false;
 
     private listeners: Array<(e: TraceableWalletEvent) => void> = [];
+
+    private intentListener: ((response: unknown) => void) | null = null;
     private readonly analytics?: Analytics<
         JsBridgeEvent,
         'bridge_key' | 'wallet_app_name' | 'wallet_app_version'
@@ -124,9 +126,8 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             });
         }
     }
-    onIntent(_listener: (response: unknown) => void): void {
-        // TODO: use in connect (rename connect to makeIntent or smth)
-        throw new Error('Method not implemented.');
+    onIntent(listener: (response: unknown) => void): void {
+        this.intentListener = listener;
     }
 
     public connect(message: ConnectRequest | IntentRequest, options?: OptionalTraceable): void {
@@ -280,6 +281,8 @@ export class InjectedProvider<T extends string = string> implements InternalProv
         options?: OptionalTraceable
     ): Promise<void> {
         const traceId = options?.traceId ?? UUIDv7();
+        const isIntent = (message as IntentRequest).m !== undefined;
+
         try {
             logDebug(
                 `Injected Provider connect request: protocolVersion: ${protocolVersion}, message:`,
@@ -289,14 +292,22 @@ export class InjectedProvider<T extends string = string> implements InternalProv
                 js_bridge_method: 'connect',
                 trace_id: traceId
             });
-            const connectEvent = await this.injectedWallet.connect(
+            const response = await this.injectedWallet.connect(
                 protocolVersion,
                 message as unknown as ConnectRequest
             );
+
             this.analytics?.emitJsBridgeResponse({
                 js_bridge_method: 'connect'
             });
-            logDebug('Injected Provider connect response:', connectEvent);
+            logDebug('Injected Provider connect response:', response);
+
+            if (isIntent) {
+                this.intentListener?.({ ...response, traceId });
+                return;
+            }
+
+            const connectEvent = response;
 
             if (connectEvent.event === 'connect') {
                 await this.updateSession();
