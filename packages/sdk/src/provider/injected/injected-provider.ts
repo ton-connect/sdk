@@ -3,7 +3,7 @@ import {
     AppRequest,
     ConnectEventError,
     ConnectRequest,
-    IntentRequest,
+    RawIntentRequest,
     RpcMethod,
     WalletResponse
 } from '@tonconnect/protocol';
@@ -131,7 +131,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
         this.intentListener = listener;
     }
 
-    public connect(message: ConnectRequest | IntentRequest, options?: OptionalTraceable): void {
+    public connect(message: ConnectRequest | RawIntentRequest, options?: OptionalTraceable): void {
         this._connect(PROTOCOL_VERSION, message, options);
     }
 
@@ -278,11 +278,11 @@ export class InjectedProvider<T extends string = string> implements InternalProv
 
     private async _connect(
         protocolVersion: number,
-        message: ConnectRequest | IntentRequest,
+        message: ConnectRequest | RawIntentRequest,
         options?: OptionalTraceable
     ): Promise<void> {
         const traceId = options?.traceId ?? UUIDv7();
-        const isIntent = (message as IntentRequest).m !== undefined;
+        const isIntent = (message as RawIntentRequest).m !== undefined;
 
         try {
             logDebug(
@@ -291,7 +291,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             );
 
             if (isIntent) {
-                await this._connectIntent(protocolVersion, message as IntentRequest, traceId);
+                await this._connectIntent(protocolVersion, message as RawIntentRequest, traceId);
                 return;
             }
 
@@ -338,7 +338,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
 
     private async _connectIntent(
         protocolVersion: number,
-        intent: IntentRequest,
+        intent: RawIntentRequest,
         traceId: string
     ): Promise<void> {
         const response = await this.injectedWallet.sendIntent(intent, {

@@ -4,7 +4,7 @@ import {
     ConnectEventSuccess,
     ConnectRequest,
     hexToByteArray,
-    IntentRequest,
+    RawIntentRequest,
     RpcMethod,
     SessionCrypto,
     TonAddressItemReply,
@@ -94,7 +94,7 @@ export class BridgeProvider implements HTTPProvider {
 
     public connect(
         // TODO: into separate methods for clarity
-        message: ConnectRequest | IntentRequest,
+        message: ConnectRequest | RawIntentRequest,
         options?: OptionalTraceable<{
             openingDeadlineMS?: number;
             signal?: AbortSignal;
@@ -550,7 +550,7 @@ export class BridgeProvider implements HTTPProvider {
     private generateUniversalLink(
         universalLink: string,
         // refactor for clarity
-        message: ConnectRequest | IntentRequest,
+        message: ConnectRequest | RawIntentRequest,
         options: Traceable
     ): string {
         if (isTelegramUrl(universalLink)) {
@@ -591,7 +591,7 @@ export class BridgeProvider implements HTTPProvider {
 
     private generateRegularUniversalLink(
         universalLink: string,
-        message: ConnectRequest | IntentRequest,
+        message: ConnectRequest | RawIntentRequest,
         options: Traceable
     ): string {
         let url = new URL(universalLink);
@@ -631,7 +631,7 @@ export class BridgeProvider implements HTTPProvider {
 
     private generateTGUniversalLink(
         universalLink: string,
-        message: ConnectRequest | IntentRequest,
+        message: ConnectRequest | RawIntentRequest,
         options: Traceable
     ): string {
         const urlToWrap = this.generateRegularUniversalLink('about:blank', message, options);

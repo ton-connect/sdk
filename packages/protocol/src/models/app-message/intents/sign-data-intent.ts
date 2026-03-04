@@ -1,8 +1,8 @@
-import { BaseIntentPayload } from './base-intent-payload';
+import { RawBaseIntentPayload } from './base-intent-payload';
 import type { SignDataPayload } from '../../wallet-message';
 import type { ChainId } from '../../CHAIN';
 
-export interface SignDataIntentRequest extends BaseIntentPayload {
+export interface RawSignDataIntentRequest extends RawBaseIntentPayload {
     /**
      * Must be set to `signIntent`.
      */

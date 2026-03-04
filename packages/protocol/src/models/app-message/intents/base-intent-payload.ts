@@ -1,14 +1,14 @@
 import { ConnectRequest } from '../connect-request';
 
 /**
- * Common fields for all intent payloads.
+ * Common fields for all raw intent payloads.
  *
  * Field names are shortened to keep the URL compact:
  * - `id`: intent identifier, used to match responses.
  * - `m`: intent message type discriminator.
  * - `c`: optional embedded connect request to be executed together with the intent.
  */
-export interface BaseIntentPayload {
+export interface RawBaseIntentPayload {
     /**
      * Intent identifier. Must be unique per dApp session and is echoed back in the wallet response.
      */

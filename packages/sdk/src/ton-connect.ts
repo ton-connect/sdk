@@ -4,7 +4,7 @@ import {
     ConnectEventSuccess,
     ConnectItem,
     ConnectRequest,
-    IntentRequest as ProtocolIntentRequest,
+    RawIntentRequest,
     SendTransactionRpcResponseSuccess,
     SignDataPayload,
     SignDataRpcResponseSuccess,
@@ -842,7 +842,7 @@ export class TonConnect implements ITonConnect {
         buildIntent: (
             data: TIntentRequest,
             params: { id: string; connectRequest?: ConnectRequest }
-        ) => ProtocolIntentRequest
+        ) => RawIntentRequest
     ): string | void {
         const abortController = createAbortController(options?.signal);
         if (abortController.signal.aborted) {

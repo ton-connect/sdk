@@ -1,12 +1,10 @@
 import {
-    BaseIntentPayload,
     ConnectRequest,
     IntentItem,
-    // TODO: raw request?
-    SendActionIntentRequest as MakeSendActionIntentRequest,
-    SendTransactionIntentRequest as MakeSendTransactionIntentRequest,
-    SignDataIntentRequest as MakeSignDataIntentRequest,
-    SignMessageIntentRequest as MakeSignMessageIntentRequest,
+    RawSendActionIntentRequest,
+    RawSendTransactionIntentRequest,
+    RawSignDataIntentRequest,
+    RawSignMessageIntentRequest,
     SendJettonItem,
     SendNftItem,
     SendTonItem
@@ -81,7 +79,7 @@ function mapIntentItem(item: SendTransactionIntentItem): IntentItem {
 export function serializeSendTransactionIntent(
     tx: SendTransactionIntentRequest,
     params: CommonSerializeParams
-): MakeSendTransactionIntentRequest {
+): RawSendTransactionIntentRequest {
     return {
         id: params.id,
         m: 'txIntent',
@@ -95,7 +93,7 @@ export function serializeSendTransactionIntent(
 export function serializeSignDataIntent(
     req: SignDataIntentRequest,
     params: CommonSerializeParams & { manifestUrl: string }
-): MakeSignDataIntentRequest {
+): RawSignDataIntentRequest {
     return {
         id: params.id,
         m: 'signIntent',
@@ -109,7 +107,7 @@ export function serializeSignDataIntent(
 export function serializeSignMessageIntent(
     req: SignMessageIntentRequest,
     params: CommonSerializeParams
-): MakeSignMessageIntentRequest {
+): RawSignMessageIntentRequest {
     return {
         id: params.id,
         m: 'signMsg',
@@ -123,7 +121,7 @@ export function serializeSignMessageIntent(
 export function serializeSendActionIntent(
     req: SendActionIntentRequest,
     params: CommonSerializeParams
-): MakeSendActionIntentRequest {
+): RawSendActionIntentRequest {
     return {
         id: params.id,
         m: 'actionIntent',
@@ -143,23 +141,4 @@ function toBase64Url(input: string): string {
 
     const b64 = btoa(unescape(encodeURIComponent(input)));
     return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
-}
-
-export function encodeConnectRequestForUrl(connectRequest: ConnectRequest): string {
-    return toBase64Url(JSON.stringify(connectRequest));
-}
-
-export function buildInlineIntentUrl(intentPayload: BaseIntentPayload): string {
-    const r = toBase64Url(JSON.stringify(intentPayload));
-    const search = new URLSearchParams();
-
-    if (intentPayload.id) {
-        search.set('id', intentPayload.id);
-    }
-    search.set('r', r);
-    if (intentPayload.c !== undefined) {
-        search.set('c', encodeConnectRequestForUrl(intentPayload.c));
-    }
-
-    return `tc://intent_inline?${search.toString()}`;
 }

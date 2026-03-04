@@ -1,4 +1,4 @@
-import { AppRequest, ConnectRequest, IntentRequest, RpcMethod } from '@tonconnect/protocol';
+import { AppRequest, ConnectRequest, RawIntentRequest, RpcMethod } from '@tonconnect/protocol';
 import { OptionalTraceable, WithoutId } from 'src/utils/types';
 import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet/traceable-events';
 
@@ -7,14 +7,14 @@ export type Provider = InternalProvider | HTTPProvider;
 export interface InternalProvider extends BaseProvider {
     type: 'injected';
 
-    connect(message: ConnectRequest | IntentRequest, options?: OptionalTraceable): void;
+    connect(message: ConnectRequest | RawIntentRequest, options?: OptionalTraceable): void;
 }
 
 export interface HTTPProvider extends BaseProvider {
     type: 'http';
 
     connect(
-        message: ConnectRequest | IntentRequest,
+        message: ConnectRequest | RawIntentRequest,
         options?: OptionalTraceable<{
             openingDeadlineMS?: number;
             signal?: AbortSignal;

@@ -1,10 +1,10 @@
-import type { SendTransactionIntentRequest } from './send-transaction-intent';
-import type { SignDataIntentRequest } from './sign-data-intent';
-import type { SignMessageIntentRequest } from './sign-message-intent';
-import type { SendActionIntentRequest } from './send-action-intent';
+import type { RawSendTransactionIntentRequest } from './send-transaction-intent';
+import type { RawSignDataIntentRequest } from './sign-data-intent';
+import type { RawSignMessageIntentRequest } from './sign-message-intent';
+import type { RawSendActionIntentRequest } from './send-action-intent';
 
-export type IntentRequest =
-    | SendTransactionIntentRequest
-    | SignDataIntentRequest
-    | SignMessageIntentRequest
-    | SendActionIntentRequest;
+export type RawIntentRequest =
+    | RawSendTransactionIntentRequest
+    | RawSignDataIntentRequest
+    | RawSignMessageIntentRequest
+    | RawSendActionIntentRequest;

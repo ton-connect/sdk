@@ -1,6 +1,6 @@
-import { BaseIntentPayload } from './base-intent-payload';
+import { RawBaseIntentPayload } from './base-intent-payload';
 
-export interface SendActionIntentRequest extends BaseIntentPayload {
+export interface RawSendActionIntentRequest extends RawBaseIntentPayload {
     /**
      * Must be set to `actionIntent`.
      */

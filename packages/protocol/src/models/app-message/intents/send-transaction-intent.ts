@@ -1,8 +1,8 @@
-import { BaseIntentPayload } from './base-intent-payload';
+import { RawBaseIntentPayload } from './base-intent-payload';
 import type { IntentItem } from './intent-items';
 import type { ChainId } from '../../CHAIN';
 
-export interface SendTransactionIntentRequest extends BaseIntentPayload {
+export interface RawSendTransactionIntentRequest extends RawBaseIntentPayload {
     /**
      * Must be set to `txIntent`.
      */

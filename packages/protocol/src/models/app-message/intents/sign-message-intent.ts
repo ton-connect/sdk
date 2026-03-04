@@ -1,8 +1,8 @@
 import type { ChainId } from '../../CHAIN';
-import { BaseIntentPayload } from './base-intent-payload';
+import { RawBaseIntentPayload } from './base-intent-payload';
 import type { IntentItem } from './intent-items';
 
-export interface SignMessageIntentRequest extends BaseIntentPayload {
+export interface RawSignMessageIntentRequest extends RawBaseIntentPayload {
     /**
      * Must be set to `signMsg`.
      */
