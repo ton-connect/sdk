@@ -8,6 +8,7 @@ import {
     SendTransactionRpcResponseSuccess,
     SignDataPayload,
     SignDataRpcResponseSuccess,
+    SignMessageRpcResponseSuccess,
     TonAddressItemReply,
     TonProofItemReply
 } from '@tonconnect/protocol';
@@ -53,6 +54,7 @@ import {
 import { connectErrorsParser } from 'src/parsers/connect-errors-parser';
 import { sendTransactionParser } from 'src/parsers/send-transaction-parser';
 import { signDataParser } from 'src/parsers/sign-data-parser';
+import { SignMessageParser, signMessageParser } from 'src/parsers/sign-message-parser';
 import { BridgeProvider } from 'src/provider/bridge/bridge-provider';
 import { InjectedProvider } from 'src/provider/injected/injected-provider';
 import { Provider } from 'src/provider/provider';
@@ -742,13 +744,89 @@ export class TonConnect implements ITonConnect {
     }
 
     public async signMessage(
-        _message: SendTransactionRequest,
-        _options?: OptionalTraceable<{
+        message: SendTransactionRequest,
+        options?: OptionalTraceable<{
             onRequestSent?: () => void;
             signal?: AbortSignal;
         }>
     ): Promise<Traceable<SignMessageResponse>> {
-        throw new TonConnectError('signMessage is not implemented yet');
+        const abortController = createAbortController(options?.signal);
+        if (abortController.signal.aborted) {
+            throw new TonConnectError('Message signing was aborted');
+        }
+
+        const validationError = validateSendTransactionRequest(message);
+        if (validationError) {
+            if (isQaModeEnabled()) {
+                console.error('SignMessageRequest validation failed: ' + validationError);
+            } else {
+                throw new TonConnectError(
+                    'SignMessageRequest validation failed: ' + validationError
+                );
+            }
+        }
+
+        this.checkConnection();
+
+        const requiredMessagesNumber = message.messages.length;
+        const requireExtraCurrencies = message.messages.some(
+            m => m.extraCurrency && Object.keys(m.extraCurrency).length > 0
+        );
+        checkSendTransactionSupport(this.wallet!.device.features, {
+            requiredMessagesNumber,
+            requireExtraCurrencies
+        });
+
+        const traceId = options?.traceId ?? UUIDv7();
+
+        const { validUntil, messages, ...tx } = message;
+        const from = message.from || this.account!.address;
+        const network = message.network || this.account!.chain;
+
+        if (this.wallet?.account.chain && network !== this.wallet.account.chain) {
+            if (!isQaModeEnabled()) {
+                throw new WalletWrongNetworkError('Wallet connected to a wrong network', {
+                    cause: {
+                        expectedChainId: this.wallet?.account.chain,
+                        actualChainId: network
+                    }
+                });
+            }
+            console.error('Wallet connected to a wrong network', {
+                expectedChainId: this.wallet?.account.chain,
+                actualChainId: network
+            });
+        }
+
+        const response = await this.provider!.sendRequest(
+            signMessageParser.convertToRpcRequest({
+                ...tx,
+                from,
+                network,
+                valid_until: validUntil,
+                messages: messages.map(({ extraCurrency, payload, stateInit, ...msg }) => ({
+                    ...msg,
+                    payload: normalizeBase64(payload),
+                    stateInit: normalizeBase64(stateInit),
+                    extra_currency: extraCurrency
+                }))
+            }),
+            {
+                onRequestSent: options?.onRequestSent,
+                signal: abortController.signal,
+                traceId
+            }
+        );
+
+        if (signMessageParser.isError(response)) {
+            signMessageParser.parseAndThrowError(response);
+        }
+
+        const result = signMessageParser.convertFromRpcResponse(
+            response as SignMessageRpcResponseSuccess
+        );
+
+        return { ...result, traceId: (response as { traceId: string }).traceId };
     }
 
     /**

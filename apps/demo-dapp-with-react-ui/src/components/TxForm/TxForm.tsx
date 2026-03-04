@@ -33,6 +33,7 @@ export function TxForm() {
     const [txResult, setTxResult] = useState<object | null>(null);
     const [loading, setLoading] = useState(false);
     const [waitingTx, setWaitingTx] = useState(false);
+    const [signMessageResult, setSignMessageResult] = useState<object | null>(null);
 
     const wallet = useTonWallet();
     const [tonConnectUi] = useTonConnectUI();
@@ -43,6 +44,7 @@ export function TxForm() {
 
     const handleSendTx = async () => {
         setTxResult(null);
+        setSignMessageResult(null);
         setLoading(true);
         setWaitingTx(false);
         try {
@@ -57,6 +59,20 @@ export function TxForm() {
             }
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleSignMessage = async () => {
+        setSignMessageResult(null);
+
+        try {
+            const result = await tonConnectUi.signMessage(tx);
+            setSignMessageResult(result);
+        } catch (e) {
+            console.error('signMessage failed:', e);
+            setSignMessageResult(
+                e instanceof Error ? { error: e.message } : { error: 'Unknown error' }
+            );
         }
     };
 
@@ -112,12 +128,17 @@ export function TxForm() {
             )}
 
             {wallet ? (
-                <button onClick={handleSendTx} disabled={loading || waitingTx}>
-                    {loading ? 'Sending...' : 'Send transaction'}
-                </button>
+                <div className="send-tx-form__buttons">
+                    <button onClick={handleSendTx} disabled={loading || waitingTx}>
+                        {loading ? 'Sending...' : 'Send transaction'}
+                    </button>
+                    <button onClick={handleSignMessage} disabled={waitingTx}>
+                        Sign same message
+                    </button>
+                </div>
             ) : (
                 <button onClick={() => tonConnectUi.openModal()}>
-                    Connect wallet to send the transaction
+                    Connect wallet to send / sign the transaction
                 </button>
             )}
 
@@ -126,6 +147,20 @@ export function TxForm() {
                     <div className="find-transaction-demo__json-label">Transaction</div>
                     <div className="find-transaction-demo__json-view">
                         <ReactJson src={txResult} name={false} theme="ocean" collapsed={false} />
+                    </div>
+                </>
+            )}
+
+            {signMessageResult && (
+                <>
+                    <div className="find-transaction-demo__json-label">SignMessage result</div>
+                    <div className="find-transaction-demo__json-view">
+                        <ReactJson
+                            src={signMessageResult}
+                            name={false}
+                            theme="ocean"
+                            collapsed={false}
+                        />
                     </div>
                 </>
             )}

@@ -1,11 +1,16 @@
-import {
-    WalletResponseTemplateError,
-    WalletResponseTemplateSuccess
-} from './wallet-response-template';
+import { WalletResponseTemplateError } from './wallet-response-template';
 
 export type SignMessageRpcResponse = SignMessageRpcResponseSuccess | SignMessageRpcResponseError;
 
-export interface SignMessageRpcResponseSuccess extends WalletResponseTemplateSuccess {}
+export interface SignMessageRpcResponseSuccess {
+    result: {
+        /**
+         * Signed internal message BoC (base64).
+         */
+        internal_boc: string;
+    };
+    id: string;
+}
 
 export interface SignMessageRpcResponseError extends WalletResponseTemplateError {
     error: { code: SIGN_MESSAGE_ERROR_CODES; message: string; data?: unknown };

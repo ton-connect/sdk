@@ -5,6 +5,10 @@ import {
 } from './send-transaction-rpc-response';
 import { SignDataRpcResponseError, SignDataRpcResponseSuccess } from './sign-data-rpc-response';
 import {
+    SignMessageRpcResponseError,
+    SignMessageRpcResponseSuccess
+} from './sign-message-rpc-response';
+import {
     DisconnectRpcResponseError,
     DisconnectRpcResponseSuccess
 } from './disconnect-rpc-response';
@@ -18,6 +22,11 @@ export type RpcResponses = {
     signData: {
         error: SignDataRpcResponseError;
         success: SignDataRpcResponseSuccess;
+    };
+
+    signMessage: {
+        error: SignMessageRpcResponseError;
+        success: SignMessageRpcResponseSuccess;
     };
 
     disconnect: {
