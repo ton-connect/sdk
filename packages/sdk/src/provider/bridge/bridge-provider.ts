@@ -39,6 +39,8 @@ import { sha256 } from 'sha.js';
 export class BridgeProvider implements HTTPProvider {
     private static readonly INTENT_TTL_SECONDS = 300;
     private static readonly MAX_INLINE_INTENT_URL_LENGTH = 1023;
+    private static readonly DEFAULT_OBJECT_STORAGE_URL =
+        'https://ton-connect-bridge-v3-staging.tapps.ninja/objects';
     public static async fromStorage(
         storage: BridgeConnectionStorage,
         analyticsManager?: AnalyticsManager
@@ -584,9 +586,7 @@ export class BridgeProvider implements HTTPProvider {
         ) {
             return this.walletConnectionSource.objectStorageUrl;
         }
-        const DEFAULT_OBJECT_STORAGE_URL =
-            'https://ton-connect-bridge-v3-staging.tapps.ninja/objects';
-        return DEFAULT_OBJECT_STORAGE_URL;
+        return BridgeProvider.DEFAULT_OBJECT_STORAGE_URL;
     }
 
     private generateRegularUniversalLink(

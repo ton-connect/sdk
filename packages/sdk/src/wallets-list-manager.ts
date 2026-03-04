@@ -175,9 +175,9 @@ export class WalletsListManager {
                     (walletConfig as WalletInfoRemote).universalLink =
                         walletConfigDTO.universal_url!;
                     (walletConfig as WalletInfoRemote).deepLink = walletConfigDTO.deepLink;
-                    if (walletConfigDTO.object_storage_url) {
+                    if (bridge.object_storage_url) {
                         (walletConfig as WalletInfoRemote).objectStorageUrl =
-                            walletConfigDTO.object_storage_url;
+                            bridge.object_storage_url;
                     }
                 }
                 if (bridge.type === 'js') {

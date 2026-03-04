@@ -146,12 +146,16 @@ export interface WalletInfoDTO {
 
     deepLink?: string;
     bridge: (WalletInfoBridgeRemoteDTO | WalletInfoBridgeInjectedDTO)[];
-    object_storage_url?: string;
 }
 
 export interface WalletInfoBridgeRemoteDTO {
     type: 'sse';
     url: string;
+    /**
+     * Optional URL for intent object storage (POST with text/plain body, returns get_url).
+     * When intent payload does not fit in URL, SDK uses this or default bridge storage.
+     */
+    object_storage_url?: string;
 }
 
 export interface WalletInfoBridgeInjectedDTO {

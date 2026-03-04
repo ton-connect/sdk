@@ -129,16 +129,3 @@ export function serializeSendActionIntent(
         a: req.actionUrl
     };
 }
-
-function toBase64Url(input: string): string {
-    if (typeof Buffer !== 'undefined') {
-        return Buffer.from(input, 'utf8')
-            .toString('base64')
-            .replace(/\+/g, '-')
-            .replace(/\//g, '_')
-            .replace(/=+$/g, '');
-    }
-
-    const b64 = btoa(unescape(encodeURIComponent(input)));
-    return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
-}

@@ -14,7 +14,10 @@ export interface WalletConnectionSourceHTTP {
      */
     bridgeUrl: string;
 
-    objectStorageUrl?: string; // TODO should be passed when clicked on specific wallet
+    /**
+     * Optional URL for intent object storage associated with this bridge endpoint.
+     */
+    objectStorageUrl?: string;
 }
 
 export interface WalletConnectionSourceJS {
