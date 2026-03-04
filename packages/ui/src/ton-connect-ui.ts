@@ -75,7 +75,7 @@ import {
 import { IMG } from 'src/app/env/IMG';
 
 type TonConnectUIIntentOptions = ActionConfiguration &
-    OptionalTraceable<Omit<IntentUrlOptions, 'signal' | 'onIntentUrlReady'>>;
+    OptionalTraceable<Omit<IntentUrlOptions, 'onIntentUrlReady'>>;
 
 export class TonConnectUI {
     public static getWallets(): Promise<WalletInfo[]> {
@@ -125,6 +125,49 @@ export class TonConnectUI {
      * Manages the modal window state.
      */
     public readonly modal: WalletsModal;
+
+    private waitForIntentResponse<T>(signal?: AbortSignal): Promise<T> {
+        return new Promise<T>((resolve, reject) => {
+            let unsubscribe: (() => void) | null = null;
+
+            const onAbort = (): void => {
+                if (unsubscribe) {
+                    unsubscribe();
+                }
+                if (signal) {
+                    signal.removeEventListener('abort', onAbort);
+                }
+                reject(new TonConnectUIError('Intent was aborted'));
+            };
+
+            if (signal?.aborted) {
+                onAbort();
+                return;
+            }
+
+            unsubscribe = this.connector.onIntentResponse(response => {
+                if (signal) {
+                    signal.removeEventListener('abort', onAbort);
+                }
+                unsubscribe?.();
+
+                const maybeError = response as unknown as {
+                    error?: { code: number; message: string };
+                };
+
+                if (maybeError && maybeError.error) {
+                    reject(new TonConnectError(maybeError.error.message, { cause: maybeError }));
+                    return;
+                }
+
+                resolve(response as T);
+            });
+
+            if (signal) {
+                signal.addEventListener('abort', onAbort);
+            }
+        });
+    }
 
     /**
      * Manages the single wallet modal window state.
@@ -859,13 +902,9 @@ export class TonConnectUI {
                 intentType: 'sendTransaction'
             });
 
-            // TODO add abort, think of how to dedup
-            const intentResponse = (await new Promise<OptionalTraceable<SendTransactionResponse>>(
-                resolve =>
-                    this.connector.onIntentResponse(response =>
-                        resolve(response as OptionalTraceable<SendTransactionResponse>)
-                    )
-            )) as OptionalTraceable<SendTransactionResponse>;
+            const intentResponse = await this.waitForIntentResponse<
+                OptionalTraceable<SendTransactionResponse>
+            >(options?.signal);
 
             widgetController.setAction({
                 name: 'transaction-sent',
@@ -905,10 +944,9 @@ export class TonConnectUI {
         try {
             this.modal.openIntent({ traceId, intent, intentType: 'signData' });
 
-            // TODO add abort, think of how to dedup
-            const intentResponse = await new Promise(resolve =>
-                this.connector.onIntentResponse(resolve)
-            );
+            const intentResponse = await this.waitForIntentResponse<
+                OptionalTraceable<SignDataResponse>
+            >(options?.signal);
 
             widgetController.setAction({
                 name: 'data-signed',
@@ -918,7 +956,7 @@ export class TonConnectUI {
             });
 
             success = true;
-            return intentResponse as SignDataResponse;
+            return intentResponse;
         } catch (e) {
             widgetController.setAction({
                 name: 'sign-data-canceled',
@@ -948,9 +986,9 @@ export class TonConnectUI {
         try {
             this.modal.openIntent({ traceId, intent, intentType: 'signMessage' });
 
-            const intentResponse = await new Promise(resolve =>
-                this.connector.onIntentResponse(resolve)
-            );
+            const intentResponse = await this.waitForIntentResponse<
+                OptionalTraceable<SignMessageResponse>
+            >(options?.signal);
 
             widgetController.setAction({
                 name: 'data-signed',
@@ -960,7 +998,7 @@ export class TonConnectUI {
             });
 
             success = true;
-            return intentResponse as SignMessageResponse;
+            return intentResponse;
         } catch (e) {
             widgetController.setAction({
                 name: 'sign-data-canceled',
@@ -991,12 +1029,9 @@ export class TonConnectUI {
             // Reuse intent modal flow for generic action intents.
             this.modal.openIntent({ traceId, intent, intentType: 'sendAction' });
 
-            const intentResponse = await new Promise<OptionalTraceable<SendActionIntentResponse>>(
-                resolve =>
-                    this.connector.onIntentResponse(response =>
-                        resolve(response as OptionalTraceable<SendActionIntentResponse>)
-                    )
-            );
+            const intentResponse = await this.waitForIntentResponse<
+                OptionalTraceable<SendActionIntentResponse>
+            >(options?.signal);
 
             widgetController.setAction({
                 name: 'transaction-sent',
