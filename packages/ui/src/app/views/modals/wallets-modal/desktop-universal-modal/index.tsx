@@ -38,11 +38,16 @@ export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = prop
     });
 
     setLastSelectedWalletInfo({ openMethod: 'qrcode' });
-    const request = createMemo(() =>
-        connector.connect(walletsBridges(), props.additionalRequest, {
+    const request = createMemo(() => {
+        // If intentLink is provided, use it directly
+        if (props.walletModalState.intentLink) {
+            return props.walletModalState.intentLink;
+        }
+        // Otherwise, generate link using connector
+        return connector.connect(walletsBridges(), props.additionalRequest, {
             traceId: props.walletModalState.traceId
-        })
-    );
+        });
+    });
 
     const supportedWallets = createMemo(
         () => props.walletsList.filter(wallet => wallet.isSupportRequiredFeatures),
@@ -68,14 +73,24 @@ export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = prop
             onClick={() => setPopupOpened(false)}
             data-tc-wallets-modal-universal-desktop="true"
         >
-            <H1 translationKey="walletModal.desktopUniversalModal.connectYourWallet">
-                Connect your wallet
+            <H1
+                translationKey={
+                    props.walletModalState.intentLink
+                        ? 'walletModal.desktopUniversalModal.connectYourWalletIntent'
+                        : 'walletModal.desktopUniversalModal.connectYourWallet'
+                }
+            >
+                {props.walletModalState.intentLink ? 'Complete in wallet' : 'Connect your wallet'}
             </H1>
             <H2Styled translationKey="walletModal.desktopUniversalModal.scan">
                 Scan with your mobile wallet
             </H2Styled>
             <QRCodeStyled
-                sourceUrl={addReturnStrategy(request()!, 'none')}
+                sourceUrl={
+                    request()!.startsWith('tc://')
+                        ? request()!
+                        : addReturnStrategy(request()!, 'none')
+                }
                 disableCopy={popupOpened()}
                 imageUrl={IMG.TON}
             />

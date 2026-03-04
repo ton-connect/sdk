@@ -19,6 +19,9 @@
     "extractorMessageReporting": {
       "ae-missing-release-tag": {
         "logLevel": "none"
+      },
+      "ae-forgotten-export": {
+        "logLevel": "warning"
       }
     },
     "tsdocMessageReporting": {

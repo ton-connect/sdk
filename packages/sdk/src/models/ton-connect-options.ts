@@ -64,4 +64,13 @@ export interface TonConnectOptions {
      * Analytics configuration.
      */
     analytics?: AnalyticsSettings;
+
+    /**
+     * Default Object Storage endpoint for intents when using the "object_storage" transport.
+     * Must be a full POST URL, e.g. https://ton-connect-bridge-v3-staging.tapps.ninja/objects
+     * SDK will append the ttl query parameter automatically.
+     *
+     * @default 'https://ton-connect-bridge-v3-staging.tapps.ninja/objects'
+     */
+    objectStorageBaseUrl?: string;
 }

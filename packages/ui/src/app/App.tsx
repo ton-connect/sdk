@@ -9,6 +9,7 @@ import { themeState } from 'src/app/state/theme-state';
 import { GlobalStyles, globalStylesTag } from 'src/app/styles/global-styles';
 import { AccountButton } from 'src/app/views/account-button';
 import { ActionsModal, WalletsModal } from 'src/app/views/modals';
+import { IntentModal } from 'src/app/views/modals/intent-modal/intent-modal';
 import './styles/style.d.ts';
 import { TonConnectUI } from 'src/ton-connect-ui';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
@@ -42,6 +43,7 @@ const App: Component<AppProps> = props => {
                             <WalletsModal />
                             <SingleWalletModal />
                             <ActionsModal />
+                            <IntentModal />
                         </Dynamic>
                     </ThemeProvider>
                 </ConnectorContext.Provider>

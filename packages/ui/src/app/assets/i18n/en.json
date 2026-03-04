@@ -54,10 +54,11 @@
       "openWalletOnTelegram": "Connect Wallet in Telegram",
       "chooseOtherApplication": "Choose other application",
       "openLink": "Open Link",
-      "scan": "Scan with your mobile wallet"
+      "scan": "Scan with your mobile wallet"
     },
     "desktopUniversalModal": {
       "connectYourWallet": "Connect your TON wallet",
+      "connectYourWalletIntent": "Complete in wallet",
       "scan": "Scan with your mobile wallet",
       "availableWallets": "Available wallets"
     },

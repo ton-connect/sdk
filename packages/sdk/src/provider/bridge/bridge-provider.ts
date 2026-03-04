@@ -8,7 +8,12 @@ import {
     SessionCrypto,
     TonAddressItemReply,
     WalletMessage,
-    WalletResponse
+    WalletResponse,
+    MakeSendTransactionIntentRequest,
+    MakeSignDataIntentRequest,
+    MakeSignMessageIntentRequest,
+    MakeSendActionIntentRequest,
+    AppMessage
 } from '@tonconnect/protocol';
 import { TonConnectError } from 'src/errors/ton-connect.error';
 import { WalletConnectionSourceHTTP } from 'src/models/wallet/wallet-connection-source';
@@ -67,6 +72,8 @@ export class BridgeProvider implements HTTPProvider {
     private pendingGateways: BridgeGateway[] = [];
 
     private listeners: Array<(e: TraceableWalletEvent) => void> = [];
+
+    private intentResponseCallback?: (response: TraceableWalletResponse<RpcMethod>) => void;
 
     private readonly defaultOpeningDeadlineMS = 12000;
 
@@ -380,6 +387,12 @@ export class BridgeProvider implements HTTPProvider {
         return () => (this.listeners = this.listeners.filter(listener => listener !== callback));
     }
 
+    public setIntentResponseCallback(
+        callback: (response: TraceableWalletResponse<RpcMethod>) => void
+    ): void {
+        this.intentResponseCallback = callback;
+    }
+
     public pause(): void {
         this.gateway?.pause();
         this.pendingGateways.forEach(bridge => bridge.pause());
@@ -453,7 +466,16 @@ export class BridgeProvider implements HTTPProvider {
             const id = walletMessage.id.toString();
             const resolve = this.pendingRequests.get(id);
             if (!resolve) {
-                logDebug(`Response id ${id} doesn't match any request's id`);
+                // Check if this is an intent response (id starts with "intent-" or "sign-intent-")
+                if (id.startsWith('intent-') || id.startsWith('sign-intent-')) {
+                    logDebug('Intent response received:', walletMessage);
+                    // Emit intent response event
+                    if (this.intentResponseCallback) {
+                        this.intentResponseCallback({ ...walletMessage, traceId });
+                    }
+                } else {
+                    logDebug(`Response id ${id} doesn't match any request's id`);
+                }
                 return;
             }
 
@@ -509,6 +531,12 @@ export class BridgeProvider implements HTTPProvider {
             item => item.name === 'ton_addr'
         ) as TonAddressItemReply;
 
+        // Log connect event items to verify ton_proof is present
+        logDebug(
+            'Connect event items:',
+            connectEvent.payload.items.map(item => item.name)
+        );
+
         const connectEventToSave: BridgeConnectionHttp['connectEvent'] = {
             ...connectEvent,
             payload: {
@@ -545,12 +573,17 @@ export class BridgeProvider implements HTTPProvider {
 
     private generateRegularUniversalLink(
         universalLink: string,
-        message: ConnectRequest,
-        options: Traceable
+        message: ConnectRequest | AppMessage,
+        options: Traceable,
+        sessionId?: string
     ): string {
         const url = new URL(universalLink);
         url.searchParams.append('v', PROTOCOL_VERSION.toString());
-        url.searchParams.append('id', this.session!.sessionCrypto.sessionId);
+        if (sessionId) {
+            url.searchParams.append('id', sessionId);
+        } else if (this.session) {
+            url.searchParams.append('id', this.session.sessionCrypto.sessionId);
+        }
         url.searchParams.append('trace_id', options.traceId);
         url.searchParams.append('r', JSON.stringify(message));
         return url.toString();
@@ -558,10 +591,16 @@ export class BridgeProvider implements HTTPProvider {
 
     private generateTGUniversalLink(
         universalLink: string,
-        message: ConnectRequest,
-        options: Traceable
+        message: ConnectRequest | AppMessage,
+        options: Traceable,
+        sessionId?: string
     ): string {
-        const urlToWrap = this.generateRegularUniversalLink('about:blank', message, options);
+        const urlToWrap = this.generateRegularUniversalLink(
+            'about:blank',
+            message,
+            options,
+            sessionId
+        );
         const linkParams = urlToWrap.split('?')[1]!;
 
         const startapp = 'tonconnect-' + encodeTelegramUrlParameters(linkParams);
@@ -574,6 +613,48 @@ export class BridgeProvider implements HTTPProvider {
         return url.toString();
     }
 
+    /**
+     * Generates a universal link for a send transaction intent.
+     * Works without an established session.
+     * Uses tc://intent_inline format for intents.
+     */
+    public generateIntentUniversalLink(
+        _universalLink: string, // Not used for intents, kept for API compatibility
+        intent:
+            | MakeSendTransactionIntentRequest
+            | MakeSignDataIntentRequest
+            | MakeSignMessageIntentRequest
+            | MakeSendActionIntentRequest,
+        options: Traceable,
+        sessionId?: string
+    ): string {
+        // For intents, use tc://intent_inline format
+        // Use provided sessionId or generate a new one
+        const finalSessionId =
+            sessionId || (this.session ? this.session.sessionCrypto.sessionId : UUIDv7());
+
+        // Encode intent as base64url (URL-safe base64 without padding)
+        logDebug('Generating intent universal link with intent:', JSON.stringify(intent, null, 2));
+        const intentJson = JSON.stringify(intent);
+        // Use standard base64 first, then convert to base64url format
+        const intentBase64 = Base64.encode(intentJson, false); // false = standard base64
+        // Convert to base64url: replace + with -, / with _, and remove padding
+        const intentBase64Url = intentBase64
+            .replace(/\+/g, '-')
+            .replace(/\//g, '_')
+            .replace(/=/g, '');
+
+        // Build URL using URLSearchParams (as in feature/intents-demo branch)
+        // Note: URLSearchParams will encode the base64url string, but that's acceptable for tc:// links
+        const params = new URLSearchParams({
+            id: finalSessionId,
+            trace_id: options.traceId,
+            r: intentBase64Url
+        });
+
+        return `tc://intent_inline?${params.toString()}`;
+    }
+
     // TODO: Remove this method after all dApps and the wallets-list.json have been updated
     private convertToDirectLink(universalLink: string): string {
         const url = new URL(universalLink);
@@ -584,6 +665,33 @@ export class BridgeProvider implements HTTPProvider {
         }
 
         return url.toString();
+    }
+
+    /**
+     * Opens gateways for intent to listen for connect events.
+     * Similar to openGateways but doesn't require a full connection setup.
+     */
+    public async openGatewaysForIntent(
+        sessionCrypto: SessionCrypto,
+        options?: Traceable
+    ): Promise<void> {
+        const traceId = options?.traceId ?? UUIDv7();
+
+        // Set session for intent
+        this.session = {
+            sessionCrypto,
+            bridgeUrl:
+                'bridgeUrl' in this.walletConnectionSource &&
+                !Array.isArray(this.walletConnectionSource)
+                    ? this.walletConnectionSource.bridgeUrl
+                    : ''
+        };
+
+        // Open gateways to listen for events
+        await this.openGateways(sessionCrypto, {
+            openingDeadlineMS: this.defaultOpeningDeadlineMS,
+            traceId
+        });
     }
 
     private async openGateways(

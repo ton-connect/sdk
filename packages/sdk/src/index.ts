@@ -6,6 +6,7 @@ export { TonConnect as default } from './ton-connect';
 export { WalletsListManager } from './wallets-list-manager';
 export { ITonConnect } from './ton-connect.interface';
 export type { AnalyticsSettings } from './models/ton-connect-options';
+export type { IntentUniversalLinkOptions } from './ton-connect.interface';
 export type {
     EventDispatcher,
     RemoveTonConnectPrefix,
@@ -66,7 +67,16 @@ export type {
     SessionInfo
 } from './tracker/types';
 export { BrowserEventDispatcher } from './tracker/browser-event-dispatcher';
-export type { TonAddressItem, TonProofItem, ConnectItem } from '@tonconnect/protocol';
+export type {
+    TonAddressItem,
+    TonProofItem,
+    ConnectItem,
+    ConnectRequest,
+    IntentItem,
+    SendTonItem,
+    SendJettonItem,
+    SendNftItem
+} from '@tonconnect/protocol';
 export {
     CHAIN,
     ConnectEventSuccess,

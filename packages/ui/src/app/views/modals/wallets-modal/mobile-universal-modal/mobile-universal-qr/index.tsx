@@ -11,13 +11,20 @@ interface MobileUniversalQRProps {
     onOpenLink: () => void;
     onCopy: () => void;
     isCopiedShown: ReturnType<typeof setTimeout> | void;
+    isIntent?: boolean;
 }
 
 export const MobileUniversalQR: Component<MobileUniversalQRProps> = props => {
     return (
         <>
-            <H1Styled translationKey="walletModal.mobileUniversalModal.connectYourWallet">
-                Connect your TON wallet
+            <H1Styled
+                translationKey={
+                    props.isIntent
+                        ? 'walletModal.mobileUniversalModal.connectYourWalletIntent'
+                        : 'walletModal.mobileUniversalModal.connectYourWallet'
+                }
+            >
+                {props.isIntent ? 'Complete in wallet' : 'Connect your TON wallet'}
             </H1Styled>
             <H2Styled translationKey="walletModal.mobileUniversalModal.scan">
                 Scan with your mobile wallet
@@ -25,7 +32,11 @@ export const MobileUniversalQR: Component<MobileUniversalQRProps> = props => {
             <QrCodeWrapper>
                 <QRCode
                     imageUrl={IMG.TON}
-                    sourceUrl={addReturnStrategy(props.universalLink, 'none')}
+                    sourceUrl={
+                        props.universalLink.startsWith('tc://')
+                            ? props.universalLink
+                            : addReturnStrategy(props.universalLink, 'none')
+                    }
                     disableCopy
                 />
             </QrCodeWrapper>
