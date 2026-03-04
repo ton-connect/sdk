@@ -851,6 +851,7 @@ export class TonConnectUI {
 
         const { notifications, modals } = this.getModalsAndNotificationsConfiguration(options);
 
+        let success = false;
         try {
             this.modal.openIntent({
                 traceId,
@@ -873,6 +874,7 @@ export class TonConnectUI {
                 traceId
             });
 
+            success = true;
             return intentResponse;
         } catch (e) {
             widgetController.setAction({
@@ -882,6 +884,8 @@ export class TonConnectUI {
                 traceId
             });
             throw e;
+        } finally {
+            this.modal.close(success ? 'wallet-selected' : 'action-cancelled');
         }
     }
 
@@ -897,6 +901,7 @@ export class TonConnectUI {
 
         const { notifications, modals } = this.getModalsAndNotificationsConfiguration(options);
 
+        let success = false;
         try {
             this.modal.openIntent({ traceId, intent, intentType: 'signData' });
 
@@ -905,13 +910,18 @@ export class TonConnectUI {
                 this.connector.onIntentResponse(resolve)
             );
 
+            console.log('here', intentResponse);
+            console.log(notifications);
+
             widgetController.setAction({
                 name: 'data-signed',
                 showNotification: notifications.includes('success'),
                 openModal: modals.includes('success'),
                 traceId
             });
+            console.log('after');
 
+            success = true;
             return intentResponse as SignDataResponse;
         } catch (e) {
             widgetController.setAction({
@@ -921,6 +931,8 @@ export class TonConnectUI {
                 traceId
             });
             throw e;
+        } finally {
+            this.modal.close(success ? 'wallet-selected' : 'action-cancelled');
         }
     }
 
@@ -936,6 +948,7 @@ export class TonConnectUI {
 
         const { notifications, modals } = this.getModalsAndNotificationsConfiguration(options);
 
+        let success = false;
         try {
             this.modal.openIntent({ traceId, intent, intentType: 'signMessage' });
 
@@ -950,6 +963,7 @@ export class TonConnectUI {
                 traceId
             });
 
+            success = true;
             return intentResponse as SignMessageResponse;
         } catch (e) {
             widgetController.setAction({
@@ -959,6 +973,8 @@ export class TonConnectUI {
                 traceId
             });
             throw e;
+        } finally {
+            this.modal.close(success ? 'wallet-selected' : 'action-cancelled');
         }
     }
 
@@ -974,6 +990,7 @@ export class TonConnectUI {
 
         const { notifications, modals } = this.getModalsAndNotificationsConfiguration(options);
 
+        let success = false;
         try {
             // Reuse intent modal flow for generic action intents.
             this.modal.openIntent({ traceId, intent, intentType: 'sendAction' });
@@ -992,6 +1009,7 @@ export class TonConnectUI {
                 traceId
             });
 
+            success = true;
             return intentResponse;
         } catch (e) {
             widgetController.setAction({
@@ -1001,6 +1019,8 @@ export class TonConnectUI {
                 traceId
             });
             throw e;
+        } finally {
+            this.modal.close(success ? 'wallet-selected' : 'action-cancelled');
         }
     }
 
