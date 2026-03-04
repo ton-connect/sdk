@@ -1,6 +1,6 @@
 import { BaseIntentPayload } from './base-intent-payload';
 import type { SignDataPayload } from '../../wallet-message';
-import type { ChainId } from 'src/models/CHAIN';
+import type { ChainId } from '../../CHAIN';
 
 export interface SignDataIntentRequest extends BaseIntentPayload {
     /**

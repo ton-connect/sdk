@@ -1,6 +1,6 @@
 import { BaseIntentPayload } from './base-intent-payload';
 import type { IntentItem } from './intent-items';
-import type { ChainId } from 'src/models/CHAIN';
+import type { ChainId } from '../../CHAIN';
 
 export interface SendTransactionIntentRequest extends BaseIntentPayload {
     /**
