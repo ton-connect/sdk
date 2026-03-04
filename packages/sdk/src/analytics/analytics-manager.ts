@@ -38,9 +38,7 @@ export class AnalyticsManager {
 
     private shouldSend: boolean = true;
 
-    private readonly baseEvent: Partial<AnalyticsEvent>;
-
-    private walletListDownloadDuration?: number;
+    private baseEvent: Partial<AnalyticsEvent>;
 
     public readonly mode: AnalyticsMode;
 
@@ -118,15 +116,10 @@ export class AnalyticsManager {
         const traceId = event.trace_id ?? UUIDv7();
 
         const dynamicMetrics = getDynamicConnectionMetrics();
-        const walletListDurationMetric =
-            this.walletListDownloadDuration !== undefined
-                ? { wallet_list_download_duration: this.walletListDownloadDuration }
-                : {};
 
         const enhancedEvent = {
             ...this.baseEvent,
             ...dynamicMetrics,
-            ...walletListDurationMetric,
             ...event,
             event_id: UUIDv7(),
             client_timestamp: Math.floor(Date.now() / 1000),
@@ -330,6 +323,9 @@ export class AnalyticsManager {
     }
 
     setWalletListDownloadDuration(duration: number | undefined): void {
-        this.walletListDownloadDuration = duration;
+        this.baseEvent = {
+            ...this.baseEvent,
+            wallet_list_download_duration: duration
+        };
     }
 }
