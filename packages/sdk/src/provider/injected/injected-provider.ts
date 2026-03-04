@@ -131,8 +131,12 @@ export class InjectedProvider<T extends string = string> implements InternalProv
         this.intentListener = listener;
     }
 
-    public connect(message: ConnectRequest | RawIntentRequest, options?: OptionalTraceable): void {
+    public connect(message: ConnectRequest, options?: OptionalTraceable): void {
         this._connect(PROTOCOL_VERSION, message, options);
+    }
+
+    public sendIntent(intent: RawIntentRequest, options?: OptionalTraceable): void {
+        this._connect(PROTOCOL_VERSION, intent, options);
     }
 
     public async restoreConnection(options?: OptionalTraceable): Promise<void> {

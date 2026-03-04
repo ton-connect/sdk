@@ -8,6 +8,7 @@ import {
     DISCONNECT_ERROR_CODES,
     DisconnectRpcResponseSuccess,
     Feature,
+    RawIntentRequest,
     RpcMethod,
     SEND_TRANSACTION_ERROR_CODES,
     SendTransactionRpcResponseSuccess,
@@ -101,8 +102,7 @@ export class WalletConnectProvider implements InternalProvider {
         };
     }
     onIntent(_listener: (response: unknown) => void): void {
-        // TODO?
-        throw new Error('Method not implemented.');
+        throw new TonConnectError('Intents are not supported for WalletConnect provider');
     }
 
     public static async fromStorage(
@@ -130,6 +130,10 @@ export class WalletConnectProvider implements InternalProvider {
             signal: abortController.signal,
             abortController
         }).catch(error => logDebug('WalletConnect connect unexpected error', error));
+    }
+
+    sendIntent(_intent: RawIntentRequest, _options?: OptionalTraceable): void {
+        throw new TonConnectError('Intents are not supported for WalletConnect provider');
     }
 
     async _connect(

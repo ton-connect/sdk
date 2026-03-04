@@ -95,8 +95,66 @@ export class BridgeProvider implements HTTPProvider {
     }
 
     public connect(
-        // TODO: into separate methods for clarity
-        message: ConnectRequest | RawIntentRequest,
+        message: ConnectRequest,
+        options?: OptionalTraceable<{
+            openingDeadlineMS?: number;
+            signal?: AbortSignal;
+        }>
+    ): string {
+        const traceId = options?.traceId ?? UUIDv7();
+        const abortController = createAbortController(options?.signal);
+        this.abortController?.abort();
+        this.abortController = abortController;
+
+        this.closeGateways();
+
+        const sessionCrypto = new SessionCrypto();
+
+        this.session = {
+            sessionCrypto,
+            bridgeUrl:
+                'bridgeUrl' in this.walletConnectionSource
+                    ? this.walletConnectionSource.bridgeUrl
+                    : ''
+        };
+
+        this.connectionStorage
+            .storeConnection({
+                type: 'http',
+                connectionSource: this.walletConnectionSource,
+                sessionCrypto
+            })
+            .then(async () => {
+                if (abortController.signal.aborted) {
+                    return;
+                }
+
+                await callForSuccess(
+                    _options =>
+                        this.openGateways(sessionCrypto, {
+                            openingDeadlineMS:
+                                options?.openingDeadlineMS ?? this.defaultOpeningDeadlineMS,
+                            signal: _options?.signal,
+                            traceId
+                        }),
+                    {
+                        attempts: Number.MAX_SAFE_INTEGER,
+                        delayMs: this.defaultRetryTimeoutMS,
+                        signal: abortController.signal
+                    }
+                );
+            });
+
+        const universalLink =
+            'universalLink' in this.walletConnectionSource &&
+            this.walletConnectionSource.universalLink
+                ? this.walletConnectionSource.universalLink
+                : this.standardUniversalLink;
+        return this.generateUniversalLink(universalLink, message, { traceId });
+    }
+
+    public sendIntent(
+        intent: RawIntentRequest,
         options?: OptionalTraceable<{
             openingDeadlineMS?: number;
             signal?: AbortSignal;
@@ -152,12 +210,9 @@ export class BridgeProvider implements HTTPProvider {
                 ? this.walletConnectionSource.universalLink
                 : this.standardUniversalLink;
 
-        // move in sepparate methods
-        if ('m' in message) {
-            this.pendingRequests.set(message.id.toString(), this.intentListener.bind(this));
-        }
+        this.pendingRequests.set(intent.id.toString(), this.intentListener.bind(this));
 
-        return this.generateUniversalLink(universalLink, message, { traceId });
+        return this.generateUniversalLink(universalLink, intent, { traceId });
     }
 
     // TODO: types, naming, array with subscribe/unsub

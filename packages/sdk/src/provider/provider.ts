@@ -7,14 +7,30 @@ export type Provider = InternalProvider | HTTPProvider;
 export interface InternalProvider extends BaseProvider {
     type: 'injected';
 
-    connect(message: ConnectRequest | RawIntentRequest, options?: OptionalTraceable): void;
+    /**
+     * Establishes a connection using a ConnectRequest (classic TonConnect flow).
+     */
+    connect(message: ConnectRequest, options?: OptionalTraceable): void;
+
+    /**
+     * Sends a raw intent request (inline / deep link intent flow).
+     */
+    sendIntent(intent: RawIntentRequest, options?: OptionalTraceable): void;
 }
 
 export interface HTTPProvider extends BaseProvider {
     type: 'http';
 
     connect(
-        message: ConnectRequest | RawIntentRequest,
+        message: ConnectRequest,
+        options?: OptionalTraceable<{
+            openingDeadlineMS?: number;
+            signal?: AbortSignal;
+        }>
+    ): string;
+
+    sendIntent(
+        intent: RawIntentRequest,
         options?: OptionalTraceable<{
             openingDeadlineMS?: number;
             signal?: AbortSignal;

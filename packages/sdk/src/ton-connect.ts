@@ -54,7 +54,7 @@ import {
 import { connectErrorsParser } from 'src/parsers/connect-errors-parser';
 import { sendTransactionParser } from 'src/parsers/send-transaction-parser';
 import { signDataParser } from 'src/parsers/sign-data-parser';
-import { SignMessageParser, signMessageParser } from 'src/parsers/sign-message-parser';
+import { signMessageParser } from 'src/parsers/sign-message-parser';
 import { BridgeProvider } from 'src/provider/bridge/bridge-provider';
 import { InjectedProvider } from 'src/provider/injected/injected-provider';
 import { Provider } from 'src/provider/provider';
@@ -944,7 +944,7 @@ export class TonConnect implements ITonConnect {
             this.provider = null;
         });
 
-        return this.provider.connect(intentRequest, {
+        return this.provider.sendIntent(intentRequest, {
             signal: abortController.signal,
             traceId
         });
