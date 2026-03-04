@@ -37,6 +37,8 @@ import { waitForSome } from 'src/utils/promise';
 import { sha256 } from 'sha.js';
 
 export class BridgeProvider implements HTTPProvider {
+    private static readonly INTENT_TTL_SECONDS = 300;
+    private static readonly MAX_INLINE_INTENT_URL_LENGTH = 1023;
     public static async fromStorage(
         storage: BridgeConnectionStorage,
         analyticsManager?: AnalyticsManager
@@ -452,7 +454,6 @@ export class BridgeProvider implements HTTPProvider {
             throw err;
         }
 
-        logDebug('Pending requests:', this.pendingRequests);
         logDebug('Wallet message received:', walletMessage);
         const requestType = 'event' in walletMessage ? walletMessage.event : '';
         this.analytics?.emitBridgeClientMessageReceived({
@@ -563,15 +564,16 @@ export class BridgeProvider implements HTTPProvider {
         // this request should be sent only once, right now sending every url creation, maybe ok
         const objectStorageUrl = this.getObjectStorageUrl();
         const url = new URL(objectStorageUrl);
-        // TODO: refactor
-        url.searchParams.set('ttl', '300');
-        // TODO: handle error
+        url.searchParams.set('ttl', BridgeProvider.INTENT_TTL_SECONDS.toString());
+
         void fetch(url.toString(), {
             method: 'POST',
             headers: {
                 'Content-Type': 'text/plain'
             },
             body: JSON.stringify(payload)
+        }).catch(error => {
+            logDebug('Failed to store intent payload in object storage', error);
         });
     }
 
@@ -582,7 +584,6 @@ export class BridgeProvider implements HTTPProvider {
         ) {
             return this.walletConnectionSource.objectStorageUrl;
         }
-        // TODO refactor
         const DEFAULT_OBJECT_STORAGE_URL =
             'https://ton-connect-bridge-v3-staging.tapps.ninja/objects';
         return DEFAULT_OBJECT_STORAGE_URL;
@@ -598,15 +599,10 @@ export class BridgeProvider implements HTTPProvider {
         url.searchParams.append('id', this.session!.sessionCrypto.sessionId);
         url.searchParams.append('trace_id', options.traceId);
 
-        // Is intent. Refactor
         if ('m' in message) {
             url.searchParams.append('r', Base64.encode(JSON.stringify(message)));
-            // TODO refactor
-            const MAX_INLINE_INTENT_URL_LENGTH = 1023;
-
             url.searchParams.append('m', 'intent_inline');
-            if (url.toString().length > MAX_INLINE_INTENT_URL_LENGTH) {
-                // TODO REFACTOR TODO
+            if (url.toString().length > BridgeProvider.MAX_INLINE_INTENT_URL_LENGTH) {
                 const shortUrl = new URL(universalLink);
                 const sessionCrypto = new SessionCrypto();
                 shortUrl.searchParams.append('v', PROTOCOL_VERSION.toString());

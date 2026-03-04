@@ -854,7 +854,7 @@ export class TonConnect implements ITonConnect {
         const connectRequest = this.createConnectRequest(options?.connectRequest);
 
         const intentRequest = buildIntent(data, {
-            id: '0', // not this id. Should be formed in bridge. leave for now. This is why 2 intents in a row not working
+            id: UUIDv7(),
             connectRequest
         });
 

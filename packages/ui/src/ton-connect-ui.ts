@@ -910,16 +910,12 @@ export class TonConnectUI {
                 this.connector.onIntentResponse(resolve)
             );
 
-            console.log('here', intentResponse);
-            console.log(notifications);
-
             widgetController.setAction({
                 name: 'data-signed',
                 showNotification: notifications.includes('success'),
                 openModal: modals.includes('success'),
                 traceId
             });
-            console.log('after');
 
             success = true;
             return intentResponse as SignDataResponse;

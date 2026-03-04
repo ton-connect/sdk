@@ -291,23 +291,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             );
 
             if (isIntent) {
-                // TODO: move into separate method
-                const response = await this.injectedWallet.sendIntent(message as IntentRequest, {
-                    protocolVersion,
-                    traceId
-                });
-
-                const { connectEvent, intentResponse } = response;
-                if (connectEvent) {
-                    if (connectEvent?.event === 'connect') {
-                        await this.updateSession();
-                        this.makeSubscriptions({ traceId });
-                    }
-                    this.listeners.forEach(listener => listener({ ...connectEvent, traceId }));
-                }
-
-                this.intentListener?.({ ...intentResponse, traceId });
-                logDebug('Injected Provider intent response:', response);
+                await this._connectIntent(protocolVersion, message as IntentRequest, traceId);
                 return;
             }
 
@@ -350,6 +334,29 @@ export class InjectedProvider<T extends string = string> implements InternalProv
 
             this.listeners.forEach(listener => listener({ ...connectEventError, traceId }));
         }
+    }
+
+    private async _connectIntent(
+        protocolVersion: number,
+        intent: IntentRequest,
+        traceId: string
+    ): Promise<void> {
+        const response = await this.injectedWallet.sendIntent(intent, {
+            protocolVersion,
+            traceId
+        });
+
+        const { connectEvent, intentResponse } = response;
+        if (connectEvent) {
+            if (connectEvent.event === 'connect') {
+                await this.updateSession();
+                this.makeSubscriptions({ traceId });
+            }
+            this.listeners.forEach(listener => listener({ ...connectEvent, traceId }));
+        }
+
+        this.intentListener?.({ ...intentResponse, traceId });
+        logDebug('Injected Provider intent response:', response);
     }
 
     private makeSubscriptions(options: Traceable): void {
