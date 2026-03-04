@@ -1,5 +1,6 @@
 import { BaseIntentPayload } from './base-intent-payload';
 import type { SignDataPayload } from '../../wallet-message';
+import type { ChainId } from 'src/models/CHAIN';
 
 export interface SignDataIntentRequest extends BaseIntentPayload {
     /**
@@ -8,9 +9,9 @@ export interface SignDataIntentRequest extends BaseIntentPayload {
     m: 'signIntent';
 
     /**
-     * Target network identifier (e.g. `-239`, `-3`).
+     * Target network identifier.
      */
-    n?: string;
+    n?: ChainId;
 
     /**
      * URL of the dApp `tonconnect-manifest.json` used for domain binding.

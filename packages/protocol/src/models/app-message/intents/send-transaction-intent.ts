@@ -1,5 +1,6 @@
 import { BaseIntentPayload } from './base-intent-payload';
 import type { IntentItem } from './intent-items';
+import type { ChainId } from 'src/models/CHAIN';
 
 export interface SendTransactionIntentRequest extends BaseIntentPayload {
     /**
@@ -14,10 +15,9 @@ export interface SendTransactionIntentRequest extends BaseIntentPayload {
     vu?: number;
 
     /**
-     * Target network identifier (e.g. `-239`, `-3`).
-     * If omitted, wallet chooses its current network.
+     * Target network identifier.
      */
-    n?: string;
+    n?: ChainId;
 
     /**
      * List of transfer instructions encoded as compact intent items.

@@ -1,3 +1,4 @@
+import type { ChainId } from 'src/models/CHAIN';
 import { BaseIntentPayload } from './base-intent-payload';
 import type { IntentItem } from './intent-items';
 
@@ -13,9 +14,9 @@ export interface SignMessageIntentRequest extends BaseIntentPayload {
     vu?: number;
 
     /**
-     * Target network identifier (e.g. `-239`, `-3`).
+     * Target network identifier.
      */
-    n?: string;
+    n?: ChainId;
 
     /**
      * Messages to build and sign as a single internal message BoC.
