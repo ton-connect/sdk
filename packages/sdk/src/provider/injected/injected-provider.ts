@@ -100,6 +100,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
 
     private listeners: Array<(e: TraceableWalletEvent) => void> = [];
 
+    // TODO: should be array. Maybe reuse listeners?
     private intentListener: ((response: unknown) => void) | null = null;
     private readonly analytics?: Analytics<
         JsBridgeEvent,
@@ -288,10 +289,33 @@ export class InjectedProvider<T extends string = string> implements InternalProv
                 `Injected Provider connect request: protocolVersion: ${protocolVersion}, message:`,
                 message
             );
+
+            if (isIntent) {
+                // TODO: move into separate method
+                const response = await this.injectedWallet.sendIntent(message as IntentRequest, {
+                    protocolVersion,
+                    traceId
+                });
+
+                const { connectEvent, intentResponse } = response;
+                if (connectEvent) {
+                    if (connectEvent?.event === 'connect') {
+                        await this.updateSession();
+                        this.makeSubscriptions({ traceId });
+                    }
+                    this.listeners.forEach(listener => listener({ ...connectEvent, traceId }));
+                }
+
+                this.intentListener?.({ ...intentResponse, traceId });
+                logDebug('Injected Provider intent response:', response);
+                return;
+            }
+
             this.analytics?.emitJsBridgeCall({
                 js_bridge_method: 'connect',
                 trace_id: traceId
             });
+
             const response = await this.injectedWallet.connect(
                 protocolVersion,
                 message as unknown as ConnectRequest
@@ -301,11 +325,6 @@ export class InjectedProvider<T extends string = string> implements InternalProv
                 js_bridge_method: 'connect'
             });
             logDebug('Injected Provider connect response:', response);
-
-            if (isIntent) {
-                this.intentListener?.({ ...response, traceId });
-                return;
-            }
 
             const connectEvent = response;
 

@@ -1,5 +1,9 @@
 import { ConnectRequest } from './connect-request';
-import { SignDataPayload } from '../wallet-message';
+import {
+    SendTransactionRpcResponse,
+    SignDataPayload,
+    SignDataRpcResponse
+} from '../wallet-message';
 
 // TODO: in protocol add sign messages as send tx and sign data
 // TODO: refactor by folders
@@ -77,3 +81,5 @@ export interface SendNftItem {
 }
 
 export type IntentItem = SendTonItem | SendJettonItem | SendNftItem;
+
+export type IntentResponse = SendTransactionRpcResponse | SignDataRpcResponse; // TODO: add sign message. Add
