@@ -43,7 +43,7 @@ import {
     SignDataIntentRequest,
     SignMessageIntentRequest,
     SendActionIntentRequest,
-    IntentUrlOptions
+    IntentOptions
 } from 'src/models/methods/intents';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
 import { AnalyticsSettings, TonConnectOptions } from 'src/models/ton-connect-options';
@@ -896,7 +896,7 @@ export class TonConnect implements ITonConnect {
     public sendTransactionIntent(
         wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
         transaction: SendTransactionIntentRequest,
-        options?: OptionalTraceable<IntentUrlOptions>
+        options?: OptionalTraceable<IntentOptions>
     ): string | void {
         return this.sendIntentWithProvider(
             'sendTransactionIntent',
@@ -915,7 +915,7 @@ export class TonConnect implements ITonConnect {
             | 'sendActionIntent',
         wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
         data: TIntentRequest,
-        options: OptionalTraceable<IntentUrlOptions> | undefined,
+        options: OptionalTraceable<IntentOptions> | undefined,
         buildIntent: (
             data: TIntentRequest,
             params: { id: string; connectRequest?: ConnectRequest }
@@ -928,6 +928,7 @@ export class TonConnect implements ITonConnect {
 
         const traceId = options?.traceId ?? UUIDv7();
 
+        // TODO TBD
         const connectRequest = this.createConnectRequest(options?.connectRequest);
 
         const intentRequest = buildIntent(data, {
@@ -952,7 +953,7 @@ export class TonConnect implements ITonConnect {
     public signDataIntent(
         wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
         data: SignDataIntentRequest,
-        options?: OptionalTraceable<IntentUrlOptions>
+        options?: OptionalTraceable<IntentOptions>
     ): string | void {
         return this.sendIntentWithProvider(
             'signDataIntent',
@@ -971,7 +972,7 @@ export class TonConnect implements ITonConnect {
     public signMessageIntent(
         wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
         message: SignMessageIntentRequest,
-        options?: OptionalTraceable<IntentUrlOptions>
+        options?: OptionalTraceable<IntentOptions>
     ): string | void {
         return this.sendIntentWithProvider(
             'signMessageIntent',
@@ -985,7 +986,7 @@ export class TonConnect implements ITonConnect {
     public sendActionIntent(
         wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
         action: SendActionIntentRequest,
-        options?: OptionalTraceable<IntentUrlOptions>
+        options?: OptionalTraceable<IntentOptions>
     ): string | void {
         return this.sendIntentWithProvider(
             'sendActionIntent',

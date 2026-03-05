@@ -19,7 +19,7 @@ import {
     SignDataIntentRequest,
     SignMessageIntentRequest,
     SendActionIntentRequest,
-    IntentUrlOptions
+    IntentOptions
 } from 'src/models/methods/intents';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
 import { WalletInfo } from 'src/models/wallet/wallet-info';
@@ -166,7 +166,7 @@ export interface ITonConnect {
     sendTransactionIntent(
         wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
         transaction: SendTransactionIntentRequest,
-        options?: OptionalTraceable<IntentUrlOptions>
+        options?: OptionalTraceable<IntentOptions>
     ): string | void;
 
     /**
@@ -178,7 +178,7 @@ export interface ITonConnect {
     signDataIntent(
         wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
         data: SignDataIntentRequest,
-        options?: OptionalTraceable<IntentUrlOptions>
+        options?: OptionalTraceable<IntentOptions>
     ): string | void;
 
     /**
@@ -190,7 +190,7 @@ export interface ITonConnect {
     signMessageIntent(
         wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
         message: SignMessageIntentRequest,
-        options?: OptionalTraceable<IntentUrlOptions>
+        options?: OptionalTraceable<IntentOptions>
     ): string | void;
 
     /**
@@ -202,6 +202,6 @@ export interface ITonConnect {
     sendActionIntent(
         wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
         action: SendActionIntentRequest,
-        options?: OptionalTraceable<IntentUrlOptions>
+        options?: OptionalTraceable<IntentOptions>
     ): string | void;
 }
