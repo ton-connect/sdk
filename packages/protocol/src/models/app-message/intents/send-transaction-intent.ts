@@ -15,6 +15,12 @@ export interface RawSendTransactionIntentRequest extends RawBaseIntentPayload {
     vu?: number;
 
     /**
+     * Explicit sender address for the intent.
+     * Shortened field name: `f` (maps to `from` in high-level SDK types).
+     */
+    f?: string;
+
+    /**
      * Target network identifier.
      */
     n?: ChainId;

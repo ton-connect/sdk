@@ -42,5 +42,10 @@ export type SendTransactionIntentItem =
 export interface SendTransactionIntentRequest {
     validUntil: number;
     network?: ChainId;
+    /**
+     * Explicit sender address for the intent.
+     * If omitted, the wallet will use its default selected account.
+     */
+    from?: string;
     items: SendTransactionIntentItem[];
 }

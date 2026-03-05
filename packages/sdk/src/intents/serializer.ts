@@ -85,6 +85,7 @@ export function serializeSendTransactionIntent(
         m: 'txIntent',
         c: params.connectRequest,
         vu: tx.validUntil,
+        f: tx.from,
         n: tx.network,
         i: tx.items.map(mapIntentItem)
     };
@@ -126,6 +127,7 @@ export function serializeSendActionIntent(
         id: params.id,
         m: 'actionIntent',
         c: params.connectRequest,
+        f: req.from,
         a: req.actionUrl
     };
 }
