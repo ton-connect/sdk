@@ -189,21 +189,23 @@ export class InjectedProvider<T extends string = string> implements InternalProv
                 this.connectionStorage.removeConnection().then(resolve);
             };
 
-            try {
-                this.injectedWallet.disconnect();
-                onRequestSent();
-            } catch (e) {
-                logDebug(e);
-
-                this.sendRequest(
-                    {
-                        method: 'disconnect',
-                        params: []
-                    },
-                    { onRequestSent, traceId }
-                );
-            }
+            this.sendDisconnect({ onRequestSent, traceId });
         });
+    }
+
+    private sendDisconnect(options?: { onRequestSent?: () => void; traceId: string }) {
+        try {
+            this.injectedWallet.disconnect();
+            options?.onRequestSent?.();
+        } catch {
+            this.sendRequest(
+                {
+                    method: 'disconnect',
+                    params: []
+                },
+                options
+            );
+        }
     }
 
     private closeAllListeners(): void {
@@ -383,6 +385,9 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             this.unsubscribeCallback = this.injectedWallet.listen(e => {
                 const traceId = e.traceId ?? UUIDv7();
                 logDebug('Wallet message received:', e);
+                console.log(
+                    `[InjectedProvider] wallet event received: event=${e.event}, listenSubscriptions=${this.listenSubscriptions}`
+                );
 
                 if (this.listenSubscriptions) {
                     this.listeners.forEach(listener => listener({ ...e, traceId }));
