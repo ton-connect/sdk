@@ -10,6 +10,7 @@ import {
     WalletConnectionSourceHTTP
 } from '@tonconnect/sdk';
 import { IntentType } from 'src/models/wallets-modal';
+import { TonConnectUIError } from 'src/errors';
 
 type IntentOptions = OptionalTraceable<IntentUrlOptions>;
 
@@ -50,7 +51,8 @@ export function startIntentFlow(
                 options
             );
         case 'signData':
-        default:
             return connector.signDataIntent(walletSource, intent as SignDataIntentRequest, options);
+        default:
+            throw new TonConnectUIError(`Unsupported intent type ${intentType}`);
     }
 }
