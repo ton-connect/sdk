@@ -103,6 +103,28 @@ export class BridgeProvider implements HTTPProvider {
         }>
     ): string {
         const traceId = options?.traceId ?? UUIDv7();
+
+        this.subscribeToBridgeEvents({ ...options, traceId });
+        const universalLink = this.obtainUniversalLink();
+
+        return this.generateUniversalLink(universalLink, message, { traceId });
+    }
+
+    private obtainUniversalLink() {
+        const universalLink =
+            'universalLink' in this.walletConnectionSource &&
+            this.walletConnectionSource.universalLink
+                ? this.walletConnectionSource.universalLink
+                : this.standardUniversalLink;
+        return universalLink;
+    }
+
+    private subscribeToBridgeEvents(
+        options: OptionalTraceable<{
+            openingDeadlineMS?: number;
+            signal?: AbortSignal;
+        }>
+    ) {
         const abortController = createAbortController(options?.signal);
         this.abortController?.abort();
         this.abortController = abortController;
@@ -136,7 +158,7 @@ export class BridgeProvider implements HTTPProvider {
                             openingDeadlineMS:
                                 options?.openingDeadlineMS ?? this.defaultOpeningDeadlineMS,
                             signal: _options?.signal,
-                            traceId
+                            traceId: options.traceId
                         }),
                     {
                         attempts: Number.MAX_SAFE_INTEGER,
@@ -145,13 +167,6 @@ export class BridgeProvider implements HTTPProvider {
                     }
                 );
             });
-
-        const universalLink =
-            'universalLink' in this.walletConnectionSource &&
-            this.walletConnectionSource.universalLink
-                ? this.walletConnectionSource.universalLink
-                : this.standardUniversalLink;
-        return this.generateUniversalLink(universalLink, message, { traceId });
     }
 
     public sendIntent(
@@ -162,54 +177,9 @@ export class BridgeProvider implements HTTPProvider {
         }>
     ): string {
         const traceId = options?.traceId ?? UUIDv7();
-        const abortController = createAbortController(options?.signal);
-        this.abortController?.abort();
-        this.abortController = abortController;
 
-        this.closeGateways();
-
-        const sessionCrypto = new SessionCrypto();
-
-        this.session = {
-            sessionCrypto,
-            bridgeUrl:
-                'bridgeUrl' in this.walletConnectionSource
-                    ? this.walletConnectionSource.bridgeUrl
-                    : ''
-        };
-
-        this.connectionStorage
-            .storeConnection({
-                type: 'http',
-                connectionSource: this.walletConnectionSource,
-                sessionCrypto
-            })
-            .then(async () => {
-                if (abortController.signal.aborted) {
-                    return;
-                }
-
-                await callForSuccess(
-                    _options =>
-                        this.openGateways(sessionCrypto, {
-                            openingDeadlineMS:
-                                options?.openingDeadlineMS ?? this.defaultOpeningDeadlineMS,
-                            signal: _options?.signal,
-                            traceId
-                        }),
-                    {
-                        attempts: Number.MAX_SAFE_INTEGER,
-                        delayMs: this.defaultRetryTimeoutMS,
-                        signal: abortController.signal
-                    }
-                );
-            });
-
-        const universalLink =
-            'universalLink' in this.walletConnectionSource &&
-            this.walletConnectionSource.universalLink
-                ? this.walletConnectionSource.universalLink
-                : this.standardUniversalLink;
+        this.subscribeToBridgeEvents({ ...options, traceId });
+        const universalLink = this.obtainUniversalLink();
 
         this.pendingRequests.set(intent.id.toString(), response => {
             const typed = response as unknown as IntentResponse;
