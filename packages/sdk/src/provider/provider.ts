@@ -1,6 +1,7 @@
 import { AppRequest, ConnectRequest, RawIntentRequest, RpcMethod } from '@tonconnect/protocol';
 import { OptionalTraceable, WithoutId } from 'src/utils/types';
 import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet/traceable-events';
+import type { IntentResponse } from 'src/models/methods/intents';
 
 export type Provider = InternalProvider | HTTPProvider;
 
@@ -70,5 +71,5 @@ interface BaseProvider {
     ): Promise<TraceableWalletResponse<T>>;
 
     listen(eventsCallback: (e: TraceableWalletEvent) => void): void;
-    onIntent(listener: (response: unknown) => void): void;
+    onIntent(listener: (response: IntentResponse) => void): void;
 }

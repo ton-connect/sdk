@@ -7,6 +7,7 @@ import {
     RpcMethod,
     WalletResponse
 } from '@tonconnect/protocol';
+import type { IntentResponse } from 'src/models/methods/intents';
 import {
     InjectedWalletApi,
     isJSBridgeWithMetadata
@@ -101,7 +102,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
     private listeners: Array<(e: TraceableWalletEvent) => void> = [];
 
     // TODO: should be array. Maybe reuse listeners?
-    private intentListener: ((response: unknown) => void) | null = null;
+    private intentListener: ((response: IntentResponse) => void) | null = null;
     private readonly analytics?: Analytics<
         JsBridgeEvent,
         'bridge_key' | 'wallet_app_name' | 'wallet_app_version'
@@ -127,7 +128,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             });
         }
     }
-    onIntent(listener: (response: unknown) => void): void {
+    onIntent(listener: (response: IntentResponse) => void): void {
         this.intentListener = listener;
     }
 
@@ -359,7 +360,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             this.listeners.forEach(listener => listener({ ...connectEvent, traceId }));
         }
 
-        this.intentListener?.({ ...intentResponse, traceId });
+        this.intentListener?.(intentResponse as unknown as IntentResponse);
         logDebug('Injected Provider intent response:', response);
     }
 

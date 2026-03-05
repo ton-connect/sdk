@@ -11,6 +11,7 @@ import {
     WalletMessage,
     WalletResponse
 } from '@tonconnect/protocol';
+import type { IntentResponse } from 'src/models/methods/intents';
 import { TonConnectError } from 'src/errors/ton-connect.error';
 import { WalletConnectionSourceHTTP } from 'src/models/wallet/wallet-connection-source';
 import { BridgeGateway } from 'src/provider/bridge/bridge-gateway';
@@ -210,14 +211,16 @@ export class BridgeProvider implements HTTPProvider {
                 ? this.walletConnectionSource.universalLink
                 : this.standardUniversalLink;
 
-        this.pendingRequests.set(intent.id.toString(), this.intentListener.bind(this));
+        this.pendingRequests.set(intent.id.toString(), response => {
+            this.intentListener(response as unknown as IntentResponse);
+        });
 
         return this.generateUniversalLink(universalLink, intent, { traceId });
     }
 
     // TODO: types, naming, array with subscribe/unsub
-    private intentListener = (_response: unknown) => {};
-    public onIntent(listener: (response: unknown) => void) {
+    private intentListener = (_response: IntentResponse) => {};
+    public onIntent(listener: (response: IntentResponse) => void) {
         this.intentListener = listener;
     }
 

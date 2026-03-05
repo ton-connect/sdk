@@ -134,9 +134,8 @@ export class TonConnect implements ITonConnect {
 
     private intentResponseSubscriptions: ((response: IntentResponse) => void)[] = [];
 
-    private readonly handleProviderIntentResponse = (response: unknown): void => {
-        const typed = response as IntentResponse;
-        this.intentResponseSubscriptions.forEach(callback => callback(typed));
+    private readonly handleProviderIntentResponse = (response: IntentResponse): void => {
+        this.intentResponseSubscriptions.forEach(callback => callback(response));
     };
 
     public onIntentResponse(callback: (response: IntentResponse) => void): () => void {

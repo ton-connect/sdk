@@ -16,6 +16,7 @@ import {
     TonProofItemReplySuccess,
     WalletResponseTemplateError
 } from '@tonconnect/protocol';
+import type { IntentResponse } from 'src/models/methods/intents';
 import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet/traceable-events';
 import { OptionalTraceable, Traceable, WithoutId } from 'src/utils/types';
 import { UUIDv7 } from 'src/utils/uuid';
@@ -101,7 +102,7 @@ export class WalletConnectProvider implements InternalProvider {
             metadata
         };
     }
-    onIntent(_listener: (response: unknown) => void): void {
+    onIntent(_listener: (response: IntentResponse) => void): void {
         throw new TonConnectError('Intents are not supported for WalletConnect provider');
     }
 
