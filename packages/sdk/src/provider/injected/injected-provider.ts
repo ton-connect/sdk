@@ -340,6 +340,20 @@ export class InjectedProvider<T extends string = string> implements InternalProv
         options?: OptionalTraceable
     ): Promise<void> {
         const traceId = options?.traceId ?? UUIDv7();
+
+        if (!this.injectedWallet.sendIntent) {
+            const event: TraceableWalletEvent = {
+                event: 'connect_error',
+                traceId,
+                payload: {
+                    code: 0,
+                    message: 'Intents are not supported for this injected wallet'
+                }
+            };
+            this.listeners.forEach(listener => listener(event));
+            return;
+        }
+
         const response = await this.injectedWallet.sendIntent(intent, {
             protocolVersion,
             traceId

@@ -25,10 +25,10 @@ export interface InjectedWalletApi {
         message: ConnectRequest
     ): Promise<OptionalTraceable<ConnectEvent>>;
 
-    sendIntent(
+    sendIntent?: (
         intent: RawIntentRequest,
         options?: OptionalTraceable<{ protocolVersion: number }>
-    ): Promise<
+    ) => Promise<
         OptionalTraceable<{
             connectEvent?: ConnectEvent;
             intentResponse: IntentResponse;

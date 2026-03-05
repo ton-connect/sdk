@@ -14,7 +14,7 @@ export interface InternalProvider extends BaseProvider {
     connect(message: ConnectRequest, options?: OptionalTraceable): void;
 
     /**
-     * Sends a raw intent request (inline / deep link intent flow).
+     * Sends a raw intent request.
      */
     sendIntent(intent: RawIntentRequest, options?: OptionalTraceable): void;
 }

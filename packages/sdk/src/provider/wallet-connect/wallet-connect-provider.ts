@@ -103,7 +103,7 @@ export class WalletConnectProvider implements InternalProvider {
         };
     }
     onIntent(_listener: (response: IntentResponse) => void): () => void {
-        throw new TonConnectError('Intents are not supported for WalletConnect provider');
+        return () => {};
     }
 
     public static async fromStorage(
@@ -133,8 +133,18 @@ export class WalletConnectProvider implements InternalProvider {
         }).catch(error => logDebug('WalletConnect connect unexpected error', error));
     }
 
-    sendIntent(_intent: RawIntentRequest, _options?: OptionalTraceable): void {
-        throw new TonConnectError('Intents are not supported for WalletConnect provider');
+    sendIntent(_intent: RawIntentRequest, options?: OptionalTraceable): void {
+        const traceId = options?.traceId ?? UUIDv7();
+        const payload = {
+            code: CONNECT_EVENT_ERROR_CODES.METHOD_NOT_SUPPORTED as const,
+            message: 'Intents are not supported for WalletConnect provider'
+        };
+
+        this.emit({
+            event: 'connect_error',
+            traceId,
+            payload
+        });
     }
 
     async _connect(
