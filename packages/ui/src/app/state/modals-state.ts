@@ -12,14 +12,26 @@ export type ActionName =
     | 'transaction-canceled'
     | 'confirm-sign-data'
     | 'data-signed'
-    | 'sign-data-canceled';
+    | 'sign-data-canceled'
+    | 'confirm-sign-message'
+    | 'message-signed'
+    | 'sign-message-canceled';
 
-export type Action = BasicAction | ConfirmTransactionAction | ConfirmSignDataAction;
+export type Action =
+    | BasicAction
+    | ConfirmTransactionAction
+    | ConfirmSignDataAction
+    | ConfirmSignMessageAction;
 
 type BasicAction = {
     name: ActionName;
     openModal: boolean;
     showNotification: boolean;
+    /**
+     * Indicates that this action was triggered from intent flow
+     * (sendTransactionIntent / signDataIntent / signMessageIntent / sendActionIntent).
+     */
+    isIntent?: boolean;
     sessionId?: string;
     traceId: string;
     intentUrl?: string;
@@ -34,6 +46,13 @@ export type ConfirmTransactionAction = BasicAction & {
 
 export type ConfirmSignDataAction = BasicAction & {
     name: 'confirm-sign-data';
+    returnStrategy: ReturnStrategy;
+    twaReturnUrl: `${string}://${string}`;
+    signed: boolean;
+};
+
+export type ConfirmSignMessageAction = BasicAction & {
+    name: 'confirm-sign-message';
     returnStrategy: ReturnStrategy;
     twaReturnUrl: `${string}://${string}`;
     signed: boolean;

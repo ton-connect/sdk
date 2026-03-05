@@ -5,14 +5,14 @@ import { LoaderIconStyled } from 'src/app/views/account-button/notifications/con
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { useI18n } from '@solid-primitives/i18n';
 
-interface ConfirmOperationNotificationProps extends Styleable {}
+interface ConfirmNotificationProps extends Styleable {}
 
-export const ConfirmOperationNotification: Component<ConfirmOperationNotificationProps> = props => {
+export const ConfirmNotification: Component<ConfirmNotificationProps> = props => {
     const tonConnectUI = useContext(TonConnectUiContext);
     const [t] = useI18n();
     const name = (): string =>
-        tonConnectUI!.wallet && 'name' in tonConnectUI!.wallet
-            ? tonConnectUI!.wallet.name
+        tonConnectUI?.wallet && 'name' in tonConnectUI.wallet
+            ? tonConnectUI.wallet.name
             : t('common.yourWallet', {}, 'Your wallet');
 
     return (

@@ -163,11 +163,12 @@ export class WalletsModalManager implements WalletsModal {
      * Opens the modal window in intent mode with a pre-built intent URL.
      * Used by intent flow to reuse the same wallets UI but with different URLs.
      */
-    public async openIntent(options: {
-        traceId: string;
-        intent: IntentRequest;
-        intentType: 'sendTransaction' | 'signData' | 'signMessage' | 'sendAction';
-    }): Promise<void> {
+    public async openIntent(
+        options: OptionalTraceable<{
+            intent: IntentRequest;
+            intentType: 'sendTransaction' | 'signData' | 'signMessage' | 'sendAction';
+        }>
+    ): Promise<void> {
         if (isInTMA()) {
             sendExpand();
         }

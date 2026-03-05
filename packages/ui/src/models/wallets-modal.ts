@@ -9,11 +9,12 @@ export interface WalletsModal {
     /**
      * Open the modal in intent mode with a pre-built intent URL.
      */
-    openIntent: (options: {
-        traceId: string;
-        intent: IntentRequest;
-        intentType: IntentType;
-    }) => void;
+    openIntent: (
+        options: OptionalTraceable<{
+            intent: IntentRequest;
+            intentType: IntentType;
+        }>
+    ) => void;
 
     /**
      * Close the modal.

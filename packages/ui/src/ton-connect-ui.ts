@@ -828,7 +828,7 @@ export class TonConnectUI {
         const sessionId = await this.getSessionId();
 
         widgetController.setAction({
-            name: 'confirm-sign-data',
+            name: 'confirm-sign-message',
             showNotification: notifications.includes('before'),
             openModal: modals.includes('before'),
             signed: false,
@@ -844,7 +844,7 @@ export class TonConnectUI {
             }
 
             widgetController.setAction({
-                name: 'confirm-sign-data',
+                name: 'confirm-sign-message',
                 showNotification: notifications.includes('before'),
                 openModal: modals.includes('before'),
                 signed: true,
@@ -902,7 +902,7 @@ export class TonConnectUI {
             );
 
             widgetController.setAction({
-                name: 'data-signed',
+                name: 'message-signed',
                 showNotification: notifications.includes('success'),
                 openModal: modals.includes('success'),
                 traceId
@@ -911,7 +911,7 @@ export class TonConnectUI {
             return result;
         } catch (e) {
             widgetController.setAction({
-                name: 'sign-data-canceled',
+                name: 'sign-message-canceled',
                 showNotification: notifications.includes('error'),
                 openModal: modals.includes('error'),
                 traceId
@@ -1034,6 +1034,7 @@ export class TonConnectUI {
                 name: 'transaction-sent',
                 showNotification: notifications.includes('success'),
                 openModal: modals.includes('success'),
+                isIntent: true,
                 traceId
             });
 
@@ -1044,6 +1045,7 @@ export class TonConnectUI {
                 name: 'transaction-canceled',
                 showNotification: notifications.includes('error'),
                 openModal: modals.includes('error'),
+                isIntent: true,
                 traceId
             });
             throw e;
@@ -1076,6 +1078,7 @@ export class TonConnectUI {
                 name: 'data-signed',
                 showNotification: notifications.includes('success'),
                 openModal: modals.includes('success'),
+                isIntent: true,
                 traceId
             });
 
@@ -1086,6 +1089,7 @@ export class TonConnectUI {
                 name: 'sign-data-canceled',
                 showNotification: notifications.includes('error'),
                 openModal: modals.includes('error'),
+                isIntent: true,
                 traceId
             });
             throw e;
@@ -1115,9 +1119,10 @@ export class TonConnectUI {
             >(options?.signal);
 
             widgetController.setAction({
-                name: 'data-signed',
+                name: 'message-signed',
                 showNotification: notifications.includes('success'),
                 openModal: modals.includes('success'),
+                isIntent: true,
                 traceId
             });
 
@@ -1125,9 +1130,10 @@ export class TonConnectUI {
             return intentResponse;
         } catch (e) {
             widgetController.setAction({
-                name: 'sign-data-canceled',
+                name: 'sign-message-canceled',
                 showNotification: notifications.includes('error'),
                 openModal: modals.includes('error'),
+                isIntent: true,
                 traceId
             });
             throw e;
@@ -1161,6 +1167,7 @@ export class TonConnectUI {
                 name: 'transaction-sent',
                 showNotification: notifications.includes('success'),
                 openModal: modals.includes('success'),
+                isIntent: true,
                 traceId
             });
 
@@ -1171,6 +1178,7 @@ export class TonConnectUI {
                 name: 'transaction-canceled',
                 showNotification: notifications.includes('error'),
                 openModal: modals.includes('error'),
+                isIntent: true,
                 traceId
             });
             throw e;

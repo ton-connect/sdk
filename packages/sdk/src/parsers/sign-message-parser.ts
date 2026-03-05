@@ -46,4 +46,3 @@ export class SignMessageParser extends RpcParser<'signMessage'> {
 }
 
 export const signMessageParser = new SignMessageParser();
-

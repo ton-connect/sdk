@@ -54,4 +54,3 @@ export function startIntentFlow(
             return connector.signDataIntent(walletSource, intent as SignDataIntentRequest, options);
     }
 }
-
