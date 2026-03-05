@@ -128,7 +128,6 @@ export function serializeSendActionIntent(
         id: params.id,
         m: 'actionIntent',
         c: params.connectRequest,
-        f: req.from,
         a: req.actionUrl
     };
 }
