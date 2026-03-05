@@ -34,7 +34,6 @@ type BasicAction = {
     isIntent?: boolean;
     sessionId?: string;
     traceId: string;
-    intentUrl?: string;
 };
 
 export type ConfirmTransactionAction = BasicAction & {
