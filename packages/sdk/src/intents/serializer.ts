@@ -93,13 +93,14 @@ export function serializeSendTransactionIntent(
 
 export function serializeSignDataIntent(
     req: SignDataIntentRequest,
-    params: CommonSerializeParams & { manifestUrl: string }
+    params: CommonSerializeParams & { manifestUrl?: string }
 ): RawSignDataIntentRequest {
     return {
         id: params.id,
         m: 'signIntent',
         c: params.connectRequest,
         n: req.network,
+        f: req.from,
         mu: params.manifestUrl,
         p: req.payload
     };

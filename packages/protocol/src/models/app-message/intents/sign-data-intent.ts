@@ -9,14 +9,21 @@ export interface RawSignDataIntentRequest extends RawBaseIntentPayload {
     m: 'signIntent';
 
     /**
+     * Explicit sender address for the intent.
+     * Shortened field name: `f` (maps to `from` in high-level SDK types).
+     */
+    f?: string;
+
+    /**
      * Target network identifier.
      */
     n?: ChainId;
 
     /**
      * URL of the dApp `tonconnect-manifest.json` used for domain binding.
+     * Optional. Must be set only if 'c' (connect_request) is not presented.
      */
-    mu: string;
+    mu?: string;
 
     /**
      * Payload to sign (text / binary / cell).
