@@ -27,6 +27,16 @@ import { WalletConnectionSourceJS } from 'src/models/wallet/wallet-connection-so
 import { SignDataPayload } from '@tonconnect/protocol';
 import { OptionalTraceable } from 'src/utils/types';
 
+export type WalletSourceArg =
+    | WalletConnectionSource
+    | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[];
+
+export type WalletIntentResult<T extends WalletSourceArg> = T extends WalletConnectionSourceJS
+    ? void
+    : T extends WalletConnectionSourceWalletConnect
+      ? void
+      : string;
+
 export interface ITonConnect {
     /**
      * Shows if the wallet is connected right now.
@@ -68,7 +78,7 @@ export interface ITonConnect {
      * @param options (optional) options
      * @returns universal link if external wallet was passed or void for the injected wallet.
      */
-    connect<T extends WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[]>(
+    connect<T extends WalletSourceArg>(
         wallet: T,
         request?: ConnectAdditionalRequest,
         options?: OptionalTraceable<{
@@ -163,11 +173,11 @@ export interface ITonConnect {
      * @param transaction transaction to send.
      * @param options optional connect request, abort signal and trace id.
      */
-    sendTransactionIntent(
-        wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
+    sendTransactionIntent<T extends WalletSourceArg>(
+        wallet: T,
         transaction: SendTransactionIntentRequest,
         options?: OptionalTraceable<IntentOptions>
-    ): string | void;
+    ): WalletIntentResult<T>;
 
     /**
      * Signs arbitrary data via intent flow.
@@ -175,11 +185,11 @@ export interface ITonConnect {
      * @param data data to sign in intent format.
      * @param options optional connect request, abort signal and trace id.
      */
-    signDataIntent(
-        wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
+    signDataIntent<T extends WalletSourceArg>(
+        wallet: T,
         data: SignDataIntentRequest,
         options?: OptionalTraceable<IntentOptions>
-    ): string | void;
+    ): WalletIntentResult<T>;
 
     /**
      * Signs message via intent flow.
@@ -187,11 +197,11 @@ export interface ITonConnect {
      * @param message message to sign.
      * @param options optional connect request, abort signal and trace id.
      */
-    signMessageIntent(
-        wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
+    signMessageIntent<T extends WalletSourceArg>(
+        wallet: T,
         message: SignMessageIntentRequest,
         options?: OptionalTraceable<IntentOptions>
-    ): string | void;
+    ): WalletIntentResult<T>;
 
     /**
      * Sends action intent.
@@ -199,9 +209,9 @@ export interface ITonConnect {
      * @param action actionUrl to be called by the wallet.
      * @param options optional connect request, abort signal and trace id.
      */
-    sendActionIntent(
-        wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
+    sendActionIntent<T extends WalletSourceArg>(
+        wallet: T,
         action: SendActionIntentRequest,
         options?: OptionalTraceable<IntentOptions>
-    ): string | void;
+    ): WalletIntentResult<T>;
 }

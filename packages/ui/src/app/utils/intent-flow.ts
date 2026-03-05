@@ -6,25 +6,21 @@ import {
     SendTransactionIntentRequest,
     SignDataIntentRequest,
     SignMessageIntentRequest,
-    WalletConnectionSource,
-    WalletConnectionSourceHTTP,
     ConnectAdditionalRequest,
-    WalletConnectionSourceJS,
-    WalletConnectionSourceWalletConnect
+    WalletSourceArg,
+    WalletIntentResult
 } from '@tonconnect/sdk';
 import { IntentType } from 'src/models/wallets-modal';
 import { TonConnectUIError } from 'src/errors';
 import { walletsModalState } from 'src/app/state/modals-state';
 
-type WalletSource = WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[];
-
 /**
  * Starts intent flow for a given wallet and intent type.
  * For HTTP wallets returns an intent URL, for injected / WalletConnect may perform side effects and return void.
  */
-export function startIntentFlow(
+export function startIntentFlow<TWallet extends WalletSourceArg>(
     connector: ITonConnect,
-    walletSource: WalletSource,
+    walletSource: TWallet,
     intentType: IntentType,
     intent:
         | SendTransactionIntentRequest
@@ -32,7 +28,7 @@ export function startIntentFlow(
         | SignMessageIntentRequest
         | SendActionIntentRequest,
     options: OptionalTraceable<IntentOptions>
-): string | void {
+): WalletIntentResult<TWallet> {
     switch (intentType) {
         case 'sendTransaction':
             return connector.sendTransactionIntent(
@@ -59,18 +55,11 @@ export function startIntentFlow(
     }
 }
 
-// TODO: move
-export function initiateTonConnectFlow<
-    TWallet extends WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[]
->(
+export function initiateTonConnectFlow<TWallet extends WalletSourceArg>(
     connector: ITonConnect,
     walletSource: TWallet,
     options: { additionalRequest?: ConnectAdditionalRequest } = {}
-): TWallet extends WalletConnectionSourceJS
-    ? void
-    : TWallet extends WalletConnectionSourceWalletConnect
-      ? void
-      : string {
+): WalletIntentResult<TWallet> {
     const state = walletsModalState();
 
     if (state.mode === 'intent') {
@@ -80,7 +69,7 @@ export function initiateTonConnectFlow<
         return startIntentFlow(connector, walletSource, intentType, intent, {
             traceId: state.traceId,
             connectRequest: options.additionalRequest
-        }) as ReturnType<typeof initiateTonConnectFlow<TWallet>>; // TODO fix
+        });
     } else {
         return connector.connect(walletSource, options.additionalRequest, {
             traceId: state.traceId

@@ -60,7 +60,7 @@ import { InjectedProvider } from 'src/provider/injected/injected-provider';
 import { Provider } from 'src/provider/provider';
 import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { DefaultStorage } from 'src/storage/default-storage';
-import { ITonConnect } from 'src/ton-connect.interface';
+import { ITonConnect, WalletIntentResult, WalletSourceArg } from 'src/ton-connect.interface';
 import { WalletWrongNetworkError } from 'src/errors/wallet/wallet-wrong-network.error';
 import { getDocument, getOriginWithPath, getWebPageManifest } from 'src/utils/web-api';
 import { WalletsListManager } from 'src/wallets-list-manager';
@@ -285,9 +285,7 @@ export class TonConnect implements ITonConnect {
      * @returns universal link if external wallet was passed or void for the injected wallet.
      */
 
-    public connect<
-        T extends WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[]
-    >(
+    public connect<T extends WalletSourceArg>(
         wallet: T,
         options?: OptionalTraceable<{
             request?: ConnectAdditionalRequest;
@@ -300,9 +298,7 @@ export class TonConnect implements ITonConnect {
           ? void
           : string;
     /** @deprecated use connect(wallet, options) instead */
-    public connect<
-        T extends WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[]
-    >(
+    public connect<T extends WalletSourceArg>(
         wallet: T,
         request?: ConnectAdditionalRequest,
         options?: OptionalTraceable<{
@@ -893,34 +889,34 @@ export class TonConnect implements ITonConnect {
         }
     }
 
-    public sendTransactionIntent(
-        wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
+    public sendTransactionIntent<T extends WalletSourceArg>(
+        wallet: T,
         transaction: SendTransactionIntentRequest,
         options?: OptionalTraceable<IntentOptions>
-    ): string | void {
+    ): WalletIntentResult<T> {
         return this.sendIntentWithProvider(
             'sendTransactionIntent',
             wallet,
             transaction,
             options,
             (req, params) => serializeSendTransactionIntent(req, params)
-        );
+        ) as WalletIntentResult<T>;
     }
 
-    private sendIntentWithProvider<TIntentRequest>(
+    private sendIntentWithProvider<TWallet extends WalletSourceArg, TIntentRequest>(
         methodName:
             | 'sendTransactionIntent'
             | 'signDataIntent'
             | 'signMessageIntent'
             | 'sendActionIntent',
-        wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
+        wallet: TWallet,
         data: TIntentRequest,
         options: OptionalTraceable<IntentOptions> | undefined,
         buildIntent: (
             data: TIntentRequest,
             params: { id: string; connectRequest?: ConnectRequest }
         ) => RawIntentRequest
-    ): string | void {
+    ): WalletIntentResult<TWallet> {
         const abortController = createAbortController(options?.signal);
         if (abortController.signal.aborted) {
             throw new TonConnectError(`${methodName} was aborted`);
@@ -947,14 +943,14 @@ export class TonConnect implements ITonConnect {
         return this.provider.sendIntent(intentRequest, {
             signal: abortController.signal,
             traceId
-        });
+        }) as WalletIntentResult<TWallet>;
     }
 
-    public signDataIntent(
-        wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
+    public signDataIntent<T extends WalletSourceArg>(
+        wallet: T,
         data: SignDataIntentRequest,
         options?: OptionalTraceable<IntentOptions>
-    ): string | void {
+    ): WalletIntentResult<T> {
         return this.sendIntentWithProvider(
             'signDataIntent',
             wallet,
@@ -966,35 +962,35 @@ export class TonConnect implements ITonConnect {
                     manifestUrl: this.dappSettings.manifestUrl
                 });
             }
-        );
+        ) as WalletIntentResult<T>;
     }
 
-    public signMessageIntent(
-        wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
+    public signMessageIntent<T extends WalletSourceArg>(
+        wallet: T,
         message: SignMessageIntentRequest,
         options?: OptionalTraceable<IntentOptions>
-    ): string | void {
+    ): WalletIntentResult<T> {
         return this.sendIntentWithProvider(
             'signMessageIntent',
             wallet,
             message,
             options,
             (req, params) => serializeSignMessageIntent(req, params)
-        );
+        ) as WalletIntentResult<T>;
     }
 
-    public sendActionIntent(
-        wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
+    public sendActionIntent<T extends WalletSourceArg>(
+        wallet: T,
         action: SendActionIntentRequest,
         options?: OptionalTraceable<IntentOptions>
-    ): string | void {
+    ): WalletIntentResult<T> {
         return this.sendIntentWithProvider(
             'sendActionIntent',
             wallet,
             action,
             options,
             (req, params) => serializeSendActionIntent(req, params)
-        );
+        ) as WalletIntentResult<T>;
     }
 
     private getSessionInfo(): { clientId: string | null; walletId: string | null } | null {
