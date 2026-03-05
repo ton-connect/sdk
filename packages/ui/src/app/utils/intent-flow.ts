@@ -7,10 +7,14 @@ import {
     SignDataIntentRequest,
     SignMessageIntentRequest,
     WalletConnectionSource,
-    WalletConnectionSourceHTTP
+    WalletConnectionSourceHTTP,
+    ConnectAdditionalRequest,
+    WalletConnectionSourceJS,
+    WalletConnectionSourceWalletConnect
 } from '@tonconnect/sdk';
 import { IntentType } from 'src/models/wallets-modal';
 import { TonConnectUIError } from 'src/errors';
+import { walletsModalState } from 'src/app/state/modals-state';
 
 type IntentOptions = OptionalTraceable<IntentUrlOptions>;
 
@@ -54,5 +58,34 @@ export function startIntentFlow(
             return connector.signDataIntent(walletSource, intent as SignDataIntentRequest, options);
         default:
             throw new TonConnectUIError(`Unsupported intent type ${intentType}`);
+    }
+}
+
+// TODO: move
+export function initiateTonConnectFlow<
+    TWallet extends WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[]
+>(
+    connector: ITonConnect,
+    walletSource: TWallet,
+    options: { additionalRequest?: ConnectAdditionalRequest } = {}
+): TWallet extends WalletConnectionSourceJS
+    ? void
+    : TWallet extends WalletConnectionSourceWalletConnect
+      ? void
+      : string {
+    const state = walletsModalState();
+
+    if (state.mode === 'intent') {
+        const intent = state.intent!;
+        const intentType = state.intentType!;
+
+        return startIntentFlow(connector, walletSource, intentType, intent, {
+            traceId: state.traceId,
+            connectRequest: options.additionalRequest
+        }) as ReturnType<typeof initiateTonConnectFlow<TWallet>>; // TODO fix
+    } else {
+        return connector.connect(walletSource, options.additionalRequest, {
+            traceId: state.traceId
+        });
     }
 }

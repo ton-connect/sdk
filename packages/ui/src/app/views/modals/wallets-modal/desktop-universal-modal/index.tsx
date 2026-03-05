@@ -8,11 +8,7 @@ import {
 } from './style';
 import { ConnectAdditionalRequest } from '@tonconnect/sdk';
 import { appState } from 'src/app/state/app.state';
-import {
-    setLastSelectedWalletInfo,
-    setLastVisibleWalletsInfo,
-    walletsModalState
-} from 'src/app/state/modals-state';
+import { setLastSelectedWalletInfo, setLastVisibleWalletsInfo } from 'src/app/state/modals-state';
 import { FourWalletsItem, H1, WalletLabeledItem } from 'src/app/components';
 import { UIWalletInfo } from 'src/app/models/ui-wallet-info';
 import { IMG } from 'src/app/env/IMG';
@@ -20,7 +16,7 @@ import { IMG } from 'src/app/env/IMG';
 import { addReturnStrategy } from 'src/app/utils/url-strategy-helpers';
 import { bridgesIsEqual, getUniqueBridges } from 'src/app/utils/bridge';
 import { WalletsModalState } from 'src/models';
-import { startIntentFlow } from 'src/app/utils/intent-flow';
+import { initiateTonConnectFlow } from 'src/app/utils/intent-flow';
 
 interface DesktopUniversalModalProps {
     additionalRequest: ConnectAdditionalRequest;
@@ -44,21 +40,8 @@ export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = prop
     }
 
     const request = createMemo(() => {
-        if (isIntentMode) {
-            const state = walletsModalState();
-            const intent = state.intent!;
-            const intentType = state.intentType!;
-
-            const commonOptions = {
-                traceId: props.walletModalState.traceId,
-                connectRequest: props.additionalRequest
-            };
-
-            return startIntentFlow(connector, walletsBridges(), intentType, intent, commonOptions);
-        }
-
-        return connector.connect(walletsBridges(), props.additionalRequest, {
-            traceId: props.walletModalState.traceId
+        return initiateTonConnectFlow(connector, walletsBridges(), {
+            additionalRequest: props.additionalRequest
         });
     });
 

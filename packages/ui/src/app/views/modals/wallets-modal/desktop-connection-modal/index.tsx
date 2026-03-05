@@ -45,7 +45,7 @@ import {
     RetryIcon
 } from 'src/app/components';
 import { appState } from 'src/app/state/app.state';
-import { setLastSelectedWalletInfo, walletsModalState } from 'src/app/state/modals-state';
+import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { Link } from 'src/app/components/link';
 import { supportsDesktop, supportsExtension, supportsMobile } from 'src/app/utils/wallets';
 import { AT_WALLET_APP_NAME } from 'src/app/env/AT_WALLET_APP_NAME';
@@ -57,7 +57,7 @@ import {
     redirectToWallet
 } from 'src/app/utils/url-strategy-helpers';
 import { WalletsModalState } from 'src/models';
-import { startIntentFlow } from 'src/app/utils/intent-flow';
+import { initiateTonConnectFlow } from 'src/app/utils/intent-flow';
 
 export interface DesktopConnectionProps {
     additionalRequest?: ConnectAdditionalRequest;
@@ -106,44 +106,19 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
     onCleanup(unsubscribe);
 
     const generateUniversalLink = (): void => {
-        if (isIntentMode) {
-            const state = walletsModalState();
-            const intent = state.intent!;
-            const intentType = state.intentType!;
-
-            const walletSource = {
-                universalLink: props.wallet.universalLink,
-                bridgeUrl: props.wallet.bridgeUrl
-            };
-
-            const commonOptions = {
-                traceId: props.walletsModalState?.traceId,
-                connectRequest: props.additionalRequest
-            };
-
-            const link = startIntentFlow(
-                connector,
-                walletSource,
-                intentType,
-                intent,
-                commonOptions
-            );
-            setUniversalLink(link as string);
-            return;
-        }
-
         // TODO: prevent double generation of universal link later and remove try-catch
         try {
-            const link = connector.connect(
+            const universalLink = initiateTonConnectFlow(
+                connector,
                 {
                     universalLink: props.wallet.universalLink,
-                    bridgeUrl: props.wallet.bridgeUrl
+                    bridgeUrl: props.wallet.bridgeUrl,
+                    objectStorageUrl: props.wallet.objectStorageUrl
                 },
-                props.additionalRequest,
-                { traceId: props.walletsModalState?.traceId }
+                { additionalRequest: props.additionalRequest }
             );
 
-            setUniversalLink(link);
+            setUniversalLink(universalLink);
         } catch (e) {}
     };
 
@@ -219,31 +194,6 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
         setMode('extension');
         if (isWalletInfoCurrentlyInjected(props.wallet)) {
             setLastSelectedWalletInfo(props.wallet);
-
-            if (isIntentMode) {
-                const state = walletsModalState();
-                const intent = state.intent!;
-                const intentType = state.intentType!;
-
-                startIntentFlow(
-                    connector,
-                    { jsBridgeKey: props.wallet.jsBridgeKey },
-                    intentType,
-                    intent,
-                    {
-                        traceId: props.walletsModalState?.traceId,
-                        connectRequest: props.additionalRequest
-                    }
-                );
-            } else {
-                connector.connect(
-                    {
-                        jsBridgeKey: props.wallet.jsBridgeKey
-                    },
-                    props.additionalRequest,
-                    { traceId: props.walletsModalState?.traceId }
-                );
-            }
         }
     };
 

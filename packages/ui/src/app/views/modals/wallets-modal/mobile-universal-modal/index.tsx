@@ -8,11 +8,7 @@ import {
     TelegramButtonStyled,
     TGImageStyled
 } from './style';
-import {
-    setLastSelectedWalletInfo,
-    setLastVisibleWalletsInfo,
-    walletsModalState
-} from 'src/app/state/modals-state';
+import { setLastSelectedWalletInfo, setLastVisibleWalletsInfo } from 'src/app/state/modals-state';
 import { appState } from 'src/app/state/app.state';
 import { IMG } from 'src/app/env/IMG';
 import { supportsMobile } from 'src/app/utils/wallets';
@@ -26,7 +22,7 @@ import { bridgesIsEqual, getUniqueBridges } from 'src/app/utils/bridge';
 import { WalletUlContainer } from 'src/app/components/wallet-item/style';
 import { UIWalletInfo } from 'src/app/models/ui-wallet-info';
 import { WalletsModalState } from 'src/models';
-import { startIntentFlow } from 'src/app/utils/intent-flow';
+import { initiateTonConnectFlow } from 'src/app/utils/intent-flow';
 
 interface MobileUniversalModalProps {
     walletsList: UIWalletInfo[];
@@ -61,34 +57,11 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
     );
 
     const getUniversalLink = (): string => {
-        // In intent mode we always use the prebuilt intent URL instead of connect URL.
-        if (props.walletModalState.mode === 'intent') {
-            const state = walletsModalState();
-            const intent = state.intent!;
-            const intentType = state.intentType!;
-
-            const commonOptions = {
-                traceId: props.walletModalState.traceId,
-                connectRequest: props.additionalRequest
-            };
-
-            const link = startIntentFlow(
-                connector,
-                walletsBridges(),
-                intentType,
-                intent,
-                commonOptions
-            );
-
-            setUniversalLink(link as string);
-        }
-
         if (!universalLink()) {
-            setUniversalLink(
-                connector.connect(walletsBridges(), props.additionalRequest, {
-                    traceId: props.walletModalState.traceId
-                })
-            );
+            const universalLink = initiateTonConnectFlow(connector, walletsBridges(), {
+                additionalRequest: props.additionalRequest
+            });
+            setUniversalLink(universalLink);
         }
         return universalLink()!;
     };
@@ -139,39 +112,14 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
         const forceRedirect = !firstClick();
         setFirstClick(false);
 
-        const link =
-            props.walletModalState.mode === 'intent'
-                ? (() => {
-                      const state = walletsModalState();
-                      const intent = state.intent!;
-                      const intentType = state.intentType ?? 'signData';
-
-                      const walletSource = {
-                          bridgeUrl: atWallet.bridgeUrl,
-                          universalLink: atWallet.universalLink
-                      };
-
-                      const commonOptions = {
-                          traceId: props.walletModalState.traceId,
-                          connectRequest: props.additionalRequest
-                      };
-
-                      return startIntentFlow(
-                          connector,
-                          walletSource,
-                          intentType,
-                          intent,
-                          commonOptions
-                      );
-                  })()
-                : connector.connect(
-                      {
-                          bridgeUrl: atWallet.bridgeUrl,
-                          universalLink: atWallet.universalLink
-                      },
-                      props.additionalRequest,
-                      { traceId: props.walletModalState.traceId }
-                  );
+        const link = initiateTonConnectFlow(
+            connector,
+            {
+                bridgeUrl: atWallet.bridgeUrl,
+                universalLink: atWallet.universalLink
+            },
+            { additionalRequest: props.additionalRequest }
+        );
 
         // TODO: fix types
         redirectToTelegram(link as string, {

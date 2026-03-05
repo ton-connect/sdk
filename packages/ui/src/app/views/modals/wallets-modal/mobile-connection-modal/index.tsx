@@ -39,6 +39,7 @@ import { Translation } from 'src/app/components/typography/Translation';
 import { redirectToTelegram, redirectToWallet } from 'src/app/utils/url-strategy-helpers';
 import { copyToClipboard } from 'src/app/utils/copy-to-clipboard';
 import { WalletsModalState } from 'src/models';
+import { initiateTonConnectFlow } from 'src/app/utils/intent-flow';
 
 export interface MobileConnectionProps {
     additionalRequest?: ConnectAdditionalRequest;
@@ -80,13 +81,13 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
     );
 
     const universalLink = createMemo(() =>
-        connector.connect(
+        initiateTonConnectFlow(
+            connector,
             {
                 universalLink: props.wallet.universalLink,
                 bridgeUrl: props.wallet.bridgeUrl
             },
-            props.additionalRequest,
-            { traceId: props.walletModalState?.traceId }
+            { additionalRequest: props.additionalRequest }
         )
     );
 
