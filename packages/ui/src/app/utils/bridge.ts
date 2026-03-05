@@ -1,5 +1,5 @@
 import { UIWalletInfo } from 'src/app/models/ui-wallet-info';
-import { isWalletInfoRemote, WalletInfo, WalletInfoRemote } from '@tonconnect/sdk';
+import { isWalletInfoRemote, WalletInfoRemote } from '@tonconnect/sdk';
 
 export function getUniqueBridges(walletsList: UIWalletInfo[]): { bridgeUrl: string }[] {
     const uniqueBridges = new Set(
