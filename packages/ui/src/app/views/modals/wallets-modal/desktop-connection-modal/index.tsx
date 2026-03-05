@@ -57,7 +57,7 @@ import {
     redirectToWallet
 } from 'src/app/utils/url-strategy-helpers';
 import { WalletsModalState } from 'src/models';
-import { buildIntentLink } from 'src/app/utils/intent-link';
+import { startIntentFlow } from 'src/app/utils/intent-flow';
 
 export interface DesktopConnectionProps {
     additionalRequest?: ConnectAdditionalRequest;
@@ -121,7 +121,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                 connectRequest: props.additionalRequest
             };
 
-            const link = buildIntentLink(
+            const link = startIntentFlow(
                 connector,
                 walletSource,
                 intentType,
@@ -225,7 +225,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                 const intent = state.intent!;
                 const intentType = state.intentType!;
 
-                buildIntentLink(
+                startIntentFlow(
                     connector,
                     { jsBridgeKey: props.wallet.jsBridgeKey },
                     intentType,

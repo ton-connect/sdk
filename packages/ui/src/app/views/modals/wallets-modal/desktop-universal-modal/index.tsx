@@ -20,7 +20,7 @@ import { IMG } from 'src/app/env/IMG';
 import { addReturnStrategy } from 'src/app/utils/url-strategy-helpers';
 import { bridgesIsEqual, getUniqueBridges } from 'src/app/utils/bridge';
 import { WalletsModalState } from 'src/models';
-import { buildIntentLink } from 'src/app/utils/intent-link';
+import { startIntentFlow } from 'src/app/utils/intent-flow';
 
 interface DesktopUniversalModalProps {
     additionalRequest: ConnectAdditionalRequest;
@@ -54,7 +54,7 @@ export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = prop
                 connectRequest: props.additionalRequest
             };
 
-            return buildIntentLink(connector, walletsBridges(), intentType, intent, commonOptions);
+            return startIntentFlow(connector, walletsBridges(), intentType, intent, commonOptions);
         }
 
         return connector.connect(walletsBridges(), props.additionalRequest, {

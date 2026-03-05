@@ -15,7 +15,11 @@ type IntentOptions = OptionalTraceable<IntentUrlOptions>;
 
 type WalletSource = WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[];
 
-export function buildIntentLink(
+/**
+ * Starts intent flow for a given wallet and intent type.
+ * For HTTP wallets returns an intent URL, for injected / WalletConnect may perform side effects and return void.
+ */
+export function startIntentFlow(
     connector: ITonConnect,
     walletSource: WalletSource,
     intentType: IntentType,
@@ -50,3 +54,4 @@ export function buildIntentLink(
             return connector.signDataIntent(walletSource, intent as SignDataIntentRequest, options);
     }
 }
+

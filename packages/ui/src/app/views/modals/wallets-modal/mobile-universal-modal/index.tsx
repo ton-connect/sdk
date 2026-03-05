@@ -26,7 +26,7 @@ import { bridgesIsEqual, getUniqueBridges } from 'src/app/utils/bridge';
 import { WalletUlContainer } from 'src/app/components/wallet-item/style';
 import { UIWalletInfo } from 'src/app/models/ui-wallet-info';
 import { WalletsModalState } from 'src/models';
-import { buildIntentLink } from 'src/app/utils/intent-link';
+import { startIntentFlow } from 'src/app/utils/intent-flow';
 
 interface MobileUniversalModalProps {
     walletsList: UIWalletInfo[];
@@ -72,7 +72,7 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
                 connectRequest: props.additionalRequest
             };
 
-            const link = buildIntentLink(
+            const link = startIntentFlow(
                 connector,
                 walletsBridges(),
                 intentType,
@@ -156,7 +156,7 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
                           connectRequest: props.additionalRequest
                       };
 
-                      return buildIntentLink(
+                      return startIntentFlow(
                           connector,
                           walletSource,
                           intentType,
