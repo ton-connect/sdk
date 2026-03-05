@@ -169,6 +169,12 @@ export interface ITonConnect {
         options?: OptionalTraceable<IntentUrlOptions>
     ): string | void;
 
+    /**
+     * Signs arbitrary data via intent flow.
+     * @param wallet target wallet connection source or list of HTTP bridge URLs.
+     * @param data data to sign in intent format.
+     * @param options optional connect request, abort signal and trace id.
+     */
     signDataIntent(
         wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[],
         data: SignDataIntentRequest,
