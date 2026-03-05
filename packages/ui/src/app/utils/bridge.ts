@@ -8,14 +8,6 @@ export function getUniqueBridges(walletsList: UIWalletInfo[]): { bridgeUrl: stri
     return Array.from(uniqueBridges).map(bridgeUrl => ({ bridgeUrl }));
 }
 
-/** Same as getUniqueBridges but accepts SDK WalletInfo[] (e.g. from connector.getWallets()). */
-export function getUniqueBridgesFromWalletInfo(walletsList: WalletInfo[]): { bridgeUrl: string }[] {
-    const uniqueBridges = new Set(
-        walletsList.filter(isWalletInfoRemote).map(item => (item as WalletInfoRemote).bridgeUrl)
-    );
-    return Array.from(uniqueBridges).map(bridgeUrl => ({ bridgeUrl }));
-}
-
 export function bridgesIsEqual(
     left: { bridgeUrl: string }[] | null,
     right: { bridgeUrl: string }[] | null
