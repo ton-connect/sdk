@@ -212,16 +212,20 @@ export class BridgeProvider implements HTTPProvider {
                 : this.standardUniversalLink;
 
         this.pendingRequests.set(intent.id.toString(), response => {
-            this.intentListener(response as unknown as IntentResponse);
+            const typed = response as unknown as IntentResponse;
+            this.intentListeners.forEach(listener => listener(typed));
         });
 
         return this.generateUniversalLink(universalLink, intent, { traceId });
     }
 
-    // TODO: types, naming, array with subscribe/unsub
-    private intentListener = (_response: IntentResponse) => {};
-    public onIntent(listener: (response: IntentResponse) => void) {
-        this.intentListener = listener;
+    private intentListeners: Array<(response: IntentResponse) => void> = [];
+    public onIntent(listener: (response: IntentResponse) => void): () => void {
+        this.intentListeners.push(listener);
+
+        return () => {
+            this.intentListeners = this.intentListeners.filter(l => l !== listener);
+        };
     }
 
     public async restoreConnection(

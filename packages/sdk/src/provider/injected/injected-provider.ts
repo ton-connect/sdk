@@ -101,8 +101,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
 
     private listeners: Array<(e: TraceableWalletEvent) => void> = [];
 
-    // TODO: should be array. Maybe reuse listeners?
-    private intentListener: ((response: IntentResponse) => void) | null = null;
+    private intentListeners: Array<(response: IntentResponse) => void> = [];
     private readonly analytics?: Analytics<
         JsBridgeEvent,
         'bridge_key' | 'wallet_app_name' | 'wallet_app_version'
@@ -128,8 +127,11 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             });
         }
     }
-    onIntent(listener: (response: IntentResponse) => void): void {
-        this.intentListener = listener;
+    onIntent(listener: (response: IntentResponse) => void): () => void {
+        this.intentListeners.push(listener);
+        return () => {
+            this.intentListeners = this.intentListeners.filter(l => l !== listener);
+        };
     }
 
     public connect(message: ConnectRequest, options?: OptionalTraceable): void {
@@ -360,7 +362,8 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             this.listeners.forEach(listener => listener({ ...connectEvent, traceId }));
         }
 
-        this.intentListener?.(intentResponse as unknown as IntentResponse);
+        const typed = intentResponse as unknown as IntentResponse;
+        this.intentListeners.forEach(listener => listener(typed));
         logDebug('Injected Provider intent response:', response);
     }
 

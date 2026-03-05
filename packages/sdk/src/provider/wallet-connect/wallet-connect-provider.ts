@@ -102,7 +102,7 @@ export class WalletConnectProvider implements InternalProvider {
             metadata
         };
     }
-    onIntent(_listener: (response: IntentResponse) => void): void {
+    onIntent(_listener: (response: IntentResponse) => void): () => void {
         throw new TonConnectError('Intents are not supported for WalletConnect provider');
     }
 

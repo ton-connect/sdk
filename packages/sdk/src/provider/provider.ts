@@ -71,5 +71,5 @@ interface BaseProvider {
     ): Promise<TraceableWalletResponse<T>>;
 
     listen(eventsCallback: (e: TraceableWalletEvent) => void): void;
-    onIntent(listener: (response: IntentResponse) => void): void;
+    onIntent(listener: (response: IntentResponse) => void): () => void;
 }
