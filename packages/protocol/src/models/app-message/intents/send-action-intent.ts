@@ -7,7 +7,8 @@ export interface RawSendActionIntentRequest extends RawBaseIntentPayload {
     m: 'actionIntent';
 
     /**
-     * Action URL to be handled by the wallet (e.g. deeplink or app-specific URL).
+     * Action URL that the wallet should call.
+     * The wallet should call with `address={user_address}` query parameter.
      */
     a: string;
 }
