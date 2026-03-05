@@ -1333,54 +1333,24 @@ export class TonConnectUI {
         options: WaitSendTransactionOptions,
         onRequestSent?: () => void
     ): Promise<OptionalTraceable<SendTransactionResponse>> {
-        return new Promise((resolve, reject) => {
-            const { transaction, signal } = options;
+        const { transaction, signal } = options;
 
-            if (signal.aborted) {
-                this.tracker.trackTransactionSigningFailed(
-                    this.wallet,
-                    transaction,
-                    'Transaction was cancelled'
-                );
-                return reject(new TonConnectUIError('Transaction was not sent'));
-            }
+        const onAborted = (): TonConnectUIError => {
+            this.tracker.trackTransactionSigningFailed(
+                this.wallet,
+                transaction,
+                'Transaction was cancelled'
+            );
+            return new TonConnectUIError('Transaction was not sent');
+        };
 
-            const onTransactionHandler = async (
-                transaction: OptionalTraceable<SendTransactionResponse>
-            ): Promise<void> => {
-                resolve(transaction);
-            };
-
-            const onErrorsHandler = (reason: TonConnectError): void => {
-                reject(reason);
-            };
-
-            const onCanceledHandler = (): void => {
-                this.tracker.trackTransactionSigningFailed(
-                    this.wallet,
-                    transaction,
-                    'Transaction was cancelled'
-                );
-                reject(new TonConnectUIError('Transaction was not sent'));
-            };
-
-            signal.addEventListener('abort', onCanceledHandler, { once: true });
-
-            this.connector
-                .sendTransaction(transaction, {
-                    onRequestSent: onRequestSent,
-                    signal: signal,
-                    traceId: options.traceId
-                })
-                .then(result => {
-                    signal.removeEventListener('abort', onCanceledHandler);
-                    return onTransactionHandler(result);
-                })
-                .catch(reason => {
-                    signal.removeEventListener('abort', onCanceledHandler);
-                    return onErrorsHandler(reason);
-                });
-        });
+        return this.runConnectorRequestWithAbortHandling(signal, onAborted, () =>
+            this.connector.sendTransaction(transaction, {
+                onRequestSent,
+                signal,
+                traceId: options.traceId
+            })
+        );
     }
 
     /**
@@ -1397,74 +1367,61 @@ export class TonConnectUI {
         options: WaitSignDataOptions,
         onRequestSent?: () => void
     ): Promise<SignDataResponse> {
-        return new Promise((resolve, reject) => {
-            const { data, signal } = options;
+        const { data, signal } = options;
 
-            if (signal.aborted) {
-                this.tracker.trackDataSigningFailed(this.wallet, data, 'SignData was cancelled');
-                return reject(new TonConnectUIError('SignData was not sent'));
-            }
+        const onAborted = (): TonConnectUIError => {
+            this.tracker.trackDataSigningFailed(this.wallet, data, 'SignData was cancelled');
+            return new TonConnectUIError('SignData was not sent');
+        };
 
-            const onSignHandler = async (data: SignDataResponse): Promise<void> => {
-                resolve(data);
-            };
-
-            const onErrorsHandler = (reason: TonConnectError): void => {
-                reject(reason);
-            };
-
-            const onCanceledHandler = (): void => {
-                this.tracker.trackDataSigningFailed(this.wallet, data, 'SignData was cancelled');
-                reject(new TonConnectUIError('SignData was not sent'));
-            };
-
-            signal.addEventListener('abort', onCanceledHandler, { once: true });
-
-            this.connector
-                .signData(data, { onRequestSent: onRequestSent, signal: signal })
-                .then(result => {
-                    // signal.removeEventListener('abort', onCanceledHandler);
-                    return onSignHandler(result);
-                })
-                .catch(reason => {
-                    // signal.removeEventListener('abort', onCanceledHandler);
-                    return onErrorsHandler(reason);
-                });
-        });
+        return this.runConnectorRequestWithAbortHandling(signal, onAborted, () =>
+            this.connector.signData(data, { onRequestSent, signal })
+        );
     }
 
     private async waitForSignMessage(
         options: WaitSignMessageOptions,
         onRequestSent?: () => void
     ): Promise<SignMessageResponse> {
-        return new Promise((resolve, reject) => {
-            const { message, signal } = options;
+        const { message, signal } = options;
+
+        const onAborted = (wasStarted: boolean): TonConnectUIError =>
+            new TonConnectUIError(
+                wasStarted ? 'SignMessage was not sent' : 'SignMessage was cancelled'
+            );
+
+        return this.runConnectorRequestWithAbortHandling(signal, onAborted, () =>
+            this.connector.signMessage(message, { onRequestSent, signal })
+        );
+    }
+
+    private async runConnectorRequestWithAbortHandling<T>(
+        signal: AbortSignal,
+        onAborted: (wasStarted: boolean) => TonConnectUIError,
+        call: () => Promise<T>
+    ): Promise<T> {
+        return new Promise<T>((resolve, reject) => {
+            let started = false;
 
             if (signal.aborted) {
-                return reject(new TonConnectUIError('SignMessage was cancelled'));
+                return reject(onAborted(started));
             }
 
-            const onSignHandler = async (data: SignMessageResponse): Promise<void> => {
-                resolve(data);
-            };
-
-            const onErrorsHandler = (reason: TonConnectError): void => {
-                reject(reason);
-            };
-
             const onCanceledHandler = (): void => {
-                reject(new TonConnectUIError('SignMessage was not sent'));
+                reject(onAborted(started));
             };
 
             signal.addEventListener('abort', onCanceledHandler, { once: true });
 
-            this.connector
-                .signMessage(message, { onRequestSent: onRequestSent, signal: signal })
+            call()
                 .then(result => {
-                    return onSignHandler(result as SignMessageResponse);
+                    started = true;
+                    signal.removeEventListener('abort', onCanceledHandler);
+                    resolve(result);
                 })
                 .catch(reason => {
-                    return onErrorsHandler(reason);
+                    signal.removeEventListener('abort', onCanceledHandler);
+                    reject(reason);
                 });
         });
     }
