@@ -139,7 +139,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
     }
 
     public sendIntent(intent: RawIntentRequest, options?: OptionalTraceable): void {
-        this._connect(PROTOCOL_VERSION, intent, options);
+        void this._sendIntent(PROTOCOL_VERSION, intent, options);
     }
 
     public async restoreConnection(options?: OptionalTraceable): Promise<void> {
@@ -285,11 +285,10 @@ export class InjectedProvider<T extends string = string> implements InternalProv
 
     private async _connect(
         protocolVersion: number,
-        message: ConnectRequest | RawIntentRequest,
+        message: ConnectRequest,
         options?: OptionalTraceable
     ): Promise<void> {
         const traceId = options?.traceId ?? UUIDv7();
-        const isIntent = (message as RawIntentRequest).m !== undefined;
 
         try {
             logDebug(
@@ -297,20 +296,12 @@ export class InjectedProvider<T extends string = string> implements InternalProv
                 message
             );
 
-            if (isIntent) {
-                await this._connectIntent(protocolVersion, message as RawIntentRequest, traceId);
-                return;
-            }
-
             this.analytics?.emitJsBridgeCall({
                 js_bridge_method: 'connect',
                 trace_id: traceId
             });
 
-            const response = await this.injectedWallet.connect(
-                protocolVersion,
-                message as unknown as ConnectRequest
-            );
+            const response = await this.injectedWallet.connect(protocolVersion, message);
 
             this.analytics?.emitJsBridgeResponse({
                 js_bridge_method: 'connect'
@@ -343,11 +334,12 @@ export class InjectedProvider<T extends string = string> implements InternalProv
         }
     }
 
-    private async _connectIntent(
+    private async _sendIntent(
         protocolVersion: number,
         intent: RawIntentRequest,
-        traceId: string
+        options?: OptionalTraceable
     ): Promise<void> {
+        const traceId = options?.traceId ?? UUIDv7();
         const response = await this.injectedWallet.sendIntent(intent, {
             protocolVersion,
             traceId
