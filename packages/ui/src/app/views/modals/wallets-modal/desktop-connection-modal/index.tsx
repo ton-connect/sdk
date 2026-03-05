@@ -194,6 +194,13 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
         setMode('extension');
         if (isWalletInfoCurrentlyInjected(props.wallet)) {
             setLastSelectedWalletInfo(props.wallet);
+            initiateTonConnectFlow(
+                connector,
+                {
+                    jsBridgeKey: props.wallet.jsBridgeKey
+                },
+                { additionalRequest: props.additionalRequest }
+            );
         }
     };
 

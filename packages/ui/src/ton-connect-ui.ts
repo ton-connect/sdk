@@ -28,7 +28,7 @@ import {
     SignDataIntentRequest,
     SignMessageIntentRequest,
     SendActionIntentRequest,
-    IntentUrlOptions,
+    IntentOptions,
     SendActionIntentResponse
 } from '@tonconnect/sdk';
 import { widgetController } from 'src/app/widget-controller';
@@ -75,7 +75,7 @@ import {
 import { IMG } from 'src/app/env/IMG';
 
 type TonConnectUIIntentOptions = ActionConfiguration &
-    OptionalTraceable<Omit<IntentUrlOptions, 'onIntentUrlReady'>>;
+    OptionalTraceable<Omit<IntentOptions, 'onIntentUrlReady'>>;
 
 export class TonConnectUI {
     public static getWallets(): Promise<WalletInfo[]> {

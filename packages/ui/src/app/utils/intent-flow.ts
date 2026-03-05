@@ -1,6 +1,6 @@
 import {
     ITonConnect,
-    IntentUrlOptions,
+    IntentOptions,
     OptionalTraceable,
     SendActionIntentRequest,
     SendTransactionIntentRequest,
@@ -15,8 +15,6 @@ import {
 import { IntentType } from 'src/models/wallets-modal';
 import { TonConnectUIError } from 'src/errors';
 import { walletsModalState } from 'src/app/state/modals-state';
-
-type IntentOptions = OptionalTraceable<IntentUrlOptions>;
 
 type WalletSource = WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[];
 
@@ -33,7 +31,7 @@ export function startIntentFlow(
         | SignDataIntentRequest
         | SignMessageIntentRequest
         | SendActionIntentRequest,
-    options: IntentOptions
+    options: OptionalTraceable<IntentOptions>
 ): string | void {
     switch (intentType) {
         case 'sendTransaction':
