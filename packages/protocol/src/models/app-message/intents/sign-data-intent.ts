@@ -9,8 +9,7 @@ export interface RawSignDataIntentRequest extends RawBaseIntentPayload {
     m: 'signIntent';
 
     /**
-     * Explicit sender address for the intent.
-     * Shortened field name: `f` (maps to `from` in high-level SDK types).
+     * The sender address in '<wc>:<hex>' format from which DApp intends to send the transaction. Current account.address by default.
      */
     f?: string;
 

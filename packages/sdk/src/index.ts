@@ -84,6 +84,7 @@ export {
     SendTransactionFeature,
     SendTransactionFeatureDeprecated,
     SignDataFeature,
+    SignMessageFeature,
     SignDataType,
     SignDataPayload,
     SignDataPayloadText,

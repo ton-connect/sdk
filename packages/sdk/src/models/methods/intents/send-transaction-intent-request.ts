@@ -43,8 +43,7 @@ export interface SendTransactionIntentRequest {
     validUntil: number;
     network?: ChainId;
     /**
-     * Explicit sender address for the intent.
-     * If omitted, the wallet will use its default selected account.
+     * The sender address in '<wc>:<hex>' format from which DApp intends to send the transaction. Current account.address by default.
      */
     from?: string;
     items: SendTransactionIntentItem[];
