@@ -144,6 +144,9 @@ export class TonConnect implements ITonConnect {
         if (this.provider) {
             this.provider.onIntent(this.handleProviderIntentResponse);
         }
+        if (this.pendingProvider) {
+            this.pendingProvider.onIntent(this.handleProviderIntentResponse);
+        }
 
         return () => {
             this.intentResponseSubscriptions = this.intentResponseSubscriptions.filter(
@@ -165,6 +168,12 @@ export class TonConnect implements ITonConnect {
     private _wallet: Wallet | null = null;
 
     private provider: Provider | null = null;
+
+    private pendingProvider: Provider | null = null;
+
+    private pendingBridgeConnectionStorage: BridgeConnectionStorage | null = null;
+
+    private providerListenUnsubscribe: (() => void) | null = null;
 
     private statusChangeSubscriptions: ((walletInfo: Wallet | null) => void)[] = [];
 
@@ -372,6 +381,8 @@ export class TonConnect implements ITonConnect {
             throw new WalletAlreadyConnectedError();
         }
 
+        this.cleanupPendingProvider();
+
         const abortController = createAbortController(options?.signal);
         this.abortController?.abort();
         this.abortController = abortController;
@@ -409,6 +420,8 @@ export class TonConnect implements ITonConnect {
     ): Promise<void> {
         const traceId = options?.traceId ?? UUIDv7();
         this.tracker.trackConnectionRestoringStarted(traceId);
+
+        this.cleanupPendingProvider();
 
         const abortController = createAbortController(options?.signal);
         this.abortController?.abort();
@@ -478,9 +491,10 @@ export class TonConnect implements ITonConnect {
             return;
         }
 
+        this.providerListenUnsubscribe?.();
         this.provider?.closeConnection();
         this.provider = provider;
-        provider.listen(this.walletEventsListener.bind(this));
+        this.providerListenUnsubscribe = provider.listen(this.walletEventsListener.bind(this));
 
         const onAbortRestore = (): void => {
             this.tracker.trackConnectionRestoringError('Connection restoring was aborted', traceId);
@@ -844,6 +858,8 @@ export class TonConnect implements ITonConnect {
             throw new WalletNotConnectedError();
         }
 
+        this.cleanupPendingProvider();
+
         const abortController = createAbortController(options?.signal);
         const prevAbortController = this.abortController;
         this.abortController = abortController;
@@ -924,7 +940,6 @@ export class TonConnect implements ITonConnect {
 
         const traceId = options?.traceId ?? UUIDv7();
 
-        // TODO TBD
         const connectRequest = this.createConnectRequest(options?.connectRequest);
 
         const intentRequest = buildIntent(data, {
@@ -932,15 +947,14 @@ export class TonConnect implements ITonConnect {
             connectRequest
         });
 
-        this.provider?.closeConnection();
-        this.provider = this.createProvider(wallet);
+        this.cleanupPendingProvider();
+        this.pendingProvider = this.createPendingProvider(wallet);
 
         abortController.signal.addEventListener('abort', () => {
-            this.provider?.closeConnection();
-            this.provider = null;
+            this.cleanupPendingProvider();
         });
 
-        return this.provider.sendIntent(intentRequest, {
+        return this.pendingProvider.sendIntent(intentRequest, {
             signal: abortController.signal,
             traceId
         }) as WalletIntentResult<TWallet>;
@@ -1023,22 +1037,26 @@ export class TonConnect implements ITonConnect {
      * or if you use SDK with NodeJS and want to save server resources.
      */
     public pauseConnection(): void {
-        if (this.provider?.type !== 'http') {
-            return;
+        if (this.provider?.type === 'http') {
+            this.provider.pause();
         }
-
-        this.provider.pause();
+        if (this.pendingProvider?.type === 'http') {
+            this.pendingProvider.pause();
+        }
     }
 
     /**
      * Unpause bridge HTTP connection if it is paused.
      */
-    public unPauseConnection(): Promise<void> {
-        if (this.provider?.type !== 'http') {
-            return Promise.resolve();
+    public async unPauseConnection(): Promise<void> {
+        const promises: Promise<void>[] = [];
+        if (this.provider?.type === 'http') {
+            promises.push(this.provider.unPause());
         }
-
-        return this.provider.unPause();
+        if (this.pendingProvider?.type === 'http') {
+            promises.push(this.pendingProvider.unPause());
+        }
+        await Promise.all(promises);
     }
 
     private addWindowFocusAndBlurSubscriptions(): void {
@@ -1113,9 +1131,113 @@ export class TonConnect implements ITonConnect {
             provider = new BridgeProvider(this.bridgeConnectionStorage, wallet, this.analytics);
         }
 
-        provider.listen(this.walletEventsListener.bind(this));
+        this.providerListenUnsubscribe = provider.listen(this.walletEventsListener.bind(this));
         provider.onIntent(this.handleProviderIntentResponse);
         return provider;
+    }
+
+    private createPendingProvider(
+        wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[]
+    ): Provider {
+        this.pendingBridgeConnectionStorage = new BridgeConnectionStorage(
+            this.dappSettings.storage,
+            this.walletsList,
+            'ton-connect-pending-storage'
+        );
+
+        let provider: Provider;
+
+        if (!Array.isArray(wallet) && isWalletConnectionSourceJS(wallet)) {
+            provider = new InjectedProvider(
+                this.pendingBridgeConnectionStorage,
+                wallet.jsBridgeKey,
+                this.analytics
+            );
+        } else if (!Array.isArray(wallet) && isWalletConnectionSourceWalletConnect(wallet)) {
+            provider = new WalletConnectProvider(this.pendingBridgeConnectionStorage);
+        } else {
+            provider = new BridgeProvider(
+                this.pendingBridgeConnectionStorage,
+                wallet,
+                this.analytics
+            );
+        }
+
+        provider.listen(this.pendingProviderEventsListener.bind(this));
+        provider.onIntent(this.handleProviderIntentResponse);
+        return provider;
+    }
+
+    private pendingProviderEventsListener(e: TraceableWalletEvent): void {
+        if (!this.pendingProvider) {
+            this.walletEventsListener(e);
+            return;
+        }
+
+        switch (e.event) {
+            case 'connect':
+                this.promotePendingProvider(e.payload, { traceId: e.traceId });
+                break;
+            case 'connect_error':
+                this.tracker.trackConnectionError(
+                    e.payload.message,
+                    e.payload.code,
+                    this.getSessionInfo(),
+                    e.traceId
+                );
+                const walletError = connectErrorsParser.parseError(e.payload);
+                this.onWalletConnectError(walletError);
+                this.cleanupPendingProvider();
+                break;
+            case 'disconnect':
+                this.cleanupPendingProvider();
+                break;
+        }
+    }
+
+    private promotePendingProvider(
+        connectEvent: ConnectEventSuccess['payload'],
+        options: Traceable
+    ): void {
+        this.providerListenUnsubscribe?.();
+        this.providerListenUnsubscribe = null;
+
+        const oldProvider = this.provider;
+
+        this.provider = this.pendingProvider;
+        this.pendingProvider = null;
+
+        oldProvider?.detach();
+
+        void this.syncStorageAfterPromotion();
+
+        this.onWalletConnected(connectEvent, options);
+    }
+
+    private async syncStorageAfterPromotion(): Promise<void> {
+        if (this.pendingBridgeConnectionStorage) {
+            try {
+                const connection = await this.pendingBridgeConnectionStorage.getConnection();
+                if (connection) {
+                    await this.bridgeConnectionStorage.storeConnection(connection);
+                }
+                await this.pendingBridgeConnectionStorage.removeConnection();
+            } catch (e) {
+                logDebug('Failed to sync storage after promotion', e);
+            }
+            this.pendingBridgeConnectionStorage = null;
+        }
+    }
+
+    private cleanupPendingProvider(): void {
+        if (this.pendingProvider) {
+            this.pendingProvider.detach();
+            this.pendingProvider = null;
+        }
+        if (this.pendingBridgeConnectionStorage) {
+            void this.pendingBridgeConnectionStorage.removeConnection();
+            this.pendingBridgeConnectionStorage = null;
+        }
     }
 
     private walletEventsListener(e: TraceableWalletEvent): void {
