@@ -615,9 +615,14 @@ export class BridgeProvider implements HTTPProvider {
                 'Content-Type': 'text/plain'
             },
             body: JSON.stringify(payload)
-        }).catch(error => {
-            logDebug('Failed to store intent payload in object storage', error);
-        });
+        })
+            .then(response => {
+                return response.text();
+            })
+            .then(text => logDebug('intent payload stored in object storage', text))
+            .catch(error => {
+                logDebug('Failed to store intent payload in object storage', error);
+            });
     }
 
     private getObjectStorageUrl(): string {

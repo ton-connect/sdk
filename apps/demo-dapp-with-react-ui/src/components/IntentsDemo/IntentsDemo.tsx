@@ -17,6 +17,8 @@ export function IntentsDemo() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [lastIntentResult, setLastIntentResult] = useState<any | null>(null);
 
+    const [objectStorageRequired, setObjectStorageRequired] = useState<boolean>(true);
+
     const commonOptions = {
         notifications: ['before', 'success', 'error'] as ('before' | 'success' | 'error')[]
     };
@@ -33,16 +35,67 @@ export function IntentsDemo() {
         const intent: SendTransactionIntentRequest = {
             validUntil: Math.floor(Date.now() / 1000) + 600,
             network: wallet?.account.chain,
-            items: [
-                {
-                    type: 'ton',
-                    // Use connected wallet as recipient if available, otherwise demo address
-                    address:
-                        wallet?.account.address ??
-                        'EQCKWpx7cNMpvmcN5ObM5lLUZHZRFKqYA4xmw9jOry0ZsF9M',
-                    amount: '1000000'
-                }
-            ]
+            items: objectStorageRequired
+                ? [
+                      {
+                          type: 'ton',
+                          // Use connected wallet as recipient if available, otherwise demo address
+                          address:
+                              wallet?.account.address ??
+                              'EQCKWpx7cNMpvmcN5ObM5lLUZHZRFKqYA4xmw9jOry0ZsF9M',
+                          amount: '1000000'
+                      },
+                      {
+                          type: 'ton',
+                          // Use connected wallet as recipient if available, otherwise demo address
+                          address:
+                              wallet?.account.address ??
+                              'EQCKWpx7cNMpvmcN5ObM5lLUZHZRFKqYA4xmw9jOry0ZsF9M',
+                          amount: '1000000'
+                      },
+                      {
+                          type: 'ton',
+                          // Use connected wallet as recipient if available, otherwise demo address
+                          address:
+                              wallet?.account.address ??
+                              'EQCKWpx7cNMpvmcN5ObM5lLUZHZRFKqYA4xmw9jOry0ZsF9M',
+                          amount: '1000000'
+                      },
+                      {
+                          type: 'ton',
+                          // Use connected wallet as recipient if available, otherwise demo address
+                          address:
+                              wallet?.account.address ??
+                              'EQCKWpx7cNMpvmcN5ObM5lLUZHZRFKqYA4xmw9jOry0ZsF9M',
+                          amount: '1000000'
+                      },
+                      {
+                          type: 'ton',
+                          // Use connected wallet as recipient if available, otherwise demo address
+                          address:
+                              wallet?.account.address ??
+                              'EQCKWpx7cNMpvmcN5ObM5lLUZHZRFKqYA4xmw9jOry0ZsF9M',
+                          amount: '1000000'
+                      },
+                      {
+                          type: 'ton',
+                          // Use connected wallet as recipient if available, otherwise demo address
+                          address:
+                              wallet?.account.address ??
+                              'EQCKWpx7cNMpvmcN5ObM5lLUZHZRFKqYA4xmw9jOry0ZsF9M',
+                          amount: '1000000'
+                      }
+                  ]
+                : [
+                      {
+                          type: 'ton',
+                          // Use connected wallet as recipient if available, otherwise demo address
+                          address:
+                              wallet?.account.address ??
+                              'EQCKWpx7cNMpvmcN5ObM5lLUZHZRFKqYA4xmw9jOry0ZsF9M',
+                          amount: '1000000'
+                      }
+                  ]
         };
 
         setLastIntentPayload(intent);
@@ -61,7 +114,9 @@ export function IntentsDemo() {
             network: wallet?.account.chain,
             payload: {
                 type: 'text',
-                text: 'Sign this sample text via intent.'
+                text: 'Sign this sample text via intent. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. '.repeat(
+                    100
+                )
             }
         };
 
