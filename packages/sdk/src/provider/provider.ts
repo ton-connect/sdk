@@ -1,13 +1,22 @@
-import { AppRequest, ConnectRequest, RpcMethod } from '@tonconnect/protocol';
+import { AppRequest, ConnectRequest, RawIntentRequest, RpcMethod } from '@tonconnect/protocol';
 import { OptionalTraceable, WithoutId } from 'src/utils/types';
 import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet/traceable-events';
+import type { IntentResponse } from 'src/models/methods/intents';
 
 export type Provider = InternalProvider | HTTPProvider;
 
 export interface InternalProvider extends BaseProvider {
     type: 'injected';
 
+    /**
+     * Establishes a connection using a ConnectRequest (classic TonConnect flow).
+     */
     connect(message: ConnectRequest, options?: OptionalTraceable): void;
+
+    /**
+     * Sends a raw intent request.
+     */
+    sendIntent(intent: RawIntentRequest, options?: OptionalTraceable): void;
 }
 
 export interface HTTPProvider extends BaseProvider {
@@ -15,6 +24,14 @@ export interface HTTPProvider extends BaseProvider {
 
     connect(
         message: ConnectRequest,
+        options?: OptionalTraceable<{
+            openingDeadlineMS?: number;
+            signal?: AbortSignal;
+        }>
+    ): string;
+
+    sendIntent(
+        intent: RawIntentRequest,
         options?: OptionalTraceable<{
             openingDeadlineMS?: number;
             signal?: AbortSignal;
@@ -36,6 +53,13 @@ interface BaseProvider {
 
     closeConnection(): void;
 
+    /**
+     * Detach all listeners and release resources without disconnecting from the wallet.
+     * Unlike closeConnection(), this does not send a disconnect signal to the wallet,
+     * preserving the wallet session for use by another provider instance.
+     */
+    detach(): void;
+
     disconnect(options?: OptionalTraceable<{ signal?: AbortSignal }>): Promise<void>;
 
     sendRequest<T extends RpcMethod>(
@@ -53,5 +77,6 @@ interface BaseProvider {
         onRequestSent?: () => void
     ): Promise<TraceableWalletResponse<T>>;
 
-    listen(eventsCallback: (e: TraceableWalletEvent) => void): void;
+    listen(eventsCallback: (e: TraceableWalletEvent) => void): () => void;
+    onIntent(listener: (response: IntentResponse) => void): () => void;
 }

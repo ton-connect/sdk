@@ -3,6 +3,8 @@ import {
     ConnectEvent,
     ConnectRequest,
     DeviceInfo,
+    RawIntentRequest,
+    IntentResponse,
     RpcMethod,
     WalletEvent,
     WalletResponse
@@ -22,6 +24,17 @@ export interface InjectedWalletApi {
         protocolVersion: number,
         message: ConnectRequest
     ): Promise<OptionalTraceable<ConnectEvent>>;
+
+    sendIntent?: (
+        intent: RawIntentRequest,
+        options?: OptionalTraceable<{ protocolVersion: number }>
+    ) => Promise<
+        OptionalTraceable<{
+            connectEvent?: ConnectEvent;
+            intentResponse: IntentResponse;
+        }>
+    >;
+
     restoreConnection(): Promise<OptionalTraceable<ConnectEvent>>;
     send<T extends RpcMethod>(message: AppRequest<T>): Promise<WalletResponse<T>>;
     listen(callback: (event: OptionalTraceable<WalletEvent>) => void): () => void;

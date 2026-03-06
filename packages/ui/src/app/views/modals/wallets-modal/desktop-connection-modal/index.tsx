@@ -57,6 +57,7 @@ import {
     redirectToWallet
 } from 'src/app/utils/url-strategy-helpers';
 import { WalletsModalState } from 'src/models';
+import { initiateTonConnectFlow } from 'src/app/utils/intent-flow';
 
 export interface DesktopConnectionProps {
     additionalRequest?: ConnectAdditionalRequest;
@@ -81,6 +82,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
     const [universalLink, setUniversalLink] = createSignal<string | undefined>();
     const [firstClick, setFirstClick] = createSignal(true);
     const connector = useContext(ConnectorContext)!;
+    const isIntentMode = props.walletsModalState?.mode === 'intent';
 
     const unsubscribe = connector.onStatusChange(
         () => {},
@@ -106,13 +108,14 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
     const generateUniversalLink = (): void => {
         // TODO: prevent double generation of universal link later and remove try-catch
         try {
-            const universalLink = connector.connect(
+            const universalLink = initiateTonConnectFlow(
+                connector,
                 {
                     universalLink: props.wallet.universalLink,
-                    bridgeUrl: props.wallet.bridgeUrl
+                    bridgeUrl: props.wallet.bridgeUrl,
+                    objectStorageUrl: props.wallet.objectStorageUrl
                 },
-                props.additionalRequest,
-                { traceId: props.walletsModalState?.traceId }
+                { additionalRequest: props.additionalRequest }
             );
 
             setUniversalLink(universalLink);
@@ -191,12 +194,12 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
         setMode('extension');
         if (isWalletInfoCurrentlyInjected(props.wallet)) {
             setLastSelectedWalletInfo(props.wallet);
-            connector.connect(
+            initiateTonConnectFlow(
+                connector,
                 {
                     jsBridgeKey: props.wallet.jsBridgeKey
                 },
-                props.additionalRequest,
-                { traceId: props.walletsModalState?.traceId }
+                { additionalRequest: props.additionalRequest }
             );
         }
     };

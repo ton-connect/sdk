@@ -4,9 +4,11 @@ import {
     ConnectEventSuccess,
     ConnectItem,
     ConnectRequest,
+    RawIntentRequest,
     SendTransactionRpcResponseSuccess,
     SignDataPayload,
     SignDataRpcResponseSuccess,
+    SignMessageRpcResponseSuccess,
     TonAddressItemReply,
     TonProofItemReply
 } from '@tonconnect/protocol';
@@ -32,8 +34,17 @@ import {
 import {
     SendTransactionRequest,
     SendTransactionResponse,
-    SignDataResponse
+    SignDataResponse,
+    SignMessageResponse
 } from 'src/models/methods';
+import type { IntentResponse } from 'src/models/methods/intents';
+import {
+    SendTransactionIntentRequest,
+    SignDataIntentRequest,
+    SignMessageIntentRequest,
+    SendActionIntentRequest,
+    IntentOptions
+} from 'src/models/methods/intents';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
 import { AnalyticsSettings, TonConnectOptions } from 'src/models/ton-connect-options';
 import {
@@ -43,12 +54,13 @@ import {
 import { connectErrorsParser } from 'src/parsers/connect-errors-parser';
 import { sendTransactionParser } from 'src/parsers/send-transaction-parser';
 import { signDataParser } from 'src/parsers/sign-data-parser';
+import { signMessageParser } from 'src/parsers/sign-message-parser';
 import { BridgeProvider } from 'src/provider/bridge/bridge-provider';
 import { InjectedProvider } from 'src/provider/injected/injected-provider';
 import { Provider } from 'src/provider/provider';
 import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { DefaultStorage } from 'src/storage/default-storage';
-import { ITonConnect } from 'src/ton-connect.interface';
+import { ITonConnect, WalletIntentResult, WalletSourceArg } from 'src/ton-connect.interface';
 import { WalletWrongNetworkError } from 'src/errors/wallet/wallet-wrong-network.error';
 import { getDocument, getOriginWithPath, getWebPageManifest } from 'src/utils/web-api';
 import { WalletsListManager } from 'src/wallets-list-manager';
@@ -82,6 +94,12 @@ import { DefaultEnvironment } from 'src/environment/default-environment';
 import { UUIDv7 } from 'src/utils/uuid';
 import { TraceableWalletEvent } from 'src/models/wallet/traceable-events';
 import { WalletConnectProvider } from 'src/provider/wallet-connect/wallet-connect-provider';
+import {
+    serializeSendActionIntent,
+    serializeSendTransactionIntent,
+    serializeSignDataIntent,
+    serializeSignMessageIntent
+} from 'src/intents/serializer';
 
 export class TonConnect implements ITonConnect {
     private desiredChainId: string | undefined;
@@ -114,6 +132,29 @@ export class TonConnect implements ITonConnect {
      */
     private readonly tracker: TonConnectTracker;
 
+    private intentResponseSubscriptions: ((response: IntentResponse) => void)[] = [];
+
+    private readonly handleProviderIntentResponse = (response: IntentResponse): void => {
+        this.intentResponseSubscriptions.forEach(callback => callback(response));
+    };
+
+    public onIntentResponse(callback: (response: IntentResponse) => void): () => void {
+        this.intentResponseSubscriptions.push(callback);
+
+        if (this.provider) {
+            this.provider.onIntent(this.handleProviderIntentResponse);
+        }
+        if (this.pendingProvider) {
+            this.pendingProvider.onIntent(this.handleProviderIntentResponse);
+        }
+
+        return () => {
+            this.intentResponseSubscriptions = this.intentResponseSubscriptions.filter(
+                cb => cb !== callback
+            );
+        };
+    }
+
     private readonly walletsList: WalletsListManager;
 
     private analytics?: AnalyticsManager;
@@ -127,6 +168,12 @@ export class TonConnect implements ITonConnect {
     private _wallet: Wallet | null = null;
 
     private provider: Provider | null = null;
+
+    private pendingProvider: Provider | null = null;
+
+    private pendingBridgeConnectionStorage: BridgeConnectionStorage | null = null;
+
+    private providerListenUnsubscribe: (() => void) | null = null;
 
     private statusChangeSubscriptions: ((walletInfo: Wallet | null) => void)[] = [];
 
@@ -170,8 +217,6 @@ export class TonConnect implements ITonConnect {
         };
 
         this.walletsRequiredFeatures = options?.walletsRequiredFeatures;
-
-        this.environment = options?.environment ?? new DefaultEnvironment();
 
         this.walletsList = new WalletsListManager({
             walletsListSource: options?.walletsListSource,
@@ -249,9 +294,7 @@ export class TonConnect implements ITonConnect {
      * @returns universal link if external wallet was passed or void for the injected wallet.
      */
 
-    public connect<
-        T extends WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[]
-    >(
+    public connect<T extends WalletSourceArg>(
         wallet: T,
         options?: OptionalTraceable<{
             request?: ConnectAdditionalRequest;
@@ -264,9 +307,7 @@ export class TonConnect implements ITonConnect {
           ? void
           : string;
     /** @deprecated use connect(wallet, options) instead */
-    public connect<
-        T extends WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[]
-    >(
+    public connect<T extends WalletSourceArg>(
         wallet: T,
         request?: ConnectAdditionalRequest,
         options?: OptionalTraceable<{
@@ -340,6 +381,8 @@ export class TonConnect implements ITonConnect {
             throw new WalletAlreadyConnectedError();
         }
 
+        this.cleanupPendingProvider();
+
         const abortController = createAbortController(options?.signal);
         this.abortController?.abort();
         this.abortController = abortController;
@@ -377,6 +420,8 @@ export class TonConnect implements ITonConnect {
     ): Promise<void> {
         const traceId = options?.traceId ?? UUIDv7();
         this.tracker.trackConnectionRestoringStarted(traceId);
+
+        this.cleanupPendingProvider();
 
         const abortController = createAbortController(options?.signal);
         this.abortController?.abort();
@@ -446,9 +491,10 @@ export class TonConnect implements ITonConnect {
             return;
         }
 
+        this.providerListenUnsubscribe?.();
         this.provider?.closeConnection();
         this.provider = provider;
-        provider.listen(this.walletEventsListener.bind(this));
+        this.providerListenUnsubscribe = provider.listen(this.walletEventsListener.bind(this));
 
         const onAbortRestore = (): void => {
             this.tracker.trackConnectionRestoringError('Connection restoring was aborted', traceId);
@@ -706,6 +752,92 @@ export class TonConnect implements ITonConnect {
         return { ...result, traceId };
     }
 
+    public async signMessage(
+        message: SendTransactionRequest,
+        options?: OptionalTraceable<{
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+        }>
+    ): Promise<Traceable<SignMessageResponse>> {
+        const abortController = createAbortController(options?.signal);
+        if (abortController.signal.aborted) {
+            throw new TonConnectError('Message signing was aborted');
+        }
+
+        const validationError = validateSendTransactionRequest(message);
+        if (validationError) {
+            if (isQaModeEnabled()) {
+                console.error('SignMessageRequest validation failed: ' + validationError);
+            } else {
+                throw new TonConnectError(
+                    'SignMessageRequest validation failed: ' + validationError
+                );
+            }
+        }
+
+        this.checkConnection();
+
+        const requiredMessagesNumber = message.messages.length;
+        const requireExtraCurrencies = message.messages.some(
+            m => m.extraCurrency && Object.keys(m.extraCurrency).length > 0
+        );
+        checkSendTransactionSupport(this.wallet!.device.features, {
+            requiredMessagesNumber,
+            requireExtraCurrencies
+        });
+
+        const traceId = options?.traceId ?? UUIDv7();
+
+        const { validUntil, messages, ...tx } = message;
+        const from = message.from || this.account!.address;
+        const network = message.network || this.account!.chain;
+
+        if (this.wallet?.account.chain && network !== this.wallet.account.chain) {
+            if (!isQaModeEnabled()) {
+                throw new WalletWrongNetworkError('Wallet connected to a wrong network', {
+                    cause: {
+                        expectedChainId: this.wallet?.account.chain,
+                        actualChainId: network
+                    }
+                });
+            }
+            console.error('Wallet connected to a wrong network', {
+                expectedChainId: this.wallet?.account.chain,
+                actualChainId: network
+            });
+        }
+
+        const response = await this.provider!.sendRequest(
+            signMessageParser.convertToRpcRequest({
+                ...tx,
+                from,
+                network,
+                valid_until: validUntil,
+                messages: messages.map(({ extraCurrency, payload, stateInit, ...msg }) => ({
+                    ...msg,
+                    payload: normalizeBase64(payload),
+                    stateInit: normalizeBase64(stateInit),
+                    extra_currency: extraCurrency
+                }))
+            }),
+            {
+                onRequestSent: options?.onRequestSent,
+                signal: abortController.signal,
+                traceId
+            }
+        );
+
+        if (signMessageParser.isError(response)) {
+            signMessageParser.parseAndThrowError(response);
+        }
+
+        const result = signMessageParser.convertFromRpcResponse(
+            response as SignMessageRpcResponseSuccess
+        );
+
+        return { ...result, traceId: (response as { traceId: string }).traceId };
+    }
+
     /**
      * Set desired network for the connection. Can only be set before connecting.
      * If wallet connects with a different chain, the SDK will throw an error and abort connection.
@@ -725,6 +857,8 @@ export class TonConnect implements ITonConnect {
         if (!this.connected) {
             throw new WalletNotConnectedError();
         }
+
+        this.cleanupPendingProvider();
 
         const abortController = createAbortController(options?.signal);
         const prevAbortController = this.abortController;
@@ -771,6 +905,108 @@ export class TonConnect implements ITonConnect {
         }
     }
 
+    public sendTransactionIntent<T extends WalletSourceArg>(
+        wallet: T,
+        transaction: SendTransactionIntentRequest,
+        options?: OptionalTraceable<IntentOptions>
+    ): WalletIntentResult<T> {
+        return this.sendIntentWithProvider(
+            'sendTransactionIntent',
+            wallet,
+            transaction,
+            options,
+            (req, params) => serializeSendTransactionIntent(req, params)
+        ) as WalletIntentResult<T>;
+    }
+
+    private sendIntentWithProvider<TWallet extends WalletSourceArg, TIntentRequest>(
+        methodName:
+            | 'sendTransactionIntent'
+            | 'signDataIntent'
+            | 'signMessageIntent'
+            | 'sendActionIntent',
+        wallet: TWallet,
+        data: TIntentRequest,
+        options: OptionalTraceable<IntentOptions> | undefined,
+        buildIntent: (
+            data: TIntentRequest,
+            params: { id: string; connectRequest?: ConnectRequest }
+        ) => RawIntentRequest
+    ): WalletIntentResult<TWallet> {
+        const abortController = createAbortController(options?.signal);
+        if (abortController.signal.aborted) {
+            throw new TonConnectError(`${methodName} was aborted`);
+        }
+
+        const traceId = options?.traceId ?? UUIDv7();
+
+        const connectRequest = this.createConnectRequest(options?.connectRequest);
+
+        const intentRequest = buildIntent(data, {
+            id: UUIDv7(),
+            connectRequest
+        });
+
+        this.cleanupPendingProvider();
+        this.pendingProvider = this.createPendingProvider(wallet);
+
+        abortController.signal.addEventListener('abort', () => {
+            this.cleanupPendingProvider();
+        });
+
+        return this.pendingProvider.sendIntent(intentRequest, {
+            signal: abortController.signal,
+            traceId
+        }) as WalletIntentResult<TWallet>;
+    }
+
+    public signDataIntent<T extends WalletSourceArg>(
+        wallet: T,
+        data: SignDataIntentRequest,
+        options?: OptionalTraceable<IntentOptions>
+    ): WalletIntentResult<T> {
+        return this.sendIntentWithProvider(
+            'signDataIntent',
+            wallet,
+            data,
+            options,
+            (req, params) => {
+                return serializeSignDataIntent(req, {
+                    ...params,
+                    manifestUrl: this.dappSettings.manifestUrl
+                });
+            }
+        ) as WalletIntentResult<T>;
+    }
+
+    public signMessageIntent<T extends WalletSourceArg>(
+        wallet: T,
+        message: SignMessageIntentRequest,
+        options?: OptionalTraceable<IntentOptions>
+    ): WalletIntentResult<T> {
+        return this.sendIntentWithProvider(
+            'signMessageIntent',
+            wallet,
+            message,
+            options,
+            (req, params) => serializeSignMessageIntent(req, params)
+        ) as WalletIntentResult<T>;
+    }
+
+    public sendActionIntent<T extends WalletSourceArg>(
+        wallet: T,
+        action: SendActionIntentRequest,
+        options?: OptionalTraceable<IntentOptions>
+    ): WalletIntentResult<T> {
+        return this.sendIntentWithProvider(
+            'sendActionIntent',
+            wallet,
+            action,
+            options,
+            (req, params) => serializeSendActionIntent(req, params)
+        ) as WalletIntentResult<T>;
+    }
+
     private getSessionInfo(): { clientId: string | null; walletId: string | null } | null {
         if (this.provider?.type !== 'http') {
             return null;
@@ -801,22 +1037,26 @@ export class TonConnect implements ITonConnect {
      * or if you use SDK with NodeJS and want to save server resources.
      */
     public pauseConnection(): void {
-        if (this.provider?.type !== 'http') {
-            return;
+        if (this.provider?.type === 'http') {
+            this.provider.pause();
         }
-
-        this.provider.pause();
+        if (this.pendingProvider?.type === 'http') {
+            this.pendingProvider.pause();
+        }
     }
 
     /**
      * Unpause bridge HTTP connection if it is paused.
      */
-    public unPauseConnection(): Promise<void> {
-        if (this.provider?.type !== 'http') {
-            return Promise.resolve();
+    public async unPauseConnection(): Promise<void> {
+        const promises: Promise<void>[] = [];
+        if (this.provider?.type === 'http') {
+            promises.push(this.provider.unPause());
         }
-
-        return this.provider.unPause();
+        if (this.pendingProvider?.type === 'http') {
+            promises.push(this.pendingProvider.unPause());
+        }
+        await Promise.all(promises);
     }
 
     private addWindowFocusAndBlurSubscriptions(): void {
@@ -891,8 +1131,113 @@ export class TonConnect implements ITonConnect {
             provider = new BridgeProvider(this.bridgeConnectionStorage, wallet, this.analytics);
         }
 
-        provider.listen(this.walletEventsListener.bind(this));
+        this.providerListenUnsubscribe = provider.listen(this.walletEventsListener.bind(this));
+        provider.onIntent(this.handleProviderIntentResponse);
         return provider;
+    }
+
+    private createPendingProvider(
+        wallet: WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[]
+    ): Provider {
+        this.pendingBridgeConnectionStorage = new BridgeConnectionStorage(
+            this.dappSettings.storage,
+            this.walletsList,
+            'ton-connect-pending-storage'
+        );
+
+        let provider: Provider;
+
+        if (!Array.isArray(wallet) && isWalletConnectionSourceJS(wallet)) {
+            provider = new InjectedProvider(
+                this.pendingBridgeConnectionStorage,
+                wallet.jsBridgeKey,
+                this.analytics
+            );
+        } else if (!Array.isArray(wallet) && isWalletConnectionSourceWalletConnect(wallet)) {
+            provider = new WalletConnectProvider(this.pendingBridgeConnectionStorage);
+        } else {
+            provider = new BridgeProvider(
+                this.pendingBridgeConnectionStorage,
+                wallet,
+                this.analytics
+            );
+        }
+
+        provider.listen(this.pendingProviderEventsListener.bind(this));
+        provider.onIntent(this.handleProviderIntentResponse);
+        return provider;
+    }
+
+    private pendingProviderEventsListener(e: TraceableWalletEvent): void {
+        if (!this.pendingProvider) {
+            this.walletEventsListener(e);
+            return;
+        }
+
+        switch (e.event) {
+            case 'connect':
+                this.promotePendingProvider(e.payload, { traceId: e.traceId });
+                break;
+            case 'connect_error':
+                this.tracker.trackConnectionError(
+                    e.payload.message,
+                    e.payload.code,
+                    this.getSessionInfo(),
+                    e.traceId
+                );
+                const walletError = connectErrorsParser.parseError(e.payload);
+                this.onWalletConnectError(walletError);
+                this.cleanupPendingProvider();
+                break;
+            case 'disconnect':
+                this.cleanupPendingProvider();
+                break;
+        }
+    }
+
+    private promotePendingProvider(
+        connectEvent: ConnectEventSuccess['payload'],
+        options: Traceable
+    ): void {
+        this.providerListenUnsubscribe?.();
+        this.providerListenUnsubscribe = null;
+
+        const oldProvider = this.provider;
+
+        this.provider = this.pendingProvider;
+        this.pendingProvider = null;
+
+        oldProvider?.detach();
+
+        void this.syncStorageAfterPromotion();
+
+        this.onWalletConnected(connectEvent, options);
+    }
+
+    private async syncStorageAfterPromotion(): Promise<void> {
+        if (this.pendingBridgeConnectionStorage) {
+            try {
+                const connection = await this.pendingBridgeConnectionStorage.getConnection();
+                if (connection) {
+                    await this.bridgeConnectionStorage.storeConnection(connection);
+                }
+                await this.pendingBridgeConnectionStorage.removeConnection();
+            } catch (e) {
+                logDebug('Failed to sync storage after promotion', e);
+            }
+            this.pendingBridgeConnectionStorage = null;
+        }
+    }
+
+    private cleanupPendingProvider(): void {
+        if (this.pendingProvider) {
+            this.pendingProvider.detach();
+            this.pendingProvider = null;
+        }
+        if (this.pendingBridgeConnectionStorage) {
+            void this.pendingBridgeConnectionStorage.removeConnection();
+            this.pendingBridgeConnectionStorage = null;
+        }
     }
 
     private walletEventsListener(e: TraceableWalletEvent): void {

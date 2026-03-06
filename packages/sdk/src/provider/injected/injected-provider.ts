@@ -3,9 +3,11 @@ import {
     AppRequest,
     ConnectEventError,
     ConnectRequest,
+    RawIntentRequest,
     RpcMethod,
     WalletResponse
 } from '@tonconnect/protocol';
+import type { IntentResponse } from 'src/models/methods/intents';
 import {
     InjectedWalletApi,
     isJSBridgeWithMetadata
@@ -98,6 +100,8 @@ export class InjectedProvider<T extends string = string> implements InternalProv
     private listenSubscriptions = false;
 
     private listeners: Array<(e: TraceableWalletEvent) => void> = [];
+
+    private intentListeners: Array<(response: IntentResponse) => void> = [];
     private readonly analytics?: Analytics<
         JsBridgeEvent,
         'bridge_key' | 'wallet_app_name' | 'wallet_app_version'
@@ -123,9 +127,19 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             });
         }
     }
+    onIntent(listener: (response: IntentResponse) => void): () => void {
+        this.intentListeners.push(listener);
+        return () => {
+            this.intentListeners = this.intentListeners.filter(l => l !== listener);
+        };
+    }
 
     public connect(message: ConnectRequest, options?: OptionalTraceable): void {
         this._connect(PROTOCOL_VERSION, message, options);
+    }
+
+    public sendIntent(intent: RawIntentRequest, options?: OptionalTraceable): void {
+        void this._sendIntent(PROTOCOL_VERSION, intent, options);
     }
 
     public async restoreConnection(options?: OptionalTraceable): Promise<void> {
@@ -167,6 +181,10 @@ export class InjectedProvider<T extends string = string> implements InternalProv
         this.closeAllListeners();
     }
 
+    public detach(): void {
+        this.closeAllListeners();
+    }
+
     public async disconnect(options?: OptionalTraceable): Promise<void> {
         const traceId = options?.traceId ?? UUIDv7();
         return new Promise(resolve => {
@@ -175,21 +193,23 @@ export class InjectedProvider<T extends string = string> implements InternalProv
                 this.connectionStorage.removeConnection().then(resolve);
             };
 
-            try {
-                this.injectedWallet.disconnect();
-                onRequestSent();
-            } catch (e) {
-                logDebug(e);
-
-                this.sendRequest(
-                    {
-                        method: 'disconnect',
-                        params: []
-                    },
-                    { onRequestSent, traceId }
-                );
-            }
+            this.sendDisconnect({ onRequestSent, traceId });
         });
+    }
+
+    private sendDisconnect(options?: { onRequestSent?: () => void; traceId: string }) {
+        try {
+            this.injectedWallet.disconnect();
+            options?.onRequestSent?.();
+        } catch {
+            this.sendRequest(
+                {
+                    method: 'disconnect',
+                    params: []
+                },
+                options
+            );
+        }
     }
 
     private closeAllListeners(): void {
@@ -275,20 +295,26 @@ export class InjectedProvider<T extends string = string> implements InternalProv
         options?: OptionalTraceable
     ): Promise<void> {
         const traceId = options?.traceId ?? UUIDv7();
+
         try {
             logDebug(
                 `Injected Provider connect request: protocolVersion: ${protocolVersion}, message:`,
                 message
             );
+
             this.analytics?.emitJsBridgeCall({
                 js_bridge_method: 'connect',
                 trace_id: traceId
             });
-            const connectEvent = await this.injectedWallet.connect(protocolVersion, message);
+
+            const response = await this.injectedWallet.connect(protocolVersion, message);
+
             this.analytics?.emitJsBridgeResponse({
                 js_bridge_method: 'connect'
             });
-            logDebug('Injected Provider connect response:', connectEvent);
+            logDebug('Injected Provider connect response:', response);
+
+            const connectEvent = response;
 
             if (connectEvent.event === 'connect') {
                 await this.updateSession();
@@ -314,6 +340,45 @@ export class InjectedProvider<T extends string = string> implements InternalProv
         }
     }
 
+    private async _sendIntent(
+        protocolVersion: number,
+        intent: RawIntentRequest,
+        options?: OptionalTraceable
+    ): Promise<void> {
+        const traceId = options?.traceId ?? UUIDv7();
+
+        if (!this.injectedWallet.sendIntent) {
+            const event: TraceableWalletEvent = {
+                event: 'connect_error',
+                traceId,
+                payload: {
+                    code: 0,
+                    message: 'Intents are not supported for this injected wallet'
+                }
+            };
+            this.listeners.forEach(listener => listener(event));
+            return;
+        }
+
+        const response = await this.injectedWallet.sendIntent(intent, {
+            protocolVersion,
+            traceId
+        });
+
+        const { connectEvent, intentResponse } = response;
+        if (connectEvent) {
+            if (connectEvent.event === 'connect') {
+                await this.updateSession();
+                this.makeSubscriptions({ traceId });
+            }
+            this.listeners.forEach(listener => listener({ ...connectEvent, traceId }));
+        }
+
+        const typed = intentResponse as unknown as IntentResponse;
+        this.intentListeners.forEach(listener => listener(typed));
+        logDebug('Injected Provider intent response:', response);
+    }
+
     private makeSubscriptions(options: Traceable): void {
         this.listenSubscriptions = true;
         this.analytics?.emitJsBridgeCall({
@@ -324,6 +389,9 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             this.unsubscribeCallback = this.injectedWallet.listen(e => {
                 const traceId = e.traceId ?? UUIDv7();
                 logDebug('Wallet message received:', e);
+                console.log(
+                    `[InjectedProvider] wallet event received: event=${e.event}, listenSubscriptions=${this.listenSubscriptions}`
+                );
 
                 if (this.listenSubscriptions) {
                     this.listeners.forEach(listener => listener({ ...e, traceId }));

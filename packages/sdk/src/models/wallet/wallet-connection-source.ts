@@ -13,6 +13,11 @@ export interface WalletConnectionSourceHTTP {
      * Url of the wallet's implementation of the [HTTP bridge]{@link https://github.com/ton-connect/docs/blob/main/bridge.md#http-bridge}.
      */
     bridgeUrl: string;
+
+    /**
+     * Optional URL for intent object storage associated with this bridge endpoint.
+     */
+    objectStorageUrl?: string;
 }
 
 export interface WalletConnectionSourceJS {

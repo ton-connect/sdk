@@ -16,33 +16,34 @@ import { IMG } from 'src/app/env/IMG';
 import { addReturnStrategy } from 'src/app/utils/url-strategy-helpers';
 import { bridgesIsEqual, getUniqueBridges } from 'src/app/utils/bridge';
 import { WalletsModalState } from 'src/models';
+import { initiateTonConnectFlow } from 'src/app/utils/intent-flow';
 
 interface DesktopUniversalModalProps {
     additionalRequest: ConnectAdditionalRequest;
-
     walletsList: UIWalletInfo[];
-
     walletModalState: WalletsModalState;
-
     onSelect: (walletInfo: UIWalletInfo) => void;
-
     onSelectAllWallets: () => void;
 }
 
 export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = props => {
     const [popupOpened, setPopupOpened] = createSignal(false);
     const connector = appState.connector;
+    const isIntentMode = props.walletModalState.mode === 'intent';
 
     const walletsBridges = createMemo(() => getUniqueBridges(props.walletsList), null, {
         equals: bridgesIsEqual
     });
 
-    setLastSelectedWalletInfo({ openMethod: 'qrcode' });
-    const request = createMemo(() =>
-        connector.connect(walletsBridges(), props.additionalRequest, {
-            traceId: props.walletModalState.traceId
-        })
-    );
+    if (!isIntentMode) {
+        setLastSelectedWalletInfo({ openMethod: 'qrcode' });
+    }
+
+    const request = createMemo(() => {
+        return initiateTonConnectFlow(connector, walletsBridges(), {
+            additionalRequest: props.additionalRequest
+        });
+    });
 
     const supportedWallets = createMemo(
         () => props.walletsList.filter(wallet => wallet.isSupportRequiredFeatures),
@@ -68,14 +69,32 @@ export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = prop
             onClick={() => setPopupOpened(false)}
             data-tc-wallets-modal-universal-desktop="true"
         >
-            <H1 translationKey="walletModal.desktopUniversalModal.connectYourWallet">
-                Connect your wallet
+            <H1
+                translationKey={
+                    isIntentMode
+                        ? 'walletModal.desktopUniversalModal.intentTitle'
+                        : 'walletModal.desktopUniversalModal.connectYourWallet'
+                }
+            >
+                {isIntentMode ? 'Prepare intent for your wallet' : 'Connect your wallet'}
             </H1>
-            <H2Styled translationKey="walletModal.desktopUniversalModal.scan">
-                Scan with your mobile wallet
+            <H2Styled
+                translationKey={
+                    isIntentMode
+                        ? 'walletModal.desktopUniversalModal.intentScan'
+                        : 'walletModal.desktopUniversalModal.scan'
+                }
+            >
+                {isIntentMode
+                    ? 'Scan this intent with your mobile wallet'
+                    : 'Scan with your mobile wallet'}
             </H2Styled>
             <QRCodeStyled
-                sourceUrl={addReturnStrategy(request()!, 'none')}
+                sourceUrl={
+                    isIntentMode
+                        ? (request() as string)
+                        : addReturnStrategy(request() as string, 'none')
+                }
                 disableCopy={popupOpened()}
                 imageUrl={IMG.TON}
             />

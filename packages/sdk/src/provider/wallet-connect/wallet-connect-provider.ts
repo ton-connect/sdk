@@ -8,6 +8,7 @@ import {
     DISCONNECT_ERROR_CODES,
     DisconnectRpcResponseSuccess,
     Feature,
+    RawIntentRequest,
     RpcMethod,
     SEND_TRANSACTION_ERROR_CODES,
     SendTransactionRpcResponseSuccess,
@@ -15,6 +16,7 @@ import {
     TonProofItemReplySuccess,
     WalletResponseTemplateError
 } from '@tonconnect/protocol';
+import type { IntentResponse } from 'src/models/methods/intents';
 import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet/traceable-events';
 import { OptionalTraceable, Traceable, WithoutId } from 'src/utils/types';
 import { UUIDv7 } from 'src/utils/uuid';
@@ -100,6 +102,9 @@ export class WalletConnectProvider implements InternalProvider {
             metadata
         };
     }
+    onIntent(_listener: (response: IntentResponse) => void): () => void {
+        return () => {};
+    }
 
     public static async fromStorage(
         storage: BridgeConnectionStorage
@@ -126,6 +131,20 @@ export class WalletConnectProvider implements InternalProvider {
             signal: abortController.signal,
             abortController
         }).catch(error => logDebug('WalletConnect connect unexpected error', error));
+    }
+
+    sendIntent(_intent: RawIntentRequest, options?: OptionalTraceable): void {
+        const traceId = options?.traceId ?? UUIDv7();
+        const payload = {
+            code: CONNECT_EVENT_ERROR_CODES.METHOD_NOT_SUPPORTED as const,
+            message: 'Intents are not supported for WalletConnect provider'
+        };
+
+        this.emit({
+            event: 'connect_error',
+            traceId,
+            payload
+        });
     }
 
     async _connect(
@@ -236,6 +255,10 @@ export class WalletConnectProvider implements InternalProvider {
         this.abortController?.abort();
         this.abortController = undefined;
         void this.disconnect();
+    }
+
+    detach(): void {
+        this.listeners = [];
     }
 
     async disconnect(options?: OptionalTraceable<{ signal?: AbortSignal }>): Promise<void> {

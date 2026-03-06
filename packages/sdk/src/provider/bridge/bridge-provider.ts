@@ -4,12 +4,14 @@ import {
     ConnectEventSuccess,
     ConnectRequest,
     hexToByteArray,
+    RawIntentRequest,
     RpcMethod,
     SessionCrypto,
     TonAddressItemReply,
     WalletMessage,
     WalletResponse
 } from '@tonconnect/protocol';
+import type { IntentResponse } from 'src/models/methods/intents';
 import { TonConnectError } from 'src/errors/ton-connect.error';
 import { WalletConnectionSourceHTTP } from 'src/models/wallet/wallet-connection-source';
 import { BridgeGateway } from 'src/provider/bridge/bridge-gateway';
@@ -24,7 +26,7 @@ import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { Optional, OptionalTraceable, Traceable, WithoutId } from 'src/utils/types';
 import { PROTOCOL_VERSION } from 'src/resources/protocol';
 import { logDebug, logError } from 'src/utils/log';
-import { encodeTelegramUrlParameters, isTelegramUrl } from 'src/utils/url';
+import { addPathToUrl, encodeTelegramUrlParameters, isTelegramUrl } from 'src/utils/url';
 import { callForSuccess } from 'src/utils/call-for-success';
 import { createAbortController } from 'src/utils/create-abort-controller';
 import { AnalyticsManager } from 'src/analytics/analytics-manager';
@@ -33,8 +35,13 @@ import { BridgeClientEvent } from 'src/analytics/types';
 import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet/traceable-events';
 import { UUIDv7 } from 'src/utils/uuid';
 import { waitForSome } from 'src/utils/promise';
+import { sha256 } from 'sha.js';
 
 export class BridgeProvider implements HTTPProvider {
+    private static readonly INTENT_TTL_SECONDS = 300;
+    private static readonly MAX_INLINE_INTENT_URL_LENGTH = 1023;
+    private static readonly DEFAULT_OBJECT_STORAGE_URL =
+        'https://ton-connect-bridge-v3-staging.tapps.ninja/objects';
     public static async fromStorage(
         storage: BridgeConnectionStorage,
         analyticsManager?: AnalyticsManager
@@ -96,6 +103,28 @@ export class BridgeProvider implements HTTPProvider {
         }>
     ): string {
         const traceId = options?.traceId ?? UUIDv7();
+
+        this.subscribeToBridgeEvents({ ...options, traceId });
+        const universalLink = this.obtainUniversalLink();
+
+        return this.generateUniversalLink(universalLink, message, { traceId });
+    }
+
+    private obtainUniversalLink() {
+        const universalLink =
+            'universalLink' in this.walletConnectionSource &&
+            this.walletConnectionSource.universalLink
+                ? this.walletConnectionSource.universalLink
+                : this.standardUniversalLink;
+        return universalLink;
+    }
+
+    private subscribeToBridgeEvents(
+        options: OptionalTraceable<{
+            openingDeadlineMS?: number;
+            signal?: AbortSignal;
+        }>
+    ) {
         const abortController = createAbortController(options?.signal);
         this.abortController?.abort();
         this.abortController = abortController;
@@ -129,7 +158,7 @@ export class BridgeProvider implements HTTPProvider {
                             openingDeadlineMS:
                                 options?.openingDeadlineMS ?? this.defaultOpeningDeadlineMS,
                             signal: _options?.signal,
-                            traceId
+                            traceId: options.traceId
                         }),
                     {
                         attempts: Number.MAX_SAFE_INTEGER,
@@ -138,14 +167,35 @@ export class BridgeProvider implements HTTPProvider {
                     }
                 );
             });
+    }
 
-        const universalLink =
-            'universalLink' in this.walletConnectionSource &&
-            this.walletConnectionSource.universalLink
-                ? this.walletConnectionSource.universalLink
-                : this.standardUniversalLink;
+    public sendIntent(
+        intent: RawIntentRequest,
+        options?: OptionalTraceable<{
+            openingDeadlineMS?: number;
+            signal?: AbortSignal;
+        }>
+    ): string {
+        const traceId = options?.traceId ?? UUIDv7();
 
-        return this.generateUniversalLink(universalLink, message, { traceId });
+        this.subscribeToBridgeEvents({ ...options, traceId });
+        const universalLink = this.obtainUniversalLink();
+
+        this.pendingRequests.set(intent.id.toString(), response => {
+            const typed = response as unknown as IntentResponse;
+            this.intentListeners.forEach(listener => listener(typed));
+        });
+
+        return this.generateUniversalLink(universalLink, intent, { traceId });
+    }
+
+    private intentListeners: Array<(response: IntentResponse) => void> = [];
+    public onIntent(listener: (response: IntentResponse) => void): () => void {
+        this.intentListeners.push(listener);
+
+        return () => {
+            this.intentListeners = this.intentListeners.filter(l => l !== listener);
+        };
     }
 
     public async restoreConnection(
@@ -326,6 +376,15 @@ export class BridgeProvider implements HTTPProvider {
     public closeConnection(): void {
         this.closeGateways();
         this.listeners = [];
+        this.intentListeners = [];
+        this.session = null;
+        this.gateway = null;
+    }
+
+    public detach(): void {
+        this.closeGateways();
+        this.listeners = [];
+        this.intentListeners = [];
         this.session = null;
         this.gateway = null;
     }
@@ -533,7 +592,8 @@ export class BridgeProvider implements HTTPProvider {
 
     private generateUniversalLink(
         universalLink: string,
-        message: ConnectRequest,
+        // refactor for clarity
+        message: ConnectRequest | RawIntentRequest,
         options: Traceable
     ): string {
         if (isTelegramUrl(universalLink)) {
@@ -543,22 +603,76 @@ export class BridgeProvider implements HTTPProvider {
         return this.generateRegularUniversalLink(universalLink, message, options);
     }
 
+    private storeIntentPayloadInObjectStorage(payload: string): void {
+        // this request should be sent only once, right now sending every url creation, maybe ok
+        const objectStorageUrl = this.getObjectStorageUrl();
+        const url = new URL(objectStorageUrl);
+        url.searchParams.set('ttl', BridgeProvider.INTENT_TTL_SECONDS.toString());
+
+        void fetch(url.toString(), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain'
+            },
+            body: payload
+        }).catch(error => {
+            logDebug('Failed to store intent payload in object storage', error);
+        });
+    }
+
+    private getObjectStorageUrl(): string {
+        if (
+            'objectStorageUrl' in this.walletConnectionSource &&
+            this.walletConnectionSource.objectStorageUrl
+        ) {
+            return this.walletConnectionSource.objectStorageUrl;
+        }
+        return BridgeProvider.DEFAULT_OBJECT_STORAGE_URL;
+    }
+
     private generateRegularUniversalLink(
         universalLink: string,
-        message: ConnectRequest,
+        message: ConnectRequest | RawIntentRequest,
         options: Traceable
     ): string {
-        const url = new URL(universalLink);
+        let url = new URL(universalLink);
         url.searchParams.append('v', PROTOCOL_VERSION.toString());
         url.searchParams.append('id', this.session!.sessionCrypto.sessionId);
         url.searchParams.append('trace_id', options.traceId);
-        url.searchParams.append('r', JSON.stringify(message));
+
+        if ('m' in message) {
+            url.searchParams.append('r', Base64.encode(JSON.stringify(message)));
+            url.searchParams.append('m', 'intent_inline');
+            if (url.toString().length > BridgeProvider.MAX_INLINE_INTENT_URL_LENGTH) {
+                const shortUrl = new URL(universalLink);
+                const sessionCrypto = new SessionCrypto();
+                shortUrl.searchParams.append('v', PROTOCOL_VERSION.toString());
+                shortUrl.searchParams.append('id', this.session!.sessionCrypto.sessionId);
+                shortUrl.searchParams.append('trace_id', options.traceId);
+                shortUrl.searchParams.append('pk', sessionCrypto.stringifyKeypair().secretKey);
+                shortUrl.searchParams.append('m', 'intent');
+                const encryptedPayloadRaw = sessionCrypto.encrypt(
+                    JSON.stringify(message),
+                    hexToByteArray(sessionCrypto.sessionId)
+                );
+                const encryptedPayload = Base64.encode(encryptedPayloadRaw);
+                this.storeIntentPayloadInObjectStorage(encryptedPayload);
+                const getUrl = addPathToUrl(
+                    this.getObjectStorageUrl(),
+                    new sha256().update(encryptedPayload).update('text/plain').digest('hex')
+                );
+                shortUrl.searchParams.append('get_url', getUrl);
+                return shortUrl.toString();
+            }
+        } else {
+            url.searchParams.append('r', JSON.stringify(message));
+        }
         return url.toString();
     }
 
     private generateTGUniversalLink(
         universalLink: string,
-        message: ConnectRequest,
+        message: ConnectRequest | RawIntentRequest,
         options: Traceable
     ): string {
         const urlToWrap = this.generateRegularUniversalLink('about:blank', message, options);

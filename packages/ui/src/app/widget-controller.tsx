@@ -14,6 +14,7 @@ import App from './App';
 import { WalletInfoWithOpenMethod, WalletOpenMethod } from 'src/models/connected-wallet';
 import { WalletsModalCloseReason } from 'src/models';
 import {
+    IntentRequest,
     OptionalTraceable,
     Traceable,
     WalletInfoRemote,
@@ -21,12 +22,21 @@ import {
 } from '@tonconnect/sdk';
 
 export const widgetController = {
-    openWalletsModal: (options?: OptionalTraceable): void =>
+    openWalletsModal: (
+        options?: OptionalTraceable & {
+            mode?: 'connect' | 'intent';
+            intent?: IntentRequest;
+            intentType?: 'sendTransaction' | 'signData' | 'signMessage' | 'sendAction';
+        }
+    ): void =>
         void setTimeout(() =>
             setWalletsModalState(prev => ({
                 status: 'opened',
                 traceId: options?.traceId ?? prev?.traceId,
-                closeReason: null
+                closeReason: null,
+                mode: options?.mode ?? prev?.mode ?? 'connect',
+                intent: options?.intent ?? prev?.intent,
+                intentType: options?.intentType ?? prev?.intentType
             }))
         ),
     closeWalletsModal: (reason: WalletsModalCloseReason): void =>
