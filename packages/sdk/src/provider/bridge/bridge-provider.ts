@@ -614,7 +614,7 @@ export class BridgeProvider implements HTTPProvider {
             headers: {
                 'Content-Type': 'text/plain'
             },
-            body: JSON.stringify(payload)
+            body: payload
         })
             .then(response => {
                 return response.text();
@@ -664,7 +664,7 @@ export class BridgeProvider implements HTTPProvider {
                 this.storeIntentPayloadInObjectStorage(encryptedPayload);
                 const getUrl = addPathToUrl(
                     this.getObjectStorageUrl(),
-                    new sha256().update(encryptedPayloadRaw).digest('hex')
+                    new sha256().update(encryptedPayload).update('text/plain').digest('hex')
                 );
                 shortUrl.searchParams.append('get_url', getUrl);
                 return shortUrl.toString();
