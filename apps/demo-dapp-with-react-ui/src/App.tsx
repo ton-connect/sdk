@@ -9,6 +9,7 @@ import { TonProofDemo } from './components/TonProofDemo/TonProofDemo';
 import { CreateJettonDemo } from './components/CreateJettonDemo/CreateJettonDemo';
 import { WalletBatchLimitsTester } from './components/WalletBatchLimitsTester/WalletBatchLimitsTester';
 import { SignDataTester } from './components/SignDataTester/SignDataTester';
+import { SignMessageDemo } from './components/SignMessageDemo/SignMessageDemo';
 import { MerkleExample } from './components/MerkleExample/MerkleExample';
 import { FindTransactionDemo } from './components/FindTransactionDemo/FindTransactionDemo';
 import { TransferUsdt } from './components/TransferUsdt/TransferUsdt';
@@ -34,6 +35,7 @@ function HomePage() {
             <IntentsDemo />
             <WalletBatchLimitsTester />
             <SignDataTester />
+            <SignMessageDemo />
             <TransferUsdt />
             <CreateJettonDemo />
             <TonProofDemo />

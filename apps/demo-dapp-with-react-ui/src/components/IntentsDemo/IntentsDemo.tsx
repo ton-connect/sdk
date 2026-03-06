@@ -12,10 +12,11 @@ import './style.scss';
 export function IntentsDemo() {
     const wallet = useTonWallet();
     const [tonConnectUi] = useTonConnectUI();
-
+    const JETTON_MASTER_DEMO = 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs'; // USDT master, used for demo only
     const [lastIntentPayload, setLastIntentPayload] = useState<object | null>(null);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [lastIntentResult, setLastIntentResult] = useState<any | null>(null);
+    const [useObjectStorageMode, setUseObjectStorageMode] = useState(false);
 
     const commonOptions = {
         notifications: ['before', 'success', 'error'] as ('before' | 'success' | 'error')[]
@@ -30,19 +31,23 @@ export function IntentsDemo() {
     }, [tonConnectUi]);
 
     const handleSendTransactionIntent = async () => {
+        const recipientAddress =
+            wallet?.account.address ?? 'EQCKWpx7cNMpvmcN5ObM5lLUZHZRFKqYA4xmw9jOry0ZsF9M';
+
+        const baseItem = {
+            type: 'ton' as const,
+            address: recipientAddress,
+            amount: '1000000'
+        };
+
+        const items = useObjectStorageMode
+            ? Array.from({ length: 30 }, () => ({ ...baseItem }))
+            : [baseItem];
+
         const intent: SendTransactionIntentRequest = {
             validUntil: Math.floor(Date.now() / 1000) + 600,
             network: wallet?.account.chain,
-            items: [
-                {
-                    type: 'ton',
-                    // Use connected wallet as recipient if available, otherwise demo address
-                    address:
-                        wallet?.account.address ??
-                        'EQCKWpx7cNMpvmcN5ObM5lLUZHZRFKqYA4xmw9jOry0ZsF9M',
-                    amount: '1000000'
-                }
-            ]
+            items
         };
 
         setLastIntentPayload(intent);
@@ -56,12 +61,52 @@ export function IntentsDemo() {
         }
     };
 
+    const handleSendJettonIntent = async () => {
+        const accountAddress =
+            wallet?.account.address ?? 'EQCKWpx7cNMpvmcN5ObM5lLUZHZRFKqYA4xmw9jOry0ZsF9M';
+
+        const jettonItemBase = {
+            type: 'jetton' as const,
+            jettonMasterAddress: JETTON_MASTER_DEMO,
+            jettonAmount: '1000000',
+            attachedTon: '2000000',
+            destination: accountAddress,
+            responseDestination: accountAddress,
+            forwardTonAmount: '1000000'
+        };
+
+        const items = useObjectStorageMode
+            ? Array.from({ length: 20 }, (_, index) => ({
+                  ...jettonItemBase,
+                  queryId: index + 1
+              }))
+            : [jettonItemBase];
+
+        const intent: SendTransactionIntentRequest = {
+            validUntil: Math.floor(Date.now() / 1000) + 600,
+            network: wallet?.account.chain,
+            items
+        };
+
+        setLastIntentPayload(intent);
+
+        try {
+            await tonConnectUi.sendTransactionIntent(intent, commonOptions);
+        } catch (e) {
+            console.error('sendJettonIntent failed:', e);
+        }
+    };
+
     const handleSignDataIntent = async () => {
+        const payloadText = useObjectStorageMode
+            ? 'Sign this sample text via intent. '.repeat(400)
+            : 'Sign this sample text via intent.';
+
         const intent: SignDataIntentRequest = {
             network: wallet?.account.chain,
             payload: {
                 type: 'text',
-                text: 'Sign this sample text via intent.'
+                text: payloadText
             }
         };
 
@@ -76,18 +121,23 @@ export function IntentsDemo() {
     };
 
     const handleSignMessageIntent = async () => {
+        const recipientAddress =
+            wallet?.account.address ?? 'EQCKWpx7cNMpvmcN5ObM5lLUZHZRFKqYA4xmw9jOry0ZsF9M';
+
+        const baseItem = {
+            type: 'ton' as const,
+            address: recipientAddress,
+            amount: '0'
+        };
+
+        const items = useObjectStorageMode
+            ? Array.from({ length: 40 }, () => ({ ...baseItem }))
+            : [baseItem];
+
         const intent: SignMessageIntentRequest = {
             validUntil: Math.floor(Date.now() / 1000) + 600,
             network: wallet?.account.chain ?? CHAIN.TESTNET,
-            items: [
-                {
-                    type: 'ton',
-                    address:
-                        wallet?.account.address ??
-                        'EQCKWpx7cNMpvmcN5ObM5lLUZHZRFKqYA4xmw9jOry0ZsF9M',
-                    amount: '0'
-                }
-            ]
+            items
         };
 
         setLastIntentPayload(intent);
@@ -96,6 +146,42 @@ export function IntentsDemo() {
             await tonConnectUi.signMessageIntent(intent, commonOptions);
         } catch (e) {
             console.error('signMessageIntent failed:', e);
+        }
+    };
+
+    const handleSignJettonMessageIntent = async () => {
+        const accountAddress =
+            wallet?.account.address ?? 'EQCKWpx7cNMpvmcN5ObM5lLUZHZRFKqYA4xmw9jOry0ZsF9M';
+
+        const jettonItemBase = {
+            type: 'jetton' as const,
+            jettonMasterAddress: JETTON_MASTER_DEMO,
+            jettonAmount: '500000',
+            attachedTon: '1500000',
+            destination: accountAddress,
+            responseDestination: accountAddress,
+            forwardTonAmount: '500000'
+        };
+
+        const items = useObjectStorageMode
+            ? Array.from({ length: 25 }, (_, index) => ({
+                  ...jettonItemBase,
+                  queryId: index + 1
+              }))
+            : [jettonItemBase];
+
+        const intent: SignMessageIntentRequest = {
+            validUntil: Math.floor(Date.now() / 1000) + 600,
+            network: wallet?.account.chain ?? CHAIN.TESTNET,
+            items
+        };
+
+        setLastIntentPayload(intent);
+
+        try {
+            await tonConnectUi.signMessageIntent(intent, commonOptions);
+        } catch (e) {
+            console.error('signJettonMessageIntent failed:', e);
         }
     };
 
@@ -163,12 +249,29 @@ export function IntentsDemo() {
                             </div>
                         )}
 
+                        <div className="intents-demo__options">
+                            <label className="intents-demo__checkbox">
+                                <input
+                                    type="checkbox"
+                                    checked={useObjectStorageMode}
+                                    onChange={e => setUseObjectStorageMode(e.target.checked)}
+                                />
+                                <span>
+                                    Generate large payloads (force object storage for intents)
+                                </span>
+                            </label>
+                        </div>
+
                         <div className="intents-demo__buttons">
                             <button onClick={handleSendTransactionIntent}>
                                 Send transaction intent
                             </button>
+                            <button onClick={handleSendJettonIntent}>Send jetton intent</button>
                             <button onClick={handleSignDataIntent}>Sign data intent</button>
                             <button onClick={handleSignMessageIntent}>Sign message intent</button>
+                            <button onClick={handleSignJettonMessageIntent}>
+                                Sign jetton message intent
+                            </button>
                             <button onClick={handleSendActionIntent}>Send action intent</button>
                         </div>
                     </div>
