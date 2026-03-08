@@ -1071,6 +1071,7 @@ export class TonConnectUI {
             });
 
             try {
+                // TODO: waitForIntentSend
                 const result = await this.connector.sendIntent(
                     { method: 'sendTransaction', ...intent },
                     { onRequestSent, signal: abortController.signal, traceId }
