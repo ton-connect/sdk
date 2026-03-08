@@ -1016,11 +1016,95 @@ export class TonConnectUI {
     ): Promise<OptionalTraceable<SendTransactionResponse>> {
         const traceId = options?.traceId ?? UUIDv7();
 
-        const { notifications, modals } = this.getModalsAndNotificationsConfiguration(options);
+        const { notifications, modals, returnStrategy, twaReturnUrl } =
+            this.getModalsAndNotificationsConfiguration(options);
+
+        if (this.connected) {
+            if (isInTMA()) {
+                sendExpand();
+            }
+
+            const sessionId = await this.getSessionId();
+
+            widgetController.setAction({
+                name: 'confirm-transaction',
+                showNotification: notifications.includes('before'),
+                openModal: modals.includes('before'),
+                sent: false,
+                sessionId: sessionId || undefined,
+                traceId
+            });
+
+            const abortController = new AbortController();
+
+            const onRequestSent = (): void => {
+                if (abortController.signal.aborted) {
+                    return;
+                }
+
+                widgetController.setAction({
+                    name: 'confirm-transaction',
+                    showNotification: notifications.includes('before'),
+                    openModal: modals.includes('before'),
+                    sent: true,
+                    sessionId: sessionId || undefined,
+                    traceId
+                });
+
+                this.redirectAfterRequestSent({
+                    returnStrategy,
+                    twaReturnUrl,
+                    sessionId: sessionId || undefined,
+                    traceId
+                });
+            };
+
+            const unsubscribe = this.onTransactionModalStateChange(action => {
+                if (action?.openModal) {
+                    return;
+                }
+
+                unsubscribe();
+                if (!action) {
+                    abortController.abort();
+                }
+            });
+
+            try {
+                const result = await this.connector.sendIntent(
+                    { method: 'sendTransaction', ...intent },
+                    { onRequestSent, signal: abortController.signal, traceId }
+                );
+
+                widgetController.setAction({
+                    name: 'transaction-sent',
+                    showNotification: notifications.includes('success'),
+                    openModal: modals.includes('success'),
+                    traceId
+                });
+
+                return result;
+            } catch (e) {
+                widgetController.setAction({
+                    name: 'transaction-canceled',
+                    showNotification: notifications.includes('error'),
+                    openModal: modals.includes('error'),
+                    traceId
+                });
+
+                if (e instanceof TonConnectError) {
+                    throw e;
+                } else {
+                    console.error(e);
+                    throw new TonConnectUIError('Unhandled error:' + e);
+                }
+            } finally {
+                unsubscribe();
+            }
+        }
 
         let success = false;
         try {
-            // TODO: if connected dont open modal, use sendIntent from this.connector as in sendTransaction, signMessage or so
             this.modal.openIntent({
                 traceId,
                 intent: { method: 'sendTransaction', ...intent }
@@ -1064,7 +1148,92 @@ export class TonConnectUI {
     ): Promise<OptionalTraceable<SignDataResponse>> {
         const traceId = options?.traceId ?? UUIDv7();
 
-        const { notifications, modals } = this.getModalsAndNotificationsConfiguration(options);
+        const { notifications, modals, returnStrategy, twaReturnUrl } =
+            this.getModalsAndNotificationsConfiguration(options);
+
+        if (this.connected) {
+            if (isInTMA()) {
+                sendExpand();
+            }
+
+            const sessionId = await this.getSessionId();
+
+            widgetController.setAction({
+                name: 'confirm-sign-data',
+                showNotification: notifications.includes('before'),
+                openModal: modals.includes('before'),
+                signed: false,
+                sessionId: sessionId || undefined,
+                traceId
+            });
+
+            const abortController = new AbortController();
+
+            const onRequestSent = (): void => {
+                if (abortController.signal.aborted) {
+                    return;
+                }
+
+                widgetController.setAction({
+                    name: 'confirm-sign-data',
+                    showNotification: notifications.includes('before'),
+                    openModal: modals.includes('before'),
+                    signed: true,
+                    sessionId: sessionId || undefined,
+                    traceId
+                });
+
+                this.redirectAfterRequestSent({
+                    returnStrategy,
+                    twaReturnUrl,
+                    sessionId: sessionId || undefined,
+                    traceId
+                });
+            };
+
+            const unsubscribe = this.onTransactionModalStateChange(action => {
+                if (action?.openModal) {
+                    return;
+                }
+
+                unsubscribe();
+                if (!action) {
+                    abortController.abort();
+                }
+            });
+
+            try {
+                const result = await this.connector.sendIntent(
+                    { method: 'signData', ...intent },
+                    { onRequestSent, signal: abortController.signal, traceId }
+                );
+
+                widgetController.setAction({
+                    name: 'data-signed',
+                    showNotification: notifications.includes('success'),
+                    openModal: modals.includes('success'),
+                    traceId
+                });
+
+                return result;
+            } catch (e) {
+                widgetController.setAction({
+                    name: 'sign-data-canceled',
+                    showNotification: notifications.includes('error'),
+                    openModal: modals.includes('error'),
+                    traceId
+                });
+
+                if (e instanceof TonConnectError) {
+                    throw e;
+                } else {
+                    console.error(e);
+                    throw new TonConnectUIError('Unhandled error:' + e);
+                }
+            } finally {
+                unsubscribe();
+            }
+        }
 
         let success = false;
         try {
@@ -1108,7 +1277,92 @@ export class TonConnectUI {
     ): Promise<OptionalTraceable<SignMessageResponse>> {
         const traceId = options?.traceId ?? UUIDv7();
 
-        const { notifications, modals } = this.getModalsAndNotificationsConfiguration(options);
+        const { notifications, modals, returnStrategy, twaReturnUrl } =
+            this.getModalsAndNotificationsConfiguration(options);
+
+        if (this.connected) {
+            if (isInTMA()) {
+                sendExpand();
+            }
+
+            const sessionId = await this.getSessionId();
+
+            widgetController.setAction({
+                name: 'confirm-sign-message',
+                showNotification: notifications.includes('before'),
+                openModal: modals.includes('before'),
+                signed: false,
+                sessionId: sessionId || undefined,
+                traceId
+            });
+
+            const abortController = new AbortController();
+
+            const onRequestSent = (): void => {
+                if (abortController.signal.aborted) {
+                    return;
+                }
+
+                widgetController.setAction({
+                    name: 'confirm-sign-message',
+                    showNotification: notifications.includes('before'),
+                    openModal: modals.includes('before'),
+                    signed: true,
+                    sessionId: sessionId || undefined,
+                    traceId
+                });
+
+                this.redirectAfterRequestSent({
+                    returnStrategy,
+                    twaReturnUrl,
+                    sessionId: sessionId || undefined,
+                    traceId
+                });
+            };
+
+            const unsubscribe = this.onTransactionModalStateChange(action => {
+                if (action?.openModal) {
+                    return;
+                }
+
+                unsubscribe();
+                if (!action) {
+                    abortController.abort();
+                }
+            });
+
+            try {
+                const result = await this.connector.sendIntent(
+                    { method: 'signMessage', ...intent },
+                    { onRequestSent, signal: abortController.signal, traceId }
+                );
+
+                widgetController.setAction({
+                    name: 'message-signed',
+                    showNotification: notifications.includes('success'),
+                    openModal: modals.includes('success'),
+                    traceId
+                });
+
+                return result;
+            } catch (e) {
+                widgetController.setAction({
+                    name: 'sign-message-canceled',
+                    showNotification: notifications.includes('error'),
+                    openModal: modals.includes('error'),
+                    traceId
+                });
+
+                if (e instanceof TonConnectError) {
+                    throw e;
+                } else {
+                    console.error(e);
+                    throw new TonConnectUIError('Unhandled error:' + e);
+                }
+            } finally {
+                unsubscribe();
+            }
+        }
 
         let success = false;
         try {
@@ -1152,7 +1406,92 @@ export class TonConnectUI {
     ): Promise<OptionalTraceable<SendActionIntentResponse>> {
         const traceId = options?.traceId ?? UUIDv7();
 
-        const { notifications, modals } = this.getModalsAndNotificationsConfiguration(options);
+        const { notifications, modals, returnStrategy, twaReturnUrl } =
+            this.getModalsAndNotificationsConfiguration(options);
+
+        if (this.connected) {
+            if (isInTMA()) {
+                sendExpand();
+            }
+
+            const sessionId = await this.getSessionId();
+
+            widgetController.setAction({
+                name: 'confirm-transaction',
+                showNotification: notifications.includes('before'),
+                openModal: modals.includes('before'),
+                sent: false,
+                sessionId: sessionId || undefined,
+                traceId
+            });
+
+            const abortController = new AbortController();
+
+            const onRequestSent = (): void => {
+                if (abortController.signal.aborted) {
+                    return;
+                }
+
+                widgetController.setAction({
+                    name: 'confirm-transaction',
+                    showNotification: notifications.includes('before'),
+                    openModal: modals.includes('before'),
+                    sent: true,
+                    sessionId: sessionId || undefined,
+                    traceId
+                });
+
+                this.redirectAfterRequestSent({
+                    returnStrategy,
+                    twaReturnUrl,
+                    sessionId: sessionId || undefined,
+                    traceId
+                });
+            };
+
+            const unsubscribe = this.onTransactionModalStateChange(action => {
+                if (action?.openModal) {
+                    return;
+                }
+
+                unsubscribe();
+                if (!action) {
+                    abortController.abort();
+                }
+            });
+
+            try {
+                const result = await this.connector.sendIntent(
+                    { method: 'sendAction', ...intent },
+                    { onRequestSent, signal: abortController.signal, traceId }
+                );
+
+                widgetController.setAction({
+                    name: 'transaction-sent',
+                    showNotification: notifications.includes('success'),
+                    openModal: modals.includes('success'),
+                    traceId
+                });
+
+                return result;
+            } catch (e) {
+                widgetController.setAction({
+                    name: 'transaction-canceled',
+                    showNotification: notifications.includes('error'),
+                    openModal: modals.includes('error'),
+                    traceId
+                });
+
+                if (e instanceof TonConnectError) {
+                    throw e;
+                } else {
+                    console.error(e);
+                    throw new TonConnectUIError('Unhandled error:' + e);
+                }
+            } finally {
+                unsubscribe();
+            }
+        }
 
         let success = false;
         try {

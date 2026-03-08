@@ -170,12 +170,11 @@ export interface ITonConnect {
         }>
     ): Promise<OptionalTraceable<IntentResponses[TMethod]>>;
 
-    // TODO: move intent response callback into subscribe to intent method
-    onIntentResponse(callback: (response: IntentResponse) => void): () => void;
-
     subscribeToIntent<TWallet extends WalletSourceArg>(
         wallet: TWallet,
         intentRequest: TypedIntentRequest,
         options?: OptionalTraceable<IntentOptions>
     ): WalletIntentResult<TWallet>;
+
+    onIntentResponse(callback: (response: IntentResponse) => void): () => void;
 }
