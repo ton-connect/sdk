@@ -17,7 +17,8 @@ import {
     SendTransactionIntentItemTon,
     SignDataIntentRequest,
     SignMessageIntentRequest,
-    SendActionIntentRequest
+    SendActionIntentRequest,
+    TypedIntentRequest
 } from 'src/models/methods/intents';
 
 interface CommonSerializeParams {
@@ -130,4 +131,17 @@ export function serializeSendActionIntent(
         c: params.connectRequest,
         a: req.actionUrl
     };
+}
+
+export function serializeIntent(req: TypedIntentRequest, params: CommonSerializeParams) {
+    switch (req.method) {
+        case 'sendTransaction':
+            return serializeSendTransactionIntent(req, params);
+        case 'signData':
+            return serializeSignDataIntent(req, params);
+        case 'signMessage':
+            return serializeSignMessageIntent(req, params);
+        case 'sendAction':
+            return serializeSendActionIntent(req, params);
+    }
 }

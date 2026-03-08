@@ -57,7 +57,7 @@ import {
     redirectToWallet
 } from 'src/app/utils/url-strategy-helpers';
 import { WalletsModalState } from 'src/models';
-import { initiateTonConnectFlow } from 'src/app/utils/intent-flow';
+import { initiateTonConnectFlow } from 'src/app/utils/ton-connect-flow';
 
 export interface DesktopConnectionProps {
     additionalRequest?: ConnectAdditionalRequest;

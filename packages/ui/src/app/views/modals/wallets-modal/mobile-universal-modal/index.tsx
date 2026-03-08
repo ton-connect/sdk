@@ -22,7 +22,7 @@ import { bridgesIsEqual, getUniqueBridges } from 'src/app/utils/bridge';
 import { WalletUlContainer } from 'src/app/components/wallet-item/style';
 import { UIWalletInfo } from 'src/app/models/ui-wallet-info';
 import { WalletsModalState } from 'src/models';
-import { initiateTonConnectFlow } from 'src/app/utils/intent-flow';
+import { initiateTonConnectFlow } from 'src/app/utils/ton-connect-flow';
 
 interface MobileUniversalModalProps {
     walletsList: UIWalletInfo[];

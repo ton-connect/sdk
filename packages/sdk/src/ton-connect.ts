@@ -4,7 +4,6 @@ import {
     ConnectEventSuccess,
     ConnectItem,
     ConnectRequest,
-    RawIntentRequest,
     SendTransactionRpcResponseSuccess,
     SignDataPayload,
     SignDataRpcResponseSuccess,
@@ -24,6 +23,7 @@ import {
 import {
     Account,
     RequiredFeatures,
+    TypedIntentRequest,
     Wallet,
     WalletConnectionSource,
     WalletConnectionSourceHTTP,
@@ -38,13 +38,7 @@ import {
     SignMessageResponse
 } from 'src/models/methods';
 import type { IntentResponse } from 'src/models/methods/intents';
-import {
-    SendTransactionIntentRequest,
-    SignDataIntentRequest,
-    SignMessageIntentRequest,
-    SendActionIntentRequest,
-    IntentOptions
-} from 'src/models/methods/intents';
+import { IntentOptions } from 'src/models/methods/intents';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
 import { AnalyticsSettings, TonConnectOptions } from 'src/models/ton-connect-options';
 import {
@@ -94,12 +88,7 @@ import { DefaultEnvironment } from 'src/environment/default-environment';
 import { UUIDv7 } from 'src/utils/uuid';
 import { TraceableWalletEvent } from 'src/models/wallet/traceable-events';
 import { WalletConnectProvider } from 'src/provider/wallet-connect/wallet-connect-provider';
-import {
-    serializeSendActionIntent,
-    serializeSendTransactionIntent,
-    serializeSignDataIntent,
-    serializeSignMessageIntent
-} from 'src/intents/serializer';
+import { serializeIntent } from 'src/intents/serializer';
 
 export class TonConnect implements ITonConnect {
     private desiredChainId: string | undefined;
@@ -889,37 +878,18 @@ export class TonConnect implements ITonConnect {
         }
     }
 
-    public sendTransactionIntent<T extends WalletSourceArg>(
-        wallet: T,
-        transaction: SendTransactionIntentRequest,
-        options?: OptionalTraceable<IntentOptions>
-    ): WalletIntentResult<T> {
-        return this.sendIntentWithProvider(
-            'sendTransactionIntent',
-            wallet,
-            transaction,
-            options,
-            (req, params) => serializeSendTransactionIntent(req, params)
-        ) as WalletIntentResult<T>;
-    }
-
-    private sendIntentWithProvider<TWallet extends WalletSourceArg, TIntentRequest>(
-        methodName:
-            | 'sendTransactionIntent'
-            | 'signDataIntent'
-            | 'signMessageIntent'
-            | 'sendActionIntent',
+    public subscribeToIntent<TWallet extends WalletSourceArg>(
         wallet: TWallet,
-        data: TIntentRequest,
-        options: OptionalTraceable<IntentOptions> | undefined,
-        buildIntent: (
-            data: TIntentRequest,
-            params: { id: string; connectRequest?: ConnectRequest }
-        ) => RawIntentRequest
+        intentRequest: TypedIntentRequest,
+        options?: OptionalTraceable<IntentOptions>
     ): WalletIntentResult<TWallet> {
+        if (this.connected) {
+            throw new WalletAlreadyConnectedError();
+        }
+
         const abortController = createAbortController(options?.signal);
         if (abortController.signal.aborted) {
-            throw new TonConnectError(`${methodName} was aborted`);
+            throw new TonConnectError(`subscribeToIntent was aborted`);
         }
 
         const traceId = options?.traceId ?? UUIDv7();
@@ -927,8 +897,8 @@ export class TonConnect implements ITonConnect {
         // TODO TBD
         const connectRequest = this.createConnectRequest(options?.connectRequest);
 
-        const intentRequest = buildIntent(data, {
-            id: UUIDv7(),
+        const rawIntentRequest = serializeIntent(intentRequest, {
+            id: UUIDv7(), // TODO
             connectRequest
         });
 
@@ -940,57 +910,10 @@ export class TonConnect implements ITonConnect {
             this.provider = null;
         });
 
-        return this.provider.sendIntent(intentRequest, {
+        return this.provider.sendIntent(rawIntentRequest, {
             signal: abortController.signal,
             traceId
         }) as WalletIntentResult<TWallet>;
-    }
-
-    public signDataIntent<T extends WalletSourceArg>(
-        wallet: T,
-        data: SignDataIntentRequest,
-        options?: OptionalTraceable<IntentOptions>
-    ): WalletIntentResult<T> {
-        return this.sendIntentWithProvider(
-            'signDataIntent',
-            wallet,
-            data,
-            options,
-            (req, params) => {
-                return serializeSignDataIntent(req, {
-                    ...params,
-                    manifestUrl: this.dappSettings.manifestUrl
-                });
-            }
-        ) as WalletIntentResult<T>;
-    }
-
-    public signMessageIntent<T extends WalletSourceArg>(
-        wallet: T,
-        message: SignMessageIntentRequest,
-        options?: OptionalTraceable<IntentOptions>
-    ): WalletIntentResult<T> {
-        return this.sendIntentWithProvider(
-            'signMessageIntent',
-            wallet,
-            message,
-            options,
-            (req, params) => serializeSignMessageIntent(req, params)
-        ) as WalletIntentResult<T>;
-    }
-
-    public sendActionIntent<T extends WalletSourceArg>(
-        wallet: T,
-        action: SendActionIntentRequest,
-        options?: OptionalTraceable<IntentOptions>
-    ): WalletIntentResult<T> {
-        return this.sendIntentWithProvider(
-            'sendActionIntent',
-            wallet,
-            action,
-            options,
-            (req, params) => serializeSendActionIntent(req, params)
-        ) as WalletIntentResult<T>;
     }
 
     private getSessionInfo(): { clientId: string | null; walletId: string | null } | null {

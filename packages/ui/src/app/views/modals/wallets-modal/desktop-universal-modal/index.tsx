@@ -16,7 +16,7 @@ import { IMG } from 'src/app/env/IMG';
 import { addReturnStrategy } from 'src/app/utils/url-strategy-helpers';
 import { bridgesIsEqual, getUniqueBridges } from 'src/app/utils/bridge';
 import { WalletsModalState } from 'src/models';
-import { initiateTonConnectFlow } from 'src/app/utils/intent-flow';
+import { initiateTonConnectFlow } from 'src/app/utils/ton-connect-flow';
 
 interface DesktopUniversalModalProps {
     additionalRequest: ConnectAdditionalRequest;

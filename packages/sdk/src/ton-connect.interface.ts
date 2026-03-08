@@ -2,6 +2,7 @@ import { ChainId } from '@tonconnect/protocol';
 import { TonConnectError } from 'src/errors';
 import {
     Account,
+    TypedIntentRequest,
     Wallet,
     WalletConnectionSource,
     WalletConnectionSourceHTTP,
@@ -14,13 +15,7 @@ import {
     SignMessageResponse
 } from 'src/models/methods';
 import type { IntentResponse } from 'src/models/methods/intents';
-import {
-    SendTransactionIntentRequest,
-    SignDataIntentRequest,
-    SignMessageIntentRequest,
-    SendActionIntentRequest,
-    IntentOptions
-} from 'src/models/methods/intents';
+import { IntentOptions } from 'src/models/methods/intents';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
 import { WalletInfo } from 'src/models/wallet/wallet-info';
 import { WalletConnectionSourceJS } from 'src/models/wallet/wallet-connection-source';
@@ -167,51 +162,9 @@ export interface ITonConnect {
      */
     getSessionId(): Promise<string | null>;
 
-    /**
-     * Sends transaction via intent flow.
-     * @param wallet target wallet connection source or list of HTTP bridge URLs.
-     * @param transaction transaction to send.
-     * @param options optional connect request, abort signal and trace id.
-     */
-    sendTransactionIntent<T extends WalletSourceArg>(
-        wallet: T,
-        transaction: SendTransactionIntentRequest,
+    subscribeToIntent<TWallet extends WalletSourceArg>(
+        wallet: TWallet,
+        intentRequest: TypedIntentRequest,
         options?: OptionalTraceable<IntentOptions>
-    ): WalletIntentResult<T>;
-
-    /**
-     * Signs arbitrary data via intent flow.
-     * @param wallet target wallet connection source or list of HTTP bridge URLs.
-     * @param data data to sign in intent format.
-     * @param options optional connect request, abort signal and trace id.
-     */
-    signDataIntent<T extends WalletSourceArg>(
-        wallet: T,
-        data: SignDataIntentRequest,
-        options?: OptionalTraceable<IntentOptions>
-    ): WalletIntentResult<T>;
-
-    /**
-     * Signs message via intent flow.
-     * @param wallet target wallet connection source or list of HTTP bridge URLs.
-     * @param message message to sign.
-     * @param options optional connect request, abort signal and trace id.
-     */
-    signMessageIntent<T extends WalletSourceArg>(
-        wallet: T,
-        message: SignMessageIntentRequest,
-        options?: OptionalTraceable<IntentOptions>
-    ): WalletIntentResult<T>;
-
-    /**
-     * Sends action intent.
-     * @param wallet target wallet connection source or list of HTTP bridge URLs.
-     * @param action actionUrl to be called by the wallet.
-     * @param options optional connect request, abort signal and trace id.
-     */
-    sendActionIntent<T extends WalletSourceArg>(
-        wallet: T,
-        action: SendActionIntentRequest,
-        options?: OptionalTraceable<IntentOptions>
-    ): WalletIntentResult<T>;
+    ): WalletIntentResult<TWallet>;
 }

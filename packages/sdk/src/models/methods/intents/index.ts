@@ -34,6 +34,19 @@ export type IntentRequest =
     | SignMessageIntentRequest
     | SendActionIntentRequest;
 
+export type TypedSendTransactionIntentRequest = SendTransactionIntentRequest & {
+    method: 'sendTransaction';
+};
+export type TypedSignDataIntentRequest = SignDataIntentRequest & { method: 'signData' };
+export type TypedSignMessageIntentRequest = SignMessageIntentRequest & { method: 'signMessage' };
+export type TypedSendActionIntentRequest = SendActionIntentRequest & { method: 'sendAction' };
+
+export type TypedIntentRequest =
+    | TypedSendTransactionIntentRequest
+    | TypedSignDataIntentRequest
+    | TypedSignMessageIntentRequest
+    | TypedSendActionIntentRequest;
+
 export type IntentResponse =
     | SendTransactionIntentResponse
     | SignDataIntentResponse

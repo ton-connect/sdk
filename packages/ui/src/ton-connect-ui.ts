@@ -1022,8 +1022,7 @@ export class TonConnectUI {
         try {
             this.modal.openIntent({
                 traceId,
-                intent: intent,
-                intentType: 'sendTransaction'
+                intent: { method: 'sendTransaction', ...intent }
             });
 
             const intentResponse = await this.waitForIntentResponse<
@@ -1068,7 +1067,7 @@ export class TonConnectUI {
 
         let success = false;
         try {
-            this.modal.openIntent({ traceId, intent, intentType: 'signData' });
+            this.modal.openIntent({ traceId, intent: { method: 'signData', ...intent } });
 
             const intentResponse = await this.waitForIntentResponse<
                 OptionalTraceable<SignDataResponse>
@@ -1112,7 +1111,7 @@ export class TonConnectUI {
 
         let success = false;
         try {
-            this.modal.openIntent({ traceId, intent, intentType: 'signMessage' });
+            this.modal.openIntent({ traceId, intent: { method: 'signMessage', ...intent } });
 
             const intentResponse = await this.waitForIntentResponse<
                 OptionalTraceable<SignMessageResponse>
@@ -1156,8 +1155,7 @@ export class TonConnectUI {
 
         let success = false;
         try {
-            // Reuse intent modal flow for generic action intents.
-            this.modal.openIntent({ traceId, intent, intentType: 'sendAction' });
+            this.modal.openIntent({ traceId, intent: { method: 'sendAction', ...intent } });
 
             const intentResponse = await this.waitForIntentResponse<
                 OptionalTraceable<SendActionIntentResponse>

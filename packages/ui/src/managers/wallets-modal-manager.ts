@@ -7,12 +7,12 @@ import {
 import { createEffect, on } from 'solid-js';
 import {
     ConnectAdditionalRequest,
-    IntentRequest,
     isConnectUrl,
     isWalletInfoCurrentlyEmbedded,
     ITonConnect,
     OptionalTraceable,
     Traceable,
+    TypedIntentRequest,
     UUIDv7,
     WalletInfoCurrentlyEmbedded
 } from '@tonconnect/sdk';
@@ -165,8 +165,7 @@ export class WalletsModalManager implements WalletsModal {
      */
     public async openIntent(
         options: OptionalTraceable<{
-            intent: IntentRequest;
-            intentType: 'sendTransaction' | 'signData' | 'signMessage' | 'sendAction';
+            intent: TypedIntentRequest;
         }>
     ): Promise<void> {
         if (isInTMA()) {
@@ -176,8 +175,7 @@ export class WalletsModalManager implements WalletsModal {
         widgetController.openWalletsModal({
             traceId: options.traceId,
             mode: 'intent',
-            intent: options.intent,
-            intentType: options.intentType
+            intent: options.intent
         });
 
         return new Promise<void>(resolve => {

@@ -39,7 +39,7 @@ import { Translation } from 'src/app/components/typography/Translation';
 import { redirectToTelegram, redirectToWallet } from 'src/app/utils/url-strategy-helpers';
 import { copyToClipboard } from 'src/app/utils/copy-to-clipboard';
 import { WalletsModalState } from 'src/models';
-import { initiateTonConnectFlow } from 'src/app/utils/intent-flow';
+import { initiateTonConnectFlow } from 'src/app/utils/ton-connect-flow';
 
 export interface MobileConnectionProps {
     additionalRequest?: ConnectAdditionalRequest;
