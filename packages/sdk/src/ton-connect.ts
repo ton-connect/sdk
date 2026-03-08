@@ -1,9 +1,11 @@
 import {
+    AppRequest,
     ChainId,
     CONNECT_ITEM_ERROR_CODES,
     ConnectEventSuccess,
     ConnectItem,
     ConnectRequest,
+    RpcMethod,
     SendTransactionRpcResponseSuccess,
     SignDataPayload,
     SignDataRpcResponseSuccess,
@@ -22,6 +24,8 @@ import {
 } from 'src/errors/wallet';
 import {
     Account,
+    IntentMethod,
+    IntentResponses,
     RequiredFeatures,
     TypedIntentRequest,
     Wallet,
@@ -878,6 +882,49 @@ export class TonConnect implements ITonConnect {
         }
     }
 
+    // TODO: move in the future to inner layer, expose methods for every intent
+    public async sendIntent<TMethod extends IntentMethod>(
+        intentRequest: TypedIntentRequest & { method: TMethod },
+        options?: OptionalTraceable<{
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+        }>
+    ): Promise<OptionalTraceable<IntentResponses[TMethod]>> {
+        const abortController = createAbortController(options?.signal);
+        if (abortController.signal.aborted) {
+            throw new TonConnectError('Message signing was aborted');
+        }
+
+        this.checkConnection();
+
+        const traceId = options?.traceId ?? UUIDv7();
+        const rpcRequest = serializeIntent(intentRequest);
+
+        // TODO: fix types, move to protocol, add intents to app request
+        const response = await this.provider!.sendRequest(
+            rpcRequest as unknown as AppRequest<RpcMethod>,
+            {
+                onRequestSent: options?.onRequestSent,
+                signal: abortController.signal,
+                traceId
+            }
+        );
+
+        // TODO: is Error
+        // if (signMessageParser.isError(response)) {
+        //     signMessageParser.parseAndThrowError(response);
+        // }
+
+        // TODO parser
+        if ('error' in response) {
+            throw new Error(JSON.stringify(response, null, 2));
+        }
+
+        const result = response.result as IntentResponses[TMethod];
+
+        return { ...result, traceId: (response as { traceId: string }).traceId };
+    }
+
     public subscribeToIntent<TWallet extends WalletSourceArg>(
         wallet: TWallet,
         intentRequest: TypedIntentRequest,
@@ -898,7 +945,6 @@ export class TonConnect implements ITonConnect {
         const connectRequest = this.createConnectRequest(options?.connectRequest);
 
         const rawIntentRequest = serializeIntent(intentRequest, {
-            id: UUIDv7(), // TODO
             connectRequest
         });
 

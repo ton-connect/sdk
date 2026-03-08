@@ -170,7 +170,7 @@ export class BridgeProvider implements HTTPProvider {
     }
 
     public sendIntent(
-        intent: RawIntentRequest,
+        intent: WithoutId<RawIntentRequest>,
         options?: OptionalTraceable<{
             openingDeadlineMS?: number;
             signal?: AbortSignal;
@@ -178,15 +178,17 @@ export class BridgeProvider implements HTTPProvider {
     ): string {
         const traceId = options?.traceId ?? UUIDv7();
 
+        const intentWithId = { id: '0', ...intent } as RawIntentRequest; // TODO: is this ok?
+
         this.subscribeToBridgeEvents({ ...options, traceId });
         const universalLink = this.obtainUniversalLink();
 
-        this.pendingRequests.set(intent.id.toString(), response => {
+        this.pendingRequests.set(intentWithId.id.toString(), response => {
             const typed = response as unknown as IntentResponse;
             this.intentListeners.forEach(listener => listener(typed));
         });
 
-        return this.generateUniversalLink(universalLink, intent, { traceId });
+        return this.generateUniversalLink(universalLink, intentWithId, { traceId });
     }
 
     private intentListeners: Array<(response: IntentResponse) => void> = [];

@@ -2,6 +2,8 @@ import { ChainId } from '@tonconnect/protocol';
 import { TonConnectError } from 'src/errors';
 import {
     Account,
+    IntentMethod,
+    IntentResponses,
     TypedIntentRequest,
     Wallet,
     WalletConnectionSource,
@@ -63,8 +65,6 @@ export interface ITonConnect {
         callback: (walletInfo: Wallet | null) => void,
         errorsHandler?: (err: TonConnectError) => void
     ): () => void;
-
-    onIntentResponse(callback: (response: IntentResponse) => void): () => void;
 
     /**
      * Generates universal link for an external wallet and subscribes to the wallet's bridge, or sends connect request to the injected wallet.
@@ -161,6 +161,17 @@ export interface ITonConnect {
      * @returns session ID string or null if not available.
      */
     getSessionId(): Promise<string | null>;
+
+    sendIntent<TMethod extends IntentMethod>(
+        intentRequest: TypedIntentRequest & { method: TMethod },
+        options?: OptionalTraceable<{
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+        }>
+    ): Promise<OptionalTraceable<IntentResponses[TMethod]>>;
+
+    // TODO: move intent response callback into subscribe to intent method
+    onIntentResponse(callback: (response: IntentResponse) => void): () => void;
 
     subscribeToIntent<TWallet extends WalletSourceArg>(
         wallet: TWallet,

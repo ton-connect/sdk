@@ -16,7 +16,7 @@ export interface InternalProvider extends BaseProvider {
     /**
      * Sends a raw intent request.
      */
-    sendIntent(intent: RawIntentRequest, options?: OptionalTraceable): void;
+    sendIntent(intent: WithoutId<RawIntentRequest>, options?: OptionalTraceable): void;
 }
 
 export interface HTTPProvider extends BaseProvider {
@@ -31,7 +31,7 @@ export interface HTTPProvider extends BaseProvider {
     ): string;
 
     sendIntent(
-        intent: RawIntentRequest,
+        intent: WithoutId<RawIntentRequest>,
         options?: OptionalTraceable<{
             openingDeadlineMS?: number;
             signal?: AbortSignal;

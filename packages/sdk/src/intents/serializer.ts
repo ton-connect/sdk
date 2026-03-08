@@ -20,9 +20,9 @@ import {
     SendActionIntentRequest,
     TypedIntentRequest
 } from 'src/models/methods/intents';
+import { WithoutId } from 'src/utils/types';
 
 interface CommonSerializeParams {
-    id: string;
     connectRequest?: ConnectRequest;
 }
 
@@ -80,9 +80,8 @@ function mapIntentItem(item: SendTransactionIntentItem): IntentItem {
 export function serializeSendTransactionIntent(
     tx: SendTransactionIntentRequest,
     params: CommonSerializeParams
-): RawSendTransactionIntentRequest {
+): WithoutId<RawSendTransactionIntentRequest> {
     return {
-        id: params.id,
         m: 'txIntent',
         c: params.connectRequest,
         vu: tx.validUntil,
@@ -95,9 +94,8 @@ export function serializeSendTransactionIntent(
 export function serializeSignDataIntent(
     req: SignDataIntentRequest,
     params: CommonSerializeParams & { manifestUrl?: string }
-): RawSignDataIntentRequest {
+): WithoutId<RawSignDataIntentRequest> {
     return {
-        id: params.id,
         m: 'signIntent',
         c: params.connectRequest,
         n: req.network,
@@ -110,9 +108,8 @@ export function serializeSignDataIntent(
 export function serializeSignMessageIntent(
     req: SignMessageIntentRequest,
     params: CommonSerializeParams
-): RawSignMessageIntentRequest {
+): WithoutId<RawSignMessageIntentRequest> {
     return {
-        id: params.id,
         m: 'signMsg',
         c: params.connectRequest,
         vu: req.validUntil,
@@ -124,16 +121,15 @@ export function serializeSignMessageIntent(
 export function serializeSendActionIntent(
     req: SendActionIntentRequest,
     params: CommonSerializeParams
-): RawSendActionIntentRequest {
+): WithoutId<RawSendActionIntentRequest> {
     return {
-        id: params.id,
         m: 'actionIntent',
         c: params.connectRequest,
         a: req.actionUrl
     };
 }
 
-export function serializeIntent(req: TypedIntentRequest, params: CommonSerializeParams) {
+export function serializeIntent(req: TypedIntentRequest, params: CommonSerializeParams = {}) {
     switch (req.method) {
         case 'sendTransaction':
             return serializeSendTransactionIntent(req, params);

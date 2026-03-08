@@ -1020,6 +1020,7 @@ export class TonConnectUI {
 
         let success = false;
         try {
+            // TODO: if connected dont open modal, use sendIntent from this.connector as in sendTransaction, signMessage or so
             this.modal.openIntent({
                 traceId,
                 intent: { method: 'sendTransaction', ...intent }

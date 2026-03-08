@@ -47,6 +47,14 @@ export type TypedIntentRequest =
     | TypedSignMessageIntentRequest
     | TypedSendActionIntentRequest;
 
+export type IntentMethod = TypedIntentRequest['method'];
+export type IntentResponses = {
+    sendTransaction: SendTransactionIntentResponse;
+    signData: SignDataIntentResponse;
+    signMessage: SignMessageIntentResponse;
+    sendAction: SendActionIntentResponse;
+};
+
 export type IntentResponse =
     | SendTransactionIntentResponse
     | SignDataIntentResponse

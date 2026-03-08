@@ -138,7 +138,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
         this._connect(PROTOCOL_VERSION, message, options);
     }
 
-    public sendIntent(intent: RawIntentRequest, options?: OptionalTraceable): void {
+    public sendIntent(intent: WithoutId<RawIntentRequest>, options?: OptionalTraceable): void {
         void this._sendIntent(PROTOCOL_VERSION, intent, options);
     }
 
@@ -338,7 +338,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
 
     private async _sendIntent(
         protocolVersion: number,
-        intent: RawIntentRequest,
+        intent: WithoutId<RawIntentRequest>,
         options?: OptionalTraceable
     ): Promise<void> {
         const traceId = options?.traceId ?? UUIDv7();
@@ -356,10 +356,13 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             return;
         }
 
-        const response = await this.injectedWallet.sendIntent(intent, {
-            protocolVersion,
-            traceId
-        });
+        const response = await this.injectedWallet.sendIntent(
+            { id: '0', ...intent } as RawIntentRequest, // TODO: is this ok?
+            {
+                protocolVersion,
+                traceId
+            }
+        );
 
         const { connectEvent, intentResponse } = response;
         if (connectEvent) {
