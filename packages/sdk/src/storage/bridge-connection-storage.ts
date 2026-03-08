@@ -19,17 +19,12 @@ import { logDebug } from 'src/utils/log';
 import { WalletsListManager } from 'src/wallets-list-manager';
 
 export class BridgeConnectionStorage {
-    private readonly storeKey: string;
+    private readonly storeKey = 'ton-connect-storage_bridge-connection';
 
     constructor(
         public readonly storage: IStorage,
-        private readonly walletsListManager: WalletsListManager,
-        keyPrefix?: string
-    ) {
-        this.storeKey = keyPrefix
-            ? `${keyPrefix}_bridge-connection`
-            : 'ton-connect-storage_bridge-connection';
-    }
+        private readonly walletsListManager: WalletsListManager
+    ) {}
 
     public async storeConnection(connection: BridgeConnection): Promise<void> {
         if (connection.type === 'injected' || connection.type === 'wallet-connect') {

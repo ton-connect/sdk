@@ -181,10 +181,6 @@ export class InjectedProvider<T extends string = string> implements InternalProv
         this.closeAllListeners();
     }
 
-    public detach(): void {
-        this.closeAllListeners();
-    }
-
     public async disconnect(options?: OptionalTraceable): Promise<void> {
         const traceId = options?.traceId ?? UUIDv7();
         return new Promise(resolve => {

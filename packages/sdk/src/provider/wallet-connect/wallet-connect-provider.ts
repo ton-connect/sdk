@@ -257,10 +257,6 @@ export class WalletConnectProvider implements InternalProvider {
         void this.disconnect();
     }
 
-    detach(): void {
-        this.listeners = [];
-    }
-
     async disconnect(options?: OptionalTraceable<{ signal?: AbortSignal }>): Promise<void> {
         const abortController = createAbortController(options?.signal);
         this.abortController?.abort();

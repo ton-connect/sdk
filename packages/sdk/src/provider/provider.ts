@@ -53,13 +53,6 @@ interface BaseProvider {
 
     closeConnection(): void;
 
-    /**
-     * Detach all listeners and release resources without disconnecting from the wallet.
-     * Unlike closeConnection(), this does not send a disconnect signal to the wallet,
-     * preserving the wallet session for use by another provider instance.
-     */
-    detach(): void;
-
     disconnect(options?: OptionalTraceable<{ signal?: AbortSignal }>): Promise<void>;
 
     sendRequest<T extends RpcMethod>(
@@ -77,6 +70,6 @@ interface BaseProvider {
         onRequestSent?: () => void
     ): Promise<TraceableWalletResponse<T>>;
 
-    listen(eventsCallback: (e: TraceableWalletEvent) => void): () => void;
+    listen(eventsCallback: (e: TraceableWalletEvent) => void): void;
     onIntent(listener: (response: IntentResponse) => void): () => void;
 }

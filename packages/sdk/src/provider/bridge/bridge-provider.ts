@@ -376,15 +376,6 @@ export class BridgeProvider implements HTTPProvider {
     public closeConnection(): void {
         this.closeGateways();
         this.listeners = [];
-        this.intentListeners = [];
-        this.session = null;
-        this.gateway = null;
-    }
-
-    public detach(): void {
-        this.closeGateways();
-        this.listeners = [];
-        this.intentListeners = [];
         this.session = null;
         this.gateway = null;
     }
