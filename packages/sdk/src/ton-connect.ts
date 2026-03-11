@@ -97,7 +97,7 @@ import { DefaultEnvironment } from 'src/environment/default-environment';
 import { UUIDv7 } from 'src/utils/uuid';
 import { TraceableWalletEvent } from 'src/models/wallet/traceable-events';
 import { WalletConnectProvider } from 'src/provider/wallet-connect/wallet-connect-provider';
-import { serializeDraft } from 'src/drafts/serializer';
+import { draftParsers } from 'src/parsers/drafts';
 
 export class TonConnect implements ITonConnect {
     private desiredChainId: string | undefined;
@@ -958,9 +958,9 @@ export class TonConnect implements ITonConnect {
         this.checkConnection();
 
         const traceId = options?.traceId ?? UUIDv7();
-        const rpcRequest = serializeDraft(draftRequest);
+        const parser = draftParsers[draftRequest.method];
+        const rpcRequest = parser.serialize(draftRequest, {});
 
-        // TODO: fix types, move to protocol, add drafts to app request
         const response = await this.provider!.sendRequest(
             rpcRequest as unknown as AppRequest<RpcMethod>,
             {
@@ -970,12 +970,11 @@ export class TonConnect implements ITonConnect {
             }
         );
 
-        // TODO parser
-        if ('error' in response) {
-            throw new Error(JSON.stringify(response, null, 2));
+        if (parser.isError(response)) {
+            parser.parseAndThrowError(response as { error: { code: number; message: string } });
         }
 
-        const result = response.result as DraftResponses[TMethod];
+        const result = parser.convertFromResponse(response);
 
         return { ...result, traceId: (response as { traceId: string }).traceId };
     }
@@ -998,7 +997,8 @@ export class TonConnect implements ITonConnect {
 
         const connectRequest = this.createConnectRequest(options?.connectRequest);
 
-        const rawDraftRequest = serializeDraft(draftRequest, {
+        const parser = draftParsers[draftRequest.method];
+        const rawDraftRequest = parser.serialize(draftRequest, {
             connectRequest
         });
 
@@ -1183,14 +1183,30 @@ export class TonConnect implements ITonConnect {
         );
 
         if (!hasRequiredFeatures) {
-            this.provider?.disconnect();
-            this.onWalletConnectError(
-                new WalletMissingRequiredFeaturesError(
-                    'Wallet does not support required features',
-                    { cause: { connectEvent } }
-                )
+            const hasNonIntentFeatures = checkRequiredWalletFeatures(
+                connectEvent.device.features,
+                this.walletsRequiredFeatures
+                    ? { ...this.walletsRequiredFeatures, intents: undefined }
+                    : undefined
             );
-            return;
+
+            if (hasNonIntentFeatures && this.walletsRequiredFeatures?.intents) {
+                this.onWalletConnectError(
+                    new WalletMissingRequiredFeaturesError(
+                        'Wallet does not support required intents features',
+                        { cause: { connectEvent } }
+                    )
+                );
+            } else {
+                this.provider?.disconnect();
+                this.onWalletConnectError(
+                    new WalletMissingRequiredFeaturesError(
+                        'Wallet does not support required features',
+                        { cause: { connectEvent } }
+                    )
+                );
+                return;
+            }
         }
 
         const wallet: Wallet = {

@@ -1132,11 +1132,11 @@ export class TonConnectUI {
             });
 
             try {
-                // TODO: waitForIntentSend
-                const result = await this.connector.sendDraft(
-                    { method: 'sendTransaction', ...intent },
-                    { onRequestSent, signal: abortController.signal, traceId }
-                );
+                const result = await this.connector.sendTransactionDraft(intent, {
+                    onRequestSent,
+                    signal: abortController.signal,
+                    traceId
+                });
 
                 widgetController.setAction({
                     name: 'transaction-sent',
@@ -1408,10 +1408,11 @@ export class TonConnectUI {
             });
 
             try {
-                const result = await this.connector.sendDraft(
-                    { method: 'signMessage', ...intent },
-                    { onRequestSent, signal: abortController.signal, traceId }
-                );
+                const result = await this.connector.signMessageDraft(intent, {
+                    onRequestSent,
+                    signal: abortController.signal,
+                    traceId
+                });
 
                 widgetController.setAction({
                     name: 'message-signed',
@@ -1544,10 +1545,11 @@ export class TonConnectUI {
             });
 
             try {
-                const result = await this.connector.sendDraft(
-                    { method: 'sendAction', ...intent },
-                    { onRequestSent, signal: abortController.signal, traceId }
-                );
+                const result = await this.connector.sendActionDraft(intent, {
+                    onRequestSent,
+                    signal: abortController.signal,
+                    traceId
+                });
 
                 widgetController.setAction({
                     name: 'transaction-sent',
