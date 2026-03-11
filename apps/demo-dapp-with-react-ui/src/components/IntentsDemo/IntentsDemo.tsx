@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { CHAIN, useTonConnectUI, useTonWallet, TonConnectButton } from '@tonconnect/ui-react';
 import type {
+    IntentResponse,
     SendTransactionDraftRequest,
-    SignDataDraftRequest,
+    SignDataPayload,
     SignMessageDraftRequest,
     SendActionDraftRequest
 } from '@tonconnect/sdk';
@@ -23,7 +24,7 @@ export function IntentsDemo() {
     };
 
     useEffect(() => {
-        const unsubscribe = tonConnectUi.connector.onDraftResponse(response => {
+        const unsubscribe = tonConnectUi.connector.onIntentResponse((response: IntentResponse) => {
             setLastIntentResult(response);
         });
 
@@ -102,12 +103,10 @@ export function IntentsDemo() {
             ? 'Sign this sample text via intent. '.repeat(400)
             : 'Sign this sample text via intent.';
 
-        const intent: SignDataDraftRequest = {
-            network: wallet?.account.chain,
-            payload: {
-                type: 'text',
-                text: payloadText
-            }
+        const intent: SignDataPayload = {
+            type: 'text',
+            text: payloadText,
+            network: wallet?.account.chain
         };
 
         setLastIntentPayload(intent);

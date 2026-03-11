@@ -1,7 +1,8 @@
-import { AppRequest, ConnectRequest, RawDraftPayload, RpcMethod } from '@tonconnect/protocol';
+import { AppRequest, ConnectRequest, RpcMethod } from '@tonconnect/protocol';
+import type { RawIntentPayload } from 'src/models/draft-payload';
 import { OptionalTraceable, WithoutId } from 'src/utils/types';
 import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet/traceable-events';
-import type { DraftResponse } from 'src/models/methods/drafts';
+import type { IntentResponse } from 'src/models';
 
 export type Provider = InternalProvider | HTTPProvider;
 
@@ -14,9 +15,13 @@ export interface InternalProvider extends BaseProvider {
     connect(message: ConnectRequest, options?: OptionalTraceable): void;
 
     /**
-     * Sends a raw draft request.
+     * Connects with intent (draft payload) via injected wallet.
+     * connectRequest is passed at URL level for external wallets, not inside the payload.
      */
-    sendDraft(draft: WithoutId<RawDraftPayload>, options?: OptionalTraceable): void;
+    connectWithIntent(
+        payload: WithoutId<RawIntentPayload>,
+        options?: OptionalTraceable<{ connectRequest?: ConnectRequest }>
+    ): void;
 }
 
 export interface HTTPProvider extends BaseProvider {
@@ -30,9 +35,14 @@ export interface HTTPProvider extends BaseProvider {
         }>
     ): string;
 
-    sendDraft(
-        draft: WithoutId<RawDraftPayload>,
+    /**
+     * Connects with intent (draft payload) via bridge as a tc:// universal link.
+     * connectRequest is passed at URL level (r param), not inside the payload.
+     */
+    connectWithIntent(
+        payload: WithoutId<RawIntentPayload>,
         options?: OptionalTraceable<{
+            connectRequest?: ConnectRequest;
             openingDeadlineMS?: number;
             signal?: AbortSignal;
         }>
@@ -71,5 +81,5 @@ interface BaseProvider {
     ): Promise<TraceableWalletResponse<T>>;
 
     listen(eventsCallback: (e: TraceableWalletEvent) => void): void;
-    onDraftResponse(listener: (response: DraftResponse) => void): () => void;
+    onIntentResponse(listener: (response: IntentResponse) => void): () => void;
 }

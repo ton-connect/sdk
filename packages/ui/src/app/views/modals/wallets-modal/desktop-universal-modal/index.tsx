@@ -35,9 +35,7 @@ export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = prop
         equals: bridgesIsEqual
     });
 
-    if (!isIntentMode) {
-        setLastSelectedWalletInfo({ openMethod: 'qrcode' });
-    }
+    setLastSelectedWalletInfo({ openMethod: 'qrcode' });
 
     const request = createMemo(() => {
         return initiateTonConnectFlow(connector, walletsBridges(), {

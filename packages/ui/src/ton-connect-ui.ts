@@ -12,6 +12,7 @@ import {
     WalletInfoCurrentlyEmbedded
 } from '@tonconnect/sdk';
 import {
+    type IntentResponse,
     isTelegramUrl,
     isWalletInfoCurrentlyEmbedded,
     ITonConnect,
@@ -25,10 +26,8 @@ import {
     SessionCrypto,
     ChainId,
     SendTransactionDraftRequest,
-    SignDataDraftRequest,
     SignMessageDraftRequest,
     SendActionDraftRequest,
-    DraftOptions,
     SendActionDraftResponse
 } from '@tonconnect/sdk';
 import { widgetController } from 'src/app/widget-controller';
@@ -75,7 +74,9 @@ import {
 import { IMG } from 'src/app/env/IMG';
 
 type TonConnectUIIntentOptions = ActionConfiguration &
-    OptionalTraceable<Omit<DraftOptions, 'onIntentUrlReady'>>;
+    OptionalTraceable<{
+        signal?: AbortSignal;
+    }>;
 
 export class TonConnectUI {
     public static getWallets(): Promise<WalletInfo[]> {
@@ -145,7 +146,7 @@ export class TonConnectUI {
                 return;
             }
 
-            unsubscribe = this.connector.onDraftResponse(response => {
+            unsubscribe = this.connector.onIntentResponse((response: IntentResponse) => {
                 if (signal) {
                     signal.removeEventListener('abort', onAbort);
                 }
@@ -535,7 +536,7 @@ export class TonConnectUI {
      */
     public async sendTransaction(
         tx: SendTransactionRequest,
-        options?: (ActionConfiguration & { useIntent?: boolean }) &
+        options?: ActionConfiguration &
             OptionalTraceable<{
                 onRequestSent?: (redirectToWallet: () => void) => void;
             }>
@@ -553,11 +554,7 @@ export class TonConnectUI {
                     from: tx.from,
                     items: tx.messages.map(message => ({
                         type: 'ton' as const,
-                        address: message.address,
-                        amount: message.amount,
-                        payload: message.payload,
-                        stateInit: message.stateInit,
-                        extraCurrency: message.extraCurrency
+                        ...message
                     }))
                 },
                 options
@@ -694,26 +691,17 @@ export class TonConnectUI {
      */
     public async signData(
         data: SignDataPayload,
-        options?: OptionalTraceable<
-            { onRequestSent?: (redirectToWallet: () => void) => void } & { useIntent?: boolean }
-        >
+        options?: ActionConfiguration &
+            OptionalTraceable<
+                { onRequestSent?: (redirectToWallet: () => void) => void } & { useIntent?: boolean }
+            >
     ): Promise<SignDataResponse> {
         const traceId = options?.traceId ?? UUIDv7();
 
         this.tracker.trackDataSentForSignature(this.wallet, data);
 
         if (!this.connected && options?.useIntent) {
-            const intentResponse = await this.signDataIntent(
-                {
-                    network: data.network,
-                    from: data.from,
-                    payload: data
-                },
-                {
-                    traceId
-                }
-            );
-
+            const intentResponse = await this.signDataIntent(data, { traceId });
             return intentResponse;
         }
 
@@ -727,7 +715,7 @@ export class TonConnectUI {
         }
 
         const { notifications, modals, returnStrategy, twaReturnUrl } =
-            this.getModalsAndNotificationsConfiguration();
+            this.getModalsAndNotificationsConfiguration(options);
 
         const sessionId = await this.getSessionId();
 
@@ -847,9 +835,10 @@ export class TonConnectUI {
      */
     public async signMessage(
         message: SendTransactionRequest,
-        options?: OptionalTraceable<
-            { onRequestSent?: (redirectToWallet: () => void) => void } & { useIntent?: boolean }
-        >
+        options?: ActionConfiguration &
+            OptionalTraceable<
+                { onRequestSent?: (redirectToWallet: () => void) => void } & { useIntent?: boolean }
+            >
     ): Promise<SignMessageResponse> {
         const traceId = options?.traceId ?? UUIDv7();
 
@@ -884,7 +873,7 @@ export class TonConnectUI {
         }
 
         const { notifications, modals, returnStrategy, twaReturnUrl } =
-            this.getModalsAndNotificationsConfiguration();
+            this.getModalsAndNotificationsConfiguration(options);
 
         const sessionId = await this.getSessionId();
 
@@ -1173,7 +1162,7 @@ export class TonConnectUI {
                 intents: { types: ['txDraft'] }
             };
 
-            this.modal.openIntent({
+            this.modal.openWithIntent({
                 traceId,
                 intent: { method: 'sendTransaction', ...intent }
             });
@@ -1212,7 +1201,7 @@ export class TonConnectUI {
      * If wallet is not connected, opens modal and shows intent QR/link.
      */
     public async signDataIntent(
-        intent: SignDataDraftRequest,
+        intent: SignDataPayload,
         options?: TonConnectUIIntentOptions
     ): Promise<OptionalTraceable<SignDataResponse>> {
         const traceId = options?.traceId ?? UUIDv7();
@@ -1272,10 +1261,11 @@ export class TonConnectUI {
             });
 
             try {
-                const result = await this.connector.sendDraft(
-                    { method: 'signData', ...intent },
-                    { onRequestSent, signal: abortController.signal, traceId }
-                );
+                const result = await this.connector.signDataDraft(intent, {
+                    onRequestSent,
+                    signal: abortController.signal,
+                    traceId
+                });
 
                 widgetController.setAction({
                     name: 'data-signed',
@@ -1312,7 +1302,7 @@ export class TonConnectUI {
                 intents: { types: ['signData'] }
             };
 
-            this.modal.openIntent({ traceId, intent: { method: 'signData', ...intent } });
+            this.modal.openWithIntent({ traceId, intent: { method: 'signData', ...intent } });
 
             const intentResponse = await this.waitForIntentResponse<
                 OptionalTraceable<SignDataResponse>
@@ -1449,7 +1439,7 @@ export class TonConnectUI {
                 intents: { types: ['signMsgDraft'] }
             };
 
-            this.modal.openIntent({ traceId, intent: { method: 'signMessage', ...intent } });
+            this.modal.openWithIntent({ traceId, intent: { method: 'signMessage', ...intent } });
 
             const intentResponse = await this.waitForIntentResponse<
                 OptionalTraceable<SignMessageResponse>
@@ -1586,7 +1576,7 @@ export class TonConnectUI {
                 intents: { types: ['actionDraft'] }
             };
 
-            this.modal.openIntent({ traceId, intent: { method: 'sendAction', ...intent } });
+            this.modal.openWithIntent({ traceId, intent: { method: 'sendAction', ...intent } });
 
             const intentResponse = await this.waitForIntentResponse<
                 OptionalTraceable<SendActionDraftResponse>

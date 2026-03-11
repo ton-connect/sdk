@@ -16,16 +16,16 @@ import { WalletsModalCloseReason } from 'src/models';
 import {
     OptionalTraceable,
     Traceable,
-    TypedDraftRequest,
     WalletInfoRemote,
     WalletNotSupportFeatureError
 } from '@tonconnect/sdk';
+import type { IntentRequest } from 'src/models/wallets-modal';
 
 export const widgetController = {
     openWalletsModal: (
         options?: OptionalTraceable & {
             mode?: 'connect' | 'intent';
-            intent?: TypedDraftRequest;
+            intent?: IntentRequest;
         }
     ): void =>
         void setTimeout(() =>

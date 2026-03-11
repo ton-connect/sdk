@@ -5,7 +5,8 @@ export { IStorage } from './storage/models/storage.interface';
 export { TonConnect as default } from './ton-connect';
 export { WalletsListManager } from './wallets-list-manager';
 export { ITonConnect } from './ton-connect.interface';
-export type { WalletSourceArg, WalletDraftResult } from './ton-connect.interface';
+export type { IntentResponse, WalletSourceArg, WaleltIntentResult } from './models';
+export type { IntentSubscribeOptions } from './models/methods/connect';
 export type { AnalyticsSettings } from './models/ton-connect-options';
 export type {
     EventDispatcher,
@@ -87,6 +88,7 @@ export {
     SignMessageFeature,
     DraftAssetType,
     SendTransactionDraftFeature,
+    SignDataDraftFeature,
     SignMessageDraftFeature,
     ActionDraftFeature,
     IntentMethodType,
@@ -109,6 +111,7 @@ export {
 } from '@tonconnect/protocol';
 
 export type { SignMessageResponse } from './models/methods/sign-message/sign-message-response';
+export type { SendActionDraftResponse } from './models/methods/send-action-draft';
 
 export { IEnvironment } from './environment/models/environment.interface';
 export { TelegramUser } from './environment/models/telegram-user';

@@ -1,11 +1,9 @@
 import {
-    AppRequest,
     ChainId,
     CONNECT_ITEM_ERROR_CODES,
     ConnectEventSuccess,
     ConnectItem,
     ConnectRequest,
-    RpcMethod,
     SendTransactionRpcResponseSuccess,
     SignDataPayload,
     SignDataRpcResponseSuccess,
@@ -24,10 +22,7 @@ import {
 } from 'src/errors/wallet';
 import {
     Account,
-    DraftMethod,
-    DraftResponses,
     RequiredFeatures,
-    TypedDraftRequest,
     Wallet,
     WalletConnectionSource,
     WalletConnectionSourceHTTP,
@@ -41,13 +36,9 @@ import {
     SignDataResponse,
     SignMessageResponse
 } from 'src/models/methods';
-import type { DraftResponse } from 'src/models/methods/drafts';
-import {
-    DraftOptions,
-    SendActionDraftRequest,
-    SendTransactionDraftRequest,
-    SignMessageDraftRequest
-} from 'src/models/methods/drafts';
+import { SendTransactionDraftRequest } from 'src/models/methods/send-transaction-draft';
+import { SignMessageDraftRequest } from 'src/models/methods/sign-message-draft';
+import { SendActionDraftRequest } from 'src/models/methods/send-action-draft';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
 import { AnalyticsSettings, TonConnectOptions } from 'src/models/ton-connect-options';
 import {
@@ -63,11 +54,13 @@ import { InjectedProvider } from 'src/provider/injected/injected-provider';
 import { Provider } from 'src/provider/provider';
 import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { DefaultStorage } from 'src/storage/default-storage';
-import { ITonConnect, WalletDraftResult, WalletSourceArg } from 'src/ton-connect.interface';
+import { ITonConnect } from 'src/ton-connect.interface';
+import { IntentResponse, WaleltIntentResult, WalletSourceArg } from 'src/models';
+import { IntentSubscribeOptions } from 'src/models/methods/connect';
 import { WalletWrongNetworkError } from 'src/errors/wallet/wallet-wrong-network.error';
 import { getDocument, getOriginWithPath, getWebPageManifest } from 'src/utils/web-api';
 import { WalletsListManager } from 'src/wallets-list-manager';
-import { OptionalTraceable, Traceable } from 'src/utils/types';
+import { OptionalTraceable, Traceable, WithoutId } from 'src/utils/types';
 import {
     checkSendTransactionSupport,
     checkRequiredWalletFeatures,
@@ -97,7 +90,11 @@ import { DefaultEnvironment } from 'src/environment/default-environment';
 import { UUIDv7 } from 'src/utils/uuid';
 import { TraceableWalletEvent } from 'src/models/wallet/traceable-events';
 import { WalletConnectProvider } from 'src/provider/wallet-connect/wallet-connect-provider';
-import { draftParsers } from 'src/parsers/drafts';
+import type { RawIntentPayload } from 'src/models/draft-payload';
+import { sendTransactionDraftParser } from 'src/parsers/send-transaction-draft-parser';
+import { signDataDraftParser } from 'src/parsers/sign-data-draft-parser';
+import { signMessageDraftParser } from 'src/parsers/sign-message-draft-parser';
+import { sendActionDraftParser } from 'src/parsers/send-action-draft-parser';
 
 export class TonConnect implements ITonConnect {
     private desiredChainId: string | undefined;
@@ -130,21 +127,21 @@ export class TonConnect implements ITonConnect {
      */
     private readonly tracker: TonConnectTracker;
 
-    private draftResponseSubscriptions: ((response: DraftResponse) => void)[] = [];
+    private intentResponseSubscriptions: ((response: IntentResponse) => void)[] = [];
 
-    private readonly handleProviderDraftResponse = (response: DraftResponse): void => {
-        this.draftResponseSubscriptions.forEach(callback => callback(response));
+    private readonly handleProviderIntentResponse = (response: IntentResponse): void => {
+        this.intentResponseSubscriptions.forEach(callback => callback(response));
     };
 
-    public onDraftResponse(callback: (response: DraftResponse) => void): () => void {
-        this.draftResponseSubscriptions.push(callback);
+    public onIntentResponse(callback: (response: IntentResponse) => void): () => void {
+        this.intentResponseSubscriptions.push(callback);
 
         if (this.provider) {
-            this.provider.onDraftResponse(this.handleProviderDraftResponse);
+            this.provider.onIntentResponse(this.handleProviderIntentResponse);
         }
 
         return () => {
-            this.draftResponseSubscriptions = this.draftResponseSubscriptions.filter(
+            this.intentResponseSubscriptions = this.intentResponseSubscriptions.filter(
                 cb => cb !== callback
             );
         };
@@ -829,14 +826,23 @@ export class TonConnect implements ITonConnect {
             signal?: AbortSignal;
         }>
     ): Promise<OptionalTraceable<SendTransactionResponse>> {
-        return this.sendDraft(
-            { method: 'sendTransaction', ...draft },
-            {
-                onRequestSent: options?.onRequestSent,
-                signal: options?.signal,
-                traceId: options?.traceId
-            }
+        const payload = sendTransactionDraftParser.convertToRpcRequest(draft);
+        return this.sendDraft<SendTransactionResponse>(
+            payload,
+            sendTransactionDraftParser,
+            options
         );
+    }
+
+    public signDataDraft(
+        draft: SignDataPayload,
+        options?: OptionalTraceable<{
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+        }>
+    ): Promise<OptionalTraceable<SignDataResponse>> {
+        const payload = signDataDraftParser.convertToRpcRequest(draft);
+        return this.sendDraft<SignDataResponse>(payload, signDataDraftParser, options);
     }
 
     public signMessageDraft(
@@ -846,14 +852,8 @@ export class TonConnect implements ITonConnect {
             signal?: AbortSignal;
         }>
     ): Promise<OptionalTraceable<SignMessageResponse>> {
-        return this.sendDraft(
-            { method: 'signMessage', ...draft },
-            {
-                onRequestSent: options?.onRequestSent,
-                signal: options?.signal,
-                traceId: options?.traceId
-            }
-        );
+        const payload = signMessageDraftParser.convertToRpcRequest(draft);
+        return this.sendDraft<SignMessageResponse>(payload, signMessageDraftParser, options);
     }
 
     public sendActionDraft(
@@ -863,18 +863,14 @@ export class TonConnect implements ITonConnect {
             signal?: AbortSignal;
         }>
     ): Promise<
-        OptionalTraceable<SignDataResponse | SendTransactionResponse | SignMessageResponse>
+        OptionalTraceable<SendTransactionResponse | SignDataResponse | SignMessageResponse>
     > {
-        return this.sendDraft(
-            { method: 'sendAction', ...draft },
-            {
-                onRequestSent: options?.onRequestSent,
-                signal: options?.signal,
-                traceId: options?.traceId
-            }
-        ) as Promise<
-            OptionalTraceable<SignDataResponse | SendTransactionResponse | SignMessageResponse>
-        >;
+        const payload = sendActionDraftParser.convertToRpcRequest(draft);
+        return this.sendDraft<SendTransactionResponse | SignDataResponse | SignMessageResponse>(
+            payload,
+            sendActionDraftParser,
+            options
+        );
     }
 
     /**
@@ -942,78 +938,172 @@ export class TonConnect implements ITonConnect {
         }
     }
 
-    // TODO: move in the future to inner layer, expose methods for every draft
-    public async sendDraft<TMethod extends DraftMethod>(
-        draftRequest: TypedDraftRequest & { method: TMethod },
+    public subscribeToSendTransactionIntent<TWallet extends WalletSourceArg>(
+        wallet: TWallet,
+        draft: SendTransactionDraftRequest,
+        options?: OptionalTraceable<IntentSubscribeOptions>
+    ): WaleltIntentResult<TWallet> {
+        return this.subscribeToIntentInternal(
+            wallet,
+            draft,
+            sendTransactionDraftParser.convertToRpcRequest.bind(sendTransactionDraftParser),
+            options
+        );
+    }
+
+    public subscribeToSignDataIntent<TWallet extends WalletSourceArg>(
+        wallet: TWallet,
+        draft: SignDataPayload,
+        options?: OptionalTraceable<IntentSubscribeOptions>
+    ): WaleltIntentResult<TWallet> {
+        return this.subscribeToIntentInternal(
+            wallet,
+            draft,
+            signDataDraftParser.convertToRpcRequest.bind(signDataDraftParser),
+            options
+        );
+    }
+
+    public subscribeToSignMessageIntent<TWallet extends WalletSourceArg>(
+        wallet: TWallet,
+        draft: SignMessageDraftRequest,
+        options?: OptionalTraceable<IntentSubscribeOptions>
+    ): WaleltIntentResult<TWallet> {
+        return this.subscribeToIntentInternal(
+            wallet,
+            draft,
+            signMessageDraftParser.convertToRpcRequest.bind(signMessageDraftParser),
+            options
+        );
+    }
+
+    public subscribeToSendActionIntent<TWallet extends WalletSourceArg>(
+        wallet: TWallet,
+        draft: SendActionDraftRequest,
+        options?: OptionalTraceable<IntentSubscribeOptions>
+    ): WaleltIntentResult<TWallet> {
+        return this.subscribeToIntentInternal(
+            wallet,
+            draft,
+            sendActionDraftParser.convertToRpcRequest.bind(sendActionDraftParser),
+            options
+        );
+    }
+
+    private async sendDraft<T extends object>(
+        intentPayload: WithoutId<RawIntentPayload>,
+        parser: {
+            convertFromRpcResponse(response: unknown): T;
+            isError(response: unknown): response is { error: { code: number; message: string } };
+            parseAndThrowError(response: { error: { code: number; message: string } }): never;
+        },
         options?: OptionalTraceable<{
             onRequestSent?: () => void;
             signal?: AbortSignal;
         }>
-    ): Promise<OptionalTraceable<DraftResponses[TMethod]>> {
+    ): Promise<OptionalTraceable<T>> {
         const abortController = createAbortController(options?.signal);
+
         if (abortController.signal.aborted) {
-            throw new TonConnectError('Message signing was aborted');
+            throw new TonConnectError('Intent sending was aborted.');
         }
 
         this.checkConnection();
 
         const traceId = options?.traceId ?? UUIDv7();
-        const parser = draftParsers[draftRequest.method];
-        const rpcRequest = parser.serialize(draftRequest, {});
 
-        const response = await this.provider!.sendRequest(
-            rpcRequest as unknown as AppRequest<RpcMethod>,
-            {
-                onRequestSent: options?.onRequestSent,
-                signal: abortController.signal,
-                traceId
+        return new Promise<OptionalTraceable<T>>((resolve, reject) => {
+            let unsubscribe: (() => void) | null = null;
+
+            const onAbort = () => {
+                if (unsubscribe) {
+                    unsubscribe();
+                }
+                reject(new TonConnectError('Intent sending was aborted.'));
+            };
+
+            unsubscribe = this.onIntentResponse(response => {
+                if (abortController.signal.aborted) {
+                    return;
+                }
+
+                if (unsubscribe) {
+                    unsubscribe();
+                    unsubscribe = null;
+                }
+                abortController.signal.removeEventListener('abort', onAbort);
+
+                try {
+                    if (parser.isError(response)) {
+                        parser.parseAndThrowError(response);
+                    }
+
+                    const result = parser.convertFromRpcResponse(response);
+                    resolve({ ...result, traceId });
+                } catch (error) {
+                    reject(error);
+                }
+            });
+
+            abortController.signal.addEventListener('abort', onAbort);
+
+            try {
+                this.provider!.connectWithIntent(intentPayload, {
+                    signal: abortController.signal,
+                    traceId
+                });
+
+                options?.onRequestSent?.();
+            } catch (error) {
+                abortController.signal.removeEventListener('abort', onAbort);
+
+                if (unsubscribe) {
+                    unsubscribe();
+                }
+
+                reject(error);
             }
-        );
-
-        if (parser.isError(response)) {
-            parser.parseAndThrowError(response as { error: { code: number; message: string } });
-        }
-
-        const result = parser.convertFromResponse(response);
-
-        return { ...result, traceId: (response as { traceId: string }).traceId };
+        });
     }
 
-    public subscribeToDraft<TWallet extends WalletSourceArg>(
+    private subscribeToIntentInternal<TWallet extends WalletSourceArg, TRequest>(
         wallet: TWallet,
-        draftRequest: TypedDraftRequest,
-        options?: OptionalTraceable<DraftOptions>
-    ): WalletDraftResult<TWallet> {
+        draft: TRequest,
+        serialize: (request: TRequest) => WithoutId<RawIntentPayload>,
+        options?: OptionalTraceable<IntentSubscribeOptions>
+    ): WaleltIntentResult<TWallet> {
         if (this.connected) {
             throw new WalletAlreadyConnectedError();
         }
 
         const abortController = createAbortController(options?.signal);
+
         if (abortController.signal.aborted) {
-            throw new TonConnectError(`subscribeToDraft was aborted`);
+            throw new TonConnectError('Draft subscription was aborted.');
         }
 
         const traceId = options?.traceId ?? UUIDv7();
-
         const connectRequest = this.createConnectRequest(options?.connectRequest);
+        const payload = serialize(draft);
 
-        const parser = draftParsers[draftRequest.method];
-        const rawDraftRequest = parser.serialize(draftRequest, {
-            connectRequest
-        });
+        if (this.provider) {
+            this.provider.closeConnection();
+        }
 
-        this.provider?.closeConnection();
         this.provider = this.createProvider(wallet);
 
         abortController.signal.addEventListener('abort', () => {
-            this.provider?.closeConnection();
-            this.provider = null;
+            if (this.provider) {
+                this.provider.closeConnection();
+                this.provider = null;
+            }
         });
 
-        return this.provider.sendDraft(rawDraftRequest, {
+        return this.provider.connectWithIntent(payload, {
+            connectRequest,
             signal: abortController.signal,
             traceId
-        }) as WalletDraftResult<TWallet>;
+        }) as WaleltIntentResult<TWallet>;
     }
 
     private getSessionInfo(): { clientId: string | null; walletId: string | null } | null {
@@ -1137,7 +1227,7 @@ export class TonConnect implements ITonConnect {
         }
 
         provider.listen(this.walletEventsListener.bind(this));
-        provider.onDraftResponse(this.handleProviderDraftResponse);
+        provider.onIntentResponse(this.handleProviderIntentResponse);
         return provider;
     }
 
@@ -1165,48 +1255,20 @@ export class TonConnect implements ITonConnect {
         connectEvent: ConnectEventSuccess['payload'],
         options: Traceable
     ): void {
-        const tonAccountItem: TonAddressItemReply | undefined = connectEvent.items.find(
-            item => item.name === 'ton_addr'
-        ) as TonAddressItemReply | undefined;
+        const tonAccountItem = connectEvent.items.find(item => item.name === 'ton_addr') as
+            | TonAddressItemReply
+            | undefined;
 
-        const tonProofItem: TonProofItemReply | undefined = connectEvent.items.find(
-            item => item.name === 'ton_proof'
-        ) as TonProofItemReply | undefined;
+        const tonProofItem = connectEvent.items.find(item => item.name === 'ton_proof') as
+            | TonProofItemReply
+            | undefined;
 
         if (!tonAccountItem) {
             throw new TonConnectError('ton_addr connection item was not found');
         }
 
-        const hasRequiredFeatures = checkRequiredWalletFeatures(
-            connectEvent.device.features,
-            this.walletsRequiredFeatures
-        );
-
-        if (!hasRequiredFeatures) {
-            const hasNonIntentFeatures = checkRequiredWalletFeatures(
-                connectEvent.device.features,
-                this.walletsRequiredFeatures
-                    ? { ...this.walletsRequiredFeatures, intents: undefined }
-                    : undefined
-            );
-
-            if (hasNonIntentFeatures && this.walletsRequiredFeatures?.intents) {
-                this.onWalletConnectError(
-                    new WalletMissingRequiredFeaturesError(
-                        'Wallet does not support required intents features',
-                        { cause: { connectEvent } }
-                    )
-                );
-            } else {
-                this.provider?.disconnect();
-                this.onWalletConnectError(
-                    new WalletMissingRequiredFeaturesError(
-                        'Wallet does not support required features',
-                        { cause: { connectEvent } }
-                    )
-                );
-                return;
-            }
+        if (!this.handleMissingRequiredFeatures(connectEvent)) {
+            return;
         }
 
         const wallet: Wallet = {
@@ -1220,76 +1282,137 @@ export class TonConnect implements ITonConnect {
             }
         };
 
-        if (this.desiredChainId && wallet.account.chain !== this.desiredChainId) {
-            const expectedChainId = this.desiredChainId;
-            const actualChainId = wallet.account.chain;
-            this.provider?.disconnect();
-            this.onWalletConnectError(
-                new WalletWrongNetworkError('Wallet connected to a wrong network', {
-                    cause: { expectedChainId, actualChainId }
-                })
-            );
+        if (!this.handleWrongNetwork(wallet)) {
             return;
         }
 
         if (tonProofItem) {
-            const validationError = validateTonProofItemReply(tonProofItem as unknown);
-            let tonProof: TonProofItemReply | undefined = undefined;
-            if (validationError) {
-                if (isQaModeEnabled()) {
-                    console.error('TonProofItem validation failed: ' + validationError);
-                }
-                tonProof = {
-                    name: 'ton_proof',
-                    error: {
-                        code: CONNECT_ITEM_ERROR_CODES.UNKNOWN_ERROR,
-                        message: validationError
-                    }
-                };
-            } else {
-                try {
-                    if ('proof' in tonProofItem) {
-                        tonProof = {
-                            name: 'ton_proof',
-                            proof: {
-                                timestamp: tonProofItem.proof.timestamp,
-                                domain: {
-                                    lengthBytes: tonProofItem.proof.domain.lengthBytes,
-                                    value: tonProofItem.proof.domain.value
-                                },
-                                payload: tonProofItem.proof.payload,
-                                signature: tonProofItem.proof.signature
-                            }
-                        };
-                    } else if ('error' in tonProofItem) {
-                        tonProof = {
-                            name: 'ton_proof',
-                            error: {
-                                code: tonProofItem.error.code,
-                                message: tonProofItem.error.message
-                            }
-                        };
-                    } else {
-                        throw new TonConnectError('Invalid data format');
-                    }
-                } catch (e) {
-                    tonProof = {
-                        name: 'ton_proof',
-                        error: {
-                            code: CONNECT_ITEM_ERROR_CODES.UNKNOWN_ERROR,
-                            message: 'Invalid data format'
-                        }
-                    };
-                }
-            }
-
-            wallet.connectItems = { tonProof };
+            wallet.connectItems = {
+                tonProof: this.processTonProofItem(tonProofItem)
+            };
         }
 
         this.wallet = wallet;
 
         const sessionInfo = this.getSessionInfo();
         this.tracker.trackConnectionCompleted(wallet, sessionInfo, options?.traceId);
+    }
+
+    private handleMissingRequiredFeatures(connectEvent: ConnectEventSuccess['payload']): boolean {
+        const hasRequiredFeatures = checkRequiredWalletFeatures(
+            connectEvent.device.features,
+            this.walletsRequiredFeatures
+        );
+
+        if (hasRequiredFeatures) {
+            return true;
+        }
+
+        const hasNonDraftFeatures = checkRequiredWalletFeatures(
+            connectEvent.device.features,
+            this.walletsRequiredFeatures
+                ? {
+                      ...this.walletsRequiredFeatures,
+                      intents: undefined,
+                      sendTransactionDraft: undefined,
+                      signMessageDraft: undefined,
+                      sendActionDraft: undefined,
+                      signDataDraft: undefined
+                  }
+                : undefined
+        );
+
+        const hasDraftOrIntentRequirements =
+            this.walletsRequiredFeatures?.intents ||
+            this.walletsRequiredFeatures?.sendTransactionDraft ||
+            this.walletsRequiredFeatures?.signMessageDraft ||
+            this.walletsRequiredFeatures?.sendActionDraft ||
+            this.walletsRequiredFeatures?.signDataDraft;
+
+        if (hasNonDraftFeatures && hasDraftOrIntentRequirements) {
+            this.onWalletConnectError(
+                new WalletMissingRequiredFeaturesError(
+                    'Wallet does not support required intents/draft features',
+                    { cause: { connectEvent } }
+                )
+            );
+        } else {
+            this.provider?.disconnect();
+            this.onWalletConnectError(
+                new WalletMissingRequiredFeaturesError(
+                    'Wallet does not support required features',
+                    { cause: { connectEvent } }
+                )
+            );
+        }
+        return false;
+    }
+
+    private handleWrongNetwork(wallet: Wallet): boolean {
+        if (!this.desiredChainId || wallet.account.chain === this.desiredChainId) {
+            return true;
+        }
+        this.provider?.disconnect();
+        this.onWalletConnectError(
+            new WalletWrongNetworkError('Wallet connected to a wrong network', {
+                cause: {
+                    expectedChainId: this.desiredChainId,
+                    actualChainId: wallet.account.chain
+                }
+            })
+        );
+        return false;
+    }
+
+    private processTonProofItem(tonProofItem: TonProofItemReply): TonProofItemReply {
+        const validationError = validateTonProofItemReply(tonProofItem as unknown);
+        if (validationError) {
+            if (isQaModeEnabled()) {
+                console.error('TonProofItem validation failed: ' + validationError);
+            }
+            return {
+                name: 'ton_proof',
+                error: {
+                    code: CONNECT_ITEM_ERROR_CODES.UNKNOWN_ERROR,
+                    message: validationError
+                }
+            };
+        }
+
+        try {
+            if ('proof' in tonProofItem) {
+                return {
+                    name: 'ton_proof',
+                    proof: {
+                        timestamp: tonProofItem.proof.timestamp,
+                        domain: {
+                            lengthBytes: tonProofItem.proof.domain.lengthBytes,
+                            value: tonProofItem.proof.domain.value
+                        },
+                        payload: tonProofItem.proof.payload,
+                        signature: tonProofItem.proof.signature
+                    }
+                };
+            }
+            if ('error' in tonProofItem) {
+                return {
+                    name: 'ton_proof',
+                    error: {
+                        code: tonProofItem.error.code,
+                        message: tonProofItem.error.message
+                    }
+                };
+            }
+            throw new TonConnectError('Invalid data format');
+        } catch {
+            return {
+                name: 'ton_proof',
+                error: {
+                    code: CONNECT_ITEM_ERROR_CODES.UNKNOWN_ERROR,
+                    message: 'Invalid data format'
+                }
+            };
+        }
     }
 
     private onWalletConnectError(error: TonConnectError): void {

@@ -1,4 +1,4 @@
-import { SendTransactionDraftItem } from './send-transaction-draft-request';
+import { SendTransactionDraftItem } from '../send-transaction-draft';
 import { ChainId } from '@tonconnect/protocol';
 
 export interface SignMessageDraftRequest {

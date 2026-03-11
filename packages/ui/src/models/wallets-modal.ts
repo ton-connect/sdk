@@ -1,9 +1,16 @@
+import { FeatureName, OptionalTraceable, RequiredFeatures } from '@tonconnect/sdk';
 import {
-    FeatureName,
-    OptionalTraceable,
-    RequiredFeatures,
-    TypedDraftRequest
+    SendTransactionDraftRequest,
+    SignDataPayload,
+    SignMessageDraftRequest,
+    SendActionDraftRequest
 } from '@tonconnect/sdk';
+
+export type IntentRequest =
+    | (SendTransactionDraftRequest & { method: 'sendTransaction' })
+    | (SignDataPayload & { method: 'signData' })
+    | (SignMessageDraftRequest & { method: 'signMessage' })
+    | (SendActionDraftRequest & { method: 'sendAction' });
 
 export interface WalletsModal {
     /**
@@ -14,9 +21,9 @@ export interface WalletsModal {
     /**
      * Open the modal in intent mode with a pre-built intent URL.
      */
-    openIntent: (
+    openWithIntent: (
         options: OptionalTraceable<{
-            intent: TypedDraftRequest;
+            intent: IntentRequest;
         }>
     ) => void;
 
@@ -97,7 +104,7 @@ export type WalletsModalState = OptionalTraceable<
         /**
          * Intent payload to be used for QR / wallet-specific links in intent mode.
          */
-        intent?: TypedDraftRequest;
+        intent?: IntentRequest;
     }
 >;
 

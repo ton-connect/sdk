@@ -8,7 +8,6 @@ import {
     DISCONNECT_ERROR_CODES,
     DisconnectRpcResponseSuccess,
     Feature,
-    RawDraftPayload,
     RpcMethod,
     SEND_TRANSACTION_ERROR_CODES,
     SendTransactionRpcResponseSuccess,
@@ -16,7 +15,8 @@ import {
     TonProofItemReplySuccess,
     WalletResponseTemplateError
 } from '@tonconnect/protocol';
-import type { DraftResponse } from 'src/models/methods/drafts';
+import type { IntentResponse } from 'src/models';
+import type { RawIntentPayload } from 'src/models/draft-payload';
 import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet/traceable-events';
 import { OptionalTraceable, Traceable, WithoutId } from 'src/utils/types';
 import { UUIDv7 } from 'src/utils/uuid';
@@ -102,7 +102,7 @@ export class WalletConnectProvider implements InternalProvider {
             metadata
         };
     }
-    onDraftResponse(_listener: (response: DraftResponse) => void): () => void {
+    onIntentResponse(_listener: (response: IntentResponse) => void): () => void {
         return () => {};
     }
 
@@ -133,11 +133,12 @@ export class WalletConnectProvider implements InternalProvider {
         }).catch(error => logDebug('WalletConnect connect unexpected error', error));
     }
 
-    sendDraft(_draft: RawDraftPayload, options?: OptionalTraceable): void {
+    // Intents are not supported for WalletConnect provider.
+    connectWithIntent(_payload: WithoutId<RawIntentPayload>, options?: OptionalTraceable): string {
         const traceId = options?.traceId ?? UUIDv7();
         const payload = {
             code: CONNECT_EVENT_ERROR_CODES.METHOD_NOT_SUPPORTED as const,
-            message: 'Drafts are not supported for WalletConnect provider'
+            message: 'Intents are not supported for WalletConnect provider'
         };
 
         this.emit({
@@ -145,6 +146,8 @@ export class WalletConnectProvider implements InternalProvider {
             traceId,
             payload
         });
+
+        return '';
     }
 
     async _connect(
@@ -328,7 +331,9 @@ export class WalletConnectProvider implements InternalProvider {
             logDebug('Send wallet-connect request:', { ...request, id: DEFAULT_REQUEST_ID });
 
             if (request.method === 'sendTransaction') {
-                const { network, ...sendTransactionPayload } = JSON.parse(request.params[0]!);
+                const { network, ...sendTransactionPayload } = JSON.parse(
+                    (request.params as string[])[0]!
+                );
 
                 const promise = this.connector!.request(
                     {
@@ -349,7 +354,9 @@ export class WalletConnectProvider implements InternalProvider {
                     traceId: options.traceId
                 };
             } else if (request.method === 'signData') {
-                const { network, ...signDataPayload } = JSON.parse(request.params[0]!);
+                const { network, ...signDataPayload } = JSON.parse(
+                    (request.params as string[])[0]!
+                );
 
                 const promise = this.connector!.request(
                     {

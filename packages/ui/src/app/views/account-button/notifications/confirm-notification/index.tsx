@@ -5,9 +5,9 @@ import { LoaderIconStyled } from 'src/app/views/account-button/notifications/con
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { useI18n } from '@solid-primitives/i18n';
 
-interface ConfirmNotificationProps extends Styleable {}
+interface ConfirmOperationNotification extends Styleable {}
 
-export const ConfirmNotification: Component<ConfirmNotificationProps> = props => {
+export const ConfirmNotification: Component<ConfirmOperationNotification> = props => {
     const tonConnectUI = useContext(TonConnectUiContext);
     const [t] = useI18n();
     const name = (): string =>

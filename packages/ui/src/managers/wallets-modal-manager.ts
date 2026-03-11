@@ -12,13 +12,17 @@ import {
     ITonConnect,
     OptionalTraceable,
     Traceable,
-    TypedDraftRequest,
     UUIDv7,
     WalletInfoCurrentlyEmbedded
 } from '@tonconnect/sdk';
 import { appState } from 'src/app/state/app.state';
 import { widgetController } from 'src/app/widget-controller';
-import { WalletsModal, WalletsModalCloseReason, WalletsModalState } from 'src/models/wallets-modal';
+import {
+    WalletsModal,
+    WalletsModalCloseReason,
+    WalletsModalState,
+    IntentRequest
+} from 'src/models/wallets-modal';
 import { isInTMA, sendExpand } from 'src/app/utils/tma-api';
 import { TonConnectUITracker } from 'src/tracker/ton-connect-ui-tracker';
 import { logError } from 'src/app/utils/log';
@@ -163,9 +167,9 @@ export class WalletsModalManager implements WalletsModal {
      * Opens the modal window in intent mode with a pre-built intent URL.
      * Used by intent flow to reuse the same wallets UI but with different URLs.
      */
-    public async openIntent(
+    public async openWithIntent(
         options: OptionalTraceable<{
-            intent: TypedDraftRequest;
+            intent: IntentRequest;
         }>
     ): Promise<void> {
         if (isInTMA()) {

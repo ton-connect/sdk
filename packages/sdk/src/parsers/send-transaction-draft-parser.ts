@@ -1,29 +1,29 @@
 import {
-    DraftItem,
-    RawSignMessageDraftRequest,
     SendJettonItem,
     SendNftItem,
     SendTonItem,
-    SIGN_MESSAGE_ERROR_CODES
+    TransactionDraftItem,
+    SEND_TRANSACTION_ERROR_CODES
 } from '@tonconnect/protocol';
 import { BadRequestError, TonConnectError, UnknownAppError, UserRejectsError } from 'src/errors';
 import { UnknownError } from 'src/errors/unknown.error';
-import { SignMessageResponse } from 'src/models/methods';
+import { SendTransactionResponse } from 'src/models/methods';
 import {
     SendTransactionDraftItem,
     SendTransactionDraftItemJetton,
     SendTransactionDraftItemNft,
     SendTransactionDraftItemTon,
-    SignMessageDraftRequest
-} from 'src/models/methods/drafts';
+    SendTransactionDraftRequest
+} from 'src/models/methods/send-transaction-draft';
+import type { AppRequest } from '@tonconnect/protocol';
+import { RpcParser } from 'src/parsers/rpc-parser';
 import { WithoutId } from 'src/utils/types';
-import { DraftParser, DraftSerializeParams } from './draft-parser';
 
 const errorMap: Partial<Record<number, typeof TonConnectError>> = {
-    [SIGN_MESSAGE_ERROR_CODES.UNKNOWN_ERROR]: UnknownError,
-    [SIGN_MESSAGE_ERROR_CODES.USER_REJECTS_ERROR]: UserRejectsError,
-    [SIGN_MESSAGE_ERROR_CODES.BAD_REQUEST_ERROR]: BadRequestError,
-    [SIGN_MESSAGE_ERROR_CODES.UNKNOWN_APP_ERROR]: UnknownAppError
+    [SEND_TRANSACTION_ERROR_CODES.UNKNOWN_ERROR]: UnknownError,
+    [SEND_TRANSACTION_ERROR_CODES.USER_REJECTS_ERROR]: UserRejectsError,
+    [SEND_TRANSACTION_ERROR_CODES.BAD_REQUEST_ERROR]: BadRequestError,
+    [SEND_TRANSACTION_ERROR_CODES.UNKNOWN_APP_ERROR]: UnknownAppError
 };
 
 function mapTonItem(item: SendTransactionDraftItemTon): SendTonItem {
@@ -66,7 +66,7 @@ function mapNftItem(item: SendTransactionDraftItemNft): SendNftItem {
     };
 }
 
-function mapDraftItem(item: SendTransactionDraftItem): DraftItem {
+export function mapDraftItem(item: SendTransactionDraftItem): TransactionDraftItem {
     switch (item.type) {
         case 'ton':
             return mapTonItem(item);
@@ -77,28 +77,30 @@ function mapDraftItem(item: SendTransactionDraftItem): DraftItem {
     }
 }
 
-class SignMessageDraftParser extends DraftParser<'signMessage'> {
-    serialize(
-        request: SignMessageDraftRequest,
-        params: DraftSerializeParams
-    ): WithoutId<RawSignMessageDraftRequest> {
+class SendTransactionDraftParser extends RpcParser<'sendTransactionDraft'> {
+    convertToRpcRequest(
+        request: SendTransactionDraftRequest
+    ): WithoutId<AppRequest<'sendTransactionDraft'>> {
         return {
-            m: 'signMsgDraft',
-            c: params.connectRequest,
-            vu: request.validUntil,
-            n: request.network,
-            i: request.items.map(mapDraftItem)
-        };
+            method: 'sendTransaction',
+            params: {
+                vu: request.validUntil,
+                f: request.from,
+                n: request.network,
+                i: request.items.map(mapDraftItem)
+            }
+        } as unknown as WithoutId<AppRequest<'sendTransactionDraft'>>;
     }
 
-    convertFromResponse(response: unknown): SignMessageResponse {
-        const typed = response as { result: { internal_boc: string } };
-        return { internalBoc: typed.result.internal_boc };
+    convertFromRpcResponse(response: unknown): SendTransactionResponse {
+        const typed = response as { result: string };
+        return { boc: typed.result };
     }
 
     parseAndThrowError(response: { error: { code: number; message: string } }): never {
-        this.throwMappedError(errorMap, response);
+        const ErrorConstructor = errorMap[response.error.code] ?? UnknownError;
+        throw new ErrorConstructor(response.error.message);
     }
 }
 
-export const signMessageDraftParser = new SignMessageDraftParser();
+export const sendTransactionDraftParser = new SendTransactionDraftParser();

@@ -28,7 +28,8 @@ export class WalletNotSupportFeatureError extends TonConnectError {
                     value?:
                         | RequiredFeatures['sendTransaction']
                         | RequiredFeatures['signData']
-                        | RequiredFeatures['signMessage'];
+                        | RequiredFeatures['signMessage']
+                        | RequiredFeatures['intents'];
                 };
             };
         }

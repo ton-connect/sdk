@@ -10,6 +10,10 @@ export type RequiredFeatures = {
     sendTransaction?: RequiredSendTransactionFeature;
     signData?: RequiredSignDataFeature;
     signMessage?: RequiredSignMessageFeature;
+    sendTransactionDraft?: RequiredSendTransactionDraftFeature;
+    signDataDraft?: RequiredSignDataDraftFeature;
+    signMessageDraft?: RequiredSignMessageDraftFeature;
+    sendActionDraft?: RequiredSendActionDraftFeature;
     /**
      * Required support for drafts.
      */
@@ -55,6 +59,26 @@ export type RequiredSignMessageFeature = {
      */
     extraCurrencyRequired?: boolean;
 };
+
+/**
+ * Required features for the send transaction draft feature.
+ */
+export type RequiredSendTransactionDraftFeature = RequiredSendTransactionFeature;
+
+/**
+ * Required features for the sign data draft feature.
+ */
+export type RequiredSignDataDraftFeature = RequiredSignDataFeature;
+
+/**
+ * Required features for the sign message draft feature.
+ */
+export type RequiredSignMessageDraftFeature = RequiredSignMessageFeature;
+
+/**
+ * Required features for the send action draft feature.
+ */
+export type RequiredSendActionDraftFeature = Record<string, never>;
 
 /**
  * Required support for Drafts feature.

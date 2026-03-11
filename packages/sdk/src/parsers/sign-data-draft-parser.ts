@@ -1,9 +1,9 @@
-import { RawSignDataDraftPayload, SIGN_DATA_ERROR_CODES } from '@tonconnect/protocol';
+import { AppRequest, SignDataPayload, SIGN_DATA_ERROR_CODES } from '@tonconnect/protocol';
 import { BadRequestError, TonConnectError, UnknownAppError, UserRejectsError } from 'src/errors';
 import { UnknownError } from 'src/errors/unknown.error';
 import { SignDataResponse } from 'src/models/methods';
-import { SignDataDraftRequest } from 'src/models/methods/drafts';
-import { DraftParser, DraftSerializeParams } from './draft-parser';
+import { RpcParser } from 'src/parsers/rpc-parser';
+import { WithoutId } from 'src/utils/types';
 
 const errorMap: Partial<Record<number, typeof TonConnectError>> = {
     [SIGN_DATA_ERROR_CODES.UNKNOWN_ERROR]: UnknownError,
@@ -12,33 +12,22 @@ const errorMap: Partial<Record<number, typeof TonConnectError>> = {
     [SIGN_DATA_ERROR_CODES.UNKNOWN_APP_ERROR]: UnknownAppError
 };
 
-class SignDataDraftParser extends DraftParser<'signData'> {
-    serialize(
-        request: SignDataDraftRequest,
-        params: DraftSerializeParams
-    ): Omit<RawSignDataDraftPayload, 'id'> {
-        const payload: Record<string, unknown> = { ...request.payload };
-        if (request.network) {
-            payload.network = request.network;
-        }
-        if (request.from) {
-            payload.from = request.from;
-        }
-
+class SignDataDraftParser extends RpcParser<'signData'> {
+    convertToRpcRequest(payload: SignDataPayload): WithoutId<AppRequest<'signData'>> {
         return {
             method: 'signData',
-            params: [JSON.stringify(payload)],
-            c: params.connectRequest
+            params: [JSON.stringify(payload)]
         };
     }
 
-    convertFromResponse(response: unknown): SignDataResponse {
+    convertFromRpcResponse(response: unknown): SignDataResponse {
         const typed = response as { result: SignDataResponse };
         return typed.result;
     }
 
     parseAndThrowError(response: { error: { code: number; message: string } }): never {
-        this.throwMappedError(errorMap, response);
+        const ErrorConstructor = errorMap[response.error.code] ?? UnknownError;
+        throw new ErrorConstructor(response.error.message);
     }
 }
 
