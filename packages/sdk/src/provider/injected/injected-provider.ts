@@ -3,11 +3,11 @@ import {
     AppRequest,
     ConnectEventError,
     ConnectRequest,
-    RawIntentRequest,
+    RawDraftPayload,
     RpcMethod,
     WalletResponse
 } from '@tonconnect/protocol';
-import type { IntentResponse } from 'src/models/methods/intents';
+import type { DraftResponse } from 'src/models/methods/drafts';
 import {
     InjectedWalletApi,
     isJSBridgeWithMetadata
@@ -101,7 +101,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
 
     private listeners: Array<(e: TraceableWalletEvent) => void> = [];
 
-    private intentListeners: Array<(response: IntentResponse) => void> = [];
+    private draftListeners: Array<(response: DraftResponse) => void> = [];
     private readonly analytics?: Analytics<
         JsBridgeEvent,
         'bridge_key' | 'wallet_app_name' | 'wallet_app_version'
@@ -127,10 +127,10 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             });
         }
     }
-    onIntent(listener: (response: IntentResponse) => void): () => void {
-        this.intentListeners.push(listener);
+    onDraftResponse(listener: (response: DraftResponse) => void): () => void {
+        this.draftListeners.push(listener);
         return () => {
-            this.intentListeners = this.intentListeners.filter(l => l !== listener);
+            this.draftListeners = this.draftListeners.filter(l => l !== listener);
         };
     }
 
@@ -138,8 +138,8 @@ export class InjectedProvider<T extends string = string> implements InternalProv
         this._connect(PROTOCOL_VERSION, message, options);
     }
 
-    public sendIntent(intent: WithoutId<RawIntentRequest>, options?: OptionalTraceable): void {
-        void this._sendIntent(PROTOCOL_VERSION, intent, options);
+    public sendDraft(draft: WithoutId<RawDraftPayload>, options?: OptionalTraceable): void {
+        void this._sendDraft(PROTOCOL_VERSION, draft, options);
     }
 
     public async restoreConnection(options?: OptionalTraceable): Promise<void> {
@@ -243,7 +243,6 @@ export class InjectedProvider<T extends string = string> implements InternalProv
                   attempts?: number;
               }>
     ): Promise<WithoutId<WalletResponse<T>>> {
-        // TODO: remove deprecated method
         const options: OptionalTraceable<{
             onRequestSent?: () => void;
             signal?: AbortSignal;
@@ -336,35 +335,35 @@ export class InjectedProvider<T extends string = string> implements InternalProv
         }
     }
 
-    private async _sendIntent(
+    private async _sendDraft(
         protocolVersion: number,
-        intent: WithoutId<RawIntentRequest>,
+        draft: WithoutId<RawDraftPayload>,
         options?: OptionalTraceable
     ): Promise<void> {
         const traceId = options?.traceId ?? UUIDv7();
 
-        if (!this.injectedWallet.sendIntent) {
+        if (!this.injectedWallet.sendDraft) {
             const event: TraceableWalletEvent = {
                 event: 'connect_error',
                 traceId,
                 payload: {
                     code: 0,
-                    message: 'Intents are not supported for this injected wallet'
+                    message: 'Drafts are not supported for this injected wallet'
                 }
             };
             this.listeners.forEach(listener => listener(event));
             return;
         }
 
-        const response = await this.injectedWallet.sendIntent(
-            { id: '0', ...intent } as RawIntentRequest, // TODO: is this ok?
+        const response = await this.injectedWallet.sendDraft(
+            { id: '0', ...draft } as RawDraftPayload,
             {
                 protocolVersion,
                 traceId
             }
         );
 
-        const { connectEvent, intentResponse } = response;
+        const { connectEvent, draftResponse } = response;
         if (connectEvent) {
             if (connectEvent.event === 'connect') {
                 await this.updateSession();
@@ -373,9 +372,9 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             this.listeners.forEach(listener => listener({ ...connectEvent, traceId }));
         }
 
-        const typed = intentResponse as unknown as IntentResponse;
-        this.intentListeners.forEach(listener => listener(typed));
-        logDebug('Injected Provider intent response:', response);
+        const typed = draftResponse as unknown as DraftResponse;
+        this.draftListeners.forEach(listener => listener(typed));
+        logDebug('Injected Provider draft response:', response);
     }
 
     private makeSubscriptions(options: Traceable): void {
@@ -388,9 +387,6 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             this.unsubscribeCallback = this.injectedWallet.listen(e => {
                 const traceId = e.traceId ?? UUIDv7();
                 logDebug('Wallet message received:', e);
-                console.log(
-                    `[InjectedProvider] wallet event received: event=${e.event}, listenSubscriptions=${this.listenSubscriptions}`
-                );
 
                 if (this.listenSubscriptions) {
                     this.listeners.forEach(listener => listener({ ...e, traceId }));

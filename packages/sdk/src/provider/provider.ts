@@ -1,7 +1,7 @@
-import { AppRequest, ConnectRequest, RawIntentRequest, RpcMethod } from '@tonconnect/protocol';
+import { AppRequest, ConnectRequest, RawDraftPayload, RpcMethod } from '@tonconnect/protocol';
 import { OptionalTraceable, WithoutId } from 'src/utils/types';
 import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet/traceable-events';
-import type { IntentResponse } from 'src/models/methods/intents';
+import type { DraftResponse } from 'src/models/methods/drafts';
 
 export type Provider = InternalProvider | HTTPProvider;
 
@@ -14,9 +14,9 @@ export interface InternalProvider extends BaseProvider {
     connect(message: ConnectRequest, options?: OptionalTraceable): void;
 
     /**
-     * Sends a raw intent request.
+     * Sends a raw draft request.
      */
-    sendIntent(intent: WithoutId<RawIntentRequest>, options?: OptionalTraceable): void;
+    sendDraft(draft: WithoutId<RawDraftPayload>, options?: OptionalTraceable): void;
 }
 
 export interface HTTPProvider extends BaseProvider {
@@ -30,8 +30,8 @@ export interface HTTPProvider extends BaseProvider {
         }>
     ): string;
 
-    sendIntent(
-        intent: WithoutId<RawIntentRequest>,
+    sendDraft(
+        draft: WithoutId<RawDraftPayload>,
         options?: OptionalTraceable<{
             openingDeadlineMS?: number;
             signal?: AbortSignal;
@@ -71,5 +71,5 @@ interface BaseProvider {
     ): Promise<TraceableWalletResponse<T>>;
 
     listen(eventsCallback: (e: TraceableWalletEvent) => void): void;
-    onIntent(listener: (response: IntentResponse) => void): () => void;
+    onDraftResponse(listener: (response: DraftResponse) => void): () => void;
 }

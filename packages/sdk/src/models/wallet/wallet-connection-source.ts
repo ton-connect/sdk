@@ -15,7 +15,7 @@ export interface WalletConnectionSourceHTTP {
     bridgeUrl: string;
 
     /**
-     * Optional URL for intent object storage associated with this bridge endpoint.
+     * Optional URL for draft object storage associated with this bridge endpoint.
      */
     objectStorageUrl?: string;
 }

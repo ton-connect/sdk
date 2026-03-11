@@ -8,7 +8,7 @@ import {
     DISCONNECT_ERROR_CODES,
     DisconnectRpcResponseSuccess,
     Feature,
-    RawIntentRequest,
+    RawDraftPayload,
     RpcMethod,
     SEND_TRANSACTION_ERROR_CODES,
     SendTransactionRpcResponseSuccess,
@@ -16,7 +16,7 @@ import {
     TonProofItemReplySuccess,
     WalletResponseTemplateError
 } from '@tonconnect/protocol';
-import type { IntentResponse } from 'src/models/methods/intents';
+import type { DraftResponse } from 'src/models/methods/drafts';
 import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet/traceable-events';
 import { OptionalTraceable, Traceable, WithoutId } from 'src/utils/types';
 import { UUIDv7 } from 'src/utils/uuid';
@@ -102,7 +102,7 @@ export class WalletConnectProvider implements InternalProvider {
             metadata
         };
     }
-    onIntent(_listener: (response: IntentResponse) => void): () => void {
+    onDraftResponse(_listener: (response: DraftResponse) => void): () => void {
         return () => {};
     }
 
@@ -133,11 +133,11 @@ export class WalletConnectProvider implements InternalProvider {
         }).catch(error => logDebug('WalletConnect connect unexpected error', error));
     }
 
-    sendIntent(_intent: RawIntentRequest, options?: OptionalTraceable): void {
+    sendDraft(_draft: RawDraftPayload, options?: OptionalTraceable): void {
         const traceId = options?.traceId ?? UUIDv7();
         const payload = {
             code: CONNECT_EVENT_ERROR_CODES.METHOD_NOT_SUPPORTED as const,
-            message: 'Intents are not supported for WalletConnect provider'
+            message: 'Drafts are not supported for WalletConnect provider'
         };
 
         this.emit({

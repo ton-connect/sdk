@@ -69,8 +69,8 @@ export interface WalletInfoRemote extends WalletInfoBase {
     bridgeUrl: string;
 
     /**
-     * Optional URL for intent object storage (POST with text/plain body, returns get_url).
-     * When intent payload does not fit in URL, SDK uses this or default bridge storage.
+     * Optional URL for draft object storage (POST with text/plain body, returns get_url).
+     * When draft payload does not fit in URL, SDK uses this or default bridge storage.
      */
     objectStorageUrl?: string;
 }
@@ -152,8 +152,8 @@ export interface WalletInfoBridgeRemoteDTO {
     type: 'sse';
     url: string;
     /**
-     * Optional URL for intent object storage (POST with text/plain body, returns get_url).
-     * When intent payload does not fit in URL, SDK uses this or default bridge storage.
+     * Optional URL for draft object storage (POST with text/plain body, returns get_url).
+     * When draft payload does not fit in URL, SDK uses this or default bridge storage.
      */
     object_storage_url?: string;
 }

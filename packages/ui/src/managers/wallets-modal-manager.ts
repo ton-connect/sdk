@@ -12,7 +12,7 @@ import {
     ITonConnect,
     OptionalTraceable,
     Traceable,
-    TypedIntentRequest,
+    TypedDraftRequest,
     UUIDv7,
     WalletInfoCurrentlyEmbedded
 } from '@tonconnect/sdk';
@@ -165,7 +165,7 @@ export class WalletsModalManager implements WalletsModal {
      */
     public async openIntent(
         options: OptionalTraceable<{
-            intent: TypedIntentRequest;
+            intent: TypedDraftRequest;
         }>
     ): Promise<void> {
         if (isInTMA()) {

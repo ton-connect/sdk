@@ -5,7 +5,7 @@ export { IStorage } from './storage/models/storage.interface';
 export { TonConnect as default } from './ton-connect';
 export { WalletsListManager } from './wallets-list-manager';
 export { ITonConnect } from './ton-connect.interface';
-export type { WalletSourceArg, WalletIntentResult } from './ton-connect.interface';
+export type { WalletSourceArg, WalletDraftResult } from './ton-connect.interface';
 export type { AnalyticsSettings } from './models/ton-connect-options';
 export type {
     EventDispatcher,
@@ -85,6 +85,12 @@ export {
     SendTransactionFeatureDeprecated,
     SignDataFeature,
     SignMessageFeature,
+    DraftAssetType,
+    SendTransactionDraftFeature,
+    SignMessageDraftFeature,
+    ActionDraftFeature,
+    IntentMethodType,
+    IntentsFeature,
     SignDataType,
     SignDataPayload,
     SignDataPayloadText,

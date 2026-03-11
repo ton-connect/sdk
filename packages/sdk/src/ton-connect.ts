@@ -24,10 +24,10 @@ import {
 } from 'src/errors/wallet';
 import {
     Account,
-    IntentMethod,
-    IntentResponses,
+    DraftMethod,
+    DraftResponses,
     RequiredFeatures,
-    TypedIntentRequest,
+    TypedDraftRequest,
     Wallet,
     WalletConnectionSource,
     WalletConnectionSourceHTTP,
@@ -41,8 +41,13 @@ import {
     SignDataResponse,
     SignMessageResponse
 } from 'src/models/methods';
-import type { IntentResponse } from 'src/models/methods/intents';
-import { IntentOptions } from 'src/models/methods/intents';
+import type { DraftResponse } from 'src/models/methods/drafts';
+import {
+    DraftOptions,
+    SendActionDraftRequest,
+    SendTransactionDraftRequest,
+    SignMessageDraftRequest
+} from 'src/models/methods/drafts';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
 import { AnalyticsSettings, TonConnectOptions } from 'src/models/ton-connect-options';
 import {
@@ -58,7 +63,7 @@ import { InjectedProvider } from 'src/provider/injected/injected-provider';
 import { Provider } from 'src/provider/provider';
 import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { DefaultStorage } from 'src/storage/default-storage';
-import { ITonConnect, WalletIntentResult, WalletSourceArg } from 'src/ton-connect.interface';
+import { ITonConnect, WalletDraftResult, WalletSourceArg } from 'src/ton-connect.interface';
 import { WalletWrongNetworkError } from 'src/errors/wallet/wallet-wrong-network.error';
 import { getDocument, getOriginWithPath, getWebPageManifest } from 'src/utils/web-api';
 import { WalletsListManager } from 'src/wallets-list-manager';
@@ -92,7 +97,7 @@ import { DefaultEnvironment } from 'src/environment/default-environment';
 import { UUIDv7 } from 'src/utils/uuid';
 import { TraceableWalletEvent } from 'src/models/wallet/traceable-events';
 import { WalletConnectProvider } from 'src/provider/wallet-connect/wallet-connect-provider';
-import { serializeIntent } from 'src/intents/serializer';
+import { serializeDraft } from 'src/drafts/serializer';
 
 export class TonConnect implements ITonConnect {
     private desiredChainId: string | undefined;
@@ -125,21 +130,21 @@ export class TonConnect implements ITonConnect {
      */
     private readonly tracker: TonConnectTracker;
 
-    private intentResponseSubscriptions: ((response: IntentResponse) => void)[] = [];
+    private draftResponseSubscriptions: ((response: DraftResponse) => void)[] = [];
 
-    private readonly handleProviderIntentResponse = (response: IntentResponse): void => {
-        this.intentResponseSubscriptions.forEach(callback => callback(response));
+    private readonly handleProviderDraftResponse = (response: DraftResponse): void => {
+        this.draftResponseSubscriptions.forEach(callback => callback(response));
     };
 
-    public onIntentResponse(callback: (response: IntentResponse) => void): () => void {
-        this.intentResponseSubscriptions.push(callback);
+    public onDraftResponse(callback: (response: DraftResponse) => void): () => void {
+        this.draftResponseSubscriptions.push(callback);
 
         if (this.provider) {
-            this.provider.onIntent(this.handleProviderIntentResponse);
+            this.provider.onDraftResponse(this.handleProviderDraftResponse);
         }
 
         return () => {
-            this.intentResponseSubscriptions = this.intentResponseSubscriptions.filter(
+            this.draftResponseSubscriptions = this.draftResponseSubscriptions.filter(
                 cb => cb !== callback
             );
         };
@@ -817,6 +822,61 @@ export class TonConnect implements ITonConnect {
         return { ...result, traceId: (response as { traceId: string }).traceId };
     }
 
+    public sendTransactionDraft(
+        draft: SendTransactionDraftRequest,
+        options?: OptionalTraceable<{
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+        }>
+    ): Promise<OptionalTraceable<SendTransactionResponse>> {
+        return this.sendDraft(
+            { method: 'sendTransaction', ...draft },
+            {
+                onRequestSent: options?.onRequestSent,
+                signal: options?.signal,
+                traceId: options?.traceId
+            }
+        );
+    }
+
+    public signMessageDraft(
+        draft: SignMessageDraftRequest,
+        options?: OptionalTraceable<{
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+        }>
+    ): Promise<OptionalTraceable<SignMessageResponse>> {
+        return this.sendDraft(
+            { method: 'signMessage', ...draft },
+            {
+                onRequestSent: options?.onRequestSent,
+                signal: options?.signal,
+                traceId: options?.traceId
+            }
+        );
+    }
+
+    public sendActionDraft(
+        draft: SendActionDraftRequest,
+        options?: OptionalTraceable<{
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+        }>
+    ): Promise<
+        OptionalTraceable<SignDataResponse | SendTransactionResponse | SignMessageResponse>
+    > {
+        return this.sendDraft(
+            { method: 'sendAction', ...draft },
+            {
+                onRequestSent: options?.onRequestSent,
+                signal: options?.signal,
+                traceId: options?.traceId
+            }
+        ) as Promise<
+            OptionalTraceable<SignDataResponse | SendTransactionResponse | SignMessageResponse>
+        >;
+    }
+
     /**
      * Set desired network for the connection. Can only be set before connecting.
      * If wallet connects with a different chain, the SDK will throw an error and abort connection.
@@ -882,14 +942,14 @@ export class TonConnect implements ITonConnect {
         }
     }
 
-    // TODO: move in the future to inner layer, expose methods for every intent
-    public async sendIntent<TMethod extends IntentMethod>(
-        intentRequest: TypedIntentRequest & { method: TMethod },
+    // TODO: move in the future to inner layer, expose methods for every draft
+    public async sendDraft<TMethod extends DraftMethod>(
+        draftRequest: TypedDraftRequest & { method: TMethod },
         options?: OptionalTraceable<{
             onRequestSent?: () => void;
             signal?: AbortSignal;
         }>
-    ): Promise<OptionalTraceable<IntentResponses[TMethod]>> {
+    ): Promise<OptionalTraceable<DraftResponses[TMethod]>> {
         const abortController = createAbortController(options?.signal);
         if (abortController.signal.aborted) {
             throw new TonConnectError('Message signing was aborted');
@@ -898,9 +958,9 @@ export class TonConnect implements ITonConnect {
         this.checkConnection();
 
         const traceId = options?.traceId ?? UUIDv7();
-        const rpcRequest = serializeIntent(intentRequest);
+        const rpcRequest = serializeDraft(draftRequest);
 
-        // TODO: fix types, move to protocol, add intents to app request
+        // TODO: fix types, move to protocol, add drafts to app request
         const response = await this.provider!.sendRequest(
             rpcRequest as unknown as AppRequest<RpcMethod>,
             {
@@ -910,41 +970,35 @@ export class TonConnect implements ITonConnect {
             }
         );
 
-        // TODO: is Error
-        // if (signMessageParser.isError(response)) {
-        //     signMessageParser.parseAndThrowError(response);
-        // }
-
         // TODO parser
         if ('error' in response) {
             throw new Error(JSON.stringify(response, null, 2));
         }
 
-        const result = response.result as IntentResponses[TMethod];
+        const result = response.result as DraftResponses[TMethod];
 
         return { ...result, traceId: (response as { traceId: string }).traceId };
     }
 
-    public subscribeToIntent<TWallet extends WalletSourceArg>(
+    public subscribeToDraft<TWallet extends WalletSourceArg>(
         wallet: TWallet,
-        intentRequest: TypedIntentRequest,
-        options?: OptionalTraceable<IntentOptions>
-    ): WalletIntentResult<TWallet> {
+        draftRequest: TypedDraftRequest,
+        options?: OptionalTraceable<DraftOptions>
+    ): WalletDraftResult<TWallet> {
         if (this.connected) {
             throw new WalletAlreadyConnectedError();
         }
 
         const abortController = createAbortController(options?.signal);
         if (abortController.signal.aborted) {
-            throw new TonConnectError(`subscribeToIntent was aborted`);
+            throw new TonConnectError(`subscribeToDraft was aborted`);
         }
 
         const traceId = options?.traceId ?? UUIDv7();
 
-        // TODO TBD
         const connectRequest = this.createConnectRequest(options?.connectRequest);
 
-        const rawIntentRequest = serializeIntent(intentRequest, {
+        const rawDraftRequest = serializeDraft(draftRequest, {
             connectRequest
         });
 
@@ -956,10 +1010,10 @@ export class TonConnect implements ITonConnect {
             this.provider = null;
         });
 
-        return this.provider.sendIntent(rawIntentRequest, {
+        return this.provider.sendDraft(rawDraftRequest, {
             signal: abortController.signal,
             traceId
-        }) as WalletIntentResult<TWallet>;
+        }) as WalletDraftResult<TWallet>;
     }
 
     private getSessionInfo(): { clientId: string | null; walletId: string | null } | null {
@@ -1083,7 +1137,7 @@ export class TonConnect implements ITonConnect {
         }
 
         provider.listen(this.walletEventsListener.bind(this));
-        provider.onIntent(this.handleProviderIntentResponse);
+        provider.onDraftResponse(this.handleProviderDraftResponse);
         return provider;
     }
 

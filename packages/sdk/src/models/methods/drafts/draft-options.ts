@@ -1,9 +1,6 @@
 import { ConnectAdditionalRequest } from '../connect';
 
-/**
- * Options when sending an operation via intent.
- */
-export interface IntentOptions {
+export interface DraftOptions {
     connectRequest?: ConnectAdditionalRequest;
     signal?: AbortSignal;
 }

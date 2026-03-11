@@ -4,7 +4,7 @@ import {
     SignMessageRpcResponse
 } from '../../wallet-message';
 
-export type IntentResponse =
+export type DraftRpcResponse =
     | SendTransactionRpcResponse
     | SignDataRpcResponse
     | SignMessageRpcResponse;

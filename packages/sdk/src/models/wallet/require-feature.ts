@@ -1,4 +1,4 @@
-import { SignDataType } from '@tonconnect/protocol';
+import { IntentMethodType, SignDataType } from '@tonconnect/protocol';
 
 /**
  * Required features for wallets.
@@ -10,6 +10,10 @@ export type RequiredFeatures = {
     sendTransaction?: RequiredSendTransactionFeature;
     signData?: RequiredSignDataFeature;
     signMessage?: RequiredSignMessageFeature;
+    /**
+     * Required support for drafts.
+     */
+    intents?: RequiredIntentsFeature;
 };
 
 /**
@@ -50,4 +54,14 @@ export type RequiredSignMessageFeature = {
      * Whether extra currency is required.
      */
     extraCurrencyRequired?: boolean;
+};
+
+/**
+ * Required support for Drafts feature.
+ */
+export type RequiredIntentsFeature = {
+    /**
+     * Draft types that must be supported via Intents feature.
+     */
+    types: IntentMethodType[];
 };

@@ -1,4 +1,9 @@
-import { Feature, SendTransactionFeature, SignDataFeature } from '@tonconnect/protocol';
+import {
+    Feature,
+    IntentsFeature,
+    SendTransactionFeature,
+    SignDataFeature
+} from '@tonconnect/protocol';
 import { logWarning } from 'src/utils/log';
 import { WalletNotSupportFeatureError } from 'src/errors/wallet';
 import {
@@ -100,7 +105,7 @@ export function checkRequiredWalletFeatures(
         return true;
     }
 
-    const { sendTransaction, signData, signMessage } = walletsRequiredFeatures;
+    const { sendTransaction, signData, signMessage, intents } = walletsRequiredFeatures;
 
     if (sendTransaction) {
         const feature = findFeature(features, 'SendTransaction');
@@ -113,12 +118,10 @@ export function checkRequiredWalletFeatures(
         }
     }
     if (signMessage) {
-        const feature = findFeature(features, 'SendTransaction');
-        if (!feature) {
-            return false;
-        }
-
-        if (!checkSendTransaction(feature, signMessage)) {
+        const hasSignMessage = features.some(
+            feature => feature && typeof feature === 'object' && feature.name === 'SignMessage'
+        );
+        if (!hasSignMessage) {
             return false;
         }
     }
@@ -130,6 +133,18 @@ export function checkRequiredWalletFeatures(
         }
 
         if (!checkSignData(feature, signData)) {
+            return false;
+        }
+    }
+
+    if (intents) {
+        const feature = findFeature(features, 'Intents') as IntentsFeature | undefined;
+        if (!feature) {
+            return false;
+        }
+
+        const allTypesSupported = intents.types.every(type => feature.types.includes(type));
+        if (!allTypesSupported) {
             return false;
         }
     }

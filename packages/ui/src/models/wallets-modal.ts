@@ -2,7 +2,7 @@ import {
     FeatureName,
     OptionalTraceable,
     RequiredFeatures,
-    TypedIntentRequest
+    TypedDraftRequest
 } from '@tonconnect/sdk';
 
 export interface WalletsModal {
@@ -16,7 +16,7 @@ export interface WalletsModal {
      */
     openIntent: (
         options: OptionalTraceable<{
-            intent: TypedIntentRequest;
+            intent: TypedDraftRequest;
         }>
     ) => void;
 
@@ -97,7 +97,7 @@ export type WalletsModalState = OptionalTraceable<
         /**
          * Intent payload to be used for QR / wallet-specific links in intent mode.
          */
-        intent?: TypedIntentRequest;
+        intent?: TypedDraftRequest;
     }
 >;
 

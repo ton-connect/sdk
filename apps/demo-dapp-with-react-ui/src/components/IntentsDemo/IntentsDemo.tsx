@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { CHAIN, useTonConnectUI, useTonWallet, TonConnectButton } from '@tonconnect/ui-react';
 import type {
-    SendTransactionIntentRequest,
-    SignDataIntentRequest,
-    SignMessageIntentRequest,
-    SendActionIntentRequest
+    SendTransactionDraftRequest,
+    SignDataDraftRequest,
+    SignMessageDraftRequest,
+    SendActionDraftRequest
 } from '@tonconnect/sdk';
 import ReactJson from 'react-json-view';
 import './style.scss';
@@ -23,7 +23,7 @@ export function IntentsDemo() {
     };
 
     useEffect(() => {
-        const unsubscribe = tonConnectUi.connector.onIntentResponse(response => {
+        const unsubscribe = tonConnectUi.connector.onDraftResponse(response => {
             setLastIntentResult(response);
         });
 
@@ -44,7 +44,7 @@ export function IntentsDemo() {
             ? Array.from({ length: 30 }, () => ({ ...baseItem }))
             : [baseItem];
 
-        const intent: SendTransactionIntentRequest = {
+        const intent: SendTransactionDraftRequest = {
             validUntil: Math.floor(Date.now() / 1000) + 600,
             network: wallet?.account.chain,
             items
@@ -82,7 +82,7 @@ export function IntentsDemo() {
               }))
             : [jettonItemBase];
 
-        const intent: SendTransactionIntentRequest = {
+        const intent: SendTransactionDraftRequest = {
             validUntil: Math.floor(Date.now() / 1000) + 600,
             network: wallet?.account.chain,
             items
@@ -102,7 +102,7 @@ export function IntentsDemo() {
             ? 'Sign this sample text via intent. '.repeat(400)
             : 'Sign this sample text via intent.';
 
-        const intent: SignDataIntentRequest = {
+        const intent: SignDataDraftRequest = {
             network: wallet?.account.chain,
             payload: {
                 type: 'text',
@@ -134,7 +134,7 @@ export function IntentsDemo() {
             ? Array.from({ length: 40 }, () => ({ ...baseItem }))
             : [baseItem];
 
-        const intent: SignMessageIntentRequest = {
+        const intent: SignMessageDraftRequest = {
             validUntil: Math.floor(Date.now() / 1000) + 600,
             network: wallet?.account.chain ?? CHAIN.TESTNET,
             items
@@ -170,7 +170,7 @@ export function IntentsDemo() {
               }))
             : [jettonItemBase];
 
-        const intent: SignMessageIntentRequest = {
+        const intent: SignMessageDraftRequest = {
             validUntil: Math.floor(Date.now() / 1000) + 600,
             network: wallet?.account.chain ?? CHAIN.TESTNET,
             items
@@ -192,7 +192,7 @@ export function IntentsDemo() {
         const accountAddress =
             wallet?.account.address ?? 'EQCKWpx7cNMpvmcN5ObM5lLUZHZRFKqYA4xmw9jOry0ZsF9M';
 
-        const intent: SendActionIntentRequest = {
+        const intent: SendActionDraftRequest = {
             actionUrl: `${origin}/intent-action-demo?address=${encodeURIComponent(accountAddress)}`
         };
 

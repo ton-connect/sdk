@@ -2,9 +2,9 @@ import { ChainId } from '@tonconnect/protocol';
 import { TonConnectError } from 'src/errors';
 import {
     Account,
-    IntentMethod,
-    IntentResponses,
-    TypedIntentRequest,
+    DraftMethod,
+    DraftResponses,
+    TypedDraftRequest,
     Wallet,
     WalletConnectionSource,
     WalletConnectionSourceHTTP,
@@ -16,8 +16,13 @@ import {
     SignDataResponse,
     SignMessageResponse
 } from 'src/models/methods';
-import type { IntentResponse } from 'src/models/methods/intents';
-import { IntentOptions } from 'src/models/methods/intents';
+import type { DraftResponse } from 'src/models/methods/drafts';
+import {
+    DraftOptions,
+    SendActionDraftRequest,
+    SendTransactionDraftRequest,
+    SignMessageDraftRequest
+} from 'src/models/methods/drafts';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
 import { WalletInfo } from 'src/models/wallet/wallet-info';
 import { WalletConnectionSourceJS } from 'src/models/wallet/wallet-connection-source';
@@ -28,7 +33,7 @@ export type WalletSourceArg =
     | WalletConnectionSource
     | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[];
 
-export type WalletIntentResult<T extends WalletSourceArg> = T extends WalletConnectionSourceJS
+export type WalletDraftResult<T extends WalletSourceArg> = T extends WalletConnectionSourceJS
     ? void
     : T extends WalletConnectionSourceWalletConnect
       ? void
@@ -157,24 +162,58 @@ export interface ITonConnect {
     ): Promise<OptionalTraceable<SignMessageResponse>>;
 
     /**
+     * Sends a transaction draft over an existing bridge session.
+     * Draft describes transfer items; wallet builds and sends the transaction.
+     */
+    sendTransactionDraft(
+        draft: SendTransactionDraftRequest,
+        options?: OptionalTraceable<{
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+        }>
+    ): Promise<OptionalTraceable<SendTransactionResponse>>;
+
+    /**
+     * Signs a message draft (same structure as transaction draft, but without sending to blockchain).
+     */
+    signMessageDraft(
+        draft: SignMessageDraftRequest,
+        options?: OptionalTraceable<{
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+        }>
+    ): Promise<OptionalTraceable<SignMessageResponse>>;
+
+    /**
+     * Sends an action draft. Wallet resolves the action URL and executes underlying sendTransaction/signData/signMessage.
+     */
+    sendActionDraft(
+        draft: SendActionDraftRequest,
+        options?: OptionalTraceable<{
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+        }>
+    ): Promise<OptionalTraceable<SignDataResponse | SendTransactionResponse | SignMessageResponse>>;
+
+    /**
      * Gets the current session ID if available.
      * @returns session ID string or null if not available.
      */
     getSessionId(): Promise<string | null>;
 
-    sendIntent<TMethod extends IntentMethod>(
-        intentRequest: TypedIntentRequest & { method: TMethod },
+    sendDraft<TMethod extends DraftMethod>(
+        draftRequest: TypedDraftRequest & { method: TMethod },
         options?: OptionalTraceable<{
             onRequestSent?: () => void;
             signal?: AbortSignal;
         }>
-    ): Promise<OptionalTraceable<IntentResponses[TMethod]>>;
+    ): Promise<OptionalTraceable<DraftResponses[TMethod]>>;
 
-    subscribeToIntent<TWallet extends WalletSourceArg>(
+    subscribeToDraft<TWallet extends WalletSourceArg>(
         wallet: TWallet,
-        intentRequest: TypedIntentRequest,
-        options?: OptionalTraceable<IntentOptions>
-    ): WalletIntentResult<TWallet>;
+        draftRequest: TypedDraftRequest,
+        options?: OptionalTraceable<DraftOptions>
+    ): WalletDraftResult<TWallet>;
 
-    onIntentResponse(callback: (response: IntentResponse) => void): () => void;
+    onDraftResponse(callback: (response: DraftResponse) => void): () => void;
 }

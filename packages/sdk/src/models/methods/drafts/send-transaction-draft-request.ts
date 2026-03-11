@@ -1,6 +1,6 @@
 import { ChainId } from '@tonconnect/protocol';
 
-export interface SendTransactionIntentItemTon {
+export interface SendTransactionDraftItemTon {
     type: 'ton';
     address: string;
     amount: string;
@@ -9,7 +9,7 @@ export interface SendTransactionIntentItemTon {
     extraCurrency?: { [k: number]: string };
 }
 
-export interface SendTransactionIntentItemJetton {
+export interface SendTransactionDraftItemJetton {
     type: 'jetton';
     jettonMasterAddress: string;
     jettonAmount: string;
@@ -22,7 +22,7 @@ export interface SendTransactionIntentItemJetton {
     queryId?: number;
 }
 
-export interface SendTransactionIntentItemNft {
+export interface SendTransactionDraftItemNft {
     type: 'nft';
     attachedTon?: string;
     nftAddress: string;
@@ -34,17 +34,17 @@ export interface SendTransactionIntentItemNft {
     queryId?: number;
 }
 
-export type SendTransactionIntentItem =
-    | SendTransactionIntentItemTon
-    | SendTransactionIntentItemJetton
-    | SendTransactionIntentItemNft;
+export type SendTransactionDraftItem =
+    | SendTransactionDraftItemTon
+    | SendTransactionDraftItemJetton
+    | SendTransactionDraftItemNft;
 
-export interface SendTransactionIntentRequest {
+export interface SendTransactionDraftRequest {
     validUntil: number;
     network?: ChainId;
     /**
-     * The sender address in '<wc>:<hex>' format from which DApp intends to send the transaction. Current account.address by default.
+     * The sender address in '<wc>:<hex>' format. Current account.address by default.
      */
     from?: string;
-    items: SendTransactionIntentItem[];
+    items: SendTransactionDraftItem[];
 }

@@ -4,14 +4,14 @@ import {
     ConnectEventSuccess,
     ConnectRequest,
     hexToByteArray,
-    RawIntentRequest,
+    RawDraftPayload,
     RpcMethod,
     SessionCrypto,
     TonAddressItemReply,
     WalletMessage,
     WalletResponse
 } from '@tonconnect/protocol';
-import type { IntentResponse } from 'src/models/methods/intents';
+import type { DraftResponse } from 'src/models/methods/drafts';
 import { TonConnectError } from 'src/errors/ton-connect.error';
 import { WalletConnectionSourceHTTP } from 'src/models/wallet/wallet-connection-source';
 import { BridgeGateway } from 'src/provider/bridge/bridge-gateway';
@@ -38,8 +38,8 @@ import { waitForSome } from 'src/utils/promise';
 import { sha256 } from 'sha.js';
 
 export class BridgeProvider implements HTTPProvider {
-    private static readonly INTENT_TTL_SECONDS = 300;
-    private static readonly MAX_INLINE_INTENT_URL_LENGTH = 1023;
+    private static readonly DRAFT_TTL_SECONDS = 300;
+    private static readonly MAX_INLINE_DRAFT_URL_LENGTH = 1023;
     private static readonly DEFAULT_OBJECT_STORAGE_URL =
         'https://ton-connect-bridge-v3-staging.tapps.ninja/objects';
     public static async fromStorage(
@@ -169,8 +169,8 @@ export class BridgeProvider implements HTTPProvider {
             });
     }
 
-    public sendIntent(
-        intent: WithoutId<RawIntentRequest>,
+    public sendDraft(
+        draft: WithoutId<RawDraftPayload>,
         options?: OptionalTraceable<{
             openingDeadlineMS?: number;
             signal?: AbortSignal;
@@ -178,25 +178,25 @@ export class BridgeProvider implements HTTPProvider {
     ): string {
         const traceId = options?.traceId ?? UUIDv7();
 
-        const intentWithId = { id: '0', ...intent } as RawIntentRequest; // TODO: is this ok?
+        const draftWithId = { id: '0', ...draft } as RawDraftPayload;
 
         this.subscribeToBridgeEvents({ ...options, traceId });
         const universalLink = this.obtainUniversalLink();
 
-        this.pendingRequests.set(intentWithId.id.toString(), response => {
-            const typed = response as unknown as IntentResponse;
-            this.intentListeners.forEach(listener => listener(typed));
+        this.pendingRequests.set(draftWithId.id.toString(), response => {
+            const typed = response as unknown as DraftResponse;
+            this.draftListeners.forEach(listener => listener(typed));
         });
 
-        return this.generateUniversalLink(universalLink, intentWithId, { traceId });
+        return this.generateUniversalLink(universalLink, draftWithId, { traceId });
     }
 
-    private intentListeners: Array<(response: IntentResponse) => void> = [];
-    public onIntent(listener: (response: IntentResponse) => void): () => void {
-        this.intentListeners.push(listener);
+    private draftListeners: Array<(response: DraftResponse) => void> = [];
+    public onDraftResponse(listener: (response: DraftResponse) => void): () => void {
+        this.draftListeners.push(listener);
 
         return () => {
-            this.intentListeners = this.intentListeners.filter(l => l !== listener);
+            this.draftListeners = this.draftListeners.filter(l => l !== listener);
         };
     }
 
@@ -585,8 +585,7 @@ export class BridgeProvider implements HTTPProvider {
 
     private generateUniversalLink(
         universalLink: string,
-        // refactor for clarity
-        message: ConnectRequest | RawIntentRequest,
+        message: ConnectRequest | RawDraftPayload,
         options: Traceable
     ): string {
         if (isTelegramUrl(universalLink)) {
@@ -596,11 +595,10 @@ export class BridgeProvider implements HTTPProvider {
         return this.generateRegularUniversalLink(universalLink, message, options);
     }
 
-    private storeIntentPayloadInObjectStorage(payload: string): void {
-        // this request should be sent only once, right now sending every url creation, maybe ok
+    private storeDraftPayloadInObjectStorage(payload: string): void {
         const objectStorageUrl = this.getObjectStorageUrl();
         const url = new URL(objectStorageUrl);
-        url.searchParams.set('ttl', BridgeProvider.INTENT_TTL_SECONDS.toString());
+        url.searchParams.set('ttl', BridgeProvider.DRAFT_TTL_SECONDS.toString());
 
         void fetch(url.toString(), {
             method: 'POST',
@@ -609,7 +607,7 @@ export class BridgeProvider implements HTTPProvider {
             },
             body: payload
         }).catch(error => {
-            logDebug('Failed to store intent payload in object storage', error);
+            logDebug('Failed to store draft payload in object storage', error);
         });
     }
 
@@ -625,47 +623,67 @@ export class BridgeProvider implements HTTPProvider {
 
     private generateRegularUniversalLink(
         universalLink: string,
-        message: ConnectRequest | RawIntentRequest,
+        message: ConnectRequest | RawDraftPayload,
         options: Traceable
     ): string {
-        let url = new URL(universalLink);
-        url.searchParams.append('v', PROTOCOL_VERSION.toString());
-        url.searchParams.append('id', this.session!.sessionCrypto.sessionId);
-        url.searchParams.append('trace_id', options.traceId);
+        const baseUrl = new URL(universalLink);
+        baseUrl.searchParams.append('v', PROTOCOL_VERSION.toString());
+        baseUrl.searchParams.append('id', this.session!.sessionCrypto.sessionId);
+        baseUrl.searchParams.append('trace_id', options.traceId);
 
-        if ('m' in message) {
-            url.searchParams.append('r', Base64.encode(JSON.stringify(message)));
-            url.searchParams.append('m', 'intent_inline');
-            if (url.toString().length > BridgeProvider.MAX_INLINE_INTENT_URL_LENGTH) {
-                const shortUrl = new URL(universalLink);
-                const sessionCrypto = new SessionCrypto();
-                shortUrl.searchParams.append('v', PROTOCOL_VERSION.toString());
-                shortUrl.searchParams.append('id', this.session!.sessionCrypto.sessionId);
-                shortUrl.searchParams.append('trace_id', options.traceId);
-                shortUrl.searchParams.append('pk', sessionCrypto.stringifyKeypair().secretKey);
-                shortUrl.searchParams.append('m', 'intent');
-                const encryptedPayloadRaw = sessionCrypto.encrypt(
-                    JSON.stringify(message),
-                    hexToByteArray(sessionCrypto.sessionId)
-                );
-                const encryptedPayload = Base64.encode(encryptedPayloadRaw);
-                this.storeIntentPayloadInObjectStorage(encryptedPayload);
-                const getUrl = addPathToUrl(
-                    this.getObjectStorageUrl(),
-                    new sha256().update(encryptedPayload).update('text/plain').digest('hex')
-                );
-                shortUrl.searchParams.append('get_url', getUrl);
-                return shortUrl.toString();
+        // Draft deep links: drafts have `m` field, signData has `method` field
+        if ('m' in message || 'method' in message) {
+            const draftWithOptionalConnect = message as RawDraftPayload & {
+                c?: ConnectRequest;
+            };
+
+            const { c: connectRequest, ...pureDraft } = draftWithOptionalConnect;
+
+            if (connectRequest) {
+                baseUrl.searchParams.append('r', JSON.stringify(connectRequest));
             }
-        } else {
-            url.searchParams.append('r', JSON.stringify(message));
+
+            const inlineUrl = new URL(baseUrl.toString());
+            const mp = Base64.encode(pureDraft, false)
+                .replace(/\+/g, '-')
+                .replace(/\//g, '_')
+                .replace(/=+$/, '');
+            inlineUrl.searchParams.append('m', 'intent');
+            inlineUrl.searchParams.append('mp', mp);
+
+            if (inlineUrl.toString().length <= BridgeProvider.MAX_INLINE_DRAFT_URL_LENGTH) {
+                return inlineUrl.toString();
+            }
+
+            const shortUrl = new URL(baseUrl.toString());
+            const sessionCrypto = new SessionCrypto();
+
+            shortUrl.searchParams.append('m', 'intent_remote');
+            shortUrl.searchParams.append('pk', sessionCrypto.stringifyKeypair().secretKey);
+
+            const encryptedPayloadRaw = sessionCrypto.encrypt(
+                JSON.stringify(pureDraft),
+                hexToByteArray(sessionCrypto.sessionId)
+            );
+            const encryptedPayload = Base64.encode(encryptedPayloadRaw);
+            this.storeDraftPayloadInObjectStorage(encryptedPayload);
+
+            const getUrl = addPathToUrl(
+                this.getObjectStorageUrl(),
+                new sha256().update(encryptedPayload).update('text/plain').digest('hex')
+            );
+            shortUrl.searchParams.append('get_url', getUrl);
+
+            return shortUrl.toString();
         }
-        return url.toString();
+
+        baseUrl.searchParams.append('r', JSON.stringify(message));
+        return baseUrl.toString();
     }
 
     private generateTGUniversalLink(
         universalLink: string,
-        message: ConnectRequest | RawIntentRequest,
+        message: ConnectRequest | RawDraftPayload,
         options: Traceable
     ): string {
         const urlToWrap = this.generateRegularUniversalLink('about:blank', message, options);

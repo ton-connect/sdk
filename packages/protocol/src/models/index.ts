@@ -9,6 +9,12 @@ export {
     SendTransactionFeature,
     SignDataType,
     SignDataFeature,
-    SignMessageFeature
+    SignMessageFeature,
+    DraftAssetType,
+    SendTransactionDraftFeature,
+    SignMessageDraftFeature,
+    ActionDraftFeature,
+    IntentMethodType,
+    IntentsFeature
 } from './feature';
 export { CHAIN, ChainId } from './CHAIN';

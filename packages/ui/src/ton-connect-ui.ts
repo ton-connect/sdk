@@ -24,12 +24,12 @@ import {
     WalletNotSupportFeatureError,
     SessionCrypto,
     ChainId,
-    SendTransactionIntentRequest,
-    SignDataIntentRequest,
-    SignMessageIntentRequest,
-    SendActionIntentRequest,
-    IntentOptions,
-    SendActionIntentResponse
+    SendTransactionDraftRequest,
+    SignDataDraftRequest,
+    SignMessageDraftRequest,
+    SendActionDraftRequest,
+    DraftOptions,
+    SendActionDraftResponse
 } from '@tonconnect/sdk';
 import { widgetController } from 'src/app/widget-controller';
 import { TonConnectUIError } from 'src/errors/ton-connect-ui.error';
@@ -75,7 +75,7 @@ import {
 import { IMG } from 'src/app/env/IMG';
 
 type TonConnectUIIntentOptions = ActionConfiguration &
-    OptionalTraceable<Omit<IntentOptions, 'onIntentUrlReady'>>;
+    OptionalTraceable<Omit<DraftOptions, 'onIntentUrlReady'>>;
 
 export class TonConnectUI {
     public static getWallets(): Promise<WalletInfo[]> {
@@ -145,7 +145,7 @@ export class TonConnectUI {
                 return;
             }
 
-            unsubscribe = this.connector.onIntentResponse(response => {
+            unsubscribe = this.connector.onDraftResponse(response => {
                 if (signal) {
                     signal.removeEventListener('abort', onAbort);
                 }
@@ -535,7 +535,7 @@ export class TonConnectUI {
      */
     public async sendTransaction(
         tx: SendTransactionRequest,
-        options?: ActionConfiguration &
+        options?: (ActionConfiguration & { useIntent?: boolean }) &
             OptionalTraceable<{
                 onRequestSent?: (redirectToWallet: () => void) => void;
             }>
@@ -543,6 +543,26 @@ export class TonConnectUI {
         const traceId = options?.traceId ?? UUIDv7();
 
         this.tracker.trackTransactionSentForSignature(this.wallet, tx);
+
+        // If wallet is not connected and useIntent flag is set, fall back to intent/draft flow.
+        if (!this.connected && options?.useIntent) {
+            return this.sendTransactionIntent(
+                {
+                    validUntil: tx.validUntil,
+                    network: tx.network,
+                    from: tx.from,
+                    items: tx.messages.map(message => ({
+                        type: 'ton' as const,
+                        address: message.address,
+                        amount: message.amount,
+                        payload: message.payload,
+                        stateInit: message.stateInit,
+                        extraCurrency: message.extraCurrency
+                    }))
+                },
+                options
+            );
+        }
 
         if (!this.connected) {
             this.tracker.trackTransactionSigningFailed(this.wallet, tx, 'Wallet was not connected');
@@ -674,11 +694,28 @@ export class TonConnectUI {
      */
     public async signData(
         data: SignDataPayload,
-        options?: OptionalTraceable<{ onRequestSent?: (redirectToWallet: () => void) => void }>
+        options?: OptionalTraceable<
+            { onRequestSent?: (redirectToWallet: () => void) => void } & { useIntent?: boolean }
+        >
     ): Promise<SignDataResponse> {
         const traceId = options?.traceId ?? UUIDv7();
 
         this.tracker.trackDataSentForSignature(this.wallet, data);
+
+        if (!this.connected && options?.useIntent) {
+            const intentResponse = await this.signDataIntent(
+                {
+                    network: data.network,
+                    from: data.from,
+                    payload: data
+                },
+                {
+                    traceId
+                }
+            );
+
+            return intentResponse;
+        }
 
         if (!this.connected) {
             this.tracker.trackDataSigningFailed(this.wallet, data, 'Wallet was not connected');
@@ -810,9 +847,33 @@ export class TonConnectUI {
      */
     public async signMessage(
         message: SendTransactionRequest,
-        options?: OptionalTraceable<{ onRequestSent?: (redirectToWallet: () => void) => void }>
+        options?: OptionalTraceable<
+            { onRequestSent?: (redirectToWallet: () => void) => void } & { useIntent?: boolean }
+        >
     ): Promise<SignMessageResponse> {
         const traceId = options?.traceId ?? UUIDv7();
+
+        if (!this.connected && options?.useIntent) {
+            const intentResponse = await this.signMessageIntent(
+                {
+                    validUntil: message.validUntil,
+                    network: message.network,
+                    items: message.messages.map(item => ({
+                        type: 'ton' as const,
+                        address: item.address,
+                        amount: item.amount,
+                        payload: item.payload,
+                        stateInit: item.stateInit,
+                        extraCurrency: item.extraCurrency
+                    }))
+                },
+                {
+                    traceId
+                }
+            );
+
+            return intentResponse;
+        }
 
         if (!this.connected) {
             throw new TonConnectUIError('Connect wallet to sign a message.');
@@ -1011,7 +1072,7 @@ export class TonConnectUI {
      * If wallet is not connected, opens modal and shows intent QR/link.
      */
     public async sendTransactionIntent(
-        intent: SendTransactionIntentRequest,
+        intent: SendTransactionDraftRequest,
         options?: TonConnectUIIntentOptions
     ): Promise<OptionalTraceable<SendTransactionResponse>> {
         const traceId = options?.traceId ?? UUIDv7();
@@ -1072,7 +1133,7 @@ export class TonConnectUI {
 
             try {
                 // TODO: waitForIntentSend
-                const result = await this.connector.sendIntent(
+                const result = await this.connector.sendDraft(
                     { method: 'sendTransaction', ...intent },
                     { onRequestSent, signal: abortController.signal, traceId }
                 );
@@ -1105,7 +1166,13 @@ export class TonConnectUI {
         }
 
         let success = false;
+        const previousRequiredFeatures = this._walletsRequiredFeatures;
         try {
+            this._walletsRequiredFeatures = {
+                ...previousRequiredFeatures,
+                intents: { types: ['txDraft'] }
+            };
+
             this.modal.openIntent({
                 traceId,
                 intent: { method: 'sendTransaction', ...intent }
@@ -1135,6 +1202,7 @@ export class TonConnectUI {
             });
             throw e;
         } finally {
+            this._walletsRequiredFeatures = previousRequiredFeatures;
             this.modal.close(success ? 'wallet-selected' : 'action-cancelled');
         }
     }
@@ -1144,7 +1212,7 @@ export class TonConnectUI {
      * If wallet is not connected, opens modal and shows intent QR/link.
      */
     public async signDataIntent(
-        intent: SignDataIntentRequest,
+        intent: SignDataDraftRequest,
         options?: TonConnectUIIntentOptions
     ): Promise<OptionalTraceable<SignDataResponse>> {
         const traceId = options?.traceId ?? UUIDv7();
@@ -1204,7 +1272,7 @@ export class TonConnectUI {
             });
 
             try {
-                const result = await this.connector.sendIntent(
+                const result = await this.connector.sendDraft(
                     { method: 'signData', ...intent },
                     { onRequestSent, signal: abortController.signal, traceId }
                 );
@@ -1237,7 +1305,13 @@ export class TonConnectUI {
         }
 
         let success = false;
+        const previousRequiredFeatures = this._walletsRequiredFeatures;
         try {
+            this._walletsRequiredFeatures = {
+                ...previousRequiredFeatures,
+                intents: { types: ['signData'] }
+            };
+
             this.modal.openIntent({ traceId, intent: { method: 'signData', ...intent } });
 
             const intentResponse = await this.waitForIntentResponse<
@@ -1264,6 +1338,7 @@ export class TonConnectUI {
             });
             throw e;
         } finally {
+            this._walletsRequiredFeatures = previousRequiredFeatures;
             this.modal.close(success ? 'wallet-selected' : 'action-cancelled');
         }
     }
@@ -1273,7 +1348,7 @@ export class TonConnectUI {
      * If wallet is not connected, opens modal and shows intent QR/link.
      */
     public async signMessageIntent(
-        intent: SignMessageIntentRequest,
+        intent: SignMessageDraftRequest,
         options?: TonConnectUIIntentOptions
     ): Promise<OptionalTraceable<SignMessageResponse>> {
         const traceId = options?.traceId ?? UUIDv7();
@@ -1333,7 +1408,7 @@ export class TonConnectUI {
             });
 
             try {
-                const result = await this.connector.sendIntent(
+                const result = await this.connector.sendDraft(
                     { method: 'signMessage', ...intent },
                     { onRequestSent, signal: abortController.signal, traceId }
                 );
@@ -1366,7 +1441,13 @@ export class TonConnectUI {
         }
 
         let success = false;
+        const previousRequiredFeatures = this._walletsRequiredFeatures;
         try {
+            this._walletsRequiredFeatures = {
+                ...previousRequiredFeatures,
+                intents: { types: ['signMsgDraft'] }
+            };
+
             this.modal.openIntent({ traceId, intent: { method: 'signMessage', ...intent } });
 
             const intentResponse = await this.waitForIntentResponse<
@@ -1393,6 +1474,7 @@ export class TonConnectUI {
             });
             throw e;
         } finally {
+            this._walletsRequiredFeatures = previousRequiredFeatures;
             this.modal.close(success ? 'wallet-selected' : 'action-cancelled');
         }
     }
@@ -1402,9 +1484,9 @@ export class TonConnectUI {
      * If wallet is not connected, opens modal and shows intent QR/link.
      */
     public async sendActionIntent(
-        intent: SendActionIntentRequest,
+        intent: SendActionDraftRequest,
         options?: TonConnectUIIntentOptions
-    ): Promise<OptionalTraceable<SendActionIntentResponse>> {
+    ): Promise<OptionalTraceable<SendActionDraftResponse>> {
         const traceId = options?.traceId ?? UUIDv7();
 
         const { notifications, modals, returnStrategy, twaReturnUrl } =
@@ -1462,7 +1544,7 @@ export class TonConnectUI {
             });
 
             try {
-                const result = await this.connector.sendIntent(
+                const result = await this.connector.sendDraft(
                     { method: 'sendAction', ...intent },
                     { onRequestSent, signal: abortController.signal, traceId }
                 );
@@ -1495,11 +1577,17 @@ export class TonConnectUI {
         }
 
         let success = false;
+        const previousRequiredFeatures = this._walletsRequiredFeatures;
         try {
+            this._walletsRequiredFeatures = {
+                ...previousRequiredFeatures,
+                intents: { types: ['actionDraft'] }
+            };
+
             this.modal.openIntent({ traceId, intent: { method: 'sendAction', ...intent } });
 
             const intentResponse = await this.waitForIntentResponse<
-                OptionalTraceable<SendActionIntentResponse>
+                OptionalTraceable<SendActionDraftResponse>
             >(options?.signal);
 
             widgetController.setAction({
@@ -1522,6 +1610,7 @@ export class TonConnectUI {
             });
             throw e;
         } finally {
+            this._walletsRequiredFeatures = previousRequiredFeatures;
             this.modal.close(success ? 'wallet-selected' : 'action-cancelled');
         }
     }
