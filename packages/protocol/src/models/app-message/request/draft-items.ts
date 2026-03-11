@@ -85,4 +85,4 @@ export interface SendNftItem {
     fp?: string;
 }
 
-export type DraftItem = SendTonItem | SendJettonItem | SendNftItem;
+export type TransactionDraftItem = SendTonItem | SendJettonItem | SendNftItem;

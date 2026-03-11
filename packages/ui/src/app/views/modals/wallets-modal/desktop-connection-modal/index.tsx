@@ -82,7 +82,6 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
     const [universalLink, setUniversalLink] = createSignal<string | undefined>();
     const [firstClick, setFirstClick] = createSignal(true);
     const connector = useContext(ConnectorContext)!;
-    const isIntentMode = props.walletsModalState?.mode === 'intent';
 
     const unsubscribe = connector.onStatusChange(
         () => {},
