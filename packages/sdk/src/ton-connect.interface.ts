@@ -17,7 +17,11 @@ import {
 import { SendTransactionDraftRequest } from 'src/models/methods/send-transaction-draft';
 import { SignMessageDraftRequest } from 'src/models/methods/sign-message-draft';
 import { SendActionDraftRequest } from 'src/models/methods/send-action-draft';
-import { ConnectAdditionalRequest, IntentSubscribeOptions } from 'src/models/methods/connect';
+import {
+    ConnectAdditionalRequest,
+    IntentRequest,
+    IntentSubscribeOptions
+} from 'src/models/methods/connect';
 import { SignDataPayload } from '@tonconnect/protocol';
 import { OptionalTraceable } from 'src/utils/types';
 
@@ -152,17 +156,6 @@ export interface ITonConnect {
     ): Promise<OptionalTraceable<SendTransactionResponse>>;
 
     /**
-     * Signs data draft via intent. Uses same payload types as signData.
-     */
-    signDataDraft(
-        data: SignDataPayload,
-        options?: OptionalTraceable<{
-            onRequestSent?: () => void;
-            signal?: AbortSignal;
-        }>
-    ): Promise<OptionalTraceable<SignDataResponse>>;
-
-    /**
      * Signs a message draft (same structure as transaction draft, but without sending to blockchain).
      */
     signMessageDraft(
@@ -184,27 +177,9 @@ export interface ITonConnect {
         }>
     ): Promise<OptionalTraceable<SendTransactionResponse | SignDataResponse | SignMessageResponse>>;
 
-    subscribeToSendTransactionIntent<TWallet extends WalletSourceArg>(
+    subscribeToIntent<TWallet extends WalletSourceArg>(
         wallet: TWallet,
-        draft: SendTransactionDraftRequest,
-        options?: OptionalTraceable<IntentSubscribeOptions>
-    ): WaleltIntentResult<TWallet>;
-
-    subscribeToSignDataIntent<TWallet extends WalletSourceArg>(
-        wallet: TWallet,
-        draft: SignDataPayload,
-        options?: OptionalTraceable<IntentSubscribeOptions>
-    ): WaleltIntentResult<TWallet>;
-
-    subscribeToSignMessageIntent<TWallet extends WalletSourceArg>(
-        wallet: TWallet,
-        draft: SignMessageDraftRequest,
-        options?: OptionalTraceable<IntentSubscribeOptions>
-    ): WaleltIntentResult<TWallet>;
-
-    subscribeToSendActionIntent<TWallet extends WalletSourceArg>(
-        wallet: TWallet,
-        draft: SendActionDraftRequest,
+        intent: IntentRequest,
         options?: OptionalTraceable<IntentSubscribeOptions>
     ): WaleltIntentResult<TWallet>;
 

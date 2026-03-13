@@ -1261,11 +1261,10 @@ export class TonConnectUI {
             });
 
             try {
-                const result = await this.connector.signDataDraft(intent, {
-                    onRequestSent,
-                    signal: abortController.signal,
-                    traceId
-                });
+                const result = await this.waitForSignData(
+                    { data: intent, signal: abortController.signal, traceId },
+                    onRequestSent
+                );
 
                 widgetController.setAction({
                     name: 'data-signed',

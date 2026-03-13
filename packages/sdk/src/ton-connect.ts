@@ -56,7 +56,7 @@ import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { DefaultStorage } from 'src/storage/default-storage';
 import { ITonConnect } from 'src/ton-connect.interface';
 import { IntentResponse, WaleltIntentResult, WalletSourceArg } from 'src/models';
-import { IntentSubscribeOptions } from 'src/models/methods/connect';
+import { IntentRequest, IntentSubscribeOptions } from 'src/models/methods/connect';
 import { WalletWrongNetworkError } from 'src/errors/wallet/wallet-wrong-network.error';
 import { getDocument, getOriginWithPath, getWebPageManifest } from 'src/utils/web-api';
 import { WalletsListManager } from 'src/wallets-list-manager';
@@ -92,7 +92,6 @@ import { TraceableWalletEvent } from 'src/models/wallet/traceable-events';
 import { WalletConnectProvider } from 'src/provider/wallet-connect/wallet-connect-provider';
 import type { RawIntentPayload } from 'src/models/draft-payload';
 import { sendTransactionDraftParser } from 'src/parsers/send-transaction-draft-parser';
-import { signDataDraftParser } from 'src/parsers/sign-data-draft-parser';
 import { signMessageDraftParser } from 'src/parsers/sign-message-draft-parser';
 import { sendActionDraftParser } from 'src/parsers/send-action-draft-parser';
 
@@ -834,17 +833,6 @@ export class TonConnect implements ITonConnect {
         );
     }
 
-    public signDataDraft(
-        draft: SignDataPayload,
-        options?: OptionalTraceable<{
-            onRequestSent?: () => void;
-            signal?: AbortSignal;
-        }>
-    ): Promise<OptionalTraceable<SignDataResponse>> {
-        const payload = signDataDraftParser.convertToRpcRequest(draft);
-        return this.sendDraft<SignDataResponse>(payload, signDataDraftParser, options);
-    }
-
     public signMessageDraft(
         draft: SignMessageDraftRequest,
         options?: OptionalTraceable<{
@@ -938,56 +926,61 @@ export class TonConnect implements ITonConnect {
         }
     }
 
-    public subscribeToSendTransactionIntent<TWallet extends WalletSourceArg>(
+    public subscribeToIntent<TWallet extends WalletSourceArg>(
         wallet: TWallet,
-        draft: SendTransactionDraftRequest,
+        intent: IntentRequest,
         options?: OptionalTraceable<IntentSubscribeOptions>
     ): WaleltIntentResult<TWallet> {
-        return this.subscribeToIntentInternal(
-            wallet,
-            draft,
-            sendTransactionDraftParser.convertToRpcRequest.bind(sendTransactionDraftParser),
-            options
-        );
-    }
+        if (this.connected) {
+            throw new WalletAlreadyConnectedError();
+        }
 
-    public subscribeToSignDataIntent<TWallet extends WalletSourceArg>(
-        wallet: TWallet,
-        draft: SignDataPayload,
-        options?: OptionalTraceable<IntentSubscribeOptions>
-    ): WaleltIntentResult<TWallet> {
-        return this.subscribeToIntentInternal(
-            wallet,
-            draft,
-            signDataDraftParser.convertToRpcRequest.bind(signDataDraftParser),
-            options
-        );
-    }
+        const abortController = createAbortController(options?.signal);
 
-    public subscribeToSignMessageIntent<TWallet extends WalletSourceArg>(
-        wallet: TWallet,
-        draft: SignMessageDraftRequest,
-        options?: OptionalTraceable<IntentSubscribeOptions>
-    ): WaleltIntentResult<TWallet> {
-        return this.subscribeToIntentInternal(
-            wallet,
-            draft,
-            signMessageDraftParser.convertToRpcRequest.bind(signMessageDraftParser),
-            options
-        );
-    }
+        if (abortController.signal.aborted) {
+            throw new TonConnectError('Draft subscription was aborted.');
+        }
 
-    public subscribeToSendActionIntent<TWallet extends WalletSourceArg>(
-        wallet: TWallet,
-        draft: SendActionDraftRequest,
-        options?: OptionalTraceable<IntentSubscribeOptions>
-    ): WaleltIntentResult<TWallet> {
-        return this.subscribeToIntentInternal(
-            wallet,
-            draft,
-            sendActionDraftParser.convertToRpcRequest.bind(sendActionDraftParser),
-            options
-        );
+        const traceId = options?.traceId ?? UUIDv7();
+        const connectRequest = this.createConnectRequest(options?.connectRequest);
+
+        let payload: WithoutId<RawIntentPayload>;
+        switch (intent.method) {
+            case 'sendTransaction':
+                payload = sendTransactionDraftParser.convertToRpcRequest(intent);
+                break;
+            case 'signData': {
+                const { method, ...signDataPayload } = intent;
+                void method;
+                payload = signDataParser.convertToRpcRequest(signDataPayload);
+                break;
+            }
+            case 'signMessage':
+                payload = signMessageDraftParser.convertToRpcRequest(intent);
+                break;
+            case 'sendAction':
+                payload = sendActionDraftParser.convertToRpcRequest(intent);
+                break;
+        }
+
+        if (this.provider) {
+            this.provider.closeConnection();
+        }
+
+        this.provider = this.createProvider(wallet);
+
+        abortController.signal.addEventListener('abort', () => {
+            if (this.provider) {
+                this.provider.closeConnection();
+                this.provider = null;
+            }
+        });
+
+        return this.provider.connectWithIntent(payload, {
+            connectRequest,
+            signal: abortController.signal,
+            traceId
+        }) as WaleltIntentResult<TWallet>;
     }
 
     private async sendDraft<T extends object>(
@@ -1064,46 +1057,6 @@ export class TonConnect implements ITonConnect {
                 reject(error);
             }
         });
-    }
-
-    private subscribeToIntentInternal<TWallet extends WalletSourceArg, TRequest>(
-        wallet: TWallet,
-        draft: TRequest,
-        serialize: (request: TRequest) => WithoutId<RawIntentPayload>,
-        options?: OptionalTraceable<IntentSubscribeOptions>
-    ): WaleltIntentResult<TWallet> {
-        if (this.connected) {
-            throw new WalletAlreadyConnectedError();
-        }
-
-        const abortController = createAbortController(options?.signal);
-
-        if (abortController.signal.aborted) {
-            throw new TonConnectError('Draft subscription was aborted.');
-        }
-
-        const traceId = options?.traceId ?? UUIDv7();
-        const connectRequest = this.createConnectRequest(options?.connectRequest);
-        const payload = serialize(draft);
-
-        if (this.provider) {
-            this.provider.closeConnection();
-        }
-
-        this.provider = this.createProvider(wallet);
-
-        abortController.signal.addEventListener('abort', () => {
-            if (this.provider) {
-                this.provider.closeConnection();
-                this.provider = null;
-            }
-        });
-
-        return this.provider.connectWithIntent(payload, {
-            connectRequest,
-            signal: abortController.signal,
-            traceId
-        }) as WaleltIntentResult<TWallet>;
     }
 
     private getSessionInfo(): { clientId: string | null; walletId: string | null } | null {

@@ -1,16 +1,4 @@
-import { FeatureName, OptionalTraceable, RequiredFeatures } from '@tonconnect/sdk';
-import {
-    SendTransactionDraftRequest,
-    SignDataPayload,
-    SignMessageDraftRequest,
-    SendActionDraftRequest
-} from '@tonconnect/sdk';
-
-export type IntentRequest =
-    | (SendTransactionDraftRequest & { method: 'sendTransaction' })
-    | (SignDataPayload & { method: 'signData' })
-    | (SignMessageDraftRequest & { method: 'signMessage' })
-    | (SendActionDraftRequest & { method: 'sendAction' });
+import { FeatureName, IntentRequest, OptionalTraceable, RequiredFeatures } from '@tonconnect/sdk';
 
 export interface WalletsModal {
     /**

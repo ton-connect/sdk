@@ -15,29 +15,10 @@ export function initiateTonConnectFlow<TWallet extends WalletSourceArg>(
 
     if (state.mode === 'intent') {
         const intent = state.intent!;
-
-        switch (intent.method) {
-            case 'sendTransaction':
-                return connector.subscribeToSendTransactionIntent(walletSource, intent, {
-                    traceId: state.traceId,
-                    connectRequest: options.additionalRequest
-                });
-            case 'signData':
-                return connector.subscribeToSignDataIntent(walletSource, intent, {
-                    traceId: state.traceId,
-                    connectRequest: options.additionalRequest
-                });
-            case 'signMessage':
-                return connector.subscribeToSignMessageIntent(walletSource, intent, {
-                    traceId: state.traceId,
-                    connectRequest: options.additionalRequest
-                });
-            case 'sendAction':
-                return connector.subscribeToSendActionIntent(walletSource, intent, {
-                    traceId: state.traceId,
-                    connectRequest: options.additionalRequest
-                });
-        }
+        return connector.subscribeToIntent(walletSource, intent, {
+            traceId: state.traceId,
+            connectRequest: options.additionalRequest
+        });
     } else {
         return connector.connect(walletSource, options.additionalRequest, {
             traceId: state.traceId

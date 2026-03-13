@@ -14,12 +14,12 @@ import App from './App';
 import { WalletInfoWithOpenMethod, WalletOpenMethod } from 'src/models/connected-wallet';
 import { WalletsModalCloseReason } from 'src/models';
 import {
+    IntentRequest,
     OptionalTraceable,
     Traceable,
     WalletInfoRemote,
     WalletNotSupportFeatureError
 } from '@tonconnect/sdk';
-import type { IntentRequest } from 'src/models/wallets-modal';
 
 export const widgetController = {
     openWalletsModal: (
