@@ -34,7 +34,7 @@ export const widgetController = {
                 traceId: options?.traceId ?? prev?.traceId,
                 closeReason: null,
                 mode: options?.mode ?? prev?.mode ?? 'connect',
-                intent: options?.intent ?? prev?.intent
+                intent: options?.mode === 'connect' ? undefined : (options?.intent ?? prev?.intent)
             }))
         ),
     closeWalletsModal: (reason: WalletsModalCloseReason): void =>

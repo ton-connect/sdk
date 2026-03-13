@@ -44,8 +44,9 @@ import { TonConnectUiOptions } from 'src/models/ton-connect-ui-options';
 import { setBorderRadius, setColors, setTheme } from 'src/app/state/theme-state';
 import { mergeOptions } from 'src/app/utils/options';
 import { appState, setAppState } from 'src/app/state/app.state';
+import { createEffect } from 'solid-js';
 import { unwrap } from 'solid-js/store';
-import { Action, setLastSelectedWalletInfo } from 'src/app/state/modals-state';
+import { Action, setLastSelectedWalletInfo, walletsModalState } from 'src/app/state/modals-state';
 import { ActionConfiguration, StrictActionConfiguration } from 'src/models/action-configuration';
 import { ConnectedWallet, WalletInfoWithOpenMethod } from 'src/models/connected-wallet';
 import { applyWalletsListConfiguration, eqWalletName } from 'src/app/utils/wallets';
@@ -102,6 +103,8 @@ export class TonConnectUI {
     private readonly walletsList: Promise<WalletInfo[]>;
 
     private _walletsRequiredFeatures?: RequiredFeatures;
+
+    private readonly _baseWalletsRequiredFeatures?: RequiredFeatures;
 
     public get walletsRequiredFeatures(): RequiredFeatures | undefined {
         return this._walletsRequiredFeatures;
@@ -334,8 +337,16 @@ export class TonConnectUI {
         });
 
         this._walletsRequiredFeatures = options.walletsRequiredFeatures;
+        this._baseWalletsRequiredFeatures = options.walletsRequiredFeatures;
 
         this._walletsPreferredFeatures = options.walletsPreferredFeatures;
+
+        createEffect(() => {
+            const state = walletsModalState();
+            if (state.status === 'opened' && state.mode === 'connect') {
+                this._walletsRequiredFeatures = this._baseWalletsRequiredFeatures;
+            }
+        });
 
         this.walletsList = this.getWallets();
 
