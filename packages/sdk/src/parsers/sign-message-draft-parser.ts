@@ -19,7 +19,7 @@ class SignMessageDraftParser extends RpcParser<'signMessageDraft'> {
         request: SignMessageDraftRequest
     ): WithoutId<AppRequest<'signMessageDraft'>> {
         return {
-            method: 'signMessage',
+            method: 'signMsgDraft',
             params: {
                 vu: request.validUntil,
                 n: request.network,

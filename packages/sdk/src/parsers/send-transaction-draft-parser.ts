@@ -82,7 +82,7 @@ class SendTransactionDraftParser extends RpcParser<'sendTransactionDraft'> {
         request: SendTransactionDraftRequest
     ): WithoutId<AppRequest<'sendTransactionDraft'>> {
         return {
-            method: 'sendTransaction',
+            method: 'txDraft',
             params: {
                 vu: request.validUntil,
                 f: request.from,
