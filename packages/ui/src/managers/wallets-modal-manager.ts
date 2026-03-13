@@ -7,6 +7,7 @@ import {
 import { createEffect, on } from 'solid-js';
 import {
     ConnectAdditionalRequest,
+    IntentRequest,
     isConnectUrl,
     isWalletInfoCurrentlyEmbedded,
     ITonConnect,
@@ -154,8 +155,38 @@ export class WalletsModalManager implements WalletsModal {
         if (embeddedWallet) {
             return this.connectEmbeddedWallet(embeddedWallet, { traceId });
         } else {
-            return this.openWalletsModal({ traceId });
+            return this.openWalletsModal({ traceId, mode: 'connect', intent: undefined });
         }
+    }
+
+    /**
+     * Opens the modal window in intent mode with a pre-built intent URL.
+     * Used by intent flow to reuse the same wallets UI but with different URLs.
+     */
+    public async openWithIntent(
+        options: OptionalTraceable<{
+            intent: IntentRequest;
+        }>
+    ): Promise<void> {
+        if (isInTMA()) {
+            sendExpand();
+        }
+
+        widgetController.openWalletsModal({
+            traceId: options.traceId,
+            mode: 'intent',
+            intent: options.intent
+        });
+
+        return new Promise<void>(resolve => {
+            const unsubscribe = this.onStateChange(state => {
+                const { status } = state;
+                if (status === 'opened') {
+                    unsubscribe();
+                    resolve();
+                }
+            });
+        });
     }
 
     /**
@@ -208,12 +239,18 @@ export class WalletsModalManager implements WalletsModal {
      * Opens the modal window to connect to an external wallet, and waits when modal window is opened.
      * @internal
      */
-    private async openWalletsModal(options: Traceable): Promise<void> {
+    private async openWalletsModal(
+        options: Traceable & { mode?: 'connect' | 'intent'; intent?: IntentRequest }
+    ): Promise<void> {
         if (isInTMA()) {
             sendExpand();
         }
 
-        widgetController.openWalletsModal({ traceId: options.traceId });
+        widgetController.openWalletsModal({
+            traceId: options.traceId,
+            mode: options.mode,
+            intent: options.intent
+        });
 
         return new Promise<void>(resolve => {
             const unsubscribe = this.onStateChange(state => {

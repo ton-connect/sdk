@@ -23,5 +23,11 @@ export {
 export {
     RequiredFeatures,
     RequiredSendTransactionFeature,
-    RequiredSignDataFeature
+    RequiredSignDataFeature,
+    RequiredSignMessageFeature,
+    RequiredSendTransactionDraftFeature,
+    RequiredSignDataDraftFeature,
+    RequiredSignMessageDraftFeature,
+    RequiredSendActionDraftFeature,
+    RequiredIntentsFeature
 } from './require-feature';

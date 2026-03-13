@@ -22,7 +22,7 @@
   },
   "notifications": {
     "confirm": {
-      "header": "Откройте {{ name }}, чтобы подтвердить транзакцию."
+      "header": "Откройте {{ name }}, чтобы подтвердить действие."
     },
     "transactionSent": {
       "header": "Транзакция отправлена",
@@ -37,6 +37,34 @@
     },
     "signDataCanceled": {
       "header": "Подпись данных отменена"
+    },
+    "messageSigned": {
+      "header": "Сообщение подписано"
+    },
+    "signMessageCanceled": {
+      "header": "Подпись сообщения отменена"
+    },
+    "intent": {
+      "transactionSent": {
+        "header": "Intent‑транзакция отправлена",
+        "text": "Ваш запрос intent отправлен в кошелёк."
+      },
+      "transactionCanceled": {
+        "header": "Intent‑транзакция отменена",
+        "text": "Запрос intent отменён. Баланс вашего счёта не изменится."
+      },
+      "dataSigned": {
+        "header": "Данные по intent подписаны"
+      },
+      "signDataCanceled": {
+        "header": "Подпись данных по intent отменена"
+      },
+      "messageSigned": {
+        "header": "Сообщение по intent подписано"
+      },
+      "signMessageCanceled": {
+        "header": "Подпись сообщения по intent отменена"
+      }
     }
   },
   "walletItem": {
@@ -135,16 +163,28 @@
   },
   "actionModal": {
     "confirmTransaction": {
-      "header": "Подтвердите действие в {{ name }}",
+      "header": "Подтвердите транзакцию в {{ name }}",
       "text": "Это займет пару секунд."
     },
     "signData": {
       "header": "Подпишите данные в {{ name }}",
       "text": "Это займет пару секунд."
     },
+    "signMessage": {
+      "header": "Подпишите сообщение в {{ name }}",
+      "text": "Это займет пару секунд."
+    },
     "transactionSent": "$notifications.transactionSent",
     "transactionCanceled": "$notifications.transactionCanceled",
     "dataSigned": "$notifications.dataSigned",
-    "signDataCanceled": "$notifications.signDataCanceled"
+    "signDataCanceled": "$notifications.signDataCanceled",
+    "messageSigned": "$notifications.messageSigned",
+    "signMessageCanceled": "$notifications.signMessageCanceled",
+    "intentTransactionSent": "$notifications.intent.transactionSent",
+    "intentTransactionCanceled": "$notifications.intent.transactionCanceled",
+    "intentDataSigned": "$notifications.intent.dataSigned",
+    "intentSignDataCanceled": "$notifications.intent.signDataCanceled",
+    "intentMessageSigned": "$notifications.intent.messageSigned",
+    "intentSignMessageCanceled": "$notifications.intent.signMessageCanceled"
   }
 }

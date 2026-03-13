@@ -58,3 +58,15 @@ export const NotificationsStyled = styled(Notifications)`
         margin-top: 20px;
     }
 `;
+
+export const ConnectButtonContainerStyled = styled.div`
+    position: relative;
+    width: fit-content;
+`;
+
+export const ConnectNotificationsStyled = styled(Notifications)`
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 20px;
+`;

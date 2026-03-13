@@ -43,6 +43,35 @@
     }
   }
 
+  &__buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    button {
+      border: none;
+      padding: 7px 15px;
+      border-radius: 15px;
+      cursor: pointer;
+
+      background-color: rgba(102,170,238,0.91);
+      color: white;
+      font-size: 16px;
+      line-height: 20px;
+
+      transition: transform 0.1s ease-in-out;
+
+      &:hover {
+        transform: scale(1.03);
+      }
+
+      &:active {
+        transform: scale(0.97);
+      }
+    }
+  }
+
   &__json-view {
     background: rgba(24, 32, 48, 0.98);
     border-radius: 14px;

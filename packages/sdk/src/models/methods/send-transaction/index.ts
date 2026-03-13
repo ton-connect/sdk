@@ -1,2 +1,2 @@
-export { SendTransactionRequest } from './send-transaction-request';
-export { SendTransactionResponse } from './send-transaction-response';
+export type { SendTransactionRequest } from './send-transaction-request';
+export type { SendTransactionResponse } from './send-transaction-response';

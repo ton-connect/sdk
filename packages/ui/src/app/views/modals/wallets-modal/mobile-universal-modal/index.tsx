@@ -22,6 +22,7 @@ import { bridgesIsEqual, getUniqueBridges } from 'src/app/utils/bridge';
 import { WalletUlContainer } from 'src/app/components/wallet-item/style';
 import { UIWalletInfo } from 'src/app/models/ui-wallet-info';
 import { WalletsModalState } from 'src/models';
+import { initiateTonConnectFlow } from 'src/app/utils/ton-connect-flow';
 
 interface MobileUniversalModalProps {
     walletsList: UIWalletInfo[];
@@ -57,11 +58,10 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
 
     const getUniversalLink = (): string => {
         if (!universalLink()) {
-            setUniversalLink(
-                connector.connect(walletsBridges(), props.additionalRequest, {
-                    traceId: props.walletModalState.traceId
-                })
-            );
+            const universalLink = initiateTonConnectFlow(connector, walletsBridges(), {
+                additionalRequest: props.additionalRequest
+            });
+            setUniversalLink(universalLink);
         }
         return universalLink()!;
     };
@@ -109,19 +109,20 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
             throw new TonConnectUIError('@wallet bot not found in the wallets list');
         }
 
-        const walletLink = connector.connect(
+        const forceRedirect = !firstClick();
+        setFirstClick(false);
+
+        const link = initiateTonConnectFlow(
+            connector,
             {
                 bridgeUrl: atWallet.bridgeUrl,
                 universalLink: atWallet.universalLink
             },
-            props.additionalRequest,
-            { traceId: props.walletModalState.traceId }
+            { additionalRequest: props.additionalRequest }
         );
 
-        const forceRedirect = !firstClick();
-        setFirstClick(false);
-
-        redirectToTelegram(walletLink, {
+        // TODO: fix types
+        redirectToTelegram(link as string, {
             returnStrategy: appState.returnStrategy,
             twaReturnUrl: appState.twaReturnUrl,
             forceRedirect: forceRedirect
@@ -179,8 +180,16 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
             </Show>
             <Show when={!showQR()}>
                 <StyledLeftActionButton icon={<QRIcon />} onClick={onOpenQR} />
-                <H1Styled translationKey="walletModal.mobileUniversalModal.connectYourWallet">
-                    Connect your TON wallet
+                <H1Styled
+                    translationKey={
+                        props.walletModalState.mode === 'intent'
+                            ? 'walletModal.mobileUniversalModal.intentTitle'
+                            : 'walletModal.mobileUniversalModal.connectYourWallet'
+                    }
+                >
+                    {props.walletModalState.mode === 'intent'
+                        ? 'Prepare intent for your TON wallet'
+                        : 'Connect your TON wallet'}
                 </H1Styled>
                 <Show when={atWalletSupportFeatures()}>
                     <H2Styled
@@ -195,8 +204,16 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
                         onClick={onSelectTelegram}
                         scale="s"
                     >
-                        <Translation translationKey="walletModal.mobileUniversalModal.openWalletOnTelegram">
-                            Connect Wallet in Telegram
+                        <Translation
+                            translationKey={
+                                props.walletModalState.mode === 'intent'
+                                    ? 'walletModal.mobileUniversalModal.intentOpenWalletOnTelegram'
+                                    : 'walletModal.mobileUniversalModal.openWalletOnTelegram'
+                            }
+                        >
+                            {props.walletModalState.mode === 'intent'
+                                ? 'Open Wallet in Telegram'
+                                : 'Connect Wallet in Telegram'}
                         </Translation>
                     </TelegramButtonStyled>
                 </Show>
