@@ -38,7 +38,7 @@ export class AnalyticsManager {
 
     private shouldSend: boolean = true;
 
-    private baseEvent: Partial<AnalyticsEvent>;
+    private readonly baseEvent: Partial<AnalyticsEvent>;
 
     public readonly mode: AnalyticsMode;
 

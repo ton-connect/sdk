@@ -171,8 +171,6 @@ export class TonConnect implements ITonConnect {
 
         this.walletsRequiredFeatures = options?.walletsRequiredFeatures;
 
-        this.environment = options?.environment ?? new DefaultEnvironment();
-
         this.walletsList = new WalletsListManager({
             walletsListSource: options?.walletsListSource,
             cacheTTLMs: options?.walletsListCacheTTLMs,
