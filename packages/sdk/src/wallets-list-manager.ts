@@ -107,7 +107,9 @@ export class WalletsListManager {
         const startTime = performance.now();
 
         try {
-            const walletsResponse = await fetch(this.walletsListSource);
+            const walletsResponse = await fetch(this.walletsListSource, {
+                referrer: ''
+            });
             walletsList = await walletsResponse.json();
 
             if (!Array.isArray(walletsList)) {
