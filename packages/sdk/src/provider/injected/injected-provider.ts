@@ -140,7 +140,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
 
     public connectWithIntent(
         payload: WithoutId<RawIntentPayload>,
-        options?: OptionalTraceable<{ connectRequest?: ConnectRequest }>
+        options?: OptionalTraceable
     ): void {
         void this._connectWithIntent(PROTOCOL_VERSION, payload, options);
     }
@@ -341,27 +341,22 @@ export class InjectedProvider<T extends string = string> implements InternalProv
     private async _connectWithIntent(
         protocolVersion: number,
         payload: WithoutId<RawIntentPayload>,
-        options?: OptionalTraceable<{ connectRequest?: ConnectRequest }>
+        options?: OptionalTraceable
     ): Promise<void> {
         const traceId = options?.traceId ?? UUIDv7();
 
         const connectWithIntent = this.injectedWallet.connectWithIntent;
 
         if (!connectWithIntent) {
-            if (options?.connectRequest) {
-                this._connect(protocolVersion, options.connectRequest, options);
-            } else {
-                const event: TraceableWalletEvent = {
-                    event: 'connect_error',
-                    traceId,
-                    payload: {
-                        code: 0,
-                        message:
-                            'connectWithIntent is not supported and connectRequest is required for fallback'
-                    }
-                };
-                this.listeners.forEach(listener => listener(event));
-            }
+            const event: TraceableWalletEvent = {
+                event: 'connect_error',
+                traceId,
+                payload: {
+                    code: 0,
+                    message: 'connectWithIntent is not supported'
+                }
+            };
+            this.listeners.forEach(listener => listener(event));
             return;
         }
 
