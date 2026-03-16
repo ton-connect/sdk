@@ -108,7 +108,10 @@ export class BridgeProvider implements HTTPProvider {
         this.subscribeToBridgeEvents({ ...options, traceId });
         const universalLink = this.obtainUniversalLink();
 
-        return this.generateUniversalLink(universalLink, { connectRequest: message }, { traceId });
+        return this.generateUniversalLink(universalLink, { connectRequest: message }, {
+            traceId,
+            signal: options?.signal
+        });
     }
 
     private obtainUniversalLink() {
@@ -200,7 +203,7 @@ export class BridgeProvider implements HTTPProvider {
                 connectRequest: options?.connectRequest,
                 draft: intentPayload
             },
-            { traceId }
+            { traceId, signal: options?.signal }
         );
     }
 
@@ -599,7 +602,7 @@ export class BridgeProvider implements HTTPProvider {
     private generateUniversalLink(
         universalLink: string,
         message: UniversalLinkMessage,
-        options: Traceable
+        options: Traceable<{ signal?: AbortSignal }>
     ): string {
         if (isTelegramUrl(universalLink)) {
             return this.generateTGUniversalLink(universalLink, message, options);
@@ -608,7 +611,10 @@ export class BridgeProvider implements HTTPProvider {
         return this.generateRegularUniversalLink(universalLink, message, options);
     }
 
-    private storeIntentPayloadInObjectStorage(payload: string): void {
+    private storeIntentPayloadInObjectStorage(
+        payload: string,
+        options?: { signal?: AbortSignal }
+    ): void {
         const objectStorageUrl = this.getObjectStorageUrl();
         const url = new URL(objectStorageUrl);
         url.searchParams.set('ttl', BridgeProvider.INTENT_TTL_SECONDS.toString());
@@ -618,7 +624,8 @@ export class BridgeProvider implements HTTPProvider {
             headers: {
                 'Content-Type': 'text/plain'
             },
-            body: payload
+            body: payload,
+            signal: options?.signal
         }).catch(error => {
             this.abortController?.abort();
             logDebug('Failed to store intent payload in object storage', error);
@@ -638,7 +645,7 @@ export class BridgeProvider implements HTTPProvider {
     private generateRegularUniversalLink(
         universalLink: string,
         message: UniversalLinkMessage,
-        options: Traceable
+        options: Traceable<{ signal?: AbortSignal }>
     ): string {
         const baseUrl = new URL(universalLink);
         baseUrl.searchParams.append('v', PROTOCOL_VERSION.toString());
@@ -673,7 +680,9 @@ export class BridgeProvider implements HTTPProvider {
                 hexToByteArray(sessionCrypto.sessionId)
             );
             const encryptedPayload = Base64.encode(encryptedPayloadRaw);
-            this.storeIntentPayloadInObjectStorage(encryptedPayload);
+            this.storeIntentPayloadInObjectStorage(encryptedPayload, {
+                signal: options.signal
+            });
 
             const getUrl = addPathToUrl(
                 this.getObjectStorageUrl(),
@@ -690,7 +699,7 @@ export class BridgeProvider implements HTTPProvider {
     private generateTGUniversalLink(
         universalLink: string,
         message: UniversalLinkMessage,
-        options: Traceable
+        options: Traceable<{ signal?: AbortSignal }>
     ): string {
         const urlToWrap = this.generateRegularUniversalLink('about:blank', message, options);
         const linkParams = urlToWrap.split('?')[1]!;
