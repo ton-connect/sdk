@@ -90,7 +90,7 @@ import { DefaultEnvironment } from 'src/environment/default-environment';
 import { UUIDv7 } from 'src/utils/uuid';
 import { TraceableWalletEvent } from 'src/models/wallet/traceable-events';
 import { WalletConnectProvider } from 'src/provider/wallet-connect/wallet-connect-provider';
-import type { RawIntentPayload } from 'src/models/draft-payload';
+import type { RawIntentPayload } from 'src/models/intent-payload';
 import { sendTransactionDraftParser } from 'src/parsers/send-transaction-draft-parser';
 import { signMessageDraftParser } from 'src/parsers/sign-message-draft-parser';
 import { sendActionDraftParser } from 'src/parsers/send-action-draft-parser';

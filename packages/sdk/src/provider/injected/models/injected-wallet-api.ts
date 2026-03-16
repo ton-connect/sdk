@@ -8,7 +8,7 @@ import {
     WalletResponse
 } from '@tonconnect/protocol';
 import { IntentResponse } from 'src/models';
-import type { RawIntentPayload } from 'src/models/draft-payload';
+import type { RawIntentPayload } from 'src/models/intent-payload';
 import { WalletInfoDTO } from 'src/models/wallet/wallet-info';
 import { hasProperties, hasProperty, OptionalTraceable } from 'src/utils/types';
 

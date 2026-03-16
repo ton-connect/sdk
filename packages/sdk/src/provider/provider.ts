@@ -1,5 +1,5 @@
 import { AppRequest, ConnectRequest, RpcMethod } from '@tonconnect/protocol';
-import type { RawIntentPayload } from 'src/models/draft-payload';
+import type { RawIntentPayload } from 'src/models/intent-payload';
 import { OptionalTraceable, WithoutId } from 'src/utils/types';
 import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet/traceable-events';
 import type { IntentResponse } from 'src/models';

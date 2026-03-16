@@ -10,7 +10,7 @@ import {
     WalletMessage,
     WalletResponse
 } from '@tonconnect/protocol';
-import type { RawIntentPayload, UniversalLinkMessage } from 'src/models/draft-payload';
+import type { RawIntentPayload, UniversalLinkMessage } from 'src/models/intent-payload';
 import type { IntentResponse } from 'src/models';
 import { TonConnectError } from 'src/errors/ton-connect.error';
 import { WalletConnectionSourceHTTP } from 'src/models/wallet/wallet-connection-source';

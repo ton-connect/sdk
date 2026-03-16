@@ -6,7 +6,7 @@ import {
     RpcMethod,
     WalletResponse
 } from '@tonconnect/protocol';
-import type { RawIntentPayload } from 'src/models/draft-payload';
+import type { RawIntentPayload } from 'src/models/intent-payload';
 import type { IntentResponse } from 'src/models';
 import {
     InjectedWalletApi,
