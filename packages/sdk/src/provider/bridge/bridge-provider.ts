@@ -108,10 +108,14 @@ export class BridgeProvider implements HTTPProvider {
         this.subscribeToBridgeEvents({ ...options, traceId });
         const universalLink = this.obtainUniversalLink();
 
-        return this.generateUniversalLink(universalLink, { connectRequest: message }, {
-            traceId,
-            signal: options?.signal
-        });
+        return this.generateUniversalLink(
+            universalLink,
+            { connectRequest: message },
+            {
+                traceId,
+                signal: options?.signal
+            }
+        );
     }
 
     private obtainUniversalLink() {

@@ -265,4 +265,3 @@ function checkSignMessageDraft(
 
     return !!(correctTypes && correctMessagesNumber && correctExtraCurrency);
 }
-
