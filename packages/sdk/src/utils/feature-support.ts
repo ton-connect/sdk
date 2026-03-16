@@ -4,7 +4,6 @@ import {
     SendTransactionDraftFeature,
     SendTransactionFeature,
     SignDataFeature,
-    SignDataDraftFeature,
     SignMessageDraftFeature,
     ActionDraftFeature
 } from '@tonconnect/protocol';
@@ -17,7 +16,6 @@ import {
     RequiredSignMessageFeature,
     RequiredSendTransactionDraftFeature,
     RequiredSignMessageDraftFeature,
-    RequiredSignDataDraftFeature,
     RequiredSendActionDraftFeature,
     RequiredIntentsFeature
 } from 'src/models';
@@ -126,7 +124,6 @@ export function checkRequiredWalletFeatures(
             ),
         () => checkSignMessageDraftFeature(features, walletsRequiredFeatures.signMessageDraft),
         () => checkSendActionDraftFeature(features, walletsRequiredFeatures.sendActionDraft),
-        () => checkSignDataDraftFeature(features, walletsRequiredFeatures.signDataDraft),
         () => checkIntentsFeature(features, walletsRequiredFeatures.intents)
     ];
 
@@ -187,15 +184,6 @@ function checkSendActionDraftFeature(
     return !!feature;
 }
 
-function checkSignDataDraftFeature(
-    features: Feature[],
-    required?: RequiredSignDataDraftFeature
-): boolean {
-    if (!required) return true;
-    const feature = findFeature(features, 'SignDataDraft') as SignDataDraftFeature | undefined;
-    return !!feature && checkSignDataDraft(feature, required);
-}
-
 function checkIntentsFeature(features: Feature[], required?: RequiredIntentsFeature): boolean {
     if (!required) return true;
     const feature = findFeature(features, 'Intents') as IntentsFeature | undefined;
@@ -235,22 +223,46 @@ function checkSignData(
 }
 
 function checkSendTransactionDraft(
-    _feature: SendTransactionDraftFeature,
-    _requiredFeature: RequiredSendTransactionDraftFeature
+    feature: SendTransactionDraftFeature,
+    requiredFeature: RequiredSendTransactionDraftFeature
 ): boolean {
-    return true;
+    const correctTypes =
+        requiredFeature.types === undefined ||
+        requiredFeature.types.every(requiredType => feature.types.includes(requiredType));
+
+    const correctMessagesNumber =
+        requiredFeature.minMessages === undefined ||
+        ('maxMessages' in feature &&
+            typeof (feature as { maxMessages?: number }).maxMessages === 'number' &&
+            requiredFeature.minMessages <= (feature as { maxMessages: number }).maxMessages);
+
+    const correctExtraCurrency =
+        !requiredFeature.extraCurrencyRequired ||
+        ('extraCurrencySupported' in feature &&
+            (feature as { extraCurrencySupported?: boolean }).extraCurrencySupported);
+
+    return !!(correctTypes && correctMessagesNumber && correctExtraCurrency);
 }
 
 function checkSignMessageDraft(
-    _feature: SignMessageDraftFeature,
-    _requiredFeature: RequiredSignMessageDraftFeature
+    feature: SignMessageDraftFeature,
+    requiredFeature: RequiredSignMessageDraftFeature
 ): boolean {
-    return true;
+    const correctTypes =
+        requiredFeature.types === undefined ||
+        requiredFeature.types.every(requiredType => feature.types.includes(requiredType));
+
+    const correctMessagesNumber =
+        requiredFeature.minMessages === undefined ||
+        ('maxMessages' in feature &&
+            typeof (feature as { maxMessages?: number }).maxMessages === 'number' &&
+            requiredFeature.minMessages <= (feature as { maxMessages: number }).maxMessages);
+
+    const correctExtraCurrency =
+        !requiredFeature.extraCurrencyRequired ||
+        ('extraCurrencySupported' in feature &&
+            (feature as { extraCurrencySupported?: boolean }).extraCurrencySupported);
+
+    return !!(correctTypes && correctMessagesNumber && correctExtraCurrency);
 }
 
-function checkSignDataDraft(
-    feature: SignDataDraftFeature,
-    requiredFeature: RequiredSignDataDraftFeature
-): boolean {
-    return requiredFeature.types.every(requiredType => feature.types.includes(requiredType));
-}

@@ -4,7 +4,6 @@ export type Feature =
     | SignDataFeature
     | SignMessageFeature
     | SendTransactionDraftFeature
-    | SignDataDraftFeature
     | SignMessageDraftFeature
     | ActionDraftFeature
     | IntentsFeature;
@@ -33,8 +32,6 @@ export type SendTransactionDraftFeature = {
     name: 'SendTransactionDraft';
     types: DraftAssetType[];
 };
-
-export type SignDataDraftFeature = { name: 'SignDataDraft'; types: SignDataType[] };
 
 export type SignMessageDraftFeature = {
     name: 'SignMessageDraft';

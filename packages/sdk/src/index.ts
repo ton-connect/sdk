@@ -88,7 +88,6 @@ export {
     SignMessageFeature,
     DraftAssetType,
     SendTransactionDraftFeature,
-    SignDataDraftFeature,
     SignMessageDraftFeature,
     ActionDraftFeature,
     IntentMethodType,

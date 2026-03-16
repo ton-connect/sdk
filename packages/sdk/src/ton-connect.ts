@@ -1269,8 +1269,7 @@ export class TonConnect implements ITonConnect {
                       intents: undefined,
                       sendTransactionDraft: undefined,
                       signMessageDraft: undefined,
-                      sendActionDraft: undefined,
-                      signDataDraft: undefined
+                      sendActionDraft: undefined
                   }
                 : undefined
         );
@@ -1279,8 +1278,7 @@ export class TonConnect implements ITonConnect {
             this.walletsRequiredFeatures?.intents ||
             this.walletsRequiredFeatures?.sendTransactionDraft ||
             this.walletsRequiredFeatures?.signMessageDraft ||
-            this.walletsRequiredFeatures?.sendActionDraft ||
-            this.walletsRequiredFeatures?.signDataDraft;
+            this.walletsRequiredFeatures?.sendActionDraft;
 
         if (hasNonDraftFeatures && hasDraftOrIntentRequirements) {
             this.onWalletConnectError(

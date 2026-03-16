@@ -26,7 +26,6 @@ export {
     RequiredSignDataFeature,
     RequiredSignMessageFeature,
     RequiredSendTransactionDraftFeature,
-    RequiredSignDataDraftFeature,
     RequiredSignMessageDraftFeature,
     RequiredSendActionDraftFeature,
     RequiredIntentsFeature

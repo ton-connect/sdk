@@ -1,4 +1,4 @@
-import { IntentMethodType, SignDataType } from '@tonconnect/protocol';
+import { DraftAssetType, IntentMethodType, SignDataType } from '@tonconnect/protocol';
 
 /**
  * Required features for wallets.
@@ -11,7 +11,6 @@ export type RequiredFeatures = {
     signData?: RequiredSignDataFeature;
     signMessage?: RequiredSignMessageFeature;
     sendTransactionDraft?: RequiredSendTransactionDraftFeature;
-    signDataDraft?: RequiredSignDataDraftFeature;
     signMessageDraft?: RequiredSignMessageDraftFeature;
     sendActionDraft?: RequiredSendActionDraftFeature;
     /**
@@ -63,17 +62,22 @@ export type RequiredSignMessageFeature = {
 /**
  * Required features for the send transaction draft feature.
  */
-export type RequiredSendTransactionDraftFeature = RequiredSendTransactionFeature;
-
-/**
- * Required features for the sign data draft feature.
- */
-export type RequiredSignDataDraftFeature = RequiredSignDataFeature;
+export type RequiredSendTransactionDraftFeature = RequiredSendTransactionFeature & {
+    /**
+     * Required draft asset types.
+     */
+    types?: DraftAssetType[];
+};
 
 /**
  * Required features for the sign message draft feature.
  */
-export type RequiredSignMessageDraftFeature = RequiredSignMessageFeature;
+export type RequiredSignMessageDraftFeature = RequiredSignMessageFeature & {
+    /**
+     * Required draft asset types.
+     */
+    types?: DraftAssetType[];
+};
 
 /**
  * Required features for the send action draft feature.
