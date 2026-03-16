@@ -8,7 +8,10 @@ export class WalletNotSupportFeatureError extends TonConnectError {
     declare cause: {
         requiredFeature: {
             featureName: FeatureName;
-            value?: RequiredFeatures['sendTransaction'] | RequiredFeatures['signData'];
+            value?:
+                | RequiredFeatures['sendTransaction']
+                | RequiredFeatures['signData']
+                | RequiredFeatures['signMessage'];
         };
     };
 
@@ -22,7 +25,11 @@ export class WalletNotSupportFeatureError extends TonConnectError {
             cause: {
                 requiredFeature: {
                     featureName: FeatureName;
-                    value?: RequiredFeatures['sendTransaction'] | RequiredFeatures['signData'];
+                    value?:
+                        | RequiredFeatures['sendTransaction']
+                        | RequiredFeatures['signData']
+                        | RequiredFeatures['signMessage']
+                        | RequiredFeatures['intents'];
                 };
             };
         }

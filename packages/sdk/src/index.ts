@@ -5,6 +5,8 @@ export { IStorage } from './storage/models/storage.interface';
 export { TonConnect as default } from './ton-connect';
 export { WalletsListManager } from './wallets-list-manager';
 export { ITonConnect } from './ton-connect.interface';
+export type { IntentResponse, WalletSourceArg, WaleltIntentResult } from './models';
+export type { IntentSubscribeOptions, IntentRequest } from './models/methods/connect';
 export type { AnalyticsSettings } from './models/ton-connect-options';
 export type {
     EventDispatcher,
@@ -66,7 +68,12 @@ export type {
     SessionInfo
 } from './tracker/types';
 export { BrowserEventDispatcher } from './tracker/browser-event-dispatcher';
-export type { TonAddressItem, TonProofItem, ConnectItem } from '@tonconnect/protocol';
+export type {
+    TonAddressItem,
+    TonProofItem,
+    ConnectItem,
+    ConnectRequest
+} from '@tonconnect/protocol';
 export {
     CHAIN,
     ConnectEventSuccess,
@@ -78,6 +85,13 @@ export {
     SendTransactionFeature,
     SendTransactionFeatureDeprecated,
     SignDataFeature,
+    SignMessageFeature,
+    DraftAssetType,
+    SendTransactionDraftFeature,
+    SignMessageDraftFeature,
+    ActionDraftFeature,
+    IntentMethodType,
+    IntentsFeature,
     SignDataType,
     SignDataPayload,
     SignDataPayloadText,
@@ -94,6 +108,9 @@ export {
     SEND_TRANSACTION_ERROR_CODES,
     SIGN_DATA_ERROR_CODES
 } from '@tonconnect/protocol';
+
+export type { SignMessageResponse } from './models/methods/sign-message/sign-message-response';
+export type { SendActionDraftResponse } from './models/methods/send-action-draft';
 
 export { IEnvironment } from './environment/models/environment.interface';
 export { TelegramUser } from './environment/models/telegram-user';

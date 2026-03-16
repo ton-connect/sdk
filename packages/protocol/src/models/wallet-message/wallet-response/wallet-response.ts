@@ -5,9 +5,25 @@ import {
 } from './send-transaction-rpc-response';
 import { SignDataRpcResponseError, SignDataRpcResponseSuccess } from './sign-data-rpc-response';
 import {
+    SignMessageRpcResponseError,
+    SignMessageRpcResponseSuccess
+} from './sign-message-rpc-response';
+import {
     DisconnectRpcResponseError,
     DisconnectRpcResponseSuccess
 } from './disconnect-rpc-response';
+import {
+    SignMessageDraftResponseError,
+    SignMessageDraftResponseSuccess
+} from './sign-message-draft-response';
+import {
+    SendTransactionDraftResponseError,
+    SendTransactionDraftResponseSuccess
+} from './send-transaction-draft-response';
+import {
+    SendActionDraftResponseError,
+    SendActionDraftResponseSuccess
+} from './send-action-draft-response';
 
 export type RpcResponses = {
     sendTransaction: {
@@ -20,9 +36,29 @@ export type RpcResponses = {
         success: SignDataRpcResponseSuccess;
     };
 
+    signMessage: {
+        error: SignMessageRpcResponseError;
+        success: SignMessageRpcResponseSuccess;
+    };
+
     disconnect: {
         error: DisconnectRpcResponseError;
         success: DisconnectRpcResponseSuccess;
+    };
+
+    sendTransactionDraft: {
+        error: SendTransactionDraftResponseError;
+        success: SendTransactionDraftResponseSuccess;
+    };
+
+    signMessageDraft: {
+        error: SignMessageDraftResponseError;
+        success: SignMessageDraftResponseSuccess;
+    };
+
+    actionDraft: {
+        error: SendActionDraftResponseError;
+        success: SendActionDraftResponseSuccess;
     };
 };
 

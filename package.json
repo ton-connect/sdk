@@ -8,6 +8,7 @@
     "watch": "turbo watch build",
     "preview": "turbo run preview",
     "lint": "eslint .",
+    "test": "turbo run test",
     "verify": "turbo run verify"
   },
   "private": true,

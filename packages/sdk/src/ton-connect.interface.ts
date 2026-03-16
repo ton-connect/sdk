@@ -2,19 +2,26 @@ import { ChainId } from '@tonconnect/protocol';
 import { TonConnectError } from 'src/errors';
 import {
     Account,
+    IntentResponse,
     Wallet,
-    WalletConnectionSource,
-    WalletConnectionSourceHTTP,
-    WalletConnectionSourceWalletConnect
+    WalletInfo,
+    WalletSourceArg,
+    WaleltIntentResult
 } from 'src/models';
 import {
     SendTransactionRequest,
     SendTransactionResponse,
-    SignDataResponse
+    SignDataResponse,
+    SignMessageResponse
 } from 'src/models/methods';
-import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
-import { WalletInfo } from 'src/models/wallet/wallet-info';
-import { WalletConnectionSourceJS } from 'src/models/wallet/wallet-connection-source';
+import { SendTransactionDraftRequest } from 'src/models/methods/send-transaction-draft';
+import { SignMessageDraftRequest } from 'src/models/methods/sign-message-draft';
+import { SendActionDraftRequest } from 'src/models/methods/send-action-draft';
+import {
+    ConnectAdditionalRequest,
+    IntentRequest,
+    IntentSubscribeOptions
+} from 'src/models/methods/connect';
 import { SignDataPayload } from '@tonconnect/protocol';
 import { OptionalTraceable } from 'src/utils/types';
 
@@ -57,18 +64,14 @@ export interface ITonConnect {
      * @param options (optional) options
      * @returns universal link if external wallet was passed or void for the injected wallet.
      */
-    connect<T extends WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[]>(
+    connect<T extends WalletSourceArg>(
         wallet: T,
         request?: ConnectAdditionalRequest,
         options?: OptionalTraceable<{
             openingDeadlineMS?: number;
             signal?: AbortSignal;
         }>
-    ): T extends WalletConnectionSourceJS
-        ? void
-        : T extends WalletConnectionSourceWalletConnect
-          ? void
-          : string;
+    ): WaleltIntentResult<T>;
 
     /**
      * Try to restore existing session and reconnect to the corresponding wallet. Call it immediately when your app is loaded.
@@ -132,9 +135,55 @@ export interface ITonConnect {
         }>
     ): Promise<OptionalTraceable<SignDataResponse>>;
 
+    signMessage(
+        message: SendTransactionRequest,
+        options?: OptionalTraceable<{
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+        }>
+    ): Promise<OptionalTraceable<SignMessageResponse>>;
+
     /**
-     * Gets the current session ID if available.
-     * @returns session ID string or null if not available.
+     * Sends a transaction draft over an existing bridge session.
+     * Draft describes transfer items; wallet builds and sends the transaction.
      */
+    sendTransactionDraft(
+        draft: SendTransactionDraftRequest,
+        options?: OptionalTraceable<{
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+        }>
+    ): Promise<OptionalTraceable<SendTransactionResponse>>;
+
+    /**
+     * Signs a message draft (same structure as transaction draft, but without sending to blockchain).
+     */
+    signMessageDraft(
+        draft: SignMessageDraftRequest,
+        options?: OptionalTraceable<{
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+        }>
+    ): Promise<OptionalTraceable<SignMessageResponse>>;
+
+    /**
+     * Sends an action draft. Wallet resolves the action URL and executes underlying sendTransaction/signData/signMessage.
+     */
+    sendActionDraft(
+        draft: SendActionDraftRequest,
+        options?: OptionalTraceable<{
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+        }>
+    ): Promise<OptionalTraceable<SendTransactionResponse | SignDataResponse | SignMessageResponse>>;
+
+    subscribeToIntent<TWallet extends WalletSourceArg>(
+        wallet: TWallet,
+        intent: IntentRequest,
+        options?: OptionalTraceable<IntentSubscribeOptions>
+    ): WaleltIntentResult<TWallet>;
+
     getSessionId(): Promise<string | null>;
+
+    onIntentResponse(callback: (response: IntentResponse) => void): () => void;
 }

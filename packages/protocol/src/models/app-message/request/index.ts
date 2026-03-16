@@ -1,4 +1,10 @@
 export { AppRequest, RpcRequests } from './app-request';
 export { SendTransactionRpcRequest } from './send-transaction-rpc-request';
 export { SignDataRpcRequest } from './sign-data-rpc-request';
+export { SignMessageRpcRequest } from './sign-message-rpc-request';
 export { DisconnectRpcRequest } from './disconnect-rpc-request';
+export { RawSendTransactionDraftRequest } from './send-transaction-draft';
+export { RawSignMessageDraftRequest } from './sign-message-draft';
+export { RawActionDraftRequest } from './send-action-draft';
+export { TransactionDraftItem } from './draft-items';
+export { SendTonItem, SendJettonItem, SendNftItem } from './draft-items';

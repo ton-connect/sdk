@@ -1,10 +1,23 @@
-import { Feature, SendTransactionFeature, SignDataFeature } from '@tonconnect/protocol';
+import {
+    Feature,
+    IntentsFeature,
+    SendTransactionDraftFeature,
+    SendTransactionFeature,
+    SignDataFeature,
+    SignMessageDraftFeature,
+    ActionDraftFeature
+} from '@tonconnect/protocol';
 import { logWarning } from 'src/utils/log';
 import { WalletNotSupportFeatureError } from 'src/errors/wallet';
 import {
     RequiredFeatures,
     RequiredSendTransactionFeature,
-    RequiredSignDataFeature
+    RequiredSignDataFeature,
+    RequiredSignMessageFeature,
+    RequiredSendTransactionDraftFeature,
+    RequiredSignMessageDraftFeature,
+    RequiredSendActionDraftFeature,
+    RequiredIntentsFeature
 } from 'src/models';
 
 export function checkSendTransactionSupport(
@@ -100,31 +113,81 @@ export function checkRequiredWalletFeatures(
         return true;
     }
 
-    const { sendTransaction, signData } = walletsRequiredFeatures;
+    const checks = [
+        () => checkSendTransactionFeature(features, walletsRequiredFeatures.sendTransaction),
+        () => checkSignMessageFeature(features, walletsRequiredFeatures.signMessage),
+        () => checkSignDataFeature(features, walletsRequiredFeatures.signData),
+        () =>
+            checkSendTransactionDraftFeature(
+                features,
+                walletsRequiredFeatures.sendTransactionDraft
+            ),
+        () => checkSignMessageDraftFeature(features, walletsRequiredFeatures.signMessageDraft),
+        () => checkSendActionDraftFeature(features, walletsRequiredFeatures.sendActionDraft),
+        () => checkIntentsFeature(features, walletsRequiredFeatures.intents)
+    ];
 
-    if (sendTransaction) {
-        const feature = findFeature(features, 'SendTransaction');
-        if (!feature) {
-            return false;
-        }
+    return checks.every(check => check());
+}
 
-        if (!checkSendTransaction(feature, sendTransaction)) {
-            return false;
-        }
-    }
+function checkSendTransactionFeature(
+    features: Feature[],
+    required?: RequiredSendTransactionFeature
+): boolean {
+    if (!required) return true;
+    const feature = findFeature(features, 'SendTransaction');
+    return !!feature && checkSendTransaction(feature, required);
+}
 
-    if (signData) {
-        const feature = findFeature(features, 'SignData');
-        if (!feature) {
-            return false;
-        }
+function checkSignMessageFeature(
+    features: Feature[],
+    required?: RequiredSignMessageFeature
+): boolean {
+    if (!required) return true;
+    return features.some(f => f && typeof f === 'object' && f.name === 'SignMessage');
+}
 
-        if (!checkSignData(feature, signData)) {
-            return false;
-        }
-    }
+function checkSignDataFeature(features: Feature[], required?: RequiredSignDataFeature): boolean {
+    if (!required) return true;
+    const feature = findFeature(features, 'SignData');
+    return !!feature && checkSignData(feature, required);
+}
 
-    return true;
+function checkSendTransactionDraftFeature(
+    features: Feature[],
+    required?: RequiredSendTransactionDraftFeature
+): boolean {
+    if (!required) return true;
+    const feature = findFeature(features, 'SendTransactionDraft') as
+        | SendTransactionDraftFeature
+        | undefined;
+    return !!feature && checkSendTransactionDraft(feature, required);
+}
+
+function checkSignMessageDraftFeature(
+    features: Feature[],
+    required?: RequiredSignMessageDraftFeature
+): boolean {
+    if (!required) return true;
+    const feature = findFeature(features, 'SignMessageDraft') as
+        | SignMessageDraftFeature
+        | undefined;
+    return !!feature && checkSignMessageDraft(feature, required);
+}
+
+function checkSendActionDraftFeature(
+    features: Feature[],
+    required?: RequiredSendActionDraftFeature
+): boolean {
+    if (!required) return true;
+    const feature = findFeature(features, 'ActionDraft') as ActionDraftFeature | undefined;
+    return !!feature;
+}
+
+function checkIntentsFeature(features: Feature[], required?: RequiredIntentsFeature): boolean {
+    if (!required) return true;
+    const feature = findFeature(features, 'Intents') as IntentsFeature | undefined;
+    return !!feature && required.types.every(type => feature.types.includes(type));
 }
 
 function findFeature<T extends Exclude<Feature, 'SendTransaction'>, P extends T['name']>(
@@ -157,4 +220,48 @@ function checkSignData(
     requiredFeature: RequiredSignDataFeature
 ): boolean {
     return requiredFeature.types.every(requiredType => feature.types.includes(requiredType));
+}
+
+function checkSendTransactionDraft(
+    feature: SendTransactionDraftFeature,
+    requiredFeature: RequiredSendTransactionDraftFeature
+): boolean {
+    const correctTypes =
+        requiredFeature.types === undefined ||
+        requiredFeature.types.every(requiredType => feature.types.includes(requiredType));
+
+    const correctMessagesNumber =
+        requiredFeature.minMessages === undefined ||
+        ('maxMessages' in feature &&
+            typeof (feature as { maxMessages?: number }).maxMessages === 'number' &&
+            requiredFeature.minMessages <= (feature as { maxMessages: number }).maxMessages);
+
+    const correctExtraCurrency =
+        !requiredFeature.extraCurrencyRequired ||
+        ('extraCurrencySupported' in feature &&
+            (feature as { extraCurrencySupported?: boolean }).extraCurrencySupported);
+
+    return !!(correctTypes && correctMessagesNumber && correctExtraCurrency);
+}
+
+function checkSignMessageDraft(
+    feature: SignMessageDraftFeature,
+    requiredFeature: RequiredSignMessageDraftFeature
+): boolean {
+    const correctTypes =
+        requiredFeature.types === undefined ||
+        requiredFeature.types.every(requiredType => feature.types.includes(requiredType));
+
+    const correctMessagesNumber =
+        requiredFeature.minMessages === undefined ||
+        ('maxMessages' in feature &&
+            typeof (feature as { maxMessages?: number }).maxMessages === 'number' &&
+            requiredFeature.minMessages <= (feature as { maxMessages: number }).maxMessages);
+
+    const correctExtraCurrency =
+        !requiredFeature.extraCurrencyRequired ||
+        ('extraCurrencySupported' in feature &&
+            (feature as { extraCurrencySupported?: boolean }).extraCurrencySupported);
+
+    return !!(correctTypes && correctMessagesNumber && correctExtraCurrency);
 }

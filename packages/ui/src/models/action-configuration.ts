@@ -26,6 +26,12 @@ export interface ActionConfiguration {
     twaReturnUrl?: `${string}://${string}`;
 
     /**
+     * Specifies if the action should be sent via intent flow if not wallet is connected.
+     * @default false
+     */
+    useIntent?: boolean;
+
+    /**
      * @deprecated Shouldn't be used anymore, SDK will automatically detect return strategy for TWA-TWA connections.
      * Specifies whether the method should redirect user to the connected wallet
      * @default 'ios'
@@ -34,7 +40,7 @@ export interface ActionConfiguration {
 }
 
 export type StrictActionConfiguration = {
-    [key in keyof Omit<ActionConfiguration, 'twaReturnUrl'>]-?: Exclude<
+    [key in keyof Omit<ActionConfiguration, 'twaReturnUrl' | 'useIntent'>]-?: Exclude<
         ActionConfiguration[key],
         'all'
     >;
