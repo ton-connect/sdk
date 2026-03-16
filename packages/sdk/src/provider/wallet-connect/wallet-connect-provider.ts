@@ -33,6 +33,7 @@ import {
     getWalletConnectOptions
 } from 'src/provider/wallet-connect/initialize';
 import { logDebug } from 'src/utils/log';
+import { parseRequestParams } from 'src/utils/parse-request-params';
 import { createAbortController } from 'src/utils/create-abort-controller';
 import { WalletConnectMetadata } from 'src/provider/wallet-connect/models/wallet-connect-options';
 
@@ -331,9 +332,9 @@ export class WalletConnectProvider implements InternalProvider {
             logDebug('Send wallet-connect request:', { ...request, id: DEFAULT_REQUEST_ID });
 
             if (request.method === 'sendTransaction') {
-                const { network, ...sendTransactionPayload } = JSON.parse(
-                    (request.params as string[])[0]!
-                );
+                const { network, ...sendTransactionPayload } = parseRequestParams(
+                    request.params as unknown[]
+                ) as { network: string };
 
                 const promise = this.connector!.request(
                     {
@@ -354,9 +355,9 @@ export class WalletConnectProvider implements InternalProvider {
                     traceId: options.traceId
                 };
             } else if (request.method === 'signData') {
-                const { network, ...signDataPayload } = JSON.parse(
-                    (request.params as string[])[0]!
-                );
+                const { network, ...signDataPayload } = parseRequestParams(
+                    request.params as unknown[]
+                ) as { network: string };
 
                 const promise = this.connector!.request(
                     {
