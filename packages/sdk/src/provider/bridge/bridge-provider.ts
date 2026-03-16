@@ -657,8 +657,9 @@ export class BridgeProvider implements HTTPProvider {
             inlineUrl.searchParams.append('m', 'intent');
             inlineUrl.searchParams.append('mp', mp);
 
-            if (inlineUrl.toString().length <= BridgeProvider.MAX_INLINE_INTENT_URL_LENGTH) {
-                return inlineUrl.toString();
+            const inlineUrlString = inlineUrl.toString();
+            if (inlineUrlString.length <= BridgeProvider.MAX_INLINE_INTENT_URL_LENGTH) {
+                return inlineUrlString;
             }
 
             const shortUrl = new URL(baseUrl.toString());
