@@ -66,7 +66,7 @@ function mapNftItem(item: SendTransactionDraftItemNft): SendNftItem {
     };
 }
 
-export function mapDraftItem(item: SendTransactionDraftItem): TransactionDraftItem {
+export function mapTransactionDraftItem(item: SendTransactionDraftItem): TransactionDraftItem {
     switch (item.type) {
         case 'ton':
             return mapTonItem(item);
@@ -87,7 +87,7 @@ class SendTransactionDraftParser extends RpcParser<'sendTransactionDraft'> {
                 vu: request.validUntil,
                 f: request.from,
                 n: request.network,
-                i: request.items.map(mapDraftItem)
+                i: request.items.map(mapTransactionDraftItem)
             }
         } as unknown as WithoutId<AppRequest<'sendTransactionDraft'>>;
     }

@@ -3,7 +3,7 @@ import { BadRequestError, TonConnectError, UnknownAppError, UserRejectsError } f
 import { UnknownError } from 'src/errors/unknown.error';
 import { SignMessageResponse } from 'src/models/methods';
 import { SignMessageDraftRequest } from 'src/models/methods/sign-message-draft';
-import { mapDraftItem } from 'src/parsers/send-transaction-draft-parser';
+import { mapTransactionDraftItem } from 'src/parsers/send-transaction-draft-parser';
 import { RpcParser } from 'src/parsers/rpc-parser';
 import { WithoutId } from 'src/utils/types';
 
@@ -23,7 +23,7 @@ class SignMessageDraftParser extends RpcParser<'signMessageDraft'> {
             params: {
                 vu: request.validUntil,
                 n: request.network,
-                i: request.items.map(mapDraftItem)
+                i: request.items.map(mapTransactionDraftItem)
             }
         } as unknown as WithoutId<AppRequest<'signMessageDraft'>>;
     }
