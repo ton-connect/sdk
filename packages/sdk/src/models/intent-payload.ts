@@ -13,6 +13,6 @@ export type RawIntentPayload =
     | SignDataRpcRequest;
 
 export interface UniversalLinkMessage {
-    connectRequest: ConnectRequest;
+    connectRequest?: ConnectRequest;
     draft?: RawIntentPayload;
 }

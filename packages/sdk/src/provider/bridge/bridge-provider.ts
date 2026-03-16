@@ -193,16 +193,10 @@ export class BridgeProvider implements HTTPProvider {
             this.intentListeners.forEach(listener => listener(typed));
         });
 
-        if (!options?.connectRequest) {
-            throw new TonConnectError(
-                'connectRequest is required when connecting with intent via bridge'
-            );
-        }
-
         return this.generateUniversalLink(
             universalLink,
             {
-                connectRequest: options.connectRequest,
+                connectRequest: options?.connectRequest,
                 draft: intentPayload
             },
             { traceId }
@@ -649,7 +643,9 @@ export class BridgeProvider implements HTTPProvider {
         baseUrl.searchParams.append('id', this.session!.sessionCrypto.sessionId);
         baseUrl.searchParams.append('trace_id', options.traceId);
 
-        baseUrl.searchParams.append('r', JSON.stringify(message.connectRequest));
+        if (message.connectRequest) {
+            baseUrl.searchParams.append('r', JSON.stringify(message.connectRequest));
+        }
 
         if (message.draft) {
             const intentPayload = message.draft;
