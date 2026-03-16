@@ -26,6 +26,7 @@ import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { Optional, OptionalTraceable, Traceable, WithoutId } from 'src/utils/types';
 import { PROTOCOL_VERSION } from 'src/resources/protocol';
 import { logDebug, logError } from 'src/utils/log';
+import { toBase64Url } from 'src/utils/base64';
 import { addPathToUrl, encodeTelegramUrlParameters, isTelegramUrl } from 'src/utils/url';
 import { callForSuccess } from 'src/utils/call-for-success';
 import { createAbortController } from 'src/utils/create-abort-controller';
@@ -619,6 +620,7 @@ export class BridgeProvider implements HTTPProvider {
             },
             body: payload
         }).catch(error => {
+            this.abortController?.abort();
             logDebug('Failed to store intent payload in object storage', error);
         });
     }
@@ -651,10 +653,7 @@ export class BridgeProvider implements HTTPProvider {
             const intentPayload = message.draft;
 
             const inlineUrl = new URL(baseUrl.toString());
-            const mp = Base64.encode(intentPayload, false)
-                .replace(/\+/g, '-')
-                .replace(/\//g, '_')
-                .replace(/=+$/, '');
+            const mp = toBase64Url(Base64.encode(intentPayload, false));
             inlineUrl.searchParams.append('m', 'intent');
             inlineUrl.searchParams.append('mp', mp);
 
