@@ -44,9 +44,8 @@ import { TonConnectUiOptions } from 'src/models/ton-connect-ui-options';
 import { setBorderRadius, setColors, setTheme } from 'src/app/state/theme-state';
 import { mergeOptions } from 'src/app/utils/options';
 import { appState, setAppState } from 'src/app/state/app.state';
-import { createEffect } from 'solid-js';
 import { unwrap } from 'solid-js/store';
-import { Action, setLastSelectedWalletInfo, walletsModalState } from 'src/app/state/modals-state';
+import { Action, setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { ActionConfiguration, StrictActionConfiguration } from 'src/models/action-configuration';
 import { ConnectedWallet, WalletInfoWithOpenMethod } from 'src/models/connected-wallet';
 import { applyWalletsListConfiguration, eqWalletName } from 'src/app/utils/wallets';
@@ -129,49 +128,6 @@ export class TonConnectUI {
      * Manages the modal window state.
      */
     public readonly modal: WalletsModal;
-
-    private waitForIntentResponse<T>(signal?: AbortSignal): Promise<T> {
-        return new Promise<T>((resolve, reject) => {
-            let unsubscribe: (() => void) | null = null;
-
-            const onAbort = (): void => {
-                if (unsubscribe) {
-                    unsubscribe();
-                }
-                if (signal) {
-                    signal.removeEventListener('abort', onAbort);
-                }
-                reject(new TonConnectUIError('Intent was aborted'));
-            };
-
-            if (signal?.aborted) {
-                onAbort();
-                return;
-            }
-
-            unsubscribe = this.connector.onIntentResponse((response: IntentResponse) => {
-                if (signal) {
-                    signal.removeEventListener('abort', onAbort);
-                }
-                unsubscribe?.();
-
-                const maybeError = response as unknown as {
-                    error?: { code: number; message: string };
-                };
-
-                if (maybeError && maybeError.error) {
-                    reject(new TonConnectError(maybeError.error.message, { cause: maybeError }));
-                    return;
-                }
-
-                resolve(response as T);
-            });
-
-            if (signal) {
-                signal.addEventListener('abort', onAbort);
-            }
-        });
-    }
 
     /**
      * Manages the single wallet modal window state.
@@ -341,13 +297,6 @@ export class TonConnectUI {
 
         this._walletsPreferredFeatures = options.walletsPreferredFeatures;
 
-        createEffect(() => {
-            const state = walletsModalState();
-            if (state.status === 'opened' && state.mode === 'connect') {
-                this._walletsRequiredFeatures = this._baseWalletsRequiredFeatures;
-            }
-        });
-
         this.walletsList = this.getWallets();
 
         this.walletsList.then(list => preloadImages(uniq(list.map(item => item.imageUrl))));
@@ -440,6 +389,7 @@ export class TonConnectUI {
      */
     public async openModal(options?: OptionalTraceable): Promise<void> {
         const traceId = options?.traceId ?? UUIDv7();
+        this._walletsRequiredFeatures = this._baseWalletsRequiredFeatures;
         await this.modal.open({ traceId });
 
         const sessionId = await this.getSessionId();
@@ -558,7 +508,7 @@ export class TonConnectUI {
 
         // If wallet is not connected and useIntent flag is set, fall back to intent/draft flow.
         if (!this.connected && options?.useIntent) {
-            return this.sendTransactionIntent(
+            return this.sendTransactionDraft(
                 {
                     validUntil: tx.validUntil,
                     network: tx.network,
@@ -712,7 +662,7 @@ export class TonConnectUI {
         this.tracker.trackDataSentForSignature(this.wallet, data);
 
         if (!this.connected && options?.useIntent) {
-            const intentResponse = await this.signDataIntent(data, { traceId });
+            const intentResponse = await this.signDataDraft(data, { traceId });
             return intentResponse;
         }
 
@@ -854,7 +804,7 @@ export class TonConnectUI {
         const traceId = options?.traceId ?? UUIDv7();
 
         if (!this.connected && options?.useIntent) {
-            const intentResponse = await this.signMessageIntent(
+            const intentResponse = await this.signMessageDraft(
                 {
                     validUntil: message.validUntil,
                     network: message.network,
@@ -1067,12 +1017,55 @@ export class TonConnectUI {
         }
     }
 
+    private waitForIntentResponse<T>(signal?: AbortSignal): Promise<T> {
+        return new Promise<T>((resolve, reject) => {
+            let unsubscribe: (() => void) | null = null;
+
+            const onAbort = (): void => {
+                if (unsubscribe) {
+                    unsubscribe();
+                }
+                if (signal) {
+                    signal.removeEventListener('abort', onAbort);
+                }
+                reject(new TonConnectUIError('Intent was aborted'));
+            };
+
+            if (signal?.aborted) {
+                onAbort();
+                return;
+            }
+
+            unsubscribe = this.connector.onIntentResponse((response: IntentResponse) => {
+                if (signal) {
+                    signal.removeEventListener('abort', onAbort);
+                }
+                unsubscribe?.();
+
+                const maybeError = response as unknown as {
+                    error?: { code: number; message: string };
+                };
+
+                if (maybeError && maybeError.error) {
+                    reject(new TonConnectError(maybeError.error.message, { cause: maybeError }));
+                    return;
+                }
+
+                resolve(response as T);
+            });
+
+            if (signal) {
+                signal.addEventListener('abort', onAbort);
+            }
+        });
+    }
+
     /**
-     * Sends the transaction via intent flow and returns signed transaction.
-     * If wallet is not connected, opens modal and shows intent QR/link.
+     * Sends the transaction via draft flow and returns signed transaction.
+     * If wallet is not connected, opens modal and shows draft QR/link.
      */
-    public async sendTransactionIntent(
-        intent: SendTransactionDraftRequest,
+    public async sendTransactionDraft(
+        draft: SendTransactionDraftRequest,
         options?: TonConnectUIIntentOptions
     ): Promise<OptionalTraceable<SendTransactionResponse>> {
         const traceId = options?.traceId ?? UUIDv7();
@@ -1132,7 +1125,7 @@ export class TonConnectUI {
             });
 
             try {
-                const result = await this.connector.sendTransactionDraft(intent, {
+                const result = await this.connector.sendTransactionDraft(draft, {
                     onRequestSent,
                     signal: abortController.signal,
                     traceId
@@ -1175,7 +1168,7 @@ export class TonConnectUI {
 
             this.modal.openWithIntent({
                 traceId,
-                intent: { method: 'sendTransaction', ...intent }
+                intent: { method: 'sendTransaction', ...draft }
             });
 
             const intentResponse = await this.waitForIntentResponse<
@@ -1208,11 +1201,11 @@ export class TonConnectUI {
     }
 
     /**
-     * Signs data via intent flow and returns the signature.
-     * If wallet is not connected, opens modal and shows intent QR/link.
+     * Signs data via draft flow and returns the signature.
+     * If wallet is not connected, opens modal and shows draft QR/link.
      */
-    public async signDataIntent(
-        intent: SignDataPayload,
+    public async signDataDraft(
+        data: SignDataPayload,
         options?: TonConnectUIIntentOptions
     ): Promise<OptionalTraceable<SignDataResponse>> {
         const traceId = options?.traceId ?? UUIDv7();
@@ -1273,7 +1266,7 @@ export class TonConnectUI {
 
             try {
                 const result = await this.waitForSignData(
-                    { data: intent, signal: abortController.signal, traceId },
+                    { data, signal: abortController.signal, traceId },
                     onRequestSent
                 );
 
@@ -1312,7 +1305,7 @@ export class TonConnectUI {
                 intents: { types: ['signData'] }
             };
 
-            this.modal.openWithIntent({ traceId, intent: { method: 'signData', ...intent } });
+            this.modal.openWithIntent({ traceId, intent: { method: 'signData', ...data } });
 
             const intentResponse = await this.waitForIntentResponse<
                 OptionalTraceable<SignDataResponse>
@@ -1344,11 +1337,11 @@ export class TonConnectUI {
     }
 
     /**
-     * Signs message via intent flow and returns signed message BoC.
-     * If wallet is not connected, opens modal and shows intent QR/link.
+     * Signs message via draft flow and returns signed message BoC.
+     * If wallet is not connected, opens modal and shows draft QR/link.
      */
-    public async signMessageIntent(
-        intent: SignMessageDraftRequest,
+    public async signMessageDraft(
+        draft: SignMessageDraftRequest,
         options?: TonConnectUIIntentOptions
     ): Promise<OptionalTraceable<SignMessageResponse>> {
         const traceId = options?.traceId ?? UUIDv7();
@@ -1408,7 +1401,7 @@ export class TonConnectUI {
             });
 
             try {
-                const result = await this.connector.signMessageDraft(intent, {
+                const result = await this.connector.signMessageDraft(draft, {
                     onRequestSent,
                     signal: abortController.signal,
                     traceId
@@ -1449,7 +1442,7 @@ export class TonConnectUI {
                 intents: { types: ['signMsgDraft'] }
             };
 
-            this.modal.openWithIntent({ traceId, intent: { method: 'signMessage', ...intent } });
+            this.modal.openWithIntent({ traceId, intent: { method: 'signMessage', ...draft } });
 
             const intentResponse = await this.waitForIntentResponse<
                 OptionalTraceable<SignMessageResponse>
@@ -1481,11 +1474,11 @@ export class TonConnectUI {
     }
 
     /**
-     * Sends action intent and returns result of underlying sendTransaction or signData.
-     * If wallet is not connected, opens modal and shows intent QR/link.
+     * Sends action draft and returns result of underlying sendTransaction or signData.
+     * If wallet is not connected, opens modal and shows draft QR/link.
      */
-    public async sendActionIntent(
-        intent: SendActionDraftRequest,
+    public async sendActionDraft(
+        draft: SendActionDraftRequest,
         options?: TonConnectUIIntentOptions
     ): Promise<OptionalTraceable<SendActionDraftResponse>> {
         const traceId = options?.traceId ?? UUIDv7();
@@ -1545,7 +1538,7 @@ export class TonConnectUI {
             });
 
             try {
-                const result = await this.connector.sendActionDraft(intent, {
+                const result = await this.connector.sendActionDraft(draft, {
                     onRequestSent,
                     signal: abortController.signal,
                     traceId
@@ -1586,7 +1579,7 @@ export class TonConnectUI {
                 intents: { types: ['actionDraft'] }
             };
 
-            this.modal.openWithIntent({ traceId, intent: { method: 'sendAction', ...intent } });
+            this.modal.openWithIntent({ traceId, intent: { method: 'sendAction', ...draft } });
 
             const intentResponse = await this.waitForIntentResponse<
                 OptionalTraceable<SendActionDraftResponse>
@@ -1658,7 +1651,8 @@ export class TonConnectUI {
     private async connectExternalWallet(options: Traceable): Promise<ConnectedWallet> {
         const abortController = new AbortController();
 
-        widgetController.openWalletsModal({ traceId: options.traceId });
+        this._walletsRequiredFeatures = this._baseWalletsRequiredFeatures;
+        widgetController.openWalletsModal({ traceId: options.traceId, mode: 'connect' });
 
         const unsubscribe = this.onModalStateChange(state => {
             const { status, closeReason } = state;

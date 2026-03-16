@@ -29,7 +29,7 @@ type BasicAction = {
     showNotification: boolean;
     /**
      * Indicates that this action was triggered from intent flow
-     * (sendTransactionIntent / signDataIntent / signMessageIntent / sendActionIntent).
+     * (sendTransactionDraft / signDataDraft / signMessageDraft / sendActionDraft).
      */
     isIntent?: boolean;
     sessionId?: string;

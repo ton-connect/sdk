@@ -54,11 +54,11 @@ export function IntentsDemo() {
         setLastIntentPayload(intent);
 
         try {
-            await tonConnectUi.sendTransactionIntent(intent, commonOptions);
+            await tonConnectUi.sendTransactionDraft(intent, commonOptions);
         } catch (e) {
             // result tracking is not implemented yet; errors are logged for debugging
 
-            console.error('sendTransactionIntent failed:', e);
+            console.error('sendTransactionDraft failed:', e);
         }
     };
 
@@ -92,7 +92,7 @@ export function IntentsDemo() {
         setLastIntentPayload(intent);
 
         try {
-            await tonConnectUi.sendTransactionIntent(intent, commonOptions);
+            await tonConnectUi.sendTransactionDraft(intent, commonOptions);
         } catch (e) {
             console.error('sendJettonIntent failed:', e);
         }
@@ -112,10 +112,10 @@ export function IntentsDemo() {
         setLastIntentPayload(intent);
 
         try {
-            const response = await tonConnectUi.signDataIntent(intent, commonOptions);
+            const response = await tonConnectUi.signDataDraft(intent, commonOptions);
             setLastIntentResult(response);
         } catch (e) {
-            console.error('signDataIntent failed:', e);
+            console.error('signDataDraft failed:', e);
         }
     };
 
@@ -142,9 +142,9 @@ export function IntentsDemo() {
         setLastIntentPayload(intent);
 
         try {
-            await tonConnectUi.signMessageIntent(intent, commonOptions);
+            await tonConnectUi.signMessageDraft(intent, commonOptions);
         } catch (e) {
-            console.error('signMessageIntent failed:', e);
+            console.error('signMessageDraft failed:', e);
         }
     };
 
@@ -178,9 +178,9 @@ export function IntentsDemo() {
         setLastIntentPayload(intent);
 
         try {
-            await tonConnectUi.signMessageIntent(intent, commonOptions);
+            await tonConnectUi.signMessageDraft(intent, commonOptions);
         } catch (e) {
-            console.error('signJettonMessageIntent failed:', e);
+            console.error('signJettonMessageDraft failed:', e);
         }
     };
 
@@ -198,9 +198,9 @@ export function IntentsDemo() {
         setLastIntentPayload(intent);
 
         try {
-            await tonConnectUi.sendActionIntent(intent, commonOptions);
+            await tonConnectUi.sendActionDraft(intent, commonOptions);
         } catch (e) {
-            console.error('sendActionIntent failed:', e);
+            console.error('sendActionDraft failed:', e);
         }
     };
 
