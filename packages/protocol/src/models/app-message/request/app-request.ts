@@ -14,7 +14,7 @@ export type RpcRequests = {
     disconnect: DisconnectRpcRequest;
     sendTransactionDraft: RawSendTransactionDraftRequest;
     signMessageDraft: RawSignMessageDraftRequest;
-    sendActionDraft: RawActionDraftRequest;
+    actionDraft: RawActionDraftRequest;
 };
 
 export type AppRequest<T extends RpcMethod> = RpcRequests[T];

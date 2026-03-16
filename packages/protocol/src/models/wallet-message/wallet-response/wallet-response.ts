@@ -56,7 +56,7 @@ export type RpcResponses = {
         success: SignMessageDraftResponseSuccess;
     };
 
-    sendActionDraft: {
+    actionDraft: {
         error: SendActionDraftResponseError;
         success: SendActionDraftResponseSuccess;
     };

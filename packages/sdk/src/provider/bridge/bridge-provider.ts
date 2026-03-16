@@ -372,7 +372,7 @@ export class BridgeProvider implements HTTPProvider {
                 await this.gateway.send(
                     encodedRequest,
                     this.session.walletPublicKey,
-                    request.method as RpcMethod,
+                    request.method,
                     {
                         attempts: options?.attempts,
                         signal: options?.signal,

@@ -5,4 +5,4 @@ export type RpcMethod =
     | 'signMessage'
     | 'sendTransactionDraft'
     | 'signMessageDraft'
-    | 'sendActionDraft';
+    | 'actionDraft';

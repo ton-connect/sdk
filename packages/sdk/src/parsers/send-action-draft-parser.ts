@@ -18,14 +18,14 @@ const errorMap: Partial<Record<number, typeof TonConnectError>> = {
     [SEND_TRANSACTION_ERROR_CODES.UNKNOWN_APP_ERROR]: UnknownAppError
 };
 
-class SendActionDraftParser extends RpcParser<'sendActionDraft'> {
-    convertToRpcRequest(request: SendActionDraftRequest): WithoutId<AppRequest<'sendActionDraft'>> {
+class SendActionDraftParser extends RpcParser<'actionDraft'> {
+    convertToRpcRequest(request: SendActionDraftRequest): WithoutId<AppRequest<'actionDraft'>> {
         return {
             method: 'actionDraft',
             params: {
                 url: request.actionUrl
             }
-        } as unknown as WithoutId<AppRequest<'sendActionDraft'>>;
+        };
     }
 
     convertFromRpcResponse(response: unknown): SendActionDraftResponse {
