@@ -126,7 +126,7 @@ export function IntentsDemo() {
         const baseItem = {
             type: 'ton' as const,
             address: recipientAddress,
-            amount: '0'
+            amount: '10'
         };
 
         const items = useObjectStorageMode

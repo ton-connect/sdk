@@ -1,9 +1,11 @@
 import {
+    AppRequest,
     ChainId,
     CONNECT_ITEM_ERROR_CODES,
     ConnectEventSuccess,
     ConnectItem,
     ConnectRequest,
+    RpcMethod,
     SendTransactionRpcResponseSuccess,
     SignDataPayload,
     SignDataRpcResponseSuccess,
@@ -1005,58 +1007,21 @@ export class TonConnect implements ITonConnect {
 
         const traceId = options?.traceId ?? UUIDv7();
 
-        return new Promise<OptionalTraceable<T>>((resolve, reject) => {
-            let unsubscribe: (() => void) | null = null;
-
-            const onAbort = () => {
-                if (unsubscribe) {
-                    unsubscribe();
-                }
-                reject(new TonConnectError('Intent sending was aborted.'));
-            };
-
-            unsubscribe = this.onIntentResponse(response => {
-                if (abortController.signal.aborted) {
-                    return;
-                }
-
-                if (unsubscribe) {
-                    unsubscribe();
-                    unsubscribe = null;
-                }
-                abortController.signal.removeEventListener('abort', onAbort);
-
-                try {
-                    if (parser.isError(response)) {
-                        parser.parseAndThrowError(response);
-                    }
-
-                    const result = parser.convertFromRpcResponse(response);
-                    resolve({ ...result, traceId });
-                } catch (error) {
-                    reject(error);
-                }
-            });
-
-            abortController.signal.addEventListener('abort', onAbort);
-
-            try {
-                this.provider!.connectWithIntent(intentPayload, {
-                    signal: abortController.signal,
-                    traceId
-                });
-
-                options?.onRequestSent?.();
-            } catch (error) {
-                abortController.signal.removeEventListener('abort', onAbort);
-
-                if (unsubscribe) {
-                    unsubscribe();
-                }
-
-                reject(error);
+        const response = await this.provider!.sendRequest(
+            intentPayload as WithoutId<AppRequest<RpcMethod>>,
+            {
+                onRequestSent: options?.onRequestSent,
+                signal: abortController.signal,
+                traceId
             }
-        });
+        );
+
+        if (parser.isError(response)) {
+            parser.parseAndThrowError(response);
+        }
+
+        const result = parser.convertFromRpcResponse(response);
+        return { ...result, traceId };
     }
 
     private getSessionInfo(): { clientId: string | null; walletId: string | null } | null {

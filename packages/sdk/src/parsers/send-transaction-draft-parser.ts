@@ -18,6 +18,7 @@ import {
 import type { AppRequest } from '@tonconnect/protocol';
 import { RpcParser } from 'src/parsers/rpc-parser';
 import { WithoutId } from 'src/utils/types';
+import { isValidRawAddress, toUserFriendlyAddress } from 'src/utils/address';
 
 const errorMap: Partial<Record<number, typeof TonConnectError>> = {
     [SEND_TRANSACTION_ERROR_CODES.UNKNOWN_ERROR]: UnknownError,
@@ -26,10 +27,17 @@ const errorMap: Partial<Record<number, typeof TonConnectError>> = {
     [SEND_TRANSACTION_ERROR_CODES.UNKNOWN_APP_ERROR]: UnknownAppError
 };
 
-function mapTonItem(item: SendTransactionDraftItemTon): SendTonItem {
+function normalizeAddress(address: string, network?: string): string {
+    if (isValidRawAddress(address)) {
+        return toUserFriendlyAddress(address, network === '-239');
+    }
+    return address;
+}
+
+function mapTonItem(item: SendTransactionDraftItemTon, network?: string): SendTonItem {
     return {
         t: 'ton',
-        a: item.address,
+        a: normalizeAddress(item.address, network),
         am: item.amount,
         p: item.payload,
         si: item.stateInit,
@@ -37,14 +45,16 @@ function mapTonItem(item: SendTransactionDraftItemTon): SendTonItem {
     };
 }
 
-function mapJettonItem(item: SendTransactionDraftItemJetton): SendJettonItem {
+function mapJettonItem(item: SendTransactionDraftItemJetton, network?: string): SendJettonItem {
     return {
         t: 'jetton',
-        ma: item.jettonMasterAddress,
+        ma: normalizeAddress(item.jettonMasterAddress, network),
         ja: item.jettonAmount,
-        d: item.destination,
+        d: normalizeAddress(item.destination, network),
         am: item.attachedTon,
-        rd: item.responseDestination,
+        rd: item.responseDestination
+            ? normalizeAddress(item.responseDestination, network)
+            : undefined,
         cp: item.customPayload,
         fta: item.forwardTonAmount,
         fp: item.forwardPayload,
@@ -52,13 +62,15 @@ function mapJettonItem(item: SendTransactionDraftItemJetton): SendJettonItem {
     };
 }
 
-function mapNftItem(item: SendTransactionDraftItemNft): SendNftItem {
+function mapNftItem(item: SendTransactionDraftItemNft, network?: string): SendNftItem {
     return {
         t: 'nft',
-        na: item.nftAddress,
-        no: item.newOwnerAddress,
+        na: normalizeAddress(item.nftAddress, network),
+        no: normalizeAddress(item.newOwnerAddress, network),
         am: item.attachedTon,
-        rd: item.responseDestination,
+        rd: item.responseDestination
+            ? normalizeAddress(item.responseDestination, network)
+            : undefined,
         cp: item.customPayload,
         fta: item.forwardTonAmount,
         fp: item.forwardPayload,
@@ -66,14 +78,17 @@ function mapNftItem(item: SendTransactionDraftItemNft): SendNftItem {
     };
 }
 
-export function mapTransactionDraftItem(item: SendTransactionDraftItem): TransactionDraftItem {
+export function mapTransactionDraftItem(
+    item: SendTransactionDraftItem,
+    network?: string
+): TransactionDraftItem {
     switch (item.type) {
         case 'ton':
-            return mapTonItem(item);
+            return mapTonItem(item, network);
         case 'jetton':
-            return mapJettonItem(item);
+            return mapJettonItem(item, network);
         case 'nft':
-            return mapNftItem(item);
+            return mapNftItem(item, network);
     }
 }
 
@@ -87,7 +102,7 @@ class SendTransactionDraftParser extends RpcParser<'sendTransactionDraft'> {
                 vu: request.validUntil,
                 f: request.from,
                 n: request.network,
-                i: request.items.map(mapTransactionDraftItem)
+                i: request.items.map(item => mapTransactionDraftItem(item, request.network))
             }
         } as unknown as WithoutId<AppRequest<'sendTransactionDraft'>>;
     }

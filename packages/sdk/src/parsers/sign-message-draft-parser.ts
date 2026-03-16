@@ -23,7 +23,7 @@ class SignMessageDraftParser extends RpcParser<'signMessageDraft'> {
             params: {
                 vu: request.validUntil,
                 n: request.network,
-                i: request.items.map(mapTransactionDraftItem)
+                i: request.items.map(item => mapTransactionDraftItem(item, request.network))
             }
         } as unknown as WithoutId<AppRequest<'signMessageDraft'>>;
     }
