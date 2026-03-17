@@ -108,7 +108,7 @@ class TonProofDemoApiService {
     }
 
     async setSignerMode(useLegacySign: boolean): Promise<void> {
-        const mode = useLegacySign ? 'tetra' : 'mixed';
+        const mode = useLegacySign ? 'mixed' : 'domain-signature';
 
         try {
             await fetch(`${this.host}/api/signer_mode`, {

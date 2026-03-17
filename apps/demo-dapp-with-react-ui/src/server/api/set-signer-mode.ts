@@ -10,7 +10,7 @@ export const setSignerModeHandler: HttpResponseResolver = async ({ request }) =>
     try {
         const body = (await request.json()) as Body;
 
-        if (body.mode !== 'tetra' && body.mode !== 'mixed') {
+        if (body.mode !== 'domain-signature' && body.mode !== 'mixed') {
             return badRequest({ error: 'Invalid signer mode' });
         }
 
