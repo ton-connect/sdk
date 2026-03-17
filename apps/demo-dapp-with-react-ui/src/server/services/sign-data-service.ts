@@ -39,6 +39,12 @@ export class SignDataService {
                 return false;
             }
 
+            const validAuthTime = 15 * 60;
+            const now = Math.floor(Date.now() / 1000);
+            if (now - validAuthTime > timestamp) {
+                return false;
+            }
+
             // Parse address and state init
             const parsedAddr = Address.parse(address);
             const stateInit = loadStateInit(Cell.fromBase64(walletStateInit).beginParse());
@@ -77,8 +83,6 @@ export class SignDataService {
 
             // Verify Ed25519 signature
             const isValid = verifySignature({
-                domain,
-                timestamp,
                 network: payload.network,
                 data: finalHash,
                 signature: Buffer.from(signature, 'base64'),

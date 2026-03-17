@@ -29,6 +29,12 @@ export class TonProofService {
                 return false;
             }
 
+            const validAuthTime = 15 * 60;
+            const now = Math.floor(Date.now() / 1000);
+            if (now - validAuthTime > payload.proof.timestamp) {
+                return false;
+            }
+
             const stateInit = loadStateInit(Cell.fromBase64(payload.proof.state_init).beginParse());
 
             // 1. First, try to obtain public key via get_public_key get-method on smart contract deployed at Address.
@@ -103,8 +109,6 @@ export class TonProofService {
             let data = Buffer.from(await sha256(fullMsg));
 
             return verifySignature({
-                domain: payload.proof.domain.value,
-                timestamp: payload.proof.timestamp,
                 network: payload.network,
                 data,
                 signature: message.signature,

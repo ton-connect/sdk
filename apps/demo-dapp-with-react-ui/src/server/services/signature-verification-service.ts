@@ -12,9 +12,11 @@ const allowedDomains = [
     'tonconnect-sdk-demo-dapp.vercel.app'
 ];
 
-type VerifyParams = {
+type VerifyDomainParams = {
     domain: string;
-    timestamp: number;
+};
+
+type VerifySignatureParams = {
     network: string;
     data: Buffer;
     signature: Buffer;
@@ -32,7 +34,7 @@ export class SignatureVerificationService {
         this.mode = mode;
     }
 
-    public verifyDomain({ domain }: Pick<VerifyParams, 'domain'>): boolean {
+    public verifyDomain({ domain }: VerifyDomainParams): boolean {
         if (!allowedDomains.includes(domain)) {
             return false;
         }
@@ -40,13 +42,12 @@ export class SignatureVerificationService {
         return true;
     }
 
-    public verifySignature(params: VerifyParams): boolean {
-        if (!this.verifyDomain(params)) {
-            return false;
-        }
-
-        const { network, data, signature, publicKey } = params;
-
+    public verifySignature({
+        network,
+        data,
+        signature,
+        publicKey
+    }: VerifySignatureParams): boolean {
         if (this.mode === 'domain-signature') {
             return domainSignVerify({
                 data,
@@ -55,7 +56,6 @@ export class SignatureVerificationService {
                 domain: getDomain(network)
             });
         }
-
         return signVerify(data, signature, publicKey);
     }
 }
@@ -70,12 +70,12 @@ export function setSignerMode(mode: SignerMode): void {
     signatureVerificationService.setMode(mode);
 }
 
-export function verifySignature(params: VerifyParams): boolean {
+export function verifySignature(params: VerifySignatureParams): boolean {
     return signatureVerificationService.verifySignature(params);
 }
 
 export function verifyDomain(domain: string): boolean {
-    return signatureVerificationService.verifyDomain({ domain } as Pick<VerifyParams, 'domain'>);
+    return signatureVerificationService.verifyDomain({ domain });
 }
 
 export { signatureVerificationService };
