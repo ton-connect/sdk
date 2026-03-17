@@ -1,19 +1,12 @@
 import { getSecureRandomBytes, sha256 } from '@ton/crypto';
-import { Address, Cell, contractAddress, domainSignVerify, loadStateInit } from '@ton/ton';
+import { Address, Cell, contractAddress, loadStateInit } from '@ton/ton';
 import { Buffer } from 'buffer';
 import { CheckProofRequestDto } from '../dto/check-proof-request-dto';
 import { tryParsePublicKey } from '../wrappers/wallets-data';
-import { getDomain } from '../utils/domain';
+import { verifySignature } from './signature-verification-service';
 
 const tonProofPrefix = 'ton-proof-item-v2/';
 const tonConnectPrefix = 'ton-connect';
-const allowedDomains = [
-    'ton-connect.github.io',
-    'localhost:5173',
-    'localhost',
-    'tonconnect-sdk-demo-dapp.vercel.app'
-];
-const validAuthTime = 15 * 60; // 15 minute
 
 export class TonProofService {
     /**
@@ -54,15 +47,6 @@ export class TonProofService {
             const wantedAddress = Address.parse(payload.address);
             const address = contractAddress(wantedAddress.workChain, stateInit);
             if (!address.equals(wantedAddress)) {
-                return false;
-            }
-
-            if (!allowedDomains.includes(payload.proof.domain.value)) {
-                return false;
-            }
-
-            const now = Math.floor(Date.now() / 1000);
-            if (now - validAuthTime > payload.proof.timestamp) {
                 return false;
             }
 
@@ -114,11 +98,13 @@ export class TonProofService {
 
             let data = Buffer.from(await sha256(fullMsg));
 
-            return domainSignVerify({
+            return verifySignature({
+                domain: payload.proof.domain.value,
+                timestamp: payload.proof.timestamp,
+                network: payload.network,
                 data,
                 signature: message.signature,
-                publicKey,
-                domain: getDomain(payload.network)
+                publicKey
             });
         } catch (e) {
             return false;

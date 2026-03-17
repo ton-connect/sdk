@@ -107,6 +107,23 @@ class TonProofDemoApiService {
         }
     }
 
+    async setSignerMode(useLegacySign: boolean): Promise<void> {
+        const mode = useLegacySign ? 'tetra' : 'mixed';
+
+        try {
+            await fetch(`${this.host}/api/signer_mode`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ mode })
+            });
+        } catch (e) {
+            // eslint-disable-next-line no-console
+            console.log('setSignerMode error:', e);
+        }
+    }
+
     async checkProof(proof: TonProofItemReplySuccess['proof'], account: Account): Promise<void> {
         try {
             const reqBody = {
