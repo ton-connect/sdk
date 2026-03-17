@@ -12,8 +12,6 @@ const allowedDomains = [
     'tonconnect-sdk-demo-dapp.vercel.app'
 ];
 
-const validAuthTime = 15 * 60; // 15 minutes
-
 type VerifyParams = {
     domain: string;
     timestamp: number;
@@ -34,16 +32,8 @@ export class SignatureVerificationService {
         this.mode = mode;
     }
 
-    public verifyDomain({
-        domain,
-        timestamp
-    }: Pick<VerifyParams, 'domain' | 'timestamp'>): boolean {
+    public verifyDomain({ domain }: Pick<VerifyParams, 'domain'>): boolean {
         if (!allowedDomains.includes(domain)) {
-            return false;
-        }
-
-        const now = Math.floor(Date.now() / 1000);
-        if (now - validAuthTime > timestamp) {
             return false;
         }
 
@@ -82,6 +72,10 @@ export function setSignerMode(mode: SignerMode): void {
 
 export function verifySignature(params: VerifyParams): boolean {
     return signatureVerificationService.verifySignature(params);
+}
+
+export function verifyDomain(domain: string): boolean {
+    return signatureVerificationService.verifyDomain({ domain } as Pick<VerifyParams, 'domain'>);
 }
 
 export { signatureVerificationService };

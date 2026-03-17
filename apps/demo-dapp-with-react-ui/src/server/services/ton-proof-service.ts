@@ -3,7 +3,7 @@ import { Address, Cell, contractAddress, loadStateInit } from '@ton/ton';
 import { Buffer } from 'buffer';
 import { CheckProofRequestDto } from '../dto/check-proof-request-dto';
 import { tryParsePublicKey } from '../wrappers/wallets-data';
-import { verifySignature } from './signature-verification-service';
+import { verifyDomain, verifySignature } from './signature-verification-service';
 
 const tonProofPrefix = 'ton-proof-item-v2/';
 const tonConnectPrefix = 'ton-connect';
@@ -25,6 +25,10 @@ export class TonProofService {
         getWalletPublicKey: (address: string) => Promise<Buffer | null>
     ): Promise<boolean> {
         try {
+            if (!verifyDomain(payload.proof.domain.value)) {
+                return false;
+            }
+
             const stateInit = loadStateInit(Cell.fromBase64(payload.proof.state_init).beginParse());
 
             // 1. First, try to obtain public key via get_public_key get-method on smart contract deployed at Address.

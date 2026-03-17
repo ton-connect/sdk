@@ -9,7 +9,7 @@ import {
     SignDataPayload
 } from '../dto/check-sign-data-request-dto';
 import { tryParsePublicKey } from '../wrappers/wallets-data';
-import { verifySignature } from './signature-verification-service';
+import { verifyDomain, verifySignature } from './signature-verification-service';
 
 export class SignDataService {
     /**
@@ -34,6 +34,10 @@ export class SignDataService {
                 public_key,
                 walletStateInit
             } = payload;
+
+            if (!verifyDomain(domain)) {
+                return false;
+            }
 
             // Parse address and state init
             const parsedAddr = Address.parse(address);
