@@ -9,16 +9,7 @@ import {
     SignDataPayload
 } from '../dto/check-sign-data-request-dto';
 import { tryParsePublicKey } from '../wrappers/wallets-data';
-import { domainSignVerify } from '@ton/ton';
-import { getDomain } from '../utils/domain';
-
-const allowedDomains = [
-    'ton-connect.github.io',
-    'localhost:5173',
-    'localhost',
-    'tonconnect-sdk-demo-dapp.vercel.app'
-];
-const validAuthTime = 15 * 60; // 15 minutes
+import { verifyDomain, verifySignature } from './signature-verification-service';
 
 export class SignDataService {
     /**
@@ -44,12 +35,11 @@ export class SignDataService {
                 walletStateInit
             } = payload;
 
-            // Check domain
-            if (!allowedDomains.includes(domain)) {
+            if (!verifyDomain(domain)) {
                 return false;
             }
 
-            // Check timestamp
+            const validAuthTime = 15 * 60;
             const now = Math.floor(Date.now() / 1000);
             if (now - validAuthTime > timestamp) {
                 return false;
@@ -92,11 +82,11 @@ export class SignDataService {
                       );
 
             // Verify Ed25519 signature
-            const isValid = domainSignVerify({
+            const isValid = verifySignature({
+                network: payload.network,
                 data: finalHash,
                 signature: Buffer.from(signature, 'base64'),
-                publicKey,
-                domain: getDomain(payload.network)
+                publicKey
             });
 
             return isValid;
