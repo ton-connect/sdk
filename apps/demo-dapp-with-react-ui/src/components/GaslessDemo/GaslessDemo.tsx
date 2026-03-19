@@ -1,0 +1,115 @@
+import { useState } from 'react';
+import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
+import ReactJson from 'react-json-view';
+import './style.scss';
+import { sendWithConnectedWallet } from './gaslessWithConnect';
+import { Address } from '@ton/core';
+import { sendWithoutConnectedWallet } from './gaslessWithoutConnect';
+
+const DEFAULT_DESTINATION = 'UQAHIrW23uWY7KOOYz6axu7WlBdA8iGwncI_Y8ZTWZA43yXF';
+
+export function GaslessDemo() {
+    const wallet = useTonWallet();
+    const [tonConnectUi] = useTonConnectUI();
+
+    const [destination, setDestination] = useState(DEFAULT_DESTINATION);
+    const [jettonAmount, setJettonAmount] = useState('1000000'); // 1 USDT in nano
+
+    const [status, setStatus] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [result, setResult] = useState<any | null>(null);
+
+    const resetState = () => {
+        setStatus(null);
+        setError(null);
+        setResult(null);
+    };
+
+    const handleGaslessSend = async () => {
+        if (!wallet) {
+            tonConnectUi.openModal();
+            return;
+        }
+
+        resetState();
+        try {
+            setDestination('Sedning transfer...');
+            const result = await sendWithConnectedWallet(
+                tonConnectUi,
+                BigInt(jettonAmount),
+                Address.parse(destination)
+            );
+            setResult(result);
+        } catch (error) {
+            setStatus('Error sedning gasless send');
+            setError(JSON.stringify(error));
+            setResult(error);
+        }
+    };
+
+    const handleGaslessIntent = async () => {
+        resetState();
+        try {
+            const result = await sendWithoutConnectedWallet(
+                tonConnectUi,
+                BigInt(jettonAmount),
+                Address.parse(destination)
+            );
+            setResult(result);
+        } catch (error) {
+            setStatus('Error sedning gasless send');
+            setError(JSON.stringify(error));
+            setResult(error);
+        }
+    };
+
+    return (
+        <div className="gasless-demo">
+            <h3>Gasless USDT Transfer</h3>
+            <p className="gasless-demo__subtitle">
+                Transfer jettons without TON in wallet — fee is paid in the jetton itself.
+            </p>
+
+            <div className="gasless-demo__form">
+                <label>
+                    Destination
+                    <input
+                        value={destination}
+                        onChange={e => setDestination(e.target.value)}
+                        placeholder="Recipient address"
+                    />
+                </label>
+                <label>
+                    Amount (nano jettons)
+                    <input
+                        value={jettonAmount}
+                        onChange={e => setJettonAmount(e.target.value)}
+                        placeholder="e.g. 1000000 = 1 USDT"
+                    />
+                </label>
+            </div>
+
+            <div className="gasless-demo__buttons">
+                {wallet ? (
+                    <button onClick={handleGaslessSend}>Send gasless (connected)</button>
+                ) : (
+                    <button onClick={() => tonConnectUi.openModal()}>
+                        Connect wallet to send gasless
+                    </button>
+                )}
+                <button onClick={handleGaslessIntent}>Sign gasless intent (no connection)</button>
+            </div>
+
+            {status && <div className="gasless-demo__status">{status}</div>}
+            {error && <div className="gasless-demo__error">Error: {error}</div>}
+
+            {result && (
+                <div className="gasless-demo__debug">
+                    <h4>Result</h4>
+                    <ReactJson src={result} name={false} theme="ocean" collapsed={false} />
+                </div>
+            )}
+        </div>
+    );
+}

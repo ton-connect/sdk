@@ -13,6 +13,7 @@ import { SignMessageDemo } from './components/SignMessageDemo/SignMessageDemo';
 import { MerkleExample } from './components/MerkleExample/MerkleExample';
 import { FindTransactionDemo } from './components/FindTransactionDemo/FindTransactionDemo';
 import { TransferUsdt } from './components/TransferUsdt/TransferUsdt';
+import { GaslessDemo } from './components/GaslessDemo/GaslessDemo';
 import { UniversalConnector } from '@reown/appkit-universal-connector';
 
 initializeWalletConnect(UniversalConnector, {
@@ -37,6 +38,7 @@ function HomePage() {
             <SignDataTester />
             <SignMessageDemo />
             <TransferUsdt />
+            <GaslessDemo />
             <CreateJettonDemo />
             <TonProofDemo />
             <FindTransactionDemo />
