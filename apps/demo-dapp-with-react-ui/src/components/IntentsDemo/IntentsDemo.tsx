@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { CHAIN, useTonConnectUI, useTonWallet, TonConnectButton } from '@tonconnect/ui-react';
 import type {
-    IntentResponse,
     SendTransactionDraftRequest,
     SignDataPayload,
     SignMessageDraftRequest,
@@ -22,14 +21,6 @@ export function IntentsDemo() {
     const commonOptions = {
         notifications: ['before', 'success', 'error'] as ('before' | 'success' | 'error')[]
     };
-
-    useEffect(() => {
-        const unsubscribe = tonConnectUi.connector.onIntentResponse((response: IntentResponse) => {
-            setLastIntentResult(response);
-        });
-
-        return unsubscribe;
-    }, [tonConnectUi]);
 
     const handleSendTransactionIntent = async () => {
         const recipientAddress =
@@ -54,7 +45,8 @@ export function IntentsDemo() {
         setLastIntentPayload(intent);
 
         try {
-            await tonConnectUi.sendTransactionDraft(intent, commonOptions);
+            const response = await tonConnectUi.sendTransactionDraft(intent, commonOptions);
+            setLastIntentResult(response);
         } catch (e) {
             // result tracking is not implemented yet; errors are logged for debugging
 
@@ -92,7 +84,8 @@ export function IntentsDemo() {
         setLastIntentPayload(intent);
 
         try {
-            await tonConnectUi.sendTransactionDraft(intent, commonOptions);
+            const response = await tonConnectUi.sendTransactionDraft(intent, commonOptions);
+            setLastIntentResult(response);
         } catch (e) {
             console.error('sendJettonIntent failed:', e);
         }
@@ -142,7 +135,8 @@ export function IntentsDemo() {
         setLastIntentPayload(intent);
 
         try {
-            await tonConnectUi.signMessageDraft(intent, commonOptions);
+            const response = await tonConnectUi.signMessageDraft(intent, commonOptions);
+            setLastIntentResult(response);
         } catch (e) {
             console.error('signMessageDraft failed:', e);
         }
@@ -178,7 +172,8 @@ export function IntentsDemo() {
         setLastIntentPayload(intent);
 
         try {
-            await tonConnectUi.signMessageDraft(intent, commonOptions);
+            const response = await tonConnectUi.signMessageDraft(intent, commonOptions);
+            setLastIntentResult(response);
         } catch (e) {
             console.error('signJettonMessageDraft failed:', e);
         }
@@ -198,7 +193,8 @@ export function IntentsDemo() {
         setLastIntentPayload(intent);
 
         try {
-            await tonConnectUi.sendActionDraft(intent, commonOptions);
+            const response = await tonConnectUi.sendActionDraft(intent, commonOptions);
+            setLastIntentResult(response);
         } catch (e) {
             console.error('sendActionDraft failed:', e);
         }
