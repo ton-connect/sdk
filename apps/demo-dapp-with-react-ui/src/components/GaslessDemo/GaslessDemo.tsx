@@ -13,7 +13,7 @@ export function GaslessDemo() {
     const [tonConnectUi] = useTonConnectUI();
 
     const [destination, setDestination] = useState(DEFAULT_DESTINATION);
-    const [jettonAmount, setJettonAmount] = useState('1000000'); // 1 USDT in nano
+    const [jettonAmount, setJettonAmount] = useState('50000'); // 0.05 USDT in nano
 
     const [status, setStatus] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -34,7 +34,6 @@ export function GaslessDemo() {
 
         resetState();
         try {
-            setDestination('Sedning transfer...');
             const result = await sendWithConnectedWallet(
                 tonConnectUi,
                 BigInt(jettonAmount),
@@ -43,8 +42,9 @@ export function GaslessDemo() {
             setResult(result);
         } catch (error) {
             setStatus('Error sedning gasless send');
-            setError(JSON.stringify(error));
-            setResult(error);
+            console.error(error);
+            setError(String(error));
+            setResult({ error: String(error) });
         }
     };
 
@@ -58,9 +58,10 @@ export function GaslessDemo() {
             );
             setResult(result);
         } catch (error) {
+            console.error(error);
             setStatus('Error sedning gasless send');
-            setError(JSON.stringify(error));
-            setResult(error);
+            setError(String(error));
+            setResult({ error: String(error) });
         }
     };
 
