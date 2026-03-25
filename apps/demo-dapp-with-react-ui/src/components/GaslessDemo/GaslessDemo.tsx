@@ -67,7 +67,7 @@ export function GaslessDemo() {
 
     return (
         <div className="gasless-demo">
-            <h3>Gasless USDT Transfer</h3>
+            <h3 id="gasless-usdt">Gasless USDT Transfer</h3>
             <p className="gasless-demo__subtitle">
                 Transfer jettons without TON in wallet — fee is paid in the jetton itself.
             </p>
