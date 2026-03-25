@@ -78,7 +78,7 @@ export async function sendWithConnectedWallet(
             address: message.address.toString(),
             payload: message.payload?.toBoc()?.toString('base64'),
             amount: message.amount,
-            stateInit: message.payload?.toBoc()?.toString('base64')
+            stateInit: message.stateInit?.toBoc()?.toString('base64')
         }))
     });
     console.log('internalBoc', internalBoc);
