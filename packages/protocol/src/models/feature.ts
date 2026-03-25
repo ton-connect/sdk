@@ -24,6 +24,8 @@ export type SignDataFeature = { name: 'SignData'; types: SignDataType[] };
 
 export type SignMessageFeature = {
     name: 'SignMessage';
+    maxMessages: number;
+    extraCurrencySupported?: boolean;
 };
 
 export type DraftAssetType = 'ton' | 'jetton' | 'nft';

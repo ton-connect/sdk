@@ -66,7 +66,8 @@ import { OptionalTraceable, Traceable, WithoutId } from 'src/utils/types';
 import {
     checkSendTransactionSupport,
     checkRequiredWalletFeatures,
-    checkSignDataSupport
+    checkSignDataSupport,
+    checkSignMessageSupport
 } from 'src/utils/feature-support';
 import { callForSuccess } from 'src/utils/call-for-success';
 import { logDebug, logError } from 'src/utils/log';
@@ -584,7 +585,7 @@ export class TonConnect implements ITonConnect {
         const requireExtraCurrencies = transaction.messages.some(
             m => m.extraCurrency && Object.keys(m.extraCurrency).length > 0
         );
-        checkSendTransactionSupport(this.wallet!.device.features, {
+        checkSignMessageSupport(this.wallet!.device.features, {
             requiredMessagesNumber,
             requireExtraCurrencies
         });

@@ -5,7 +5,8 @@ import {
     SendTransactionFeature,
     SignDataFeature,
     SignMessageDraftFeature,
-    ActionDraftFeature
+    ActionDraftFeature,
+    SignMessageFeature
 } from '@tonconnect/protocol';
 import { logWarning } from 'src/utils/log';
 import { WalletNotSupportFeatureError } from 'src/errors/wallet';
@@ -105,6 +106,46 @@ export function checkSignDataSupport(
     }
 }
 
+export function checkSignMessageSupport(
+    features: Feature[],
+    options: { requiredMessagesNumber: number; requireExtraCurrencies: boolean }
+): never | void {
+    const signMessageFeature = findFeature(features, 'SignMessage');
+
+    const requiredFeature: RequiredSignMessageFeature = {
+        minMessages: options.requiredMessagesNumber,
+        extraCurrencyRequired: options.requireExtraCurrencies
+    };
+
+    if (!signMessageFeature) {
+        throw new WalletNotSupportFeatureError("Wallet doesn't support SignMessage feature.", {
+            cause: { requiredFeature: { featureName: 'SignMessage', value: requiredFeature } }
+        });
+    }
+
+    if (options.requireExtraCurrencies && !signMessageFeature.extraCurrencySupported) {
+        throw new WalletNotSupportFeatureError(
+            `Wallet is not able to handle such SignMessage request. Extra currencies support is required.`,
+            {
+                cause: {
+                    requiredFeature: { featureName: 'SignMessage', value: requiredFeature }
+                }
+            }
+        );
+    }
+
+    if (signMessageFeature.maxMessages < options.requiredMessagesNumber) {
+        throw new WalletNotSupportFeatureError(
+            `Wallet is not able to handle such SignMessage request. Max support messages number is ${signMessageFeature.maxMessages}, but ${options.requiredMessagesNumber} is required.`,
+            {
+                cause: {
+                    requiredFeature: { featureName: 'SignMessage', value: requiredFeature }
+                }
+            }
+        );
+    }
+}
+
 export function checkRequiredWalletFeatures(
     features: Feature[],
     walletsRequiredFeatures?: RequiredFeatures
@@ -144,7 +185,8 @@ function checkSignMessageFeature(
     required?: RequiredSignMessageFeature
 ): boolean {
     if (!required) return true;
-    return features.some(f => f && typeof f === 'object' && f.name === 'SignMessage');
+    const feature = findFeature(features, 'SignMessage');
+    return !!feature && checkSignMessage(feature, required);
 }
 
 function checkSignDataFeature(features: Feature[], required?: RequiredSignDataFeature): boolean {
@@ -204,6 +246,20 @@ function findFeature<T extends Exclude<Feature, 'SendTransaction'>, P extends T[
 function checkSendTransaction(
     feature: SendTransactionFeature,
     requiredFeature: RequiredSendTransactionFeature
+): boolean {
+    const correctMessagesNumber =
+        requiredFeature.minMessages === undefined ||
+        requiredFeature.minMessages <= feature.maxMessages;
+
+    const correctExtraCurrency =
+        !requiredFeature.extraCurrencyRequired || feature.extraCurrencySupported;
+
+    return !!(correctMessagesNumber && correctExtraCurrency);
+}
+
+function checkSignMessage(
+    feature: SignMessageFeature,
+    requiredFeature: RequiredSignMessageFeature
 ): boolean {
     const correctMessagesNumber =
         requiredFeature.minMessages === undefined ||
