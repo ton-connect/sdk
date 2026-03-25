@@ -31,7 +31,7 @@ export const WalletsUl = styled.ul`
     grid-template-rows: auto;
     align-content: flex-start;
     row-gap: 8px;
-    /* justify-content: center;*/
+    justify-content: center;
     width: 100%;
     padding: 0 0 16px;
     align-self: flex-start;
