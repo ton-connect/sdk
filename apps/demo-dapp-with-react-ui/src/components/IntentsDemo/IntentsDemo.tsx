@@ -183,11 +183,8 @@ export function IntentsDemo() {
         const origin =
             typeof window !== 'undefined' ? window.location.origin : 'https://example.com';
 
-        const accountAddress =
-            wallet?.account.address ?? 'EQCKWpx7cNMpvmcN5ObM5lLUZHZRFKqYA4xmw9jOry0ZsF9M';
-
         const intent: SendActionDraftRequest = {
-            actionUrl: `${origin}/intent-action-demo?address=${encodeURIComponent(accountAddress)}`
+            actionUrl: `${origin}/intent-actions/demo-sign-data.json`
         };
 
         setLastIntentPayload(intent);
