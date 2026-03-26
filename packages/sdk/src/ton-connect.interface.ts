@@ -181,7 +181,7 @@ export interface ITonConnect {
         wallet: TWallet,
         intent: IntentRequest,
         options?: OptionalTraceable<IntentSubscribeOptions>
-    ): WaleltIntentResult<TWallet>;
+    ): Promise<WaleltIntentResult<TWallet>>;
 
     getSessionId(): Promise<string | null>;
 

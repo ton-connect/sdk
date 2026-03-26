@@ -192,7 +192,7 @@ export class BridgeProvider implements HTTPProvider {
             openingDeadlineMS?: number;
             signal?: AbortSignal;
         }>
-    ): string {
+    ): Promise<string> {
         const traceId = options?.traceId ?? UUIDv7();
 
         const intentPayload = { id: '0', ...payload } as RawIntentPayload;
@@ -206,7 +206,7 @@ export class BridgeProvider implements HTTPProvider {
             this.intentListeners.forEach(listener => listener(typed));
         });
 
-        return this.generateUniversalLink(
+        return this.generateUniversalLinkAsync(
             universalLink,
             {
                 connectRequest: options?.connectRequest,
@@ -733,25 +733,47 @@ export class BridgeProvider implements HTTPProvider {
         return this.generateRegularUniversalLink(universalLink, message, options);
     }
 
+    private async generateUniversalLinkAsync(
+        universalLink: string,
+        message: UniversalLinkMessage,
+        options: Traceable<{ signal?: AbortSignal }>
+    ): Promise<string> {
+        if (isTelegramUrl(universalLink)) {
+            return this.generateTGUniversalLinkAsync(universalLink, message, options);
+        }
+
+        return this.generateRegularUniversalLinkAsync(universalLink, message, options);
+    }
+
     private storeIntentPayloadInObjectStorage(
         payload: string,
         options?: { signal?: AbortSignal }
     ): void {
+        // Kept for backward compatibility of synchronous link generation.
+        void this.storeIntentPayloadInObjectStorageAsync(payload, options).catch(() => {});
+    }
+
+    private async storeIntentPayloadInObjectStorageAsync(
+        payload: string,
+        options?: { signal?: AbortSignal }
+    ): Promise<void> {
         const objectStorageUrl = this.getObjectStorageUrl();
         const url = new URL(objectStorageUrl);
         url.searchParams.set('ttl', BridgeProvider.INTENT_TTL_SECONDS.toString());
 
-        void fetch(url.toString(), {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'text/plain'
-            },
-            body: payload,
-            signal: options?.signal
-        }).catch(error => {
+        try {
+            await fetch(url.toString(), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'text/plain'
+                },
+                body: payload,
+                signal: options?.signal
+            });
+        } catch (error) {
             this.abortController?.abort();
             logDebug('Failed to store intent payload in object storage', error);
-        });
+        }
     }
 
     private getObjectStorageUrl(): string {
@@ -816,6 +838,83 @@ export class BridgeProvider implements HTTPProvider {
         }
 
         return baseUrl.toString();
+    }
+
+    private async generateRegularUniversalLinkAsync(
+        universalLink: string,
+        message: UniversalLinkMessage,
+        options: Traceable<{ signal?: AbortSignal }>
+    ): Promise<string> {
+        const baseUrl = new URL(universalLink);
+        baseUrl.searchParams.append('v', PROTOCOL_VERSION.toString());
+        baseUrl.searchParams.append('id', this.session!.sessionCrypto.sessionId);
+        baseUrl.searchParams.append('trace_id', options.traceId);
+
+        if (message.connectRequest) {
+            baseUrl.searchParams.append('r', JSON.stringify(message.connectRequest));
+        }
+
+        if (message.draft) {
+            const intentPayload = message.draft;
+
+            const inlineUrl = new URL(baseUrl.toString());
+            const mp = toBase64Url(Base64.encode(intentPayload, false));
+            inlineUrl.searchParams.append('m', 'intent');
+            inlineUrl.searchParams.append('mp', mp);
+
+            const inlineUrlString = inlineUrl.toString();
+            if (inlineUrlString.length <= BridgeProvider.MAX_INLINE_INTENT_URL_LENGTH) {
+                return inlineUrlString;
+            }
+
+            const shortUrl = new URL(baseUrl.toString());
+            const sessionCrypto = new SessionCrypto();
+
+            shortUrl.searchParams.append('m', 'intent_remote');
+            shortUrl.searchParams.append('pk', sessionCrypto.stringifyKeypair().secretKey);
+
+            const encryptedPayloadRaw = sessionCrypto.encrypt(
+                JSON.stringify(intentPayload),
+                hexToByteArray(sessionCrypto.sessionId)
+            );
+            const encryptedPayload = Base64.encode(encryptedPayloadRaw);
+
+            await this.storeIntentPayloadInObjectStorageAsync(encryptedPayload, {
+                signal: options.signal
+            });
+
+            const getUrl = addPathToUrl(
+                this.getObjectStorageUrl(),
+                new sha256().update(encryptedPayload).update('text/plain').digest('hex')
+            );
+            shortUrl.searchParams.append('get_url', getUrl);
+
+            return shortUrl.toString();
+        }
+
+        return baseUrl.toString();
+    }
+
+    private async generateTGUniversalLinkAsync(
+        universalLink: string,
+        message: UniversalLinkMessage,
+        options: Traceable<{ signal?: AbortSignal }>
+    ): Promise<string> {
+        const urlToWrap = await this.generateRegularUniversalLinkAsync(
+            'about:blank',
+            message,
+            options
+        );
+        const linkParams = urlToWrap.split('?')[1]!;
+
+        const startapp = 'tonconnect-' + encodeTelegramUrlParameters(linkParams);
+
+        // TODO: Remove this line after all dApps and the wallets-list.json have been updated
+        const updatedUniversalLink = this.convertToDirectLink(universalLink);
+
+        const url = new URL(updatedUniversalLink);
+        url.searchParams.append('startapp', startapp);
+        return url.toString();
     }
 
     private generateTGUniversalLink(

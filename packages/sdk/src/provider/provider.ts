@@ -42,7 +42,7 @@ export interface HTTPProvider extends BaseProvider {
             openingDeadlineMS?: number;
             signal?: AbortSignal;
         }>
-    ): string;
+    ): Promise<string>;
 
     pause(): void;
 

@@ -29,6 +29,8 @@ import {
     H1Styled,
     H2Styled,
     LoaderStyled,
+    QrLoaderPlaceholderStyled,
+    QrLoaderTextStyled,
     QRCodeStyled,
     StyledIconButton,
     TgButtonStyled,
@@ -104,10 +106,10 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
 
     onCleanup(unsubscribe);
 
-    const generateUniversalLink = (): void => {
+    const generateUniversalLink = async (): Promise<void> => {
         // TODO: prevent double generation of universal link later and remove try-catch
         try {
-            const universalLink = initiateTonConnectFlow(
+            const link = await initiateTonConnectFlow(
                 connector,
                 {
                     universalLink: props.wallet.universalLink,
@@ -117,7 +119,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                 { additionalRequest: props.additionalRequest }
             );
 
-            setUniversalLink(universalLink);
+            setUniversalLink(link);
         } catch (e) {}
     };
 
@@ -126,14 +128,14 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
             untrack(mode) !== 'extension' &&
             (supportsMobile(props.wallet) || supportsDesktop(props.wallet))
         ) {
-            generateUniversalLink();
+            void generateUniversalLink();
         }
     });
 
     const onClickMobile = (): void => {
         setConnectionErrored(null);
         if (mode() === 'extension') {
-            generateUniversalLink();
+            void generateUniversalLink();
         }
 
         setMode('mobile');
@@ -143,22 +145,27 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
         });
     };
 
-    const onClickDesktop = (): void => {
+    const onClickDesktop = async (): Promise<void> => {
         setConnectionErrored(null);
         if (mode() === 'extension') {
-            generateUniversalLink();
+            await generateUniversalLink();
         }
 
         setMode('desktop');
 
-        if (isTelegramUrl(universalLink())) {
-            onClickTelegram();
+        const link = universalLink();
+        if (!link) {
+            return;
+        }
+
+        if (isTelegramUrl(link)) {
+            onClickTelegram(link);
         } else {
             const forceRedirect = !firstClick();
             setFirstClick(false);
 
             redirectToWallet(
-                universalLink()!,
+                link,
                 props.wallet.deepLink,
                 {
                     returnStrategy: appState.returnStrategy,
@@ -174,14 +181,14 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
         }
     };
 
-    const onClickTelegram = (): void => {
+    const onClickTelegram = (link: string): void => {
         const forceRedirect = !firstClick();
         setFirstClick(false);
         setLastSelectedWalletInfo({
             ...props.wallet,
             openMethod: 'universal-link'
         });
-        redirectToTelegram(universalLink()!, {
+        redirectToTelegram(link, {
             returnStrategy: appState.returnStrategy,
             twaReturnUrl: appState.twaReturnUrl,
             forceRedirect: forceRedirect
@@ -193,7 +200,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
         setMode('extension');
         if (isWalletInfoCurrentlyInjected(props.wallet)) {
             setLastSelectedWalletInfo(props.wallet);
-            initiateTonConnectFlow(
+            void initiateTonConnectFlow(
                 connector,
                 {
                     jsBridgeKey: props.wallet.jsBridgeKey
@@ -297,11 +304,19 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                         </ButtonsContainerStyled>
                     </Match>
                     <Match when={mode() === 'mobile'}>
-                        <QRCodeStyled
-                            disableCopy={false}
-                            sourceUrl={addReturnStrategy(universalLink()!, 'none')}
-                            imageUrl={props.wallet.imageUrl}
-                        />
+                        <Show when={universalLink()}>
+                            <QRCodeStyled
+                                disableCopy={false}
+                                sourceUrl={addReturnStrategy(universalLink()!, 'none')}
+                                imageUrl={props.wallet.imageUrl}
+                            />
+                        </Show>
+                        <Show when={!universalLink()}>
+                            <QrLoaderPlaceholderStyled>
+                                <LoaderIcon size="m" />
+                                <QrLoaderTextStyled>Preparing link...</QrLoaderTextStyled>
+                            </QrLoaderPlaceholderStyled>
+                        </Show>
                     </Match>
                     <Match when={mode() === 'extension'}>
                         <Show when={isWalletInfoCurrentlyInjected(props.wallet)}>
@@ -370,7 +385,12 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                 <TgButtonStyled
                     rightIcon={<TgImageStyled src={IMG.TG} />}
                     scale="s"
-                    onClick={onClickTelegram}
+                    onClick={() => {
+                        const link = universalLink();
+                        if (link) {
+                            onClickTelegram(link);
+                        }
+                    }}
                 >
                     <Translation translationKey="walletModal.desktopConnectionModal.openWalletOnTelegram">
                         Open Wallet in Telegram on desktop

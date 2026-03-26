@@ -1,5 +1,5 @@
 import { styled } from 'solid-styled-components';
-import { ErrorIcon, H1, IconButton, LoaderIcon, Image, H2 } from 'src/app/components';
+import { ErrorIcon, H1, IconButton, LoaderIcon, Image, H2, Text } from 'src/app/components';
 import { Link } from 'src/app/components/link';
 import { rgba } from 'src/app/utils/css';
 
@@ -47,6 +47,21 @@ export const FooterButton = styled(Link)`
 export const LoaderStyled = styled(LoaderIcon)`
     margin-bottom: 18px;
     margin-top: 2px;
+`;
+
+export const QrLoaderPlaceholderStyled = styled.div`
+    margin: 0 24px 16px;
+    height: 304px;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+`;
+
+export const QrLoaderTextStyled = styled(Text)`
+    color: ${props => props.theme!.colors.text.secondary};
 `;
 
 export const ErrorIconStyled = styled(ErrorIcon)`

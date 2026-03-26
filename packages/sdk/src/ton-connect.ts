@@ -929,11 +929,11 @@ export class TonConnect implements ITonConnect {
         }
     }
 
-    public subscribeToIntent<TWallet extends WalletSourceArg>(
+    public async subscribeToIntent<TWallet extends WalletSourceArg>(
         wallet: TWallet,
         intent: IntentRequest,
         options?: OptionalTraceable<IntentSubscribeOptions>
-    ): WaleltIntentResult<TWallet> {
+    ): Promise<WaleltIntentResult<TWallet>> {
         if (this.connected) {
             throw new WalletAlreadyConnectedError();
         }
@@ -979,11 +979,11 @@ export class TonConnect implements ITonConnect {
             }
         });
 
-        return this.provider.connectWithIntent(payload, {
+        return (await this.provider.connectWithIntent(payload, {
             connectRequest,
             signal: abortController.signal,
             traceId
-        }) as WaleltIntentResult<TWallet>;
+        })) as WaleltIntentResult<TWallet>;
     }
 
     private async sendDraft<T extends object>(
