@@ -8,7 +8,6 @@ import {
 import {
     Component,
     createEffect,
-    createMemo,
     createSignal,
     Match,
     onCleanup,
