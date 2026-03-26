@@ -50,7 +50,7 @@ import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { DefaultStorage } from 'src/storage/default-storage';
 import { ITonConnect } from 'src/ton-connect.interface';
 import { WalletWrongNetworkError } from 'src/errors/wallet/wallet-wrong-network.error';
-import { getDocument, getOriginWithPath, getWebPageManifest } from 'src/utils/web-api';
+import { getDocument, getOriginWithPath, getWebPageManifest, getWindow } from 'src/utils/web-api';
 import { WalletsListManager } from 'src/wallets-list-manager';
 import { OptionalTraceable, Traceable } from 'src/utils/types';
 import {
@@ -163,7 +163,27 @@ export class TonConnect implements ITonConnect {
     }
 
     constructor(options?: TonConnectOptions) {
-        const manifestUrl = options?.manifestUrl || getWebPageManifest();
+        let manifestUrl = options?.manifestUrl || getWebPageManifest();
+
+        if (manifestUrl && !manifestUrl.startsWith('http://') && !manifestUrl.startsWith('https://')) {
+            const origin = getWindow()?.location?.origin;
+            if (origin) {
+                const resolvedUrl = new URL(manifestUrl, origin).toString();
+                console.warn(
+                    `[TON_CONNECT_SDK] manifestUrl was relative ("${manifestUrl}"). ` +
+                    `Resolved to "${resolvedUrl}". ` +
+                    `Wallets fetch the manifest externally — use an absolute URL in production.`
+                );
+                manifestUrl = resolvedUrl;
+            } else {
+                throw new TonConnectError(
+                    `[TON_CONNECT_SDK] manifestUrl must be an absolute URL (starting with https://). ` +
+                    `Received: "${manifestUrl}". ` +
+                    `Wallets fetch the manifest independently and cannot resolve relative paths.`
+                );
+            }
+        }
+
         this.dappSettings = {
             manifestUrl,
             storage: options?.storage || new DefaultStorage()
