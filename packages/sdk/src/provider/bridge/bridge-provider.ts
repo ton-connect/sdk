@@ -478,6 +478,43 @@ export class BridgeProvider implements HTTPProvider {
 
             const id = (await this.connectionStorage.getNextRpcRequestId()).toString();
             await this.connectionStorage.increaseNextRpcRequestId();
+            let settled = false;
+
+            const cleanup = (): void => {
+                if (options?.signal) {
+                    options.signal.removeEventListener('abort', onAbort);
+                }
+            };
+
+            const resolveOnce = (response: TraceableWalletResponse<T>): void => {
+                if (settled) {
+                    return;
+                }
+                settled = true;
+                cleanup();
+                resolve(response);
+            };
+
+            const rejectOnce = (error: unknown): void => {
+                if (settled) {
+                    return;
+                }
+                settled = true;
+                cleanup();
+                reject(error);
+            };
+
+            const onAbort = (): void => {
+                this.pendingRequests.delete(id.toString());
+                rejectOnce(new TonConnectError('Bridge request was aborted'));
+            };
+
+            if (options?.signal?.aborted) {
+                onAbort();
+                return;
+            }
+
+            options?.signal?.addEventListener('abort', onAbort, { once: true });
 
             logDebug('Send http-bridge request:', { ...request, id });
 
@@ -506,9 +543,11 @@ export class BridgeProvider implements HTTPProvider {
                     }
                 );
                 options?.onRequestSent?.();
-                this.pendingRequests.set(id.toString(), resolve);
+                this.pendingRequests.set(id.toString(), response =>
+                    resolveOnce(response as TraceableWalletResponse<T>)
+                );
             } catch (e) {
-                reject(e);
+                rejectOnce(e);
             }
         });
     }
