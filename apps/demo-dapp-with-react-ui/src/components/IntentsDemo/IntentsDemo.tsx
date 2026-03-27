@@ -9,6 +9,12 @@ import type {
 import ReactJson from 'react-json-view';
 import './style.scss';
 
+const ACTION_DEMO_FILES = {
+    signData: '/intent-actions/demo-sign-data.json',
+    sendTransaction: '/intent-actions/demo-send-transaction.json',
+    signMessage: '/intent-actions/demo-sign-message.json'
+} as const;
+
 export function IntentsDemo() {
     const wallet = useTonWallet();
     const [tonConnectUi] = useTonConnectUI();
@@ -17,6 +23,8 @@ export function IntentsDemo() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [lastIntentResult, setLastIntentResult] = useState<any | null>(null);
     const [useObjectStorageMode, setUseObjectStorageMode] = useState(false);
+    const [selectedActionType, setSelectedActionType] =
+        useState<keyof typeof ACTION_DEMO_FILES>('signData');
 
     const commonOptions = {
         notifications: ['before', 'success', 'error'] as ('before' | 'success' | 'error')[]
@@ -184,7 +192,7 @@ export function IntentsDemo() {
             typeof window !== 'undefined' ? window.location.origin : 'https://example.com';
 
         const intent: SendActionDraftRequest = {
-            actionUrl: `${origin}/intent-actions/demo-sign-data.json`
+            actionUrl: `${origin}${ACTION_DEMO_FILES[selectedActionType]}`
         };
 
         setLastIntentPayload(intent);
@@ -264,6 +272,28 @@ export function IntentsDemo() {
                             <button onClick={handleSignJettonMessageIntent}>
                                 Sign jetton message intent
                             </button>
+                        </div>
+
+                        <div className="intents-demo__send-action">
+                            <div className="intents-demo__label intents-demo__send-action-title">
+                                Send action intent
+                            </div>
+                            <label className="intents-demo__row">
+                                <span className="intents-demo__label">Action type</span>
+                                <select
+                                    className="intents-demo__select"
+                                    value={selectedActionType}
+                                    onChange={e =>
+                                        setSelectedActionType(
+                                            e.target.value as keyof typeof ACTION_DEMO_FILES
+                                        )
+                                    }
+                                >
+                                    <option value="signData">signData</option>
+                                    <option value="sendTransaction">sendTransaction</option>
+                                    <option value="signMessage">signMessage</option>
+                                </select>
+                            </label>
                             <button onClick={handleSendActionIntent}>Send action intent</button>
                         </div>
                     </div>

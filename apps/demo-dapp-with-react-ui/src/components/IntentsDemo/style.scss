@@ -123,6 +123,43 @@
   font-size: 13px;
 }
 
+.intents-demo__select {
+  width: 100%;
+  max-width: 420px;
+  padding: 8px 36px 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background:
+    linear-gradient(45deg, transparent 50%, rgba(255, 255, 255, 0.75) 50%) calc(100% - 17px) calc(50% - 1px) / 7px 7px no-repeat,
+    linear-gradient(135deg, rgba(255, 255, 255, 0.75) 50%, transparent 50%) calc(100% - 12px) calc(50% - 1px) / 7px 7px no-repeat,
+    rgba(0, 0, 0, 0.24);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.intents-demo__select:hover {
+  border-color: rgba(102, 170, 238, 0.7);
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.intents-demo__select:focus {
+  border-color: rgba(102, 170, 238, 0.92);
+  box-shadow: 0 0 0 3px rgba(102, 170, 238, 0.22);
+}
+
+.intents-demo__select option {
+  background: #1d2738;
+  color: #ffffff;
+}
+
 .intents-demo__row input:disabled {
   opacity: 0.5;
 }
@@ -147,6 +184,21 @@
   flex-wrap: wrap;
   gap: 10px;
   margin-top: 10px;
+}
+
+.intents-demo__send-action {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.intents-demo__send-action-title {
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 0.9;
 }
 
 .intents-demo button {
