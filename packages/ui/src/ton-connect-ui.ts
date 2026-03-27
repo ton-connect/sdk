@@ -1020,10 +1020,14 @@ export class TonConnectUI {
     private waitForIntentResponse<T>(signal?: AbortSignal): Promise<T> {
         return new Promise<T>((resolve, reject) => {
             let unsubscribe: (() => void) | null = null;
+            let unsubscribeModal: (() => void) | null = null;
 
             const onAbort = (): void => {
                 if (unsubscribe) {
                     unsubscribe();
+                }
+                if (unsubscribeModal) {
+                    unsubscribeModal();
                 }
                 if (signal) {
                     signal.removeEventListener('abort', onAbort);
@@ -1041,6 +1045,7 @@ export class TonConnectUI {
                     signal.removeEventListener('abort', onAbort);
                 }
                 unsubscribe?.();
+                unsubscribeModal?.();
 
                 const maybeError = response as unknown as {
                     error?: { code: number; message: string };
@@ -1057,6 +1062,12 @@ export class TonConnectUI {
             if (signal) {
                 signal.addEventListener('abort', onAbort);
             }
+
+            unsubscribeModal = this.onModalStateChange(state => {
+                if (state.status === 'closed') {
+                    onAbort();
+                }
+            });
         });
     }
 

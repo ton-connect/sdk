@@ -585,7 +585,7 @@ export class TonConnect implements ITonConnect {
         const requireExtraCurrencies = transaction.messages.some(
             m => m.extraCurrency && Object.keys(m.extraCurrency).length > 0
         );
-        checkSignMessageSupport(this.wallet!.device.features, {
+        checkSendTransactionSupport(this.wallet!.device.features, {
             requiredMessagesNumber,
             requireExtraCurrencies
         });
@@ -764,7 +764,7 @@ export class TonConnect implements ITonConnect {
         const requireExtraCurrencies = message.messages.some(
             m => m.extraCurrency && Object.keys(m.extraCurrency).length > 0
         );
-        checkSendTransactionSupport(this.wallet!.device.features, {
+        checkSignMessageSupport(this.wallet!.device.features, {
             requiredMessagesNumber,
             requireExtraCurrencies
         });

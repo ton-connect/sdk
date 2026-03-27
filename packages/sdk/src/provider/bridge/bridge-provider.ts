@@ -762,7 +762,7 @@ export class BridgeProvider implements HTTPProvider {
         url.searchParams.set('ttl', BridgeProvider.INTENT_TTL_SECONDS.toString());
 
         try {
-            await fetch(url.toString(), {
+            const response = await fetch(url.toString(), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'text/plain'
@@ -770,9 +770,16 @@ export class BridgeProvider implements HTTPProvider {
                 body: payload,
                 signal: options?.signal
             });
+
+            if (!response.ok) {
+                throw new TonConnectError(
+                    `Object storage responded with status ${response.status} ${response.statusText}`
+                );
+            }
         } catch (error) {
             this.abortController?.abort();
             logDebug('Failed to store intent payload in object storage', error);
+            throw error;
         }
     }
 

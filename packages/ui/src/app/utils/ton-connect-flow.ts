@@ -5,6 +5,7 @@ import {
     WaleltIntentResult
 } from '@tonconnect/sdk';
 import { walletsModalState } from 'src/app/state/modals-state';
+import { widgetController } from 'src/app/widget-controller';
 
 export async function initiateTonConnectFlow<TWallet extends WalletSourceArg>(
     connector: ITonConnect,
@@ -14,11 +15,16 @@ export async function initiateTonConnectFlow<TWallet extends WalletSourceArg>(
     const state = walletsModalState();
 
     if (state.mode === 'intent') {
-        const intent = state.intent!;
-        return await connector.subscribeToIntent(walletSource, intent, {
-            traceId: state.traceId,
-            connectRequest: options.additionalRequest
-        });
+        try {
+            const intent = state.intent!;
+            return await connector.subscribeToIntent(walletSource, intent, {
+                traceId: state.traceId,
+                connectRequest: options.additionalRequest
+            });
+        } catch (error) {
+            widgetController.closeWalletsModal('action-cancelled');
+            throw error;
+        }
     } else {
         return await connector.connect(walletSource, options.additionalRequest, {
             traceId: state.traceId
