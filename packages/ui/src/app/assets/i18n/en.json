@@ -76,6 +76,7 @@
   "walletModal": {
     "loading": "Loading wallets",
     "wallets": "Wallets",
+    "qrCodeGenerating": "QR code is generating...",
     "mobileUniversalModal": {
       "connectYourWallet": "Connect your TON wallet",
       "openWalletOnTelegramOrSelect": "Use Wallet in Telegram or choose other application",

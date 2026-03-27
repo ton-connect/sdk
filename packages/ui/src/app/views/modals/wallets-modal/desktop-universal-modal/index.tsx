@@ -19,6 +19,7 @@ import { addReturnStrategy } from 'src/app/utils/url-strategy-helpers';
 import { bridgesIsEqual, getUniqueBridges } from 'src/app/utils/bridge';
 import { WalletsModalState } from 'src/models';
 import { initiateTonConnectFlow } from 'src/app/utils/ton-connect-flow';
+import { Translation } from 'src/app/components/typography/Translation';
 
 interface DesktopUniversalModalProps {
     additionalRequest: ConnectAdditionalRequest;
@@ -105,7 +106,11 @@ export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = prop
             <Show when={request.state !== 'ready'}>
                 <QrLoaderPlaceholderStyled>
                     <LoaderIcon size="m" />
-                    <QrLoaderTextStyled>Preparing link...</QrLoaderTextStyled>
+                    <QrLoaderTextStyled>
+                        <Translation translationKey="walletModal.qrCodeGenerating">
+                            QR code is generating...
+                        </Translation>
+                    </QrLoaderTextStyled>
                 </QrLoaderPlaceholderStyled>
             </Show>
             <H2AvailableWalletsStyled translationKey="walletModal.desktopUniversalModal.availableWallets">

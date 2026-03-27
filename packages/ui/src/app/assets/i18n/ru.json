@@ -76,6 +76,7 @@
   "walletModal": {
     "loading": "Кошельки загружаются",
     "wallets": "Кошельки",
+    "qrCodeGenerating": "QR-код генерируется...",
     "mobileUniversalModal": {
       "connectYourWallet": "Подключите TON кошелёк",
       "openWalletOnTelegramOrSelect": "Подключите Wallet в Telegram или выберете другое приложение",

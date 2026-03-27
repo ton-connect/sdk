@@ -199,7 +199,11 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
                 <Show when={!universalLink()}>
                     <QrLoaderPlaceholderStyled>
                         <LoaderIcon size="m" />
-                        <QrLoaderTextStyled>Preparing link...</QrLoaderTextStyled>
+                        <QrLoaderTextStyled>
+                            <Translation translationKey="walletModal.qrCodeGenerating">
+                                QR code is generating...
+                            </Translation>
+                        </QrLoaderTextStyled>
                     </QrLoaderPlaceholderStyled>
                 </Show>
             </Show>

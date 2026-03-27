@@ -40,6 +40,7 @@ export const QrLoaderPlaceholderStyled = styled.div`
     height: 304px;
     margin-bottom: 24px;
     border-radius: ${props => borders[props.theme!.borderRadius]};
+    background-color: ${props => props.theme!.colors.background.secondary};
     display: flex;
     flex-direction: column;
     gap: 12px;
