@@ -62,9 +62,25 @@ function updateFromStoredParams(key: string) {
     } catch {}
 }
 
+function updateFromStoredRawParams(key: string) {
+    try {
+        const window = getWindow();
+        const raw = window?.sessionStorage?.getItem?.(key);
+        if (raw) {
+            const storedParams = urlParseQueryString(raw);
+            for (const paramKey in storedParams) {
+                const value = storedParams[paramKey];
+                if (value != null && typeof initParams[paramKey] === 'undefined') {
+                    initParams[paramKey] = value;
+                }
+            }
+        }
+    } catch {}
+}
+
 const LAUNCH_PARAMS_STORAGE_KEY = 'ton-connect-session_storage_launchParams';
 
-updateFromStoredParams('tapps/launchParams');
+updateFromStoredRawParams('tapps/launchParams');
 updateFromStoredParams('__telegram__initParams');
 updateFromStoredParams(LAUNCH_PARAMS_STORAGE_KEY);
 
