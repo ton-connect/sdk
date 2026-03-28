@@ -55,6 +55,7 @@
     "@solid-primitives/i18n": "^1.1.2",
     "@types/node": "^24.2.0",
     "@types/ua-parser-js": "^0.7.36",
+    "@vitest/coverage-istanbul": "3.2.4",
     "is-plain-object": "^5.0.0",
     "jsdom": "^27.0.1",
     "qrcode-generator": "^1.4.4",
