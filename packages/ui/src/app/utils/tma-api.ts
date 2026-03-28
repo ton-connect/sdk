@@ -37,7 +37,7 @@ try {
 function sessionStorageGet(key: string) {
     try {
         const window = getWindow();
-        return JSON.parse(window?.sessionStorage?.getItem?.('__telegram__' + key)!);
+        return JSON.parse(window?.sessionStorage?.getItem?.(key)!);
     } catch (e) {}
     return null;
 }
