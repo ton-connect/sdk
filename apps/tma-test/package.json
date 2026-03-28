@@ -1,0 +1,19 @@
+{
+  "name": "tma-test",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@tonconnect/ui": "workspace:*",
+    "@telegram-apps/sdk": "^2.11.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2",
+    "vite": "^7.0.6"
+  }
+}

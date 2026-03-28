@@ -26,6 +26,14 @@ import {
     WithoutVersion
 } from '@tonconnect/sdk';
 import { logError } from 'src/app/utils/log';
+import {
+    isInTMA,
+    isInTelegramBrowser,
+    getTmaPlatform,
+    getWebAppVersion
+} from 'src/app/utils/tma-api';
+import { getUserAgent, isMobileUserAgent } from 'src/app/utils/web-api';
+import UAParser from 'ua-parser-js';
 
 export type TonConnectUITrackerOptions = {
     /**
@@ -121,9 +129,22 @@ export class TonConnectUITracker {
      */
     private async setRequestVersionHandler(): Promise<void> {
         await this.eventDispatcher.addEventListener('ton-connect-ui-request-version', async () => {
+            const ua = getUserAgent();
+            const response = {
+                ...createResponseVersionEvent(this.tonConnectUiVersion),
+                tma: isInTMA(),
+                tmaPlatform: getTmaPlatform(),
+                tmaVersion: getWebAppVersion(),
+                telegramBrowser: isInTelegramBrowser(),
+                os: ua.os,
+                browser: ua.browser,
+                rawBrowser: new UAParser().getBrowser().name ?? null,
+                mobile: isMobileUserAgent()
+            };
+
             await this.eventDispatcher.dispatchEvent(
                 'ton-connect-ui-response-version',
-                createResponseVersionEvent(this.tonConnectUiVersion)
+                response as ResponseVersionEvent
             );
         });
     }

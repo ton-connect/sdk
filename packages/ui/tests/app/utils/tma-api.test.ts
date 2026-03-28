@@ -307,6 +307,76 @@ describe('tma-api user', () => {
     });
 });
 
+describe('tma-api fallback from self-persisted ton-connect storage', () => {
+    const STORAGE_KEY = 'ton-connect-session_storage_launchParams';
+
+    function setStoredParams(platform: string) {
+        sessionStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify({
+                tgWebAppData: 'user=%7B%22id%22%3A123456789%2C%22is_premium%22%3Atrue%7D',
+                tgWebAppVersion: '9.5',
+                tgWebAppPlatform: platform
+            })
+        );
+    }
+
+    beforeEach(() => {
+        vi.resetModules();
+        sessionStorage.clear();
+        window.location.hash = '';
+        delete window.TelegramWebviewProxy;
+        delete window.TelegramWebview;
+        delete window.Telegram;
+    });
+
+    afterEach(() => {
+        delete window.TelegramWebviewProxy;
+        delete window.TelegramWebview;
+        delete window.Telegram;
+    });
+
+    it.each(['android', 'ios', 'macos', 'tdesktop', 'weba', 'web'] as const)(
+        'should detect platform "%s" and isInTMA from self-persisted storage',
+        async platform => {
+            setStoredParams(platform);
+
+            const { isTmaPlatform, isInTMA } = await import('src/app/utils/tma-api');
+
+            expect(isTmaPlatform(platform)).toBe(true);
+            expect(isInTMA()).toBe(true);
+        }
+    );
+
+    it('should not detect Telegram browser when platform is known', async () => {
+        setStoredParams('macos');
+
+        const { isInTelegramBrowser } = await import('src/app/utils/tma-api');
+
+        expect(isInTelegramBrowser()).toBe(false);
+    });
+
+    it('should detect Telegram browser via TelegramWebview when platform is unknown', async () => {
+        setStoredParams('unknown');
+        window.TelegramWebview = {};
+
+        const { isInTelegramBrowser } = await import('src/app/utils/tma-api');
+
+        expect(isInTelegramBrowser()).toBe(true);
+    });
+
+    it('should parse telegram user from self-persisted storage', async () => {
+        setStoredParams('macos');
+
+        const { getTgUser } = await import('src/app/utils/tma-api');
+
+        expect(getTgUser()).toEqual({
+            id: 123456789,
+            isPremium: true
+        });
+    });
+});
+
 describe('tma-api sendOpenTelegramLink', () => {
     beforeEach(() => {
         vi.resetModules();

@@ -1,0 +1,247 @@
+:root {
+    --bg: #131415;
+    --surface: #18222D;
+    --text: #FFFFFF;
+    --hint: #B1C3D5;
+    --accent: #2EA6FF;
+    --separator: #213040;
+    --destructive: #EF5B5B;
+    --radius: 16px;
+    --mono: 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 15px;
+    line-height: 1.4;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+}
+
+#app {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 20px 16px;
+}
+
+/* --- Header --- */
+
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 40px;
+}
+
+/* --- Typography --- */
+
+.page-title {
+    color: var(--accent);
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+}
+
+.page-subtitle {
+    color: var(--hint);
+    font-size: 14px;
+    margin-top: 4px;
+    margin-bottom: 20px;
+}
+
+.section-title {
+    color: var(--hint);
+    font-size: 13px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 16px 16px 8px;
+}
+
+.section-title:first-child {
+    padding-top: 0;
+}
+
+/* --- Grouped list --- */
+
+.group {
+    background: var(--surface);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+.group-row {
+    display: flex;
+    align-items: center;
+    padding: 14px 16px;
+    gap: 12px;
+    min-height: 48px;
+}
+
+.group-row + .group-row {
+    border-top: 0.5px solid var(--separator);
+}
+
+/* --- Picker --- */
+
+.group-row.picker-row {
+    cursor: pointer;
+    transition: background 0.12s;
+}
+
+.group-row.picker-row:active {
+    background: var(--separator);
+}
+
+.picker-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.picker-name {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+}
+
+.picker-desc {
+    font-size: 13px;
+    color: var(--hint);
+    margin-top: 2px;
+}
+
+.picker-chevron {
+    color: var(--hint);
+    font-size: 18px;
+    opacity: 0.5;
+}
+
+/* --- Progress steps --- */
+
+.step-label {
+    flex: 1;
+    font-size: 14px;
+    color: var(--text);
+}
+
+.step-status {
+    font-size: 13px;
+    font-family: var(--mono);
+    white-space: nowrap;
+}
+
+.step-pending .step-label {
+    color: var(--hint);
+    opacity: 0.5;
+}
+
+.step-pending .step-status {
+    color: var(--hint);
+    opacity: 0.5;
+}
+
+.step-running .step-status {
+    color: var(--accent);
+}
+
+.step-done .step-status {
+    color: var(--accent);
+}
+
+/* --- Verdict --- */
+
+.verdict {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    border-radius: var(--radius);
+    margin-bottom: 12px;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.verdict-ok {
+    background: rgba(46, 166, 255, 0.12);
+    color: var(--accent);
+}
+
+.verdict-warn {
+    background: rgba(239, 91, 91, 0.12);
+    color: var(--destructive);
+}
+
+/* --- Diagnostics --- */
+
+.diag-label {
+    flex: 1;
+    color: var(--hint);
+    font-size: 14px;
+}
+
+.diag-value {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text);
+    text-align: right;
+}
+
+.diag-warn .diag-value {
+    color: var(--destructive);
+}
+
+/* Stacked row: label on top, scrollable code block below */
+
+.group-row-stacked {
+    display: flex;
+    flex-direction: column;
+    padding: 12px 16px;
+    gap: 6px;
+}
+
+.group-row-stacked + .group-row-stacked,
+.group-row + .group-row-stacked,
+.group-row-stacked + .group-row {
+    border-top: 0.5px solid var(--separator);
+}
+
+.group-row-stacked .diag-label {
+    flex: none;
+}
+
+.group-row-stacked .diag-value {
+    text-align: left;
+    font-size: 12px;
+    line-height: 1.5;
+    background: var(--bg);
+    padding: 8px 10px;
+    border-radius: 8px;
+    overflow-x: auto;
+    white-space: pre;
+    -webkit-overflow-scrolling: touch;
+}
+
+.diag-hint {
+    font-size: 11px;
+    color: var(--destructive);
+    opacity: 0.8;
+    margin-left: 6px;
+}
+
+/* --- TC Button --- */
+
+#button-root {
+    flex-shrink: 0;
+}

@@ -141,6 +141,20 @@ export function getTgUser(): TelegramUser | undefined {
 }
 
 /**
+ * Returns the detected TMA platform string.
+ */
+export function getTmaPlatform(): TmaPlatform {
+    return tmaPlatform;
+}
+
+/**
+ * Returns the detected TMA WebApp version, or null when not in a Mini App.
+ */
+export function getWebAppVersion(): string | null {
+    return isInTMA() ? webAppVersion : null;
+}
+
+/**
  * Returns true if the app is running in TMA on the specified platform.
  * @param platforms
  */
