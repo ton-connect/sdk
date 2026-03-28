@@ -34,21 +34,14 @@ try {
     initParams = urlParseHashParams(locationHash);
 } catch (e) {}
 
-try {
-    const launchParamsStorageKey = 'ton-connect-session_storage_launchParams';
-    if (Object.entries(initParams).length > 0) {
-        sessionStorage.setItem(launchParamsStorageKey, JSON.stringify(initParams));
-    } else {
-        const savedInitParams = sessionStorage.getItem(launchParamsStorageKey);
-        if (savedInitParams) {
-            initParams = JSON.parse(savedInitParams);
-        }
-    }
-} catch (e) {}
-
+function sessionStorageSet(key: string, value: string) {
+    try {
+        getWindow()?.sessionStorage?.setItem(key, value);
+    } catch (e) {}
+}
 function sessionStorageGet(key: string) {
     try {
-        const stored = window.sessionStorage.getItem(key);
+        const stored = getWindow()?.sessionStorage?.getItem?.(key);
         if (!stored) {
             return null;
         }
@@ -56,6 +49,16 @@ function sessionStorageGet(key: string) {
     } catch (e) {}
     return null;
 }
+
+try {
+    const launchParamsStorageKey = 'ton-connect-session_storage_launchParams';
+    if (Object.entries(initParams).length > 0) {
+        sessionStorageSet(launchParamsStorageKey, JSON.stringify(initParams));
+    } else {
+        initParams = sessionStorageGet(launchParamsStorageKey);
+    }
+} catch (e) {}
+
 const storedParamsLaunchParams = sessionStorageGet('tapps/launchParams');
 const storedParamsTelegramWebApp = sessionStorageGet('__telegram__initParams');
 
