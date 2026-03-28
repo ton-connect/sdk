@@ -1,6 +1,6 @@
 export interface Step {
     label: string;
-    action: () => Promise<void> | void;
+    action: () => Promise<void | unknown> | void;
 }
 
 function delay(ms: number): Promise<void> {

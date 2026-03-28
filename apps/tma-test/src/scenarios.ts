@@ -26,7 +26,10 @@ export const scenarios: Scenario[] = [
         description: 'No TMA libraries, only TON Connect',
         steps: [
             { label: 'Load TC', action: () => import('./tc').then(m => m.initTC()) },
-            { label: 'Diagnostic', action: () => import('./diagnostics').then(m => m.renderDiagnostics()) }
+            {
+                label: 'Diagnostic',
+                action: () => import('./diagnostics').then(m => m.renderDiagnostics())
+            }
         ]
     },
     {
@@ -41,7 +44,10 @@ export const scenarios: Scenario[] = [
                 }
             },
             { label: 'Load TC', action: () => import('./tc').then(m => m.initTC()) },
-            { label: 'Diagnostic', action: () => import('./diagnostics').then(m => m.renderDiagnostics()) }
+            {
+                label: 'Diagnostic',
+                action: () => import('./diagnostics').then(m => m.renderDiagnostics())
+            }
         ]
     },
     {
@@ -56,7 +62,10 @@ export const scenarios: Scenario[] = [
                     clearHash();
                 }
             },
-            { label: 'Diagnostic', action: () => import('./diagnostics').then(m => m.renderDiagnostics()) }
+            {
+                label: 'Diagnostic',
+                action: () => import('./diagnostics').then(m => m.renderDiagnostics())
+            }
         ]
     },
     {
@@ -67,12 +76,17 @@ export const scenarios: Scenario[] = [
                 label: 'Load SDK',
                 action: async () => {
                     const { init } = await import('@telegram-apps/sdk');
-                    try { init(); } catch {}
+                    try {
+                        init();
+                    } catch {}
                     clearHash();
                 }
             },
             { label: 'Load TC', action: () => import('./tc').then(m => m.initTC()) },
-            { label: 'Diagnostic', action: () => import('./diagnostics').then(m => m.renderDiagnostics()) }
+            {
+                label: 'Diagnostic',
+                action: () => import('./diagnostics').then(m => m.renderDiagnostics())
+            }
         ]
     },
     {
@@ -84,11 +98,16 @@ export const scenarios: Scenario[] = [
                 label: 'Load SDK',
                 action: async () => {
                     const { init } = await import('@telegram-apps/sdk');
-                    try { init(); } catch {}
+                    try {
+                        init();
+                    } catch {}
                     clearHash();
                 }
             },
-            { label: 'Diagnostic', action: () => import('./diagnostics').then(m => m.renderDiagnostics()) }
+            {
+                label: 'Diagnostic',
+                action: () => import('./diagnostics').then(m => m.renderDiagnostics())
+            }
         ]
     }
 ];
