@@ -34,15 +34,43 @@ try {
     initParams = urlParseHashParams(locationHash);
 } catch (e) {}
 
-try {
-    const launchParamsStorageKey = 'ton-connect-session_storage_launchParams';
-    if (Object.entries(initParams).length > 0) {
-        sessionStorage.setItem(launchParamsStorageKey, JSON.stringify(initParams));
-    } else {
-        const savedInitParams = sessionStorage.getItem(launchParamsStorageKey);
-        if (savedInitParams) {
-            initParams = JSON.parse(savedInitParams);
+function sessionStorageSet(key: string, value: string) {
+    try {
+        const window = getWindow();
+        return window?.sessionStorage?.setItem(key, value);
+    } catch (e) {}
+}
+
+function sessionStorageGet(key: string) {
+    try {
+        const window = getWindow();
+        return JSON.parse(window?.sessionStorage?.getItem?.(key)!);
+    } catch (e) {}
+    return null;
+}
+
+function updateFromStoredParams(key: string) {
+    try {
+        const storedParams = sessionStorageGet(key);
+        if (storedParams) {
+            for (const key in storedParams) {
+                if (typeof initParams[key] === 'undefined') {
+                    initParams[key] = storedParams[key];
+                }
+            }
         }
+    } catch {}
+}
+
+const LAUNCH_PARAMS_STORAGE_KEY = 'ton-connect-session_storage_launchParams';
+
+updateFromStoredParams('tapps/launchParams');
+updateFromStoredParams('__telegram__initParams');
+updateFromStoredParams(LAUNCH_PARAMS_STORAGE_KEY);
+
+try {
+    if (Object.entries(initParams).length > 0) {
+        sessionStorageSet(LAUNCH_PARAMS_STORAGE_KEY, JSON.stringify(initParams));
     }
 } catch (e) {}
 
