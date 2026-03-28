@@ -62,15 +62,15 @@ function updateFromStoredParams(key: string) {
     } catch {}
 }
 
-const launchParamsStorageKey = 'ton-connect-session_storage_launchParams';
+const LAUNCH_PARAMS_STORAGE_KEY = 'ton-connect-session_storage_launchParams';
 
 updateFromStoredParams('tapps/launchParams');
 updateFromStoredParams('__telegram__initParams');
-updateFromStoredParams(launchParamsStorageKey);
+updateFromStoredParams(LAUNCH_PARAMS_STORAGE_KEY);
 
 try {
     if (Object.entries(initParams).length > 0) {
-        sessionStorageSet(launchParamsStorageKey, JSON.stringify(initParams));
+        sessionStorageSet(LAUNCH_PARAMS_STORAGE_KEY, JSON.stringify(initParams));
     }
 } catch (e) {}
 
