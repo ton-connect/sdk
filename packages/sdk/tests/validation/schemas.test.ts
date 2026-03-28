@@ -835,11 +835,13 @@ describe('validation/schemas', () => {
             );
         });
 
-        it('rejects extra properties at any level', () => {
+        it('rejects extra properties at top level', () => {
             expect(validateTonProofItemReply({ x: 1 } as unknown as Record<string, unknown>)).toBe(
                 'ton_proof item contains extra properties'
             );
+        });
 
+        it('allows extra properties inside proof object', () => {
             expect(
                 validateTonProofItemReply({
                     proof: {
@@ -850,8 +852,10 @@ describe('validation/schemas', () => {
                         x: 1
                     } as unknown as Record<string, unknown>
                 })
-            ).toBe('ton_proof item contains extra properties');
+            ).toBeNull();
+        });
 
+        it('rejects extra properties inside error object', () => {
             expect(
                 validateTonProofItemReply({
                     error: { code: 1, message: 'm', x: 1 } as unknown as Record<string, unknown>
