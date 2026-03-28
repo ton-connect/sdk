@@ -34,81 +34,61 @@ try {
     initParams = urlParseHashParams(locationHash);
 } catch (e) {}
 
-function sessionStorageSet(key: string, value: string) {
-    try {
-        getWindow()?.sessionStorage?.setItem(key, value);
-    } catch (e) {}
-}
 function sessionStorageGet(key: string) {
     try {
-        const stored = getWindow()?.sessionStorage?.getItem?.(key);
-        if (!stored) {
-            return null;
-        }
-        return JSON.parse(stored);
+        const window = getWindow();
+        return JSON.parse(window?.sessionStorage?.getItem?.('__telegram__' + key)!);
     } catch (e) {}
     return null;
 }
 
-function isValidInitParams(initParams: Record<string, string>) {
+function updateFromStoredParams(key: string) {
     try {
-        return (
-            !!initParams.tgWebAppPlatform ||
-            !!initParams.tgWebAppVersion ||
-            !!initParams.tgWebAppData
-        );
+        const storedParams = sessionStorageGet(key);
+        if (storedParams) {
+            for (const key in storedParams) {
+                if (typeof initParams[key] === 'undefined') {
+                    initParams[key] = storedParams[key];
+                }
+            }
+        }
     } catch {}
-    return false;
 }
+
+updateFromStoredParams('tapps/launchParams');
+updateFromStoredParams('__telegram__initParams');
 
 try {
     const launchParamsStorageKey = 'ton-connect-session_storage_launchParams';
-    if (isValidInitParams(initParams)) {
-        sessionStorageSet(launchParamsStorageKey, JSON.stringify(initParams));
+    if (Object.entries(initParams).length > 0) {
+        sessionStorage.setItem(launchParamsStorageKey, JSON.stringify(initParams));
     } else {
-        initParams = sessionStorageGet(launchParamsStorageKey);
+        const savedInitParams = sessionStorage.getItem(launchParamsStorageKey);
+        if (savedInitParams) {
+            initParams = JSON.parse(savedInitParams);
+        }
     }
 } catch (e) {}
 
-const storedParamsLaunchParams = sessionStorageGet('tapps/launchParams');
-const storedParamsTelegramWebApp = sessionStorageGet('__telegram__initParams');
-
-function getField(obj: unknown, key: string) {
-    try {
-        if (typeof obj === 'object' && obj !== null) {
-            return (obj as Record<string, string>)[key];
-        }
-    } catch {}
-
-    return null;
+let tmaPlatform: TmaPlatform = 'unknown';
+if (initParams?.tgWebAppPlatform) {
+    tmaPlatform = (initParams.tgWebAppPlatform as TmaPlatform) ?? 'unknown';
 }
-
-function getInitParamField(key: string, defaultValue?: string): string | undefined {
-    try {
-        return (
-            getField(initParams, key) ||
-            getField(storedParamsLaunchParams, key) ||
-            getField(storedParamsTelegramWebApp, key) ||
-            defaultValue
-        );
-    } catch {
-        return defaultValue;
-    }
-}
-
-let tmaPlatform = getInitParamField('tgWebAppPlatform', 'unknown') as TmaPlatform;
 if (tmaPlatform === 'unknown') {
     const window = getWindow();
     tmaPlatform = window?.Telegram?.WebApp?.platform ?? 'unknown';
 }
 
-let webAppVersion = getInitParamField('tgWebAppVersion', '6.0');
+let webAppVersion = '6.0';
+if (initParams?.tgWebAppVersion) {
+    webAppVersion = initParams.tgWebAppVersion;
+}
 if (!webAppVersion) {
     const window = getWindow();
     webAppVersion = window?.Telegram?.WebApp?.version ?? '6.0';
 }
 
-const initDataRaw = getInitParamField('tgWebAppData');
+const initDataRaw = initParams?.tgWebAppData;
 
 type TelegramUser = {
     id: number;
