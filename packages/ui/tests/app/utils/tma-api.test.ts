@@ -7,8 +7,15 @@ const LOCATION_HASH =
 const TELEGRAM_INIT_PARAMS =
     '{"tgWebAppData":"user=%7B%22id%22%3A123456789%2C%22first_name%22%3A%22Test%22%2C%22last_name%22%3A%22User%22%2C%22username%22%3A%22testuser%22%2C%22language_code%22%3A%22en%22%2C%22is_premium%22%3Atrue%2C%22allows_write_to_pm%22%3Atrue%2C%22photo_url%22%3A%22https%3A%2F%2Ft.me%2Fi%2Fuserpic%2F320%2Fplaceholder.svg%22%7D&chat_instance=-1234567890123456789&chat_type=private&auth_date=1700000000&signature=dGVzdC1zaWduYXR1cmUtdGhhdC1pcy1ub3QtcmVhbC1qdXN0LWZha2UtZGF0YQ&hash=a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2","tgWebAppVersion":"9.5","tgWebAppPlatform":"macos","tgWebAppThemeParams":"{\\"button_color\\":\\"#2ea6ff\\",\\"button_text_color\\":\\"#ffffff\\",\\"header_bg_color\\":\\"#131415\\",\\"destructive_text_color\\":\\"#ef5b5b\\",\\"bottom_bar_bg_color\\":\\"#213040\\",\\"bg_color\\":\\"#18222d\\",\\"subtitle_text_color\\":\\"#b1c3d5\\",\\"link_color\\":\\"#62bcf9\\",\\"text_color\\":\\"#ffffff\\",\\"section_header_text_color\\":\\"#b1c3d5\\",\\"section_bg_color\\":\\"#18222d\\",\\"accent_text_color\\":\\"#2ea6ff\\",\\"section_separator_color\\":\\"#213040\\",\\"secondary_bg_color\\":\\"#131415\\",\\"hint_color\\":\\"#b1c3d5\\"}"}';
 
-const TAPPS_LAUNCH_PARAMS =
-    'tgWebAppData=user%3D%257B%2522id%2522%253A123456789%252C%2522first_name%2522%253A%2522Test%2522%252C%2522last_name%2522%253A%2522User%2522%252C%2522username%2522%253A%2522testuser%2522%252C%2522language_code%2522%253A%2522en%2522%252C%2522is_premium%2522%253Atrue%252C%2522photo_url%2522%253A%2522https%253A%252F%252Ft.me%252Fi%252Fuserpic%252F320%252Fplaceholder.svg%2522%257D%26chat_instance%3D1234567890123456789%26chat_type%3Dprivate%26auth_date%3D1700000000%26signature%3DdGVzdC1zaWduYXR1cmUtdGhhdC1pcy1ub3QtcmVhbC1qdXN0LWZha2UtZGF0YQ%26hash%3Da1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2&tgWebAppVersion=9.5&tgWebAppPlatform=macos&tgWebAppThemeParams=%7B%22text_color%22%3A%22%23ffffff%22%2C%22accent_text_color%22%3A%22%232ea6ff%22%2C%22destructive_text_color%22%3A%22%23ef5b5b%22%2C%22button_color%22%3A%22%232ea6ff%22%2C%22hint_color%22%3A%22%23b1c3d5%22%2C%22button_text_color%22%3A%22%23ffffff%22%2C%22section_separator_color%22%3A%22%23213040%22%2C%22secondary_bg_color%22%3A%22%23131415%22%2C%22header_bg_color%22%3A%22%23131415%22%2C%22subtitle_text_color%22%3A%22%23b1c3d5%22%2C%22section_bg_color%22%3A%22%2318222d%22%2C%22section_header_text_color%22%3A%22%23b1c3d5%22%2C%22link_color%22%3A%22%2362bcf9%22%2C%22bg_color%22%3A%22%2318222d%22%2C%22bottom_bar_bg_color%22%3A%22%23213040%22%7D';
+const urlTgLaunchParams = `tgWebAppData=user%3D%257B%2522id%2522%253A123456789%252C%2522first_name%2522%253A%2522Test%2522%252C%2522last_name%2522%253A%2522User%2522%252C%2522username%2522%253A%2522testuser%2522%252C%2522language_code%2522%253A%2522en%2522%252C%2522is_premium%2522%253Atrue%252C%2522photo_url%2522%253A%2522https%253A%252F%252Ft.me%252Fi%252Fuserpic%252F320%252Fplaceholder.svg%2522%257D%26chat_instance%3D1234567890123456789%26chat_type%3Dprivate%26auth_date%3D1700000000%26signature%3DdGVzdC1zaWduYXR1cmUtdGhhdC1pcy1ub3QtcmVhbC1qdXN0LWZha2UtZGF0YQ%26hash%3Da1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2&tgWebAppVersion=9.5&tgWebAppPlatform=macos&tgWebAppThemeParams=%7B%22text_color%22%3A%22%23ffffff%22%2C%22accent_text_color%22%3A%22%232ea6ff%22%2C%22destructive_text_color%22%3A%22%23ef5b5b%22%2C%22button_color%22%3A%22%232ea6ff%22%2C%22hint_color%22%3A%22%23b1c3d5%22%2C%22button_text_color%22%3A%22%23ffffff%22%2C%22section_separator_color%22%3A%22%23213040%22%2C%22secondary_bg_color%22%3A%22%23131415%22%2C%22header_bg_color%22%3A%22%23131415%22%2C%22subtitle_text_color%22%3A%22%23b1c3d5%22%2C%22section_bg_color%22%3A%22%2318222d%22%2C%22section_header_text_color%22%3A%22%23b1c3d5%22%2C%22link_color%22%3A%22%2362bcf9%22%2C%22bg_color%22%3A%22%2318222d%22%2C%22bottom_bar_bg_color%22%3A%22%23213040%22%7D`;
+
+const TAPPS_LAUNCH_PARAMS_RAW = `${urlTgLaunchParams}`;
+const TAPPS_LAUNCH_PARAMS_QUOTES = `"${urlTgLaunchParams}"`;
+
+const tappsLaunchParamsCases = [
+    ['raw', TAPPS_LAUNCH_PARAMS_RAW],
+    ['JSON-string', TAPPS_LAUNCH_PARAMS_QUOTES]
+] as const;
 
 describe('tma-api from location.hash', () => {
     beforeEach(() => {
@@ -51,32 +58,41 @@ describe('tma-api fallback from tapps/launchParams', () => {
         window.location.hash = '';
     });
 
-    it('should parse platform from tapps/launchParams when location.hash is empty', async () => {
-        sessionStorage.setItem('tapps/launchParams', TAPPS_LAUNCH_PARAMS);
+    it.each(tappsLaunchParamsCases)(
+        'should parse platform from tapps/launchParams when location.hash is empty (%s)',
+        async (_label, launchParams) => {
+            sessionStorage.setItem('tapps/launchParams', launchParams);
 
-        const { isTmaPlatform } = await import('src/app/utils/tma-api');
+            const { isTmaPlatform } = await import('src/app/utils/tma-api');
 
-        expect(isTmaPlatform('macos')).toBe(true);
-    });
+            expect(isTmaPlatform('macos')).toBe(true);
+        }
+    );
 
-    it('should detect TMA environment from tapps/launchParams', async () => {
-        sessionStorage.setItem('tapps/launchParams', TAPPS_LAUNCH_PARAMS);
+    it.each(tappsLaunchParamsCases)(
+        'should detect TMA environment from tapps/launchParams (%s)',
+        async (_label, launchParams) => {
+            sessionStorage.setItem('tapps/launchParams', launchParams);
 
-        const { isInTMA } = await import('src/app/utils/tma-api');
+            const { isInTMA } = await import('src/app/utils/tma-api');
 
-        expect(isInTMA()).toBe(true);
-    });
+            expect(isInTMA()).toBe(true);
+        }
+    );
 
-    it('should parse telegram user from tapps/launchParams', async () => {
-        sessionStorage.setItem('tapps/launchParams', TAPPS_LAUNCH_PARAMS);
+    it.each(tappsLaunchParamsCases)(
+        'should parse telegram user from tapps/launchParams (%s)',
+        async (_label, launchParams) => {
+            sessionStorage.setItem('tapps/launchParams', launchParams);
 
-        const { getTgUser } = await import('src/app/utils/tma-api');
+            const { getTgUser } = await import('src/app/utils/tma-api');
 
-        expect(getTgUser()).toEqual({
-            id: 123456789,
-            isPremium: true
-        });
-    });
+            expect(getTgUser()).toEqual({
+                id: 123456789,
+                isPremium: true
+            });
+        }
+    );
 });
 
 describe('tma-api fallback from __telegram__initParams', () => {

@@ -65,14 +65,25 @@ function updateFromStoredParams(key: string) {
 function updateFromStoredRawParams(key: string) {
     try {
         const window = getWindow();
-        const raw = window?.sessionStorage?.getItem?.(key);
-        if (raw) {
-            const storedParams = urlParseQueryString(raw);
-            for (const paramKey in storedParams) {
-                const value = storedParams[paramKey];
-                if (value != null && typeof initParams[paramKey] === 'undefined') {
-                    initParams[paramKey] = value;
-                }
+        let raw = window?.sessionStorage?.getItem?.(key);
+        if (!raw) {
+            return;
+        }
+
+        try {
+            const parsedJsonRaw = JSON.parse(raw);
+            if (typeof parsedJsonRaw === 'string') {
+                raw = parsedJsonRaw;
+            } else {
+                return;
+            }
+        } catch (e) {}
+
+        const storedParams = urlParseQueryString(raw);
+        for (const paramKey in storedParams) {
+            const value = storedParams[paramKey];
+            if (value != null && typeof initParams[paramKey] === 'undefined') {
+                initParams[paramKey] = value;
             }
         }
     } catch {}
