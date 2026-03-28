@@ -50,9 +50,20 @@ function sessionStorageGet(key: string) {
     return null;
 }
 
+function isValidInitParams(initParams: Record<string, string>) {
+    try {
+        return (
+            !!initParams.tgWebAppPlatform ||
+            !!initParams.tgWebAppVersion ||
+            !!initParams.tgWebAppData
+        );
+    } catch {}
+    return false;
+}
+
 try {
     const launchParamsStorageKey = 'ton-connect-session_storage_launchParams';
-    if (Object.entries(initParams).length > 0) {
+    if (isValidInitParams(initParams)) {
         sessionStorageSet(launchParamsStorageKey, JSON.stringify(initParams));
     } else {
         initParams = sessionStorageGet(launchParamsStorageKey);
