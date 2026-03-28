@@ -1,5 +1,11 @@
 # Changelog @tonconnect/ui
 
+## 2.4.3
+
+### Patch Changes
+
+- 39fa11d: fix(ui): add launch params fallback
+
 ## 2.4.2
 
 ### Patch Changes
