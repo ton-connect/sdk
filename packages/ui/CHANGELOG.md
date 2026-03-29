@@ -1,5 +1,12 @@
 # Changelog @tonconnect/ui
 
+## 2.4.4
+
+### Patch Changes
+
+- fb9f6ca: Fixed `tapps/launchParams` sessionStorage fallback not working because the value is a raw
+  URL query string, not JSON
+
 ## 2.4.3
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # Changelog @tonconnect/ui-react
 
+## 2.4.4
+
+### Patch Changes
+
+- Updated dependencies [fb9f6ca]
+    - @tonconnect/ui@2.4.4
+
 ## 2.4.3
 
 ### Patch Changes
