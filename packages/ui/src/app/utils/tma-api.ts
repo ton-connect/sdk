@@ -62,9 +62,36 @@ function updateFromStoredParams(key: string) {
     } catch {}
 }
 
+function updateFromStoredRawParams(key: string) {
+    try {
+        const window = getWindow();
+        let raw = window?.sessionStorage?.getItem?.(key);
+        if (!raw) {
+            return;
+        }
+
+        try {
+            const parsedJsonRaw = JSON.parse(raw);
+            if (typeof parsedJsonRaw === 'string') {
+                raw = parsedJsonRaw;
+            } else {
+                return;
+            }
+        } catch (e) {}
+
+        const storedParams = urlParseQueryString(raw);
+        for (const paramKey in storedParams) {
+            const value = storedParams[paramKey];
+            if (value != null && typeof initParams[paramKey] === 'undefined') {
+                initParams[paramKey] = value;
+            }
+        }
+    } catch {}
+}
+
 const LAUNCH_PARAMS_STORAGE_KEY = 'ton-connect-session_storage_launchParams';
 
-updateFromStoredParams('tapps/launchParams');
+updateFromStoredRawParams('tapps/launchParams');
 updateFromStoredParams('__telegram__initParams');
 updateFromStoredParams(LAUNCH_PARAMS_STORAGE_KEY);
 
@@ -122,6 +149,20 @@ try {
  */
 export function getTgUser(): TelegramUser | undefined {
     return telegramUser;
+}
+
+/**
+ * Returns the detected TMA platform string.
+ */
+export function getTmaPlatform(): TmaPlatform {
+    return tmaPlatform;
+}
+
+/**
+ * Returns the detected TMA WebApp version, or null when not in a Mini App.
+ */
+export function getWebAppVersion(): string | null {
+    return isInTMA() ? webAppVersion : null;
 }
 
 /**
