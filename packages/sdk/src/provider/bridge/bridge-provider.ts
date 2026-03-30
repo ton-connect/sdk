@@ -36,7 +36,6 @@ import { BridgeClientEvent } from 'src/analytics/types';
 import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet/traceable-events';
 import { UUIDv7 } from 'src/utils/uuid';
 import { waitForSome } from 'src/utils/promise';
-import { sha256 } from 'sha.js';
 import { sendTransactionDraftParser } from 'src/parsers/send-transaction-draft-parser';
 import { sendActionDraftParser } from 'src/parsers/send-action-draft-parser';
 import { signDataParser } from 'src/parsers/sign-data-parser';
@@ -757,18 +756,10 @@ export class BridgeProvider implements HTTPProvider {
         return this.generateRegularUniversalLinkAsync(universalLink, message, options);
     }
 
-    private storeIntentPayloadInObjectStorage(
-        payload: string,
-        options?: { signal?: AbortSignal }
-    ): void {
-        // Kept for backward compatibility of synchronous link generation.
-        void this.storeIntentPayloadInObjectStorageAsync(payload, options).catch(() => {});
-    }
-
     private async storeIntentPayloadInObjectStorageAsync(
         payload: string,
         options?: { signal?: AbortSignal }
-    ): Promise<void> {
+    ): Promise<string> {
         const objectStorageUrl = this.getObjectStorageUrl();
         const url = new URL(objectStorageUrl);
         url.searchParams.set('ttl', BridgeProvider.INTENT_TTL_SECONDS.toString());
@@ -788,6 +779,26 @@ export class BridgeProvider implements HTTPProvider {
                     `Object storage responded with status ${response.status} ${response.statusText}`
                 );
             }
+
+            const body = (await response.text()).trim();
+            if (!body) {
+                throw new TonConnectError('Object storage responded with an empty get_url value');
+            }
+
+            try {
+                const parsed = JSON.parse(body) as { get_url?: string; getUrl?: string };
+                const maybeUrl = parsed.get_url ?? parsed.getUrl;
+                if (typeof maybeUrl === 'string' && maybeUrl.trim()) {
+                    return maybeUrl.trim();
+                }
+            } catch {}
+
+            if (body.startsWith('http://') || body.startsWith('https://')) {
+                return body;
+            }
+
+            const normalized = body.replace(/^\/+/, '');
+            return addPathToUrl(objectStorageUrl, normalized);
         } catch (error) {
             this.abortController?.abort();
             logDebug('Failed to store intent payload in object storage', error);
@@ -820,40 +831,9 @@ export class BridgeProvider implements HTTPProvider {
         }
 
         if (message.draft) {
-            const intentPayload = message.draft;
-
-            const inlineUrl = new URL(baseUrl.toString());
-            const mp = toBase64Url(Base64.encode(intentPayload, false));
-            inlineUrl.searchParams.append('m', 'intent');
-            inlineUrl.searchParams.append('mp', mp);
-
-            const inlineUrlString = inlineUrl.toString();
-            if (inlineUrlString.length <= BridgeProvider.MAX_INLINE_INTENT_URL_LENGTH) {
-                return inlineUrlString;
-            }
-
-            const shortUrl = new URL(baseUrl.toString());
-            const sessionCrypto = new SessionCrypto();
-
-            shortUrl.searchParams.append('m', 'intent_remote');
-            shortUrl.searchParams.append('pk', sessionCrypto.stringifyKeypair().secretKey);
-
-            const encryptedPayloadRaw = sessionCrypto.encrypt(
-                JSON.stringify(intentPayload),
-                hexToByteArray(sessionCrypto.sessionId)
+            throw new TonConnectError(
+                'Synchronous intent-link generation is not supported. Use the async `connectWithIntent` flow instead.'
             );
-            const encryptedPayload = Base64.encode(encryptedPayloadRaw);
-            this.storeIntentPayloadInObjectStorage(encryptedPayload, {
-                signal: options.signal
-            });
-
-            const getUrl = addPathToUrl(
-                this.getObjectStorageUrl(),
-                new sha256().update(encryptedPayload).update('text/plain').digest('hex')
-            );
-            shortUrl.searchParams.append('get_url', getUrl);
-
-            return shortUrl.toString();
         }
 
         return baseUrl.toString();
@@ -898,14 +878,10 @@ export class BridgeProvider implements HTTPProvider {
             );
             const encryptedPayload = Base64.encode(encryptedPayloadRaw);
 
-            await this.storeIntentPayloadInObjectStorageAsync(encryptedPayload, {
+            const getUrl = await this.storeIntentPayloadInObjectStorageAsync(encryptedPayload, {
                 signal: options.signal
             });
 
-            const getUrl = addPathToUrl(
-                this.getObjectStorageUrl(),
-                new sha256().update(encryptedPayload).update('text/plain').digest('hex')
-            );
             shortUrl.searchParams.append('get_url', getUrl);
 
             return shortUrl.toString();

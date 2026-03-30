@@ -15,10 +15,14 @@ const ACTION_DEMO_FILES = {
     signMessage: '/intent-actions/demo-sign-message.json'
 } as const;
 
+const DEMO_ADDRESSES = {
+    jettonMaster: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
+    fallbackAccount: 'EQCKWpx7cNMpvmcN5ObM5lLUZHZRFKqYA4xmw9jOry0ZsF9M'
+} as const;
+
 export function IntentsDemo() {
     const wallet = useTonWallet();
     const [tonConnectUi] = useTonConnectUI();
-    const JETTON_MASTER_DEMO = 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs'; // USDT master, used for demo only
     const [lastIntentPayload, setLastIntentPayload] = useState<object | null>(null);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [lastIntentResult, setLastIntentResult] = useState<any | null>(null);
@@ -31,8 +35,7 @@ export function IntentsDemo() {
     };
 
     const handleSendTransactionIntent = async () => {
-        const recipientAddress =
-            wallet?.account.address ?? 'EQCKWpx7cNMpvmcN5ObM5lLUZHZRFKqYA4xmw9jOry0ZsF9M';
+        const recipientAddress = wallet?.account.address ?? DEMO_ADDRESSES.fallbackAccount;
 
         const baseItem = {
             type: 'ton' as const,
@@ -63,12 +66,11 @@ export function IntentsDemo() {
     };
 
     const handleSendJettonIntent = async () => {
-        const accountAddress =
-            wallet?.account.address ?? 'EQCKWpx7cNMpvmcN5ObM5lLUZHZRFKqYA4xmw9jOry0ZsF9M';
+        const accountAddress = wallet?.account.address ?? DEMO_ADDRESSES.fallbackAccount;
 
         const jettonItemBase = {
             type: 'jetton' as const,
-            jettonMasterAddress: JETTON_MASTER_DEMO,
+            jettonMasterAddress: DEMO_ADDRESSES.jettonMaster,
             jettonAmount: '1000000',
             attachedTon: '2000000',
             destination: accountAddress,
@@ -121,8 +123,7 @@ export function IntentsDemo() {
     };
 
     const handleSignMessageIntent = async () => {
-        const recipientAddress =
-            wallet?.account.address ?? 'EQCKWpx7cNMpvmcN5ObM5lLUZHZRFKqYA4xmw9jOry0ZsF9M';
+        const recipientAddress = wallet?.account.address ?? DEMO_ADDRESSES.fallbackAccount;
 
         const baseItem = {
             type: 'ton' as const,
@@ -151,12 +152,11 @@ export function IntentsDemo() {
     };
 
     const handleSignJettonMessageIntent = async () => {
-        const accountAddress =
-            wallet?.account.address ?? 'EQCKWpx7cNMpvmcN5ObM5lLUZHZRFKqYA4xmw9jOry0ZsF9M';
+        const accountAddress = wallet?.account.address ?? DEMO_ADDRESSES.fallbackAccount;
 
         const jettonItemBase = {
             type: 'jetton' as const,
-            jettonMasterAddress: JETTON_MASTER_DEMO,
+            jettonMasterAddress: DEMO_ADDRESSES.jettonMaster,
             jettonAmount: '500000',
             attachedTon: '1500000',
             destination: accountAddress,

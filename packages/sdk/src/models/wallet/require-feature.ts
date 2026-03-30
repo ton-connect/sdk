@@ -82,7 +82,7 @@ export type RequiredSignMessageDraftFeature = RequiredSignMessageFeature & {
 /**
  * Required features for the send action draft feature.
  */
-export type RequiredSendActionDraftFeature = Record<string, never>;
+export type RequiredSendActionDraftFeature = {};
 
 /**
  * Required support for Drafts feature.
