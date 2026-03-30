@@ -36,10 +36,6 @@ import { BridgeClientEvent } from 'src/analytics/types';
 import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet/traceable-events';
 import { UUIDv7 } from 'src/utils/uuid';
 import { waitForSome } from 'src/utils/promise';
-import { sendTransactionDraftParser } from 'src/parsers/send-transaction-draft-parser';
-import { sendActionDraftParser } from 'src/parsers/send-action-draft-parser';
-import { signDataParser } from 'src/parsers/sign-data-parser';
-import { signMessageDraftParser } from 'src/parsers/sign-message-draft-parser';
 
 export class BridgeProvider implements HTTPProvider {
     private static readonly INTENT_TTL_SECONDS = 300;
@@ -195,13 +191,12 @@ export class BridgeProvider implements HTTPProvider {
         const traceId = options?.traceId ?? UUIDv7();
 
         const intentPayload = { id: '0', ...payload } as RawIntentPayload;
-        const intentMethod = payload.method;
 
         this.subscribeToBridgeEvents({ ...options, traceId });
         const universalLink = this.obtainUniversalLink();
 
         this.pendingRequests.set(intentPayload.id.toString(), response => {
-            const typed = this.convertIntentResponse(intentMethod, response);
+            const typed = response as unknown as IntentResponse;
             this.intentListeners.forEach(listener => listener(typed));
         });
 
@@ -213,119 +208,6 @@ export class BridgeProvider implements HTTPProvider {
             },
             { traceId, signal: options?.signal }
         );
-    }
-
-    private convertIntentResponseByRpcMethod(
-        intentRpcMethod: string | undefined,
-        result: unknown,
-        response: unknown
-    ): IntentResponse | null {
-        switch (intentRpcMethod) {
-            case 'signMsgDraft': {
-                const rpcResultObj = result as Record<string, unknown> | null;
-                if (rpcResultObj && typeof rpcResultObj.internal_boc === 'string') {
-                    return signMessageDraftParser.convertFromRpcResponse(response);
-                }
-                return null;
-            }
-            case 'txDraft': {
-                if (typeof result === 'string') {
-                    return sendTransactionDraftParser.convertFromRpcResponse(response);
-                }
-                return null;
-            }
-            case 'actionDraft': {
-                const rpcResultObj = result as Record<string, unknown> | null;
-                if (
-                    rpcResultObj &&
-                    (typeof rpcResultObj.internalBoc === 'string' ||
-                        typeof rpcResultObj.boc === 'string' ||
-                        typeof rpcResultObj.signature === 'string')
-                ) {
-                    return sendActionDraftParser.convertFromRpcResponse(response);
-                }
-                return null;
-            }
-            default:
-                return result as IntentResponse;
-        }
-    }
-
-    private convertIntentResponseByRpcShape(
-        result: unknown,
-        response: unknown
-    ): IntentResponse | null {
-        if (typeof result === 'object' && result !== null) {
-            const resultObj = result as Record<string, unknown>;
-
-            if (typeof resultObj.internal_boc === 'string') {
-                return signMessageDraftParser.convertFromRpcResponse(response);
-            }
-
-            if (typeof resultObj.signature === 'string') {
-                const converted = signDataParser.convertFromRpcResponse(
-                    response as unknown as Parameters<
-                        typeof signDataParser.convertFromRpcResponse
-                    >[0]
-                );
-                return converted;
-            }
-        }
-
-        if (typeof result === 'string') {
-            // `sendTransactionDraft` style: { result: string(boc) }
-            return sendTransactionDraftParser.convertFromRpcResponse(response);
-        }
-
-        return null;
-    }
-
-    private convertIntentResponse(
-        intentRpcMethod: string | undefined,
-        response: unknown
-    ): IntentResponse {
-        const typed = response as unknown as Record<string, unknown>;
-        const result = typed?.result as unknown;
-        const traceId = typeof typed?.traceId === 'string' ? (typed.traceId as string) : undefined;
-
-        // Preserve errors as-is (UI will handle them).
-        if (typed && typeof typed === 'object' && 'error' in typed) {
-            return response as IntentResponse;
-        }
-
-        // Already normalized responses (strip possible RPC envelope keys)
-        if (typeof typed?.internalBoc === 'string') {
-            const converted = { internalBoc: typed.internalBoc } as IntentResponse;
-            if (traceId) {
-                return { ...converted, traceId } as unknown as IntentResponse;
-            }
-            return converted;
-        }
-        if (typeof typed?.boc === 'string') {
-            const converted = { boc: typed.boc } as IntentResponse;
-            if (traceId) {
-                return { ...converted, traceId } as unknown as IntentResponse;
-            }
-            return converted;
-        }
-
-        const byMethod = this.convertIntentResponseByRpcMethod(intentRpcMethod, result, response);
-        if (byMethod) {
-            if (traceId) {
-                return { ...byMethod, traceId } as unknown as IntentResponse;
-            }
-            return byMethod;
-        }
-
-        const byShape = this.convertIntentResponseByRpcShape(result, response);
-        if (byShape) {
-            if (traceId) {
-                return { ...byShape, traceId } as unknown as IntentResponse;
-            }
-            return byShape;
-        }
-
-        return response as IntentResponse;
     }
 
     private intentListeners: Array<(response: IntentResponse) => void> = [];

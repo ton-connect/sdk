@@ -26,7 +26,7 @@ export async function initiateTonConnectFlow<TWallet extends WalletSourceArg>(
             throw error;
         }
     } else {
-        return await connector.connect(walletSource, options.additionalRequest, {
+        return connector.connect(walletSource, options.additionalRequest, {
             traceId: state.traceId
         });
     }
