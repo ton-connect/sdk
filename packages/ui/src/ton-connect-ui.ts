@@ -812,15 +812,12 @@ export class TonConnectUI {
                     network: message.network,
                     items: message.messages.map(item => ({
                         type: 'ton' as const,
-                        address: item.address,
-                        amount: item.amount,
-                        payload: item.payload,
-                        stateInit: item.stateInit,
-                        extraCurrency: item.extraCurrency
+                        ...item
                     }))
                 },
                 {
-                    traceId
+                    traceId,
+                    ...options
                 }
             );
 
