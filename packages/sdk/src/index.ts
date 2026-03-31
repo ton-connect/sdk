@@ -5,7 +5,7 @@ export { IStorage } from './storage/models/storage.interface';
 export { TonConnect as default } from './ton-connect';
 export { WalletsListManager } from './wallets-list-manager';
 export { ITonConnect } from './ton-connect.interface';
-export type { IntentResponse, WalletSourceArg, WaleltIntentResult } from './models';
+export type { IntentResponse, WalletSourceArg, WalletIntentResult } from './models';
 export type { IntentSubscribeOptions, IntentRequest } from './models/methods/connect';
 export type { AnalyticsSettings } from './models/ton-connect-options';
 export type {

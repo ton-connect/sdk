@@ -2,7 +2,7 @@ import {
     ITonConnect,
     ConnectAdditionalRequest,
     WalletSourceArg,
-    WaleltIntentResult
+    WalletIntentResult
 } from '@tonconnect/sdk';
 import { walletsModalState } from 'src/app/state/modals-state';
 import { widgetController } from 'src/app/widget-controller';
@@ -11,7 +11,7 @@ export async function initiateTonConnectFlow<TWallet extends WalletSourceArg>(
     connector: ITonConnect,
     walletSource: TWallet,
     options: { additionalRequest?: ConnectAdditionalRequest } = {}
-): Promise<WaleltIntentResult<TWallet>> {
+): Promise<WalletIntentResult<TWallet>> {
     const state = walletsModalState();
 
     if (state.mode === 'intent') {

@@ -6,7 +6,7 @@ import {
     Wallet,
     WalletInfo,
     WalletSourceArg,
-    WaleltIntentResult
+    WalletIntentResult
 } from 'src/models';
 import {
     SendTransactionRequest,
@@ -71,7 +71,7 @@ export interface ITonConnect {
             openingDeadlineMS?: number;
             signal?: AbortSignal;
         }>
-    ): WaleltIntentResult<T>;
+    ): WalletIntentResult<T>;
 
     /**
      * Try to restore existing session and reconnect to the corresponding wallet. Call it immediately when your app is loaded.
@@ -181,7 +181,7 @@ export interface ITonConnect {
         wallet: TWallet,
         intent: IntentRequest,
         options?: OptionalTraceable<IntentSubscribeOptions>
-    ): Promise<WaleltIntentResult<TWallet>>;
+    ): Promise<WalletIntentResult<TWallet>>;
 
     getSessionId(): Promise<string | null>;
 

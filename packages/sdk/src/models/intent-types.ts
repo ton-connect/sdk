@@ -12,7 +12,7 @@ export type WalletSourceArg =
     | WalletConnectionSource
     | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[];
 
-export type WaleltIntentResult<T extends WalletSourceArg> = T extends WalletConnectionSourceJS
+export type WalletIntentResult<T extends WalletSourceArg> = T extends WalletConnectionSourceJS
     ? void
     : T extends WalletConnectionSourceWalletConnect
       ? void

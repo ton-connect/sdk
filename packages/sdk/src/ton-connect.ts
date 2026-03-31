@@ -58,7 +58,7 @@ import { Provider } from 'src/provider/provider';
 import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { DefaultStorage } from 'src/storage/default-storage';
 import { ITonConnect } from 'src/ton-connect.interface';
-import { IntentResponse, WaleltIntentResult, WalletSourceArg } from 'src/models';
+import { IntentResponse, WalletIntentResult, WalletSourceArg } from 'src/models';
 import { IntentRequest, IntentSubscribeOptions } from 'src/models/methods/connect';
 import { WalletWrongNetworkError } from 'src/errors/wallet/wallet-wrong-network.error';
 import { getDocument, getOriginWithPath, getWebPageManifest } from 'src/utils/web-api';
@@ -926,7 +926,7 @@ export class TonConnect implements ITonConnect {
         wallet: TWallet,
         intent: IntentRequest,
         options?: OptionalTraceable<IntentSubscribeOptions>
-    ): Promise<WaleltIntentResult<TWallet>> {
+    ): Promise<WalletIntentResult<TWallet>> {
         if (this.connected) {
             throw new WalletAlreadyConnectedError();
         }
@@ -979,7 +979,7 @@ export class TonConnect implements ITonConnect {
             noConnect: options?.noConnect,
             signal: abortController.signal,
             traceId
-        })) as WaleltIntentResult<TWallet>;
+        })) as WalletIntentResult<TWallet>;
     }
 
     private async sendDraft<T extends object>(
