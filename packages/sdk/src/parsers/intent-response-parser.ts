@@ -3,6 +3,7 @@ import { sendActionDraftParser } from 'src/parsers/send-action-draft-parser';
 import { sendTransactionDraftParser } from 'src/parsers/send-transaction-draft-parser';
 import { signDataParser } from 'src/parsers/sign-data-parser';
 import { signMessageDraftParser } from 'src/parsers/sign-message-draft-parser';
+import { OptionalTraceable } from 'src/utils/types';
 
 class IntentResponseParser {
     convertFromRpcResponse(response: unknown): IntentResponse {
@@ -25,17 +26,13 @@ class IntentResponseParser {
     private convertNormalizedIntentResponse(
         typed: Record<string, unknown> | null,
         traceId?: string
-    ): IntentResponse | null {
+    ): OptionalTraceable<IntentResponse> | null {
         if (typed && typeof typed.internalBoc === 'string') {
-            return traceId
-                ? ({ internalBoc: typed.internalBoc, traceId } as unknown as IntentResponse)
-                : ({ internalBoc: typed.internalBoc } as IntentResponse);
+            return { internalBoc: typed.internalBoc, traceId };
         }
 
         if (typed && typeof typed.boc === 'string') {
-            return traceId
-                ? ({ boc: typed.boc, traceId } as unknown as IntentResponse)
-                : ({ boc: typed.boc } as IntentResponse);
+            return { boc: typed.boc, traceId };
         }
 
         return null;
@@ -45,12 +42,10 @@ class IntentResponseParser {
         response: unknown,
         result: unknown,
         traceId?: string
-    ): IntentResponse {
+    ): OptionalTraceable<IntentResponse> {
         if (typeof result === 'string') {
             const converted = sendTransactionDraftParser.convertFromRpcResponse(response);
-            return traceId
-                ? ({ ...converted, traceId } as unknown as IntentResponse)
-                : (converted as IntentResponse);
+            return { ...converted, traceId };
         }
 
         if (result && typeof result === 'object') {
@@ -58,25 +53,19 @@ class IntentResponseParser {
 
             if (typeof resultObj.internal_boc === 'string') {
                 const converted = signMessageDraftParser.convertFromRpcResponse(response);
-                return traceId
-                    ? ({ ...converted, traceId } as unknown as IntentResponse)
-                    : (converted as IntentResponse);
+                return { ...converted, traceId };
             }
 
             if (typeof resultObj.signature === 'string') {
                 const converted = signDataParser.convertFromRpcResponse(
                     response as Parameters<typeof signDataParser.convertFromRpcResponse>[0]
                 );
-                return traceId
-                    ? ({ ...converted, traceId } as unknown as IntentResponse)
-                    : (converted as IntentResponse);
+                return { ...converted, traceId };
             }
         }
 
         const converted = sendActionDraftParser.convertFromRpcResponse(response);
-        return traceId
-            ? ({ ...converted, traceId } as unknown as IntentResponse)
-            : (converted as IntentResponse);
+        return { ...converted, traceId };
     }
 }
 
