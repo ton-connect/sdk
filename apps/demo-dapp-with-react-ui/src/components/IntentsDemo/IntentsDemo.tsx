@@ -27,11 +27,13 @@ export function IntentsDemo() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [lastIntentResult, setLastIntentResult] = useState<any | null>(null);
     const [useObjectStorageMode, setUseObjectStorageMode] = useState(false);
+    const [noConnect, setNoConnect] = useState(false);
     const [selectedActionType, setSelectedActionType] =
         useState<keyof typeof ACTION_DEMO_FILES>('signData');
 
     const commonOptions = {
-        notifications: ['before', 'success', 'error'] as ('before' | 'success' | 'error')[]
+        notifications: ['before', 'success', 'error'] as ('before' | 'success' | 'error')[],
+        noConnect
     };
 
     const handleSendTransactionIntent = async () => {
@@ -259,6 +261,14 @@ export function IntentsDemo() {
                                 <span>
                                     Generate large payloads (force object storage for intents)
                                 </span>
+                            </label>
+                            <label className="intents-demo__checkbox">
+                                <input
+                                    type="checkbox"
+                                    checked={noConnect}
+                                    onChange={e => setNoConnect(e.target.checked)}
+                                />
+                                <span>noConnect (generate intent link without connectRequest)</span>
                             </label>
                         </div>
 

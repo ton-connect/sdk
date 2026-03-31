@@ -19,7 +19,8 @@ export async function initiateTonConnectFlow<TWallet extends WalletSourceArg>(
             const intent = state.intent!;
             return await connector.subscribeToIntent(walletSource, intent, {
                 traceId: state.traceId,
-                connectRequest: options.additionalRequest
+                connectRequest: options.additionalRequest,
+                noConnect: state.noConnect
             });
         } catch (error) {
             widgetController.closeWalletsModal('action-cancelled');

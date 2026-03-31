@@ -26,6 +26,7 @@ export const widgetController = {
         options?: OptionalTraceable & {
             mode?: 'connect' | 'intent';
             intent?: IntentRequest;
+            noConnect?: boolean;
         }
     ): void =>
         void setTimeout(() =>
@@ -34,7 +35,11 @@ export const widgetController = {
                 traceId: options?.traceId ?? prev?.traceId,
                 closeReason: null,
                 mode: options?.mode ?? prev?.mode ?? 'connect',
-                intent: options?.mode === 'connect' ? undefined : (options?.intent ?? prev?.intent)
+                intent: options?.mode === 'connect' ? undefined : (options?.intent ?? prev?.intent),
+                noConnect:
+                    options?.mode === 'connect'
+                        ? undefined
+                        : (options?.noConnect ?? prev?.noConnect)
             }))
         ),
     closeWalletsModal: (reason: WalletsModalCloseReason): void =>

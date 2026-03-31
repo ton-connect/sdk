@@ -162,6 +162,7 @@ export class WalletsModalManager implements WalletsModal {
     public async openWithIntent(
         options: OptionalTraceable<{
             intent: IntentRequest;
+            noConnect?: boolean;
         }>
     ): Promise<void> {
         if (isInTMA()) {
@@ -171,7 +172,8 @@ export class WalletsModalManager implements WalletsModal {
         widgetController.openWalletsModal({
             traceId: options.traceId,
             mode: 'intent',
-            intent: options.intent
+            intent: options.intent,
+            noConnect: options.noConnect
         });
 
         return new Promise<void>(resolve => {

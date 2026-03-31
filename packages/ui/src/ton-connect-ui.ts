@@ -76,6 +76,7 @@ import { IMG } from 'src/app/env/IMG';
 type TonConnectUIIntentOptions = ActionConfiguration &
     OptionalTraceable<{
         signal?: AbortSignal;
+        noConnect?: boolean;
     }>;
 
 export class TonConnectUI {
@@ -1186,7 +1187,8 @@ export class TonConnectUI {
 
             this.modal.openWithIntent({
                 traceId,
-                intent: { method: 'sendTransaction', ...draft }
+                intent: { method: 'sendTransaction', ...draft },
+                noConnect: options?.noConnect
             });
 
             const intentResponse = await this.waitForIntentResponse<
@@ -1323,7 +1325,11 @@ export class TonConnectUI {
                 intents: { types: ['signData'] }
             };
 
-            this.modal.openWithIntent({ traceId, intent: { method: 'signData', ...data } });
+            this.modal.openWithIntent({
+                traceId,
+                intent: { method: 'signData', ...data },
+                noConnect: options?.noConnect
+            });
 
             const intentResponse = await this.waitForIntentResponse<
                 OptionalTraceable<SignDataResponse>
@@ -1467,7 +1473,11 @@ export class TonConnectUI {
                 intents: { types: ['signMsgDraft'] }
             };
 
-            this.modal.openWithIntent({ traceId, intent: { method: 'signMessage', ...draft } });
+            this.modal.openWithIntent({
+                traceId,
+                intent: { method: 'signMessage', ...draft },
+                noConnect: options?.noConnect
+            });
 
             const intentResponse = await this.waitForIntentResponse<
                 OptionalTraceable<SignMessageResponse>
@@ -1604,7 +1614,11 @@ export class TonConnectUI {
                 intents: { types: ['actionDraft'] }
             };
 
-            this.modal.openWithIntent({ traceId, intent: { method: 'sendAction', ...draft } });
+            this.modal.openWithIntent({
+                traceId,
+                intent: { method: 'sendAction', ...draft },
+                noConnect: options?.noConnect
+            });
 
             const intentResponse = await this.waitForIntentResponse<
                 OptionalTraceable<SendActionDraftResponse>

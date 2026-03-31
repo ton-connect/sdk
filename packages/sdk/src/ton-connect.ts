@@ -937,7 +937,9 @@ export class TonConnect implements ITonConnect {
         }
 
         const traceId = options?.traceId ?? UUIDv7();
-        const connectRequest = this.createConnectRequest(options?.connectRequest);
+        const connectRequest = options?.noConnect
+            ? undefined
+            : this.createConnectRequest(options?.connectRequest);
 
         let payload: WithoutId<RawIntentPayload>;
         switch (intent.method) {
@@ -973,6 +975,7 @@ export class TonConnect implements ITonConnect {
 
         return (await this.provider.connectWithIntent(payload, {
             connectRequest,
+            noConnect: options?.noConnect,
             signal: abortController.signal,
             traceId
         })) as WaleltIntentResult<TWallet>;

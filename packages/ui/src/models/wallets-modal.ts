@@ -12,6 +12,7 @@ export interface WalletsModal {
     openWithIntent: (
         options: OptionalTraceable<{
             intent: IntentRequest;
+            noConnect?: boolean;
         }>
     ) => void;
 
@@ -93,6 +94,10 @@ export type WalletsModalState = OptionalTraceable<
          * Intent payload to be used for QR / wallet-specific links in intent mode.
          */
         intent?: IntentRequest;
+        /**
+         * If true, the intent link must be generated without connectRequest (`r` param).
+         */
+        noConnect?: boolean;
     }
 >;
 
