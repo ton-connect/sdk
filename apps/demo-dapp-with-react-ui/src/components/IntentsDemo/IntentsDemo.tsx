@@ -117,7 +117,10 @@ export function IntentsDemo() {
         setLastIntentPayload(intent);
 
         try {
-            const response = await tonConnectUi.signDataDraft(intent, commonOptions);
+            const response = await tonConnectUi.signData(intent, {
+                ...commonOptions,
+                useIntent: true
+            });
             setLastIntentResult(response);
         } catch (e) {
             console.error('signDataDraft failed:', e);

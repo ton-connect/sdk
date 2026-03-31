@@ -664,7 +664,7 @@ export class TonConnectUI {
         this.tracker.trackDataSentForSignature(this.wallet, data);
 
         if (!this.connected && options?.useIntent) {
-            const intentResponse = await this.signDataDraft(data, { traceId });
+            const intentResponse = await this.signDataDraft(data, { ...options, traceId });
             return intentResponse;
         }
 
@@ -1225,7 +1225,7 @@ export class TonConnectUI {
      * Signs data via draft flow and returns the signature.
      * If wallet is not connected, opens modal and shows draft QR/link.
      */
-    public async signDataDraft(
+    private async signDataDraft(
         data: SignDataPayload,
         options?: TonConnectUIIntentOptions
     ): Promise<OptionalTraceable<SignDataResponse>> {
