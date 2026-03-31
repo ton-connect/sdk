@@ -11,6 +11,7 @@ import {
 import {
     SendTransactionRequest,
     SendTransactionResponse,
+    SendActionDraftResponse,
     SignDataResponse,
     SignMessageResponse
 } from 'src/models/methods';
@@ -175,7 +176,7 @@ export interface ITonConnect {
             onRequestSent?: () => void;
             signal?: AbortSignal;
         }>
-    ): Promise<OptionalTraceable<SendTransactionResponse | SignDataResponse | SignMessageResponse>>;
+    ): Promise<OptionalTraceable<SendActionDraftResponse>>;
 
     subscribeToIntent<TWallet extends WalletSourceArg>(
         wallet: TWallet,
