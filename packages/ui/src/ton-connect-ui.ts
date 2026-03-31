@@ -921,6 +921,13 @@ export class TonConnectUI {
 
             return result;
         } catch (e) {
+            if (e instanceof WalletNotSupportFeatureError) {
+                widgetController.clearAction();
+                widgetController.openWalletNotSupportFeatureModal(e.cause, { traceId });
+
+                throw e;
+            }
+
             widgetController.setAction({
                 name: 'sign-message-canceled',
                 showNotification: notifications.includes('error'),
@@ -1427,6 +1434,13 @@ export class TonConnectUI {
 
                 return result;
             } catch (e) {
+                if (e instanceof WalletNotSupportFeatureError) {
+                    widgetController.clearAction();
+                    widgetController.openWalletNotSupportFeatureModal(e.cause, { traceId });
+
+                    throw e;
+                }
+
                 widgetController.setAction({
                     name: 'sign-message-canceled',
                     showNotification: notifications.includes('error'),
