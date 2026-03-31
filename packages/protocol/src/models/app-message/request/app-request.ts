@@ -12,8 +12,8 @@ export type RpcRequests = {
     signData: SignDataRpcRequest;
     signMessage: SignMessageRpcRequest;
     disconnect: DisconnectRpcRequest;
-    sendTransactionDraft: RawSendTransactionDraftRequest;
-    signMessageDraft: RawSignMessageDraftRequest;
+    txDraft: RawSendTransactionDraftRequest;
+    signMsgDraft: RawSignMessageDraftRequest;
     actionDraft: RawActionDraftRequest;
 };
 

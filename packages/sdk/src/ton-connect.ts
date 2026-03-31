@@ -944,7 +944,7 @@ export class TonConnect implements ITonConnect {
 
         let payload: WithoutId<RawIntentPayload>;
         switch (intent.method) {
-            case 'sendTransaction':
+            case 'txDraft':
                 payload = sendTransactionDraftParser.convertToRpcRequest(intent);
                 break;
             case 'signData': {
@@ -953,10 +953,10 @@ export class TonConnect implements ITonConnect {
                 payload = signDataParser.convertToRpcRequest(signDataPayload);
                 break;
             }
-            case 'signMessage':
+            case 'signMsgDraft':
                 payload = signMessageDraftParser.convertToRpcRequest(intent);
                 break;
-            case 'sendAction':
+            case 'actionDraft':
                 payload = sendActionDraftParser.convertToRpcRequest(intent);
                 break;
         }

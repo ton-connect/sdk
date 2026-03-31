@@ -3,7 +3,7 @@ import type { TransactionDraftItem } from './draft-items';
 
 export interface RawSignMessageDraftRequest {
     id: string;
-    method: 'signMessage';
+    method: 'signMsgDraft';
     params: {
         /* Unix timestamp. After this moment the draft is invalid. */
         vu?: number;

@@ -14,10 +14,8 @@ const errorMap: Partial<Record<number, typeof TonConnectError>> = {
     [SIGN_MESSAGE_ERROR_CODES.UNKNOWN_APP_ERROR]: UnknownAppError
 };
 
-class SignMessageDraftParser extends RpcParser<'signMessageDraft'> {
-    convertToRpcRequest(
-        request: SignMessageDraftRequest
-    ): WithoutId<AppRequest<'signMessageDraft'>> {
+class SignMessageDraftParser extends RpcParser<'signMsgDraft'> {
+    convertToRpcRequest(request: SignMessageDraftRequest): WithoutId<AppRequest<'signMsgDraft'>> {
         return {
             method: 'signMsgDraft',
             params: {
@@ -25,7 +23,7 @@ class SignMessageDraftParser extends RpcParser<'signMessageDraft'> {
                 n: request.network,
                 i: request.items.map(item => mapTransactionDraftItem(item, request.network))
             }
-        } as unknown as WithoutId<AppRequest<'signMessageDraft'>>;
+        } as WithoutId<AppRequest<'signMsgDraft'>>;
     }
 
     convertFromRpcResponse(response: unknown): SignMessageResponse {

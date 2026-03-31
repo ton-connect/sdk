@@ -46,12 +46,12 @@ export type RpcResponses = {
         success: DisconnectRpcResponseSuccess;
     };
 
-    sendTransactionDraft: {
+    txDraft: {
         error: SendTransactionDraftResponseError;
         success: SendTransactionDraftResponseSuccess;
     };
 
-    signMessageDraft: {
+    signMsgDraft: {
         error: SignMessageDraftResponseError;
         success: SignMessageDraftResponseSuccess;
     };

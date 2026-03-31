@@ -4,7 +4,7 @@ import { SignMessageDraftRequest } from '../sign-message-draft';
 import { SendActionDraftRequest } from '../send-action-draft';
 
 export type IntentRequest =
-    | (SendTransactionDraftRequest & { method: 'sendTransaction' })
+    | (SendTransactionDraftRequest & { method: 'txDraft' })
     | (SignDataPayload & { method: 'signData' })
-    | (SignMessageDraftRequest & { method: 'signMessage' })
-    | (SendActionDraftRequest & { method: 'sendAction' });
+    | (SignMessageDraftRequest & { method: 'signMsgDraft' })
+    | (SendActionDraftRequest & { method: 'actionDraft' });

@@ -1188,7 +1188,7 @@ export class TonConnectUI {
 
             this.modal.openWithIntent({
                 traceId,
-                intent: { method: 'sendTransaction', ...draft },
+                intent: { method: 'txDraft', ...draft },
                 noConnect: options?.noConnect
             });
 
@@ -1476,7 +1476,7 @@ export class TonConnectUI {
 
             this.modal.openWithIntent({
                 traceId,
-                intent: { method: 'signMessage', ...draft },
+                intent: { method: 'signMsgDraft', ...draft },
                 noConnect: options?.noConnect
             });
 
@@ -1617,7 +1617,7 @@ export class TonConnectUI {
 
             this.modal.openWithIntent({
                 traceId,
-                intent: { method: 'sendAction', ...draft },
+                intent: { method: 'actionDraft', ...draft },
                 noConnect: options?.noConnect
             });
 

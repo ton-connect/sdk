@@ -3,6 +3,6 @@ export type RpcMethod =
     | 'sendTransaction'
     | 'signData'
     | 'signMessage'
-    | 'sendTransactionDraft'
-    | 'signMessageDraft'
+    | 'txDraft'
+    | 'signMsgDraft'
     | 'actionDraft';

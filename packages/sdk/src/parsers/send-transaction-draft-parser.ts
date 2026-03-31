@@ -92,10 +92,8 @@ export function mapTransactionDraftItem(
     }
 }
 
-class SendTransactionDraftParser extends RpcParser<'sendTransactionDraft'> {
-    convertToRpcRequest(
-        request: SendTransactionDraftRequest
-    ): WithoutId<AppRequest<'sendTransactionDraft'>> {
+class SendTransactionDraftParser extends RpcParser<'txDraft'> {
+    convertToRpcRequest(request: SendTransactionDraftRequest): WithoutId<AppRequest<'txDraft'>> {
         return {
             method: 'txDraft',
             params: {
@@ -104,7 +102,7 @@ class SendTransactionDraftParser extends RpcParser<'sendTransactionDraft'> {
                 n: request.network,
                 i: request.items.map(item => mapTransactionDraftItem(item, request.network))
             }
-        } as unknown as WithoutId<AppRequest<'sendTransactionDraft'>>;
+        } as WithoutId<AppRequest<'txDraft'>>;
     }
 
     convertFromRpcResponse(response: unknown): SendTransactionResponse {

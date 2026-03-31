@@ -3,7 +3,7 @@ import { TransactionDraftItem } from './draft-items';
 
 export interface RawSendTransactionDraftRequest {
     id: string;
-    method: 'sendTransaction';
+    method: 'txDraft';
     params: {
         /* Unix timestamp. After this moment the draft is invalid.*/
         vu?: number;
