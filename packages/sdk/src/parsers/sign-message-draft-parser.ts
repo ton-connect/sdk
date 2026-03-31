@@ -20,6 +20,7 @@ class SignMessageDraftParser extends RpcParser<'signMsgDraft'> {
             method: 'signMsgDraft',
             params: {
                 vu: request.validUntil,
+                f: request.from,
                 n: request.network,
                 i: request.items.map(item => mapTransactionDraftItem(item, request.network))
             }
