@@ -6,6 +6,7 @@ import {
     RequiredFeatures,
     SignDataPayload,
     SignDataResponse,
+    SignMessageRequest,
     SignMessageResponse,
     Traceable,
     UUIDv7,
@@ -796,7 +797,7 @@ export class TonConnectUI {
      * @param message transaction-like request describing the internal message to sign.
      */
     public async signMessage(
-        message: SendTransactionRequest,
+        message: SignMessageRequest,
         options?: ActionConfiguration &
             OptionalTraceable<
                 { onRequestSent?: (redirectToWallet: () => void) => void } & { useIntent?: boolean }

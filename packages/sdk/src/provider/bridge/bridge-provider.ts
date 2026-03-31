@@ -713,12 +713,6 @@ export class BridgeProvider implements HTTPProvider {
             baseUrl.searchParams.append('r', JSON.stringify(message.connectRequest));
         }
 
-        if (message.draft) {
-            throw new TonConnectError(
-                'Synchronous intent-link generation is not supported. Use the async `connectWithIntent` flow instead.'
-            );
-        }
-
         return baseUrl.toString();
     }
 

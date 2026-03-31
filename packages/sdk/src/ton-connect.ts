@@ -36,6 +36,7 @@ import {
     SendTransactionRequest,
     SendTransactionResponse,
     SignDataResponse,
+    SignMessageRequest,
     SignMessageResponse
 } from 'src/models/methods';
 import { SendTransactionDraftRequest } from 'src/models/methods/send-transaction-draft';
@@ -733,7 +734,7 @@ export class TonConnect implements ITonConnect {
     }
 
     public async signMessage(
-        message: SendTransactionRequest,
+        message: SignMessageRequest,
         options?: OptionalTraceable<{
             onRequestSent?: () => void;
             signal?: AbortSignal;
