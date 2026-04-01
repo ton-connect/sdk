@@ -7,7 +7,7 @@ import {
 } from '@tonconnect/protocol';
 import { BadRequestError, TonConnectError, UnknownAppError, UserRejectsError } from 'src/errors';
 import { UnknownError } from 'src/errors/unknown.error';
-import { SignMessageResponse } from 'src/models/methods';
+import { SignMessageResponse, SignMessageRpcPayload } from 'src/models/methods';
 import { RpcParser } from 'src/parsers/rpc-parser';
 import { WithoutId } from 'src/utils/types';
 
@@ -19,7 +19,7 @@ const signMessageErrors: Partial<Record<CONNECT_EVENT_ERROR_CODES, typeof TonCon
 };
 
 export class SignMessageParser extends RpcParser<'signMessage'> {
-    convertToRpcRequest(request: unknown): WithoutId<SignMessageRpcRequest> {
+    convertToRpcRequest(request: SignMessageRpcPayload): WithoutId<SignMessageRpcRequest> {
         return {
             method: 'signMessage',
             params: [JSON.stringify(request)]
