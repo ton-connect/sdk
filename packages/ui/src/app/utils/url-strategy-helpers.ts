@@ -593,7 +593,9 @@ export function enrichUniversalLink(
     const traceId = params.traceId;
 
     const orderedKeys = ['tonconnect', 'v', 'id', 'trace_id'];
-    const unorderedParams = searchParams.entries().filter(([key]) => !orderedKeys.includes(key));
+    const unorderedParams = Array.from(searchParams.entries()).filter(
+        ([key]) => !orderedKeys.includes(key)
+    );
 
     // rebuild search params with proper ordering
     const startApp = buildQueryParams({

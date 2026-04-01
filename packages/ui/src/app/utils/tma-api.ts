@@ -34,15 +34,70 @@ try {
     initParams = urlParseHashParams(locationHash);
 } catch (e) {}
 
-try {
-    const launchParamsStorageKey = 'ton-connect-session_storage_launchParams';
-    if (Object.entries(initParams).length > 0) {
-        sessionStorage.setItem(launchParamsStorageKey, JSON.stringify(initParams));
-    } else {
-        const savedInitParams = sessionStorage.getItem(launchParamsStorageKey);
-        if (savedInitParams) {
-            initParams = JSON.parse(savedInitParams);
+function sessionStorageSet(key: string, value: string) {
+    try {
+        const window = getWindow();
+        return window?.sessionStorage?.setItem(key, value);
+    } catch (e) {}
+}
+
+function sessionStorageGet(key: string) {
+    try {
+        const window = getWindow();
+        return JSON.parse(window?.sessionStorage?.getItem?.(key)!);
+    } catch (e) {}
+    return null;
+}
+
+function updateFromStoredParams(key: string) {
+    try {
+        const storedParams = sessionStorageGet(key);
+        if (storedParams) {
+            for (const key in storedParams) {
+                if (typeof initParams[key] === 'undefined') {
+                    initParams[key] = storedParams[key];
+                }
+            }
         }
+    } catch {}
+}
+
+function updateFromStoredRawParams(key: string) {
+    try {
+        const window = getWindow();
+        let raw = window?.sessionStorage?.getItem?.(key);
+        if (!raw) {
+            return;
+        }
+
+        try {
+            const parsedJsonRaw = JSON.parse(raw);
+            if (typeof parsedJsonRaw === 'string') {
+                raw = parsedJsonRaw;
+            } else {
+                return;
+            }
+        } catch (e) {}
+
+        const storedParams = urlParseQueryString(raw);
+        for (const paramKey in storedParams) {
+            const value = storedParams[paramKey];
+            if (value != null && typeof initParams[paramKey] === 'undefined') {
+                initParams[paramKey] = value;
+            }
+        }
+    } catch {}
+}
+
+const LAUNCH_PARAMS_STORAGE_KEY = 'ton-connect-session_storage_launchParams';
+
+updateFromStoredRawParams('tapps/launchParams');
+updateFromStoredParams('__telegram__initParams');
+updateFromStoredParams(LAUNCH_PARAMS_STORAGE_KEY);
+
+try {
+    if (Object.entries(initParams).length > 0) {
+        sessionStorageSet(LAUNCH_PARAMS_STORAGE_KEY, JSON.stringify(initParams));
     }
 } catch (e) {}
 
@@ -94,6 +149,20 @@ try {
  */
 export function getTgUser(): TelegramUser | undefined {
     return telegramUser;
+}
+
+/**
+ * Returns the detected TMA platform string.
+ */
+export function getTmaPlatform(): TmaPlatform {
+    return tmaPlatform;
+}
+
+/**
+ * Returns the detected TMA WebApp version, or null when not in a Mini App.
+ */
+export function getWebAppVersion(): string | null {
+    return isInTMA() ? webAppVersion : null;
 }
 
 /**
