@@ -9,8 +9,7 @@ import {
     SignDataPayload
 } from '../dto/check-sign-data-request-dto';
 import { tryParsePublicKey } from '../wrappers/wallets-data';
-import { domainSignVerify } from '@ton/ton';
-import { getDomain } from '../utils/domain';
+import nacl from 'tweetnacl';
 
 const allowedDomains = [
     'ton-connect.github.io',
@@ -93,12 +92,11 @@ export class SignDataService {
                       );
 
             // Verify Ed25519 signature
-            const isValid = domainSignVerify({
-                data: finalHash,
-                signature: Buffer.from(signature, 'base64'),
-                publicKey,
-                domain: getDomain(payload.network)
-            });
+            const isValid = nacl.sign.detached.verify(
+                finalHash,
+                Buffer.from(signature, 'base64'),
+                publicKey
+            );
 
             return isValid;
         } catch (e) {
