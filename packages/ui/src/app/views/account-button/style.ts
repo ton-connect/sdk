@@ -62,6 +62,7 @@ export const NotificationsStyled = styled(Notifications)`
 export const ConnectButtonContainerStyled = styled.div`
     position: relative;
     width: fit-content;
+    z-index: 1100;
 `;
 
 export const ConnectNotificationsStyled = styled(Notifications)`
@@ -69,4 +70,5 @@ export const ConnectNotificationsStyled = styled(Notifications)`
     top: 100%;
     right: 0;
     margin-top: 20px;
+    z-index: 1100;
 `;

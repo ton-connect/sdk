@@ -141,7 +141,7 @@ export const AccountButton: Component<AccountButtonProps> = () => {
                                     position: position.strategy,
                                     top: `${position.y ?? 0}px`,
                                     left: `${position.x ?? 0}px`,
-                                    'z-index': 999
+                                    'z-index': 1100
                                 }}
                                 data-tc-dropdown-container="true"
                             >
