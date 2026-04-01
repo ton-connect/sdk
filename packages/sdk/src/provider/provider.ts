@@ -17,7 +17,10 @@ export interface InternalProvider extends BaseProvider {
     /**
      * Connects with intent (draft payload) via injected wallet.
      */
-    connectWithIntent(payload: WithoutId<RawIntentPayload>, options?: OptionalTraceable): void;
+    connectWithIntent(
+        payload: WithoutId<RawIntentPayload>,
+        options?: OptionalTraceable<{ connectRequest?: ConnectRequest }>
+    ): void;
 }
 
 export interface HTTPProvider extends BaseProvider {

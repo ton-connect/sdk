@@ -135,7 +135,10 @@ export class WalletConnectProvider implements InternalProvider {
     }
 
     // Intents are not supported for WalletConnect provider.
-    connectWithIntent(_payload: WithoutId<RawIntentPayload>, options?: OptionalTraceable): string {
+    connectWithIntent(
+        _payload: WithoutId<RawIntentPayload>,
+        options?: OptionalTraceable<{ connectRequest?: ConnectRequest }>
+    ): string {
         const traceId = options?.traceId ?? UUIDv7();
         const payload = {
             code: CONNECT_EVENT_ERROR_CODES.METHOD_NOT_SUPPORTED as const,
