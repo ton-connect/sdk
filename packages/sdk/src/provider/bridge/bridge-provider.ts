@@ -184,7 +184,6 @@ export class BridgeProvider implements HTTPProvider {
         payload: WithoutId<RawIntentPayload>,
         options?: OptionalTraceable<{
             connectRequest?: ConnectRequest;
-            noConnect?: boolean;
             openingDeadlineMS?: number;
             signal?: AbortSignal;
         }>
@@ -204,7 +203,7 @@ export class BridgeProvider implements HTTPProvider {
         return this.generateUniversalLinkAsync(
             universalLink,
             {
-                connectRequest: options?.noConnect ? undefined : options?.connectRequest,
+                connectRequest: options?.connectRequest,
                 draft: intentPayload
             },
             { traceId, signal: options?.signal }

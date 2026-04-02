@@ -42,7 +42,6 @@ export interface HTTPProvider extends BaseProvider {
         payload: WithoutId<RawIntentPayload>,
         options?: OptionalTraceable<{
             connectRequest?: ConnectRequest;
-            noConnect?: boolean;
             openingDeadlineMS?: number;
             signal?: AbortSignal;
         }>

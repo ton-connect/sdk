@@ -938,9 +938,9 @@ export class TonConnect implements ITonConnect {
         }
 
         const traceId = options?.traceId ?? UUIDv7();
-        const connectRequest = options?.noConnect
-            ? undefined
-            : this.createConnectRequest(options?.connectRequest);
+        const connectRequest = options?.connectRequest
+            ? this.createConnectRequest(options?.connectRequest)
+            : undefined;
 
         let payload: WithoutId<RawIntentPayload>;
         switch (intent.method) {
@@ -976,7 +976,6 @@ export class TonConnect implements ITonConnect {
 
         return (await this.provider.connectWithIntent(payload, {
             connectRequest,
-            noConnect: options?.noConnect,
             signal: abortController.signal,
             traceId
         })) as WalletIntentResult<TWallet>;
