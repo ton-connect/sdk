@@ -31,11 +31,11 @@ export function WalletBatchLimitsTester() {
         // Create array with 'count' messages
         const messages = Array(count)
             .fill(null)
-            .map(() => ({
+            .map((_, i) => ({
                 // Send to user's own wallet address in non-bounceable format
                 address: userAddress,
                 // Small amount to send in nanoTON (0.00001 TON = 10000 nanoTON)
-                amount: '10000'
+                amount: (10000 + i).toString()
             }));
 
         return {
