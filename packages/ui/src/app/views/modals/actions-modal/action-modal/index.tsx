@@ -46,7 +46,8 @@ export const ActionModal: Component<ActionModalProps> = props => {
                 (currentAction.executed ||
                     currentAction.name === 'transaction-sent' ||
                     currentAction.name === 'data-signed' ||
-                    currentAction.name === 'message-signed')
+                    currentAction.name === 'message-signed' ||
+                    currentAction.name === 'action-sent')
         );
 
         setCanceled(

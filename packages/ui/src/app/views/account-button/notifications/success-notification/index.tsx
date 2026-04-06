@@ -45,6 +45,20 @@ export const SuccessNotification: Component<SuccessNotificationProps> = props =>
                     },
                     dataAttrs: { 'data-tc-notification-message-signed': 'true' }
                 };
+            case 'action-sent':
+                return {
+                    header: {
+                        translationKey: isIntent
+                            ? 'notifications.intent.actionSent.header'
+                            : 'notifications.actionSent.header'
+                    },
+                    text: {
+                        translationKey: isIntent
+                            ? 'notifications.intent.actionSent.text'
+                            : 'notifications.actionSent.text'
+                    },
+                    dataAttrs: { 'data-tc-notification-action-sent': 'true' }
+                };
             default:
                 return {
                     header: { translationKey: 'notifications.transactionSent.header' },

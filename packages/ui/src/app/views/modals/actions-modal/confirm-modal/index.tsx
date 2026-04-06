@@ -44,6 +44,13 @@ export const ConfirmModal: Component<ConfirmModalProps> = props => {
                         headerTranslationValues: { name: name() },
                         dataAttrs: { 'data-tc-sign-message-confirm-modal': 'true' }
                     };
+                case 'confirm-action':
+                    return {
+                        headerTranslationKey: 'actionModal.confirmAction.header',
+                        textTranslationKey: 'actionModal.confirmAction.text',
+                        headerTranslationValues: { name: name() },
+                        dataAttrs: { 'data-tc-confirm-action-modal': 'true' }
+                    };
                 default:
                     return {
                         headerTranslationKey: 'actionModal.confirmTransaction.header',

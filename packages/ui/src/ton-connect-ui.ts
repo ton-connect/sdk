@@ -546,8 +546,8 @@ export class TonConnectUI {
                 }
             },
             {
-                success: 'transaction-sent',
                 before: 'confirm-transaction',
+                success: 'transaction-sent',
                 error: 'transaction-canceled'
             },
             { ...options, traceId }
@@ -595,8 +595,8 @@ export class TonConnectUI {
                 }
             },
             {
-                success: 'data-signed',
                 before: 'confirm-sign-data',
+                success: 'data-signed',
                 error: 'sign-data-canceled'
             },
             { ...options, traceId }
@@ -646,8 +646,8 @@ export class TonConnectUI {
                 }
             },
             {
-                success: 'message-signed',
                 before: 'confirm-sign-message',
+                success: 'message-signed',
                 error: 'sign-message-canceled'
             },
             { ...options, traceId }
@@ -685,8 +685,8 @@ export class TonConnectUI {
                 }
             },
             {
-                success: 'transaction-sent',
                 before: 'confirm-transaction',
+                success: 'transaction-sent',
                 error: 'transaction-canceled'
             },
             { ...options, traceId }
@@ -728,8 +728,8 @@ export class TonConnectUI {
                 }
             },
             {
-                success: 'message-signed',
                 before: 'confirm-sign-message',
+                success: 'message-signed',
                 error: 'sign-message-canceled'
             },
             { ...options, traceId }
@@ -749,7 +749,7 @@ export class TonConnectUI {
         if (!this.connected && options?.intents?.use) {
             return this.initiateIntentFlow(
                 { method: 'actionDraft', ...draft },
-                { success: 'transaction-sent', error: 'transaction-canceled' },
+                { success: 'action-sent', error: 'action-canceled' },
                 { ...options, traceId }
             );
         }
@@ -770,10 +770,9 @@ export class TonConnectUI {
                 }
             },
             {
-                // TODO: add action action
-                success: 'transaction-sent',
-                before: 'confirm-transaction',
-                error: 'transaction-canceled'
+                before: 'confirm-action',
+                success: 'action-sent',
+                error: 'action-canceled'
             },
             { ...options, traceId }
         );

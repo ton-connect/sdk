@@ -41,6 +41,16 @@ export const CanceledModal: Component<CanceledModalProps> = props => {
                         : 'actionModal.signMessageCanceled.text',
                     dataAttrs: { 'data-tc-sign-message-canceled-modal': 'true' }
                 };
+            case 'action-canceled':
+                return {
+                    headerTranslationKey: isIntent
+                        ? 'actionModal.intentActionCanceled.header'
+                        : 'actionModal.actionCanceled.header',
+                    textTranslationKey: isIntent
+                        ? 'actionModal.intentActionCanceled.text'
+                        : 'actionModal.actionCanceled.text',
+                    dataAttrs: { 'data-tc-action-canceled-modal': 'true' }
+                };
             default:
                 return {
                     headerTranslationKey: 'actionModal.transactionCanceled.header',

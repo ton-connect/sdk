@@ -15,7 +15,10 @@ export type ActionName =
     | 'sign-data-canceled'
     | 'confirm-sign-message'
     | 'message-signed'
-    | 'sign-message-canceled';
+    | 'sign-message-canceled'
+    | 'confirm-action'
+    | 'action-sent'
+    | 'action-canceled';
 
 export type Action =
     | BasicAction

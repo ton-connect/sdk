@@ -21,7 +21,8 @@ export const ActionsModal: Component = () => {
                         action() &&
                         (action()!.name === 'confirm-transaction' ||
                             action()!.name === 'confirm-sign-data' ||
-                            action()!.name === 'confirm-sign-message')
+                            action()!.name === 'confirm-sign-message' ||
+                            action()!.name === 'confirm-action')
                     }
                 >
                     <ConfirmModal onClose={() => setAction(null)} />
@@ -31,7 +32,8 @@ export const ActionsModal: Component = () => {
                         action() &&
                         (action()!.name === 'transaction-sent' ||
                             action()!.name === 'data-signed' ||
-                            action()!.name === 'message-signed')
+                            action()!.name === 'message-signed' ||
+                            action()!.name === 'action-sent')
                     }
                 >
                     <SuccessModal onClose={() => setAction(null)} />
@@ -41,7 +43,8 @@ export const ActionsModal: Component = () => {
                         action() &&
                         (action()!.name === 'transaction-canceled' ||
                             action()!.name === 'sign-data-canceled' ||
-                            action()!.name === 'sign-message-canceled')
+                            action()!.name === 'sign-message-canceled' ||
+                            action()!.name === 'action-canceled')
                     }
                 >
                     <CanceledModal onClose={() => setAction(null)} />

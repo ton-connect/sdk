@@ -39,6 +39,17 @@ export const SuccessModal: Component<SuccessModalProps> = props => {
                         : 'actionModal.messageSigned.header',
                     dataAttrs: { 'data-tc-message-signed-modal': 'true' }
                 };
+            case 'action-sent':
+                return {
+                    headerTranslationKey: isIntent
+                        ? 'actionModal.intentActionSent.header'
+                        : 'actionModal.actionSent.header',
+                    textTranslationKey: isIntent
+                        ? 'actionModal.intentActionSent.text'
+                        : 'actionModal.actionSent.text',
+                    showButton: 'open-wallet',
+                    dataAttrs: { 'data-tc-action-sent-modal': 'true' }
+                };
             default:
                 return {
                     headerTranslationKey: 'actionModal.transactionSent.header',

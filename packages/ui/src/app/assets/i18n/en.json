@@ -44,6 +44,14 @@
     "signMessageCanceled": {
       "header": "Sign message canceled"
     },
+    "actionSent": {
+      "header": "Action sent",
+      "text": "Your action will be processed in a few seconds."
+    },
+    "actionCanceled": {
+      "header": "Action canceled",
+      "text": "There will be no changes to your account."
+    },
     "intent": {
       "transactionSent": {
         "header": "Intent transaction sent",
@@ -64,6 +72,14 @@
       },
       "signMessageCanceled": {
         "header": "Intent message signing canceled"
+      },
+      "actionSent": {
+        "header": "Intent action sent",
+        "text": "Your intent request was sent to your wallet."
+      },
+      "actionCanceled": {
+        "header": "Intent action canceled",
+        "text": "The intent request was canceled. Your account will not change."
       }
     }
   },
@@ -186,6 +202,14 @@
     "intentDataSigned": "$notifications.intent.dataSigned",
     "intentSignDataCanceled": "$notifications.intent.signDataCanceled",
     "intentMessageSigned": "$notifications.intent.messageSigned",
-    "intentSignMessageCanceled": "$notifications.intent.signMessageCanceled"
+    "intentSignMessageCanceled": "$notifications.intent.signMessageCanceled",
+    "confirmAction": {
+      "header": "Confirm the action in {{ name }}",
+      "text": "It will only take a moment."
+    },
+    "actionSent": "$notifications.actionSent",
+    "actionCanceled": "$notifications.actionCanceled",
+    "intentActionSent": "$notifications.intent.actionSent",
+    "intentActionCanceled": "$notifications.intent.actionCanceled"
   }
 }

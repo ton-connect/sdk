@@ -44,6 +44,14 @@
     "signMessageCanceled": {
       "header": "Подпись сообщения отменена"
     },
+    "actionSent": {
+      "header": "Действие отправлено",
+      "text": "Ваше действие будет обработано через несколько секунд."
+    },
+    "actionCanceled": {
+      "header": "Действие отменено",
+      "text": "Состояние вашего счёта не изменится."
+    },
     "intent": {
       "transactionSent": {
         "header": "Intent‑транзакция отправлена",
@@ -64,6 +72,14 @@
       },
       "signMessageCanceled": {
         "header": "Подпись сообщения по intent отменена"
+      },
+      "actionSent": {
+        "header": "Intent‑действие отправлено",
+        "text": "Ваш запрос intent отправлен в кошелёк."
+      },
+      "actionCanceled": {
+        "header": "Intent‑действие отменено",
+        "text": "Запрос intent отменён. Баланс вашего счёта не изменится."
       }
     }
   },
@@ -175,17 +191,25 @@
       "header": "Подпишите сообщение в {{ name }}",
       "text": "Это займет пару секунд."
     },
+    "confirmAction": {
+      "header": "Подтвердите действие в {{ name }}",
+      "text": "Это займет пару секунд."
+    },
     "transactionSent": "$notifications.transactionSent",
     "transactionCanceled": "$notifications.transactionCanceled",
     "dataSigned": "$notifications.dataSigned",
     "signDataCanceled": "$notifications.signDataCanceled",
     "messageSigned": "$notifications.messageSigned",
     "signMessageCanceled": "$notifications.signMessageCanceled",
+    "actionSent": "$notifications.actionSent",
+    "actionCanceled": "$notifications.actionCanceled",
     "intentTransactionSent": "$notifications.intent.transactionSent",
     "intentTransactionCanceled": "$notifications.intent.transactionCanceled",
     "intentDataSigned": "$notifications.intent.dataSigned",
     "intentSignDataCanceled": "$notifications.intent.signDataCanceled",
     "intentMessageSigned": "$notifications.intent.messageSigned",
-    "intentSignMessageCanceled": "$notifications.intent.signMessageCanceled"
+    "intentSignMessageCanceled": "$notifications.intent.signMessageCanceled",
+    "intentActionSent": "$notifications.intent.actionSent",
+    "intentActionCanceled": "$notifications.intent.actionCanceled"
   }
 }

@@ -49,7 +49,8 @@ export const Notifications: Component<NotificationsProps> = props => {
                                 when={
                                     openedNotification.action === 'transaction-sent' ||
                                     openedNotification.action === 'data-signed' ||
-                                    openedNotification.action === 'message-signed'
+                                    openedNotification.action === 'message-signed' ||
+                                    openedNotification.action === 'action-sent'
                                 }
                             >
                                 <SuccessNotification class={NotificationClass} />
@@ -58,7 +59,8 @@ export const Notifications: Component<NotificationsProps> = props => {
                                 when={
                                     openedNotification.action === 'transaction-canceled' ||
                                     openedNotification.action === 'sign-data-canceled' ||
-                                    openedNotification.action === 'sign-message-canceled'
+                                    openedNotification.action === 'sign-message-canceled' ||
+                                    openedNotification.action === 'action-canceled'
                                 }
                             >
                                 <ErrorNotification class={NotificationClass} />
@@ -67,7 +69,8 @@ export const Notifications: Component<NotificationsProps> = props => {
                                 when={
                                     openedNotification.action === 'confirm-transaction' ||
                                     openedNotification.action === 'confirm-sign-data' ||
-                                    openedNotification.action === 'confirm-sign-message'
+                                    openedNotification.action === 'confirm-sign-message' ||
+                                    openedNotification.action === 'confirm-action'
                                 }
                             >
                                 <ConfirmNotification class={NotificationClass} />
