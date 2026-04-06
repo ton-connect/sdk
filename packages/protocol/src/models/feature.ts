@@ -8,5 +8,5 @@ export type SendTransactionFeature = {
     extraCurrencySupported?: boolean;
 };
 
-export type SignDataType = 'text' | 'binary' | 'cell';
+export type SignDataType = 'text' | 'binary' | 'cell' | 'eip712';
 export type SignDataFeature = { name: 'SignData'; types: SignDataType[] };

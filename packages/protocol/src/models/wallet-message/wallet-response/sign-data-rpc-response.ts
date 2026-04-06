@@ -17,7 +17,7 @@ export interface SignDataRpcResponseSuccess {
 export type SignDataPayload = {
     network?: ChainId;
     from?: string;
-} & (SignDataPayloadText | SignDataPayloadBinary | SignDataPayloadCell);
+} & (SignDataPayloadText | SignDataPayloadBinary | SignDataPayloadCell | SignDataPayloadEip712);
 
 export type SignDataPayloadText = {
     type: 'text';
@@ -34,6 +34,31 @@ export type SignDataPayloadCell = {
     schema: string;
     cell: string;
 };
+
+export type SignDataPayloadEip712 = {
+    type: 'eip712';
+} & Eip712TypedData;
+
+export interface Eip712TypedDataField {
+    name: string;
+    type: string;
+}
+
+export interface Eip712Domain {
+    name?: string;
+    version?: string;
+    chainId?: number | string;
+    verifyingContract?: string;
+    salt?: string;
+    [key: string]: unknown;
+}
+
+export interface Eip712TypedData {
+    types: Record<string, Eip712TypedDataField[]>;
+    primaryType: string;
+    domain: Eip712Domain;
+    message: Record<string, unknown>;
+}
 
 export interface SignDataRpcResponseError extends WalletResponseTemplateError {
     error: { code: SIGN_DATA_ERROR_CODES; message: string };
