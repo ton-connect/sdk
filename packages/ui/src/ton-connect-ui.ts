@@ -660,9 +660,54 @@ export class TonConnectUI {
 
         this.tracker.trackDataSentForSignature(this.wallet, data);
 
+        const { notifications, modals, returnStrategy, twaReturnUrl } =
+            this.getModalsAndNotificationsConfiguration(options);
+
         if (!this.connected && options?.intents?.use) {
-            const intentResponse = await this.signDataDraft(data, { ...options, traceId });
-            return intentResponse;
+            let success = false;
+            const previousRequiredFeatures = this._walletsRequiredFeatures;
+            try {
+                this._walletsRequiredFeatures = {
+                    ...previousRequiredFeatures,
+                    intents: { types: ['signData'] }
+                };
+
+                this.modal.openWithIntent({
+                    traceId,
+                    intent: {
+                        method: 'signData',
+                        ...data,
+                        omitConnect: options?.intents?.omitConnect
+                    }
+                });
+
+                const intentResponse = await this.waitForIntentResponse<
+                    OptionalTraceable<SignDataResponse>
+                >(options?.signal);
+
+                widgetController.setAction({
+                    name: 'data-signed',
+                    showNotification: notifications.includes('success'),
+                    openModal: modals.includes('success'),
+                    isIntent: true,
+                    traceId
+                });
+
+                success = true;
+                return intentResponse;
+            } catch (e) {
+                widgetController.setAction({
+                    name: 'sign-data-canceled',
+                    showNotification: notifications.includes('error'),
+                    openModal: modals.includes('error'),
+                    isIntent: true,
+                    traceId
+                });
+                throw e;
+            } finally {
+                this._walletsRequiredFeatures = previousRequiredFeatures;
+                this.modal.close(success ? 'wallet-selected' : 'action-cancelled');
+            }
         }
 
         if (!this.connected) {
@@ -673,9 +718,6 @@ export class TonConnectUI {
         if (isInTMA()) {
             sendExpand();
         }
-
-        const { notifications, modals, returnStrategy, twaReturnUrl } =
-            this.getModalsAndNotificationsConfiguration(options);
 
         const sessionId = await this.getSessionId();
 
@@ -1219,173 +1261,6 @@ export class TonConnectUI {
         } catch (e) {
             widgetController.setAction({
                 name: 'transaction-canceled',
-                showNotification: notifications.includes('error'),
-                openModal: modals.includes('error'),
-                traceId
-            });
-
-            if (e instanceof TonConnectError) {
-                throw e;
-            } else {
-                console.error(e);
-                throw new TonConnectUIError('Unhandled error:' + e);
-            }
-        } finally {
-            unsubscribe();
-        }
-    }
-
-    /**
-     * Signs data via draft flow and returns the signature.
-     * If wallet is not connected, opens modal and shows draft QR/link.
-     */
-    private async signDataDraft(
-        data: SignDataPayload,
-        options?: ActionOptions
-    ): Promise<OptionalTraceable<SignDataResponse>> {
-        const traceId = options?.traceId ?? UUIDv7();
-
-        const { notifications, modals, returnStrategy, twaReturnUrl } =
-            this.getModalsAndNotificationsConfiguration(options);
-
-        if (!this.connected && options?.intents?.use) {
-            let success = false;
-            const previousRequiredFeatures = this._walletsRequiredFeatures;
-            try {
-                this._walletsRequiredFeatures = {
-                    ...previousRequiredFeatures,
-                    intents: { types: ['signData'] }
-                };
-
-                this.modal.openWithIntent({
-                    traceId,
-                    intent: {
-                        method: 'signData',
-                        ...data,
-                        omitConnect: options?.intents?.omitConnect
-                    }
-                });
-
-                const intentResponse = await this.waitForIntentResponse<
-                    OptionalTraceable<SignDataResponse>
-                >(options?.signal);
-
-                widgetController.setAction({
-                    name: 'data-signed',
-                    showNotification: notifications.includes('success'),
-                    openModal: modals.includes('success'),
-                    isIntent: true,
-                    traceId
-                });
-
-                success = true;
-                return intentResponse;
-            } catch (e) {
-                widgetController.setAction({
-                    name: 'sign-data-canceled',
-                    showNotification: notifications.includes('error'),
-                    openModal: modals.includes('error'),
-                    isIntent: true,
-                    traceId
-                });
-                throw e;
-            } finally {
-                this._walletsRequiredFeatures = previousRequiredFeatures;
-                this.modal.close(success ? 'wallet-selected' : 'action-cancelled');
-            }
-        }
-
-        if (!this.connected) {
-            throw new TonConnectUIError('Connect wallet to sign data.');
-        }
-
-        if (isInTMA()) {
-            sendExpand();
-        }
-
-        const sessionId = await this.getSessionId();
-
-        widgetController.setAction({
-            name: 'confirm-sign-data',
-            showNotification: notifications.includes('before'),
-            openModal: modals.includes('before'),
-            signed: false,
-            sessionId: sessionId || undefined,
-            traceId
-        });
-
-        const abortController = new AbortController();
-
-        const onRequestSent = (): void => {
-            if (abortController.signal.aborted) {
-                return;
-            }
-
-            widgetController.setAction({
-                name: 'confirm-sign-data',
-                showNotification: notifications.includes('before'),
-                openModal: modals.includes('before'),
-                signed: true,
-                sessionId: sessionId || undefined,
-                traceId
-            });
-
-            this.redirectAfterRequestSent({
-                returnStrategy,
-                twaReturnUrl,
-                sessionId: sessionId || undefined,
-                traceId
-            });
-
-            let firstClick = true;
-            const redirectToWallet = async () => {
-                if (abortController.signal.aborted) {
-                    return;
-                }
-
-                const forceRedirect = !firstClick;
-                firstClick = false;
-
-                await this.redirectAfterRequestSent({
-                    returnStrategy,
-                    twaReturnUrl,
-                    forceRedirect,
-                    sessionId: sessionId || undefined,
-                    traceId
-                });
-            };
-
-            options?.onRequestSent?.(redirectToWallet);
-        };
-
-        const unsubscribe = this.onTransactionModalStateChange(action => {
-            if (action?.openModal) {
-                return;
-            }
-
-            unsubscribe();
-            if (!action) {
-                abortController.abort();
-            }
-        });
-
-        try {
-            const result = await this.waitForSignData(
-                { data, signal: abortController.signal, traceId },
-                onRequestSent
-            );
-
-            widgetController.setAction({
-                name: 'data-signed',
-                showNotification: notifications.includes('success'),
-                openModal: modals.includes('success'),
-                traceId
-            });
-
-            return result;
-        } catch (e) {
-            widgetController.setAction({
-                name: 'sign-data-canceled',
                 showNotification: notifications.includes('error'),
                 openModal: modals.includes('error'),
                 traceId
