@@ -33,7 +33,10 @@ export function IntentsDemo() {
 
     const commonOptions = {
         notifications: ['before', 'success', 'error'] as ('before' | 'success' | 'error')[],
-        noConnect
+        intents: {
+            use: true,
+            omitConnect: noConnect
+        }
     };
 
     const handleSendTransactionIntent = async () => {
@@ -58,7 +61,7 @@ export function IntentsDemo() {
         setLastIntentPayload(intent);
 
         try {
-            const response = await tonConnectUi.sendTransactionDraft(intent, commonOptions);
+            const response = await tonConnectUi.sendTransactionDraft(intent, { ...commonOptions });
             setLastIntentResult(response);
         } catch (e) {
             // result tracking is not implemented yet; errors are logged for debugging
@@ -117,10 +120,7 @@ export function IntentsDemo() {
         setLastIntentPayload(intent);
 
         try {
-            const response = await tonConnectUi.signData(intent, {
-                ...commonOptions,
-                useIntent: true
-            });
+            const response = await tonConnectUi.signData(intent, commonOptions);
             setLastIntentResult(response);
         } catch (e) {
             console.error('signDataDraft failed:', e);

@@ -949,9 +949,9 @@ export class TonConnect implements ITonConnect {
         }
 
         const traceId = options?.traceId ?? UUIDv7();
-        const connectRequest = options?.connectRequest
-            ? this.createConnectRequest(options?.connectRequest)
-            : undefined;
+        const connectRequest = intent.omitConnect
+            ? undefined
+            : this.createConnectRequest(options?.connectRequest);
 
         let payload: WithoutId<RawIntentPayload>;
         switch (intent.method) {
