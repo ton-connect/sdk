@@ -8,9 +8,6 @@ export type Provider = InternalProvider | HTTPProvider;
 export interface InternalProvider extends BaseProvider {
     type: 'injected';
 
-    /**
-     * Establishes a connection using a ConnectRequest (classic TonConnect flow).
-     */
     connect(message: ConnectRequest, options?: OptionalTraceable): void;
 
     /**
