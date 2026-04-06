@@ -42,6 +42,8 @@ export class BridgeProvider implements HTTPProvider {
     private static readonly MAX_INLINE_INTENT_URL_LENGTH = 1023;
     private static readonly DEFAULT_OBJECT_STORAGE_URL =
         'https://ton-connect-bridge-v3-staging.tapps.ninja/objects';
+    private static readonly OBJECT_STORAGE_ATTEMPTS = 3;
+
     public static async fromStorage(
         storage: BridgeConnectionStorage,
         analyticsManager?: AnalyticsManager
@@ -102,19 +104,18 @@ export class BridgeProvider implements HTTPProvider {
             signal?: AbortSignal;
         }>
     ): string {
+        const abortController = createAbortController(options?.signal);
+        this.abortController?.abort();
+        this.abortController = abortController;
+
         const traceId = options?.traceId ?? UUIDv7();
 
-        this.subscribeToBridgeEvents({ ...options, traceId });
+        this.subscribeToBridgeEvents({ ...options, traceId, signal: abortController.signal });
         const universalLink = this.obtainUniversalLink();
 
-        return this.generateUniversalLink(
-            universalLink,
-            { connectRequest: message },
-            {
-                traceId,
-                signal: options?.signal
-            }
-        );
+        return this.generateUniversalLink(universalLink, message, {
+            traceId
+        });
     }
 
     private obtainUniversalLink() {
@@ -129,13 +130,9 @@ export class BridgeProvider implements HTTPProvider {
     private subscribeToBridgeEvents(
         options: OptionalTraceable<{
             openingDeadlineMS?: number;
-            signal?: AbortSignal;
+            signal: AbortSignal;
         }>
     ) {
-        const abortController = createAbortController(options?.signal);
-        this.abortController?.abort();
-        this.abortController = abortController;
-
         this.closeGateways();
 
         const sessionCrypto = new SessionCrypto();
@@ -155,7 +152,7 @@ export class BridgeProvider implements HTTPProvider {
                 sessionCrypto
             })
             .then(async () => {
-                if (abortController.signal.aborted) {
+                if (options.signal.aborted) {
                     return;
                 }
 
@@ -170,17 +167,13 @@ export class BridgeProvider implements HTTPProvider {
                     {
                         attempts: Number.MAX_SAFE_INTEGER,
                         delayMs: this.defaultRetryTimeoutMS,
-                        signal: abortController.signal
+                        signal: options.signal
                     }
                 );
             });
     }
 
-    /**
-     * Connects with intent via bridge as a tc:// universal link.
-     * connectRequest is at URL level (r param). Intent payload is transported in m/mp params.
-     */
-    public connectWithIntent(
+    public async connectWithIntent(
         payload: WithoutId<RawIntentPayload>,
         options?: OptionalTraceable<{
             connectRequest?: ConnectRequest;
@@ -188,11 +181,15 @@ export class BridgeProvider implements HTTPProvider {
             signal?: AbortSignal;
         }>
     ): Promise<string> {
+        const abortController = createAbortController(options?.signal);
+        this.abortController?.abort();
+        this.abortController = abortController;
+
         const traceId = options?.traceId ?? UUIDv7();
 
         const intentPayload = { id: '0', ...payload } as RawIntentPayload;
 
-        this.subscribeToBridgeEvents({ ...options, traceId });
+        this.subscribeToBridgeEvents({ ...options, traceId, signal: abortController.signal });
         const universalLink = this.obtainUniversalLink();
 
         this.pendingRequests.set(intentPayload.id.toString(), response => {
@@ -200,14 +197,32 @@ export class BridgeProvider implements HTTPProvider {
             this.intentListeners.forEach(listener => listener(typed));
         });
 
-        return this.generateUniversalLinkAsync(
-            universalLink,
-            {
-                connectRequest: options?.connectRequest,
-                draft: intentPayload
-            },
-            { traceId, signal: options?.signal }
-        );
+        const timeoutId = setTimeout(() => {
+            abortController.abort();
+        }, this.defaultOpeningDeadlineMS);
+
+        try {
+            return await callForSuccess(
+                _options =>
+                    this.generateUniversalIntentLink(
+                        universalLink,
+                        {
+                            connectRequest: options?.connectRequest,
+                            draft: intentPayload
+                        },
+                        { traceId, signal: _options.signal }
+                    ),
+                {
+                    attempts: BridgeProvider.OBJECT_STORAGE_ATTEMPTS,
+                    delayMs: this.defaultRetryTimeoutMS,
+                    signal: abortController.signal
+                }
+            );
+        } catch (error) {
+            throw error;
+        } finally {
+            clearTimeout(timeoutId);
+        }
     }
 
     private intentListeners: Array<(response: IntentResponse) => void> = [];
@@ -616,26 +631,28 @@ export class BridgeProvider implements HTTPProvider {
 
     private generateUniversalLink(
         universalLink: string,
-        message: UniversalLinkMessage,
-        options: Traceable<{ signal?: AbortSignal }>
+        message: ConnectRequest,
+        options: Traceable
     ): string {
         if (isTelegramUrl(universalLink)) {
-            return this.generateTGUniversalLink(universalLink, message, options);
+            const urlToWrap = this.generateRegularUniversalLink('about:blank', message, options);
+            return this.wrapTgLink(universalLink, urlToWrap);
         }
 
         return this.generateRegularUniversalLink(universalLink, message, options);
     }
 
-    private async generateUniversalLinkAsync(
+    private async generateUniversalIntentLink(
         universalLink: string,
         message: UniversalLinkMessage,
         options: Traceable<{ signal?: AbortSignal }>
     ): Promise<string> {
         if (isTelegramUrl(universalLink)) {
-            return this.generateTGUniversalLinkAsync(universalLink, message, options);
+            const urlToWrap = await this.generateRegularIntentLink('about:blank', message, options);
+            return this.wrapTgLink(universalLink, urlToWrap);
         }
 
-        return this.generateRegularUniversalLinkAsync(universalLink, message, options);
+        return this.generateRegularIntentLink(universalLink, message, options);
     }
 
     private async storeIntentPayloadInObjectStorageAsync(
@@ -700,22 +717,19 @@ export class BridgeProvider implements HTTPProvider {
 
     private generateRegularUniversalLink(
         universalLink: string,
-        message: UniversalLinkMessage,
-        options: Traceable<{ signal?: AbortSignal }>
+        message: ConnectRequest,
+        options: Traceable
     ): string {
-        const baseUrl = new URL(universalLink);
-        baseUrl.searchParams.append('v', PROTOCOL_VERSION.toString());
-        baseUrl.searchParams.append('id', this.session!.sessionCrypto.sessionId);
-        baseUrl.searchParams.append('trace_id', options.traceId);
+        const url = new URL(universalLink);
+        url.searchParams.append('v', PROTOCOL_VERSION.toString());
+        url.searchParams.append('id', this.session!.sessionCrypto.sessionId);
+        url.searchParams.append('trace_id', options.traceId);
+        url.searchParams.append('r', JSON.stringify(message));
 
-        if (message.connectRequest) {
-            baseUrl.searchParams.append('r', JSON.stringify(message.connectRequest));
-        }
-
-        return baseUrl.toString();
+        return url.toString();
     }
 
-    private async generateRegularUniversalLinkAsync(
+    private async generateRegularIntentLink(
         universalLink: string,
         message: UniversalLinkMessage,
         options: Traceable<{ signal?: AbortSignal }>
@@ -766,34 +780,7 @@ export class BridgeProvider implements HTTPProvider {
         return baseUrl.toString();
     }
 
-    private async generateTGUniversalLinkAsync(
-        universalLink: string,
-        message: UniversalLinkMessage,
-        options: Traceable<{ signal?: AbortSignal }>
-    ): Promise<string> {
-        const urlToWrap = await this.generateRegularUniversalLinkAsync(
-            'about:blank',
-            message,
-            options
-        );
-        const linkParams = urlToWrap.split('?')[1]!;
-
-        const startapp = 'tonconnect-' + encodeTelegramUrlParameters(linkParams);
-
-        // TODO: Remove this line after all dApps and the wallets-list.json have been updated
-        const updatedUniversalLink = this.convertToDirectLink(universalLink);
-
-        const url = new URL(updatedUniversalLink);
-        url.searchParams.append('startapp', startapp);
-        return url.toString();
-    }
-
-    private generateTGUniversalLink(
-        universalLink: string,
-        message: UniversalLinkMessage,
-        options: Traceable<{ signal?: AbortSignal }>
-    ): string {
-        const urlToWrap = this.generateRegularUniversalLink('about:blank', message, options);
+    private wrapTgLink(universalLink: string, urlToWrap: string): string {
         const linkParams = urlToWrap.split('?')[1]!;
 
         const startapp = 'tonconnect-' + encodeTelegramUrlParameters(linkParams);
