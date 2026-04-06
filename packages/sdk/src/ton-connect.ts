@@ -152,10 +152,6 @@ export class TonConnect implements ITonConnect {
     public onIntentResponse(callback: (response: Traceable<IntentResponse>) => void): () => void {
         this.intentResponseSubscriptions.push(callback);
 
-        if (this.provider) {
-            this.provider.onIntentResponse(this.handleProviderIntentResponse);
-        }
-
         return () => {
             this.intentResponseSubscriptions = this.intentResponseSubscriptions.filter(
                 cb => cb !== callback
@@ -492,6 +488,7 @@ export class TonConnect implements ITonConnect {
         this.provider?.closeConnection();
         this.provider = provider;
         provider.listen(this.walletEventsListener.bind(this));
+        provider.onIntentResponse(this.handleProviderIntentResponse.bind(this));
 
         const onAbortRestore = (): void => {
             this.tracker.trackConnectionRestoringError('Connection restoring was aborted', traceId);
