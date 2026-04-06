@@ -27,7 +27,7 @@ import { Optional, OptionalTraceable, Traceable, WithoutId } from 'src/utils/typ
 import { PROTOCOL_VERSION } from 'src/resources/protocol';
 import { logDebug, logError } from 'src/utils/log';
 import { toBase64Url } from 'src/utils/base64';
-import { addPathToUrl, encodeTelegramUrlParameters, isTelegramUrl } from 'src/utils/url';
+import { encodeTelegramUrlParameters, isTelegramUrl } from 'src/utils/url';
 import { callForSuccess } from 'src/utils/call-for-success';
 import { createAbortController } from 'src/utils/create-abort-controller';
 import { AnalyticsManager } from 'src/analytics/analytics-manager';
@@ -684,24 +684,12 @@ export class BridgeProvider implements HTTPProvider {
             }
 
             const body = (await response.text()).trim();
-            if (!body) {
-                throw new TonConnectError('Object storage responded with an empty get_url value');
-            }
-
-            try {
-                const parsed = JSON.parse(body) as { get_url?: string; getUrl?: string };
-                const maybeUrl = parsed.get_url ?? parsed.getUrl;
-                if (typeof maybeUrl === 'string' && maybeUrl.trim()) {
-                    return maybeUrl.trim();
-                }
-            } catch {}
 
             if (body.startsWith('http://') || body.startsWith('https://')) {
                 return body;
             }
 
-            const normalized = body.replace(/^\/+/, '');
-            return addPathToUrl(objectStorageUrl, normalized);
+            throw new TonConnectError(`Object storage responded with invalid payload ${body}`);
         } catch (error) {
             this.abortController?.abort();
             logDebug('Failed to store intent payload in object storage', error);
