@@ -14,9 +14,6 @@
       "cache": false,
       "dependsOn": ["build"]
     },
-    "test": {
-      "cache": false
-    },
     "//#lint": {
     },
     "verify": {

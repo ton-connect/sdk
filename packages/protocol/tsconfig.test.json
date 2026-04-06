@@ -4,7 +4,6 @@
         "target": "ESNext",
         "outDir": "./dist-tests",
         "baseUrl": "./",
-        "isolatedModules": true,
         "paths": {
             "src/*": ["./src/*"],
             "tests/*": ["./tests/*"]

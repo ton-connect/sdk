@@ -63,4 +63,3 @@ TonConnect UI React is a React UI kit for TonConnect SDK. Use it to connect your
 ## 🛠️ Development
 
 Follow the instructions in [DEVELOPERS.md](./DEVELOPERS.md) to set up the development environment.
-                    
