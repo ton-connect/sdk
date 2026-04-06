@@ -1,4 +1,4 @@
-import { DraftAssetType, IntentMethodType, SignDataType } from '@tonconnect/protocol';
+import { DraftAssetType, IntentRpcMethod, SignDataType } from '@tonconnect/protocol';
 
 /**
  * Required features for wallets.
@@ -91,5 +91,5 @@ export type RequiredIntentsFeature = {
     /**
      * Draft types that must be supported via Intents feature.
      */
-    types: IntentMethodType[];
+    types: IntentRpcMethod[];
 };

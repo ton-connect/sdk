@@ -5,6 +5,7 @@ import {
     ConnectEventSuccess,
     ConnectItem,
     ConnectRequest,
+    IntentRpcMethod,
     RpcMethod,
     SendTransactionRpcResponseSuccess,
     SignDataPayload,
@@ -92,7 +93,7 @@ import { BridgePartialSession, BridgeSession } from 'src/provider/bridge/models/
 import { IEnvironment } from 'src/environment/models/environment.interface';
 import { DefaultEnvironment } from 'src/environment/default-environment';
 import { UUIDv7 } from 'src/utils/uuid';
-import { TraceableWalletEvent } from 'src/models/wallet/traceable-events';
+import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet/traceable-events';
 import { WalletConnectProvider } from 'src/provider/wallet-connect/wallet-connect-provider';
 import type { RawIntentPayload } from 'src/models/intent-payload';
 import { sendTransactionDraftParser } from 'src/parsers/send-transaction-draft-parser';
@@ -131,14 +132,24 @@ export class TonConnect implements ITonConnect {
      */
     private readonly tracker: TonConnectTracker;
 
-    private intentResponseSubscriptions: ((response: IntentResponse) => void)[] = [];
+    private intentResponseSubscriptions: ((response: Traceable<IntentResponse>) => void)[] = [];
 
-    private readonly handleProviderIntentResponse = (response: IntentResponse): void => {
-        const converted = intentResponseParser.convertFromRpcResponse(response);
-        this.intentResponseSubscriptions.forEach(callback => callback(converted));
+    private readonly handleProviderIntentResponse = (
+        intentRawResponse: TraceableWalletResponse<IntentRpcMethod>
+    ): void => {
+        const { traceId, ...rpcResponse } = intentRawResponse;
+        if (intentResponseParser.isError(rpcResponse)) {
+            this.intentResponseSubscriptions.forEach(callback =>
+                callback({ ...rpcResponse, traceId })
+            );
+            return;
+        }
+
+        const response = intentResponseParser.convertFromRpcResponse(rpcResponse);
+        this.intentResponseSubscriptions.forEach(callback => callback({ ...response, traceId }));
     };
 
-    public onIntentResponse(callback: (response: IntentResponse) => void): () => void {
+    public onIntentResponse(callback: (response: Traceable<IntentResponse>) => void): () => void {
         this.intentResponseSubscriptions.push(callback);
 
         if (this.provider) {

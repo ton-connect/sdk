@@ -1053,12 +1053,8 @@ export class TonConnectUI {
                 unsubscribe?.();
                 unsubscribeModal?.();
 
-                const maybeError = response as unknown as {
-                    error?: { code: number; message: string };
-                };
-
-                if (maybeError && maybeError.error) {
-                    reject(new TonConnectError(maybeError.error.message, { cause: maybeError }));
+                if ('error' in response) {
+                    reject(new TonConnectError(response.error.message, { cause: response }));
                     return;
                 }
 

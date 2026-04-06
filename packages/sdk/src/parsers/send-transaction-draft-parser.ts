@@ -3,7 +3,9 @@ import {
     SendNftItem,
     SendTonItem,
     TransactionDraftItem,
-    SEND_TRANSACTION_ERROR_CODES
+    SEND_TRANSACTION_ERROR_CODES,
+    WalletResponseSuccess,
+    WalletResponseError
 } from '@tonconnect/protocol';
 import { BadRequestError, TonConnectError, UnknownAppError, UserRejectsError } from 'src/errors';
 import { UnknownError } from 'src/errors/unknown.error';
@@ -105,12 +107,13 @@ class SendTransactionDraftParser extends RpcParser<'txDraft'> {
         } as WithoutId<AppRequest<'txDraft'>>;
     }
 
-    convertFromRpcResponse(response: unknown): SendTransactionResponse {
-        const typed = response as { result: string };
-        return { boc: typed.result };
+    convertFromRpcResponse(
+        response: WithoutId<WalletResponseSuccess<'txDraft'>>
+    ): SendTransactionResponse {
+        return { boc: response.result };
     }
 
-    parseAndThrowError(response: { error: { code: number; message: string } }): never {
+    parseAndThrowError(response: WithoutId<WalletResponseError<'txDraft'>>): never {
         const ErrorConstructor = errorMap[response.error.code] ?? UnknownError;
         throw new ErrorConstructor(response.error.message);
     }

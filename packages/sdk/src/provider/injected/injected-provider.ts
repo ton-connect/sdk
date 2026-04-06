@@ -3,11 +3,11 @@ import {
     AppRequest,
     ConnectEventError,
     ConnectRequest,
+    IntentRpcMethod,
     RpcMethod,
     WalletResponse
 } from '@tonconnect/protocol';
 import type { RawIntentPayload } from 'src/models/intent-payload';
-import type { IntentResponse } from 'src/models';
 import {
     InjectedWalletApi,
     isJSBridgeWithMetadata
@@ -23,7 +23,7 @@ import { Analytics } from 'src/analytics/analytics';
 import { AnalyticsManager } from 'src/analytics/analytics-manager';
 import { JsBridgeEvent } from 'src/analytics/types';
 import { UUIDv7 } from 'src/utils/uuid';
-import { TraceableWalletEvent } from 'src/models/wallet/traceable-events';
+import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet/traceable-events';
 
 type WindowWithTon<T extends string> = {
     [key in T]: {
@@ -101,7 +101,8 @@ export class InjectedProvider<T extends string = string> implements InternalProv
 
     private listeners: Array<(e: TraceableWalletEvent) => void> = [];
 
-    private intentListeners: Array<(response: IntentResponse) => void> = [];
+    private intentListeners: Array<(response: TraceableWalletResponse<IntentRpcMethod>) => void> =
+        [];
     private readonly analytics?: Analytics<
         JsBridgeEvent,
         'bridge_key' | 'wallet_app_name' | 'wallet_app_version'
@@ -127,7 +128,9 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             });
         }
     }
-    onIntentResponse(listener: (response: IntentResponse) => void): () => void {
+    onIntentResponse(
+        listener: (response: TraceableWalletResponse<IntentRpcMethod>) => void
+    ): () => void {
         this.intentListeners.push(listener);
         return () => {
             this.intentListeners = this.intentListeners.filter(l => l !== listener);
@@ -368,16 +371,21 @@ export class InjectedProvider<T extends string = string> implements InternalProv
         );
 
         const { connectEvent, intentResponse } = response;
+        const responseTraceId = response.traceId ?? traceId;
+
         if (connectEvent) {
             if (connectEvent.event === 'connect') {
                 await this.updateSession();
                 this.makeSubscriptions({ traceId });
             }
-            this.listeners.forEach(listener => listener({ ...connectEvent, traceId }));
+            this.listeners.forEach(listener =>
+                listener({ ...connectEvent, traceId: responseTraceId })
+            );
         }
 
-        const typed = intentResponse as unknown as IntentResponse;
-        this.intentListeners.forEach(listener => listener(typed));
+        this.intentListeners.forEach(listener =>
+            listener({ ...intentResponse, traceId: responseTraceId })
+        );
         logDebug('Injected Provider intent response:', response);
     }
 

@@ -4,6 +4,7 @@ import {
     ConnectEventSuccess,
     ConnectRequest,
     hexToByteArray,
+    IntentRpcMethod,
     RpcMethod,
     SessionCrypto,
     TonAddressItemReply,
@@ -11,7 +12,6 @@ import {
     WalletResponse
 } from '@tonconnect/protocol';
 import type { RawIntentPayload, UniversalLinkMessage } from 'src/models/intent-payload';
-import type { IntentResponse } from 'src/models';
 import { TonConnectError } from 'src/errors/ton-connect.error';
 import { WalletConnectionSourceHTTP } from 'src/models/wallet/wallet-connection-source';
 import { BridgeGateway } from 'src/provider/bridge/bridge-gateway';
@@ -193,8 +193,9 @@ export class BridgeProvider implements HTTPProvider {
         const universalLink = this.obtainUniversalLink();
 
         this.pendingRequests.set(intentPayload.id.toString(), response => {
-            const typed = response as unknown as IntentResponse;
-            this.intentListeners.forEach(listener => listener(typed));
+            this.intentListeners.forEach(listener =>
+                listener(response as TraceableWalletResponse<IntentRpcMethod>)
+            );
         });
 
         const timeoutId = setTimeout(() => {
@@ -225,8 +226,11 @@ export class BridgeProvider implements HTTPProvider {
         }
     }
 
-    private intentListeners: Array<(response: IntentResponse) => void> = [];
-    public onIntentResponse(listener: (response: IntentResponse) => void): () => void {
+    private intentListeners: Array<(response: TraceableWalletResponse<IntentRpcMethod>) => void> =
+        [];
+    public onIntentResponse(
+        listener: (response: TraceableWalletResponse<IntentRpcMethod>) => void
+    ): () => void {
         this.intentListeners.push(listener);
 
         return () => {

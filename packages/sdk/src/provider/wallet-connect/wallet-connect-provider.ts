@@ -8,6 +8,7 @@ import {
     DISCONNECT_ERROR_CODES,
     DisconnectRpcResponseSuccess,
     Feature,
+    IntentRpcMethod,
     RpcMethod,
     SEND_TRANSACTION_ERROR_CODES,
     SendTransactionRpcResponseSuccess,
@@ -15,7 +16,6 @@ import {
     TonProofItemReplySuccess,
     WalletResponseTemplateError
 } from '@tonconnect/protocol';
-import type { IntentResponse } from 'src/models';
 import type { RawIntentPayload } from 'src/models/intent-payload';
 import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet/traceable-events';
 import { OptionalTraceable, Traceable, WithoutId } from 'src/utils/types';
@@ -103,7 +103,9 @@ export class WalletConnectProvider implements InternalProvider {
             metadata
         };
     }
-    onIntentResponse(_listener: (response: IntentResponse) => void): () => void {
+    onIntentResponse(
+        _listener: (response: TraceableWalletResponse<IntentRpcMethod>) => void
+    ): () => void {
         return () => {};
     }
 

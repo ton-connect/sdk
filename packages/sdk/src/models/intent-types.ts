@@ -5,8 +5,19 @@ import type {
     WalletConnectionSourceJS,
     WalletConnectionSourceWalletConnect
 } from './wallet';
+import { RpcMethod, WalletResponseError } from '@tonconnect/protocol';
 
-export type IntentResponse = SendTransactionResponse | SignDataResponse | SignMessageResponse;
+export type IntentRpcMethod = Extract<
+    RpcMethod,
+    'signData' | 'txDraft' | 'signMsgDraft' | 'actionDraft'
+>;
+
+export type IntentResponseError = WalletResponseError<IntentRpcMethod>;
+export type IntentResponse =
+    | SendTransactionResponse
+    | SignDataResponse
+    | SignMessageResponse
+    | IntentResponseError;
 
 export type WalletSourceArg =
     | WalletConnectionSource

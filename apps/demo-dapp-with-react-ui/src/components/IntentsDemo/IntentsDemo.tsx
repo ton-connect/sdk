@@ -193,8 +193,7 @@ export function IntentsDemo() {
     };
 
     const handleSendActionIntent = async () => {
-        const origin =
-            typeof window !== 'undefined' ? window.location.origin : 'https://example.com';
+        const origin = 'https://sdk-demo-dapp-react-git-feature-final-intents-topteam.vercel.app';
 
         const intent: SendActionDraftRequest = {
             actionUrl: `${origin}${ACTION_DEMO_FILES[selectedActionType]}`

@@ -1,10 +1,16 @@
-import { AppRequest, SEND_ACTION_DRAFT_ERROR_CODES } from '@tonconnect/protocol';
+import {
+    AppRequest,
+    SEND_ACTION_DRAFT_ERROR_CODES,
+    SendActionDraftResponseSuccess,
+    WalletResponseError
+} from '@tonconnect/protocol';
 import { BadRequestError, TonConnectError, UnknownAppError, UserRejectsError } from 'src/errors';
 import { UnknownError } from 'src/errors/unknown.error';
 import { SendTransactionResponse, SignDataResponse, SignMessageResponse } from 'src/models/methods';
 import { SendActionDraftRequest } from 'src/models/methods/send-action-draft';
-import { RpcParser } from 'src/parsers/rpc-parser';
 import { WithoutId } from 'src/utils/types';
+import { RpcParser } from 'src/parsers/rpc-parser';
+import { arbitraryResponseParser } from 'src/parsers/arbitrary-response.parser';
 
 export type SendActionDraftResponse =
     | SendTransactionResponse
@@ -19,6 +25,12 @@ const errorMap: Partial<Record<number, typeof TonConnectError>> = {
 };
 
 class SendActionDraftParser extends RpcParser<'actionDraft'> {
+    convertFromRpcResponse(
+        rpcResponse: WithoutId<SendActionDraftResponseSuccess>
+    ): SendActionDraftResponse {
+        return arbitraryResponseParser.convertFromRpcResponse(rpcResponse);
+    }
+
     convertToRpcRequest(request: SendActionDraftRequest): WithoutId<AppRequest<'actionDraft'>> {
         return {
             method: 'actionDraft',
@@ -28,11 +40,7 @@ class SendActionDraftParser extends RpcParser<'actionDraft'> {
         };
     }
 
-    convertFromRpcResponse(response: unknown): SendActionDraftResponse {
-        return (response as { result: SendActionDraftResponse }).result;
-    }
-
-    parseAndThrowError(response: { error: { code: number; message: string } }): never {
+    parseAndThrowError(response: WithoutId<WalletResponseError<'actionDraft'>>): never {
         const ErrorConstructor = errorMap[response.error.code] ?? UnknownError;
         throw new ErrorConstructor(response.error.message);
     }

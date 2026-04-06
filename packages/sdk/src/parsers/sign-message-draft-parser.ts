@@ -1,4 +1,9 @@
-import { AppRequest, SIGN_MESSAGE_ERROR_CODES } from '@tonconnect/protocol';
+import {
+    AppRequest,
+    SIGN_MESSAGE_ERROR_CODES,
+    WalletResponseError,
+    WalletResponseSuccess
+} from '@tonconnect/protocol';
 import { BadRequestError, TonConnectError, UnknownAppError, UserRejectsError } from 'src/errors';
 import { UnknownError } from 'src/errors/unknown.error';
 import { SignMessageResponse } from 'src/models/methods';
@@ -27,12 +32,13 @@ class SignMessageDraftParser extends RpcParser<'signMsgDraft'> {
         } as WithoutId<AppRequest<'signMsgDraft'>>;
     }
 
-    convertFromRpcResponse(response: unknown): SignMessageResponse {
-        const typed = response as { result: { internal_boc: string } };
-        return { internalBoc: typed.result.internal_boc };
+    convertFromRpcResponse(
+        response: WithoutId<WalletResponseSuccess<'signMsgDraft'>>
+    ): SignMessageResponse {
+        return { internalBoc: response.result.internal_boc };
     }
 
-    parseAndThrowError(response: { error: { code: number; message: string } }): never {
+    parseAndThrowError(response: WithoutId<WalletResponseError<'signMsgDraft'>>): never {
         const ErrorConstructor = errorMap[response.error.code] ?? UnknownError;
         throw new ErrorConstructor(response.error.message);
     }

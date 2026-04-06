@@ -1,3 +1,5 @@
+import { IntentRpcMethod } from './intents-rpc-method';
+
 export type Feature =
     | SendTransactionFeatureDeprecated
     | SendTransactionFeature
@@ -44,9 +46,7 @@ export type ActionDraftFeature = {
     name: 'ActionDraft';
 };
 
-export type IntentMethodType = 'txDraft' | 'signMsgDraft' | 'actionDraft' | 'signData';
-
 export type IntentsFeature = {
     name: 'Intents';
-    types: IntentMethodType[];
+    types: IntentRpcMethod[];
 };
