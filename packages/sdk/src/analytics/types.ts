@@ -204,7 +204,7 @@ export type SignDataRequestFailedEvent = TonConnectBaseEvent &
     WalletInfo &
     SessionInfo & {
         event_name: 'sign-data-request-failed';
-        sign_data_type: 'text' | 'cell' | 'binary';
+        sign_data_type: 'text' | 'cell' | 'binary' | 'eip712';
         sign_data_schema?: string;
         sign_data_value: string;
         error_code: number;

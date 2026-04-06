@@ -217,6 +217,8 @@ export function validateSignDataPayload(data: unknown): ValidationResult {
             return validateSignDataPayloadBinary(data);
         case 'cell':
             return validateSignDataPayloadCell(data);
+        case 'eip712':
+            return validateSignDataPayloadEip712(data);
         default:
             return "Invalid 'type' value";
     }
@@ -284,6 +286,41 @@ function validateSignDataPayloadCell(data: Record<string, unknown>): ValidationR
 
     if (!isValidBoc(data.cell)) {
         return "Invalid 'cell' format (must be valid base64)";
+    }
+
+    if (data.network !== undefined) {
+        if (!isValidNetwork(data.network)) {
+            return "Invalid 'network' format";
+        }
+    }
+
+    if (data.from !== undefined && !isValidAddress(data.from)) {
+        return "Invalid 'from'";
+    }
+
+    return null;
+}
+
+function validateSignDataPayloadEip712(data: Record<string, unknown>): ValidationResult {
+    const allowedKeys = ['type', 'domain', 'types', 'primaryType', 'message', 'network', 'from'];
+    if (hasExtraProperties(data, allowedKeys)) {
+        return 'EIP-712 payload contains extra properties';
+    }
+
+    if (typeof data.domain !== 'object' || data.domain === null) {
+        return "'domain' must be an object";
+    }
+
+    if (typeof data.types !== 'object' || data.types === null) {
+        return "'types' must be an object";
+    }
+
+    if (!isValidString(data.primaryType) || data.primaryType === '') {
+        return "'primaryType' must be a non-empty string";
+    }
+
+    if (typeof data.message !== 'object' || data.message === null) {
+        return "'message' must be an object";
     }
 
     if (data.network !== undefined) {
