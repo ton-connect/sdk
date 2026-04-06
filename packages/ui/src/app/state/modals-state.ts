@@ -34,27 +34,25 @@ type BasicAction = {
     isIntent?: boolean;
     sessionId?: string;
     traceId: string;
+    executed?: boolean;
 };
 
 export type ConfirmTransactionAction = BasicAction & {
     name: 'confirm-transaction';
     returnStrategy: ReturnStrategy;
     twaReturnUrl: `${string}://${string}`;
-    sent: boolean;
 };
 
 export type ConfirmSignDataAction = BasicAction & {
     name: 'confirm-sign-data';
     returnStrategy: ReturnStrategy;
     twaReturnUrl: `${string}://${string}`;
-    signed: boolean;
 };
 
 export type ConfirmSignMessageAction = BasicAction & {
     name: 'confirm-sign-message';
     returnStrategy: ReturnStrategy;
     twaReturnUrl: `${string}://${string}`;
-    signed: boolean;
 };
 
 export const [walletsModalState, setWalletsModalState] = createSignal<WalletsModalState>({
