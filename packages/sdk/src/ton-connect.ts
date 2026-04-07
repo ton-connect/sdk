@@ -99,7 +99,7 @@ import type { RawIntentPayload } from 'src/models/intent-payload';
 import { sendTransactionDraftParser } from 'src/parsers/send-transaction-draft-parser';
 import { signMessageDraftParser } from 'src/parsers/sign-message-draft-parser';
 import { sendActionDraftParser } from 'src/parsers/send-action-draft-parser';
-import { intentResponseParser } from 'src/parsers/intent-response-parser';
+import { intentParser } from 'src/parsers/intent-parser';
 
 export class TonConnect implements ITonConnect {
     private desiredChainId: string | undefined;
@@ -138,14 +138,14 @@ export class TonConnect implements ITonConnect {
         intentRawResponse: TraceableWalletResponse<IntentRpcMethod>
     ): void => {
         const { traceId, ...rpcResponse } = intentRawResponse;
-        if (intentResponseParser.isError(rpcResponse)) {
+        if (intentParser.isError(rpcResponse)) {
             this.intentResponseSubscriptions.forEach(callback =>
                 callback({ ...rpcResponse, traceId })
             );
             return;
         }
 
-        const response = intentResponseParser.convertFromRpcResponse(rpcResponse);
+        const response = intentParser.convertFromRpcResponse(rpcResponse);
         this.intentResponseSubscriptions.forEach(callback => callback({ ...response, traceId }));
     };
 
@@ -950,24 +950,7 @@ export class TonConnect implements ITonConnect {
             ? undefined
             : this.createConnectRequest(options?.connectRequest);
 
-        let payload: WithoutId<RawIntentPayload>;
-        switch (intent.method) {
-            case 'txDraft':
-                payload = sendTransactionDraftParser.convertToRpcRequest(intent);
-                break;
-            case 'signData': {
-                const { method, ...signDataPayload } = intent;
-                void method;
-                payload = signDataParser.convertToRpcRequest(signDataPayload);
-                break;
-            }
-            case 'signMsgDraft':
-                payload = signMessageDraftParser.convertToRpcRequest(intent);
-                break;
-            case 'actionDraft':
-                payload = sendActionDraftParser.convertToRpcRequest(intent);
-                break;
-        }
+        const rpcIntentPayload = intentParser.convertToRpcRequest(intent);
 
         if (this.provider) {
             this.provider.closeConnection();
@@ -982,7 +965,7 @@ export class TonConnect implements ITonConnect {
             }
         });
 
-        return (await this.provider.connectWithIntent(payload, {
+        return (await this.provider.connectWithIntent(rpcIntentPayload, {
             connectRequest,
             signal: abortController.signal,
             traceId
