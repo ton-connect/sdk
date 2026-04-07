@@ -888,8 +888,10 @@ export class TonConnectUI {
             openModal: modals.includes('before'),
             executed: false,
             sessionId: sessionId || undefined,
-            traceId: options.traceId
-        });
+            traceId: options.traceId,
+            returnStrategy,
+            twaReturnUrl
+        } as Action);
 
         const abortController = new AbortController();
 
@@ -904,8 +906,10 @@ export class TonConnectUI {
                 openModal: modals.includes('before'),
                 executed: true,
                 sessionId: sessionId || undefined,
-                traceId: options.traceId
-            });
+                traceId: options.traceId,
+                returnStrategy,
+                twaReturnUrl
+            } as Action);
 
             this.redirectAfterRequestSent({
                 returnStrategy,

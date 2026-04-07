@@ -24,7 +24,8 @@ export type Action =
     | BasicAction
     | ConfirmTransactionAction
     | ConfirmSignDataAction
-    | ConfirmSignMessageAction;
+    | ConfirmSignMessageAction
+    | ConfirmActionAction;
 
 type BasicAction = {
     name: ActionName;
@@ -54,6 +55,12 @@ export type ConfirmSignDataAction = BasicAction & {
 
 export type ConfirmSignMessageAction = BasicAction & {
     name: 'confirm-sign-message';
+    returnStrategy: ReturnStrategy;
+    twaReturnUrl: `${string}://${string}`;
+};
+
+export type ConfirmActionAction = BasicAction & {
+    name: 'confirm-action';
     returnStrategy: ReturnStrategy;
     twaReturnUrl: `${string}://${string}`;
 };

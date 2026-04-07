@@ -140,7 +140,7 @@ export class WalletConnectProvider implements InternalProvider {
     connectWithIntent(
         _payload: WithoutId<RawIntentPayload>,
         options?: OptionalTraceable<{ connectRequest?: ConnectRequest }>
-    ): string {
+    ): void {
         const traceId = options?.traceId ?? UUIDv7();
         const payload = {
             code: CONNECT_EVENT_ERROR_CODES.METHOD_NOT_SUPPORTED as const,
@@ -152,8 +152,6 @@ export class WalletConnectProvider implements InternalProvider {
             traceId,
             payload
         });
-
-        return '';
     }
 
     async _connect(

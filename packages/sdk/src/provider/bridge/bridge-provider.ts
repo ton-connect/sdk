@@ -219,6 +219,7 @@ export class BridgeProvider implements HTTPProvider {
                 }
             );
         } catch (error) {
+            this.pendingRequests.delete(intentPayload.id.toString());
             throw error;
         } finally {
             clearTimeout(timeoutId);
@@ -690,7 +691,6 @@ export class BridgeProvider implements HTTPProvider {
 
             throw new TonConnectError(`Object storage responded with invalid payload ${body}`);
         } catch (error) {
-            this.abortController?.abort();
             logDebug('Failed to store intent payload in object storage', error);
             throw error;
         }

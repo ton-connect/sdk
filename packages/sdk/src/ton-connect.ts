@@ -819,7 +819,7 @@ export class TonConnect implements ITonConnect {
             response as SignMessageRpcResponseSuccess
         );
 
-        return { ...result, traceId: (response as { traceId: string }).traceId };
+        return { ...result, traceId: response.traceId };
     }
 
     public sendTransactionDraft(
@@ -1198,7 +1198,19 @@ export class TonConnect implements ITonConnect {
             throw new TonConnectError('ton_addr connection item was not found');
         }
 
-        if (!this.handleMissingRequiredFeatures(connectEvent)) {
+        const hasRequiredFeatures = checkRequiredWalletFeatures(
+            connectEvent.device.features,
+            this.walletsRequiredFeatures
+        );
+
+        if (!hasRequiredFeatures) {
+            this.provider?.disconnect();
+            this.onWalletConnectError(
+                new WalletMissingRequiredFeaturesError(
+                    'Wallet does not support required features',
+                    { cause: { connectEvent } }
+                )
+            );
             return;
         }
 
@@ -1213,135 +1225,76 @@ export class TonConnect implements ITonConnect {
             }
         };
 
-        if (!this.handleWrongNetwork(wallet)) {
+        if (this.desiredChainId && wallet.account.chain !== this.desiredChainId) {
+            const expectedChainId = this.desiredChainId;
+            const actualChainId = wallet.account.chain;
+            this.provider?.disconnect();
+            this.onWalletConnectError(
+                new WalletWrongNetworkError('Wallet connected to a wrong network', {
+                    cause: { expectedChainId, actualChainId }
+                })
+            );
             return;
         }
 
         if (tonProofItem) {
-            wallet.connectItems = {
-                tonProof: this.processTonProofItem(tonProofItem)
-            };
+            const validationError = validateTonProofItemReply(tonProofItem as unknown);
+            let tonProof: TonProofItemReply | undefined = undefined;
+            if (validationError) {
+                if (isQaModeEnabled()) {
+                    console.error('TonProofItem validation failed: ' + validationError);
+                }
+                tonProof = {
+                    name: 'ton_proof',
+                    error: {
+                        code: CONNECT_ITEM_ERROR_CODES.UNKNOWN_ERROR,
+                        message: validationError
+                    }
+                };
+            } else {
+                try {
+                    if ('proof' in tonProofItem) {
+                        tonProof = {
+                            name: 'ton_proof',
+                            proof: {
+                                timestamp: tonProofItem.proof.timestamp,
+                                domain: {
+                                    lengthBytes: tonProofItem.proof.domain.lengthBytes,
+                                    value: tonProofItem.proof.domain.value
+                                },
+                                payload: tonProofItem.proof.payload,
+                                signature: tonProofItem.proof.signature
+                            }
+                        };
+                    } else if ('error' in tonProofItem) {
+                        tonProof = {
+                            name: 'ton_proof',
+                            error: {
+                                code: tonProofItem.error.code,
+                                message: tonProofItem.error.message
+                            }
+                        };
+                    } else {
+                        throw new TonConnectError('Invalid data format');
+                    }
+                } catch (e) {
+                    tonProof = {
+                        name: 'ton_proof',
+                        error: {
+                            code: CONNECT_ITEM_ERROR_CODES.UNKNOWN_ERROR,
+                            message: 'Invalid data format'
+                        }
+                    };
+                }
+            }
+
+            wallet.connectItems = { tonProof };
         }
 
         this.wallet = wallet;
 
         const sessionInfo = this.getSessionInfo();
         this.tracker.trackConnectionCompleted(wallet, sessionInfo, options?.traceId);
-    }
-
-    private handleMissingRequiredFeatures(connectEvent: ConnectEventSuccess['payload']): boolean {
-        const hasRequiredFeatures = checkRequiredWalletFeatures(
-            connectEvent.device.features,
-            this.walletsRequiredFeatures
-        );
-
-        if (hasRequiredFeatures) {
-            return true;
-        }
-
-        const hasNonDraftFeatures = checkRequiredWalletFeatures(
-            connectEvent.device.features,
-            this.walletsRequiredFeatures
-                ? {
-                      ...this.walletsRequiredFeatures,
-                      intents: undefined,
-                      sendTransactionDraft: undefined,
-                      signMessageDraft: undefined,
-                      sendActionDraft: undefined
-                  }
-                : undefined
-        );
-
-        const hasDraftOrIntentRequirements =
-            this.walletsRequiredFeatures?.intents ||
-            this.walletsRequiredFeatures?.sendTransactionDraft ||
-            this.walletsRequiredFeatures?.signMessageDraft ||
-            this.walletsRequiredFeatures?.sendActionDraft;
-
-        if (hasNonDraftFeatures && hasDraftOrIntentRequirements) {
-            this.onWalletConnectError(
-                new WalletMissingRequiredFeaturesError(
-                    'Wallet does not support required intents/draft features',
-                    { cause: { connectEvent } }
-                )
-            );
-        } else {
-            this.provider?.disconnect();
-            this.onWalletConnectError(
-                new WalletMissingRequiredFeaturesError(
-                    'Wallet does not support required features',
-                    { cause: { connectEvent } }
-                )
-            );
-        }
-        return false;
-    }
-
-    private handleWrongNetwork(wallet: Wallet): boolean {
-        if (!this.desiredChainId || wallet.account.chain === this.desiredChainId) {
-            return true;
-        }
-        this.provider?.disconnect();
-        this.onWalletConnectError(
-            new WalletWrongNetworkError('Wallet connected to a wrong network', {
-                cause: {
-                    expectedChainId: this.desiredChainId,
-                    actualChainId: wallet.account.chain
-                }
-            })
-        );
-        return false;
-    }
-
-    private processTonProofItem(tonProofItem: TonProofItemReply): TonProofItemReply {
-        const validationError = validateTonProofItemReply(tonProofItem as unknown);
-        if (validationError) {
-            if (isQaModeEnabled()) {
-                console.error('TonProofItem validation failed: ' + validationError);
-            }
-            return {
-                name: 'ton_proof',
-                error: {
-                    code: CONNECT_ITEM_ERROR_CODES.UNKNOWN_ERROR,
-                    message: validationError
-                }
-            };
-        }
-
-        try {
-            if ('proof' in tonProofItem) {
-                return {
-                    name: 'ton_proof',
-                    proof: {
-                        timestamp: tonProofItem.proof.timestamp,
-                        domain: {
-                            lengthBytes: tonProofItem.proof.domain.lengthBytes,
-                            value: tonProofItem.proof.domain.value
-                        },
-                        payload: tonProofItem.proof.payload,
-                        signature: tonProofItem.proof.signature
-                    }
-                };
-            }
-            if ('error' in tonProofItem) {
-                return {
-                    name: 'ton_proof',
-                    error: {
-                        code: tonProofItem.error.code,
-                        message: tonProofItem.error.message
-                    }
-                };
-            }
-            throw new TonConnectError('Invalid data format');
-        } catch {
-            return {
-                name: 'ton_proof',
-                error: {
-                    code: CONNECT_ITEM_ERROR_CODES.UNKNOWN_ERROR,
-                    message: 'Invalid data format'
-                }
-            };
-        }
     }
 
     private onWalletConnectError(error: TonConnectError): void {
