@@ -53,16 +53,27 @@ export const Notifications: Component<NotificationsProps> = props => {
                             <Match when={openedNotification.action === 'transaction-canceled'}>
                                 <ErrorTransactionNotification class={NotificationClass} />
                             </Match>
-                            <Match when={openedNotification.action === 'data-signed'}>
+                            <Match
+                                when={
+                                    openedNotification.action === 'data-signed' ||
+                                    openedNotification.action === 'message-signed'
+                                }
+                            >
                                 <SuccessSignDataNotification class={NotificationClass} />
                             </Match>
-                            <Match when={openedNotification.action === 'sign-data-canceled'}>
+                            <Match
+                                when={
+                                    openedNotification.action === 'sign-data-canceled' ||
+                                    openedNotification.action === 'sign-message-canceled'
+                                }
+                            >
                                 <ErrorSignDataNotification class={NotificationClass} />
                             </Match>
                             <Match
                                 when={
                                     openedNotification.action === 'confirm-transaction' ||
-                                    openedNotification.action === 'confirm-sign-data'
+                                    openedNotification.action === 'confirm-sign-data' ||
+                                    openedNotification.action === 'confirm-sign-message'
                                 }
                             >
                                 <ConfirmOperationNotification class={NotificationClass} />

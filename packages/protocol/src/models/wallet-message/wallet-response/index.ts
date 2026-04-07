@@ -27,6 +27,12 @@ export {
     DISCONNECT_ERROR_CODES
 } from './disconnect-rpc-response';
 export {
+    SignMessageRpcResponse,
+    SignMessageRpcResponseSuccess,
+    SignMessageRpcResponseError,
+    SIGN_MESSAGE_ERROR_CODES
+} from './sign-message-rpc-response';
+export {
     WalletResponseTemplateError,
     WalletResponseTemplateSuccess
 } from './wallet-response-template';

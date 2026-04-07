@@ -9,6 +9,7 @@ export type RequiredFeatures = {
      */
     sendTransaction?: RequiredSendTransactionFeature;
     signData?: RequiredSignDataFeature;
+    signMessage?: RequiredSignMessageFeature;
 };
 
 /**
@@ -34,4 +35,19 @@ export type RequiredSignDataFeature = {
      * Supported sign data types.
      */
     types: SignDataType[];
+};
+
+/**
+ * Required features for the sign message feature.
+ */
+export type RequiredSignMessageFeature = {
+    /**
+     * Minimum number of messages to sign.
+     */
+    minMessages?: number;
+
+    /**
+     * Whether extra currency is required.
+     */
+    extraCurrencyRequired?: boolean;
 };

@@ -35,27 +35,25 @@ export const ActionModal: Component<ActionModalProps> = props => {
     const dataAttrs = useDataAttributes(props);
     const tonConnectUI = useContext(TonConnectUiContext);
     const [firstClick, setFirstClick] = createSignal(true);
-    const [sent, setSent] = createSignal(false);
-    const [signed, setSigned] = createSignal(false);
+    const [executed, setExecuted] = createSignal(false);
     const [canceled, setCanceled] = createSignal(false);
 
     createEffect(() => {
         const currentAction = action();
 
-        setSent(
+        setExecuted(
             !!currentAction &&
-                (('sent' in currentAction && currentAction.sent) ||
-                    currentAction.name === 'transaction-sent')
+                (currentAction.executed ||
+                    currentAction.name === 'transaction-sent' ||
+                    currentAction.name === 'data-signed' ||
+                    currentAction.name === 'message-signed')
         );
-        setSigned(
-            !!currentAction &&
-                (('signed' in currentAction && currentAction.signed) ||
-                    currentAction.name === 'data-signed')
-        );
+
         setCanceled(
             !!currentAction &&
                 (currentAction.name === 'transaction-canceled' ||
-                    currentAction.name === 'sign-data-canceled')
+                    currentAction.name === 'sign-data-canceled' ||
+                    currentAction.name === 'sign-message-canceled')
         );
     });
 
@@ -130,8 +128,7 @@ export const ActionModal: Component<ActionModalProps> = props => {
             />
             <Show
                 when={
-                    !sent() &&
-                    !signed() &&
+                    !executed() &&
                     !canceled() &&
                     ((props.showButton === 'open-wallet' && universalLink) ||
                         props.showButton !== 'open-wallet')
@@ -141,7 +138,7 @@ export const ActionModal: Component<ActionModalProps> = props => {
                     <LoaderIconStyled />
                 </LoaderButtonStyled>
             </Show>
-            <Show when={sent() || signed()}>
+            <Show when={executed()}>
                 <Show when={props.showButton !== 'open-wallet'}>
                     <ButtonStyled onClick={() => props.onClose()}>
                         <Translation translationKey="common.close">Close</Translation>

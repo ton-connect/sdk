@@ -10,7 +10,8 @@ import {
 import {
     SendTransactionRequest,
     SendTransactionResponse,
-    SignDataResponse
+    SignDataResponse,
+    SignMessageResponse
 } from 'src/models/methods';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
 import { WalletInfo } from 'src/models/wallet/wallet-info';
@@ -131,6 +132,21 @@ export interface ITonConnect {
             signal?: AbortSignal;
         }>
     ): Promise<OptionalTraceable<SignDataResponse>>;
+
+    /**
+     * Asks connected wallet to sign the message without sending it to the blockchain.
+     * @param message message to sign (same structure as transaction).
+     * @param options (optional) onRequestSent callback and abort signal.
+     * @returns signed internal message boc.
+     * If user rejects signing, method will throw the corresponding error.
+     */
+    signMessage(
+        message: SendTransactionRequest,
+        options?: OptionalTraceable<{
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+        }>
+    ): Promise<OptionalTraceable<SignMessageResponse>>;
 
     /**
      * Gets the current session ID if available.

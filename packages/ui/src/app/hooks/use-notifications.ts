@@ -40,7 +40,12 @@ export function useOpenedNotifications(
             if (!action || !action.showNotification) {
                 // clearAction not work without that code
                 setOpenedNotifications(openedNotifications =>
-                    openedNotifications.filter(n => n.action !== 'confirm-transaction')
+                    openedNotifications.filter(
+                        n =>
+                            n.action !== 'confirm-transaction' &&
+                            n.action !== 'confirm-sign-data' &&
+                            n.action !== 'confirm-sign-message'
+                    )
                 );
 
                 return;
@@ -58,7 +63,15 @@ export function useOpenedNotifications(
             const isConfirmSignDataAction =
                 latestAction()?.name === 'confirm-sign-data' && action.name === 'confirm-sign-data';
 
-            if (isConfirmTransactionAction || isConfirmSignDataAction) {
+            const isConfirmSignMessageAction =
+                latestAction()?.name === 'confirm-sign-message' &&
+                action.name === 'confirm-sign-message';
+
+            if (
+                isConfirmTransactionAction ||
+                isConfirmSignDataAction ||
+                isConfirmSignMessageAction
+            ) {
                 return;
             }
 
@@ -67,7 +80,10 @@ export function useOpenedNotifications(
             // cleanup all not confirmed transactions
             setOpenedNotifications(openedNotifications =>
                 openedNotifications.filter(
-                    n => n.action !== 'confirm-transaction' && n.action !== 'confirm-sign-data'
+                    n =>
+                        n.action !== 'confirm-transaction' &&
+                        n.action !== 'confirm-sign-data' &&
+                        n.action !== 'confirm-sign-message'
                 )
             );
 
