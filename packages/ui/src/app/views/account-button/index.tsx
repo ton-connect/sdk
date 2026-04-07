@@ -5,6 +5,8 @@ import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { Account, CHAIN, toUserFriendlyAddress } from '@tonconnect/sdk';
 import {
     AccountButtonStyled,
+    ConnectButtonContainerStyled,
+    ConnectNotificationsStyled,
     DropdownButtonStyled,
     DropdownContainerStyled,
     DropdownStyled,
@@ -99,22 +101,25 @@ export const AccountButton: Component<AccountButtonProps> = () => {
             </Show>
             <Show when={!restoringProcess()}>
                 <Show when={!account()}>
-                    <AccountButtonStyled
-                        onClick={() => tonConnectUI.openModal()}
-                        data-tc-connect-button="true"
-                        scale="s"
-                    >
-                        <TonIcon fill={theme.colors.connectButton.foreground} />
-                        <Text
-                            translationKey="button.connectWallet"
-                            fontSize="15px"
-                            lineHeight="18px"
-                            fontWeight="590"
-                            color={theme.colors.connectButton.foreground}
+                    <ConnectButtonContainerStyled>
+                        <AccountButtonStyled
+                            onClick={() => tonConnectUI.openModal()}
+                            data-tc-connect-button="true"
+                            scale="s"
                         >
-                            Connect wallet
-                        </Text>
-                    </AccountButtonStyled>
+                            <TonIcon fill={theme.colors.connectButton.foreground} />
+                            <Text
+                                translationKey="button.connectWallet"
+                                fontSize="15px"
+                                lineHeight="18px"
+                                fontWeight="590"
+                                color={theme.colors.connectButton.foreground}
+                            >
+                                Connect wallet
+                            </Text>
+                        </AccountButtonStyled>
+                        <ConnectNotificationsStyled />
+                    </ConnectButtonContainerStyled>
                 </Show>
                 <Show when={account()}>
                     <DropdownContainerStyled>
@@ -136,7 +141,7 @@ export const AccountButton: Component<AccountButtonProps> = () => {
                                     position: position.strategy,
                                     top: `${position.y ?? 0}px`,
                                     left: `${position.x ?? 0}px`,
-                                    'z-index': 999
+                                    'z-index': 1100
                                 }}
                                 data-tc-dropdown-container="true"
                             >

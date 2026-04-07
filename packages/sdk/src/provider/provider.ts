@@ -1,4 +1,5 @@
-import { AppRequest, ConnectRequest, RpcMethod } from '@tonconnect/protocol';
+import { AppRequest, ConnectRequest, IntentRpcMethod, RpcMethod } from '@tonconnect/protocol';
+import type { RawIntentPayload } from 'src/models/intent-payload';
 import { OptionalTraceable, WithoutId } from 'src/utils/types';
 import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet/traceable-events';
 
@@ -8,6 +9,14 @@ export interface InternalProvider extends BaseProvider {
     type: 'injected';
 
     connect(message: ConnectRequest, options?: OptionalTraceable): void;
+
+    /**
+     * Connects with intent (draft payload) via injected wallet.
+     */
+    connectWithIntent(
+        payload: WithoutId<RawIntentPayload>,
+        options?: OptionalTraceable<{ connectRequest?: ConnectRequest }>
+    ): void;
 }
 
 export interface HTTPProvider extends BaseProvider {
@@ -20,6 +29,19 @@ export interface HTTPProvider extends BaseProvider {
             signal?: AbortSignal;
         }>
     ): string;
+
+    /**
+     * Connects with intent (draft payload) via bridge as a tc:// universal link.
+     * connectRequest is passed at URL level (r param), not inside the payload.
+     */
+    connectWithIntent(
+        payload: WithoutId<RawIntentPayload>,
+        options?: OptionalTraceable<{
+            connectRequest?: ConnectRequest;
+            openingDeadlineMS?: number;
+            signal?: AbortSignal;
+        }>
+    ): Promise<string>;
 
     pause(): void;
 
@@ -54,4 +76,7 @@ interface BaseProvider {
     ): Promise<TraceableWalletResponse<T>>;
 
     listen(eventsCallback: (e: TraceableWalletEvent) => void): void;
+    onIntentResponse(
+        listener: (response: TraceableWalletResponse<IntentRpcMethod>) => void
+    ): () => void;
 }

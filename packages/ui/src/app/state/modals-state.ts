@@ -12,30 +12,57 @@ export type ActionName =
     | 'transaction-canceled'
     | 'confirm-sign-data'
     | 'data-signed'
-    | 'sign-data-canceled';
+    | 'sign-data-canceled'
+    | 'confirm-sign-message'
+    | 'message-signed'
+    | 'sign-message-canceled'
+    | 'confirm-action'
+    | 'action-sent'
+    | 'action-canceled';
 
-export type Action = BasicAction | ConfirmTransactionAction | ConfirmSignDataAction;
+export type Action =
+    | BasicAction
+    | ConfirmTransactionAction
+    | ConfirmSignDataAction
+    | ConfirmSignMessageAction
+    | ConfirmActionAction;
 
 type BasicAction = {
     name: ActionName;
     openModal: boolean;
     showNotification: boolean;
+    /**
+     * Indicates that this action was triggered from intent flow
+     * (sendTransactionDraft / signDataDraft / signMessageDraft / sendActionDraft).
+     */
+    isIntent?: boolean;
     sessionId?: string;
     traceId: string;
+    executed?: boolean;
 };
 
 export type ConfirmTransactionAction = BasicAction & {
     name: 'confirm-transaction';
     returnStrategy: ReturnStrategy;
     twaReturnUrl: `${string}://${string}`;
-    sent: boolean;
 };
 
 export type ConfirmSignDataAction = BasicAction & {
     name: 'confirm-sign-data';
     returnStrategy: ReturnStrategy;
     twaReturnUrl: `${string}://${string}`;
-    signed: boolean;
+};
+
+export type ConfirmSignMessageAction = BasicAction & {
+    name: 'confirm-sign-message';
+    returnStrategy: ReturnStrategy;
+    twaReturnUrl: `${string}://${string}`;
+};
+
+export type ConfirmActionAction = BasicAction & {
+    name: 'confirm-action';
+    returnStrategy: ReturnStrategy;
+    twaReturnUrl: `${string}://${string}`;
 };
 
 export const [walletsModalState, setWalletsModalState] = createSignal<WalletsModalState>({

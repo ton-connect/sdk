@@ -3,10 +3,12 @@ import {
     ConnectEvent,
     ConnectRequest,
     DeviceInfo,
+    IntentRpcMethod,
     RpcMethod,
     WalletEvent,
     WalletResponse
 } from '@tonconnect/protocol';
+import type { RawIntentPayload } from 'src/models/intent-payload';
 import { WalletInfoDTO } from 'src/models/wallet/wallet-info';
 import { hasProperties, hasProperty, OptionalTraceable } from 'src/utils/types';
 
@@ -22,6 +24,17 @@ export interface InjectedWalletApi {
         protocolVersion: number,
         message: ConnectRequest
     ): Promise<OptionalTraceable<ConnectEvent>>;
+
+    connectWithIntent?: (
+        payload: RawIntentPayload,
+        options?: OptionalTraceable<{ protocolVersion: number; connectRequest?: ConnectRequest }>
+    ) => Promise<
+        OptionalTraceable<{
+            connectEvent?: ConnectEvent;
+            intentResponse: WalletResponse<IntentRpcMethod>;
+        }>
+    >;
+
     restoreConnection(): Promise<OptionalTraceable<ConnectEvent>>;
     send<T extends RpcMethod>(message: AppRequest<T>): Promise<WalletResponse<T>>;
     listen(callback: (event: OptionalTraceable<WalletEvent>) => void): () => void;

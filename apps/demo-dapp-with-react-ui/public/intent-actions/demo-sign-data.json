@@ -1,0 +1,7 @@
+{
+  "action_type": "signData",
+  "action": {
+    "type": "text",
+    "text": "Demo action for {address}"
+  }
+}

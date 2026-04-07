@@ -1,9 +1,9 @@
 import { getSecureRandomBytes, sha256 } from '@ton/crypto';
-import { Address, Cell, contractAddress, domainSignVerify, loadStateInit } from '@ton/ton';
+import { Address, Cell, contractAddress, loadStateInit } from '@ton/ton';
 import { Buffer } from 'buffer';
+import { sign } from 'tweetnacl';
 import { CheckProofRequestDto } from '../dto/check-proof-request-dto';
 import { tryParsePublicKey } from '../wrappers/wallets-data';
-import { getDomain } from '../utils/domain';
 
 const tonProofPrefix = 'ton-proof-item-v2/';
 const tonConnectPrefix = 'ton-connect';
@@ -11,7 +11,8 @@ const allowedDomains = [
     'ton-connect.github.io',
     'localhost:5173',
     'localhost',
-    'tonconnect-sdk-demo-dapp.vercel.app'
+    'tonconnect-sdk-demo-dapp.vercel.app',
+    'sdk-demo-dapp-react-git-feature-final-intents-topteam.vercel.app'
 ];
 const validAuthTime = 15 * 60; // 15 minute
 
@@ -30,7 +31,7 @@ export class TonProofService {
     public async checkProof(
         payload: CheckProofRequestDto,
         getWalletPublicKey: (address: string) => Promise<Buffer | null>
-    ): Promise<boolean> {
+    ): Promise<{ isValid: boolean; reason?: string }> {
         try {
             const stateInit = loadStateInit(Cell.fromBase64(payload.proof.state_init).beginParse());
 
@@ -41,29 +42,32 @@ export class TonProofService {
             let publicKey =
                 tryParsePublicKey(stateInit) ?? (await getWalletPublicKey(payload.address));
             if (!publicKey) {
-                return false;
+                return { isValid: false, reason: 'Cannot obtain public key' };
             }
 
             // 2.2. Check that TonAddressItemReply.publicKey equals to obtained public key
             const wantedPublicKey = Buffer.from(payload.public_key, 'hex');
             if (!publicKey.equals(wantedPublicKey)) {
-                return false;
+                return { isValid: false, reason: '!publicKey.equals(wantedPublicKey)' };
             }
 
             // 2.3. Check that TonAddressItemReply.walletStateInit.hash() equals to TonAddressItemReply.address. .hash() means BoC hash.
             const wantedAddress = Address.parse(payload.address);
             const address = contractAddress(wantedAddress.workChain, stateInit);
             if (!address.equals(wantedAddress)) {
-                return false;
+                return { isValid: false, reason: '!address.equals(wantedAddress)' };
             }
 
             if (!allowedDomains.includes(payload.proof.domain.value)) {
-                return false;
+                return {
+                    isValid: false,
+                    reason: '!allowedDomains.includes(payload.proof.domain.value'
+                };
             }
 
             const now = Math.floor(Date.now() / 1000);
             if (now - validAuthTime > payload.proof.timestamp) {
-                return false;
+                return { isValid: false, reason: 'now - validAuthTime > payload.proof.timestamp' };
             }
 
             const message = {
@@ -105,23 +109,19 @@ export class TonProofService {
 
             const msgHash = Buffer.from(await sha256(msg));
 
-            // signature = Ed25519Sign(privkey, domain_prefix ++ sha256(0xffff ++ utf8_encode("ton-connect") ++ sha256(message)))
+            // signature = Ed25519Sign(privkey, sha256(0xffff ++ utf8_encode("ton-connect") ++ sha256(message)))
             const fullMsg = Buffer.concat([
                 Buffer.from([0xff, 0xff]),
                 Buffer.from(tonConnectPrefix),
                 msgHash
             ]);
 
-            let data = Buffer.from(await sha256(fullMsg));
+            const result = Buffer.from(await sha256(fullMsg));
 
-            return domainSignVerify({
-                data,
-                signature: message.signature,
-                publicKey,
-                domain: getDomain(payload.network)
-            });
+            const isValid = sign.detached.verify(result, message.signature, publicKey);
+            return { isValid };
         } catch (e) {
-            return false;
+            return { isValid: false, reason: JSON.stringify(e) };
         }
     }
 }

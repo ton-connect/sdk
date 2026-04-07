@@ -35,6 +35,23 @@ export const QRCodeStyled = styled(QRCode)`
     margin-bottom: 24px;
 `;
 
+export const QrLoaderPlaceholderStyled = styled.div`
+    width: 100%;
+    height: 304px;
+    margin-bottom: 24px;
+    border-radius: ${props => borders[props.theme!.borderRadius]};
+    background-color: ${props => props.theme!.colors.background.secondary};
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+`;
+
+export const QrLoaderTextStyled = styled(Text)`
+    color: ${props => props.theme!.colors.text.secondary};
+`;
+
 export const WalletsContainerStyled = styled.ul`
     display: flex;
 `;

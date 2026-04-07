@@ -1,9 +1,12 @@
 import { ConnectAdditionalRequest, isWalletInfoRemote } from '@tonconnect/sdk';
 import { Component, createMemo, createSignal, For, Show } from 'solid-js';
 import { AtWalletIcon, FourWalletsItem, QRIcon, WalletItem } from 'src/app/components';
+import { LoaderIcon } from 'src/app/components';
 import {
     H1Styled,
     H2Styled,
+    QrLoaderPlaceholderStyled,
+    QrLoaderTextStyled,
     StyledLeftActionButton,
     TelegramButtonStyled,
     TGImageStyled
@@ -22,6 +25,7 @@ import { bridgesIsEqual, getUniqueBridges } from 'src/app/utils/bridge';
 import { WalletUlContainer } from 'src/app/components/wallet-item/style';
 import { UIWalletInfo } from 'src/app/models/ui-wallet-info';
 import { WalletsModalState } from 'src/models';
+import { initiateTonConnectFlow } from 'src/app/utils/ton-connect-flow';
 
 interface MobileUniversalModalProps {
     walletsList: UIWalletInfo[];
@@ -39,6 +43,7 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
     const [showQR, setShowQR] = createSignal(false);
     const [firstClick, setFirstClick] = createSignal(true);
     const [universalLink, setUniversalLink] = createSignal<string | null>(null);
+    let universalLinkPromise: Promise<string> | null = null;
     const connector = appState.connector;
     const walletsList = (): UIWalletInfo[] =>
         props.walletsList.filter(w => supportsMobile(w) && w.appName !== AT_WALLET_APP_NAME);
@@ -55,15 +60,26 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
         null
     );
 
-    const getUniversalLink = (): string => {
-        if (!universalLink()) {
-            setUniversalLink(
-                connector.connect(walletsBridges(), props.additionalRequest, {
-                    traceId: props.walletModalState.traceId
-                })
-            );
+    const getUniversalLink = async (): Promise<string> => {
+        const cachedLink = universalLink();
+        if (cachedLink) {
+            return cachedLink;
         }
-        return universalLink()!;
+
+        if (!universalLinkPromise) {
+            universalLinkPromise = initiateTonConnectFlow(connector, walletsBridges(), {
+                additionalRequest: props.additionalRequest
+            }).then(link => {
+                setUniversalLink(link);
+                return link;
+            });
+        }
+
+        try {
+            return await universalLinkPromise;
+        } finally {
+            universalLinkPromise = null;
+        }
     };
 
     setLastSelectedWalletInfo({ openMethod: 'universal-link' });
@@ -77,17 +93,18 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
             clearTimeout(isCopiedShown());
         }
 
-        await copyToClipboard(getUniversalLink());
+        await copyToClipboard(await getUniversalLink());
         const timeoutId = setTimeout(() => setIsCopiedShown(undefined), 1500);
         setIsCopiedShown(timeoutId);
     };
 
-    const onSelectUniversal = (): void => {
+    const onSelectUniversal = async (): Promise<void> => {
         const forceRedirect = !firstClick();
         setFirstClick(false);
 
+        const link = await getUniversalLink();
         redirectToWallet(
-            getUniversalLink(),
+            link,
             undefined,
             {
                 returnStrategy: appState.returnStrategy,
@@ -101,27 +118,27 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
         );
     };
 
-    const onSelectTelegram = (): void => {
+    const onSelectTelegram = async (): Promise<void> => {
         setUniversalLink(null);
+        universalLinkPromise = null;
 
         const atWallet = props.walletsList.find(wallet => wallet.appName === AT_WALLET_APP_NAME);
         if (!atWallet || !isWalletInfoRemote(atWallet)) {
             throw new TonConnectUIError('@wallet bot not found in the wallets list');
         }
 
-        const walletLink = connector.connect(
+        const forceRedirect = !firstClick();
+        setFirstClick(false);
+
+        const link = await initiateTonConnectFlow(
+            connector,
             {
                 bridgeUrl: atWallet.bridgeUrl,
                 universalLink: atWallet.universalLink
             },
-            props.additionalRequest,
-            { traceId: props.walletModalState.traceId }
+            { additionalRequest: props.additionalRequest }
         );
-
-        const forceRedirect = !firstClick();
-        setFirstClick(false);
-
-        redirectToTelegram(walletLink, {
+        redirectToTelegram(link as string, {
             returnStrategy: appState.returnStrategy,
             twaReturnUrl: appState.twaReturnUrl,
             forceRedirect: forceRedirect
@@ -130,6 +147,7 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
 
     const onOpenQR = (): void => {
         setShowQR(true);
+        void getUniversalLink();
         setLastSelectedWalletInfo({
             openMethod: 'qrcode'
         });
@@ -170,17 +188,37 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
         <div data-tc-wallets-modal-universal-mobile="true">
             <Show when={showQR()}>
                 <StyledLeftActionButton icon="arrow" onClick={onCloseQR} />
-                <MobileUniversalQR
-                    universalLink={getUniversalLink()}
-                    isCopiedShown={isCopiedShown()}
-                    onOpenLink={onSelectUniversal}
-                    onCopy={onCopy}
-                />
+                <Show when={universalLink()}>
+                    <MobileUniversalQR
+                        universalLink={universalLink()!}
+                        isCopiedShown={isCopiedShown()}
+                        onOpenLink={onSelectUniversal}
+                        onCopy={onCopy}
+                    />
+                </Show>
+                <Show when={!universalLink()}>
+                    <QrLoaderPlaceholderStyled>
+                        <LoaderIcon size="m" />
+                        <QrLoaderTextStyled>
+                            <Translation translationKey="walletModal.qrCodeGenerating">
+                                QR code is generating...
+                            </Translation>
+                        </QrLoaderTextStyled>
+                    </QrLoaderPlaceholderStyled>
+                </Show>
             </Show>
             <Show when={!showQR()}>
                 <StyledLeftActionButton icon={<QRIcon />} onClick={onOpenQR} />
-                <H1Styled translationKey="walletModal.mobileUniversalModal.connectYourWallet">
-                    Connect your TON wallet
+                <H1Styled
+                    translationKey={
+                        props.walletModalState.mode === 'intent'
+                            ? 'walletModal.mobileUniversalModal.intentTitle'
+                            : 'walletModal.mobileUniversalModal.connectYourWallet'
+                    }
+                >
+                    {props.walletModalState.mode === 'intent'
+                        ? 'Prepare intent for your TON wallet'
+                        : 'Connect your TON wallet'}
                 </H1Styled>
                 <Show when={atWalletSupportFeatures()}>
                     <H2Styled
@@ -195,8 +233,16 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
                         onClick={onSelectTelegram}
                         scale="s"
                     >
-                        <Translation translationKey="walletModal.mobileUniversalModal.openWalletOnTelegram">
-                            Connect Wallet in Telegram
+                        <Translation
+                            translationKey={
+                                props.walletModalState.mode === 'intent'
+                                    ? 'walletModal.mobileUniversalModal.intentOpenWalletOnTelegram'
+                                    : 'walletModal.mobileUniversalModal.openWalletOnTelegram'
+                            }
+                        >
+                            {props.walletModalState.mode === 'intent'
+                                ? 'Open Wallet in Telegram'
+                                : 'Connect Wallet in Telegram'}
                         </Translation>
                     </TelegramButtonStyled>
                 </Show>

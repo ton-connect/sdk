@@ -145,6 +145,9 @@ export const WalletsModal: Component = () => {
     const unsubscribe = connector.onStatusChange(
         (wallet: Wallet | null) => {
             if (wallet) {
+                if (selectedWalletError()) {
+                    return;
+                }
                 onClose('wallet-selected');
             }
         },

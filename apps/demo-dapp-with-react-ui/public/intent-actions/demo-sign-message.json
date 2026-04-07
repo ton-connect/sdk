@@ -1,0 +1,12 @@
+{
+  "action_type": "signMessage",
+  "action": {
+    "network": "-239",
+    "messages": [
+      {
+        "address": "EQCKWpx7cNMpvmcN5ObM5lLUZHZRFKqYA4xmw9jOry0ZsF9M",
+        "amount": "5000000"
+      }
+    ]
+  }
+}

@@ -1,5 +1,5 @@
 import { styled } from 'solid-styled-components';
-import { Button, H1, H2, IconButton, Image } from 'src/app/components';
+import { Button, H1, H2, IconButton, Image, Text } from 'src/app/components';
 import { mediaNotTouch, mediaTouch } from 'src/app/styles/media';
 import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
 
@@ -100,4 +100,20 @@ export const StyledLeftActionButton = styled(IconButton)`
     position: absolute;
     top: 16px;
     left: 16px;
+`;
+
+export const QrLoaderPlaceholderStyled = styled.div`
+    margin: 0 24px 16px;
+    height: 304px;
+    border-radius: ${props => borders[props.theme!.borderRadius]};
+    background-color: ${props => props.theme!.colors.background.secondary};
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+`;
+
+export const QrLoaderTextStyled = styled(Text)`
+    color: ${props => props.theme!.colors.text.secondary};
 `;

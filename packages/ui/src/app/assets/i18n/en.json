@@ -22,7 +22,7 @@
   },
   "notifications": {
     "confirm": {
-      "header": "Open {{ name }} to confirm the transaction."
+      "header": "Open {{ name }} to confirm the action."
     },
     "transactionSent": {
       "header": "Transaction sent",
@@ -37,6 +37,50 @@
     },
     "signDataCanceled": {
       "header": "Sign data canceled"
+    },
+    "messageSigned": {
+      "header": "Message signed"
+    },
+    "signMessageCanceled": {
+      "header": "Sign message canceled"
+    },
+    "actionSent": {
+      "header": "Action sent",
+      "text": "Your action will be processed in a few seconds."
+    },
+    "actionCanceled": {
+      "header": "Action canceled",
+      "text": "There will be no changes to your account."
+    },
+    "intent": {
+      "transactionSent": {
+        "header": "Intent transaction sent",
+        "text": "Your intent request was sent to your wallet."
+      },
+      "transactionCanceled": {
+        "header": "Intent transaction canceled",
+        "text": "The intent request was canceled. Your account will not change."
+      },
+      "dataSigned": {
+        "header": "Intent data signed"
+      },
+      "signDataCanceled": {
+        "header": "Intent data signing canceled"
+      },
+      "messageSigned": {
+        "header": "Intent message signed"
+      },
+      "signMessageCanceled": {
+        "header": "Intent message signing canceled"
+      },
+      "actionSent": {
+        "header": "Intent action sent",
+        "text": "Your intent request was sent to your wallet."
+      },
+      "actionCanceled": {
+        "header": "Intent action canceled",
+        "text": "The intent request was canceled. Your account will not change."
+      }
     }
   },
   "walletItem": {
@@ -48,6 +92,7 @@
   "walletModal": {
     "loading": "Loading wallets",
     "wallets": "Wallets",
+    "qrCodeGenerating": "QR code is generating...",
     "mobileUniversalModal": {
       "connectYourWallet": "Connect your TON wallet",
       "openWalletOnTelegramOrSelect": "Use Wallet in Telegram or choose other application",
@@ -142,9 +187,29 @@
       "header": "Sign the data in {{ name }}",
       "text": "It will only take a moment."
     },
+    "signMessage": {
+      "header": "Sign the message in {{ name }}",
+      "text": "It will only take a moment."
+    },
     "transactionSent": "$notifications.transactionSent",
     "transactionCanceled": "$notifications.transactionCanceled",
     "dataSigned": "$notifications.dataSigned",
-    "signDataCanceled": "$notifications.signDataCanceled"
+    "signDataCanceled": "$notifications.signDataCanceled",
+    "messageSigned": "$notifications.messageSigned",
+    "signMessageCanceled": "$notifications.signMessageCanceled",
+    "intentTransactionSent": "$notifications.intent.transactionSent",
+    "intentTransactionCanceled": "$notifications.intent.transactionCanceled",
+    "intentDataSigned": "$notifications.intent.dataSigned",
+    "intentSignDataCanceled": "$notifications.intent.signDataCanceled",
+    "intentMessageSigned": "$notifications.intent.messageSigned",
+    "intentSignMessageCanceled": "$notifications.intent.signMessageCanceled",
+    "confirmAction": {
+      "header": "Confirm the action in {{ name }}",
+      "text": "It will only take a moment."
+    },
+    "actionSent": "$notifications.actionSent",
+    "actionCanceled": "$notifications.actionCanceled",
+    "intentActionSent": "$notifications.intent.actionSent",
+    "intentActionCanceled": "$notifications.intent.actionCanceled"
   }
 }

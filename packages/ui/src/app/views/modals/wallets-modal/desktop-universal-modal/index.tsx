@@ -1,47 +1,51 @@
-import { Component, createMemo, createSignal, For } from 'solid-js';
+import { Component, createMemo, createResource, createSignal, For, Show } from 'solid-js';
 import {
     DesktopUniversalModalStyled,
     H2AvailableWalletsStyled,
     H2Styled,
+    QrLoaderPlaceholderStyled,
+    QrLoaderTextStyled,
     QRCodeStyled,
     WalletsContainerStyled
 } from './style';
 import { ConnectAdditionalRequest } from '@tonconnect/sdk';
 import { appState } from 'src/app/state/app.state';
 import { setLastSelectedWalletInfo, setLastVisibleWalletsInfo } from 'src/app/state/modals-state';
-import { FourWalletsItem, H1, WalletLabeledItem } from 'src/app/components';
+import { FourWalletsItem, H1, LoaderIcon, WalletLabeledItem } from 'src/app/components';
 import { UIWalletInfo } from 'src/app/models/ui-wallet-info';
 import { IMG } from 'src/app/env/IMG';
 
 import { addReturnStrategy } from 'src/app/utils/url-strategy-helpers';
 import { bridgesIsEqual, getUniqueBridges } from 'src/app/utils/bridge';
 import { WalletsModalState } from 'src/models';
+import { initiateTonConnectFlow } from 'src/app/utils/ton-connect-flow';
+import { Translation } from 'src/app/components/typography/Translation';
 
 interface DesktopUniversalModalProps {
     additionalRequest: ConnectAdditionalRequest;
-
     walletsList: UIWalletInfo[];
-
     walletModalState: WalletsModalState;
-
     onSelect: (walletInfo: UIWalletInfo) => void;
-
     onSelectAllWallets: () => void;
 }
 
 export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = props => {
     const [popupOpened, setPopupOpened] = createSignal(false);
     const connector = appState.connector;
+    const isIntentMode = props.walletModalState.mode === 'intent';
 
     const walletsBridges = createMemo(() => getUniqueBridges(props.walletsList), null, {
         equals: bridgesIsEqual
     });
 
     setLastSelectedWalletInfo({ openMethod: 'qrcode' });
-    const request = createMemo(() =>
-        connector.connect(walletsBridges(), props.additionalRequest, {
-            traceId: props.walletModalState.traceId
-        })
+
+    const [request] = createResource(
+        () => walletsBridges(),
+        bridges =>
+            initiateTonConnectFlow(connector, bridges, {
+                additionalRequest: props.additionalRequest
+            })
     );
 
     const supportedWallets = createMemo(
@@ -68,17 +72,47 @@ export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = prop
             onClick={() => setPopupOpened(false)}
             data-tc-wallets-modal-universal-desktop="true"
         >
-            <H1 translationKey="walletModal.desktopUniversalModal.connectYourWallet">
-                Connect your wallet
+            <H1
+                translationKey={
+                    isIntentMode
+                        ? 'walletModal.desktopUniversalModal.intentTitle'
+                        : 'walletModal.desktopUniversalModal.connectYourWallet'
+                }
+            >
+                {isIntentMode ? 'Prepare intent for your wallet' : 'Connect your wallet'}
             </H1>
-            <H2Styled translationKey="walletModal.desktopUniversalModal.scan">
-                Scan with your mobile wallet
+            <H2Styled
+                translationKey={
+                    isIntentMode
+                        ? 'walletModal.desktopUniversalModal.intentScan'
+                        : 'walletModal.desktopUniversalModal.scan'
+                }
+            >
+                {isIntentMode
+                    ? 'Scan this intent with your mobile wallet'
+                    : 'Scan with your mobile wallet'}
             </H2Styled>
-            <QRCodeStyled
-                sourceUrl={addReturnStrategy(request()!, 'none')}
-                disableCopy={popupOpened()}
-                imageUrl={IMG.TON}
-            />
+            <Show when={request.state === 'ready' && request()}>
+                <QRCodeStyled
+                    sourceUrl={
+                        isIntentMode
+                            ? (request() as string)
+                            : addReturnStrategy(request() as string, 'none')
+                    }
+                    disableCopy={popupOpened()}
+                    imageUrl={IMG.TON}
+                />
+            </Show>
+            <Show when={request.state !== 'ready'}>
+                <QrLoaderPlaceholderStyled>
+                    <LoaderIcon size="m" />
+                    <QrLoaderTextStyled>
+                        <Translation translationKey="walletModal.qrCodeGenerating">
+                            QR code is generating...
+                        </Translation>
+                    </QrLoaderTextStyled>
+                </QrLoaderPlaceholderStyled>
+            </Show>
             <H2AvailableWalletsStyled translationKey="walletModal.desktopUniversalModal.availableWallets">
                 Available wallets
             </H2AvailableWalletsStyled>

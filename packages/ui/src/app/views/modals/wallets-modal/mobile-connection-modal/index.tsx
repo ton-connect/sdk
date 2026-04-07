@@ -8,7 +8,6 @@ import {
 import {
     Component,
     createEffect,
-    createMemo,
     createSignal,
     Match,
     onCleanup,
@@ -27,6 +26,8 @@ import {
     ImageStyled,
     LoaderStyled,
     MobileConnectionModalStyled,
+    QrLoaderPlaceholderStyled,
+    QrLoaderTextStyled,
     StyledIconButton
 } from './style';
 import { ConnectorContext } from 'src/app/state/connector.context';
@@ -39,6 +40,7 @@ import { Translation } from 'src/app/components/typography/Translation';
 import { redirectToTelegram, redirectToWallet } from 'src/app/utils/url-strategy-helpers';
 import { copyToClipboard } from 'src/app/utils/copy-to-clipboard';
 import { WalletsModalState } from 'src/models';
+import { initiateTonConnectFlow } from 'src/app/utils/ton-connect-flow';
 
 export interface MobileConnectionProps {
     additionalRequest?: ConnectAdditionalRequest;
@@ -79,32 +81,53 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
         }
     );
 
-    const universalLink = createMemo(() =>
-        connector.connect(
-            {
-                universalLink: props.wallet.universalLink,
-                bridgeUrl: props.wallet.bridgeUrl
-            },
-            props.additionalRequest,
-            { traceId: props.walletModalState?.traceId }
-        )
-    );
+    const [universalLink, setUniversalLink] = createSignal<string | null>(null);
+    let universalLinkPromise: Promise<string> | null = null;
 
-    const onClickTelegram = (): void => {
+    const getUniversalLink = async (): Promise<string> => {
+        const cachedLink = universalLink();
+        if (cachedLink) {
+            return cachedLink;
+        }
+
+        if (!universalLinkPromise) {
+            universalLinkPromise = initiateTonConnectFlow(
+                connector,
+                {
+                    universalLink: props.wallet.universalLink,
+                    bridgeUrl: props.wallet.bridgeUrl,
+                    objectStorageUrl: props.wallet.objectStorageUrl
+                },
+                { additionalRequest: props.additionalRequest }
+            ).then(link => {
+                setUniversalLink(link as string);
+                return link as string;
+            });
+        }
+
+        try {
+            return await universalLinkPromise;
+        } finally {
+            universalLinkPromise = null;
+        }
+    };
+
+    const onClickTelegram = async (): Promise<void> => {
+        const link = await getUniversalLink();
         const alwaysForceRedirect = true;
         setLastSelectedWalletInfo({
             ...props.wallet,
             openMethod: 'universal-link'
         });
-        redirectToTelegram(universalLink()!, {
+        redirectToTelegram(link, {
             returnStrategy: appState.returnStrategy,
             twaReturnUrl: appState.twaReturnUrl,
             forceRedirect: alwaysForceRedirect
         });
     };
 
-    const onRetry = (): void => {
-        const currentUniversalLink = universalLink();
+    const onRetry = async (): Promise<void> => {
+        const currentUniversalLink = await getUniversalLink();
         if (isTelegramUrl(currentUniversalLink)) {
             return onClickTelegram();
         }
@@ -115,7 +138,7 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
         setFirstClick(false);
 
         redirectToWallet(
-            universalLink()!,
+            currentUniversalLink,
             props.wallet.deepLink,
             {
                 returnStrategy: appState.returnStrategy,
@@ -139,7 +162,7 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
             clearTimeout(isCopiedShown());
         }
 
-        await copyToClipboard(universalLink());
+        await copyToClipboard(await getUniversalLink());
         const timeoutId = setTimeout(() => setIsCopiedShown(undefined), 1500);
         setIsCopiedShown(timeoutId);
     };
@@ -147,6 +170,8 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
     const onOpenQR = (): void => {
         setConnectionErrored(null);
         setShowQR(true);
+        // Pre-generate the link so QR can be rendered only after object storage is ready.
+        void getUniversalLink();
         setLastSelectedWalletInfo({
             ...props.wallet,
             openMethod: 'qrcode'
@@ -170,7 +195,7 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
     };
 
     onCleanup(unsubscribe);
-    onRetry();
+    void onRetry();
 
     return (
         <MobileConnectionModalStyled data-tc-wallets-modal-connection-mobile="true">
@@ -178,13 +203,25 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
                 <StyledIconButton icon="arrow" onClick={onBack} />
             </Show>
             <Show when={showQR()}>
-                <MobileConnectionQR
-                    universalLink={universalLink()}
-                    walletInfo={props.wallet}
-                    onOpenLink={onRetry}
-                    onCopy={onCopy}
-                    isCopiedShown={isCopiedShown()}
-                />
+                <Show when={universalLink()}>
+                    <MobileConnectionQR
+                        universalLink={universalLink()!}
+                        walletInfo={props.wallet}
+                        onOpenLink={onRetry}
+                        onCopy={onCopy}
+                        isCopiedShown={isCopiedShown()}
+                    />
+                </Show>
+                <Show when={!universalLink()}>
+                    <QrLoaderPlaceholderStyled>
+                        <LoaderStyled size="s" />
+                        <QrLoaderTextStyled>
+                            <Translation translationKey="walletModal.qrCodeGenerating">
+                                QR code is generating...
+                            </Translation>
+                        </QrLoaderTextStyled>
+                    </QrLoaderPlaceholderStyled>
+                </Show>
             </Show>
             <Show when={!showQR()}>
                 <H1Styled>{props.wallet.name}</H1Styled>
