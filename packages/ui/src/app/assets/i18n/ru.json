@@ -151,7 +151,7 @@
     "transactionSent": "$notifications.transactionSent",
     "transactionCanceled": "$notifications.transactionCanceled",
     "signMessage": {
-      "header": "Подпишите\u00A0сообщение в\u00A0{{ name }}",
+      "header": "Подпишите сообщение в {{ name }}",
       "text": "Это займет пару секунд."
     },
     "dataSigned": "$notifications.dataSigned",
