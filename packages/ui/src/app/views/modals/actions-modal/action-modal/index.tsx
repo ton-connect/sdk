@@ -13,7 +13,7 @@ import { useDataAttributes } from 'src/app/hooks/use-data-attributes';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { isTelegramUrl } from '@tonconnect/sdk';
 import { appState } from 'src/app/state/app.state';
-import { action } from 'src/app/state/modals-state';
+import { action, isExecutedAction, isCanceledAction } from 'src/app/state/modals-state';
 import { isInTMA } from 'src/app/utils/tma-api';
 import {
     redirectToTelegram,
@@ -42,19 +42,10 @@ export const ActionModal: Component<ActionModalProps> = props => {
         const currentAction = action();
 
         setExecuted(
-            !!currentAction &&
-                (currentAction.executed ||
-                    currentAction.name === 'transaction-sent' ||
-                    currentAction.name === 'data-signed' ||
-                    currentAction.name === 'message-signed')
+            !!currentAction && (currentAction.executed || isExecutedAction(currentAction.name))
         );
 
-        setCanceled(
-            !!currentAction &&
-                (currentAction.name === 'transaction-canceled' ||
-                    currentAction.name === 'sign-data-canceled' ||
-                    currentAction.name === 'sign-message-canceled')
-        );
+        setCanceled(!!currentAction && isCanceledAction(currentAction.name));
     });
 
     let universalLink: string | undefined;

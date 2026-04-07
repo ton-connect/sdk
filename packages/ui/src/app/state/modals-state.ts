@@ -50,6 +50,30 @@ export type ConfirmSignMessageAction = BasicAction & {
     twaReturnUrl: `${string}://${string}`;
 };
 
+const successActions: readonly ActionName[] = ['transaction-sent', 'data-signed', 'message-signed'];
+const errorActions: readonly ActionName[] = [
+    'transaction-canceled',
+    'sign-data-canceled',
+    'sign-message-canceled'
+];
+const confirmActions: readonly ActionName[] = [
+    'confirm-transaction',
+    'confirm-sign-data',
+    'confirm-sign-message'
+];
+
+export function isExecutedAction(name: ActionName): boolean {
+    return (successActions as readonly string[]).includes(name);
+}
+
+export function isCanceledAction(name: ActionName): boolean {
+    return (errorActions as readonly string[]).includes(name);
+}
+
+export function isConfirmAction(name: ActionName): boolean {
+    return (confirmActions as readonly string[]).includes(name);
+}
+
 export const [walletsModalState, setWalletsModalState] = createSignal<WalletsModalState>({
     status: 'closed',
     closeReason: null

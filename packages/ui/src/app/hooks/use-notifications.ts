@@ -1,5 +1,5 @@
 import { Accessor, createEffect, createSignal, on, onCleanup } from 'solid-js';
-import { Action, action, ActionName } from 'src/app/state/modals-state';
+import { Action, action, ActionName, isConfirmAction } from 'src/app/state/modals-state';
 
 type Notification = {
     action: ActionName;
@@ -40,12 +40,7 @@ export function useOpenedNotifications(
             if (!action || !action.showNotification) {
                 // clearAction not work without that code
                 setOpenedNotifications(openedNotifications =>
-                    openedNotifications.filter(
-                        n =>
-                            n.action !== 'confirm-transaction' &&
-                            n.action !== 'confirm-sign-data' &&
-                            n.action !== 'confirm-sign-message'
-                    )
+                    openedNotifications.filter(n => !isConfirmAction(n.action))
                 );
 
                 return;
@@ -56,22 +51,10 @@ export function useOpenedNotifications(
                 return;
             }
 
-            const isConfirmTransactionAction =
-                latestAction()?.name === 'confirm-transaction' &&
-                action.name === 'confirm-transaction';
+            const isDuplicateConfirmAction =
+                latestAction()?.name === action.name && isConfirmAction(action.name);
 
-            const isConfirmSignDataAction =
-                latestAction()?.name === 'confirm-sign-data' && action.name === 'confirm-sign-data';
-
-            const isConfirmSignMessageAction =
-                latestAction()?.name === 'confirm-sign-message' &&
-                action.name === 'confirm-sign-message';
-
-            if (
-                isConfirmTransactionAction ||
-                isConfirmSignDataAction ||
-                isConfirmSignMessageAction
-            ) {
+            if (isDuplicateConfirmAction) {
                 return;
             }
 
@@ -79,12 +62,7 @@ export function useOpenedNotifications(
 
             // cleanup all not confirmed transactions
             setOpenedNotifications(openedNotifications =>
-                openedNotifications.filter(
-                    n =>
-                        n.action !== 'confirm-transaction' &&
-                        n.action !== 'confirm-sign-data' &&
-                        n.action !== 'confirm-sign-message'
-                )
+                openedNotifications.filter(n => !isConfirmAction(n.action))
             );
 
             // create notification
