@@ -9,6 +9,7 @@ export {
     SendTransactionFeature,
     SignDataType,
     SignDataFeature,
-    SignMessageFeature
+    SignMessageFeature,
+    StructuredItemType
 } from './feature';
 export { CHAIN, ChainId } from './CHAIN';

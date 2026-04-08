@@ -9,7 +9,8 @@ import {
     SignDataRpcResponseSuccess,
     SignMessageRpcResponseSuccess,
     TonAddressItemReply,
-    TonProofItemReply
+    TonProofItemReply,
+    StructuredItemType
 } from '@tonconnect/protocol';
 import { DappMetadataError } from 'src/errors/dapp/dapp-metadata.error';
 import { ManifestContentErrorError } from 'src/errors/protocol/events/connect/manifest-content-error.error';
@@ -32,10 +33,16 @@ import {
 } from 'src/models';
 import {
     SendTransactionRequest,
+    SendTransactionRequestWithMessages,
+    SendTransactionRequestWithItems,
     SendTransactionResponse,
     SignDataResponse,
     SignMessageRequest,
-    SignMessageResponse
+    SignMessageResponse,
+    StructuredItem,
+    RawStructuredItem,
+    TransactionRpcPayload,
+    hasItems
 } from 'src/models/methods';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
 import { AnalyticsSettings, TonConnectOptions } from 'src/models/ton-connect-options';
@@ -557,13 +564,13 @@ export class TonConnect implements ITonConnect {
 
         this.checkConnection();
 
-        const requiredMessagesNumber = transaction.messages.length;
-        const requireExtraCurrencies = transaction.messages.some(
-            m => m.extraCurrency && Object.keys(m.extraCurrency).length > 0
-        );
+        const { requiredMessagesNumber, requireExtraCurrencies, requiredItemTypes } =
+            this.extractRequiredFeatures(transaction);
+
         checkSendTransactionSupport(this.wallet!.device.features, {
             requiredMessagesNumber,
-            requireExtraCurrencies
+            requireExtraCurrencies,
+            requiredItemTypes
         });
 
         const sessionInfo = this.getSessionInfo();
@@ -575,7 +582,6 @@ export class TonConnect implements ITonConnect {
             traceId
         );
 
-        const { validUntil, messages, ...tx } = transaction;
         const from = transaction.from || this.account!.address;
         const network = transaction.network || this.account!.chain;
 
@@ -594,14 +600,12 @@ export class TonConnect implements ITonConnect {
             });
         }
 
+        const rpcPayload = hasItems(transaction)
+            ? this.buildItemsRpcPayload(transaction, from, network)
+            : this.buildMessagesRpcPayload(transaction, from, network);
+
         const response = await this.provider!.sendRequest(
-            sendTransactionParser.convertToRpcRequest({
-                ...tx,
-                from,
-                network,
-                valid_until: validUntil,
-                messages: this.normalizeTransactionMessages(messages)
-            }),
+            sendTransactionParser.convertToRpcRequest(rpcPayload),
             {
                 onRequestSent: options.onRequestSent,
                 signal: abortController.signal,
@@ -626,6 +630,27 @@ export class TonConnect implements ITonConnect {
         );
         this.tracker.trackTransactionSigned(this.wallet, transaction, result, sessionInfo, traceId);
         return { ...result, traceId: response.traceId };
+    }
+
+    private extractRequiredFeatures(
+        transaction: SendTransactionRequestWithMessages | SendTransactionRequestWithItems
+    ) {
+        const useItems = hasItems(transaction);
+        const requiredMessagesNumber = useItems
+            ? transaction.items.length
+            : transaction.messages.length;
+        const requireExtraCurrencies = useItems
+            ? transaction.items
+                  ?.filter(i => i.type === 'ton')
+                  .some(m => m.extraCurrency && Object.keys(m.extraCurrency).length > 0)
+            : transaction.messages.some(
+                  m => m.extraCurrency && Object.keys(m.extraCurrency).length > 0
+              );
+        const requiredItemTypes: StructuredItemType[] | undefined = useItems
+            ? [...new Set(transaction.items.map(item => item.type))]
+            : undefined;
+
+        return { requiredMessagesNumber, requireExtraCurrencies, requiredItemTypes };
     }
 
     public async signData(
@@ -731,18 +756,17 @@ export class TonConnect implements ITonConnect {
 
         this.checkConnection();
 
-        const requiredMessagesNumber = message.messages.length;
-        const requireExtraCurrencies = message.messages.some(
-            m => m.extraCurrency && Object.keys(m.extraCurrency).length > 0
-        );
+        const { requiredMessagesNumber, requireExtraCurrencies, requiredItemTypes } =
+            this.extractRequiredFeatures(message);
+
         checkSignMessageSupport(this.wallet!.device.features, {
             requiredMessagesNumber,
-            requireExtraCurrencies
+            requireExtraCurrencies,
+            requiredItemTypes
         });
 
         const traceId = options?.traceId ?? UUIDv7();
 
-        const { validUntil, messages, ...tx } = message;
         const from = message.from || this.account!.address;
         const network = message.network || this.account!.chain;
 
@@ -761,14 +785,12 @@ export class TonConnect implements ITonConnect {
             });
         }
 
+        const rpcPayload = hasItems(message)
+            ? this.buildItemsRpcPayload(message, from, network)
+            : this.buildMessagesRpcPayload(message, from, network);
+
         const response = await this.provider!.sendRequest(
-            signMessageParser.convertToRpcRequest({
-                ...tx,
-                from,
-                network,
-                valid_until: validUntil,
-                messages: this.normalizeTransactionMessages(messages)
-            }),
+            signMessageParser.convertToRpcRequest(rpcPayload),
             {
                 onRequestSent: options?.onRequestSent,
                 signal: abortController.signal,
@@ -877,13 +899,95 @@ export class TonConnect implements ITonConnect {
         }
     }
 
-    private normalizeTransactionMessages(messages: SendTransactionRequest['messages']) {
-        return messages.map(({ extraCurrency, payload, stateInit, ...msg }) => ({
-            ...msg,
-            payload: normalizeBase64(payload),
-            stateInit: normalizeBase64(stateInit),
-            extra_currency: extraCurrency
-        }));
+    private buildMessagesRpcPayload(
+        transaction: SendTransactionRequest,
+        from: string,
+        network: ChainId
+    ): TransactionRpcPayload {
+        const tx = transaction as SendTransactionRequestWithMessages;
+        const { validUntil, messages, ...rest } = tx;
+        return {
+            ...rest,
+            from,
+            network,
+            valid_until: validUntil,
+            messages: messages.map(({ extraCurrency, payload, stateInit, ...msg }) => ({
+                ...msg,
+                payload: normalizeBase64(payload),
+                stateInit: normalizeBase64(stateInit),
+                extra_currency: extraCurrency
+            }))
+        };
+    }
+
+    private buildItemsRpcPayload(
+        transaction: SendTransactionRequest,
+        from: string,
+        network: ChainId
+    ): TransactionRpcPayload {
+        const tx = transaction as SendTransactionRequestWithItems;
+        const { validUntil, items, ...rest } = tx;
+        return {
+            ...rest,
+            from,
+            network,
+            valid_until: validUntil,
+            items: items.map(item => this.normalizeStructuredItem(item))
+        };
+    }
+
+    private normalizeStructuredItem(item: StructuredItem): RawStructuredItem {
+        switch (item.type) {
+            case 'ton': {
+                const { extraCurrency, stateInit, payload, ...rest } = item;
+                return {
+                    ...rest,
+                    payload: normalizeBase64(payload),
+                    state_init: normalizeBase64(stateInit),
+                    extra_currency: extraCurrency
+                };
+            }
+            case 'jetton': {
+                const {
+                    attachAmount,
+                    responseDestination,
+                    customPayload,
+                    forwardAmount,
+                    forwardPayload,
+                    ...rest
+                } = item;
+                return {
+                    ...rest,
+                    attach_amount: attachAmount,
+                    response_destination: responseDestination,
+                    custom_payload: normalizeBase64(customPayload),
+                    forward_amount: forwardAmount,
+                    forward_payload: normalizeBase64(forwardPayload)
+                };
+            }
+            case 'nft': {
+                const {
+                    nftAddress,
+                    newOwner,
+                    attachAmount,
+                    responseDestination,
+                    customPayload,
+                    forwardAmount,
+                    forwardPayload,
+                    ...rest
+                } = item;
+                return {
+                    ...rest,
+                    nft_address: nftAddress,
+                    new_owner: newOwner,
+                    attach_amount: attachAmount,
+                    response_destination: responseDestination,
+                    custom_payload: normalizeBase64(customPayload),
+                    forward_amount: forwardAmount,
+                    forward_payload: normalizeBase64(forwardPayload)
+                };
+            }
+        }
     }
 
     /**
