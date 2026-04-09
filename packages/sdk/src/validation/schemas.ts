@@ -275,7 +275,8 @@ function validateJettonItem(item: Record<string, unknown>, index: number): Valid
         'responseDestination',
         'customPayload',
         'forwardAmount',
-        'forwardPayload'
+        'forwardPayload',
+        'queryId'
     ];
     if (hasExtraProperties(item, allowedKeys)) {
         return `Jetton item at index ${index} contains extra properties`;
@@ -331,9 +332,16 @@ function validateJettonItem(item: Record<string, unknown>, index: number): Valid
         }
     }
 
+    if (item.queryId !== undefined) {
+        if (!isValidString(item.queryId) || !/^[0-9]+$/.test(item.queryId)) {
+            return `Invalid 'queryId' in jetton item at index ${index}`;
+        }
+    }
+
     return null;
 }
 
+// eslint-disable-next-line complexity
 function validateNftItem(item: Record<string, unknown>, index: number): ValidationResult {
     const allowedKeys = [
         'type',
@@ -343,7 +351,8 @@ function validateNftItem(item: Record<string, unknown>, index: number): Validati
         'responseDestination',
         'customPayload',
         'forwardAmount',
-        'forwardPayload'
+        'forwardPayload',
+        'queryId'
     ];
     if (hasExtraProperties(item, allowedKeys)) {
         return `NFT item at index ${index} contains extra properties`;
@@ -388,6 +397,12 @@ function validateNftItem(item: Record<string, unknown>, index: number): Validati
     if (item.forwardPayload !== undefined) {
         if (!isValidString(item.forwardPayload) || !isValidBoc(item.forwardPayload)) {
             return `Invalid 'forwardPayload' in nft item at index ${index}`;
+        }
+    }
+
+    if (item.queryId !== undefined) {
+        if (!isValidString(item.queryId) || !/^[0-9]+$/.test(item.queryId)) {
+            return `Invalid 'queryId' in nft item at index ${index}`;
         }
     }
 

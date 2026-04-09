@@ -22,6 +22,7 @@ export interface RawJettonItem {
     custom_payload?: string;
     forward_amount?: string;
     forward_payload?: string;
+    query_id?: string;
 }
 
 export interface RawNftItem {
@@ -33,6 +34,7 @@ export interface RawNftItem {
     custom_payload?: string;
     forward_amount?: string;
     forward_payload?: string;
+    query_id?: string;
 }
 
 export interface TonItem {
@@ -80,6 +82,9 @@ export interface JettonItem {
 
     /** Raw one-cell BoC encoded in Base64. */
     forwardPayload?: string;
+
+    /** Custom query ID for the transfer. */
+    queryId?: string;
 }
 
 export interface NftItem {
@@ -105,4 +110,7 @@ export interface NftItem {
 
     /** Raw one-cell BoC encoded in Base64. */
     forwardPayload?: string;
+
+    /** Custom query ID for the transfer. */
+    queryId?: string;
 }

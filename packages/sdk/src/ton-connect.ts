@@ -955,6 +955,7 @@ export class TonConnect implements ITonConnect {
                     customPayload,
                     forwardAmount,
                     forwardPayload,
+                    queryId,
                     ...rest
                 } = item;
                 return {
@@ -963,7 +964,8 @@ export class TonConnect implements ITonConnect {
                     response_destination: responseDestination,
                     custom_payload: normalizeBase64(customPayload),
                     forward_amount: forwardAmount,
-                    forward_payload: normalizeBase64(forwardPayload)
+                    forward_payload: normalizeBase64(forwardPayload),
+                    query_id: queryId
                 };
             }
             case 'nft': {
@@ -975,6 +977,7 @@ export class TonConnect implements ITonConnect {
                     customPayload,
                     forwardAmount,
                     forwardPayload,
+                    queryId,
                     ...rest
                 } = item;
                 return {
@@ -985,7 +988,8 @@ export class TonConnect implements ITonConnect {
                     response_destination: responseDestination,
                     custom_payload: normalizeBase64(customPayload),
                     forward_amount: forwardAmount,
-                    forward_payload: normalizeBase64(forwardPayload)
+                    forward_payload: normalizeBase64(forwardPayload),
+                    query_id: queryId
                 };
             }
         }
