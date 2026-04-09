@@ -8,6 +8,9 @@ import { TransactionSentModal } from 'src/app/views/modals/actions-modal/transac
 import { ConfirmSignDataModal } from './confirm-sign-data-modal';
 import { SignDataCanceledModal } from './sign-data-canceled-modal';
 import { DataSignedModal } from './data-signed-modal';
+import { ConfirmSignMessageModal } from './confirm-sign-message-modal';
+import { MessageSignedModal } from './message-signed-modal';
+import { SignMessageCanceledModal } from './sign-message-canceled-modal';
 
 export const ActionsModal: Component = () => {
     return (
@@ -36,6 +39,15 @@ export const ActionsModal: Component = () => {
                 </Match>
                 <Match when={action()!.name === 'confirm-sign-data'}>
                     <ConfirmSignDataModal onClose={() => setAction(null)} />
+                </Match>
+                <Match when={action()!.name === 'message-signed'}>
+                    <MessageSignedModal onClose={() => setAction(null)} />
+                </Match>
+                <Match when={action()!.name === 'sign-message-canceled'}>
+                    <SignMessageCanceledModal onClose={() => setAction(null)} />
+                </Match>
+                <Match when={action()!.name === 'confirm-sign-message'}>
+                    <ConfirmSignMessageModal onClose={() => setAction(null)} />
                 </Match>
             </Switch>
         </Modal>

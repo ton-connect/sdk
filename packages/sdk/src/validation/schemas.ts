@@ -50,6 +50,10 @@ function hasExtraProperties(obj: Record<string, unknown>, allowedKeys: string[])
     return Object.keys(obj).some(key => !allowedKeys.includes(key));
 }
 
+export function validateSignMessageRequest(data: unknown): ValidationResult {
+    return validateSendTransactionRequest(data);
+}
+
 export function validateSendTransactionRequest(data: unknown): ValidationResult {
     if (!isValidObject(data)) {
         return 'Request must be an object';
