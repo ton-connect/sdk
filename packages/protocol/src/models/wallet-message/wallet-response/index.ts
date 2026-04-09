@@ -33,6 +33,7 @@ export {
     SIGN_MESSAGE_ERROR_CODES
 } from './sign-message-rpc-response';
 export {
+    WalletResponseTemplate,
     WalletResponseTemplateError,
     WalletResponseTemplateSuccess
 } from './wallet-response-template';

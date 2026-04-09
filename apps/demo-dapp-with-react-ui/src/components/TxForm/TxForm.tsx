@@ -52,6 +52,7 @@ const defaultTxWithMessages: SendTransactionRequest = {
 export function TxForm() {
     const [tx, setTx] = useState(defaultTx);
     const [waitForTx, setWaitForTx] = useState(false);
+    const [withConnect, setWithConnect] = useState(false);
     const [txResult, setTxResult] = useState<object | null>(null);
     const [loading, setLoading] = useState(false);
     const [waitingTx, setWaitingTx] = useState(false);
@@ -69,7 +70,13 @@ export function TxForm() {
         setSignResult(null);
         setSignLoading(true);
         try {
-            const result = await tonConnectUi.signMessage(tx);
+            const result = await tonConnectUi.signMessage(tx, {
+                onConnected: withConnect
+                    ? send => {
+                          return send();
+                      }
+                    : undefined
+            });
             setSignResult(result);
         } finally {
             setSignLoading(false);
@@ -81,7 +88,13 @@ export function TxForm() {
         setLoading(true);
         setWaitingTx(false);
         try {
-            const transaction = await tonConnectUi.sendTransaction(tx);
+            const transaction = await tonConnectUi.sendTransaction(tx, {
+                onConnected: withConnect
+                    ? send => {
+                          return send();
+                      }
+                    : undefined
+            });
             if (waitForTx && wallet && wallet.account && transaction) {
                 setWaitingTx(true);
                 const network = wallet.account.chain === CHAIN.TESTNET ? 'testnet' : 'mainnet';
@@ -100,6 +113,16 @@ export function TxForm() {
             <h3>Configure and send transaction</h3>
             <button onClick={() => setTx(defaultTx)}>Set message payload</button>
             <button onClick={() => setTx(defaultTxWithMessages)}>Set items payload</button>
+            <label
+                style={{ margin: '12px 0 0 2px', color: '#b8d4f1', fontWeight: 500, fontSize: 15 }}
+            >
+                <input
+                    type="checkbox"
+                    checked={withConnect}
+                    onChange={e => setWithConnect(e.target.checked)}
+                />
+                With connect
+            </label>
 
             <ReactJson
                 theme="ocean"
@@ -148,7 +171,7 @@ export function TxForm() {
                 </div>
             )}
 
-            {wallet ? (
+            {wallet || withConnect ? (
                 <>
                     <button onClick={handleSendTx} disabled={loading || waitingTx}>
                         {loading ? 'Sending...' : 'Send transaction'}

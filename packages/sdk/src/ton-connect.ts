@@ -10,7 +10,9 @@ import {
     SignMessageRpcResponseSuccess,
     TonAddressItemReply,
     TonProofItemReply,
-    StructuredItemType
+    StructuredItemType,
+    WalletResponse,
+    RpcMethod
 } from '@tonconnect/protocol';
 import { DappMetadataError } from 'src/errors/dapp/dapp-metadata.error';
 import { ManifestContentErrorError } from 'src/errors/protocol/events/connect/manifest-content-error.error';
@@ -23,6 +25,7 @@ import {
 } from 'src/errors/wallet';
 import {
     Account,
+    AppRichRequest,
     RequiredFeatures,
     Wallet,
     WalletConnectionSource,
@@ -80,7 +83,8 @@ import {
     validateSignDataPayload,
     validateConnectAdditionalRequest,
     validateTonProofItemReply,
-    validateSignMessageRequest
+    validateSignMessageRequest,
+    validateAppRichRequest
 } from './validation/schemas';
 import { isQaModeEnabled } from './utils/qa-mode';
 import { normalizeBase64 } from './utils/base64';
@@ -95,6 +99,7 @@ import { DefaultEnvironment } from 'src/environment/default-environment';
 import { UUIDv7 } from 'src/utils/uuid';
 import { TraceableWalletEvent } from 'src/models/wallet/traceable-events';
 import { WalletConnectProvider } from 'src/provider/wallet-connect/wallet-connect-provider';
+import { wireRequestParser } from 'src/parsers/wire-request-parser';
 
 export class TonConnect implements ITonConnect {
     private desiredChainId: string | undefined;
@@ -148,6 +153,8 @@ export class TonConnect implements ITonConnect {
     private readonly walletsRequiredFeatures: RequiredFeatures | undefined;
 
     private abortController?: AbortController;
+
+    private pendingAppRequestMethod?: AppRichRequest['method'];
 
     /**
      * Shows if the wallet is connected right now.
@@ -270,6 +277,7 @@ export class TonConnect implements ITonConnect {
             request?: ConnectAdditionalRequest;
             openingDeadlineMS?: number;
             signal?: AbortSignal;
+            appRequest?: AppRichRequest;
         }>
     ): T extends WalletConnectionSourceJS
         ? void
@@ -285,6 +293,7 @@ export class TonConnect implements ITonConnect {
         options?: OptionalTraceable<{
             openingDeadlineMS?: number;
             signal?: AbortSignal;
+            appRequest?: AppRichRequest;
         }>
     ): T extends WalletConnectionSourceJS
         ? void
@@ -300,10 +309,12 @@ export class TonConnect implements ITonConnect {
                   request?: ConnectAdditionalRequest;
                   openingDeadlineMS?: number;
                   signal?: AbortSignal;
+                  appRequest?: AppRichRequest;
               }>,
         additionalOptions?: OptionalTraceable<{
             openingDeadlineMS?: number;
             signal?: AbortSignal;
+            appRequest?: AppRichRequest;
         }>
     ): void | string {
         // TODO: remove deprecated method
@@ -311,6 +322,7 @@ export class TonConnect implements ITonConnect {
             request?: ConnectAdditionalRequest;
             openingDeadlineMS?: number;
             signal?: AbortSignal;
+            appRequest?: AppRichRequest;
         }> = {
             ...additionalOptions
         };
@@ -334,6 +346,7 @@ export class TonConnect implements ITonConnect {
             options.request = requestOrOptions?.request;
             options.openingDeadlineMS = requestOrOptions?.openingDeadlineMS;
             options.signal = requestOrOptions?.signal;
+            options.appRequest = requestOrOptions?.appRequest;
         }
 
         if (options.request) {
@@ -344,6 +357,18 @@ export class TonConnect implements ITonConnect {
                 } else {
                     throw new TonConnectError(
                         'ConnectAdditionalRequest validation failed: ' + validationError
+                    );
+                }
+            }
+        }
+        if (options.appRequest) {
+            const validationError = validateAppRichRequest(options.appRequest);
+            if (validationError) {
+                if (isQaModeEnabled()) {
+                    console.error('AppRichRequest validation failed: ' + validationError);
+                } else {
+                    throw new TonConnectError(
+                        'AppRichRequest validation failed: ' + validationError
                     );
                 }
             }
@@ -372,10 +397,17 @@ export class TonConnect implements ITonConnect {
         const traceId = options?.traceId ?? UUIDv7();
         this.tracker.trackConnectionStarted(traceId);
 
+        const wireAppRequest = options?.appRequest
+            ? wireRequestParser.convertToWireRequest(options.appRequest)
+            : undefined;
+
+        this.pendingAppRequestMethod = options?.appRequest?.method;
+
         return this.provider.connect(this.createConnectRequest(options?.request), {
             openingDeadlineMS: options?.openingDeadlineMS,
             signal: abortController.signal,
-            traceId
+            traceId,
+            appRequest: wireAppRequest
         });
     }
 
@@ -1097,7 +1129,10 @@ export class TonConnect implements ITonConnect {
     private walletEventsListener(e: TraceableWalletEvent): void {
         switch (e.event) {
             case 'connect':
-                this.onWalletConnected(e.payload, { traceId: e.traceId });
+                this.onWalletConnected(e.payload, {
+                    traceId: e.traceId,
+                    response: e.response
+                });
                 break;
             case 'connect_error':
                 this.tracker.trackConnectionError(
@@ -1116,8 +1151,11 @@ export class TonConnect implements ITonConnect {
 
     private onWalletConnected(
         connectEvent: ConnectEventSuccess['payload'],
-        options: Traceable
+        options: Traceable<{ response?: WalletResponse<RpcMethod> }>
     ): void {
+        const method = this.pendingAppRequestMethod;
+        this.pendingAppRequestMethod = undefined;
+
         const tonAccountItem: TonAddressItemReply | undefined = connectEvent.items.find(
             item => item.name === 'ton_addr'
         ) as TonAddressItemReply | undefined;
@@ -1221,6 +1259,13 @@ export class TonConnect implements ITonConnect {
             }
 
             wallet.connectItems = { tonProof };
+        }
+
+        if (options.response && method) {
+            wallet.appRequestResponse = wireRequestParser.convertFromRpcResponse(
+                method,
+                options.response
+            );
         }
 
         this.wallet = wallet;

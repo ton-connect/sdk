@@ -1,3 +1,4 @@
+export { Consumable } from '../utils/consumable';
 export type { Locales } from './locales';
 export { THEME } from './THEME';
 export type { Theme } from './THEME';

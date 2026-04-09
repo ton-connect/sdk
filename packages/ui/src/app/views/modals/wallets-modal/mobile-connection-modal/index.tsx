@@ -8,7 +8,6 @@ import {
 import {
     Component,
     createEffect,
-    createMemo,
     createSignal,
     Match,
     onCleanup,
@@ -36,14 +35,19 @@ import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { useTheme } from 'solid-styled-components';
 import { MobileConnectionQR } from 'src/app/views/modals/wallets-modal/mobile-connection-modal/mobile-connection-qr';
 import { Translation } from 'src/app/components/typography/Translation';
-import { redirectToTelegram, redirectToWallet } from 'src/app/utils/url-strategy-helpers';
+import {
+    redirectToTelegram,
+    redirectToWallet,
+    removeRequestFromUniversalLink
+} from 'src/app/utils/url-strategy-helpers';
 import { copyToClipboard } from 'src/app/utils/copy-to-clipboard';
 import { WalletsModalState } from 'src/models';
+import { logDebug } from 'src/app/utils/log';
 
 export interface MobileConnectionProps {
     additionalRequest?: ConnectAdditionalRequest;
     wallet: WalletInfoRemote;
-    walletModalState?: WalletsModalState;
+    walletsModalState?: WalletsModalState;
     onBackClick: () => void;
     backDisabled?: boolean;
     defaultError?: 'missing-features' | 'connection-declined' | 'not-supported' | null;
@@ -79,24 +83,53 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
         }
     );
 
-    const universalLink = createMemo(() =>
-        connector.connect(
-            {
-                universalLink: props.wallet.universalLink,
-                bridgeUrl: props.wallet.bridgeUrl
-            },
-            props.additionalRequest,
-            { traceId: props.walletModalState?.traceId }
-        )
-    );
+    const [universalLink, setUniversalLink] = createSignal<string | null>(null);
 
-    const onClickTelegram = (): void => {
+    const getUniversalLink = (consume: boolean): string => {
+        let link = universalLink();
+        let wasEmpty = !!link;
+
+        if (!link) {
+            const appRequest =
+                props.walletsModalState && 'appRequest' in props.walletsModalState
+                    ? props.walletsModalState.appRequest
+                    : undefined;
+
+            link = connector.connect(
+                {
+                    universalLink: props.wallet.universalLink,
+                    bridgeUrl: props.wallet.bridgeUrl
+                },
+                props.additionalRequest,
+                {
+                    traceId: props.walletsModalState?.traceId,
+                    appRequest: appRequest?.consume()
+                }
+            );
+        }
+
+        const linkWithoutRequest = removeRequestFromUniversalLink(link);
+
+        const linkToStore = consume ? linkWithoutRequest : link;
+        const linkToReturn = consume ? link : linkWithoutRequest;
+
+        const wasConsumed = linkToReturn !== linkToStore;
+        if (wasConsumed || wasEmpty) {
+            setUniversalLink(linkToStore);
+        }
+
+        logDebug('getUniversalLink', linkToReturn);
+
+        return linkToReturn;
+    };
+
+    const onClickTelegram = (universalLink: string): void => {
         const alwaysForceRedirect = true;
         setLastSelectedWalletInfo({
             ...props.wallet,
             openMethod: 'universal-link'
         });
-        redirectToTelegram(universalLink()!, {
+        redirectToTelegram(universalLink, {
             returnStrategy: appState.returnStrategy,
             twaReturnUrl: appState.twaReturnUrl,
             forceRedirect: alwaysForceRedirect
@@ -104,9 +137,9 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
     };
 
     const onRetry = (): void => {
-        const currentUniversalLink = universalLink();
+        const currentUniversalLink = getUniversalLink(true);
         if (isTelegramUrl(currentUniversalLink)) {
-            return onClickTelegram();
+            return onClickTelegram(currentUniversalLink);
         }
 
         setConnectionErrored(null);
@@ -115,7 +148,7 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
         setFirstClick(false);
 
         redirectToWallet(
-            universalLink()!,
+            currentUniversalLink,
             props.wallet.deepLink,
             {
                 returnStrategy: appState.returnStrategy,
@@ -139,7 +172,7 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
             clearTimeout(isCopiedShown());
         }
 
-        await copyToClipboard(universalLink());
+        await copyToClipboard(getUniversalLink(true));
         const timeoutId = setTimeout(() => setIsCopiedShown(undefined), 1500);
         setIsCopiedShown(timeoutId);
     };
@@ -179,7 +212,7 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
             </Show>
             <Show when={showQR()}>
                 <MobileConnectionQR
-                    universalLink={universalLink()}
+                    universalLink={getUniversalLink(false)}
                     walletInfo={props.wallet}
                     onOpenLink={onRetry}
                     onCopy={onCopy}

@@ -457,6 +457,27 @@ export function validateConnectAdditionalRequest(data: unknown): ValidationResul
     return null;
 }
 
+export function validateAppRichRequest(data: unknown) {
+    if (!isValidObject(data)) {
+        return 'Request must be an object';
+    }
+
+    if (!isValidString(data.method)) {
+        return "'method' is required";
+    }
+
+    switch (data.method) {
+        case 'sendTransaction':
+            return validateSendTransactionRequest(data);
+        case 'signData':
+            return validateSignDataPayload(data);
+        case 'signMessage':
+            return validateSignMessageRequest(data);
+    }
+
+    return `Invalid 'method' value: ${data.method}`;
+}
+
 export function validateSignDataPayload(data: unknown): ValidationResult {
     if (!isValidObject(data)) {
         return 'Payload must be an object';

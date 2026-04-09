@@ -17,11 +17,16 @@ import { copyToClipboard } from 'src/app/utils/copy-to-clipboard';
 import { TonConnectUIError } from 'src/errors';
 import { MobileUniversalQR } from './mobile-universal-qr';
 import { Translation } from 'src/app/components/typography/Translation';
-import { redirectToTelegram, redirectToWallet } from 'src/app/utils/url-strategy-helpers';
+import {
+    redirectToTelegram,
+    redirectToWallet,
+    removeRequestFromUniversalLink
+} from 'src/app/utils/url-strategy-helpers';
 import { bridgesIsEqual, getUniqueBridges } from 'src/app/utils/bridge';
 import { WalletUlContainer } from 'src/app/components/wallet-item/style';
 import { UIWalletInfo } from 'src/app/models/ui-wallet-info';
 import { WalletsModalState } from 'src/models';
+import { logDebug } from 'src/app/utils/log';
 
 interface MobileUniversalModalProps {
     walletsList: UIWalletInfo[];
@@ -55,15 +60,35 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
         null
     );
 
-    const getUniversalLink = (): string => {
-        if (!universalLink()) {
-            setUniversalLink(
-                connector.connect(walletsBridges(), props.additionalRequest, {
-                    traceId: props.walletModalState.traceId
-                })
-            );
+    const getUniversalLink = (consume: boolean): string => {
+        let link = universalLink();
+        let wasEmpty = !!link;
+
+        if (!link) {
+            const appRequest =
+                'appRequest' in props.walletModalState
+                    ? props.walletModalState.appRequest
+                    : undefined;
+
+            link = connector.connect(walletsBridges(), props.additionalRequest, {
+                traceId: props.walletModalState.traceId,
+                appRequest: appRequest?.consume()
+            });
         }
-        return universalLink()!;
+
+        const linkWithoutRequest = removeRequestFromUniversalLink(link);
+
+        const linkToStore = consume ? linkWithoutRequest : link;
+        const linkToReturn = consume ? link : linkWithoutRequest;
+
+        const wasConsumed = linkToReturn !== linkToStore;
+        if (wasConsumed || wasEmpty) {
+            setUniversalLink(linkToStore);
+        }
+
+        logDebug('getUniversalLink', linkToReturn);
+
+        return linkToReturn;
     };
 
     setLastSelectedWalletInfo({ openMethod: 'universal-link' });
@@ -77,7 +102,7 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
             clearTimeout(isCopiedShown());
         }
 
-        await copyToClipboard(getUniversalLink());
+        await copyToClipboard(getUniversalLink(true));
         const timeoutId = setTimeout(() => setIsCopiedShown(undefined), 1500);
         setIsCopiedShown(timeoutId);
     };
@@ -87,7 +112,7 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
         setFirstClick(false);
 
         redirectToWallet(
-            getUniversalLink(),
+            getUniversalLink(true),
             undefined,
             {
                 returnStrategy: appState.returnStrategy,
@@ -109,13 +134,16 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
             throw new TonConnectUIError('@wallet bot not found in the wallets list');
         }
 
+        const appRequest =
+            'appRequest' in props.walletModalState ? props.walletModalState.appRequest : undefined;
+
         const walletLink = connector.connect(
             {
                 bridgeUrl: atWallet.bridgeUrl,
                 universalLink: atWallet.universalLink
             },
             props.additionalRequest,
-            { traceId: props.walletModalState.traceId }
+            { traceId: props.walletModalState.traceId, appRequest: appRequest?.consume() }
         );
 
         const forceRedirect = !firstClick();
@@ -171,7 +199,7 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
             <Show when={showQR()}>
                 <StyledLeftActionButton icon="arrow" onClick={onCloseQR} />
                 <MobileUniversalQR
-                    universalLink={getUniversalLink()}
+                    universalLink={getUniversalLink(false)}
                     isCopiedShown={isCopiedShown()}
                     onOpenLink={onSelectUniversal}
                     onCopy={onCopy}

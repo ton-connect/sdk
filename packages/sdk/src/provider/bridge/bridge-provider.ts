@@ -11,6 +11,7 @@ import {
     WalletResponse
 } from '@tonconnect/protocol';
 import { TonConnectError } from 'src/errors/ton-connect.error';
+import { AppWireRequest } from 'src/models/methods';
 import { WalletConnectionSourceHTTP } from 'src/models/wallet/wallet-connection-source';
 import { BridgeGateway } from 'src/provider/bridge/bridge-gateway';
 import {
@@ -33,6 +34,7 @@ import { BridgeClientEvent } from 'src/analytics/types';
 import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet/traceable-events';
 import { UUIDv7 } from 'src/utils/uuid';
 import { waitForSome } from 'src/utils/promise';
+import { toBase64Url } from 'src/utils/base64';
 
 export class BridgeProvider implements HTTPProvider {
     public static async fromStorage(
@@ -93,6 +95,7 @@ export class BridgeProvider implements HTTPProvider {
         options?: OptionalTraceable<{
             openingDeadlineMS?: number;
             signal?: AbortSignal;
+            appRequest?: AppWireRequest;
         }>
     ): string {
         const traceId = options?.traceId ?? UUIDv7();
@@ -145,7 +148,7 @@ export class BridgeProvider implements HTTPProvider {
                 ? this.walletConnectionSource.universalLink
                 : this.standardUniversalLink;
 
-        return this.generateUniversalLink(universalLink, message, { traceId });
+        return this.generateUniversalLink(universalLink, message, { traceId }, options?.appRequest);
     }
 
     public async restoreConnection(
@@ -534,34 +537,48 @@ export class BridgeProvider implements HTTPProvider {
     private generateUniversalLink(
         universalLink: string,
         message: ConnectRequest,
-        options: Traceable
+        options: Traceable,
+        appRequest?: AppWireRequest
     ): string {
         if (isTelegramUrl(universalLink)) {
-            return this.generateTGUniversalLink(universalLink, message, options);
+            return this.generateTGUniversalLink(universalLink, message, options, appRequest);
         }
 
-        return this.generateRegularUniversalLink(universalLink, message, options);
+        return this.generateRegularUniversalLink(universalLink, message, options, appRequest);
     }
 
     private generateRegularUniversalLink(
         universalLink: string,
         message: ConnectRequest,
-        options: Traceable
+        options: Traceable,
+        appRequest?: AppWireRequest
     ): string {
         const url = new URL(universalLink);
         url.searchParams.append('v', PROTOCOL_VERSION.toString());
         url.searchParams.append('id', this.session!.sessionCrypto.sessionId);
         url.searchParams.append('trace_id', options.traceId);
         url.searchParams.append('r', JSON.stringify(message));
+        if (appRequest) {
+            url.searchParams.append(
+                'req',
+                toBase64Url(Base64.encode(JSON.stringify(appRequest), false))
+            );
+        }
         return url.toString();
     }
 
     private generateTGUniversalLink(
         universalLink: string,
         message: ConnectRequest,
-        options: Traceable
+        options: Traceable,
+        appRequest?: AppWireRequest
     ): string {
-        const urlToWrap = this.generateRegularUniversalLink('about:blank', message, options);
+        const urlToWrap = this.generateRegularUniversalLink(
+            'about:blank',
+            message,
+            options,
+            appRequest
+        );
         const linkParams = urlToWrap.split('?')[1]!;
 
         const startapp = 'tonconnect-' + encodeTelegramUrlParameters(linkParams);

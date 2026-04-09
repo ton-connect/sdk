@@ -6,6 +6,7 @@ import {
 } from 'src/app/state/modals-state';
 import { createEffect, on } from 'solid-js';
 import {
+    AppRichRequest,
     ConnectAdditionalRequest,
     isConnectUrl,
     isWalletInfoCurrentlyEmbedded,
@@ -17,6 +18,7 @@ import {
 } from '@tonconnect/sdk';
 import { appState } from 'src/app/state/app.state';
 import { widgetController } from 'src/app/widget-controller';
+import { Consumable } from 'src/utils/consumable';
 import { WalletsModal, WalletsModalCloseReason, WalletsModalState } from 'src/models/wallets-modal';
 import { isInTMA, sendExpand } from 'src/app/utils/tma-api';
 import { TonConnectUITracker } from 'src/tracker/ton-connect-ui-tracker';
@@ -144,7 +146,9 @@ export class WalletsModalManager implements WalletsModal {
     /**
      * Opens the modal window.
      */
-    public async open(options?: OptionalTraceable): Promise<void> {
+    public async open(
+        options?: OptionalTraceable<{ appRequest?: Consumable<AppRichRequest> }>
+    ): Promise<void> {
         const traceId = options?.traceId ?? UUIDv7();
 
         this.tracker.trackConnectionStarted();
@@ -154,7 +158,7 @@ export class WalletsModalManager implements WalletsModal {
         if (embeddedWallet) {
             return this.connectEmbeddedWallet(embeddedWallet, { traceId });
         } else {
-            return this.openWalletsModal({ traceId });
+            return this.openWalletsModal({ traceId, appRequest: options?.appRequest });
         }
     }
 
@@ -208,12 +212,17 @@ export class WalletsModalManager implements WalletsModal {
      * Opens the modal window to connect to an external wallet, and waits when modal window is opened.
      * @internal
      */
-    private async openWalletsModal(options: Traceable): Promise<void> {
+    private async openWalletsModal(
+        options: Traceable & { appRequest?: Consumable<AppRichRequest> }
+    ): Promise<void> {
         if (isInTMA()) {
             sendExpand();
         }
 
-        widgetController.openWalletsModal({ traceId: options.traceId });
+        widgetController.openWalletsModal({
+            traceId: options.traceId,
+            appRequest: options.appRequest
+        });
 
         return new Promise<void>(resolve => {
             const unsubscribe = this.onStateChange(state => {
