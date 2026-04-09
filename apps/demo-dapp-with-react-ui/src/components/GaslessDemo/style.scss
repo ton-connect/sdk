@@ -1,0 +1,105 @@
+.gasless-demo {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  margin-top: 60px;
+  padding: 20px;
+
+  h3 {
+    margin: 0;
+    color: white;
+    opacity: 0.8;
+  }
+
+  &__subtitle {
+    margin: 0;
+    color: white;
+    opacity: 0.6;
+    font-size: 15px;
+    text-align: center;
+    max-width: 600px;
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 500px;
+
+    label {
+      display: flex;
+      flex-direction: column;
+      color: white;
+      opacity: 0.85;
+      font-size: 14px;
+      gap: 4px;
+    }
+
+    input {
+      width: 100%;
+      padding: 6px 10px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+  }
+
+  &__buttons {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 8px;
+  }
+
+  button {
+    border: none;
+    padding: 7px 15px;
+    border-radius: 15px;
+    cursor: pointer;
+    background-color: rgba(102, 170, 238, 0.91);
+    color: white;
+    font-size: 16px;
+    line-height: 20px;
+    transition: transform 0.1s ease-in-out;
+
+    &:hover {
+      transform: scale(1.03);
+    }
+
+    &:active {
+      transform: scale(0.97);
+    }
+  }
+
+  &__status {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+  }
+
+  &__error {
+    color: rgba(238, 102, 102, 0.91);
+    font-size: 14px;
+  }
+
+  &__debug {
+    width: 100%;
+    max-width: 600px;
+    text-align: left;
+
+    h4 {
+      color: white;
+      opacity: 0.9;
+      margin-bottom: 8px;
+      font-size: 15px;
+    }
+
+    .react-json-view {
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 12px;
+    }
+  }
+}

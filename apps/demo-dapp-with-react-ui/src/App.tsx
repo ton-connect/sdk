@@ -12,6 +12,7 @@ import { MerkleExample } from './components/MerkleExample/MerkleExample';
 import { FindTransactionDemo } from './components/FindTransactionDemo/FindTransactionDemo';
 import { TransferUsdt } from './components/TransferUsdt/TransferUsdt';
 import { UniversalConnector } from '@reown/appkit-universal-connector';
+import { GaslessDemo } from './components/GaslessDemo/GaslessDemo';
 
 initializeWalletConnect(UniversalConnector, {
     projectId: '9cb446f4a1b697039a23332618d942b0',
@@ -30,6 +31,7 @@ function HomePage() {
         <div className="app">
             <Header />
             <TxForm />
+            <GaslessDemo />
             <WalletBatchLimitsTester />
             <SignDataTester />
             <TransferUsdt />
