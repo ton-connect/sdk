@@ -2,6 +2,7 @@ import { ChainId } from '@tonconnect/protocol';
 import { TonConnectError } from 'src/errors';
 import {
     Account,
+    SignMessageRequest,
     Wallet,
     WalletConnectionSource,
     WalletConnectionSourceHTTP,
@@ -141,7 +142,7 @@ export interface ITonConnect {
      * If user rejects signing, method will throw the corresponding error.
      */
     signMessage(
-        message: SendTransactionRequest,
+        message: SignMessageRequest,
         options?: OptionalTraceable<{
             onRequestSent?: () => void;
             signal?: AbortSignal;
