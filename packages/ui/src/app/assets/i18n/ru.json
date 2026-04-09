@@ -37,6 +37,12 @@
     },
     "signDataCanceled": {
       "header": "Подпись данных отменена"
+    },
+    "messageSigned": {
+      "header": "Сообщение подписано"
+    },
+    "signMessageCanceled": {
+      "header": "Подпись сообщения отменена"
     }
   },
   "walletItem": {
@@ -144,7 +150,13 @@
     },
     "transactionSent": "$notifications.transactionSent",
     "transactionCanceled": "$notifications.transactionCanceled",
+    "signMessage": {
+      "header": "Подпишите сообщение в {{ name }}",
+      "text": "Это займет пару секунд."
+    },
     "dataSigned": "$notifications.dataSigned",
-    "signDataCanceled": "$notifications.signDataCanceled"
+    "signDataCanceled": "$notifications.signDataCanceled",
+    "messageSigned": "$notifications.messageSigned",
+    "signMessageCanceled": "$notifications.signMessageCanceled"
   }
 }

@@ -110,12 +110,12 @@ describe('validation/schemas', () => {
 
         it('requires non-empty messages', () => {
             const result1 = validateSendTransactionRequest({ validUntil: 1 } as unknown);
-            expect(result1).toBe("'messages' is required");
+            expect(result1).toBe("Request must contain 'messages' or 'items'");
             const result2 = validateSendTransactionRequest({
                 validUntil: 1,
                 messages: []
             } as unknown);
-            expect(result2).toBe("'messages' is required");
+            expect(result2).toBe("'messages' must not be empty");
         });
 
         it('rejects non-object message', () => {

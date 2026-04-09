@@ -37,6 +37,12 @@
     },
     "signDataCanceled": {
       "header": "Sign data canceled"
+    },
+    "messageSigned": {
+      "header": "Message signed"
+    },
+    "signMessageCanceled": {
+      "header": "Sign message canceled"
     }
   },
   "walletItem": {
@@ -144,7 +150,13 @@
     },
     "transactionSent": "$notifications.transactionSent",
     "transactionCanceled": "$notifications.transactionCanceled",
+    "signMessage": {
+      "header": "Sign the message in {{ name }}",
+      "text": "It will only take a moment."
+    },
     "dataSigned": "$notifications.dataSigned",
-    "signDataCanceled": "$notifications.signDataCanceled"
+    "signDataCanceled": "$notifications.signDataCanceled",
+    "messageSigned": "$notifications.messageSigned",
+    "signMessageCanceled": "$notifications.signMessageCanceled"
   }
 }

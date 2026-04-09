@@ -27,12 +27,36 @@ const defaultTx: SendTransactionRequest = {
     ]
 };
 
+const defaultTxWithMessages: SendTransactionRequest = {
+    validUntil: Math.floor(Date.now() / 1000) + 600,
+    items: [
+        {
+            type: 'ton',
+            address: 'EQCKWpx7cNMpvmcN5ObM5lLUZHZRFKqYA4xmw9jOry0ZsF9M',
+            amount: '5000000',
+            // (optional) Body in boc base64 format.
+            payload: defaultBody.toBoc().toString('base64'),
+            // (optional) State init in boc base64 format.
+            stateInit:
+                'te6cckEBBAEAOgACATQCAQAAART/APSkE/S88sgLAwBI0wHQ0wMBcbCRW+D6QDBwgBDIywVYzxYh+gLLagHPFsmAQPsAlxCarA=='
+        },
+        {
+            type: 'jetton',
+            master: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
+            amount: '50000',
+            destination: 'EQCKWpx7cNMpvmcN5ObM5lLUZHZRFKqYA4xmw9jOry0ZsF9M'
+        }
+    ]
+};
+
 export function TxForm() {
     const [tx, setTx] = useState(defaultTx);
     const [waitForTx, setWaitForTx] = useState(false);
     const [txResult, setTxResult] = useState<object | null>(null);
     const [loading, setLoading] = useState(false);
     const [waitingTx, setWaitingTx] = useState(false);
+    const [signLoading, setSignLoading] = useState(false);
+    const [signResult, setSignResult] = useState<object | null>(null);
 
     const wallet = useTonWallet();
     const [tonConnectUi] = useTonConnectUI();
@@ -40,6 +64,17 @@ export function TxForm() {
     const onChange = useCallback((value: InteractionProps) => {
         setTx(value.updated_src as SendTransactionRequest);
     }, []);
+
+    const handleSignMessage = async () => {
+        setSignResult(null);
+        setSignLoading(true);
+        try {
+            const result = await tonConnectUi.signMessage(tx);
+            setSignResult(result);
+        } finally {
+            setSignLoading(false);
+        }
+    };
 
     const handleSendTx = async () => {
         setTxResult(null);
@@ -63,10 +98,12 @@ export function TxForm() {
     return (
         <div className="send-tx-form">
             <h3>Configure and send transaction</h3>
+            <button onClick={() => setTx(defaultTx)}>Set message payload</button>
+            <button onClick={() => setTx(defaultTxWithMessages)}>Set items payload</button>
 
             <ReactJson
                 theme="ocean"
-                src={defaultTx}
+                src={tx}
                 onEdit={onChange}
                 onAdd={onChange}
                 onDelete={onChange}
@@ -112,9 +149,14 @@ export function TxForm() {
             )}
 
             {wallet ? (
-                <button onClick={handleSendTx} disabled={loading || waitingTx}>
-                    {loading ? 'Sending...' : 'Send transaction'}
-                </button>
+                <>
+                    <button onClick={handleSendTx} disabled={loading || waitingTx}>
+                        {loading ? 'Sending...' : 'Send transaction'}
+                    </button>
+                    <button onClick={handleSignMessage} disabled={signLoading}>
+                        {signLoading ? 'Signing...' : 'Sign message'}
+                    </button>
+                </>
             ) : (
                 <button onClick={() => tonConnectUi.openModal()}>
                     Connect wallet to send the transaction
@@ -126,6 +168,15 @@ export function TxForm() {
                     <div className="find-transaction-demo__json-label">Transaction</div>
                     <div className="find-transaction-demo__json-view">
                         <ReactJson src={txResult} name={false} theme="ocean" collapsed={false} />
+                    </div>
+                </>
+            )}
+
+            {signResult && (
+                <>
+                    <div className="find-transaction-demo__json-label">Sign Message Result</div>
+                    <div className="find-transaction-demo__json-view">
+                        <ReactJson src={signResult} name={false} theme="ocean" collapsed={false} />
                     </div>
                 </>
             )}

@@ -92,8 +92,12 @@ export {
     CONNECT_ITEM_ERROR_CODES,
     CONNECT_EVENT_ERROR_CODES,
     SEND_TRANSACTION_ERROR_CODES,
-    SIGN_DATA_ERROR_CODES
+    SIGN_DATA_ERROR_CODES,
+    SignMessageFeature,
+    SIGN_MESSAGE_ERROR_CODES
 } from '@tonconnect/protocol';
+
+export type { SignMessageResponse } from './models/methods/sign-message/sign-message-response';
 
 export { IEnvironment } from './environment/models/environment.interface';
 export { TelegramUser } from './environment/models/telegram-user';
@@ -122,4 +126,4 @@ export { Traceable, OptionalTraceable } from './utils/types';
 
 export { UUIDv7 } from './utils/uuid';
 export { Version7Options, UUIDTypes } from './utils/uuid/types';
-export type { ChainId } from '@tonconnect/protocol';
+export type { ChainId, StructuredItemType } from '@tonconnect/protocol';

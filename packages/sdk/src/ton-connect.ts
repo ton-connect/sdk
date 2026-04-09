@@ -7,8 +7,10 @@ import {
     SendTransactionRpcResponseSuccess,
     SignDataPayload,
     SignDataRpcResponseSuccess,
+    SignMessageRpcResponseSuccess,
     TonAddressItemReply,
-    TonProofItemReply
+    TonProofItemReply,
+    StructuredItemType
 } from '@tonconnect/protocol';
 import { DappMetadataError } from 'src/errors/dapp/dapp-metadata.error';
 import { ManifestContentErrorError } from 'src/errors/protocol/events/connect/manifest-content-error.error';
@@ -31,8 +33,16 @@ import {
 } from 'src/models';
 import {
     SendTransactionRequest,
+    SendTransactionRequestWithMessages,
+    SendTransactionRequestWithItems,
     SendTransactionResponse,
-    SignDataResponse
+    SignDataResponse,
+    SignMessageRequest,
+    SignMessageResponse,
+    StructuredItem,
+    RawStructuredItem,
+    TransactionRpcPayload,
+    hasItems
 } from 'src/models/methods';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
 import { AnalyticsSettings, TonConnectOptions } from 'src/models/ton-connect-options';
@@ -43,6 +53,7 @@ import {
 import { connectErrorsParser } from 'src/parsers/connect-errors-parser';
 import { sendTransactionParser } from 'src/parsers/send-transaction-parser';
 import { signDataParser } from 'src/parsers/sign-data-parser';
+import { signMessageParser } from 'src/parsers/sign-message-parser';
 import { BridgeProvider } from 'src/provider/bridge/bridge-provider';
 import { InjectedProvider } from 'src/provider/injected/injected-provider';
 import { Provider } from 'src/provider/provider';
@@ -56,7 +67,8 @@ import { OptionalTraceable, Traceable } from 'src/utils/types';
 import {
     checkSendTransactionSupport,
     checkRequiredWalletFeatures,
-    checkSignDataSupport
+    checkSignDataSupport,
+    checkSignMessageSupport
 } from 'src/utils/feature-support';
 import { callForSuccess } from 'src/utils/call-for-success';
 import { logDebug, logError } from 'src/utils/log';
@@ -67,7 +79,8 @@ import {
     validateSendTransactionRequest,
     validateSignDataPayload,
     validateConnectAdditionalRequest,
-    validateTonProofItemReply
+    validateTonProofItemReply,
+    validateSignMessageRequest
 } from './validation/schemas';
 import { isQaModeEnabled } from './utils/qa-mode';
 import { normalizeBase64 } from './utils/base64';
@@ -552,13 +565,13 @@ export class TonConnect implements ITonConnect {
 
         this.checkConnection();
 
-        const requiredMessagesNumber = transaction.messages.length;
-        const requireExtraCurrencies = transaction.messages.some(
-            m => m.extraCurrency && Object.keys(m.extraCurrency).length > 0
-        );
+        const { requiredMessagesNumber, requireExtraCurrencies, requiredItemTypes } =
+            this.extractRequiredFeatures(transaction);
+
         checkSendTransactionSupport(this.wallet!.device.features, {
             requiredMessagesNumber,
-            requireExtraCurrencies
+            requireExtraCurrencies,
+            requiredItemTypes
         });
 
         const sessionInfo = this.getSessionInfo();
@@ -570,7 +583,6 @@ export class TonConnect implements ITonConnect {
             traceId
         );
 
-        const { validUntil, messages, ...tx } = transaction;
         const from = transaction.from || this.account!.address;
         const network = transaction.network || this.account!.chain;
 
@@ -589,19 +601,12 @@ export class TonConnect implements ITonConnect {
             });
         }
 
+        const rpcPayload = hasItems(transaction)
+            ? this.buildItemsRpcPayload(transaction, from, network)
+            : this.buildMessagesRpcPayload(transaction, from, network);
+
         const response = await this.provider!.sendRequest(
-            sendTransactionParser.convertToRpcRequest({
-                ...tx,
-                from,
-                network,
-                valid_until: validUntil,
-                messages: messages.map(({ extraCurrency, payload, stateInit, ...msg }) => ({
-                    ...msg,
-                    payload: normalizeBase64(payload),
-                    stateInit: normalizeBase64(stateInit),
-                    extra_currency: extraCurrency
-                }))
-            }),
+            sendTransactionParser.convertToRpcRequest(rpcPayload),
             {
                 onRequestSent: options.onRequestSent,
                 signal: abortController.signal,
@@ -626,6 +631,27 @@ export class TonConnect implements ITonConnect {
         );
         this.tracker.trackTransactionSigned(this.wallet, transaction, result, sessionInfo, traceId);
         return { ...result, traceId: response.traceId };
+    }
+
+    private extractRequiredFeatures(
+        transaction: SendTransactionRequestWithMessages | SendTransactionRequestWithItems
+    ) {
+        const useItems = hasItems(transaction);
+        const requiredMessagesNumber = useItems
+            ? transaction.items.length
+            : transaction.messages.length;
+        const requireExtraCurrencies = useItems
+            ? transaction.items
+                  ?.filter(i => i.type === 'ton')
+                  .some(m => m.extraCurrency && Object.keys(m.extraCurrency).length > 0)
+            : transaction.messages.some(
+                  m => m.extraCurrency && Object.keys(m.extraCurrency).length > 0
+              );
+        const requiredItemTypes: StructuredItemType[] | undefined = useItems
+            ? [...new Set(transaction.items.map(item => item.type))]
+            : undefined;
+
+        return { requiredMessagesNumber, requireExtraCurrencies, requiredItemTypes };
     }
 
     public async signData(
@@ -704,6 +730,84 @@ export class TonConnect implements ITonConnect {
         this.tracker.trackDataSigned(this.wallet, data, result, sessionInfo, traceId);
 
         return { ...result, traceId };
+    }
+
+    public async signMessage(
+        message: SignMessageRequest,
+        options?: OptionalTraceable<{
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+        }>
+    ): Promise<Traceable<SignMessageResponse>> {
+        const abortController = createAbortController(options?.signal);
+        if (abortController.signal.aborted) {
+            throw new TonConnectError('Message signing was aborted');
+        }
+
+        const validationError = validateSignMessageRequest(message);
+        if (validationError) {
+            if (isQaModeEnabled()) {
+                console.error('SignMessageRequest validation failed: ' + validationError);
+            } else {
+                throw new TonConnectError(
+                    'SignMessageRequest validation failed: ' + validationError
+                );
+            }
+        }
+
+        this.checkConnection();
+
+        const { requiredMessagesNumber, requireExtraCurrencies, requiredItemTypes } =
+            this.extractRequiredFeatures(message);
+
+        checkSignMessageSupport(this.wallet!.device.features, {
+            requiredMessagesNumber,
+            requireExtraCurrencies,
+            requiredItemTypes
+        });
+
+        const traceId = options?.traceId ?? UUIDv7();
+
+        const from = message.from || this.account!.address;
+        const network = message.network || this.account!.chain;
+
+        if (this.wallet?.account.chain && network !== this.wallet.account.chain) {
+            if (!isQaModeEnabled()) {
+                throw new WalletWrongNetworkError('Wallet connected to a wrong network', {
+                    cause: {
+                        expectedChainId: this.wallet?.account.chain,
+                        actualChainId: network
+                    }
+                });
+            }
+            console.error('Wallet connected to a wrong network', {
+                expectedChainId: this.wallet?.account.chain,
+                actualChainId: network
+            });
+        }
+
+        const rpcPayload = hasItems(message)
+            ? this.buildItemsRpcPayload(message, from, network)
+            : this.buildMessagesRpcPayload(message, from, network);
+
+        const response = await this.provider!.sendRequest(
+            signMessageParser.convertToRpcRequest(rpcPayload),
+            {
+                onRequestSent: options?.onRequestSent,
+                signal: abortController.signal,
+                traceId
+            }
+        );
+
+        if (signMessageParser.isError(response)) {
+            signMessageParser.parseAndThrowError(response);
+        }
+
+        const result = signMessageParser.convertFromRpcResponse(
+            response as SignMessageRpcResponseSuccess
+        );
+
+        return { ...result, traceId: response.traceId };
     }
 
     /**
@@ -793,6 +897,101 @@ export class TonConnect implements ITonConnect {
             return { clientId, walletId };
         } catch {
             return null;
+        }
+    }
+
+    private buildMessagesRpcPayload(
+        transaction: SendTransactionRequest,
+        from: string,
+        network: ChainId
+    ): TransactionRpcPayload {
+        const tx = transaction as SendTransactionRequestWithMessages;
+        const { validUntil, messages, ...rest } = tx;
+        return {
+            ...rest,
+            from,
+            network,
+            valid_until: validUntil,
+            messages: messages.map(({ extraCurrency, payload, stateInit, ...msg }) => ({
+                ...msg,
+                payload: normalizeBase64(payload),
+                stateInit: normalizeBase64(stateInit),
+                extra_currency: extraCurrency
+            }))
+        };
+    }
+
+    private buildItemsRpcPayload(
+        transaction: SendTransactionRequest,
+        from: string,
+        network: ChainId
+    ): TransactionRpcPayload {
+        const tx = transaction as SendTransactionRequestWithItems;
+        const { validUntil, items, ...rest } = tx;
+        return {
+            ...rest,
+            from,
+            network,
+            valid_until: validUntil,
+            items: items.map(item => this.normalizeStructuredItem(item))
+        };
+    }
+
+    private normalizeStructuredItem(item: StructuredItem): RawStructuredItem {
+        switch (item.type) {
+            case 'ton': {
+                const { extraCurrency, stateInit, payload, ...rest } = item;
+                return {
+                    ...rest,
+                    payload: normalizeBase64(payload),
+                    state_init: normalizeBase64(stateInit),
+                    extra_currency: extraCurrency
+                };
+            }
+            case 'jetton': {
+                const {
+                    attachAmount,
+                    responseDestination,
+                    customPayload,
+                    forwardAmount,
+                    forwardPayload,
+                    queryId,
+                    ...rest
+                } = item;
+                return {
+                    ...rest,
+                    attach_amount: attachAmount,
+                    response_destination: responseDestination,
+                    custom_payload: normalizeBase64(customPayload),
+                    forward_amount: forwardAmount,
+                    forward_payload: normalizeBase64(forwardPayload),
+                    query_id: queryId
+                };
+            }
+            case 'nft': {
+                const {
+                    nftAddress,
+                    newOwner,
+                    attachAmount,
+                    responseDestination,
+                    customPayload,
+                    forwardAmount,
+                    forwardPayload,
+                    queryId,
+                    ...rest
+                } = item;
+                return {
+                    ...rest,
+                    nft_address: nftAddress,
+                    new_owner: newOwner,
+                    attach_amount: attachAmount,
+                    response_destination: responseDestination,
+                    custom_payload: normalizeBase64(customPayload),
+                    forward_amount: forwardAmount,
+                    forward_payload: normalizeBase64(forwardPayload),
+                    query_id: queryId
+                };
+            }
         }
     }
 
