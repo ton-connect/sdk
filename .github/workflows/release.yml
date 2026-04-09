@@ -1,0 +1,233 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - 'release/**'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (publish with --dry-run)'
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: Release
+    if: startsWith(github.ref, 'refs/heads/release/')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '${{ env.NVMRC }}'
+          cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build everything
+        run: |
+          pnpm build
+
+      - name: Pack packages
+        run: |
+          pnpm pack -r --pack-destination release-artifacts
+
+      - name: Check if versions exist on npm
+        id: check_versions
+        run: |
+          BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+          echo "branch_name=${BRANCH_NAME}" >> $GITHUB_OUTPUT
+
+          get_npm_tag() {
+            local version=$1
+            if [[ "$version" == *"-alpha"* ]]; then
+              echo "alpha"
+            elif [[ "$version" == *"-beta"* ]]; then
+              echo "beta"
+            elif [[ "$version" == *"-rc"* ]]; then
+              echo "rc"
+            else
+              echo "latest"
+            fi
+          }
+
+          check_npm_version() {
+            local pkg_name=$1
+            local pkg_path=$2
+            local output_key=$3
+
+            LOCAL_VERSION=$(node -p "require('./${pkg_path}/package.json').version")
+            NPM_TAG=$(get_npm_tag "$LOCAL_VERSION")
+            echo "${pkg_name} local version: $LOCAL_VERSION (tag: $NPM_TAG)"
+
+            echo "${output_key}_version=${LOCAL_VERSION}" >> $GITHUB_OUTPUT
+            echo "${output_key}_tag=${NPM_TAG}" >> $GITHUB_OUTPUT
+
+            if npm view "${pkg_name}@${LOCAL_VERSION}" version 2>/dev/null; then
+              echo "${pkg_name}@${LOCAL_VERSION} already exists on npm"
+              echo "${output_key}_exists=true" >> $GITHUB_OUTPUT
+            else
+              echo "${pkg_name}@${LOCAL_VERSION} does not exist on npm"
+              echo "${output_key}_exists=false" >> $GITHUB_OUTPUT
+            fi
+          }
+
+          check_npm_version "@tonconnect/protocol" "packages/protocol" "protocol"
+          check_npm_version "@tonconnect/sdk" "packages/sdk" "sdk"
+          check_npm_version "@tonconnect/ui" "packages/ui" "ui"
+          check_npm_version "@tonconnect/ui-react" "packages/ui-react" "ui_react"
+          check_npm_version "@tonconnect/isomorphic-eventsource" "packages/isomorphic-eventsource" "isomorphic_eventsource"
+          check_npm_version "@tonconnect/isomorphic-fetch" "packages/isomorphic-fetch" "isomorphic_fetch"
+
+          # Use sdk version for release tag
+          SDK_VERSION=$(node -p "require('./packages/sdk/package.json').version")
+          echo "release_version=${SDK_VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Create git tags
+        if: inputs.dry_run != 'true'
+        run: |
+          TAG="v${{ steps.check_versions.outputs.release_version }}"
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already exists, skipping"
+          else
+            git tag "$TAG"
+            git push origin "$TAG"
+          fi
+
+      - name: Publish @tonconnect/protocol
+        if: steps.check_versions.outputs.protocol_exists == 'false'
+        run: |
+          DRY_RUN_FLAG=""
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            DRY_RUN_FLAG="--dry-run"
+            echo "🏜️ DRY RUN mode"
+          fi
+          pnpm publish \
+            --filter="@tonconnect/protocol" \
+            --access=public \
+            --publish-branch="${{ steps.check_versions.outputs.branch_name }}" \
+            --tag=${{ steps.check_versions.outputs.protocol_tag }} \
+            --provenance \
+            --verbose \
+            $DRY_RUN_FLAG
+
+      - name: Publish @tonconnect/isomorphic-eventsource
+        if: steps.check_versions.outputs.isomorphic_eventsource_exists == 'false'
+        run: |
+          DRY_RUN_FLAG=""
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            DRY_RUN_FLAG="--dry-run"
+            echo "🏜️ DRY RUN mode"
+          fi
+          pnpm publish \
+            --filter="@tonconnect/isomorphic-eventsource" \
+            --access=public \
+            --publish-branch="${{ steps.check_versions.outputs.branch_name }}" \
+            --tag=${{ steps.check_versions.outputs.isomorphic_eventsource_tag }} \
+            --provenance \
+            --verbose \
+            $DRY_RUN_FLAG
+
+      - name: Publish @tonconnect/isomorphic-fetch
+        if: steps.check_versions.outputs.isomorphic_fetch_exists == 'false'
+        run: |
+          DRY_RUN_FLAG=""
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            DRY_RUN_FLAG="--dry-run"
+            echo "🏜️ DRY RUN mode"
+          fi
+          pnpm publish \
+            --filter="@tonconnect/isomorphic-fetch" \
+            --access=public \
+            --publish-branch="${{ steps.check_versions.outputs.branch_name }}" \
+            --tag=${{ steps.check_versions.outputs.isomorphic_fetch_tag }} \
+            --provenance \
+            --verbose \
+            $DRY_RUN_FLAG
+
+      - name: Publish @tonconnect/sdk
+        if: steps.check_versions.outputs.sdk_exists == 'false'
+        run: |
+          DRY_RUN_FLAG=""
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            DRY_RUN_FLAG="--dry-run"
+            echo "🏜️ DRY RUN mode"
+          fi
+          pnpm publish \
+            --filter="@tonconnect/sdk" \
+            --access=public \
+            --publish-branch="${{ steps.check_versions.outputs.branch_name }}" \
+            --tag=${{ steps.check_versions.outputs.sdk_tag }} \
+            --provenance \
+            --verbose \
+            $DRY_RUN_FLAG
+
+      - name: Publish @tonconnect/ui
+        if: steps.check_versions.outputs.ui_exists == 'false'
+        run: |
+          DRY_RUN_FLAG=""
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            DRY_RUN_FLAG="--dry-run"
+            echo "🏜️ DRY RUN mode"
+          fi
+          pnpm publish \
+            --filter="@tonconnect/ui" \
+            --access=public \
+            --publish-branch="${{ steps.check_versions.outputs.branch_name }}" \
+            --tag=${{ steps.check_versions.outputs.ui_tag }} \
+            --provenance \
+            --verbose \
+            $DRY_RUN_FLAG
+
+      - name: Publish @tonconnect/ui-react
+        if: steps.check_versions.outputs.ui_react_exists == 'false'
+        run: |
+          DRY_RUN_FLAG=""
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            DRY_RUN_FLAG="--dry-run"
+            echo "🏜️ DRY RUN mode"
+          fi
+          pnpm publish \
+            --filter="@tonconnect/ui-react" \
+            --access=public \
+            --publish-branch="${{ steps.check_versions.outputs.branch_name }}" \
+            --tag=${{ steps.check_versions.outputs.ui_react_tag }} \
+            --provenance \
+            --verbose \
+            $DRY_RUN_FLAG
+
+      - name: Create Release Draft
+        if: inputs.dry_run != 'true'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.check_versions.outputs.release_version }}
+          name: Release v${{ steps.check_versions.outputs.release_version }}
+          draft: true
+          files: |
+            release-artifacts/tonconnect-protocol-*.tgz
+            release-artifacts/tonconnect-sdk-*.tgz
+            release-artifacts/tonconnect-ui-*.tgz
+            release-artifacts/tonconnect-ui-react-*.tgz
+            release-artifacts/tonconnect-isomorphic-eventsource-*.tgz
+            release-artifacts/tonconnect-isomorphic-fetch-*.tgz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
