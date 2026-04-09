@@ -72,7 +72,8 @@ import {
     validateSendTransactionRequest,
     validateSignDataPayload,
     validateConnectAdditionalRequest,
-    validateTonProofItemReply
+    validateTonProofItemReply,
+    validateSignMessageRequest
 } from './validation/schemas';
 import { isQaModeEnabled } from './utils/qa-mode';
 import { normalizeBase64 } from './utils/base64';
@@ -718,7 +719,7 @@ export class TonConnect implements ITonConnect {
             throw new TonConnectError('Message signing was aborted');
         }
 
-        const validationError = validateSendTransactionRequest(message);
+        const validationError = validateSignMessageRequest(message);
         if (validationError) {
             if (isQaModeEnabled()) {
                 console.error('SignMessageRequest validation failed: ' + validationError);
