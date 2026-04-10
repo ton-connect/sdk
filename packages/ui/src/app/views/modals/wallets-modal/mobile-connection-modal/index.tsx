@@ -172,7 +172,7 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
             clearTimeout(isCopiedShown());
         }
 
-        await copyToClipboard(getUniversalLink(true));
+        await copyToClipboard(getUniversalLink(false));
         const timeoutId = setTimeout(() => setIsCopiedShown(undefined), 1500);
         setIsCopiedShown(timeoutId);
     };
