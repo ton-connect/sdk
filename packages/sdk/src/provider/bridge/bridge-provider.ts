@@ -22,10 +22,8 @@ import { BridgeIncomingMessage } from 'src/provider/bridge/models/bridge-incommi
 import { BridgePartialSession, BridgeSession } from 'src/provider/bridge/models/bridge-session';
 import { HTTPProvider } from 'src/provider/provider';
 import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
-import { Optional, OptionalTraceable, Traceable, WithoutId } from 'src/utils/types';
-import { PROTOCOL_VERSION } from 'src/resources/protocol';
+import { Optional, OptionalTraceable, WithoutId } from 'src/utils/types';
 import { logDebug, logError } from 'src/utils/log';
-import { encodeTelegramUrlParameters, isTelegramUrl } from 'src/utils/url';
 import { callForSuccess } from 'src/utils/call-for-success';
 import { createAbortController } from 'src/utils/create-abort-controller';
 import { AnalyticsManager } from 'src/analytics/analytics-manager';
@@ -34,7 +32,7 @@ import { BridgeClientEvent } from 'src/analytics/types';
 import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet/traceable-events';
 import { UUIDv7 } from 'src/utils/uuid';
 import { waitForSome } from 'src/utils/promise';
-import { toBase64Url } from 'src/utils/base64';
+import { generateUniversalLink } from 'src/provider/bridge/universal-link';
 
 export class BridgeProvider implements HTTPProvider {
     public static async fromStorage(
@@ -148,7 +146,11 @@ export class BridgeProvider implements HTTPProvider {
                 ? this.walletConnectionSource.universalLink
                 : this.standardUniversalLink;
 
-        return this.generateUniversalLink(universalLink, message, { traceId }, options?.appRequest);
+        return generateUniversalLink(universalLink, message, {
+            traceId,
+            sessionId: this.session!.sessionCrypto.sessionId,
+            appRequest: options?.appRequest
+        });
     }
 
     public async restoreConnection(
@@ -532,75 +534,6 @@ export class BridgeProvider implements HTTPProvider {
     private async removeBridgeAndSession(): Promise<void> {
         this.closeConnection();
         await this.connectionStorage.removeConnection();
-    }
-
-    private generateUniversalLink(
-        universalLink: string,
-        message: ConnectRequest,
-        options: Traceable,
-        appRequest?: AppWireRequest
-    ): string {
-        if (isTelegramUrl(universalLink)) {
-            return this.generateTGUniversalLink(universalLink, message, options, appRequest);
-        }
-
-        return this.generateRegularUniversalLink(universalLink, message, options, appRequest);
-    }
-
-    private generateRegularUniversalLink(
-        universalLink: string,
-        message: ConnectRequest,
-        options: Traceable,
-        appRequest?: AppWireRequest
-    ): string {
-        const url = new URL(universalLink);
-        url.searchParams.append('v', PROTOCOL_VERSION.toString());
-        url.searchParams.append('id', this.session!.sessionCrypto.sessionId);
-        url.searchParams.append('trace_id', options.traceId);
-        url.searchParams.append('r', JSON.stringify(message));
-        if (appRequest) {
-            url.searchParams.append(
-                'req',
-                toBase64Url(Base64.encode(JSON.stringify(appRequest), false))
-            );
-        }
-        return url.toString();
-    }
-
-    private generateTGUniversalLink(
-        universalLink: string,
-        message: ConnectRequest,
-        options: Traceable,
-        appRequest?: AppWireRequest
-    ): string {
-        const urlToWrap = this.generateRegularUniversalLink(
-            'about:blank',
-            message,
-            options,
-            appRequest
-        );
-        const linkParams = urlToWrap.split('?')[1]!;
-
-        const startapp = 'tonconnect-' + encodeTelegramUrlParameters(linkParams);
-
-        // TODO: Remove this line after all dApps and the wallets-list.json have been updated
-        const updatedUniversalLink = this.convertToDirectLink(universalLink);
-
-        const url = new URL(updatedUniversalLink);
-        url.searchParams.append('startapp', startapp);
-        return url.toString();
-    }
-
-    // TODO: Remove this method after all dApps and the wallets-list.json have been updated
-    private convertToDirectLink(universalLink: string): string {
-        const url = new URL(universalLink);
-
-        if (url.searchParams.has('attach')) {
-            url.searchParams.delete('attach');
-            url.pathname += '/start';
-        }
-
-        return url.toString();
     }
 
     private async openGateways(
