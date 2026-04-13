@@ -12,6 +12,7 @@ import {
 
 import { TonApiClient } from '@ton-api/client';
 import { JettonItem, TonConnectUI } from '@tonconnect/ui-react';
+import { retry } from '../../utils/retry';
 
 const ta = new TonApiClient({
     baseUrl: 'https://tonapi.io'
@@ -128,10 +129,14 @@ export async function sendItems(
         )
         .endCell();
 
-    return await ta.gasless.gaslessSend({
-        walletPublicKey: publicKey,
-        boc: extMessage
-    });
+    return await retry(
+        () =>
+            ta.gasless.gaslessSend({
+                walletPublicKey: publicKey,
+                boc: extMessage
+            }),
+        { delay: 2000, retries: 5 }
+    );
 }
 
 async function printConfigAndReturnRelayAddress(): Promise<Address> {
