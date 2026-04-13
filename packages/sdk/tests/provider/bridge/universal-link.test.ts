@@ -7,7 +7,7 @@ describe.each(CASES)(
     'generateUniversalLink — $label',
     ({ universalLink, sessionId, traceId, connectRequest, txRequest, maxLength }) => {
         const buildUrl = () => {
-            const appRequest =
+            const embeddedRequest =
                 txRequest !== null
                     ? wireRequestParser.convertToWireRequest({
                           method: 'sendTransaction',
@@ -18,7 +18,7 @@ describe.each(CASES)(
             return generateUniversalLink(universalLink, connectRequest, {
                 sessionId,
                 traceId,
-                appRequest
+                embeddedRequest
             });
         };
 

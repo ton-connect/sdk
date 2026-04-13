@@ -1,6 +1,9 @@
-export type AppWireRequest = AppWireSendTransaction | AppWireSignMessage | AppWireSignData;
+export type EmbeddedWireRequest =
+    | EmbeddedWireSendTransaction
+    | EmbeddedWireSignMessage
+    | EmbeddedWireSignData;
 
-export interface AppWireSendTransaction {
+export interface EmbeddedWireSendTransaction {
     /** from address */
     f?: string;
     /** network (chain id) */
@@ -15,7 +18,7 @@ export interface AppWireSendTransaction {
     i?: WireItem[];
 }
 
-export interface AppWireSignMessage {
+export interface EmbeddedWireSignMessage {
     /** from address */
     f?: string;
     /** network (chain id) */
@@ -32,7 +35,7 @@ export interface AppWireSignMessage {
 
 // ── SignData payload ───────────────────────────────────────────────
 
-export type AppWireSignData = {
+export type EmbeddedWireSignData = {
     /** method: signData */
     m: 'sd';
     /** network */

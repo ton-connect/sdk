@@ -65,14 +65,14 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
         let wasEmpty = !!link;
 
         if (!link) {
-            const appRequest =
-                'appRequest' in props.walletModalState
-                    ? props.walletModalState.appRequest
+            const embeddedRequest =
+                'embeddedRequest' in props.walletModalState
+                    ? props.walletModalState.embeddedRequest
                     : undefined;
 
             link = connector.connect(walletsBridges(), props.additionalRequest, {
                 traceId: props.walletModalState.traceId,
-                appRequest: appRequest?.consume()
+                embeddedRequest: embeddedRequest?.consume()
             });
         }
 
@@ -134,8 +134,10 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
             throw new TonConnectUIError('@wallet bot not found in the wallets list');
         }
 
-        const appRequest =
-            'appRequest' in props.walletModalState ? props.walletModalState.appRequest : undefined;
+        const embeddedRequest =
+            'embeddedRequest' in props.walletModalState
+                ? props.walletModalState.embeddedRequest
+                : undefined;
 
         const walletLink = connector.connect(
             {
@@ -143,7 +145,7 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
                 universalLink: atWallet.universalLink
             },
             props.additionalRequest,
-            { traceId: props.walletModalState.traceId, appRequest: appRequest?.consume() }
+            { traceId: props.walletModalState.traceId, embeddedRequest: embeddedRequest?.consume() }
         );
 
         const forceRedirect = !firstClick();

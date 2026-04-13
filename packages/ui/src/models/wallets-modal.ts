@@ -1,11 +1,11 @@
-import { AppRichRequest, FeatureName, OptionalTraceable, RequiredFeatures } from '@tonconnect/sdk';
+import { EmbeddedRequest, FeatureName, OptionalTraceable, RequiredFeatures } from '@tonconnect/sdk';
 import { Consumable } from 'src/utils/consumable';
 
 export interface WalletsModal {
     /**
      * Open the modal.
      */
-    open: (options?: OptionalTraceable<{ appRequest?: Consumable<AppRichRequest> }>) => void;
+    open: (options?: OptionalTraceable<{ embeddedRequest?: Consumable<EmbeddedRequest> }>) => void;
 
     /**
      * Close the modal.
@@ -42,7 +42,7 @@ export type WalletModalOpened = {
      * Embedded deep link request to include in the connect URL.
      * Present only when the modal was opened via `initiateDeepLinkFlow`.
      */
-    appRequest?: Consumable<AppRichRequest> | null;
+    embeddedRequest?: Consumable<EmbeddedRequest> | null;
 };
 
 /**

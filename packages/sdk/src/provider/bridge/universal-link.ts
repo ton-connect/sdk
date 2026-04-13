@@ -1,6 +1,6 @@
 import { Base64, ConnectRequest } from '@tonconnect/protocol';
 import { Traceable } from 'src/utils/types';
-import { AppWireRequest } from 'src/models';
+import { EmbeddedWireRequest } from 'src/models';
 import { encodeTelegramUrlParameters, isTelegramUrl } from 'src/utils/url';
 import { PROTOCOL_VERSION } from 'src/resources/protocol';
 import { toBase64Url } from 'src/utils/base64';
@@ -8,7 +8,7 @@ import { toBase64Url } from 'src/utils/base64';
 export function generateUniversalLink(
     universalLink: string,
     message: ConnectRequest,
-    options: Traceable<{ sessionId: string; appRequest?: AppWireRequest }>
+    options: Traceable<{ sessionId: string;             embeddedRequest?: EmbeddedWireRequest }>
 ): string {
     if (isTelegramUrl(universalLink)) {
         return generateTGUniversalLink(universalLink, message, options);
@@ -20,17 +20,17 @@ export function generateUniversalLink(
 function generateRegularUniversalLink(
     universalLink: string,
     message: ConnectRequest,
-    options: Traceable<{ sessionId: string; appRequest?: AppWireRequest }>
+    options: Traceable<{ sessionId: string;             embeddedRequest?: EmbeddedWireRequest }>
 ): string {
     const url = new URL(universalLink);
     url.searchParams.append('v', PROTOCOL_VERSION.toString());
     url.searchParams.append('id', options.sessionId);
     url.searchParams.append('trace_id', options.traceId);
     url.searchParams.append('r', JSON.stringify(message));
-    if (options.appRequest) {
+    if (options.embeddedRequest) {
         url.searchParams.append(
             'req',
-            toBase64Url(Base64.encode(JSON.stringify(options.appRequest), false))
+            toBase64Url(Base64.encode(JSON.stringify(options.embeddedRequest), false))
         );
     }
     return url.toString();
@@ -39,7 +39,7 @@ function generateRegularUniversalLink(
 function generateTGUniversalLink(
     universalLink: string,
     message: ConnectRequest,
-    options: Traceable<{ sessionId: string; appRequest?: AppWireRequest }>
+    options: Traceable<{ sessionId: string;             embeddedRequest?: EmbeddedWireRequest }>
 ): string {
     const urlToWrap = generateRegularUniversalLink('about:blank', message, options);
     const linkParams = urlToWrap.split('?')[1]!;

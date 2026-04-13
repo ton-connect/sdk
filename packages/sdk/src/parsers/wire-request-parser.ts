@@ -1,7 +1,7 @@
 import {
     AppRequestResponse,
-    AppRichRequest,
-    AppWireRequest,
+    EmbeddedRequest,
+    EmbeddedWireRequest,
     hasItems,
     SendTransactionRequest,
     SendTransactionRequestWithItems,
@@ -12,7 +12,7 @@ import {
 } from 'src/models';
 import { normalizeBase64 } from 'src/utils/base64';
 
-function buildAppRequestPayload(richRequest: AppRichRequest): AppWireRequest {
+function buildAppRequestPayload(richRequest: EmbeddedRequest): EmbeddedWireRequest {
     switch (richRequest.method) {
         case 'sendTransaction': {
             const tx = richRequest.request;
@@ -133,7 +133,7 @@ import {
 import { WithoutId } from 'src/utils/types';
 
 export class WireRequestParser {
-    convertToWireRequest(request: AppRichRequest): AppWireRequest {
+    convertToWireRequest(request: EmbeddedRequest): EmbeddedWireRequest {
         return buildAppRequestPayload(request);
     }
 
@@ -144,7 +144,7 @@ export class WireRequestParser {
     }
 
     convertFromRpcResponse(
-        method: AppRichRequest['method'],
+        method: EmbeddedRequest['method'],
         response: WalletResponse<RpcMethod>
     ): AppRequestResponse {
         if (this.isError(response)) {

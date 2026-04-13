@@ -1,6 +1,6 @@
 import {
     Account,
-    AppRichRequest,
+    EmbeddedRequest,
     BrowserEventDispatcher,
     ConnectAdditionalRequest,
     OptionalTraceable,
@@ -835,18 +835,18 @@ export class TonConnectUI {
     }
 
     private async initiateDeepLinkFlow<TResponse>(
-        appRequest: AppRichRequest,
+        embeddedRequest: EmbeddedRequest,
         handlers: BridgeFlowHandlers<TResponse>,
         action: BridgeFlowAction,
         options: PickRequired<ActionOptions<TResponse>, 'traceId' | 'onConnected'>
     ): Promise<TResponse> {
-        const consumable = new Consumable(appRequest);
+        const consumable = new Consumable(embeddedRequest);
 
         const abortController = new AbortController();
 
         await this.modal.open({
             traceId: options.traceId,
-            appRequest: consumable
+            embeddedRequest: consumable
         });
 
         const unsubscribe = this.onModalStateChange(state => {
@@ -866,7 +866,7 @@ export class TonConnectUI {
             traceId: options.traceId
         });
 
-        const response = connectedWallet.appRequestResponse;
+        const response = connectedWallet.embeddedResponse;
         if (response) {
             if (!response.ok) {
                 throw new TonConnectUIError(

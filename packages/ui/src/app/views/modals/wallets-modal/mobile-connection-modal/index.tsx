@@ -90,9 +90,9 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
         let wasEmpty = !!link;
 
         if (!link) {
-            const appRequest =
-                props.walletsModalState && 'appRequest' in props.walletsModalState
-                    ? props.walletsModalState.appRequest
+            const embeddedRequest =
+                props.walletsModalState && 'embeddedRequest' in props.walletsModalState
+                    ? props.walletsModalState.embeddedRequest
                     : undefined;
 
             link = connector.connect(
@@ -103,7 +103,7 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
                 props.additionalRequest,
                 {
                     traceId: props.walletsModalState?.traceId,
-                    appRequest: appRequest?.consume()
+                    embeddedRequest: embeddedRequest?.consume()
                 }
             );
         }

@@ -6,7 +6,7 @@ import {
 } from 'src/app/state/modals-state';
 import { createEffect, on } from 'solid-js';
 import {
-    AppRichRequest,
+    EmbeddedRequest,
     ConnectAdditionalRequest,
     isConnectUrl,
     isWalletInfoCurrentlyEmbedded,
@@ -147,7 +147,7 @@ export class WalletsModalManager implements WalletsModal {
      * Opens the modal window.
      */
     public async open(
-        options?: OptionalTraceable<{ appRequest?: Consumable<AppRichRequest> }>
+        options?: OptionalTraceable<{ embeddedRequest?: Consumable<EmbeddedRequest> }>
     ): Promise<void> {
         const traceId = options?.traceId ?? UUIDv7();
 
@@ -158,7 +158,7 @@ export class WalletsModalManager implements WalletsModal {
         if (embeddedWallet) {
             return this.connectEmbeddedWallet(embeddedWallet, { traceId });
         } else {
-            return this.openWalletsModal({ traceId, appRequest: options?.appRequest });
+            return this.openWalletsModal({ traceId, embeddedRequest: options?.embeddedRequest });
         }
     }
 
@@ -213,7 +213,7 @@ export class WalletsModalManager implements WalletsModal {
      * @internal
      */
     private async openWalletsModal(
-        options: Traceable & { appRequest?: Consumable<AppRichRequest> }
+        options: Traceable & { embeddedRequest?: Consumable<EmbeddedRequest> }
     ): Promise<void> {
         if (isInTMA()) {
             sendExpand();
@@ -221,7 +221,7 @@ export class WalletsModalManager implements WalletsModal {
 
         widgetController.openWalletsModal({
             traceId: options.traceId,
-            appRequest: options.appRequest
+            embeddedRequest: options.embeddedRequest
         });
 
         return new Promise<void>(resolve => {

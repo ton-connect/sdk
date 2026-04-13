@@ -2,7 +2,7 @@ import { ChainId } from '@tonconnect/protocol';
 import { TonConnectError } from 'src/errors';
 import {
     Account,
-    AppRichRequest,
+    EmbeddedRequest,
     SignMessageRequest,
     Wallet,
     WalletConnectionSource,
@@ -66,7 +66,7 @@ export interface ITonConnect {
         options?: OptionalTraceable<{
             openingDeadlineMS?: number;
             signal?: AbortSignal;
-            appRequest?: AppRichRequest;
+            embeddedRequest?: EmbeddedRequest;
         }>
     ): T extends WalletConnectionSourceJS
         ? void

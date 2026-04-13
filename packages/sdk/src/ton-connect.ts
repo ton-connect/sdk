@@ -25,7 +25,7 @@ import {
 } from 'src/errors/wallet';
 import {
     Account,
-    AppRichRequest,
+    EmbeddedRequest,
     RequiredFeatures,
     Wallet,
     WalletConnectionSource,
@@ -84,7 +84,7 @@ import {
     validateConnectAdditionalRequest,
     validateTonProofItemReply,
     validateSignMessageRequest,
-    validateAppRichRequest
+    validateEmbeddedRequest
 } from './validation/schemas';
 import { isQaModeEnabled } from './utils/qa-mode';
 import { normalizeBase64 } from './utils/base64';
@@ -154,7 +154,7 @@ export class TonConnect implements ITonConnect {
 
     private abortController?: AbortController;
 
-    private pendingAppRequestMethod?: AppRichRequest['method'];
+    private pendingEmbeddedRequestMethod?: EmbeddedRequest['method'];
 
     /**
      * Shows if the wallet is connected right now.
@@ -277,7 +277,7 @@ export class TonConnect implements ITonConnect {
             request?: ConnectAdditionalRequest;
             openingDeadlineMS?: number;
             signal?: AbortSignal;
-            appRequest?: AppRichRequest;
+            embeddedRequest?: EmbeddedRequest;
         }>
     ): T extends WalletConnectionSourceJS
         ? void
@@ -293,7 +293,7 @@ export class TonConnect implements ITonConnect {
         options?: OptionalTraceable<{
             openingDeadlineMS?: number;
             signal?: AbortSignal;
-            appRequest?: AppRichRequest;
+            embeddedRequest?: EmbeddedRequest;
         }>
     ): T extends WalletConnectionSourceJS
         ? void
@@ -309,12 +309,12 @@ export class TonConnect implements ITonConnect {
                   request?: ConnectAdditionalRequest;
                   openingDeadlineMS?: number;
                   signal?: AbortSignal;
-                  appRequest?: AppRichRequest;
+                  embeddedRequest?: EmbeddedRequest;
               }>,
         additionalOptions?: OptionalTraceable<{
             openingDeadlineMS?: number;
             signal?: AbortSignal;
-            appRequest?: AppRichRequest;
+            embeddedRequest?: EmbeddedRequest;
         }>
     ): void | string {
         // TODO: remove deprecated method
@@ -322,7 +322,7 @@ export class TonConnect implements ITonConnect {
             request?: ConnectAdditionalRequest;
             openingDeadlineMS?: number;
             signal?: AbortSignal;
-            appRequest?: AppRichRequest;
+            embeddedRequest?: EmbeddedRequest;
         }> = {
             ...additionalOptions
         };
@@ -346,7 +346,7 @@ export class TonConnect implements ITonConnect {
             options.request = requestOrOptions?.request;
             options.openingDeadlineMS = requestOrOptions?.openingDeadlineMS;
             options.signal = requestOrOptions?.signal;
-            options.appRequest = requestOrOptions?.appRequest;
+            options.embeddedRequest = requestOrOptions?.embeddedRequest;
         }
 
         if (options.request) {
@@ -361,14 +361,14 @@ export class TonConnect implements ITonConnect {
                 }
             }
         }
-        if (options.appRequest) {
-            const validationError = validateAppRichRequest(options.appRequest);
+        if (options.embeddedRequest) {
+            const validationError = validateEmbeddedRequest(options.embeddedRequest);
             if (validationError) {
                 if (isQaModeEnabled()) {
-                    console.error('AppRichRequest validation failed: ' + validationError);
+                    console.error('EmbeddedRequest validation failed: ' + validationError);
                 } else {
                     throw new TonConnectError(
-                        'AppRichRequest validation failed: ' + validationError
+                        'EmbeddedRequest validation failed: ' + validationError
                     );
                 }
             }
@@ -397,17 +397,17 @@ export class TonConnect implements ITonConnect {
         const traceId = options?.traceId ?? UUIDv7();
         this.tracker.trackConnectionStarted(traceId);
 
-        const wireAppRequest = options?.appRequest
-            ? wireRequestParser.convertToWireRequest(options.appRequest)
+        const wireEmbeddedRequest = options?.embeddedRequest
+            ? wireRequestParser.convertToWireRequest(options.embeddedRequest)
             : undefined;
 
-        this.pendingAppRequestMethod = options?.appRequest?.method;
+        this.pendingEmbeddedRequestMethod = options?.embeddedRequest?.method;
 
         return this.provider.connect(this.createConnectRequest(options?.request), {
             openingDeadlineMS: options?.openingDeadlineMS,
             signal: abortController.signal,
             traceId,
-            appRequest: wireAppRequest
+            embeddedRequest: wireEmbeddedRequest
         });
     }
 
@@ -1153,8 +1153,8 @@ export class TonConnect implements ITonConnect {
         connectEvent: ConnectEventSuccess['payload'],
         options: Traceable<{ response?: WalletResponse<RpcMethod> }>
     ): void {
-        const method = this.pendingAppRequestMethod;
-        this.pendingAppRequestMethod = undefined;
+        const method = this.pendingEmbeddedRequestMethod;
+        this.pendingEmbeddedRequestMethod = undefined;
 
         const tonAccountItem: TonAddressItemReply | undefined = connectEvent.items.find(
             item => item.name === 'ton_addr'
@@ -1262,7 +1262,7 @@ export class TonConnect implements ITonConnect {
         }
 
         if (options.response && method) {
-            wallet.appRequestResponse = wireRequestParser.convertFromRpcResponse(
+            wallet.embeddedResponse = wireRequestParser.convertFromRpcResponse(
                 method,
                 options.response
             );

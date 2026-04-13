@@ -14,7 +14,7 @@ import App from './App';
 import { WalletInfoWithOpenMethod, WalletOpenMethod } from 'src/models/connected-wallet';
 import { WalletsModalCloseReason } from 'src/models';
 import {
-    AppRichRequest,
+    EmbeddedRequest,
     OptionalTraceable,
     Traceable,
     WalletInfoRemote,
@@ -24,14 +24,14 @@ import { Consumable } from 'src/utils/consumable';
 
 export const widgetController = {
     openWalletsModal: (
-        options?: OptionalTraceable<{ appRequest?: Consumable<AppRichRequest> }>
+        options?: OptionalTraceable<{ embeddedRequest?: Consumable<EmbeddedRequest> }>
     ): void =>
         void setTimeout(() =>
             setWalletsModalState(prev => ({
                 status: 'opened',
                 traceId: options?.traceId ?? prev?.traceId,
                 closeReason: null,
-                appRequest: options?.appRequest
+                embeddedRequest: options?.embeddedRequest
             }))
         ),
     closeWalletsModal: (reason: WalletsModalCloseReason): void =>

@@ -50,7 +50,7 @@ export interface UniversalLinkCase {
     sessionId: string;
     traceId: string;
     connectRequest: ConnectRequest;
-    /** null → connect-only (no appRequest / no req param). */
+    /** null → connect-only (no embeddedRequest / no req param). */
     txRequest: SendTransactionRequest | null;
     /** Upper bound for URL length (guards against accidental URL bloat). */
     maxLength: number;
@@ -221,7 +221,7 @@ export const CASES: UniversalLinkCase[] = [
         maxLength: MAX_LENGTH
     },
     {
-        label: 'connect-only (no appRequest)',
+        label: 'connect-only (no embeddedRequest)',
         universalLink: STANDARD_LINK,
         sessionId: SESSION_ID,
         traceId: TRACE_ID,
@@ -310,7 +310,7 @@ export const CASES: UniversalLinkCase[] = [
         maxLength: MAX_LENGTH
     },
     {
-        label: 'Telegram attach link — connect-only (no appRequest)',
+        label: 'Telegram attach link — connect-only (no embeddedRequest)',
         universalLink: TG_ATTACH_LINK,
         sessionId: SESSION_ID,
         traceId: TRACE_ID,
@@ -387,7 +387,7 @@ export const CASES: UniversalLinkCase[] = [
         maxLength: MAX_LENGTH
     },
     {
-        label: 'no-proof: Telegram attach link — connect-only (no appRequest)',
+        label: 'no-proof: Telegram attach link — connect-only (no embeddedRequest)',
         universalLink: TG_ATTACH_LINK,
         sessionId: SESSION_ID,
         traceId: TRACE_ID,

@@ -35,8 +35,8 @@ export interface Wallet {
 
     /**
      * Response to the embedded app request (deep link request).
-     * Present only if an AppRichRequest was embedded in the connect URL
+     * Present only if an EmbeddedRequest was embedded in the connect URL
      * and the wallet processed it during connection.
      */
-    appRequestResponse?: AppRequestResponse;
+    embeddedResponse?: AppRequestResponse;
 }

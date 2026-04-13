@@ -11,7 +11,7 @@ import {
     WalletResponse
 } from '@tonconnect/protocol';
 import { TonConnectError } from 'src/errors/ton-connect.error';
-import { AppWireRequest } from 'src/models/methods';
+import { EmbeddedWireRequest } from 'src/models/methods';
 import { WalletConnectionSourceHTTP } from 'src/models/wallet/wallet-connection-source';
 import { BridgeGateway } from 'src/provider/bridge/bridge-gateway';
 import {
@@ -93,7 +93,7 @@ export class BridgeProvider implements HTTPProvider {
         options?: OptionalTraceable<{
             openingDeadlineMS?: number;
             signal?: AbortSignal;
-            appRequest?: AppWireRequest;
+            embeddedRequest?: EmbeddedWireRequest;
         }>
     ): string {
         const traceId = options?.traceId ?? UUIDv7();
@@ -150,7 +150,7 @@ export class BridgeProvider implements HTTPProvider {
         return generateUniversalLink(universalLink, message, {
             traceId,
             sessionId: this.session!.sessionCrypto.sessionId,
-            appRequest: options?.appRequest
+            embeddedRequest: options?.embeddedRequest
         });
     }
 

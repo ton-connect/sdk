@@ -457,7 +457,7 @@ export function validateConnectAdditionalRequest(data: unknown): ValidationResul
     return null;
 }
 
-export function validateAppRichRequest(data: unknown) {
+export function validateEmbeddedRequest(data: unknown) {
     if (!isValidObject(data)) {
         return 'Request must be an object';
     }
