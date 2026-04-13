@@ -121,7 +121,7 @@ export function TxForm() {
                     checked={withConnect}
                     onChange={e => setWithConnect(e.target.checked)}
                 />
-                With connect
+                Embed request in connect
             </label>
 
             <ReactJson
