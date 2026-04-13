@@ -146,6 +146,7 @@ export class BridgeProvider implements HTTPProvider {
                 ? this.walletConnectionSource.universalLink
                 : this.standardUniversalLink;
 
+        // TODO: add 1024 or 2048 limit
         return generateUniversalLink(universalLink, message, {
             traceId,
             sessionId: this.session!.sessionCrypto.sessionId,
