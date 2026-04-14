@@ -3,7 +3,8 @@ import {
     isTelegramUrl,
     WalletInfoRemote,
     WalletWrongNetworkError,
-    WalletMissingRequiredFeaturesError
+    WalletMissingRequiredFeaturesError,
+    checkRequiredWalletFeatures
 } from '@tonconnect/sdk';
 import {
     Component,
@@ -90,8 +91,15 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
         let wasEmpty = !!link;
 
         if (!link) {
+            const hasEmbeddedRequestFeature = checkRequiredWalletFeatures(
+                props.wallet.features ?? [],
+                { embeddedRequest: {} }
+            );
+
             const embeddedRequest =
-                props.walletsModalState && 'embeddedRequest' in props.walletsModalState
+                hasEmbeddedRequestFeature &&
+                props.walletsModalState &&
+                'embeddedRequest' in props.walletsModalState
                     ? props.walletsModalState.embeddedRequest
                     : undefined;
 

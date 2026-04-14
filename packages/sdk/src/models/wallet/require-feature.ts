@@ -10,6 +10,7 @@ export type RequiredFeatures = {
     sendTransaction?: RequiredSendTransactionFeature;
     signData?: RequiredSignDataFeature;
     signMessage?: RequiredSignMessageFeature;
+    embeddedRequest?: RequiredEmbeddedRequestFeature;
 };
 
 /**
@@ -61,3 +62,8 @@ export type RequiredSignMessageFeature = {
      */
     itemTypes?: StructuredItemType[];
 };
+
+/**
+ * Required features for the embedded request feature.
+ */
+export type RequiredEmbeddedRequestFeature = {};

@@ -211,7 +211,7 @@ export function checkRequiredWalletFeatures(
         return true;
     }
 
-    const { sendTransaction, signData, signMessage } = walletsRequiredFeatures;
+    const { sendTransaction, signData, signMessage, embeddedRequest } = walletsRequiredFeatures;
 
     if (sendTransaction) {
         const feature = findFeature(features, 'SendTransaction');
@@ -242,6 +242,13 @@ export function checkRequiredWalletFeatures(
         }
 
         if (!checkSignMessage(feature, signMessage)) {
+            return false;
+        }
+    }
+
+    if (embeddedRequest) {
+        const feature = findFeature(features, 'EmbeddedRequest');
+        if (!feature) {
             return false;
         }
     }

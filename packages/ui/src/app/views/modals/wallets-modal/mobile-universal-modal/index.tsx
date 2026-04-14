@@ -1,4 +1,8 @@
-import { ConnectAdditionalRequest, isWalletInfoRemote } from '@tonconnect/sdk';
+import {
+    ConnectAdditionalRequest,
+    isWalletInfoRemote,
+    checkRequiredWalletFeatures
+} from '@tonconnect/sdk';
 import { Component, createMemo, createSignal, For, Show } from 'solid-js';
 import { AtWalletIcon, FourWalletsItem, QRIcon, WalletItem } from 'src/app/components';
 import {
@@ -134,8 +138,12 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
             throw new TonConnectUIError('@wallet bot not found in the wallets list');
         }
 
+        const walletSupportsEmbeddedRequest = checkRequiredWalletFeatures(atWallet.features ?? [], {
+            embeddedRequest: {}
+        });
+
         const embeddedRequest =
-            'embeddedRequest' in props.walletModalState
+            walletSupportsEmbeddedRequest && 'embeddedRequest' in props.walletModalState
                 ? props.walletModalState.embeddedRequest
                 : undefined;
 
