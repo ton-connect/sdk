@@ -2,7 +2,8 @@ export type Feature =
     | SendTransactionFeatureDeprecated
     | SendTransactionFeature
     | SignDataFeature
-    | SignMessageFeature;
+    | SignMessageFeature
+    | EmbeddedRequestFeature;
 
 export type FeatureName = Exclude<Feature, 'SendTransaction'>['name'];
 
@@ -27,3 +28,5 @@ export type SignMessageFeature = {
     extraCurrencySupported?: boolean;
     itemTypes?: StructuredItemType[];
 };
+
+export type EmbeddedRequestFeature = { name: 'EmbeddedRequest' };

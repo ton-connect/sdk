@@ -10,6 +10,7 @@ export {
     SignDataType,
     SignDataFeature,
     SignMessageFeature,
+    EmbeddedRequestFeature,
     StructuredItemType
 } from './feature';
 export { CHAIN, ChainId } from './CHAIN';
