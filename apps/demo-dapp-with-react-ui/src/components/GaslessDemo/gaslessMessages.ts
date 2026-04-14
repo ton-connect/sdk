@@ -37,7 +37,7 @@ export async function sendMessages(
     const walletAddress = Address.parse(tonConnectUi.wallet.account.address);
     const publicKey = tonConnectUi.wallet.account.publicKey;
 
-    console.log({ walletAddress, publicKey });
+    console.debug({ walletAddress, publicKey });
     const jettonWalletAddressResult = await ta.blockchain.execGetMethodForBlockchainAccount(
         usdtMaster,
         'get_wallet_address',
@@ -45,12 +45,12 @@ export async function sendMessages(
             args: [walletAddress.toString()]
         }
     );
-    console.log('jettonWalletAddressResult', jettonWalletAddressResult);
+    console.debug('jettonWalletAddressResult', jettonWalletAddressResult);
     const jettonWallet = Address.parse(jettonWalletAddressResult.decoded.jetton_wallet_address);
 
-    console.log('re');
+    console.debug('re');
     const relayerAddress = await printConfigAndReturnRelayAddress();
-    console.log('relayerAddress', relayerAddress);
+    console.debug('relayerAddress', relayerAddress);
     const tetherTransferPayload = beginCell()
         .storeUint(OP_CODES.JETTON_TRANSFER, 32)
         .storeUint(0, 64)
@@ -81,7 +81,7 @@ export async function sendMessages(
         messages: [{ boc: messageToEstimate }]
     });
 
-    console.log('Estimated transfer:', params);
+    console.debug('Estimated transfer:', params);
 
     const { internalBoc } = await tonConnectUi.signMessage({
         validUntil: Math.ceil(Date.now() / 1000) + 5 * 60,
@@ -92,7 +92,7 @@ export async function sendMessages(
             stateInit: message.stateInit?.toBoc()?.toString('base64')
         }))
     });
-    console.log('internalBoc', internalBoc);
+    console.debug('internalBoc', internalBoc);
 
     const {
         info: { dest },
@@ -125,9 +125,9 @@ export async function sendMessages(
 async function printConfigAndReturnRelayAddress(): Promise<Address> {
     const cfg = await ta.gasless.gaslessConfig();
 
-    console.log('Available jettons for gasless transfer');
-    console.log(cfg.gasJettons.map(gasJetton => gasJetton.masterId));
+    console.debug('Available jettons for gasless transfer');
+    console.debug(cfg.gasJettons.map(gasJetton => gasJetton.masterId));
 
-    console.log(`Relay address to send fees to: ${cfg.relayAddress}`);
+    console.debug(`Relay address to send fees to: ${cfg.relayAddress}`);
     return cfg.relayAddress;
 }

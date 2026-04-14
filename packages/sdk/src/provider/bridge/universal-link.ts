@@ -8,7 +8,7 @@ import { toBase64Url } from 'src/utils/base64';
 export function generateUniversalLink(
     universalLink: string,
     message: ConnectRequest,
-    options: Traceable<{ sessionId: string;             embeddedRequest?: EmbeddedWireRequest }>
+    options: Traceable<{ sessionId: string; embeddedRequest?: EmbeddedWireRequest }>
 ): string {
     if (isTelegramUrl(universalLink)) {
         return generateTGUniversalLink(universalLink, message, options);
@@ -20,7 +20,7 @@ export function generateUniversalLink(
 function generateRegularUniversalLink(
     universalLink: string,
     message: ConnectRequest,
-    options: Traceable<{ sessionId: string;             embeddedRequest?: EmbeddedWireRequest }>
+    options: Traceable<{ sessionId: string; embeddedRequest?: EmbeddedWireRequest }>
 ): string {
     const url = new URL(universalLink);
     url.searchParams.append('v', PROTOCOL_VERSION.toString());
@@ -39,7 +39,7 @@ function generateRegularUniversalLink(
 function generateTGUniversalLink(
     universalLink: string,
     message: ConnectRequest,
-    options: Traceable<{ sessionId: string;             embeddedRequest?: EmbeddedWireRequest }>
+    options: Traceable<{ sessionId: string; embeddedRequest?: EmbeddedWireRequest }>
 ): string {
     const urlToWrap = generateRegularUniversalLink('about:blank', message, options);
     const linkParams = urlToWrap.split('?')[1]!;
