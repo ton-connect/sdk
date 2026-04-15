@@ -3,6 +3,7 @@ import {
     Base64,
     ConnectEventSuccess,
     ConnectRequest,
+    EmbeddedWireRequest,
     hexToByteArray,
     RpcMethod,
     SessionCrypto,
@@ -11,7 +12,6 @@ import {
     WalletResponse
 } from '@tonconnect/protocol';
 import { TonConnectError } from 'src/errors/ton-connect.error';
-import { EmbeddedWireRequest } from 'src/models/methods';
 import { WalletConnectionSourceHTTP } from 'src/models/wallet/wallet-connection-source';
 import { BridgeGateway } from 'src/provider/bridge/bridge-gateway';
 import {

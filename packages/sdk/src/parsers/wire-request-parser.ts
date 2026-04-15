@@ -1,16 +1,25 @@
 import {
+    RpcMethod,
+    SignDataRpcResponseSuccess,
+    SignMessageRpcResponseSuccess,
+    WalletResponse,
+    WalletResponseError,
+    EmbeddedWireRequest,
+    WireItem,
+    WireMessage
+} from '@tonconnect/protocol';
+
+import {
     AppRequestResponse,
     EmbeddedRequest,
-    EmbeddedWireRequest,
     hasItems,
     SendTransactionRequest,
     SendTransactionRequestWithItems,
     SendTransactionRequestWithMessages,
-    StructuredItem,
-    WireItem,
-    WireMessage
+    StructuredItem
 } from 'src/models';
 import { normalizeBase64 } from 'src/utils/base64';
+import { WithoutId } from 'src/utils/types';
 
 function buildAppRequestPayload(richRequest: EmbeddedRequest): EmbeddedWireRequest {
     switch (richRequest.method) {
@@ -122,15 +131,6 @@ function buildWireItem(item: StructuredItem): WireItem {
             };
     }
 }
-
-import {
-    RpcMethod,
-    SignDataRpcResponseSuccess,
-    SignMessageRpcResponseSuccess,
-    WalletResponse,
-    WalletResponseError
-} from '@tonconnect/protocol';
-import { WithoutId } from 'src/utils/types';
 
 export class WireRequestParser {
     convertToWireRequest(request: EmbeddedRequest): EmbeddedWireRequest {

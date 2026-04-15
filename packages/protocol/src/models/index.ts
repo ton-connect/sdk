@@ -14,3 +14,20 @@ export {
     StructuredItemType
 } from './feature';
 export { CHAIN, ChainId } from './CHAIN';
+export {
+    EmbeddedWireRequest,
+    EmbeddedWireSendTransaction,
+    EmbeddedWireSignMessage,
+    EmbeddedWireSignData,
+    WireMessage,
+    WireItem,
+    WireTonItem,
+    WireJettonItem,
+    WireNftItem,
+    WireSignDataText,
+    WireSignDataBinary,
+    WireSignDataCell,
+    ParsedEmbeddedRequest,
+    expandEmbeddedWireRequest,
+    parseEmbeddedRequest
+} from './embedded-request';

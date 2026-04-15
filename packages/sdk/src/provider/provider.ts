@@ -1,5 +1,4 @@
-import { AppRequest, ConnectRequest, RpcMethod } from '@tonconnect/protocol';
-import { EmbeddedWireRequest } from 'src/models/methods';
+import { AppRequest, ConnectRequest, EmbeddedWireRequest, RpcMethod } from '@tonconnect/protocol';
 import { OptionalTraceable, WithoutId } from 'src/utils/types';
 import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet/traceable-events';
 

@@ -3,7 +3,6 @@ import { SignDataPayload } from '@tonconnect/protocol';
 import { SendTransactionRequest } from './send-transaction';
 import { SignMessageRequest } from './sign-message';
 
-export * from './embedded-wire-request';
 export * from './connect';
 export * from './send-transaction';
 export * from './sign-data';

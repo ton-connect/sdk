@@ -1,6 +1,5 @@
-import { Base64, ConnectRequest } from '@tonconnect/protocol';
+import { Base64, ConnectRequest, EmbeddedWireRequest } from '@tonconnect/protocol';
 import { Traceable } from 'src/utils/types';
-import { EmbeddedWireRequest } from 'src/models';
 import { encodeTelegramUrlParameters, isTelegramUrl } from 'src/utils/url';
 import { PROTOCOL_VERSION } from 'src/resources/protocol';
 import { toBase64Url } from 'src/utils/base64';
