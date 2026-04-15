@@ -30,16 +30,56 @@ jobs:
       - name: Build docs
         run: pnpm generateDocs
 
-      - name: Pack packages
-        run: |
-          mkdir -p packed
-          for pkg in protocol sdk ui ui-react isomorphic-fetch isomorphic-eventsource; do
-            (cd packages/$pkg && pnpm pack --pack-destination ../../packed)
-          done
-
-      - name: Upload packed packages
+      - name: Pack protocol
+        run: cd packages/protocol && pnpm pack --pack-destination ../../packed
+      - name: Upload protocol
         uses: actions/upload-artifact@v4
         with:
-          name: tonconnect-packages
-          path: packed/*.tgz
+          name: tonconnect-protocol
+          path: packed/tonconnect-protocol-*.tgz
+          if-no-files-found: error
+
+      - name: Pack sdk
+        run: cd packages/sdk && pnpm pack --pack-destination ../../packed
+      - name: Upload sdk
+        uses: actions/upload-artifact@v4
+        with:
+          name: tonconnect-sdk
+          path: packed/tonconnect-sdk-*.tgz
+          if-no-files-found: error
+
+      - name: Pack ui
+        run: cd packages/ui && pnpm pack --pack-destination ../../packed
+      - name: Upload ui
+        uses: actions/upload-artifact@v4
+        with:
+          name: tonconnect-ui
+          path: packed/tonconnect-ui-*.tgz
+          if-no-files-found: error
+
+      - name: Pack ui-react
+        run: cd packages/ui-react && pnpm pack --pack-destination ../../packed
+      - name: Upload ui-react
+        uses: actions/upload-artifact@v4
+        with:
+          name: tonconnect-ui-react
+          path: packed/tonconnect-ui-react-*.tgz
+          if-no-files-found: error
+
+      - name: Pack isomorphic-fetch
+        run: cd packages/isomorphic-fetch && pnpm pack --pack-destination ../../packed
+      - name: Upload isomorphic-fetch
+        uses: actions/upload-artifact@v4
+        with:
+          name: tonconnect-isomorphic-fetch
+          path: packed/tonconnect-isomorphic-fetch-*.tgz
+          if-no-files-found: error
+
+      - name: Pack isomorphic-eventsource
+        run: cd packages/isomorphic-eventsource && pnpm pack --pack-destination ../../packed
+      - name: Upload isomorphic-eventsource
+        uses: actions/upload-artifact@v4
+        with:
+          name: tonconnect-isomorphic-eventsource
+          path: packed/tonconnect-isomorphic-eventsource-*.tgz
           if-no-files-found: error
