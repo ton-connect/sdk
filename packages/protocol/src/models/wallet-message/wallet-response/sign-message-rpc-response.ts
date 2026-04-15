@@ -7,7 +7,7 @@ export interface SignMessageRpcResponseSuccess {
         /**
          * Signed internal message BoC (base64).
          */
-        internal_boc: string;
+        internalBoc: string;
     };
     id: string;
 }

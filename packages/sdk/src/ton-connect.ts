@@ -972,56 +972,26 @@ export class TonConnect implements ITonConnect {
     private normalizeStructuredItem(item: StructuredItem): RawStructuredItem {
         switch (item.type) {
             case 'ton': {
-                const { extraCurrency, stateInit, payload, ...rest } = item;
+                const { extraCurrency, ...rest } = item;
                 return {
                     ...rest,
-                    payload: normalizeBase64(payload),
-                    state_init: normalizeBase64(stateInit),
+                    payload: normalizeBase64(item.payload),
+                    stateInit: normalizeBase64(item.stateInit),
                     extra_currency: extraCurrency
                 };
             }
             case 'jetton': {
-                const {
-                    attachAmount,
-                    responseDestination,
-                    customPayload,
-                    forwardAmount,
-                    forwardPayload,
-                    queryId,
-                    ...rest
-                } = item;
                 return {
-                    ...rest,
-                    attach_amount: attachAmount,
-                    response_destination: responseDestination,
-                    custom_payload: normalizeBase64(customPayload),
-                    forward_amount: forwardAmount,
-                    forward_payload: normalizeBase64(forwardPayload),
-                    query_id: queryId
+                    ...item,
+                    customPayload: normalizeBase64(item.customPayload),
+                    forwardPayload: normalizeBase64(item.forwardPayload)
                 };
             }
             case 'nft': {
-                const {
-                    nftAddress,
-                    newOwner,
-                    attachAmount,
-                    responseDestination,
-                    customPayload,
-                    forwardAmount,
-                    forwardPayload,
-                    queryId,
-                    ...rest
-                } = item;
                 return {
-                    ...rest,
-                    nft_address: nftAddress,
-                    new_owner: newOwner,
-                    attach_amount: attachAmount,
-                    response_destination: responseDestination,
-                    custom_payload: normalizeBase64(customPayload),
-                    forward_amount: forwardAmount,
-                    forward_payload: normalizeBase64(forwardPayload),
-                    query_id: queryId
+                    ...item,
+                    customPayload: normalizeBase64(item.customPayload),
+                    forwardPayload: normalizeBase64(item.forwardPayload)
                 };
             }
         }

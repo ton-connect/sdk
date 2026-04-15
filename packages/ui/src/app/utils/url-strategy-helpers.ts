@@ -631,8 +631,8 @@ function addQueryParametersIfNotPresented(
     return parsed.toString();
 }
 
-export function removeRequestFromUniversalLink(universalLink: string) {
-    return removeParamsFromUniversalLink(universalLink, ['req']);
+export function removeEmbeddedRequestFromUniversalLink(universalLink: string) {
+    return removeParamsFromUniversalLink(universalLink, ['e']);
 }
 
 export function removeParamsFromUniversalLink(universalLink: string, params: string[]): string {

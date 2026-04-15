@@ -39,8 +39,8 @@ export type WalletModalOpened = {
     closeReason: null;
 
     /**
-     * Embedded deep link request to include in the connect URL.
-     * Present only when the modal was opened via `initiateDeepLinkFlow`.
+     * Embedded request to include in the connect URL.
+     * Present only when the modal was opened via `initiateEmbeddedRequestFlow`.
      */
     embeddedRequest?: Consumable<EmbeddedRequest> | null;
 };

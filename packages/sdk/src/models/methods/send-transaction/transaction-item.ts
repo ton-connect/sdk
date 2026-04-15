@@ -1,6 +1,6 @@
 export type StructuredItem = TonItem | JettonItem | NftItem;
 
-/** Snake_case wire-format items sent in the JSON-RPC payload. */
+/** Wire-format items sent in the JSON-RPC payload. */
 export type RawStructuredItem = RawTonItem | RawJettonItem | RawNftItem;
 
 export interface RawTonItem {
@@ -8,7 +8,7 @@ export interface RawTonItem {
     address: string;
     amount: string;
     payload?: string;
-    state_init?: string;
+    stateInit?: string;
     extra_currency?: { [k: number]: string };
 }
 
@@ -17,24 +17,24 @@ export interface RawJettonItem {
     master: string;
     destination: string;
     amount: string;
-    attach_amount?: string;
-    response_destination?: string;
-    custom_payload?: string;
-    forward_amount?: string;
-    forward_payload?: string;
-    query_id?: string;
+    attachAmount?: string;
+    responseDestination?: string;
+    customPayload?: string;
+    forwardAmount?: string;
+    forwardPayload?: string;
+    queryId?: string;
 }
 
 export interface RawNftItem {
     type: 'nft';
-    nft_address: string;
-    new_owner: string;
-    attach_amount?: string;
-    response_destination?: string;
-    custom_payload?: string;
-    forward_amount?: string;
-    forward_payload?: string;
-    query_id?: string;
+    nftAddress: string;
+    newOwner: string;
+    attachAmount?: string;
+    responseDestination?: string;
+    customPayload?: string;
+    forwardAmount?: string;
+    forwardPayload?: string;
+    queryId?: string;
 }
 
 export interface TonItem {

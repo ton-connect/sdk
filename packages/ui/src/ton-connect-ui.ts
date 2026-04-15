@@ -515,7 +515,7 @@ export class TonConnectUI {
         } satisfies BridgeFlowAction;
 
         if (!this.connected && options?.onConnected) {
-            return this.initiateDeepLinkFlow(
+            return this.initiateEmbeddedRequestFlow(
                 { method: 'sendTransaction', request: tx },
                 handlers,
                 action,
@@ -563,7 +563,7 @@ export class TonConnectUI {
         } satisfies BridgeFlowAction;
 
         if (!this.connected && options?.onConnected) {
-            return this.initiateDeepLinkFlow(
+            return this.initiateEmbeddedRequestFlow(
                 { method: 'signData', request: data },
                 handlers,
                 action,
@@ -609,7 +609,7 @@ export class TonConnectUI {
         } satisfies BridgeFlowAction;
 
         if (!this.connected && options?.onConnected) {
-            return this.initiateDeepLinkFlow(
+            return this.initiateEmbeddedRequestFlow(
                 { method: 'signMessage', request: message },
                 handlers,
                 action,
@@ -834,7 +834,7 @@ export class TonConnectUI {
         });
     }
 
-    private async initiateDeepLinkFlow<TResponse>(
+    private async initiateEmbeddedRequestFlow<TResponse>(
         embeddedRequest: EmbeddedRequest,
         handlers: BridgeFlowHandlers<TResponse>,
         action: BridgeFlowAction,

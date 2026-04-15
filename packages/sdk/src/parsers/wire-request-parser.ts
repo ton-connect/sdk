@@ -158,7 +158,7 @@ export class WireRequestParser {
                 return {
                     ok: true,
                     result: {
-                        internalBoc: (response as SignMessageRpcResponseSuccess).result.internal_boc
+                        internalBoc: (response as SignMessageRpcResponseSuccess).result.internalBoc
                     }
                 };
             }

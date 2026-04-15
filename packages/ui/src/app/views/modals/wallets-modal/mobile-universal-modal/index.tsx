@@ -26,7 +26,7 @@ import { Translation } from 'src/app/components/typography/Translation';
 import {
     redirectToTelegram,
     redirectToWallet,
-    removeRequestFromUniversalLink
+    removeEmbeddedRequestFromUniversalLink
 } from 'src/app/utils/url-strategy-helpers';
 import { bridgesIsEqual, getUniqueBridges } from 'src/app/utils/bridge';
 import { WalletUlContainer } from 'src/app/components/wallet-item/style';
@@ -82,7 +82,7 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
             });
         }
 
-        const linkWithoutRequest = removeRequestFromUniversalLink(link);
+        const linkWithoutRequest = removeEmbeddedRequestFromUniversalLink(link);
 
         const linkToStore = consume ? linkWithoutRequest : link;
         const linkToReturn = consume ? link : linkWithoutRequest;

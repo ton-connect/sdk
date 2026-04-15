@@ -138,7 +138,7 @@ interface ExpandedTonItem {
     address: string;
     amount: string;
     payload?: string;
-    state_init?: string;
+    stateInit?: string;
     extra_currency?: { [k: number]: string };
 }
 
@@ -147,24 +147,24 @@ interface ExpandedJettonItem {
     master: string;
     destination: string;
     amount: string;
-    attach_amount?: string;
-    response_destination?: string;
-    custom_payload?: string;
-    forward_amount?: string;
-    forward_payload?: string;
-    query_id?: string;
+    attachAmount?: string;
+    responseDestination?: string;
+    customPayload?: string;
+    forwardAmount?: string;
+    forwardPayload?: string;
+    queryId?: string;
 }
 
 interface ExpandedNftItem {
     type: 'nft';
-    nft_address: string;
-    new_owner: string;
-    attach_amount?: string;
-    response_destination?: string;
-    custom_payload?: string;
-    forward_amount?: string;
-    forward_payload?: string;
-    query_id?: string;
+    nftAddress: string;
+    newOwner: string;
+    attachAmount?: string;
+    responseDestination?: string;
+    customPayload?: string;
+    forwardAmount?: string;
+    forwardPayload?: string;
+    queryId?: string;
 }
 
 function expandItem(w: WireItem): ExpandedItem {
@@ -175,7 +175,7 @@ function expandItem(w: WireItem): ExpandedItem {
                 item.payload = w.p;
             }
             if (w.si !== undefined) {
-                item.state_init = w.si;
+                item.stateInit = w.si;
             }
             if (w.ec !== undefined) {
                 item.extra_currency = w.ec;
@@ -190,48 +190,48 @@ function expandItem(w: WireItem): ExpandedItem {
                 amount: w.am
             };
             if (w.aa !== undefined) {
-                item.attach_amount = w.aa;
+                item.attachAmount = w.aa;
             }
             if (w.rd !== undefined) {
-                item.response_destination = w.rd;
+                item.responseDestination = w.rd;
             }
             if (w.cp !== undefined) {
-                item.custom_payload = w.cp;
+                item.customPayload = w.cp;
             }
             if (w.fa !== undefined) {
-                item.forward_amount = w.fa;
+                item.forwardAmount = w.fa;
             }
             if (w.fp !== undefined) {
-                item.forward_payload = w.fp;
+                item.forwardPayload = w.fp;
             }
             if (w.qi !== undefined) {
-                item.query_id = w.qi;
+                item.queryId = w.qi;
             }
             return item;
         }
         case 'nft': {
             const item: ExpandedNftItem = {
                 type: 'nft',
-                nft_address: w.na,
-                new_owner: w.no
+                nftAddress: w.na,
+                newOwner: w.no
             };
             if (w.aa !== undefined) {
-                item.attach_amount = w.aa;
+                item.attachAmount = w.aa;
             }
             if (w.rd !== undefined) {
-                item.response_destination = w.rd;
+                item.responseDestination = w.rd;
             }
             if (w.cp !== undefined) {
-                item.custom_payload = w.cp;
+                item.customPayload = w.cp;
             }
             if (w.fa !== undefined) {
-                item.forward_amount = w.fa;
+                item.forwardAmount = w.fa;
             }
             if (w.fp !== undefined) {
-                item.forward_payload = w.fp;
+                item.forwardPayload = w.fp;
             }
             if (w.qi !== undefined) {
-                item.query_id = w.qi;
+                item.queryId = w.qi;
             }
             return item;
         }
@@ -308,10 +308,10 @@ export function expandEmbeddedWireRequest(wire: EmbeddedWireRequest): ParsedEmbe
 }
 
 /**
- * Decode a `req` URL parameter and return `{ method, params: [string] }` —
+ * Decode the `e` URL parameter and return `{ method, params: [string] }` —
  * the same shape as a bridge `AppRequest` (without `id`).
  *
- * The `req` value is `base64url(JSON.stringify(EmbeddedWireRequest))`.
+ * The `e` value is `base64url(JSON.stringify(EmbeddedWireRequest))`.
  */
 export function parseEmbeddedRequest(reqParam: string): ParsedEmbeddedRequest {
     const json = fromBase64Url(reqParam);

@@ -40,7 +40,7 @@ export class SignMessageParser extends RpcParser<'signMessage'> {
         rpcResponse: WithoutId<SignMessageRpcResponseSuccess>
     ): SignMessageResponse {
         return {
-            internalBoc: rpcResponse.result.internal_boc
+            internalBoc: rpcResponse.result.internalBoc
         };
     }
 }

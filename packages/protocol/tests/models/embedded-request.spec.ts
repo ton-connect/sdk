@@ -126,12 +126,12 @@ describe('expandEmbeddedWireRequest', () => {
             master: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
             destination: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
             amount: '10000000',
-            attach_amount: '50000000',
-            response_destination: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
-            custom_payload: 'te6cckEBAQEADAAAFAAAAABIZWxsbyGVgYQo',
-            forward_amount: '50',
-            forward_payload: 'te6cckEBAQEADAAAFAAAAABIZWxsbyGVgYQo',
-            query_id: '42'
+            attachAmount: '50000000',
+            responseDestination: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
+            customPayload: 'te6cckEBAQEADAAAFAAAAABIZWxsbyGVgYQo',
+            forwardAmount: '50',
+            forwardPayload: 'te6cckEBAQEADAAAFAAAAABIZWxsbyGVgYQo',
+            queryId: '42'
         });
     });
 
@@ -184,14 +184,14 @@ describe('expandEmbeddedWireRequest', () => {
 
         expect(payload.items[0]).toEqual({
             type: 'nft',
-            nft_address: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
-            new_owner: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
-            attach_amount: '100000000',
-            response_destination: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
-            custom_payload: 'te6cckEBAQEADAAAFAAAAABIZWxsbyGVgYQo',
-            forward_amount: '1',
-            forward_payload: 'te6cckEBAQEADAAAFAAAAABIZWxsbyGVgYQo',
-            query_id: '99'
+            nftAddress: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
+            newOwner: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
+            attachAmount: '100000000',
+            responseDestination: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
+            customPayload: 'te6cckEBAQEADAAAFAAAAABIZWxsbyGVgYQo',
+            forwardAmount: '1',
+            forwardPayload: 'te6cckEBAQEADAAAFAAAAABIZWxsbyGVgYQo',
+            queryId: '99'
         });
     });
 
@@ -354,7 +354,7 @@ describe('parseEmbeddedRequest', () => {
         const payload = JSON.parse(result.params[0]);
         expect(payload.items[0].type).toBe('jetton');
         expect(payload.items[0].master).toBe('EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs');
-        expect(payload.items[0].forward_amount).toBe('10000');
+        expect(payload.items[0].forwardAmount).toBe('10000');
     });
 
     it('decodes a signData text request', () => {
@@ -440,10 +440,10 @@ describe('parseEmbeddedRequest', () => {
         expect(payload.items[0].type).toBe('ton');
         expect(payload.items[1].type).toBe('jetton');
         expect(payload.items[2].type).toBe('nft');
-        expect(payload.items[2].nft_address).toBe(
+        expect(payload.items[2].nftAddress).toBe(
             'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs'
         );
-        expect(payload.items[2].new_owner).toBe('EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c');
+        expect(payload.items[2].newOwner).toBe('EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c');
     });
 
     it('returns ParsedEmbeddedRequest compatible with AppRequest shape', () => {

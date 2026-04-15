@@ -3,7 +3,7 @@ import { Account } from 'src/models';
 import { SendTransactionResponse, SignDataResponse, SignMessageResponse } from 'src/models/methods';
 
 /**
- * Parsed response to an embedded app request (deep link request).
+ * Parsed response to an embedded request.
  * Contains either a method-specific success result or an error.
  */
 export type AppRequestResponse =
@@ -34,7 +34,7 @@ export interface Wallet {
     };
 
     /**
-     * Response to the embedded app request (deep link request).
+     * Response to the embedded request.
      * Present only if an EmbeddedRequest was embedded in the connect URL
      * and the wallet processed it during connection.
      */

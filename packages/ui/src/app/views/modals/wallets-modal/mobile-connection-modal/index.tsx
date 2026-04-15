@@ -39,7 +39,7 @@ import { Translation } from 'src/app/components/typography/Translation';
 import {
     redirectToTelegram,
     redirectToWallet,
-    removeRequestFromUniversalLink
+    removeEmbeddedRequestFromUniversalLink
 } from 'src/app/utils/url-strategy-helpers';
 import { copyToClipboard } from 'src/app/utils/copy-to-clipboard';
 import { WalletsModalState } from 'src/models';
@@ -116,7 +116,7 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
             );
         }
 
-        const linkWithoutRequest = removeRequestFromUniversalLink(link);
+        const linkWithoutRequest = removeEmbeddedRequestFromUniversalLink(link);
 
         const linkToStore = consume ? linkWithoutRequest : link;
         const linkToReturn = consume ? link : linkWithoutRequest;

@@ -28,7 +28,7 @@ function generateRegularUniversalLink(
     url.searchParams.append('r', JSON.stringify(message));
     if (options.embeddedRequest) {
         url.searchParams.append(
-            'req',
+            'e',
             toBase64Url(Base64.encode(JSON.stringify(options.embeddedRequest), false))
         );
     }
