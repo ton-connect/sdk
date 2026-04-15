@@ -220,6 +220,7 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
             <Show when={!showQR()}>
                 <StyledLeftActionButton icon={<QRIcon />} onClick={onOpenQR} />
                 <Show when={isQaModeEnabled()}>
+                    {/* TODO: remove*/}
                     <ButtonStyled onClick={() => copyToClipboard(getUniversalLink(true))}>
                         Copy to clipboard (QA)
                     </ButtonStyled>
