@@ -1,11 +1,13 @@
 import {
     ConnectAdditionalRequest,
     isWalletInfoRemote,
-    checkRequiredWalletFeatures
+    checkRequiredWalletFeatures,
+    isQaModeEnabled
 } from '@tonconnect/sdk';
 import { Component, createMemo, createSignal, For, Show } from 'solid-js';
 import { AtWalletIcon, FourWalletsItem, QRIcon, WalletItem } from 'src/app/components';
 import {
+    ButtonStyled,
     H1Styled,
     H2Styled,
     StyledLeftActionButton,
@@ -217,6 +219,11 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
             </Show>
             <Show when={!showQR()}>
                 <StyledLeftActionButton icon={<QRIcon />} onClick={onOpenQR} />
+                <Show when={isQaModeEnabled()}>
+                    <ButtonStyled onClick={() => copyToClipboard(getUniversalLink(true))}>
+                        Copy to clipboard (QA)
+                    </ButtonStyled>
+                </Show>
                 <H1Styled translationKey="walletModal.mobileUniversalModal.connectYourWallet">
                     Connect your TON wallet
                 </H1Styled>
