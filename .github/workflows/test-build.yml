@@ -29,3 +29,17 @@ jobs:
 
       - name: Build docs
         run: pnpm generateDocs
+
+      - name: Pack packages
+        run: |
+          mkdir -p packed
+          for pkg in protocol sdk ui ui-react isomorphic-fetch isomorphic-eventsource; do
+            (cd packages/$pkg && pnpm pack --pack-destination ../../packed)
+          done
+
+      - name: Upload packed packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: tonconnect-packages
+          path: packed/*.tgz
+          if-no-files-found: error
