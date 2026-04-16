@@ -78,6 +78,9 @@ export function TxForm() {
                     : undefined
             });
             setSignResult(result);
+            console.debug('Success tonConnectUi.signMessage', result);
+        } catch (error) {
+            console.error('Error tonConnectUi.signMessage', error);
         } finally {
             setSignLoading(false);
         }
@@ -95,6 +98,7 @@ export function TxForm() {
                       }
                     : undefined
             });
+            console.debug('Success tonConnectUi.sendTransaction', transaction);
             if (waitForTx && wallet && wallet.account && transaction) {
                 setWaitingTx(true);
                 const network = wallet.account.chain === CHAIN.TESTNET ? 'testnet' : 'mainnet';
@@ -103,6 +107,8 @@ export function TxForm() {
                 setTxResult(result);
                 setWaitingTx(false);
             }
+        } catch (err) {
+            console.error('Error tonConnectUi.sendTransaction', err);
         } finally {
             setLoading(false);
         }
