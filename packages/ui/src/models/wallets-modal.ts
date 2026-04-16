@@ -1,5 +1,10 @@
-import { EmbeddedRequest, FeatureName, OptionalTraceable, RequiredFeatures } from '@tonconnect/sdk';
-import { Consumable } from 'src/utils/consumable';
+import {
+    EmbeddedRequest,
+    FeatureName,
+    OptionalTraceable,
+    RequiredFeatures,
+    Consumable
+} from '@tonconnect/sdk';
 
 export interface WalletsModal {
     /**

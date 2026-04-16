@@ -33,6 +33,7 @@ import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet
 import { UUIDv7 } from 'src/utils/uuid';
 import { waitForSome } from 'src/utils/promise';
 import { generateUniversalLink } from 'src/provider/bridge/universal-link';
+import { Consumable } from 'src/utils/consumable';
 
 export class BridgeProvider implements HTTPProvider {
     public static async fromStorage(
@@ -72,6 +73,8 @@ export class BridgeProvider implements HTTPProvider {
 
     private readonly defaultRetryTimeoutMS = 2000;
 
+    private readonly maxUrlLength = 1024;
+
     private readonly optionalOpenGateways = 3;
 
     private abortController?: AbortController;
@@ -93,7 +96,7 @@ export class BridgeProvider implements HTTPProvider {
         options?: OptionalTraceable<{
             openingDeadlineMS?: number;
             signal?: AbortSignal;
-            embeddedRequest?: EmbeddedWireRequest;
+            embeddedRequest?: Consumable<EmbeddedWireRequest>;
         }>
     ): string {
         const traceId = options?.traceId ?? UUIDv7();
@@ -146,11 +149,22 @@ export class BridgeProvider implements HTTPProvider {
                 ? this.walletConnectionSource.universalLink
                 : this.standardUniversalLink;
 
-        // TODO: add 1024 or 2048 limit
-        return generateUniversalLink(universalLink, message, {
+        const embeddedRequest = options?.embeddedRequest?.peek();
+
+        const link = generateUniversalLink(universalLink, message, {
             traceId,
             sessionId: this.session!.sessionCrypto.sessionId,
-            embeddedRequest: options?.embeddedRequest
+            embeddedRequest
+        });
+
+        if (link.length <= this.maxUrlLength) {
+            options?.embeddedRequest?.consume();
+            return link;
+        }
+
+        return generateUniversalLink(universalLink, message, {
+            traceId,
+            sessionId: this.session!.sessionCrypto.sessionId
         });
     }
 

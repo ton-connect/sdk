@@ -81,6 +81,7 @@ export {
     isConnectUrl
 } from './utils/url';
 export { enableQaMode, isQaModeEnabled } from './utils/qa-mode';
+export { Consumable, OptionalConsumable } from './utils/consumable';
 export type { AnalyticsMode } from './analytics/analytics-manager';
 
 export {

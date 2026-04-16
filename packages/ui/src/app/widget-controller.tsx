@@ -18,9 +18,9 @@ import {
     OptionalTraceable,
     Traceable,
     WalletInfoRemote,
-    WalletNotSupportFeatureError
+    WalletNotSupportFeatureError,
+    Consumable
 } from '@tonconnect/sdk';
-import { Consumable } from 'src/utils/consumable';
 
 export const widgetController = {
     openWalletsModal: (

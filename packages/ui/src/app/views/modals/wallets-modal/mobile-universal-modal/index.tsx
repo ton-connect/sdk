@@ -78,7 +78,7 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
 
             link = connector.connect(walletsBridges(), props.additionalRequest, {
                 traceId: props.walletModalState.traceId,
-                embeddedRequest: embeddedRequest?.consume()
+                embeddedRequest: embeddedRequest ?? undefined
             });
         }
 
@@ -155,7 +155,10 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
                 universalLink: atWallet.universalLink
             },
             props.additionalRequest,
-            { traceId: props.walletModalState.traceId, embeddedRequest: embeddedRequest?.consume() }
+            {
+                traceId: props.walletModalState.traceId,
+                embeddedRequest: embeddedRequest ?? undefined
+            }
         );
 
         const forceRedirect = !firstClick();

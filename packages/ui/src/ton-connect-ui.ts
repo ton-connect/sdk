@@ -10,7 +10,8 @@ import {
     SignMessageResponse,
     Traceable,
     UUIDv7,
-    WalletInfoCurrentlyEmbedded
+    WalletInfoCurrentlyEmbedded,
+    Consumable
 } from '@tonconnect/sdk';
 import {
     isTelegramUrl,
@@ -59,7 +60,6 @@ import {
 } from 'src/app/utils/url-strategy-helpers';
 import { SingleWalletModalManager } from 'src/managers/single-wallet-modal-manager';
 import { SingleWalletModal, SingleWalletModalState } from 'src/models/single-wallet-modal';
-import { Consumable } from 'src/utils/consumable';
 import { TonConnectUITracker } from 'src/tracker/ton-connect-ui-tracker';
 import { tonConnectUiVersion } from 'src/constants/version';
 import { ReturnStrategy } from './models';

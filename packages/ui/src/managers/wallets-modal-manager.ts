@@ -14,11 +14,11 @@ import {
     OptionalTraceable,
     Traceable,
     UUIDv7,
-    WalletInfoCurrentlyEmbedded
+    WalletInfoCurrentlyEmbedded,
+    Consumable
 } from '@tonconnect/sdk';
 import { appState } from 'src/app/state/app.state';
 import { widgetController } from 'src/app/widget-controller';
-import { Consumable } from 'src/utils/consumable';
 import { WalletsModal, WalletsModalCloseReason, WalletsModalState } from 'src/models/wallets-modal';
 import { isInTMA, sendExpand } from 'src/app/utils/tma-api';
 import { TonConnectUITracker } from 'src/tracker/ton-connect-ui-tracker';

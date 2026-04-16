@@ -100,6 +100,7 @@ import { UUIDv7 } from 'src/utils/uuid';
 import { TraceableWalletEvent } from 'src/models/wallet/traceable-events';
 import { WalletConnectProvider } from 'src/provider/wallet-connect/wallet-connect-provider';
 import { wireRequestParser } from 'src/parsers/wire-request-parser';
+import { Consumable, OptionalConsumable } from 'src/utils/consumable';
 
 export class TonConnect implements ITonConnect {
     private desiredChainId: string | undefined;
@@ -277,7 +278,7 @@ export class TonConnect implements ITonConnect {
             request?: ConnectAdditionalRequest;
             openingDeadlineMS?: number;
             signal?: AbortSignal;
-            embeddedRequest?: EmbeddedRequest;
+            embeddedRequest?: OptionalConsumable<EmbeddedRequest>;
         }>
     ): T extends WalletConnectionSourceJS
         ? void
@@ -293,7 +294,7 @@ export class TonConnect implements ITonConnect {
         options?: OptionalTraceable<{
             openingDeadlineMS?: number;
             signal?: AbortSignal;
-            embeddedRequest?: EmbeddedRequest;
+            embeddedRequest?: OptionalConsumable<EmbeddedRequest>;
         }>
     ): T extends WalletConnectionSourceJS
         ? void
@@ -309,12 +310,12 @@ export class TonConnect implements ITonConnect {
                   request?: ConnectAdditionalRequest;
                   openingDeadlineMS?: number;
                   signal?: AbortSignal;
-                  embeddedRequest?: EmbeddedRequest;
+                  embeddedRequest?: OptionalConsumable<EmbeddedRequest>;
               }>,
         additionalOptions?: OptionalTraceable<{
             openingDeadlineMS?: number;
             signal?: AbortSignal;
-            embeddedRequest?: EmbeddedRequest;
+            embeddedRequest?: OptionalConsumable<EmbeddedRequest>;
         }>
     ): void | string {
         // TODO: remove deprecated method
@@ -322,7 +323,7 @@ export class TonConnect implements ITonConnect {
             request?: ConnectAdditionalRequest;
             openingDeadlineMS?: number;
             signal?: AbortSignal;
-            embeddedRequest?: EmbeddedRequest;
+            embeddedRequest?: OptionalConsumable<EmbeddedRequest>;
         }> = {
             ...additionalOptions
         };
@@ -349,6 +350,8 @@ export class TonConnect implements ITonConnect {
             options.embeddedRequest = requestOrOptions?.embeddedRequest;
         }
 
+        const embeddedRequest = Consumable.fromOptional(options.embeddedRequest);
+
         if (options.request) {
             const validationError = validateConnectAdditionalRequest(options.request);
             if (validationError) {
@@ -361,8 +364,8 @@ export class TonConnect implements ITonConnect {
                 }
             }
         }
-        if (options.embeddedRequest) {
-            const validationError = validateEmbeddedRequest(options.embeddedRequest);
+        if (embeddedRequest.peek()) {
+            const validationError = validateEmbeddedRequest(embeddedRequest.peek());
             if (validationError) {
                 if (isQaModeEnabled()) {
                     console.error('EmbeddedRequest validation failed: ' + validationError);
@@ -397,18 +400,24 @@ export class TonConnect implements ITonConnect {
         const traceId = options?.traceId ?? UUIDv7();
         this.tracker.trackConnectionStarted(traceId);
 
-        const wireEmbeddedRequest = options?.embeddedRequest
-            ? wireRequestParser.convertToWireRequest(options.embeddedRequest)
+        const peeked = embeddedRequest.peek();
+        const wireConsumable = peeked
+            ? new Consumable(wireRequestParser.convertToWireRequest(peeked))
             : undefined;
 
-        this.pendingEmbeddedRequestMethod = options?.embeddedRequest?.method;
-
-        return this.provider.connect(this.createConnectRequest(options?.request), {
+        const url = this.provider.connect(this.createConnectRequest(options?.request), {
             openingDeadlineMS: options?.openingDeadlineMS,
             signal: abortController.signal,
             traceId,
-            embeddedRequest: wireEmbeddedRequest
+            embeddedRequest: wireConsumable
         });
+
+        // consume the original only if the provider consumed the wire version
+        if (wireConsumable && wireConsumable.peek() === undefined) {
+            this.pendingEmbeddedRequestMethod = embeddedRequest.consume()?.method;
+        }
+
+        return url;
     }
 
     /**

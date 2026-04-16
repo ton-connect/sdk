@@ -111,7 +111,7 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
                 props.additionalRequest,
                 {
                     traceId: props.walletsModalState?.traceId,
-                    embeddedRequest: embeddedRequest?.consume()
+                    embeddedRequest: embeddedRequest ?? undefined
                 }
             );
         }
