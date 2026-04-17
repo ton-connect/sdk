@@ -947,13 +947,11 @@ export class TonConnect implements ITonConnect {
         network: ChainId
     ): TransactionRpcPayload {
         const tx = transaction as SendTransactionRequestWithMessages;
-        const { validUntil, messages, ...rest } = tx;
         return {
-            ...rest,
             from,
             network,
-            valid_until: validUntil,
-            messages: messages.map(({ extraCurrency, payload, stateInit, ...msg }) => ({
+            valid_until: tx.validUntil,
+            messages: tx.messages.map(({ extraCurrency, payload, stateInit, ...msg }) => ({
                 ...msg,
                 payload: normalizeBase64(payload),
                 stateInit: normalizeBase64(stateInit),
@@ -968,13 +966,11 @@ export class TonConnect implements ITonConnect {
         network: ChainId
     ): TransactionRpcPayload {
         const tx = transaction as SendTransactionRequestWithItems;
-        const { validUntil, items, ...rest } = tx;
         return {
-            ...rest,
             from,
             network,
-            valid_until: validUntil,
-            items: items.map(item => this.normalizeStructuredItem(item))
+            valid_until: tx.validUntil,
+            items: tx.items.map(item => this.normalizeStructuredItem(item))
         };
     }
 

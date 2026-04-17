@@ -468,11 +468,11 @@ export function validateEmbeddedRequest(data: unknown) {
 
     switch (data.method) {
         case 'sendTransaction':
-            return validateSendTransactionRequest(data);
+            return validateSendTransactionRequest(data.request);
         case 'signData':
-            return validateSignDataPayload(data);
+            return validateSignDataPayload(data.request);
         case 'signMessage':
-            return validateSignMessageRequest(data);
+            return validateSignMessageRequest(data.request);
     }
 
     return `Invalid 'method' value: ${data.method}`;

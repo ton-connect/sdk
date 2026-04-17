@@ -165,6 +165,8 @@ export class WireRequestParser {
             case 'signData': {
                 return { ok: true, result: (response as SignDataRpcResponseSuccess).result };
             }
+            default:
+                throw new Error(`Unexpected embedded request method: ${method}`);
         }
     }
 }

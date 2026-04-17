@@ -29,6 +29,6 @@ export class Consumable<T> {
     }
 
     get consumed(): boolean {
-        return this._value === null;
+        return this._value === undefined;
     }
 }
