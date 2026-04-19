@@ -841,7 +841,7 @@ export class TonConnect implements ITonConnect {
         );
 
         if (signMessageParser.isError(response)) {
-            signMessageParser.parseAndThrowError(response);
+            return signMessageParser.parseAndThrowError(response);
         }
 
         const result = signMessageParser.convertFromRpcResponse(
