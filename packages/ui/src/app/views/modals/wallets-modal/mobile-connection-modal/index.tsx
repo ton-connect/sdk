@@ -88,7 +88,7 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
 
     const getUniversalLink = (consume: boolean): string => {
         let link = universalLink();
-        let wasEmpty = !!link;
+        let wasEmpty = !link;
 
         if (!link) {
             const hasEmbeddedRequestFeature = checkRequiredWalletFeatures(
