@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 
 import {
     enrichUniversalLink,
-    removeRequestFromUniversalLink,
-    removeParamsFromUniversalLink
+    removeParamsFromUniversalLink,
+    removeEmbeddedRequestFromUniversalLink
 } from 'src/app/utils/url-strategy-helpers';
 
 describe.each([
@@ -139,11 +139,11 @@ describe.each([
 
 describe.each([
     {
-        link: 'https://example.com/connect?v=2&id=abc&req=base64EncodedRequest',
+        link: 'https://example.com/connect?v=2&id=abc&e=base64EncodedRequest',
         expected: 'https://example.com/connect?v=2&id=abc'
     },
     {
-        link: 'https://t.me/wallet/start?startapp=tonconnect-v__2-id__abc-req__base64EncodedRequest',
+        link: 'https://t.me/wallet/start?startapp=tonconnect-v__2-id__abc-e__base64EncodedRequest',
         expected: 'https://t.me/wallet/start?startapp=tonconnect-v__2-id__abc'
     },
     {
@@ -155,12 +155,12 @@ describe.each([
         expected: 'https://t.me/wallet/start?startapp=tonconnect-v__2-id__abc'
     },
     {
-        link: 'https://example.com/connect?v=2&req=eyJtIjoic3QiLCJ2dSI6MTcwMH0%3D&id=abc',
+        link: 'https://example.com/connect?v=2&e=eyJtIjoic3QiLCJ2dSI6MTcwMH0%3D&id=abc',
         expected: 'https://example.com/connect?v=2&id=abc'
     }
-])('removeRequestFromUniversalLink', ({ link, expected }) => {
+])('removeEmbeddedRequestFromUniversalLink', ({ link, expected }) => {
     it('should return valid url', () => {
-        const result = removeRequestFromUniversalLink(link);
+        const result = removeEmbeddedRequestFromUniversalLink(link);
         expect(result).toBe(expected);
     });
 });
