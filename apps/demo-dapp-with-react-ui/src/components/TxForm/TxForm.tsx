@@ -72,7 +72,10 @@ export function TxForm() {
         try {
             const result = await tonConnectUi.signMessage(tx, {
                 onConnected: withConnect
-                    ? send => {
+                    ? (send, { dispatched }) => {
+                          if (dispatched && !confirm('Sign message twice?')) {
+                              throw new Error('Sign message twice');
+                          }
                           return send();
                       }
                     : undefined
@@ -93,7 +96,10 @@ export function TxForm() {
         try {
             const transaction = await tonConnectUi.sendTransaction(tx, {
                 onConnected: withConnect
-                    ? send => {
+                    ? (send, { dispatched }) => {
+                          if (dispatched && !confirm('Send message twice?')) {
+                              throw new Error('Send message twice');
+                          }
                           return send();
                       }
                     : undefined
