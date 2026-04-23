@@ -1,15 +1,13 @@
 import { Base64 } from '../utils/base64';
 import { ChainId } from './CHAIN';
 import { AppRequest } from './app-message';
+import { RpcJettonItem, RpcNftItem, RpcStructuredItem, RpcTonItem } from './structured-item';
 
 // ── Wire types (compact URL‑encoded format) ─────────────────────────
 
-export type EmbeddedWireRequest =
-    | EmbeddedWireSendTransaction
-    | EmbeddedWireSignMessage
-    | EmbeddedWireSignData;
+export type WireRequest = WireSendTransaction | WireSignMessage | WireSignData;
 
-export interface EmbeddedWireSendTransaction {
+export interface WireSendTransaction {
     m: 'st';
     f?: string;
     n?: string;
@@ -18,7 +16,7 @@ export interface EmbeddedWireSendTransaction {
     i?: WireItem[];
 }
 
-export interface EmbeddedWireSignMessage {
+export interface WireSignMessage {
     m: 'sm';
     f?: string;
     n?: string;
@@ -27,7 +25,7 @@ export interface EmbeddedWireSignMessage {
     i?: WireItem[];
 }
 
-export type EmbeddedWireSignData = {
+export type WireSignData = {
     m: 'sd';
     n?: string;
     f?: string;
@@ -131,46 +129,10 @@ function expandMessage(w: WireMessage): ExpandedMessage {
     return msg;
 }
 
-type ExpandedItem = ExpandedTonItem | ExpandedJettonItem | ExpandedNftItem;
-
-interface ExpandedTonItem {
-    type: 'ton';
-    address: string;
-    amount: string;
-    payload?: string;
-    stateInit?: string;
-    extra_currency?: { [k: number]: string };
-}
-
-interface ExpandedJettonItem {
-    type: 'jetton';
-    master: string;
-    destination: string;
-    amount: string;
-    attachAmount?: string;
-    responseDestination?: string;
-    customPayload?: string;
-    forwardAmount?: string;
-    forwardPayload?: string;
-    queryId?: string;
-}
-
-interface ExpandedNftItem {
-    type: 'nft';
-    nftAddress: string;
-    newOwner: string;
-    attachAmount?: string;
-    responseDestination?: string;
-    customPayload?: string;
-    forwardAmount?: string;
-    forwardPayload?: string;
-    queryId?: string;
-}
-
-function expandItem(w: WireItem): ExpandedItem {
+function expandItem(w: WireItem): RpcStructuredItem {
     switch (w.t) {
         case 'ton': {
-            const item: ExpandedTonItem = { type: 'ton', address: w.a, amount: w.am };
+            const item: RpcTonItem = { type: 'ton', address: w.a, amount: w.am };
             if (w.p !== undefined) {
                 item.payload = w.p;
             }
@@ -183,7 +145,7 @@ function expandItem(w: WireItem): ExpandedItem {
             return item;
         }
         case 'jetton': {
-            const item: ExpandedJettonItem = {
+            const item: RpcJettonItem = {
                 type: 'jetton',
                 master: w.ma,
                 destination: w.d,
@@ -210,7 +172,7 @@ function expandItem(w: WireItem): ExpandedItem {
             return item;
         }
         case 'nft': {
-            const item: ExpandedNftItem = {
+            const item: RpcNftItem = {
                 type: 'nft',
                 nftAddress: w.na,
                 newOwner: w.no
@@ -239,7 +201,7 @@ function expandItem(w: WireItem): ExpandedItem {
 }
 
 function expandTransactionBody(
-    wire: EmbeddedWireSendTransaction | EmbeddedWireSignMessage
+    wire: WireSendTransaction | WireSignMessage
 ): Record<string, unknown> {
     const payload: Record<string, unknown> = {};
     if (wire.vu !== undefined) {
@@ -260,7 +222,7 @@ function expandTransactionBody(
     return payload;
 }
 
-function expandSignDataBody(wire: EmbeddedWireSignData): Record<string, unknown> {
+function expandSignDataBody(wire: WireSignData): Record<string, unknown> {
     const payload: Record<string, unknown> = {};
     if (wire.n !== undefined) {
         payload.network = wire.n as ChainId;
@@ -287,7 +249,7 @@ function expandSignDataBody(wire: EmbeddedWireSignData): Record<string, unknown>
     return payload;
 }
 
-export function expandEmbeddedWireRequest(wire: EmbeddedWireRequest): ParsedEmbeddedRequest {
+export function expandWireRequest(wire: WireRequest): ParsedEmbeddedRequest {
     switch (wire.m) {
         case 'st':
             return {
@@ -311,10 +273,10 @@ export function expandEmbeddedWireRequest(wire: EmbeddedWireRequest): ParsedEmbe
  * Decode the `e` URL parameter and return `{ method, params: [string] }` —
  * the same shape as a bridge `AppRequest` (without `id`).
  *
- * The `e` value is `base64url(JSON.stringify(EmbeddedWireRequest))`.
+ * The `e` value is `base64url(JSON.stringify(WireRequest))`.
  */
 export function parseEmbeddedRequest(reqParam: string): ParsedEmbeddedRequest {
     const json = fromBase64Url(reqParam);
-    const wire: EmbeddedWireRequest = JSON.parse(json);
-    return expandEmbeddedWireRequest(wire);
+    const wire: WireRequest = JSON.parse(json);
+    return expandWireRequest(wire);
 }

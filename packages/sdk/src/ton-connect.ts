@@ -4,6 +4,7 @@ import {
     ConnectEventSuccess,
     ConnectItem,
     ConnectRequest,
+    RpcStructuredItem,
     SendTransactionRpcResponseSuccess,
     SignDataPayload,
     SignDataRpcResponseSuccess,
@@ -43,8 +44,6 @@ import {
     SignMessageRequest,
     SignMessageResponse,
     StructuredItem,
-    RawStructuredItem,
-    TransactionRpcPayload,
     hasItems
 } from 'src/models/methods';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
@@ -942,16 +941,15 @@ export class TonConnect implements ITonConnect {
     }
 
     private buildMessagesRpcPayload(
-        transaction: SendTransactionRequest,
+        transaction: SendTransactionRequestWithMessages,
         from: string,
         network: ChainId
-    ): TransactionRpcPayload {
-        const tx = transaction as SendTransactionRequestWithMessages;
+    ) {
         return {
             from,
             network,
-            valid_until: tx.validUntil,
-            messages: tx.messages.map(({ extraCurrency, payload, stateInit, ...msg }) => ({
+            valid_until: transaction.validUntil,
+            messages: transaction.messages.map(({ extraCurrency, payload, stateInit, ...msg }) => ({
                 ...msg,
                 payload: normalizeBase64(payload),
                 stateInit: normalizeBase64(stateInit),
@@ -961,20 +959,19 @@ export class TonConnect implements ITonConnect {
     }
 
     private buildItemsRpcPayload(
-        transaction: SendTransactionRequest,
+        transaction: SendTransactionRequestWithItems,
         from: string,
         network: ChainId
-    ): TransactionRpcPayload {
-        const tx = transaction as SendTransactionRequestWithItems;
+    ) {
         return {
             from,
             network,
-            valid_until: tx.validUntil,
-            items: tx.items.map(item => this.normalizeStructuredItem(item))
+            valid_until: transaction.validUntil,
+            items: transaction.items.map(item => this.normalizeStructuredItem(item))
         };
     }
 
-    private normalizeStructuredItem(item: StructuredItem): RawStructuredItem {
+    private normalizeStructuredItem(item: StructuredItem): RpcStructuredItem {
         switch (item.type) {
             case 'ton': {
                 const { extraCurrency, ...rest } = item;

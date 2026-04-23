@@ -3,7 +3,7 @@ import {
     Base64,
     ConnectEventSuccess,
     ConnectRequest,
-    EmbeddedWireRequest,
+    WireRequest,
     hexToByteArray,
     RpcMethod,
     SessionCrypto,
@@ -96,7 +96,7 @@ export class BridgeProvider implements HTTPProvider {
         options?: OptionalTraceable<{
             openingDeadlineMS?: number;
             signal?: AbortSignal;
-            embeddedRequest?: Consumable<EmbeddedWireRequest>;
+            embeddedRequest?: Consumable<WireRequest>;
         }>
     ): string {
         const traceId = options?.traceId ?? UUIDv7();

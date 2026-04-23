@@ -1,11 +1,11 @@
 import { Base64 } from 'src/utils';
 import {
-    EmbeddedWireRequest,
-    EmbeddedWireSendTransaction,
-    EmbeddedWireSignMessage,
-    EmbeddedWireSignData,
+    WireRequest,
+    WireSendTransaction,
+    WireSignMessage,
+    WireSignData,
     parseEmbeddedRequest,
-    expandEmbeddedWireRequest,
+    expandWireRequest,
     ParsedEmbeddedRequest
 } from 'src/models';
 
@@ -13,20 +13,20 @@ function toBase64Url(base64: string): string {
     return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
-function encodeReqParam(wire: EmbeddedWireRequest): string {
+function encodeReqParam(wire: WireRequest): string {
     return toBase64Url(Base64.encode(JSON.stringify(wire), false));
 }
 
-describe('expandEmbeddedWireRequest', () => {
+describe('expandWireRequest', () => {
     it('expands a sendTransaction with messages', () => {
-        const wire: EmbeddedWireSendTransaction = {
+        const wire: WireSendTransaction = {
             m: 'st',
             n: '-239',
             vu: 1761071945,
             ms: [{ a: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs', am: '1000000000' }]
         };
 
-        const result = expandEmbeddedWireRequest(wire);
+        const result = expandWireRequest(wire);
         expect(result.method).toBe('sendTransaction');
 
         const payload = JSON.parse(result.params[0]);
@@ -43,7 +43,7 @@ describe('expandEmbeddedWireRequest', () => {
     });
 
     it('expands a sendTransaction with messages including payload and stateInit', () => {
-        const wire: EmbeddedWireSendTransaction = {
+        const wire: WireSendTransaction = {
             m: 'st',
             vu: 1761071945,
             ms: [
@@ -57,7 +57,7 @@ describe('expandEmbeddedWireRequest', () => {
             ]
         };
 
-        const result = expandEmbeddedWireRequest(wire);
+        const result = expandWireRequest(wire);
         const payload = JSON.parse(result.params[0]);
 
         expect(payload.messages[0]).toEqual({
@@ -70,7 +70,7 @@ describe('expandEmbeddedWireRequest', () => {
     });
 
     it('expands a sendTransaction with ton items', () => {
-        const wire: EmbeddedWireSendTransaction = {
+        const wire: WireSendTransaction = {
             m: 'st',
             vu: 1761071945,
             i: [
@@ -83,7 +83,7 @@ describe('expandEmbeddedWireRequest', () => {
             ]
         };
 
-        const result = expandEmbeddedWireRequest(wire);
+        const result = expandWireRequest(wire);
         const payload = JSON.parse(result.params[0]);
 
         expect(payload.items).toEqual([
@@ -98,7 +98,7 @@ describe('expandEmbeddedWireRequest', () => {
     });
 
     it('expands jetton items with all optional fields', () => {
-        const wire: EmbeddedWireSendTransaction = {
+        const wire: WireSendTransaction = {
             m: 'st',
             n: '-239',
             vu: 1761071945,
@@ -118,7 +118,7 @@ describe('expandEmbeddedWireRequest', () => {
             ]
         };
 
-        const result = expandEmbeddedWireRequest(wire);
+        const result = expandWireRequest(wire);
         const payload = JSON.parse(result.params[0]);
 
         expect(payload.items[0]).toEqual({
@@ -136,7 +136,7 @@ describe('expandEmbeddedWireRequest', () => {
     });
 
     it('expands jetton items with only required fields', () => {
-        const wire: EmbeddedWireSendTransaction = {
+        const wire: WireSendTransaction = {
             m: 'st',
             vu: 1761071945,
             i: [
@@ -149,7 +149,7 @@ describe('expandEmbeddedWireRequest', () => {
             ]
         };
 
-        const result = expandEmbeddedWireRequest(wire);
+        const result = expandWireRequest(wire);
         const payload = JSON.parse(result.params[0]);
 
         expect(payload.items[0]).toEqual({
@@ -161,7 +161,7 @@ describe('expandEmbeddedWireRequest', () => {
     });
 
     it('expands nft items with all optional fields', () => {
-        const wire: EmbeddedWireSendTransaction = {
+        const wire: WireSendTransaction = {
             m: 'st',
             vu: 1761071945,
             i: [
@@ -179,7 +179,7 @@ describe('expandEmbeddedWireRequest', () => {
             ]
         };
 
-        const result = expandEmbeddedWireRequest(wire);
+        const result = expandWireRequest(wire);
         const payload = JSON.parse(result.params[0]);
 
         expect(payload.items[0]).toEqual({
@@ -196,7 +196,7 @@ describe('expandEmbeddedWireRequest', () => {
     });
 
     it('expands mixed ton + jetton items', () => {
-        const wire: EmbeddedWireSendTransaction = {
+        const wire: WireSendTransaction = {
             m: 'st',
             n: '-239',
             vu: 1761071945,
@@ -217,7 +217,7 @@ describe('expandEmbeddedWireRequest', () => {
             ]
         };
 
-        const result = expandEmbeddedWireRequest(wire);
+        const result = expandWireRequest(wire);
         const payload = JSON.parse(result.params[0]);
 
         expect(payload.items).toHaveLength(2);
@@ -226,14 +226,14 @@ describe('expandEmbeddedWireRequest', () => {
     });
 
     it('expands a signMessage request', () => {
-        const wire: EmbeddedWireSignMessage = {
+        const wire: WireSignMessage = {
             m: 'sm',
             n: '-239',
             vu: 1761071945,
             ms: [{ a: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs', am: '0' }]
         };
 
-        const result = expandEmbeddedWireRequest(wire);
+        const result = expandWireRequest(wire);
         expect(result.method).toBe('signMessage');
 
         const payload = JSON.parse(result.params[0]);
@@ -242,7 +242,7 @@ describe('expandEmbeddedWireRequest', () => {
     });
 
     it('expands a signData text request', () => {
-        const wire: EmbeddedWireSignData = {
+        const wire: WireSignData = {
             m: 'sd',
             n: '-239',
             f: '0:abc123',
@@ -250,7 +250,7 @@ describe('expandEmbeddedWireRequest', () => {
             tx: 'Hello, world!'
         };
 
-        const result = expandEmbeddedWireRequest(wire);
+        const result = expandWireRequest(wire);
         expect(result.method).toBe('signData');
 
         const payload = JSON.parse(result.params[0]);
@@ -263,26 +263,26 @@ describe('expandEmbeddedWireRequest', () => {
     });
 
     it('expands a signData binary request', () => {
-        const wire: EmbeddedWireSignData = {
+        const wire: WireSignData = {
             m: 'sd',
             t: 'binary',
             b: 'AQIDBA=='
         };
 
-        const result = expandEmbeddedWireRequest(wire);
+        const result = expandWireRequest(wire);
         const payload = JSON.parse(result.params[0]);
         expect(payload).toEqual({ type: 'binary', bytes: 'AQIDBA==' });
     });
 
     it('expands a signData cell request', () => {
-        const wire: EmbeddedWireSignData = {
+        const wire: WireSignData = {
             m: 'sd',
             t: 'cell',
             s: 'some_schema',
             c: 'te6cckEBAQEABgAACAAAAABT+rFy'
         };
 
-        const result = expandEmbeddedWireRequest(wire);
+        const result = expandWireRequest(wire);
         const payload = JSON.parse(result.params[0]);
         expect(payload).toEqual({
             type: 'cell',
@@ -292,13 +292,13 @@ describe('expandEmbeddedWireRequest', () => {
     });
 
     it('omits undefined optional fields from the expanded payload', () => {
-        const wire: EmbeddedWireSendTransaction = {
+        const wire: WireSendTransaction = {
             m: 'st',
             vu: 1761071945,
             ms: [{ a: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs', am: '100' }]
         };
 
-        const result = expandEmbeddedWireRequest(wire);
+        const result = expandWireRequest(wire);
         const payload = JSON.parse(result.params[0]);
 
         expect(payload).not.toHaveProperty('network');
@@ -312,7 +312,7 @@ describe('expandEmbeddedWireRequest', () => {
 
 describe('parseEmbeddedRequest', () => {
     it('decodes base64url and expands a sendTransaction', () => {
-        const wire: EmbeddedWireSendTransaction = {
+        const wire: WireSendTransaction = {
             m: 'st',
             n: '-239',
             vu: 1761071945,
@@ -332,7 +332,7 @@ describe('parseEmbeddedRequest', () => {
     });
 
     it('decodes a signMessage with jetton items', () => {
-        const wire: EmbeddedWireSignMessage = {
+        const wire: WireSignMessage = {
             m: 'sm',
             vu: 1761071945,
             i: [
@@ -358,7 +358,7 @@ describe('parseEmbeddedRequest', () => {
     });
 
     it('decodes a signData text request', () => {
-        const wire: EmbeddedWireSignData = {
+        const wire: WireSignData = {
             m: 'sd',
             n: '-239',
             t: 'text',
@@ -375,7 +375,7 @@ describe('parseEmbeddedRequest', () => {
     });
 
     it('handles base64url characters correctly (no + / = in input)', () => {
-        const wire: EmbeddedWireSendTransaction = {
+        const wire: WireSendTransaction = {
             m: 'st',
             vu: 1761071945,
             f: '0:abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
@@ -401,7 +401,7 @@ describe('parseEmbeddedRequest', () => {
     });
 
     it('roundtrips through encode → parse for a complex request', () => {
-        const wire: EmbeddedWireSendTransaction = {
+        const wire: WireSendTransaction = {
             m: 'st',
             n: '-239',
             f: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
@@ -447,7 +447,7 @@ describe('parseEmbeddedRequest', () => {
     });
 
     it('returns ParsedEmbeddedRequest compatible with AppRequest shape', () => {
-        const wire: EmbeddedWireSendTransaction = {
+        const wire: WireSendTransaction = {
             m: 'st',
             vu: 1761071945,
             ms: [{ a: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs', am: '1' }]

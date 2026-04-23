@@ -1,4 +1,4 @@
-import { Base64, ConnectRequest, EmbeddedWireRequest } from '@tonconnect/protocol';
+import { Base64, ConnectRequest, WireRequest } from '@tonconnect/protocol';
 import { Traceable } from 'src/utils/types';
 import { encodeTelegramUrlParameters, isTelegramUrl } from 'src/utils/url';
 import { PROTOCOL_VERSION } from 'src/resources/protocol';
@@ -7,7 +7,7 @@ import { toBase64Url } from 'src/utils/base64';
 export function generateUniversalLink(
     universalLink: string,
     message: ConnectRequest,
-    options: Traceable<{ sessionId: string; embeddedRequest?: EmbeddedWireRequest }>
+    options: Traceable<{ sessionId: string; embeddedRequest?: WireRequest }>
 ): string {
     if (isTelegramUrl(universalLink)) {
         return generateTGUniversalLink(universalLink, message, options);
@@ -19,7 +19,7 @@ export function generateUniversalLink(
 function generateRegularUniversalLink(
     universalLink: string,
     message: ConnectRequest,
-    options: Traceable<{ sessionId: string; embeddedRequest?: EmbeddedWireRequest }>
+    options: Traceable<{ sessionId: string; embeddedRequest?: WireRequest }>
 ): string {
     const url = new URL(universalLink);
     url.searchParams.append('v', PROTOCOL_VERSION.toString());
@@ -38,7 +38,7 @@ function generateRegularUniversalLink(
 function generateTGUniversalLink(
     universalLink: string,
     message: ConnectRequest,
-    options: Traceable<{ sessionId: string; embeddedRequest?: EmbeddedWireRequest }>
+    options: Traceable<{ sessionId: string; embeddedRequest?: WireRequest }>
 ): string {
     const urlToWrap = generateRegularUniversalLink('about:blank', message, options);
     const linkParams = urlToWrap.split('?')[1]!;

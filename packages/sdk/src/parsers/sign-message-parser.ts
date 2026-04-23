@@ -1,5 +1,7 @@
 import {
+    ChainId,
     CONNECT_EVENT_ERROR_CODES,
+    RpcStructuredItem,
     SIGN_MESSAGE_ERROR_CODES,
     SignMessageRpcRequest,
     SignMessageRpcResponseError,
@@ -7,7 +9,7 @@ import {
 } from '@tonconnect/protocol';
 import { BadRequestError, TonConnectError, UnknownAppError, UserRejectsError } from 'src/errors';
 import { UnknownError } from 'src/errors/unknown.error';
-import { SignMessageResponse, SignMessageRpcPayload } from 'src/models/methods';
+import { SignMessageResponse } from 'src/models/methods';
 import { RpcParser } from 'src/parsers/rpc-parser';
 import { WithoutId } from 'src/utils/types';
 
@@ -19,7 +21,28 @@ const signMessageErrors: Partial<Record<CONNECT_EVENT_ERROR_CODES, typeof TonCon
 };
 
 export class SignMessageParser extends RpcParser<'signMessage'> {
-    convertToRpcRequest(request: SignMessageRpcPayload): WithoutId<SignMessageRpcRequest> {
+    convertToRpcRequest(
+        request: {
+            from: string;
+            network: ChainId;
+            valid_until: number;
+        } & (
+            | {
+                  messages: Array<{
+                      address: string;
+                      amount: string;
+                      stateInit?: string;
+                      payload?: string;
+                      extra_currency?: { [k: number]: string };
+                  }>;
+                  items?: never;
+              }
+            | {
+                  items: RpcStructuredItem[];
+                  messages?: never;
+              }
+        )
+    ): WithoutId<SignMessageRpcRequest> {
         return {
             method: 'signMessage',
             params: [JSON.stringify(request)]

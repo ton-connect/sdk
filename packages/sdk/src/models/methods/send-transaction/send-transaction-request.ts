@@ -1,5 +1,5 @@
 import { ChainId } from '@tonconnect/protocol';
-import { StructuredItem } from './transaction-item';
+import { StructuredItem } from './structured-item';
 
 export interface SendTransactionRequestBase {
     /**

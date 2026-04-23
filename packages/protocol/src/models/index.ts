@@ -14,11 +14,12 @@ export {
     StructuredItemType
 } from './feature';
 export { CHAIN, ChainId } from './CHAIN';
+export { RpcStructuredItem, RpcTonItem, RpcJettonItem, RpcNftItem } from './structured-item';
 export {
-    EmbeddedWireRequest,
-    EmbeddedWireSendTransaction,
-    EmbeddedWireSignMessage,
-    EmbeddedWireSignData,
+    WireRequest,
+    WireSendTransaction,
+    WireSignMessage,
+    WireSignData,
     WireMessage,
     WireItem,
     WireTonItem,
@@ -28,6 +29,6 @@ export {
     WireSignDataBinary,
     WireSignDataCell,
     ParsedEmbeddedRequest,
-    expandEmbeddedWireRequest,
+    expandWireRequest,
     parseEmbeddedRequest
 } from './embedded-request';

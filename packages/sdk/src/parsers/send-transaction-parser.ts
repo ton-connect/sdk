@@ -1,5 +1,7 @@
 import {
+    ChainId,
     CONNECT_EVENT_ERROR_CODES,
+    RpcStructuredItem,
     SEND_TRANSACTION_ERROR_CODES,
     SendTransactionRpcRequest,
     SendTransactionRpcResponseError,
@@ -7,7 +9,7 @@ import {
 } from '@tonconnect/protocol';
 import { BadRequestError, TonConnectError, UnknownAppError, UserRejectsError } from 'src/errors';
 import { UnknownError } from 'src/errors/unknown.error';
-import { SendTransactionResponse, TransactionRpcPayload } from 'src/models/methods';
+import { SendTransactionResponse } from 'src/models/methods';
 import { RpcParser } from 'src/parsers/rpc-parser';
 import { WithoutId } from 'src/utils/types';
 
@@ -19,7 +21,28 @@ const sendTransactionErrors: Partial<Record<CONNECT_EVENT_ERROR_CODES, typeof To
 };
 
 class SendTransactionParser extends RpcParser<'sendTransaction'> {
-    convertToRpcRequest(request: TransactionRpcPayload): WithoutId<SendTransactionRpcRequest> {
+    convertToRpcRequest(
+        request: {
+            from: string;
+            network: ChainId;
+            valid_until: number;
+        } & (
+            | {
+                  messages: Array<{
+                      address: string;
+                      amount: string;
+                      stateInit?: string;
+                      payload?: string;
+                      extra_currency?: { [k: number]: string };
+                  }>;
+                  items?: never;
+              }
+            | {
+                  items: RpcStructuredItem[];
+                  messages?: never;
+              }
+        )
+    ): WithoutId<SendTransactionRpcRequest> {
         return {
             method: 'sendTransaction',
             params: [JSON.stringify(request)]
