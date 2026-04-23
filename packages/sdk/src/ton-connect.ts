@@ -98,7 +98,7 @@ import { UUIDv7 } from 'src/utils/uuid';
 import { TraceableWalletEvent } from 'src/models/wallet/traceable-events';
 import { WalletConnectProvider } from 'src/provider/wallet-connect/wallet-connect-provider';
 import { wireRequestParser } from 'src/parsers/wire-request-parser';
-import { Consumable, OptionalConsumable } from 'src/utils/consumable';
+import { Consumable, ConsumableLike } from 'src/utils/consumable';
 
 export class TonConnect implements ITonConnect {
     private desiredChainId: string | undefined;
@@ -276,7 +276,7 @@ export class TonConnect implements ITonConnect {
             request?: ConnectAdditionalRequest;
             openingDeadlineMS?: number;
             signal?: AbortSignal;
-            embeddedRequest?: OptionalConsumable<EmbeddedRequest>;
+            embeddedRequest?: ConsumableLike<EmbeddedRequest>;
         }>
     ): T extends WalletConnectionSourceJS
         ? void
@@ -292,7 +292,7 @@ export class TonConnect implements ITonConnect {
         options?: OptionalTraceable<{
             openingDeadlineMS?: number;
             signal?: AbortSignal;
-            embeddedRequest?: OptionalConsumable<EmbeddedRequest>;
+            embeddedRequest?: ConsumableLike<EmbeddedRequest>;
         }>
     ): T extends WalletConnectionSourceJS
         ? void
@@ -308,12 +308,12 @@ export class TonConnect implements ITonConnect {
                   request?: ConnectAdditionalRequest;
                   openingDeadlineMS?: number;
                   signal?: AbortSignal;
-                  embeddedRequest?: OptionalConsumable<EmbeddedRequest>;
+                  embeddedRequest?: ConsumableLike<EmbeddedRequest>;
               }>,
         additionalOptions?: OptionalTraceable<{
             openingDeadlineMS?: number;
             signal?: AbortSignal;
-            embeddedRequest?: OptionalConsumable<EmbeddedRequest>;
+            embeddedRequest?: ConsumableLike<EmbeddedRequest>;
         }>
     ): void | string {
         // TODO: remove deprecated method
@@ -321,7 +321,7 @@ export class TonConnect implements ITonConnect {
             request?: ConnectAdditionalRequest;
             openingDeadlineMS?: number;
             signal?: AbortSignal;
-            embeddedRequest?: OptionalConsumable<EmbeddedRequest>;
+            embeddedRequest?: ConsumableLike<EmbeddedRequest>;
         }> = {
             ...additionalOptions
         };

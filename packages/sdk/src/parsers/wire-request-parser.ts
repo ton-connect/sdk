@@ -133,9 +133,7 @@ function buildWireItem(item: StructuredItem): WireItem {
 }
 
 export class WireRequestParser {
-    convertToWireRequest(request: EmbeddedRequest): WireRequest {
-        return buildAppRequestPayload(request);
-    }
+    convertToWireRequest = buildAppRequestPayload;
 
     public isError(
         response: WithoutId<WalletResponse<RpcMethod>>

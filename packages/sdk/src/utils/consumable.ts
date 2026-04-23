@@ -1,11 +1,11 @@
 import { logDebug } from './log';
 
-export type OptionalConsumable<T> = T | Consumable<T>;
+export type ConsumableLike<T> = T | Consumable<T>;
 
 export class Consumable<T> {
     private _value: T | undefined;
 
-    static fromOptional<T>(value: OptionalConsumable<T>): Consumable<T> {
+    static fromOptional<T>(value: ConsumableLike<T>): Consumable<T> {
         if (value instanceof Consumable) {
             return value;
         }

@@ -20,7 +20,7 @@ import { WalletInfo } from 'src/models/wallet/wallet-info';
 import { WalletConnectionSourceJS } from 'src/models/wallet/wallet-connection-source';
 import { SignDataPayload } from '@tonconnect/protocol';
 import { OptionalTraceable } from 'src/utils/types';
-import { OptionalConsumable } from 'src/utils/consumable';
+import { ConsumableLike } from 'src/utils/consumable';
 
 export interface ITonConnect {
     /**
@@ -67,7 +67,7 @@ export interface ITonConnect {
         options?: OptionalTraceable<{
             openingDeadlineMS?: number;
             signal?: AbortSignal;
-            embeddedRequest?: OptionalConsumable<EmbeddedRequest>;
+            embeddedRequest?: ConsumableLike<EmbeddedRequest>;
         }>
     ): T extends WalletConnectionSourceJS
         ? void
