@@ -348,7 +348,7 @@ export class TonConnect implements ITonConnect {
             options.embeddedRequest = requestOrOptions?.embeddedRequest;
         }
 
-        const embeddedRequest = Consumable.fromOptional(options.embeddedRequest);
+        const embeddedRequest = Consumable.fromConsumableLike(options.embeddedRequest);
 
         if (options.request) {
             const validationError = validateConnectAdditionalRequest(options.request);
