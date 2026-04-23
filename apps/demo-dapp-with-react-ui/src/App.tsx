@@ -13,6 +13,7 @@ import { FindTransactionDemo } from './components/FindTransactionDemo/FindTransa
 import { TransferUsdt } from './components/TransferUsdt/TransferUsdt';
 import { UniversalConnector } from '@reown/appkit-universal-connector';
 import { GaslessDemo } from './components/GaslessDemo/GaslessDemo';
+import { OneClickPay } from './pages/OneClickPay/OneClickPay';
 
 initializeWalletConnect(UniversalConnector, {
     projectId: '9cb446f4a1b697039a23332618d942b0',
@@ -61,6 +62,7 @@ function App() {
             <div>
                 <Routes>
                     <Route path="/" element={<HomePage />} />
+                    <Route path="/pay" element={<OneClickPay />} />
                     <Route path="/iframe" element={<IframePage />} />
                     <Route path="/iframe/iframe" element={<IframeIframePage />} />
                 </Routes>
