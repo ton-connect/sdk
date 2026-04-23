@@ -16,7 +16,7 @@ export {
 export { CHAIN, ChainId } from './CHAIN';
 export { RpcStructuredItem, RpcTonItem, RpcJettonItem, RpcNftItem } from './structured-item';
 export {
-    WireRequest,
+    WireEmbeddedRequest,
     WireSendTransaction,
     WireSignMessage,
     WireSignData,
@@ -28,7 +28,6 @@ export {
     WireSignDataText,
     WireSignDataBinary,
     WireSignDataCell,
-    ParsedEmbeddedRequest,
-    expandWireRequest,
+    expandWireEmbeddedRequest,
     parseEmbeddedRequest
 } from './embedded-request';

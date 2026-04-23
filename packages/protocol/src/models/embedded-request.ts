@@ -3,103 +3,189 @@ import { ChainId } from './CHAIN';
 import { AppRequest } from './app-message';
 import { RpcJettonItem, RpcNftItem, RpcStructuredItem, RpcTonItem } from './structured-item';
 
-// ── Wire types (compact URL‑encoded format) ─────────────────────────
+// ────────────────────────────────────────────────────────────────────────────
+//  Wire types — compact, URL-encoded shape of an RPC request embedded in the
+//  connect URL as the `e` query parameter. Every field is abbreviated to
+//  minimise URL length; the protocol `parseEmbeddedRequest` / `expandWireEmbeddedRequest`
+//  helpers convert these back to the standard JSON-RPC `AppRequest` shape.
+// ────────────────────────────────────────────────────────────────────────────
 
-export type WireRequest = WireSendTransaction | WireSignMessage | WireSignData;
+/**
+ * Top-level wire shape of an embedded app-request. Discriminated on `m` (method).
+ * One of:
+ *  - {@link WireSendTransaction} (`m: 'st'`)
+ *  - {@link WireSignMessage}     (`m: 'sm'`)
+ *  - {@link WireSignData}        (`m: 'sd'`)
+ */
+export type WireEmbeddedRequest = WireSendTransaction | WireSignMessage | WireSignData;
 
+/**
+ * Compact wire form of `AppRequest<'sendTransaction'>`.
+ * The payload carries EITHER `ms` (raw messages) OR `i` (structured items),
+ * never both.
+ */
 export interface WireSendTransaction {
+    /** method discriminator: `sendTransaction` */
     m: 'st';
+    /** from — sender address (optional; defaults to connected account) */
     f?: string;
+    /** network — TON chain id (e.g. `"-239"` for mainnet) */
     n?: string;
+    /** valid_until — unix epoch seconds */
     vu?: number;
+    /** raw messages (mutually exclusive with `i`) */
     ms?: WireMessage[];
+    /** structured items (mutually exclusive with `ms`) */
     i?: WireItem[];
 }
 
+/**
+ * Compact wire form of `AppRequest<'signMessage'>`.
+ * Same shape as {@link WireSendTransaction}; only the method discriminator differs.
+ */
 export interface WireSignMessage {
+    /** method discriminator: `signMessage` */
     m: 'sm';
+    /** from — sender address */
     f?: string;
+    /** network — TON chain id */
     n?: string;
+    /** valid_until — unix epoch seconds */
     vu?: number;
+    /** raw messages (mutually exclusive with `i`) */
     ms?: WireMessage[];
+    /** structured items (mutually exclusive with `ms`) */
     i?: WireItem[];
 }
 
+/**
+ * Compact wire form of `AppRequest<'signData'>`.
+ * Discriminated on `t` (payload type): `text` | `binary` | `cell`.
+ */
 export type WireSignData = {
+    /** method discriminator: `signData` */
     m: 'sd';
+    /** network — TON chain id */
     n?: string;
+    /** from — sender address */
     f?: string;
 } & (WireSignDataText | WireSignDataBinary | WireSignDataCell);
 
+/** Sign-data payload: plain UTF-8 text. */
 export interface WireSignDataText {
+    /** payload type discriminator */
     t: 'text';
+    /** text to sign */
     tx: string;
 }
 
+/** Sign-data payload: arbitrary binary blob, base64-encoded. */
 export interface WireSignDataBinary {
+    /** payload type discriminator */
     t: 'binary';
+    /** base64-encoded bytes */
     b: string;
 }
 
+/** Sign-data payload: a TVM cell with a TL-B schema. */
 export interface WireSignDataCell {
+    /** payload type discriminator */
     t: 'cell';
+    /** TL-B schema describing the cell layout */
     s: string;
+    /** base64-encoded cell BoC */
     c: string;
 }
 
+/**
+ * Wire form of a raw transaction message (non-structured — the caller is
+ * responsible for the BoC). Counterpart of the standard `SendTransaction`
+ * `messages[]` element.
+ */
 export interface WireMessage {
+    /** destination address */
     a: string;
+    /** amount in nanocoins (decimal string) */
     am: string;
+    /** optional one-cell BoC body, base64 */
     p?: string;
+    /** optional state init, base64 */
     si?: string;
+    /** extra currencies map */
     ec?: { [k: number]: string };
 }
 
+/**
+ * Wire form of a single structured item. Discriminated on `t`.
+ * Counterpart of the user-facing `StructuredItem` (SDK).
+ */
 export type WireItem = WireTonItem | WireJettonItem | WireNftItem;
 
+/** Structured item: native TON transfer. */
 export interface WireTonItem {
+    /** item type discriminator */
     t: 'ton';
+    /** destination address */
     a: string;
+    /** amount in nanocoins (decimal string) */
     am: string;
+    /** optional one-cell BoC body, base64 */
     p?: string;
+    /** optional state init, base64 */
     si?: string;
+    /** extra currencies map */
     ec?: { [k: number]: string };
 }
 
+/** Structured item: jetton (TEP-74) transfer. */
 export interface WireJettonItem {
+    /** item type discriminator */
     t: 'jetton';
+    /** jetton master contract address */
     ma: string;
+    /** jetton recipient address */
     d: string;
+    /** jetton amount in elementary units */
     am: string;
+    /** TON to attach for fees (wallet estimates if omitted) */
     aa?: string;
+    /** where to send excess TON (defaults to sender) */
     rd?: string;
+    /** optional custom_payload cell BoC, base64 */
     cp?: string;
+    /** forward_ton_amount in nanocoins */
     fa?: string;
+    /** optional forward_payload cell BoC, base64 */
     fp?: string;
+    /** optional query_id */
     qi?: string;
 }
 
+/** Structured item: NFT (TEP-62) transfer. */
 export interface WireNftItem {
+    /** item type discriminator */
     t: 'nft';
+    /** NFT item contract address */
     na: string;
+    /** new owner address */
     no: string;
+    /** TON to attach for fees */
     aa?: string;
+    /** where to send excess TON (defaults to sender) */
     rd?: string;
+    /** optional custom_payload cell BoC, base64 */
     cp?: string;
+    /** forward_ton_amount in nanocoins */
     fa?: string;
+    /** optional forward_payload cell BoC, base64 */
     fp?: string;
+    /** optional query_id */
     qi?: string;
 }
 
-// ── Parsed output ────────────────────────────────────────────────────
-// Same shape as AppRequest but without `id` (embedded requests have no id).
-
-export type ParsedEmbeddedRequest = Omit<
-    AppRequest<'sendTransaction' | 'signMessage' | 'signData'>,
-    'id'
->;
-
-// ── Helpers ──────────────────────────────────────────────────────────
+// ────────────────────────────────────────────────────────────────────────────
+//  Helpers
+// ────────────────────────────────────────────────────────────────────────────
 
 function fromBase64Url(base64url: string): string {
     const padded = base64url.length + ((4 - (base64url.length % 4)) % 4);
@@ -249,7 +335,13 @@ function expandSignDataBody(wire: WireSignData): Record<string, unknown> {
     return payload;
 }
 
-export function expandWireRequest(wire: WireRequest): ParsedEmbeddedRequest {
+/**
+ * Expand a compact {@link WireEmbeddedRequest} back to the standard JSON-RPC
+ * `AppRequest`-shaped `{ method, params: [JSON-string] }`.
+ */
+export function expandWireEmbeddedRequest(
+    wire: WireEmbeddedRequest
+): Omit<AppRequest<'sendTransaction' | 'signMessage' | 'signData'>, 'id'> {
     switch (wire.m) {
         case 'st':
             return {
@@ -273,10 +365,12 @@ export function expandWireRequest(wire: WireRequest): ParsedEmbeddedRequest {
  * Decode the `e` URL parameter and return `{ method, params: [string] }` —
  * the same shape as a bridge `AppRequest` (without `id`).
  *
- * The `e` value is `base64url(JSON.stringify(WireRequest))`.
+ * The `e` value is `base64url(JSON.stringify(WireEmbeddedRequest))`.
  */
-export function parseEmbeddedRequest(reqParam: string): ParsedEmbeddedRequest {
+export function parseEmbeddedRequest(
+    reqParam: string
+): Omit<AppRequest<'sendTransaction' | 'signMessage' | 'signData'>, 'id'> {
     const json = fromBase64Url(reqParam);
-    const wire: WireRequest = JSON.parse(json);
-    return expandWireRequest(wire);
+    const wire: WireEmbeddedRequest = JSON.parse(json);
+    return expandWireEmbeddedRequest(wire);
 }

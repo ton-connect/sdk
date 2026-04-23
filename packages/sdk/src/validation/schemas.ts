@@ -182,8 +182,8 @@ function validateStructuredItems(items: unknown[]): ValidationResult {
         return "'items' must not be empty";
     }
 
-    for (let i = 0; i < (items as unknown[]).length; i++) {
-        const item = (items as unknown[])[i];
+    for (let i = 0; i < items.length; i++) {
+        const item = items[i];
         const itemError = validateStructuredItem(item, i);
         if (itemError) {
             return itemError;

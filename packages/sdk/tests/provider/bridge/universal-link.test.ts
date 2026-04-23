@@ -9,7 +9,7 @@ describe.each(CASES)(
         const buildUrl = () => {
             const embeddedRequest =
                 txRequest !== null
-                    ? wireRequestParser.convertToWireRequest({
+                    ? wireRequestParser.convertToWireEmbeddedRequest({
                           method: 'sendTransaction',
                           request: txRequest
                       })

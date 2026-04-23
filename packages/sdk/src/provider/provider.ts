@@ -1,4 +1,4 @@
-import { AppRequest, ConnectRequest, WireRequest, RpcMethod } from '@tonconnect/protocol';
+import { AppRequest, ConnectRequest, WireEmbeddedRequest, RpcMethod } from '@tonconnect/protocol';
 import { OptionalTraceable, WithoutId } from 'src/utils/types';
 import { Consumable } from 'src/utils/consumable';
 import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet/traceable-events';
@@ -19,7 +19,7 @@ export interface HTTPProvider extends BaseProvider {
         options?: OptionalTraceable<{
             openingDeadlineMS?: number;
             signal?: AbortSignal;
-            embeddedRequest?: Consumable<WireRequest>;
+            embeddedRequest?: Consumable<WireEmbeddedRequest>;
         }>
     ): string;
 

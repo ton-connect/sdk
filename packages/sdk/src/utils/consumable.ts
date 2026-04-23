@@ -3,7 +3,7 @@ import { logDebug } from './log';
 export type ConsumableLike<T> = T | Consumable<T>;
 
 export class Consumable<T> {
-    private _value: T | undefined;
+    private value: T | undefined;
 
     static fromConsumableLike<T>(value: ConsumableLike<T>): Consumable<T> {
         if (value instanceof Consumable) {
@@ -14,21 +14,21 @@ export class Consumable<T> {
     }
 
     constructor(value: T) {
-        this._value = value;
+        this.value = value;
     }
 
     peek(): T | undefined {
-        return this._value;
+        return this.value;
     }
 
     consume(): T | undefined {
-        logDebug('Consuming object', this._value);
-        const value = this._value;
-        this._value = undefined;
+        logDebug('Consuming object', this.value);
+        const value = this.value;
+        this.value = undefined;
         return value;
     }
 
     get consumed(): boolean {
-        return this._value === undefined;
+        return this.value === undefined;
     }
 }

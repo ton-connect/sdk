@@ -903,7 +903,7 @@ export class TonConnectUI {
             traceId: options.traceId,
             returnStrategy,
             twaReturnUrl
-        } as Action);
+        });
 
         const abortController = new AbortController();
 
@@ -921,7 +921,7 @@ export class TonConnectUI {
                 traceId: options.traceId,
                 returnStrategy,
                 twaReturnUrl
-            } as Action);
+            });
 
             this.redirectAfterRequestSent({
                 returnStrategy,

@@ -1,23 +1,22 @@
 import { Base64 } from 'src/utils';
 import {
-    WireRequest,
+    WireEmbeddedRequest,
     WireSendTransaction,
     WireSignMessage,
     WireSignData,
     parseEmbeddedRequest,
-    expandWireRequest,
-    ParsedEmbeddedRequest
+    expandWireEmbeddedRequest
 } from 'src/models';
 
 function toBase64Url(base64: string): string {
     return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
-function encodeReqParam(wire: WireRequest): string {
+function encodeReqParam(wire: WireEmbeddedRequest): string {
     return toBase64Url(Base64.encode(JSON.stringify(wire), false));
 }
 
-describe('expandWireRequest', () => {
+describe('expandWireEmbeddedRequest', () => {
     it('expands a sendTransaction with messages', () => {
         const wire: WireSendTransaction = {
             m: 'st',
@@ -26,7 +25,7 @@ describe('expandWireRequest', () => {
             ms: [{ a: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs', am: '1000000000' }]
         };
 
-        const result = expandWireRequest(wire);
+        const result = expandWireEmbeddedRequest(wire);
         expect(result.method).toBe('sendTransaction');
 
         const payload = JSON.parse(result.params[0]);
@@ -57,7 +56,7 @@ describe('expandWireRequest', () => {
             ]
         };
 
-        const result = expandWireRequest(wire);
+        const result = expandWireEmbeddedRequest(wire);
         const payload = JSON.parse(result.params[0]);
 
         expect(payload.messages[0]).toEqual({
@@ -83,7 +82,7 @@ describe('expandWireRequest', () => {
             ]
         };
 
-        const result = expandWireRequest(wire);
+        const result = expandWireEmbeddedRequest(wire);
         const payload = JSON.parse(result.params[0]);
 
         expect(payload.items).toEqual([
@@ -118,7 +117,7 @@ describe('expandWireRequest', () => {
             ]
         };
 
-        const result = expandWireRequest(wire);
+        const result = expandWireEmbeddedRequest(wire);
         const payload = JSON.parse(result.params[0]);
 
         expect(payload.items[0]).toEqual({
@@ -149,7 +148,7 @@ describe('expandWireRequest', () => {
             ]
         };
 
-        const result = expandWireRequest(wire);
+        const result = expandWireEmbeddedRequest(wire);
         const payload = JSON.parse(result.params[0]);
 
         expect(payload.items[0]).toEqual({
@@ -179,7 +178,7 @@ describe('expandWireRequest', () => {
             ]
         };
 
-        const result = expandWireRequest(wire);
+        const result = expandWireEmbeddedRequest(wire);
         const payload = JSON.parse(result.params[0]);
 
         expect(payload.items[0]).toEqual({
@@ -217,7 +216,7 @@ describe('expandWireRequest', () => {
             ]
         };
 
-        const result = expandWireRequest(wire);
+        const result = expandWireEmbeddedRequest(wire);
         const payload = JSON.parse(result.params[0]);
 
         expect(payload.items).toHaveLength(2);
@@ -233,7 +232,7 @@ describe('expandWireRequest', () => {
             ms: [{ a: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs', am: '0' }]
         };
 
-        const result = expandWireRequest(wire);
+        const result = expandWireEmbeddedRequest(wire);
         expect(result.method).toBe('signMessage');
 
         const payload = JSON.parse(result.params[0]);
@@ -250,7 +249,7 @@ describe('expandWireRequest', () => {
             tx: 'Hello, world!'
         };
 
-        const result = expandWireRequest(wire);
+        const result = expandWireEmbeddedRequest(wire);
         expect(result.method).toBe('signData');
 
         const payload = JSON.parse(result.params[0]);
@@ -269,7 +268,7 @@ describe('expandWireRequest', () => {
             b: 'AQIDBA=='
         };
 
-        const result = expandWireRequest(wire);
+        const result = expandWireEmbeddedRequest(wire);
         const payload = JSON.parse(result.params[0]);
         expect(payload).toEqual({ type: 'binary', bytes: 'AQIDBA==' });
     });
@@ -282,7 +281,7 @@ describe('expandWireRequest', () => {
             c: 'te6cckEBAQEABgAACAAAAABT+rFy'
         };
 
-        const result = expandWireRequest(wire);
+        const result = expandWireEmbeddedRequest(wire);
         const payload = JSON.parse(result.params[0]);
         expect(payload).toEqual({
             type: 'cell',
@@ -298,7 +297,7 @@ describe('expandWireRequest', () => {
             ms: [{ a: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs', am: '100' }]
         };
 
-        const result = expandWireRequest(wire);
+        const result = expandWireEmbeddedRequest(wire);
         const payload = JSON.parse(result.params[0]);
 
         expect(payload).not.toHaveProperty('network');
@@ -446,14 +445,14 @@ describe('parseEmbeddedRequest', () => {
         expect(payload.items[2].newOwner).toBe('EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c');
     });
 
-    it('returns ParsedEmbeddedRequest compatible with AppRequest shape', () => {
+    it('returns compatible with AppRequest shape', () => {
         const wire: WireSendTransaction = {
             m: 'st',
             vu: 1761071945,
             ms: [{ a: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs', am: '1' }]
         };
 
-        const result: ParsedEmbeddedRequest = parseEmbeddedRequest(encodeReqParam(wire));
+        const result = parseEmbeddedRequest(encodeReqParam(wire));
 
         expect(result).toHaveProperty('method');
         expect(result).toHaveProperty('params');

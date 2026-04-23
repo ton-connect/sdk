@@ -400,7 +400,7 @@ export class TonConnect implements ITonConnect {
 
         const peeked = embeddedRequest.peek();
         const wireConsumable = peeked
-            ? new Consumable(wireRequestParser.convertToWireRequest(peeked))
+            ? new Consumable(wireRequestParser.convertToWireEmbeddedRequest(peeked))
             : undefined;
 
         const url = this.provider.connect(this.createConnectRequest(options?.request), {
