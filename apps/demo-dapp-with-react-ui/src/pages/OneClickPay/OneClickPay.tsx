@@ -97,10 +97,7 @@ export function OneClickPay() {
                 <header className="one-click-pay__head">
                     <div className="one-click-pay__diamond" aria-hidden>
                         <svg viewBox="0 0 40 40" fill="none">
-                            <path
-                                d="M20 36 L6 14 L14 6 H26 L34 14 Z"
-                                fill="url(#g1)"
-                            />
+                            <path d="M20 36 L6 14 L14 6 H26 L34 14 Z" fill="url(#g1)" />
                             <defs>
                                 <linearGradient id="g1" x1="0" y1="0" x2="40" y2="40">
                                     <stop offset="0" stopColor="#32B4FF" />
@@ -116,8 +113,15 @@ export function OneClickPay() {
                             in the wallet.
                         </p>
                         {wallet && (
-                            <span className="one-click-pay__wallet-chip" title={wallet.account.address}>
-                                {shortAddr(Address.parse(wallet.account.address).toString({ bounceable: false }))}
+                            <span
+                                className="one-click-pay__wallet-chip"
+                                title={wallet.account.address}
+                            >
+                                {shortAddr(
+                                    Address.parse(wallet.account.address).toString({
+                                        bounceable: false
+                                    })
+                                )}
                             </span>
                         )}
                     </div>
