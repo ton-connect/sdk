@@ -1,5 +1,5 @@
 export type { Account } from './account';
-export type { AppRequestResponse, Wallet } from './wallet';
+export type { EmbeddedResponse, Wallet } from './wallet';
 export type {
     WalletConnectionSource,
     WalletConnectionSourceHTTP,

@@ -6,7 +6,7 @@ export interface TonItem {
     /** Destination address in friendly format. */
     address: string;
 
-    /** Amount in nanocoins as decimal string. */
+    /** Amount in nanocoins as string. */
     amount: string;
 
     /** Raw one-cell BoC encoded in Base64. */

@@ -10,7 +10,7 @@ import {
 } from '@tonconnect/protocol';
 
 import {
-    AppRequestResponse,
+    EmbeddedResponse,
     EmbeddedRequest,
     hasItems,
     SendTransactionRequest,
@@ -146,7 +146,7 @@ export class WireRequestParser {
     convertFromRpcResponse(
         method: EmbeddedRequest['method'],
         response: WalletResponse<RpcMethod>
-    ): AppRequestResponse {
+    ): EmbeddedResponse {
         if (this.isError(response)) {
             return { ok: false, error: response.error };
         }

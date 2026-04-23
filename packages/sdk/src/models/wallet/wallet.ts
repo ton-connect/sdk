@@ -6,7 +6,7 @@ import { SendTransactionResponse, SignDataResponse, SignMessageResponse } from '
  * Parsed response to an embedded request.
  * Contains either a method-specific success result or an error.
  */
-export type AppRequestResponse =
+export type EmbeddedResponse =
     | { ok: true; result: SendTransactionResponse | SignDataResponse | SignMessageResponse }
     | { ok: false; error: { code: number; message: string; data?: unknown } };
 
@@ -38,5 +38,5 @@ export interface Wallet {
      * Present only if an EmbeddedRequest was embedded in the connect URL
      * and the wallet processed it during connection.
      */
-    embeddedResponse?: AppRequestResponse;
+    embeddedResponse?: EmbeddedResponse;
 }

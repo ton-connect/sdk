@@ -494,12 +494,13 @@ export class TonConnectUI {
         this.tracker.trackTransactionSentForSignature(this.wallet, tx);
 
         const handlers = {
-            onAbort: wasStarted => {
-                const errorMessage = wasStarted
-                    ? 'Transaction was not sent'
-                    : 'Transaction was canceled';
-                this.tracker.trackTransactionSigningFailed(this.wallet, tx, errorMessage);
-                return new TonConnectUIError(errorMessage);
+            onAbort: () => {
+                this.tracker.trackTransactionSigningFailed(
+                    this.wallet,
+                    tx,
+                    'Transaction was cancelled'
+                );
+                return new TonConnectUIError('Transaction was not sent');
             },
             sendRequestBuilder: options => async () => {
                 const result = await this.connector.sendTransaction(tx, options);
@@ -544,10 +545,9 @@ export class TonConnectUI {
         this.tracker.trackDataSentForSignature(this.wallet, data);
 
         const handlers = {
-            onAbort: wasStarted => {
-                const errorMessage = wasStarted ? 'SignData was not sent' : 'SignData was canceled';
-                this.tracker.trackDataSigningFailed(this.wallet, data, errorMessage);
-                return new TonConnectUIError(errorMessage);
+            onAbort: () => {
+                this.tracker.trackDataSigningFailed(this.wallet, data, 'SignData was cancelled');
+                return new TonConnectUIError('SignData was not sent');
             },
             sendRequestBuilder: options => async () => {
                 const result = await this.connector.signData(data, options);
@@ -591,11 +591,8 @@ export class TonConnectUI {
         const traceId = options?.traceId ?? UUIDv7();
 
         const handlers = {
-            onAbort: wasStarted => {
-                const errorMessage = wasStarted
-                    ? 'SignMessage was not sent'
-                    : 'SignMessage was cancelled';
-                return new TonConnectUIError(errorMessage);
+            onAbort: () => {
+                return new TonConnectUIError('SignMessage was not sent');
             },
             sendRequestBuilder: options => async () => {
                 return await this.connector.signMessage(message, options);
@@ -1014,25 +1011,22 @@ export class TonConnectUI {
 
     private async runConnectorRequestWithAbortHandling<T>(
         signal: AbortSignal,
-        onAborted: (wasStarted: boolean) => TonConnectUIError,
+        onAborted: () => TonConnectUIError,
         call: () => Promise<T>
     ): Promise<T> {
         return new Promise<T>((resolve, reject) => {
-            let started = false;
-
             if (signal.aborted) {
-                return reject(onAborted(started));
+                return reject(onAborted());
             }
 
             const onCanceledHandler = (): void => {
-                reject(onAborted(started));
+                reject(onAborted());
             };
 
             signal.addEventListener('abort', onCanceledHandler, { once: true });
 
             call()
                 .then(result => {
-                    started = true;
                     signal.removeEventListener('abort', onCanceledHandler);
                     resolve(result);
                 })
@@ -1227,7 +1221,7 @@ type ActionOptions<TResponse> = ActionConfiguration &
     }>;
 
 type BridgeFlowHandlers<TResponse> = {
-    onAbort: (wasStarted: boolean) => TonConnectUIError;
+    onAbort: () => TonConnectUIError;
     sendRequestBuilder: (
         options: OptionalTraceable<{ onRequestSent?: () => void; signal?: AbortSignal }>
     ) => () => Promise<TResponse>;
