@@ -15,7 +15,7 @@ export interface ConnectEventSuccess {
 
     /**
      * Response to the embedded app request (deep link request).
-     * Present only if the wallet processed a `req` parameter from the connect URL.
+     * Present only if the wallet processed an `e` parameter from the connect URL.
      */
     response?: WalletResponse<RpcMethod>;
 }

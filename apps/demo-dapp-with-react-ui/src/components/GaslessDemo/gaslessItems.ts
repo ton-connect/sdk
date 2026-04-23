@@ -104,10 +104,7 @@ export async function sendItems(
 
     const { internalBoc } = await tonConnectUi.signMessage({
         validUntil: Math.ceil(Date.now() / 1000) + 5 * 60,
-        items: params.messages.map(message => ({
-            ...payloadToStructuredItem(message.payload!),
-            stateInit: message.stateInit?.toString('base64')
-        }))
+        items: params.messages.map(message => payloadToStructuredItem(message.payload!))
     });
     console.debug('internalBoc', internalBoc);
 

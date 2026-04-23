@@ -6,6 +6,19 @@ import { useState } from 'react';
 import ReactJson from 'react-json-view';
 import { TonProofDemoApi } from '../../TonProofDemoApi';
 
+// Embedded-request callback: when `dispatched` is true the wallet may have already
+// processed the request (the response was lost in transit). For signData this is rarely
+// dangerous (no funds move), but for sendTransaction you MUST verify on-chain before
+// calling send() — see TxForm.tsx for the safe pattern.
+function onConnectedSafeSignData<T>(send: () => Promise<T>, ctx: { dispatched: boolean }) {
+    if (ctx.dispatched) {
+        console.warn(
+            '[signData] embedded request was dispatched but no response received — re-sending over the bridge'
+        );
+    }
+    return send();
+}
+
 // Component to test SignData functionality
 export function SignDataTester() {
     const wallet = useTonWallet();
@@ -35,7 +48,7 @@ export function SignDataTester() {
             console.log('📤 Sign Data Request (Text):', requestPayload);
 
             const result = await tonConnectUi.signData(requestPayload, {
-                onConnected: embeddedRequest ? send => send() : undefined
+                onConnected: embeddedRequest ? onConnectedSafeSignData : undefined
             });
 
             setSignDataResponse(result);
@@ -76,7 +89,7 @@ export function SignDataTester() {
             console.log('📤 Sign Data Request (Binary):', requestPayload);
 
             const result = await tonConnectUi.signData(requestPayload, {
-                onConnected: embeddedRequest ? send => send() : undefined
+                onConnected: embeddedRequest ? onConnectedSafeSignData : undefined
             });
 
             setSignDataResponse(result);
@@ -123,7 +136,7 @@ export function SignDataTester() {
             console.log('📤 Sign Data Request (Cell):', requestPayload);
 
             const result = await tonConnectUi.signData(requestPayload, {
-                onConnected: embeddedRequest ? send => send() : undefined
+                onConnected: embeddedRequest ? onConnectedSafeSignData : undefined
             });
 
             setSignDataResponse(result);

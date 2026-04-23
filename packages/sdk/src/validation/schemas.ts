@@ -459,20 +459,31 @@ export function validateConnectAdditionalRequest(data: unknown): ValidationResul
 
 export function validateEmbeddedRequest(data: unknown) {
     if (!isValidObject(data)) {
-        return 'Request must be an object';
+        return 'Embedded request must be an object';
+    }
+
+    if (hasExtraProperties(data, ['method', 'request'])) {
+        return 'Embedded request contains extra properties';
     }
 
     if (!isValidString(data.method)) {
-        return "'method' is required";
+        return "Embedded request: 'method' is required";
     }
+
+    if (!('request' in data)) {
+        return "Embedded request: 'request' is required";
+    }
+
+    const prefixError = (inner: ValidationResult): ValidationResult =>
+        inner === null ? null : `Embedded ${data.method}: ${inner}`;
 
     switch (data.method) {
         case 'sendTransaction':
-            return validateSendTransactionRequest(data.request);
+            return prefixError(validateSendTransactionRequest(data.request));
         case 'signData':
-            return validateSignDataPayload(data.request);
+            return prefixError(validateSignDataPayload(data.request));
         case 'signMessage':
-            return validateSignMessageRequest(data.request);
+            return prefixError(validateSignMessageRequest(data.request));
     }
 
     return `Invalid 'method' value: ${data.method}`;

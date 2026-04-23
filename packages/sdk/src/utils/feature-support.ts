@@ -191,16 +191,23 @@ export function checkSignMessageSupport(
         }
     }
 
-    if (signMessageFeature.maxMessages < options.requiredMessagesNumber) {
-        throw new WalletNotSupportFeatureError(
-            `Wallet is not able to handle such SignMessage request. Max support messages number is ${signMessageFeature.maxMessages}, but ${options.requiredMessagesNumber} is required.`,
-            {
-                cause: {
-                    requiredFeature: { featureName: 'SignMessage', value: requiredFeature }
+    if (signMessageFeature.maxMessages !== undefined) {
+        if (signMessageFeature.maxMessages < options.requiredMessagesNumber) {
+            throw new WalletNotSupportFeatureError(
+                `Wallet is not able to handle such SignMessage request. Max support messages number is ${signMessageFeature.maxMessages}, but ${options.requiredMessagesNumber} is required.`,
+                {
+                    cause: {
+                        requiredFeature: { featureName: 'SignMessage', value: requiredFeature }
+                    }
                 }
-            }
-        );
+            );
+        }
+        return;
     }
+
+    logWarning(
+        "Connected wallet didn't provide information about max allowed messages in the SignMessage request. Request may be rejected by the wallet."
+    );
 }
 
 export function checkRequiredWalletFeatures(

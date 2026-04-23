@@ -66,11 +66,11 @@ export type SendTransactionRequest =
     | SendTransactionRequestWithItems;
 
 export function hasItems(req: SendTransactionRequest): req is SendTransactionRequestWithItems {
-    return 'items' in req && Array.isArray((req as SendTransactionRequestWithItems).items);
+    return 'items' in req && Array.isArray(req.items);
 }
 
 export function hasMessages(
     req: SendTransactionRequest
 ): req is SendTransactionRequestWithMessages {
-    return 'messages' in req && Array.isArray((req as SendTransactionRequestWithMessages).messages);
+    return 'messages' in req && Array.isArray(req.messages);
 }

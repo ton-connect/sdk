@@ -4,7 +4,6 @@ import {
     ConnectEventSuccess,
     ConnectItem,
     ConnectRequest,
-    RpcStructuredItem,
     SendTransactionRpcResponseSuccess,
     SignDataPayload,
     SignDataRpcResponseSuccess,
@@ -43,7 +42,6 @@ import {
     SignDataResponse,
     SignMessageRequest,
     SignMessageResponse,
-    StructuredItem,
     hasItems
 } from 'src/models/methods';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
@@ -87,6 +85,7 @@ import {
 } from './validation/schemas';
 import { isQaModeEnabled } from './utils/qa-mode';
 import { normalizeBase64 } from './utils/base64';
+import { normalizeStructuredItem } from './utils/normalize-structured-item';
 import { AnalyticsManager } from 'src/analytics/analytics-manager';
 import { BrowserEventDispatcher } from 'src/tracker/browser-event-dispatcher';
 import { EventDispatcher } from 'src/tracker/event-dispatcher';
@@ -967,36 +966,8 @@ export class TonConnect implements ITonConnect {
             from,
             network,
             valid_until: transaction.validUntil,
-            items: transaction.items.map(item => this.normalizeStructuredItem(item))
+            items: transaction.items.map(item => normalizeStructuredItem(item))
         };
-    }
-
-    private normalizeStructuredItem(item: StructuredItem): RpcStructuredItem {
-        switch (item.type) {
-            case 'ton': {
-                const { extraCurrency, ...rest } = item;
-                return {
-                    ...rest,
-                    payload: normalizeBase64(item.payload),
-                    stateInit: normalizeBase64(item.stateInit),
-                    extra_currency: extraCurrency
-                };
-            }
-            case 'jetton': {
-                return {
-                    ...item,
-                    customPayload: normalizeBase64(item.customPayload),
-                    forwardPayload: normalizeBase64(item.forwardPayload)
-                };
-            }
-            case 'nft': {
-                return {
-                    ...item,
-                    customPayload: normalizeBase64(item.customPayload),
-                    forwardPayload: normalizeBase64(item.forwardPayload)
-                };
-            }
-        }
     }
 
     /**
