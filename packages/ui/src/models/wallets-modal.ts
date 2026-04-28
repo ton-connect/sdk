@@ -10,7 +10,7 @@ export interface WalletsModal {
     /**
      * Open the modal.
      */
-    open: (options?: OptionalTraceable<{ embeddedRequest?: Consumable<EmbeddedRequest> }>) => void;
+    open: (options?: OptionalTraceable) => void;
 
     /**
      * Close the modal.

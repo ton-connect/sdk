@@ -121,6 +121,8 @@ export class TonConnectUI {
      */
     public readonly modal: WalletsModal;
 
+    private readonly modalManager: WalletsModalManager;
+
     /**
      * Manages the single wallet modal window state.
      * TODO: make it public when interface will be ready for external usage.
@@ -260,7 +262,7 @@ export class TonConnectUI {
             tonConnectUiVersion: tonConnectUiVersion
         });
 
-        this.modal = new WalletsModalManager({
+        this.modalManager = new WalletsModalManager({
             connector: this.connector,
             tracker: this.tracker,
             setConnectRequestParametersCallback: (
@@ -269,6 +271,7 @@ export class TonConnectUI {
                 this.connectRequestParametersCallback = callback;
             }
         });
+        this.modal = this.modalManager;
 
         this.singleWalletModal = new SingleWalletModalManager({
             connector: this.connector,
@@ -841,7 +844,7 @@ export class TonConnectUI {
 
         const abortController = new AbortController();
 
-        await this.modal.open({
+        await this.modalManager.open({
             traceId: options.traceId,
             embeddedRequest: consumable
         });
