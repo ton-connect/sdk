@@ -24,6 +24,20 @@
     line-height: 20px;
   }
 
+  &__mode {
+    display: flex;
+    gap: 20px;
+    color: white;
+    font-size: 16px;
+
+    label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+  }
+
   &__buttons {
     display: flex;
     gap: 20px;

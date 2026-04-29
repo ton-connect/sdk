@@ -1,15 +1,25 @@
+/* eslint-disable no-console */
 import './style.scss';
-import { SendTransactionRequest, useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
+import {
+    SendTransactionRequest,
+    SignMessageRequest,
+    useTonConnectUI,
+    useTonWallet
+} from '@tonconnect/ui-react';
 import { Address } from '@ton/ton';
+import { useState } from 'react';
 
-// Component to test wallet batch message limits
+type Mode = 'sendTransaction' | 'signMessage';
+
+// Component to test wallet batch message limits for sendTransaction / signMessage
 export function WalletBatchLimitsTester() {
     const wallet = useTonWallet();
     const [tonConnectUi] = useTonConnectUI();
+    const [mode, setMode] = useState<Mode>('sendTransaction');
 
-    // Generate transaction with specified number of messages
-    const generateMultipleMessages = (count: number): SendTransactionRequest => {
-        // The transaction is valid for 10 minutes
+    const generateMultipleMessages = (
+        count: number
+    ): SendTransactionRequest & SignMessageRequest => {
         const validUntil = Math.floor(Date.now() / 1000) + 600;
 
         // Get user's wallet address and convert to non-bounceable format
@@ -44,10 +54,20 @@ export function WalletBatchLimitsTester() {
         };
     };
 
-    // Send transaction with specified number of messages
-    const handleSendTransaction = (count: number) => {
-        const tx = generateMultipleMessages(count);
-        tonConnectUi.sendTransaction(tx);
+    // Run the selected action with specified number of messages
+    const handleAction = async (count: number) => {
+        const request = generateMultipleMessages(count);
+        try {
+            if (mode === 'sendTransaction') {
+                const result = await tonConnectUi.sendTransaction(request);
+                console.log(`📥 sendTransaction Response (${count} messages):`, result);
+            } else {
+                const result = await tonConnectUi.signMessage(request);
+                console.log(`📥 signMessage Response (${count} messages):`, result);
+            }
+        } catch (e) {
+            console.error(`Error in ${mode} with ${count} messages:`, e);
+        }
     };
 
     return (
@@ -58,12 +78,36 @@ export function WalletBatchLimitsTester() {
                 Send multiple messages to the wallet to test message batching capabilities
             </div>
 
+            <div className="wallet-batch-limits-tester__mode">
+                <label>
+                    <input
+                        type="radio"
+                        name="batch-tester-mode"
+                        value="sendTransaction"
+                        checked={mode === 'sendTransaction'}
+                        onChange={() => setMode('sendTransaction')}
+                    />
+                    Send Transaction
+                </label>
+                <label>
+                    <input
+                        type="radio"
+                        name="batch-tester-mode"
+                        value="signMessage"
+                        checked={mode === 'signMessage'}
+                        onChange={() => setMode('signMessage')}
+                    />
+                    Sign Message
+                </label>
+            </div>
+
             {wallet ? (
                 <div className="wallet-batch-limits-tester__buttons">
-                    <button onClick={() => handleSendTransaction(4)}>Test with 4 Messages</button>
-                    <button onClick={() => handleSendTransaction(255)}>
-                        Test with 255 Messages
-                    </button>
+                    {[4, 5, 255, 256].map(count => (
+                        <button key={count} onClick={() => handleAction(count)}>
+                            Test with {count} Messages
+                        </button>
+                    ))}
                 </div>
             ) : (
                 <div className="wallet-batch-limits-tester__error">
