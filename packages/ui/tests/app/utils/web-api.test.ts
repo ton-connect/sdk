@@ -47,7 +47,7 @@ describe('web-api openLink — embedded request length guard', () => {
     });
 
     describe('strips `e` from links longer than MAX_LINK_LENGTH', () => {
-        const longE = 'A'.repeat(MAX_LINK_LENGTH);
+        const longE = 'E'.repeat(MAX_LINK_LENGTH);
 
         it('tc:// — drops e=, keeps other params', () => {
             const link = `tc://?v=2&id=abc&r=req&e=${longE}`;
