@@ -73,6 +73,12 @@ export class BridgeProvider implements HTTPProvider {
 
     private readonly defaultRetryTimeoutMS = 2000;
 
+    // NOTE: this is duplicated as `MAX_LINK_LENGTH` in
+    // packages/ui/src/app/utils/web-api.ts. The duplication is a consequence
+    // of an architectural shortcoming — universal-link generation lives here
+    // in the SDK (which enforces this cap), while the UI layer independently
+    // re-checks the produced link before opening it. Until the length policy
+    // is centralised, both constants must be kept in sync.
     private readonly maxUrlLength = 1024;
 
     private readonly optionalOpenGateways = 3;

@@ -1,7 +1,8 @@
-import { getWindow, openLinkBlank } from 'src/app/utils/web-api';
+import { getWindow, openLinkBlank, MAX_LINK_LENGTH } from 'src/app/utils/web-api';
 import { TonConnectUIError } from 'src/errors';
 import { logDebug, logError } from 'src/app/utils/log';
 import { setLastOpenedLink } from 'src/app/state/modals-state';
+import { removeEmbeddedRequestFromUniversalLink } from 'src/app/utils/url-strategy-helpers';
 
 type TmaPlatform = 'android' | 'ios' | 'macos' | 'tdesktop' | 'weba' | 'web' | 'unknown';
 
@@ -202,6 +203,9 @@ export function sendExpand(): void {
  * @param fallback The function to call if the link can't be opened in TMA.
  */
 export function sendOpenTelegramLink(link: string, fallback?: () => void): void {
+    if (link.length > MAX_LINK_LENGTH) {
+        link = removeEmbeddedRequestFromUniversalLink(link);
+    }
     const url = new URL(link);
     if (url.protocol !== 'http:' && url.protocol !== 'https:') {
         if (fallback) {
