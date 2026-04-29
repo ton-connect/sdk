@@ -6,7 +6,7 @@ import { RpcJettonItem, RpcNftItem, RpcStructuredItem, RpcTonItem } from './stru
 // ────────────────────────────────────────────────────────────────────────────
 //  Wire types — compact, URL-encoded shape of an RPC request embedded in the
 //  connect URL as the `e` query parameter. Every field is abbreviated to
-//  minimise URL length; the protocol `parseEmbeddedRequest` / `expandWireEmbeddedRequest`
+//  minimise URL length; the protocol `decodeEmbeddedRequestParam` / `decodeWireEmbeddedRequest`
 //  helpers convert these back to the standard JSON-RPC `AppRequest` shape.
 // ────────────────────────────────────────────────────────────────────────────
 
@@ -336,10 +336,10 @@ function expandSignDataBody(wire: WireSignData): Record<string, unknown> {
 }
 
 /**
- * Expand a compact {@link WireEmbeddedRequest} back to the standard JSON-RPC
+ * Decode a compact {@link WireEmbeddedRequest} back to the standard JSON-RPC
  * `AppRequest`-shaped `{ method, params: [JSON-string] }`.
  */
-export function expandWireEmbeddedRequest(
+export function decodeWireEmbeddedRequest(
     wire: WireEmbeddedRequest
 ): Omit<AppRequest<'sendTransaction' | 'signMessage' | 'signData'>, 'id'> {
     switch (wire.m) {
@@ -367,10 +367,10 @@ export function expandWireEmbeddedRequest(
  *
  * The `e` value is `base64url(JSON.stringify(WireEmbeddedRequest))`.
  */
-export function parseEmbeddedRequest(
+export function decodeEmbeddedRequestParam(
     reqParam: string
 ): Omit<AppRequest<'sendTransaction' | 'signMessage' | 'signData'>, 'id'> {
     const json = fromBase64Url(reqParam);
     const wire: WireEmbeddedRequest = JSON.parse(json);
-    return expandWireEmbeddedRequest(wire);
+    return decodeWireEmbeddedRequest(wire);
 }

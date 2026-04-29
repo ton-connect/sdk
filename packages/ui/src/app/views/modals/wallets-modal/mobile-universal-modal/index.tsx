@@ -1,13 +1,11 @@
 import {
     ConnectAdditionalRequest,
     isWalletInfoRemote,
-    checkRequiredWalletFeatures,
-    isQaModeEnabled
+    checkRequiredWalletFeatures
 } from '@tonconnect/sdk';
 import { Component, createMemo, createSignal, For, Show } from 'solid-js';
 import { AtWalletIcon, FourWalletsItem, QRIcon, WalletItem } from 'src/app/components';
 import {
-    ButtonStyled,
     H1Styled,
     H2Styled,
     StyledLeftActionButton,
@@ -66,7 +64,7 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
         null
     );
 
-    const getUniversalLink = (consume: boolean): string => {
+    const getUniversalLink = (options: { useEmbeddedRequest: boolean }): string => {
         let link = universalLink();
         let wasEmpty = !link;
 
@@ -84,8 +82,8 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
 
         const linkWithoutRequest = removeEmbeddedRequestFromUniversalLink(link);
 
-        const linkToStore = consume ? linkWithoutRequest : link;
-        const linkToReturn = consume ? link : linkWithoutRequest;
+        const linkToStore = options.useEmbeddedRequest ? linkWithoutRequest : link;
+        const linkToReturn = options.useEmbeddedRequest ? link : linkWithoutRequest;
 
         const wasConsumed = linkToReturn !== linkToStore;
         if (wasConsumed || wasEmpty) {
@@ -108,7 +106,7 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
             clearTimeout(isCopiedShown());
         }
 
-        await copyToClipboard(getUniversalLink(false));
+        await copyToClipboard(getUniversalLink({ useEmbeddedRequest: false }));
         const timeoutId = setTimeout(() => setIsCopiedShown(undefined), 1500);
         setIsCopiedShown(timeoutId);
     };
@@ -118,7 +116,7 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
         setFirstClick(false);
 
         redirectToWallet(
-            getUniversalLink(true),
+            getUniversalLink({ useEmbeddedRequest: true }),
             undefined,
             {
                 returnStrategy: appState.returnStrategy,
@@ -214,7 +212,7 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
             <Show when={showQR()}>
                 <StyledLeftActionButton icon="arrow" onClick={onCloseQR} />
                 <MobileUniversalQR
-                    universalLink={getUniversalLink(false)}
+                    universalLink={getUniversalLink({ useEmbeddedRequest: false })}
                     isCopiedShown={isCopiedShown()}
                     onOpenLink={onSelectUniversal}
                     onCopy={onCopy}
@@ -222,12 +220,6 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
             </Show>
             <Show when={!showQR()}>
                 <StyledLeftActionButton icon={<QRIcon />} onClick={onOpenQR} />
-                <Show when={isQaModeEnabled()}>
-                    {/* TODO: remove*/}
-                    <ButtonStyled onClick={() => copyToClipboard(getUniversalLink(true))}>
-                        Copy to clipboard (QA)
-                    </ButtonStyled>
-                </Show>
                 <H1Styled translationKey="walletModal.mobileUniversalModal.connectYourWallet">
                     Connect your TON wallet
                 </H1Styled>
