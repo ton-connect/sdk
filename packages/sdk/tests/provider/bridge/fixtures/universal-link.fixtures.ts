@@ -83,7 +83,7 @@ export const CASES: UniversalLinkCase[] = [
                     forwardAmount: '5000'
                 }
             ]
-        },
+        }
     },
     {
         label: '1 TON transfer with payload (messages)',
@@ -94,7 +94,7 @@ export const CASES: UniversalLinkCase[] = [
         txRequest: {
             validUntil: VALID_UNTIL,
             messages: [{ address: RECIPIENT, amount: '1000000000', payload: BOC_PAYLOAD }]
-        },
+        }
     },
     {
         label: '1 TON transfer with payload (items)',
@@ -105,7 +105,7 @@ export const CASES: UniversalLinkCase[] = [
         txRequest: {
             validUntil: VALID_UNTIL,
             items: [{ type: 'ton', address: RECIPIENT, amount: '1000000000', payload: BOC_PAYLOAD }]
-        },
+        }
     },
     {
         label: '1 TON transfer without payload (messages)',
@@ -116,7 +116,7 @@ export const CASES: UniversalLinkCase[] = [
         txRequest: {
             validUntil: VALID_UNTIL,
             messages: [{ address: RECIPIENT, amount: '1000000000' }]
-        },
+        }
     },
     {
         label: '1 TON transfer without payload (items)',
@@ -127,7 +127,7 @@ export const CASES: UniversalLinkCase[] = [
         txRequest: {
             validUntil: VALID_UNTIL,
             items: [{ type: 'ton', address: RECIPIENT, amount: '1000000000' }]
-        },
+        }
     },
     {
         label: 'TON + jetton transfer (items)',
@@ -149,7 +149,7 @@ export const CASES: UniversalLinkCase[] = [
                     forwardAmount: '10000'
                 }
             ]
-        },
+        }
     },
     {
         label: '1 jetton transfer with forward & custom payload (items)',
@@ -171,7 +171,7 @@ export const CASES: UniversalLinkCase[] = [
                     customPayload: BOC_PAYLOAD
                 }
             ]
-        },
+        }
     },
     {
         label: '1 jetton transfer with attachAmount and queryId (items)',
@@ -191,7 +191,7 @@ export const CASES: UniversalLinkCase[] = [
                     queryId: '42'
                 }
             ]
-        },
+        }
     },
     {
         label: 'sendTransaction with explicit from and network (messages)',
@@ -204,7 +204,7 @@ export const CASES: UniversalLinkCase[] = [
             from: SENDER,
             validUntil: VALID_UNTIL,
             messages: [{ address: RECIPIENT, amount: '500000000' }]
-        },
+        }
     },
     {
         label: 'connect-only (no embeddedRequest)',
@@ -212,7 +212,7 @@ export const CASES: UniversalLinkCase[] = [
         sessionId: SESSION_ID,
         traceId: TRACE_ID,
         connectRequest: WITH_PROOF_CONNECT,
-        txRequest: null,
+        txRequest: null
     },
     {
         label: 'Telegram direct link — 1 TON transfer without payload (messages)',
@@ -223,7 +223,7 @@ export const CASES: UniversalLinkCase[] = [
         txRequest: {
             validUntil: VALID_UNTIL,
             messages: [{ address: RECIPIENT, amount: '1' }]
-        },
+        }
     },
 
     // ── Legacy https://t.me/wallet?attach=wallet — with proof ────────────────
@@ -237,7 +237,7 @@ export const CASES: UniversalLinkCase[] = [
         txRequest: {
             validUntil: VALID_UNTIL,
             messages: [{ address: RECIPIENT, amount: '1000000000' }]
-        },
+        }
     },
     {
         label: 'Telegram attach link — TON + jetton transfer (items)',
@@ -259,7 +259,7 @@ export const CASES: UniversalLinkCase[] = [
                     forwardAmount: '10000'
                 }
             ]
-        },
+        }
     },
     {
         label: 'Telegram attach link — 2 jetton transfers (items)',
@@ -288,7 +288,7 @@ export const CASES: UniversalLinkCase[] = [
                     forwardAmount: '5000'
                 }
             ]
-        },
+        }
     },
     {
         label: 'Telegram attach link — connect-only (no embeddedRequest)',
@@ -296,7 +296,7 @@ export const CASES: UniversalLinkCase[] = [
         sessionId: SESSION_ID,
         traceId: TRACE_ID,
         connectRequest: WITH_PROOF_CONNECT,
-        txRequest: null,
+        txRequest: null
     },
 
     // ── Standard tc:// — no proof ─────────────────────────────────────────────
@@ -310,7 +310,7 @@ export const CASES: UniversalLinkCase[] = [
         txRequest: {
             validUntil: VALID_UNTIL,
             messages: [{ address: RECIPIENT, amount: '1000000000' }]
-        },
+        }
     },
     {
         label: 'no-proof: 2 jetton transfers (items)',
@@ -339,7 +339,7 @@ export const CASES: UniversalLinkCase[] = [
                     forwardAmount: '5000'
                 }
             ]
-        },
+        }
     },
     {
         label: 'no-proof: 1 jetton with forward & custom payload (items)',
@@ -361,7 +361,7 @@ export const CASES: UniversalLinkCase[] = [
                     customPayload: BOC_PAYLOAD
                 }
             ]
-        },
+        }
     },
     {
         label: 'no-proof: Telegram attach link — connect-only (no embeddedRequest)',
@@ -369,6 +369,6 @@ export const CASES: UniversalLinkCase[] = [
         sessionId: SESSION_ID,
         traceId: TRACE_ID,
         connectRequest: NO_PROOF_CONNECT,
-        txRequest: null,
+        txRequest: null
     }
 ];
