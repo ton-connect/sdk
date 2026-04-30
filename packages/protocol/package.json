@@ -44,9 +44,9 @@
     "@rollup/plugin-typescript": "^12.1.4",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.2.0",
-    "jest": "^30.0.5",
-    "rollup": "^4.46.2",
-    "ts-jest": "^29.0.3"
+    "jest": "^30.3.0",
+    "rollup": "^4.60.2",
+    "ts-jest": "^29.4.9"
   },
   "typedoc": {
     "entryPoint": "./src/index.ts"

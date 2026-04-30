@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@reown/appkit-universal-connector": "^1.8.14",
+    "@reown/appkit-universal-connector": "^1.8.19",
     "@ton-api/client": "^0.4.0",
     "@ton-community/assets-sdk": "0.0.5",
     "@ton/core": "0.63.1",
@@ -26,7 +26,7 @@
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-json-view": "^1.21.3",
-    "react-router-dom": "^7.9.4",
+    "react-router-dom": "^7.14.2",
     "tweetnacl": "^1.0.3",
     "zod": "^4.0.15"
   },
@@ -37,7 +37,7 @@
     "@vitejs/plugin-react": "^4.7.0",
     "sass": "^1.90.0",
     "typescript": "^5.9.2",
-    "vite": "^7.0.6"
+    "vite": "^7.3.2"
   },
   "msw": {
     "workerDirectory": [
