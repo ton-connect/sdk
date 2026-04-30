@@ -7,8 +7,12 @@ import {
     SendTransactionRpcResponseSuccess,
     SignDataPayload,
     SignDataRpcResponseSuccess,
+    SignMessageRpcResponseSuccess,
     TonAddressItemReply,
-    TonProofItemReply
+    TonProofItemReply,
+    StructuredItemType,
+    WalletResponse,
+    RpcMethod
 } from '@tonconnect/protocol';
 import { DappMetadataError } from 'src/errors/dapp/dapp-metadata.error';
 import { ManifestContentErrorError } from 'src/errors/protocol/events/connect/manifest-content-error.error';
@@ -21,6 +25,7 @@ import {
 } from 'src/errors/wallet';
 import {
     Account,
+    EmbeddedRequest,
     RequiredFeatures,
     Wallet,
     WalletConnectionSource,
@@ -31,8 +36,13 @@ import {
 } from 'src/models';
 import {
     SendTransactionRequest,
+    SendTransactionRequestWithMessages,
+    SendTransactionRequestWithItems,
     SendTransactionResponse,
-    SignDataResponse
+    SignDataResponse,
+    SignMessageRequest,
+    SignMessageResponse,
+    hasItems
 } from 'src/models/methods';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
 import { AnalyticsSettings, TonConnectOptions } from 'src/models/ton-connect-options';
@@ -43,6 +53,7 @@ import {
 import { connectErrorsParser } from 'src/parsers/connect-errors-parser';
 import { sendTransactionParser } from 'src/parsers/send-transaction-parser';
 import { signDataParser } from 'src/parsers/sign-data-parser';
+import { signMessageParser } from 'src/parsers/sign-message-parser';
 import { BridgeProvider } from 'src/provider/bridge/bridge-provider';
 import { InjectedProvider } from 'src/provider/injected/injected-provider';
 import { Provider } from 'src/provider/provider';
@@ -56,7 +67,8 @@ import { OptionalTraceable, Traceable } from 'src/utils/types';
 import {
     checkSendTransactionSupport,
     checkRequiredWalletFeatures,
-    checkSignDataSupport
+    checkSignDataSupport,
+    checkSignMessageSupport
 } from 'src/utils/feature-support';
 import { callForSuccess } from 'src/utils/call-for-success';
 import { logDebug, logError } from 'src/utils/log';
@@ -67,10 +79,13 @@ import {
     validateSendTransactionRequest,
     validateSignDataPayload,
     validateConnectAdditionalRequest,
-    validateTonProofItemReply
+    validateTonProofItemReply,
+    validateSignMessageRequest,
+    validateEmbeddedRequest
 } from './validation/schemas';
 import { isQaModeEnabled } from './utils/qa-mode';
 import { normalizeBase64 } from './utils/base64';
+import { normalizeStructuredItem } from './utils/normalize-structured-item';
 import { AnalyticsManager } from 'src/analytics/analytics-manager';
 import { BrowserEventDispatcher } from 'src/tracker/browser-event-dispatcher';
 import { EventDispatcher } from 'src/tracker/event-dispatcher';
@@ -82,6 +97,8 @@ import { DefaultEnvironment } from 'src/environment/default-environment';
 import { UUIDv7 } from 'src/utils/uuid';
 import { TraceableWalletEvent } from 'src/models/wallet/traceable-events';
 import { WalletConnectProvider } from 'src/provider/wallet-connect/wallet-connect-provider';
+import { wireRequestParser } from 'src/parsers/wire-request-parser';
+import { Consumable, ConsumableLike } from 'src/utils/consumable';
 
 export class TonConnect implements ITonConnect {
     private desiredChainId: string | undefined;
@@ -135,6 +152,8 @@ export class TonConnect implements ITonConnect {
     private readonly walletsRequiredFeatures: RequiredFeatures | undefined;
 
     private abortController?: AbortController;
+
+    private pendingEmbeddedRequestMethod?: EmbeddedRequest['method'];
 
     /**
      * Shows if the wallet is connected right now.
@@ -257,6 +276,7 @@ export class TonConnect implements ITonConnect {
             request?: ConnectAdditionalRequest;
             openingDeadlineMS?: number;
             signal?: AbortSignal;
+            embeddedRequest?: ConsumableLike<EmbeddedRequest>;
         }>
     ): T extends WalletConnectionSourceJS
         ? void
@@ -272,6 +292,7 @@ export class TonConnect implements ITonConnect {
         options?: OptionalTraceable<{
             openingDeadlineMS?: number;
             signal?: AbortSignal;
+            embeddedRequest?: ConsumableLike<EmbeddedRequest>;
         }>
     ): T extends WalletConnectionSourceJS
         ? void
@@ -287,10 +308,12 @@ export class TonConnect implements ITonConnect {
                   request?: ConnectAdditionalRequest;
                   openingDeadlineMS?: number;
                   signal?: AbortSignal;
+                  embeddedRequest?: ConsumableLike<EmbeddedRequest>;
               }>,
         additionalOptions?: OptionalTraceable<{
             openingDeadlineMS?: number;
             signal?: AbortSignal;
+            embeddedRequest?: ConsumableLike<EmbeddedRequest>;
         }>
     ): void | string {
         // TODO: remove deprecated method
@@ -298,6 +321,7 @@ export class TonConnect implements ITonConnect {
             request?: ConnectAdditionalRequest;
             openingDeadlineMS?: number;
             signal?: AbortSignal;
+            embeddedRequest?: ConsumableLike<EmbeddedRequest>;
         }> = {
             ...additionalOptions
         };
@@ -321,7 +345,10 @@ export class TonConnect implements ITonConnect {
             options.request = requestOrOptions?.request;
             options.openingDeadlineMS = requestOrOptions?.openingDeadlineMS;
             options.signal = requestOrOptions?.signal;
+            options.embeddedRequest = requestOrOptions?.embeddedRequest;
         }
+
+        const embeddedRequest = Consumable.fromConsumableLike(options.embeddedRequest);
 
         if (options.request) {
             const validationError = validateConnectAdditionalRequest(options.request);
@@ -331,6 +358,18 @@ export class TonConnect implements ITonConnect {
                 } else {
                     throw new TonConnectError(
                         'ConnectAdditionalRequest validation failed: ' + validationError
+                    );
+                }
+            }
+        }
+        if (embeddedRequest.peek()) {
+            const validationError = validateEmbeddedRequest(embeddedRequest.peek());
+            if (validationError) {
+                if (isQaModeEnabled()) {
+                    console.error('EmbeddedRequest validation failed: ' + validationError);
+                } else {
+                    throw new TonConnectError(
+                        'EmbeddedRequest validation failed: ' + validationError
                     );
                 }
             }
@@ -359,11 +398,24 @@ export class TonConnect implements ITonConnect {
         const traceId = options?.traceId ?? UUIDv7();
         this.tracker.trackConnectionStarted(traceId);
 
-        return this.provider.connect(this.createConnectRequest(options?.request), {
+        const peeked = embeddedRequest.peek();
+        const wireConsumable = peeked
+            ? new Consumable(wireRequestParser.convertToWireEmbeddedRequest(peeked))
+            : undefined;
+
+        const url = this.provider.connect(this.createConnectRequest(options?.request), {
             openingDeadlineMS: options?.openingDeadlineMS,
             signal: abortController.signal,
-            traceId
+            traceId,
+            embeddedRequest: wireConsumable
         });
+
+        // consume the original only if the provider consumed the wire version
+        if (wireConsumable && wireConsumable.peek() === undefined) {
+            this.pendingEmbeddedRequestMethod = embeddedRequest.consume()?.method;
+        }
+
+        return url;
     }
 
     /**
@@ -552,13 +604,13 @@ export class TonConnect implements ITonConnect {
 
         this.checkConnection();
 
-        const requiredMessagesNumber = transaction.messages.length;
-        const requireExtraCurrencies = transaction.messages.some(
-            m => m.extraCurrency && Object.keys(m.extraCurrency).length > 0
-        );
+        const { requiredMessagesNumber, requireExtraCurrencies, requiredItemTypes } =
+            this.extractRequiredFeatures(transaction);
+
         checkSendTransactionSupport(this.wallet!.device.features, {
             requiredMessagesNumber,
-            requireExtraCurrencies
+            requireExtraCurrencies,
+            requiredItemTypes
         });
 
         const sessionInfo = this.getSessionInfo();
@@ -570,7 +622,6 @@ export class TonConnect implements ITonConnect {
             traceId
         );
 
-        const { validUntil, messages, ...tx } = transaction;
         const from = transaction.from || this.account!.address;
         const network = transaction.network || this.account!.chain;
 
@@ -589,19 +640,12 @@ export class TonConnect implements ITonConnect {
             });
         }
 
+        const rpcPayload = hasItems(transaction)
+            ? this.buildItemsRpcPayload(transaction, from, network)
+            : this.buildMessagesRpcPayload(transaction, from, network);
+
         const response = await this.provider!.sendRequest(
-            sendTransactionParser.convertToRpcRequest({
-                ...tx,
-                from,
-                network,
-                valid_until: validUntil,
-                messages: messages.map(({ extraCurrency, payload, stateInit, ...msg }) => ({
-                    ...msg,
-                    payload: normalizeBase64(payload),
-                    stateInit: normalizeBase64(stateInit),
-                    extra_currency: extraCurrency
-                }))
-            }),
+            sendTransactionParser.convertToRpcRequest(rpcPayload),
             {
                 onRequestSent: options.onRequestSent,
                 signal: abortController.signal,
@@ -626,6 +670,27 @@ export class TonConnect implements ITonConnect {
         );
         this.tracker.trackTransactionSigned(this.wallet, transaction, result, sessionInfo, traceId);
         return { ...result, traceId: response.traceId };
+    }
+
+    private extractRequiredFeatures(
+        transaction: SendTransactionRequestWithMessages | SendTransactionRequestWithItems
+    ) {
+        const useItems = hasItems(transaction);
+        const requiredMessagesNumber = useItems
+            ? transaction.items.length
+            : transaction.messages.length;
+        const requireExtraCurrencies = useItems
+            ? transaction.items
+                  ?.filter(i => i.type === 'ton')
+                  .some(m => m.extraCurrency && Object.keys(m.extraCurrency).length > 0)
+            : transaction.messages.some(
+                  m => m.extraCurrency && Object.keys(m.extraCurrency).length > 0
+              );
+        const requiredItemTypes: StructuredItemType[] | undefined = useItems
+            ? [...new Set(transaction.items.map(item => item.type))]
+            : undefined;
+
+        return { requiredMessagesNumber, requireExtraCurrencies, requiredItemTypes };
     }
 
     public async signData(
@@ -704,6 +769,84 @@ export class TonConnect implements ITonConnect {
         this.tracker.trackDataSigned(this.wallet, data, result, sessionInfo, traceId);
 
         return { ...result, traceId };
+    }
+
+    public async signMessage(
+        message: SignMessageRequest,
+        options?: OptionalTraceable<{
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+        }>
+    ): Promise<Traceable<SignMessageResponse>> {
+        const abortController = createAbortController(options?.signal);
+        if (abortController.signal.aborted) {
+            throw new TonConnectError('Message signing was aborted');
+        }
+
+        const validationError = validateSignMessageRequest(message);
+        if (validationError) {
+            if (isQaModeEnabled()) {
+                console.error('SignMessageRequest validation failed: ' + validationError);
+            } else {
+                throw new TonConnectError(
+                    'SignMessageRequest validation failed: ' + validationError
+                );
+            }
+        }
+
+        this.checkConnection();
+
+        const { requiredMessagesNumber, requireExtraCurrencies, requiredItemTypes } =
+            this.extractRequiredFeatures(message);
+
+        checkSignMessageSupport(this.wallet!.device.features, {
+            requiredMessagesNumber,
+            requireExtraCurrencies,
+            requiredItemTypes
+        });
+
+        const traceId = options?.traceId ?? UUIDv7();
+
+        const from = message.from || this.account!.address;
+        const network = message.network || this.account!.chain;
+
+        if (this.wallet?.account.chain && network !== this.wallet.account.chain) {
+            if (!isQaModeEnabled()) {
+                throw new WalletWrongNetworkError('Wallet connected to a wrong network', {
+                    cause: {
+                        expectedChainId: this.wallet?.account.chain,
+                        actualChainId: network
+                    }
+                });
+            }
+            console.error('Wallet connected to a wrong network', {
+                expectedChainId: this.wallet?.account.chain,
+                actualChainId: network
+            });
+        }
+
+        const rpcPayload = hasItems(message)
+            ? this.buildItemsRpcPayload(message, from, network)
+            : this.buildMessagesRpcPayload(message, from, network);
+
+        const response = await this.provider!.sendRequest(
+            signMessageParser.convertToRpcRequest(rpcPayload),
+            {
+                onRequestSent: options?.onRequestSent,
+                signal: abortController.signal,
+                traceId
+            }
+        );
+
+        if (signMessageParser.isError(response)) {
+            return signMessageParser.parseAndThrowError(response);
+        }
+
+        const result = signMessageParser.convertFromRpcResponse(
+            response as SignMessageRpcResponseSuccess
+        );
+
+        return { ...result, traceId: response.traceId };
     }
 
     /**
@@ -794,6 +937,37 @@ export class TonConnect implements ITonConnect {
         } catch {
             return null;
         }
+    }
+
+    private buildMessagesRpcPayload(
+        transaction: SendTransactionRequestWithMessages,
+        from: string,
+        network: ChainId
+    ) {
+        return {
+            from,
+            network,
+            valid_until: transaction.validUntil,
+            messages: transaction.messages.map(({ extraCurrency, payload, stateInit, ...msg }) => ({
+                ...msg,
+                payload: normalizeBase64(payload),
+                stateInit: normalizeBase64(stateInit),
+                extra_currency: extraCurrency
+            }))
+        };
+    }
+
+    private buildItemsRpcPayload(
+        transaction: SendTransactionRequestWithItems,
+        from: string,
+        network: ChainId
+    ) {
+        return {
+            from,
+            network,
+            valid_until: transaction.validUntil,
+            items: transaction.items.map(item => normalizeStructuredItem(item))
+        };
     }
 
     /**
@@ -898,7 +1072,10 @@ export class TonConnect implements ITonConnect {
     private walletEventsListener(e: TraceableWalletEvent): void {
         switch (e.event) {
             case 'connect':
-                this.onWalletConnected(e.payload, { traceId: e.traceId });
+                this.onWalletConnected(e.payload, {
+                    traceId: e.traceId,
+                    response: e.response
+                });
                 break;
             case 'connect_error':
                 this.tracker.trackConnectionError(
@@ -917,8 +1094,11 @@ export class TonConnect implements ITonConnect {
 
     private onWalletConnected(
         connectEvent: ConnectEventSuccess['payload'],
-        options: Traceable
+        options: Traceable<{ response?: WalletResponse<RpcMethod> }>
     ): void {
+        const method = this.pendingEmbeddedRequestMethod;
+        this.pendingEmbeddedRequestMethod = undefined;
+
         const tonAccountItem: TonAddressItemReply | undefined = connectEvent.items.find(
             item => item.name === 'ton_addr'
         ) as TonAddressItemReply | undefined;
@@ -1022,6 +1202,13 @@ export class TonConnect implements ITonConnect {
             }
 
             wallet.connectItems = { tonProof };
+        }
+
+        if (options.response && method) {
+            wallet.embeddedResponse = wireRequestParser.convertFromRpcResponse(
+                method,
+                options.response
+            );
         }
 
         this.wallet = wallet;

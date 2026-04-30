@@ -435,4 +435,78 @@ describe('tma-api sendOpenTelegramLink', () => {
 
         expect(() => sendOpenTelegramLink('https://t.me/wallet')).not.toThrow();
     });
+
+    describe('embedded request length guard (non-TMA fallback)', () => {
+        // Force the non-TMA branch: clear the version-bearing hash so that
+        // sendOpenTelegramLink falls back to openLinkBlank → window.open.
+        beforeEach(() => {
+            window.location.hash = '';
+        });
+
+        it('passes short t.me direct links through unchanged', async () => {
+            const { sendOpenTelegramLink } = await import('src/app/utils/tma-api');
+            const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+
+            const link = 'https://t.me/wallet/start?startapp=tonconnect-v__2-id__abc';
+            sendOpenTelegramLink(link);
+
+            const opened = openSpy.mock.calls[0]![0] as string;
+            expect(opened).toBe(link);
+
+            openSpy.mockRestore();
+        });
+
+        it('passes short t.me legacy attach links through unchanged (path/search preserved)', async () => {
+            const { sendOpenTelegramLink } = await import('src/app/utils/tma-api');
+            const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+
+            const link = 'https://t.me/wallet?attach=wallet';
+            sendOpenTelegramLink(link);
+
+            const opened = openSpy.mock.calls[0]![0] as string;
+            expect(opened).toContain('attach=wallet');
+
+            openSpy.mockRestore();
+        });
+
+        it('strips e__ from a long t.me direct link', async () => {
+            const { sendOpenTelegramLink } = await import('src/app/utils/tma-api');
+            const { MAX_LINK_LENGTH } = await import('src/app/utils/web-api');
+            const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+
+            const longE = 'A'.repeat(MAX_LINK_LENGTH);
+            const link = `https://t.me/wallet/start?startapp=tonconnect-v__2-id__abc-r__req-e__${longE}`;
+            expect(link.length).toBeGreaterThan(MAX_LINK_LENGTH);
+
+            sendOpenTelegramLink(link);
+
+            const opened = openSpy.mock.calls[0]![0] as string;
+            expect(opened).not.toContain('e__');
+            expect(opened).not.toContain(longE);
+            expect(opened).toContain('v__2');
+            expect(opened).toContain('id__abc');
+            expect(opened).toContain('r__req');
+
+            openSpy.mockRestore();
+        });
+
+        it('strips e__ from a long t.me legacy attach link', async () => {
+            const { sendOpenTelegramLink } = await import('src/app/utils/tma-api');
+            const { MAX_LINK_LENGTH } = await import('src/app/utils/web-api');
+            const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+
+            const longE = 'A'.repeat(MAX_LINK_LENGTH);
+            const link = `https://t.me/wallet?attach=wallet&startapp=tonconnect-v__2-id__abc-e__${longE}`;
+            expect(link.length).toBeGreaterThan(MAX_LINK_LENGTH);
+
+            sendOpenTelegramLink(link);
+
+            const opened = openSpy.mock.calls[0]![0] as string;
+            expect(opened).not.toContain('e__');
+            expect(opened).not.toContain(longE);
+            expect(opened).toContain('id__abc');
+
+            openSpy.mockRestore();
+        });
+    });
 });

@@ -1,6 +1,10 @@
 import { describe, it, expect } from 'vitest';
 
-import { enrichUniversalLink } from 'src/app/utils/url-strategy-helpers';
+import {
+    enrichUniversalLink,
+    removeParamsFromUniversalLink,
+    removeEmbeddedRequestFromUniversalLink
+} from 'src/app/utils/url-strategy-helpers';
 
 describe.each([
     {
@@ -76,6 +80,87 @@ describe.each([
 ])('enrichUniversalLink', ({ link, params, expected }) => {
     it('should return valid url', () => {
         const result = enrichUniversalLink(link, params);
+        expect(result).toBe(expected);
+    });
+});
+
+describe.each([
+    {
+        link: 'https://example.com/connect?v=2&id=abc&req=encodedData',
+        params: ['req'],
+        expected: 'https://example.com/connect?v=2&id=abc'
+    },
+    {
+        link: 'https://example.com/connect?v=2&id=abc&req=data&trace_id=t1',
+        params: ['req', 'trace_id'],
+        expected: 'https://example.com/connect?v=2&id=abc'
+    },
+    {
+        link: 'https://example.com/connect?v=2&id=abc',
+        params: ['req'],
+        expected: 'https://example.com/connect?v=2&id=abc'
+    },
+    {
+        link: 'https://example.com/connect?req=data',
+        params: ['req'],
+        expected: 'https://example.com/connect'
+    },
+    {
+        link: 'https://example.com/connect?v=2&req=data',
+        params: [],
+        expected: 'https://example.com/connect?v=2&req=data'
+    },
+    {
+        link: 'https://t.me/wallet/start?startapp=tonconnect-v__2-id__abc-req__encodedData',
+        params: ['req'],
+        expected: 'https://t.me/wallet/start?startapp=tonconnect-v__2-id__abc'
+    },
+    {
+        link: 'https://t.me/wallet/start?startapp=tonconnect-v__2-id__abc-req__data-trace--5Fid__t1',
+        params: ['req', 'trace_id'],
+        expected: 'https://t.me/wallet/start?startapp=tonconnect-v__2-id__abc'
+    },
+    {
+        link: 'https://t.me/wallet/start?startapp=tonconnect-v__2-id__abc',
+        params: ['req'],
+        expected: 'https://t.me/wallet/start?startapp=tonconnect-v__2-id__abc'
+    },
+    {
+        link: 'https://t.me/wallet?attach=wallet&startapp=tonconnect-v__2-id__abc-req__data',
+        params: ['req'],
+        expected: 'https://t.me/wallet/start?startapp=tonconnect-v__2-id__abc'
+    }
+])('removeParamsFromUniversalLink', ({ link, params, expected }) => {
+    it('should return valid url', () => {
+        const result = removeParamsFromUniversalLink(link, params);
+        expect(result).toBe(expected);
+    });
+});
+
+describe.each([
+    {
+        link: 'https://example.com/connect?v=2&id=abc&e=base64EncodedRequest',
+        expected: 'https://example.com/connect?v=2&id=abc'
+    },
+    {
+        link: 'https://t.me/wallet/start?startapp=tonconnect-v__2-id__abc-e__base64EncodedRequest',
+        expected: 'https://t.me/wallet/start?startapp=tonconnect-v__2-id__abc'
+    },
+    {
+        link: 'https://example.com/connect?v=2&id=abc',
+        expected: 'https://example.com/connect?v=2&id=abc'
+    },
+    {
+        link: 'https://t.me/wallet/start?startapp=tonconnect-v__2-id__abc',
+        expected: 'https://t.me/wallet/start?startapp=tonconnect-v__2-id__abc'
+    },
+    {
+        link: 'https://example.com/connect?v=2&e=eyJtIjoic3QiLCJ2dSI6MTcwMH0%3D&id=abc',
+        expected: 'https://example.com/connect?v=2&id=abc'
+    }
+])('removeEmbeddedRequestFromUniversalLink', ({ link, expected }) => {
+    it('should return valid url', () => {
+        const result = removeEmbeddedRequestFromUniversalLink(link);
         expect(result).toBe(expected);
     });
 });

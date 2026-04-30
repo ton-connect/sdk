@@ -1,5 +1,7 @@
 import {
+    ChainId,
     CONNECT_EVENT_ERROR_CODES,
+    RpcStructuredItem,
     SEND_TRANSACTION_ERROR_CODES,
     SendTransactionRpcRequest,
     SendTransactionRpcResponseError,
@@ -7,12 +9,9 @@ import {
 } from '@tonconnect/protocol';
 import { BadRequestError, TonConnectError, UnknownAppError, UserRejectsError } from 'src/errors';
 import { UnknownError } from 'src/errors/unknown.error';
-import { SendTransactionRequest, SendTransactionResponse } from 'src/models/methods';
+import { SendTransactionResponse } from 'src/models/methods';
 import { RpcParser } from 'src/parsers/rpc-parser';
 import { WithoutId } from 'src/utils/types';
-
-type ArrayElement<T> = T extends Array<infer U> ? U : never;
-type Message = ArrayElement<SendTransactionRequest['messages']>;
 
 const sendTransactionErrors: Partial<Record<CONNECT_EVENT_ERROR_CODES, typeof TonConnectError>> = {
     [SEND_TRANSACTION_ERROR_CODES.UNKNOWN_ERROR]: UnknownError,
@@ -23,12 +22,26 @@ const sendTransactionErrors: Partial<Record<CONNECT_EVENT_ERROR_CODES, typeof To
 
 class SendTransactionParser extends RpcParser<'sendTransaction'> {
     convertToRpcRequest(
-        request: Omit<SendTransactionRequest, 'validUntil' | 'messages'> & {
+        request: {
+            from: string;
+            network: ChainId;
             valid_until: number;
-            messages: Array<
-                Omit<Message, 'extraCurrency'> & { extra_currency?: Message['extraCurrency'] }
-            >;
-        }
+        } & (
+            | {
+                  messages: Array<{
+                      address: string;
+                      amount: string;
+                      stateInit?: string;
+                      payload?: string;
+                      extra_currency?: { [k: number]: string };
+                  }>;
+                  items?: never;
+              }
+            | {
+                  items: RpcStructuredItem[];
+                  messages?: never;
+              }
+        )
     ): WithoutId<SendTransactionRpcRequest> {
         return {
             method: 'sendTransaction',

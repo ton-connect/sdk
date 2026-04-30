@@ -50,12 +50,16 @@ function hasExtraProperties(obj: Record<string, unknown>, allowedKeys: string[])
     return Object.keys(obj).some(key => !allowedKeys.includes(key));
 }
 
+export function validateSignMessageRequest(data: unknown): ValidationResult {
+    return validateSendTransactionRequest(data);
+}
+
 export function validateSendTransactionRequest(data: unknown): ValidationResult {
     if (!isValidObject(data)) {
         return 'Request must be an object';
     }
 
-    const allowedKeys = ['validUntil', 'network', 'from', 'messages'];
+    const allowedKeys = ['validUntil', 'network', 'from', 'messages', 'items'];
     if (hasExtraProperties(data, allowedKeys)) {
         return 'Request contains extra properties';
     }
@@ -84,15 +88,35 @@ export function validateSendTransactionRequest(data: unknown): ValidationResult 
         return "Invalid 'from' address format";
     }
 
-    if (!isValidArray(data.messages) || data.messages.length === 0) {
-        return "'messages' is required";
+    const hasMessagesField = isValidArray(data.messages);
+    const hasItemsField = isValidArray(data.items);
+
+    if (hasMessagesField && hasItemsField) {
+        return "Request must contain either 'messages' or 'items', not both";
     }
 
-    for (let i = 0; i < data.messages.length; i++) {
-        const message = data.messages[i];
-        const messageError = validateTransactionMessage(message, i);
-        if (messageError) {
-            return messageError;
+    if (!hasMessagesField && !hasItemsField) {
+        return "Request must contain 'messages' or 'items'";
+    }
+
+    if (hasMessagesField) {
+        if ((data.messages as unknown[]).length === 0) {
+            return "'messages' must not be empty";
+        }
+
+        for (let i = 0; i < (data.messages as unknown[]).length; i++) {
+            const message = (data.messages as unknown[])[i];
+            const messageError = validateTransactionMessage(message, i);
+            if (messageError) {
+                return messageError;
+            }
+        }
+    }
+
+    if (hasItemsField) {
+        const error = validateStructuredItems(data.items as unknown[]);
+        if (error) {
+            return error;
         }
     }
 
@@ -153,6 +177,238 @@ function validateTransactionMessage(message: unknown, index: number): Validation
     return null;
 }
 
+function validateStructuredItems(items: unknown[]): ValidationResult {
+    if (items.length === 0) {
+        return "'items' must not be empty";
+    }
+
+    for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        const itemError = validateStructuredItem(item, i);
+        if (itemError) {
+            return itemError;
+        }
+    }
+
+    return null;
+}
+
+function validateStructuredItem(item: unknown, index: number): ValidationResult {
+    if (!isValidObject(item)) {
+        return `Item at index ${index} must be an object`;
+    }
+
+    if (!isValidString(item.type)) {
+        return `'type' is required in item at index ${index}`;
+    }
+
+    switch (item.type) {
+        case 'ton':
+            return validateTonItem(item, index);
+        case 'jetton':
+            return validateJettonItem(item, index);
+        case 'nft':
+            return validateNftItem(item, index);
+        default:
+            return `Unknown item type '${item.type}' at index ${index}`;
+    }
+}
+
+function validateTonItem(item: Record<string, unknown>, index: number): ValidationResult {
+    const allowedKeys = ['type', 'address', 'amount', 'payload', 'stateInit', 'extraCurrency'];
+    if (hasExtraProperties(item, allowedKeys)) {
+        return `Ton item at index ${index} contains extra properties`;
+    }
+
+    if (!isValidString(item.address)) {
+        return `'address' is required in ton item at index ${index}`;
+    }
+    if (!isValidUserFriendlyAddress(item.address)) {
+        return `Wrong 'address' format in ton item at index ${index}`;
+    }
+
+    if (!isValidString(item.amount)) {
+        return `'amount' is required in ton item at index ${index}`;
+    }
+    if (!/^[0-9]+$/.test(item.amount)) {
+        return `Incorrect 'amount' in ton item at index ${index}`;
+    }
+
+    if (item.payload !== undefined) {
+        if (!isValidString(item.payload) || !isValidBoc(item.payload)) {
+            return `Invalid 'payload' in ton item at index ${index}`;
+        }
+    }
+
+    if (item.stateInit !== undefined) {
+        if (!isValidString(item.stateInit) || !isValidBoc(item.stateInit)) {
+            return `Invalid 'stateInit' in ton item at index ${index}`;
+        }
+    }
+
+    if (item.extraCurrency !== undefined) {
+        if (!isValidObject(item.extraCurrency)) {
+            return `Invalid 'extraCurrency' in ton item at index ${index}`;
+        }
+        for (const [key, value] of Object.entries(item.extraCurrency)) {
+            if (
+                !INTEGER_REGEX.test(key) ||
+                typeof value !== 'string' ||
+                !POSITIVE_INTEGER_REGEX.test(value)
+            ) {
+                return `Invalid 'extraCurrency' format in ton item at index ${index}`;
+            }
+        }
+    }
+
+    return null;
+}
+
+// eslint-disable-next-line complexity
+function validateJettonItem(item: Record<string, unknown>, index: number): ValidationResult {
+    const allowedKeys = [
+        'type',
+        'master',
+        'destination',
+        'amount',
+        'attachAmount',
+        'responseDestination',
+        'customPayload',
+        'forwardAmount',
+        'forwardPayload',
+        'queryId'
+    ];
+    if (hasExtraProperties(item, allowedKeys)) {
+        return `Jetton item at index ${index} contains extra properties`;
+    }
+
+    if (!isValidString(item.master)) {
+        return `'master' is required in jetton item at index ${index}`;
+    }
+    if (!isValidAddress(item.master)) {
+        return `Wrong 'master' address format in jetton item at index ${index}`;
+    }
+
+    if (!isValidString(item.destination)) {
+        return `'destination' is required in jetton item at index ${index}`;
+    }
+    if (!isValidAddress(item.destination)) {
+        return `Wrong 'destination' address format in jetton item at index ${index}`;
+    }
+
+    if (!isValidString(item.amount)) {
+        return `'amount' is required in jetton item at index ${index}`;
+    }
+    if (!/^[0-9]+$/.test(item.amount)) {
+        return `Incorrect 'amount' in jetton item at index ${index}`;
+    }
+
+    if (
+        item.attachAmount !== undefined &&
+        (!isValidString(item.attachAmount) || !/^[0-9]+$/.test(item.attachAmount))
+    ) {
+        return `Invalid 'attachAmount' in jetton item at index ${index}`;
+    }
+
+    if (item.responseDestination !== undefined && !isValidAddress(item.responseDestination)) {
+        return `Wrong 'responseDestination' address format in jetton item at index ${index}`;
+    }
+
+    if (item.customPayload !== undefined) {
+        if (!isValidString(item.customPayload) || !isValidBoc(item.customPayload)) {
+            return `Invalid 'customPayload' in jetton item at index ${index}`;
+        }
+    }
+
+    if (item.forwardAmount !== undefined) {
+        if (!isValidString(item.forwardAmount) || !/^[0-9]+$/.test(item.forwardAmount)) {
+            return `Invalid 'forwardAmount' in jetton item at index ${index}`;
+        }
+    }
+
+    if (item.forwardPayload !== undefined) {
+        if (!isValidString(item.forwardPayload) || !isValidBoc(item.forwardPayload)) {
+            return `Invalid 'forwardPayload' in jetton item at index ${index}`;
+        }
+    }
+
+    if (item.queryId !== undefined) {
+        if (!isValidString(item.queryId) || !/^[0-9]+$/.test(item.queryId)) {
+            return `Invalid 'queryId' in jetton item at index ${index}`;
+        }
+    }
+
+    return null;
+}
+
+// eslint-disable-next-line complexity
+function validateNftItem(item: Record<string, unknown>, index: number): ValidationResult {
+    const allowedKeys = [
+        'type',
+        'nftAddress',
+        'newOwner',
+        'attachAmount',
+        'responseDestination',
+        'customPayload',
+        'forwardAmount',
+        'forwardPayload',
+        'queryId'
+    ];
+    if (hasExtraProperties(item, allowedKeys)) {
+        return `NFT item at index ${index} contains extra properties`;
+    }
+
+    if (!isValidString(item.nftAddress)) {
+        return `'nftAddress' is required in nft item at index ${index}`;
+    }
+    if (!isValidAddress(item.nftAddress)) {
+        return `Wrong 'nftAddress' address format in nft item at index ${index}`;
+    }
+
+    if (!isValidString(item.newOwner)) {
+        return `'newOwner' is required in nft item at index ${index}`;
+    }
+    if (!isValidAddress(item.newOwner)) {
+        return `Wrong 'newOwner' address format in nft item at index ${index}`;
+    }
+
+    if (item.attachAmount !== undefined) {
+        if (!isValidString(item.attachAmount) || !/^[0-9]+$/.test(item.attachAmount)) {
+            return `Invalid 'attachAmount' in nft item at index ${index}`;
+        }
+    }
+
+    if (item.responseDestination !== undefined && !isValidAddress(item.responseDestination)) {
+        return `Wrong 'responseDestination' address format in nft item at index ${index}`;
+    }
+
+    if (item.customPayload !== undefined) {
+        if (!isValidString(item.customPayload) || !isValidBoc(item.customPayload)) {
+            return `Invalid 'customPayload' in nft item at index ${index}`;
+        }
+    }
+
+    if (item.forwardAmount !== undefined) {
+        if (!isValidString(item.forwardAmount) || !/^[0-9]+$/.test(item.forwardAmount)) {
+            return `Invalid 'forwardAmount' in nft item at index ${index}`;
+        }
+    }
+
+    if (item.forwardPayload !== undefined) {
+        if (!isValidString(item.forwardPayload) || !isValidBoc(item.forwardPayload)) {
+            return `Invalid 'forwardPayload' in nft item at index ${index}`;
+        }
+    }
+
+    if (item.queryId !== undefined) {
+        if (!isValidString(item.queryId) || !/^[0-9]+$/.test(item.queryId)) {
+            return `Invalid 'queryId' in nft item at index ${index}`;
+        }
+    }
+
+    return null;
+}
+
 export function validateConnectAdditionalRequest(data: unknown): ValidationResult {
     if (!isValidObject(data)) {
         return 'Request must be an object';
@@ -199,6 +455,38 @@ export function validateConnectAdditionalRequest(data: unknown): ValidationResul
     }
 
     return null;
+}
+
+export function validateEmbeddedRequest(data: unknown) {
+    if (!isValidObject(data)) {
+        return 'Embedded request must be an object';
+    }
+
+    if (hasExtraProperties(data, ['method', 'request'])) {
+        return 'Embedded request contains extra properties';
+    }
+
+    if (!isValidString(data.method)) {
+        return "Embedded request: 'method' is required";
+    }
+
+    if (!('request' in data)) {
+        return "Embedded request: 'request' is required";
+    }
+
+    const prefixError = (inner: ValidationResult): ValidationResult =>
+        inner === null ? null : `Embedded ${data.method}: ${inner}`;
+
+    switch (data.method) {
+        case 'sendTransaction':
+            return prefixError(validateSendTransactionRequest(data.request));
+        case 'signData':
+            return prefixError(validateSignDataPayload(data.request));
+        case 'signMessage':
+            return prefixError(validateSignMessageRequest(data.request));
+    }
+
+    return `Invalid 'method' value: ${data.method}`;
 }
 
 export function validateSignDataPayload(data: unknown): ValidationResult {

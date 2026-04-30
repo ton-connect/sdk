@@ -27,12 +27,37 @@ const defaultTx: SendTransactionRequest = {
     ]
 };
 
+const defaultTxWithMessages: SendTransactionRequest = {
+    validUntil: Math.floor(Date.now() / 1000) + 600,
+    items: [
+        {
+            type: 'ton',
+            address: 'EQCKWpx7cNMpvmcN5ObM5lLUZHZRFKqYA4xmw9jOry0ZsF9M',
+            amount: '5000000',
+            // (optional) Body in boc base64 format.
+            payload: defaultBody.toBoc().toString('base64'),
+            // (optional) State init in boc base64 format.
+            stateInit:
+                'te6cckEBBAEAOgACATQCAQAAART/APSkE/S88sgLAwBI0wHQ0wMBcbCRW+D6QDBwgBDIywVYzxYh+gLLagHPFsmAQPsAlxCarA=='
+        },
+        {
+            type: 'jetton',
+            master: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
+            amount: '50000',
+            destination: 'EQCKWpx7cNMpvmcN5ObM5lLUZHZRFKqYA4xmw9jOry0ZsF9M'
+        }
+    ]
+};
+
 export function TxForm() {
     const [tx, setTx] = useState(defaultTx);
     const [waitForTx, setWaitForTx] = useState(false);
+    const [withConnect, setWithConnect] = useState(false);
     const [txResult, setTxResult] = useState<object | null>(null);
     const [loading, setLoading] = useState(false);
     const [waitingTx, setWaitingTx] = useState(false);
+    const [signLoading, setSignLoading] = useState(false);
+    const [signResult, setSignResult] = useState<object | null>(null);
 
     const wallet = useTonWallet();
     const [tonConnectUi] = useTonConnectUI();
@@ -41,12 +66,60 @@ export function TxForm() {
         setTx(value.updated_src as SendTransactionRequest);
     }, []);
 
+    const buildNftItemsPayload = (): SendTransactionRequest => {
+        const newOwner =
+            wallet?.account?.address ?? 'TODO: connect a wallet to fill the new owner address';
+        return {
+            validUntil: Math.floor(Date.now() / 1000) + 600,
+            items: [
+                {
+                    type: 'nft',
+                    nftAddress: 'TODO: paste NFT item contract address',
+                    newOwner
+                }
+            ]
+        };
+    };
+
+    const handleSignMessage = async () => {
+        setSignResult(null);
+        setSignLoading(true);
+        try {
+            const result = await tonConnectUi.signMessage(tx, {
+                onConnected: withConnect
+                    ? (send, { dispatched }) => {
+                          if (dispatched && !confirm('Sign message twice?')) {
+                              throw new Error('Sign message twice');
+                          }
+                          return send();
+                      }
+                    : undefined
+            });
+            setSignResult(result);
+            console.debug('Success tonConnectUi.signMessage', result);
+        } catch (error) {
+            console.error('Error tonConnectUi.signMessage', error);
+        } finally {
+            setSignLoading(false);
+        }
+    };
+
     const handleSendTx = async () => {
         setTxResult(null);
         setLoading(true);
         setWaitingTx(false);
         try {
-            const transaction = await tonConnectUi.sendTransaction(tx);
+            const transaction = await tonConnectUi.sendTransaction(tx, {
+                onConnected: withConnect
+                    ? (send, { dispatched }) => {
+                          if (dispatched && !confirm('Send message twice?')) {
+                              throw new Error('Send message twice');
+                          }
+                          return send();
+                      }
+                    : undefined
+            });
+            console.debug('Success tonConnectUi.sendTransaction', transaction);
             if (waitForTx && wallet && wallet.account && transaction) {
                 setWaitingTx(true);
                 const network = wallet.account.chain === CHAIN.TESTNET ? 'testnet' : 'mainnet';
@@ -55,6 +128,8 @@ export function TxForm() {
                 setTxResult(result);
                 setWaitingTx(false);
             }
+        } catch (err) {
+            console.error('Error tonConnectUi.sendTransaction', err);
         } finally {
             setLoading(false);
         }
@@ -63,10 +138,23 @@ export function TxForm() {
     return (
         <div className="send-tx-form">
             <h3>Configure and send transaction</h3>
+            <button onClick={() => setTx(defaultTx)}>Set message payload</button>
+            <button onClick={() => setTx(defaultTxWithMessages)}>Set items payload</button>
+            <button onClick={() => setTx(buildNftItemsPayload())}>Set NFT items payload</button>
+            <label
+                style={{ margin: '12px 0 0 2px', color: '#b8d4f1', fontWeight: 500, fontSize: 15 }}
+            >
+                <input
+                    type="checkbox"
+                    checked={withConnect}
+                    onChange={e => setWithConnect(e.target.checked)}
+                />
+                Embed request in connect
+            </label>
 
             <ReactJson
                 theme="ocean"
-                src={defaultTx}
+                src={tx}
                 onEdit={onChange}
                 onAdd={onChange}
                 onDelete={onChange}
@@ -111,10 +199,15 @@ export function TxForm() {
                 </div>
             )}
 
-            {wallet ? (
-                <button onClick={handleSendTx} disabled={loading || waitingTx}>
-                    {loading ? 'Sending...' : 'Send transaction'}
-                </button>
+            {wallet || withConnect ? (
+                <>
+                    <button onClick={handleSendTx} disabled={loading || waitingTx}>
+                        {loading ? 'Sending...' : 'Send transaction'}
+                    </button>
+                    <button onClick={handleSignMessage} disabled={signLoading}>
+                        {signLoading ? 'Signing...' : 'Sign message'}
+                    </button>
+                </>
             ) : (
                 <button onClick={() => tonConnectUi.openModal()}>
                     Connect wallet to send the transaction
@@ -126,6 +219,15 @@ export function TxForm() {
                     <div className="find-transaction-demo__json-label">Transaction</div>
                     <div className="find-transaction-demo__json-view">
                         <ReactJson src={txResult} name={false} theme="ocean" collapsed={false} />
+                    </div>
+                </>
+            )}
+
+            {signResult && (
+                <>
+                    <div className="find-transaction-demo__json-label">Sign Message Result</div>
+                    <div className="find-transaction-demo__json-view">
+                        <ReactJson src={signResult} name={false} theme="ocean" collapsed={false} />
                     </div>
                 </>
             )}

@@ -1,5 +1,5 @@
 export type { Account } from './account';
-export type { Wallet } from './wallet';
+export type { EmbeddedResponse, Wallet } from './wallet';
 export type {
     WalletConnectionSource,
     WalletConnectionSourceHTTP,
@@ -23,5 +23,7 @@ export {
 export {
     RequiredFeatures,
     RequiredSendTransactionFeature,
-    RequiredSignDataFeature
+    RequiredSignDataFeature,
+    RequiredSignMessageFeature,
+    RequiredEmbeddedRequestFeature
 } from './require-feature';

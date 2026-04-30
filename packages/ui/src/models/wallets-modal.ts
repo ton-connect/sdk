@@ -1,4 +1,10 @@
-import { FeatureName, OptionalTraceable, RequiredFeatures } from '@tonconnect/sdk';
+import {
+    EmbeddedRequest,
+    FeatureName,
+    OptionalTraceable,
+    RequiredFeatures,
+    Consumable
+} from '@tonconnect/sdk';
 
 export interface WalletsModal {
     /**
@@ -36,6 +42,12 @@ export type WalletModalOpened = {
      * Always `null` for opened modal window.
      */
     closeReason: null;
+
+    /**
+     * Embedded request to include in the connect URL.
+     * Present only when the modal was opened via `initiateEmbeddedRequestFlow`.
+     */
+    embeddedRequest?: Consumable<EmbeddedRequest> | null;
 };
 
 /**

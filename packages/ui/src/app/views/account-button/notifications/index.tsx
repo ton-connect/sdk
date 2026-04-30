@@ -6,9 +6,12 @@ import { SuccessTransactionNotification } from './success-transaction-notificati
 import { NotificationClass } from './style';
 import { Styleable } from 'src/app/models/styleable';
 import { useOpenedNotifications } from 'src/app/hooks/use-notifications';
+import { isConfirmAction } from 'src/app/state/modals-state';
 import { animate } from 'src/app/utils/animate';
 import { ErrorSignDataNotification } from './error-sign-data-notification';
 import { SuccessSignDataNotification } from './success-sign-data-notification';
+import { SuccessSignMessageNotification } from './success-sign-message-notification';
+import { ErrorSignMessageNotification } from './error-sign-message-notification';
 
 export interface NotificationsProps extends Styleable {}
 
@@ -56,15 +59,16 @@ export const Notifications: Component<NotificationsProps> = props => {
                             <Match when={openedNotification.action === 'data-signed'}>
                                 <SuccessSignDataNotification class={NotificationClass} />
                             </Match>
+                            <Match when={openedNotification.action === 'message-signed'}>
+                                <SuccessSignMessageNotification class={NotificationClass} />
+                            </Match>
                             <Match when={openedNotification.action === 'sign-data-canceled'}>
                                 <ErrorSignDataNotification class={NotificationClass} />
                             </Match>
-                            <Match
-                                when={
-                                    openedNotification.action === 'confirm-transaction' ||
-                                    openedNotification.action === 'confirm-sign-data'
-                                }
-                            >
+                            <Match when={openedNotification.action === 'sign-message-canceled'}>
+                                <ErrorSignMessageNotification class={NotificationClass} />
+                            </Match>
+                            <Match when={isConfirmAction(openedNotification.action)}>
                                 <ConfirmOperationNotification class={NotificationClass} />
                             </Match>
                         </Switch>

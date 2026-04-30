@@ -1,6 +1,7 @@
 import { ChainId } from '@tonconnect/protocol';
+import { StructuredItem } from './structured-item';
 
-export interface SendTransactionRequest {
+export interface SendTransactionRequestBase {
     /**
      * Sending transaction deadline in unix epoch seconds.
      */
@@ -15,7 +16,9 @@ export interface SendTransactionRequest {
      * The sender address in '<wc>:<hex>' format from which DApp intends to send the transaction. Current account.address by default.
      */
     from?: string;
+}
 
+export interface SendTransactionRequestWithMessages extends SendTransactionRequestBase {
     /**
      * Messages to send: min is 1, max is 4.
      */
@@ -45,4 +48,29 @@ export interface SendTransactionRequest {
          */
         extraCurrency?: { [k: number]: string };
     }[];
+
+    items?: never;
+}
+
+export interface SendTransactionRequestWithItems extends SendTransactionRequestBase {
+    /**
+     * Structured transaction items. The wallet constructs the BoC for each item.
+     */
+    items: StructuredItem[];
+
+    messages?: never;
+}
+
+export type SendTransactionRequest =
+    | SendTransactionRequestWithMessages
+    | SendTransactionRequestWithItems;
+
+export function hasItems(req: SendTransactionRequest): req is SendTransactionRequestWithItems {
+    return 'items' in req && Array.isArray(req.items);
+}
+
+export function hasMessages(
+    req: SendTransactionRequest
+): req is SendTransactionRequestWithMessages {
+    return 'messages' in req && Array.isArray(req.messages);
 }

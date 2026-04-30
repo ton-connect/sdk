@@ -8,6 +8,26 @@ export {
     SendTransactionFeatureDeprecated,
     SendTransactionFeature,
     SignDataType,
-    SignDataFeature
+    SignDataFeature,
+    SignMessageFeature,
+    EmbeddedRequestFeature,
+    StructuredItemType
 } from './feature';
 export { CHAIN, ChainId } from './CHAIN';
+export { RpcStructuredItem, RpcTonItem, RpcJettonItem, RpcNftItem } from './structured-item';
+export {
+    WireEmbeddedRequest,
+    WireSendTransaction,
+    WireSignMessage,
+    WireSignData,
+    WireMessage,
+    WireItem,
+    WireTonItem,
+    WireJettonItem,
+    WireNftItem,
+    WireSignDataText,
+    WireSignDataBinary,
+    WireSignDataCell,
+    decodeWireEmbeddedRequest,
+    decodeEmbeddedRequestParam
+} from './embedded-request';

@@ -14,19 +14,24 @@ import App from './App';
 import { WalletInfoWithOpenMethod, WalletOpenMethod } from 'src/models/connected-wallet';
 import { WalletsModalCloseReason } from 'src/models';
 import {
+    EmbeddedRequest,
     OptionalTraceable,
     Traceable,
     WalletInfoRemote,
-    WalletNotSupportFeatureError
+    WalletNotSupportFeatureError,
+    Consumable
 } from '@tonconnect/sdk';
 
 export const widgetController = {
-    openWalletsModal: (options?: OptionalTraceable): void =>
+    openWalletsModal: (
+        options?: OptionalTraceable<{ embeddedRequest?: Consumable<EmbeddedRequest> }>
+    ): void =>
         void setTimeout(() =>
             setWalletsModalState(prev => ({
                 status: 'opened',
                 traceId: options?.traceId ?? prev?.traceId,
-                closeReason: null
+                closeReason: null,
+                embeddedRequest: options?.embeddedRequest
             }))
         ),
     closeWalletsModal: (reason: WalletsModalCloseReason): void =>

@@ -9,7 +9,8 @@ import {
     SendTransactionRequest,
     SendTransactionResponse,
     SignDataResponse,
-    Wallet
+    Wallet,
+    hasMessages
 } from 'src/models';
 import { isTelegramUrl } from 'src/utils/url';
 
@@ -500,10 +501,12 @@ function createTransactionInfo(
     return {
         valid_until: String(transaction.validUntil) ?? null,
         from: transaction.from ?? wallet?.account?.address ?? null,
-        messages: transaction.messages.map(message => ({
-            address: message.address ?? null,
-            amount: message.amount ?? null
-        }))
+        messages: hasMessages(transaction)
+            ? transaction.messages.map(message => ({
+                  address: message.address ?? null,
+                  amount: message.amount ?? null
+              }))
+            : []
     };
 }
 
@@ -514,12 +517,14 @@ function createTransactionFullInfo(
     return {
         valid_until: String(transaction.validUntil) ?? null,
         from: transaction.from ?? wallet?.account?.address ?? null,
-        messages: transaction.messages.map(message => ({
-            address: message.address ?? null,
-            amount: message.amount ?? null,
-            payload: message.payload ?? null,
-            state_init: message.stateInit ?? null
-        }))
+        messages: hasMessages(transaction)
+            ? transaction.messages.map(message => ({
+                  address: message.address ?? null,
+                  amount: message.amount ?? null,
+                  payload: message.payload ?? null,
+                  state_init: message.stateInit ?? null
+              }))
+            : []
     };
 }
 

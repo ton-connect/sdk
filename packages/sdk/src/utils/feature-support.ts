@@ -1,22 +1,34 @@
-import { Feature, SendTransactionFeature, SignDataFeature } from '@tonconnect/protocol';
+import {
+    Feature,
+    SendTransactionFeature,
+    SignDataFeature,
+    SignMessageFeature,
+    StructuredItemType
+} from '@tonconnect/protocol';
 import { logWarning } from 'src/utils/log';
 import { WalletNotSupportFeatureError } from 'src/errors/wallet';
 import {
     RequiredFeatures,
     RequiredSendTransactionFeature,
-    RequiredSignDataFeature
+    RequiredSignDataFeature,
+    RequiredSignMessageFeature
 } from 'src/models';
 
 export function checkSendTransactionSupport(
     features: Feature[],
-    options: { requiredMessagesNumber: number; requireExtraCurrencies: boolean }
+    options: {
+        requiredMessagesNumber: number;
+        requireExtraCurrencies: boolean;
+        requiredItemTypes?: StructuredItemType[];
+    }
 ): never | void {
     const supportsDeprecatedSendTransactionFeature = features.includes('SendTransaction');
     const sendTransactionFeature = findFeature(features, 'SendTransaction');
 
     const requiredFeature: RequiredSendTransactionFeature = {
         minMessages: options.requiredMessagesNumber,
-        extraCurrencyRequired: options.requireExtraCurrencies
+        extraCurrencyRequired: options.requireExtraCurrencies,
+        itemTypes: options.requiredItemTypes
     };
 
     if (!supportsDeprecatedSendTransactionFeature && !sendTransactionFeature) {
@@ -29,6 +41,33 @@ export function checkSendTransactionSupport(
         if (!sendTransactionFeature || !sendTransactionFeature.extraCurrencySupported) {
             throw new WalletNotSupportFeatureError(
                 `Wallet is not able to handle such SendTransaction request. Extra currencies support is required.`,
+                {
+                    cause: {
+                        requiredFeature: { featureName: 'SendTransaction', value: requiredFeature }
+                    }
+                }
+            );
+        }
+    }
+
+    if (options.requiredItemTypes?.length) {
+        if (!sendTransactionFeature?.itemTypes) {
+            throw new WalletNotSupportFeatureError(
+                `Wallet doesn't support structured items in SendTransaction.`,
+                {
+                    cause: {
+                        requiredFeature: { featureName: 'SendTransaction', value: requiredFeature }
+                    }
+                }
+            );
+        }
+
+        const unsupportedTypes = options.requiredItemTypes.filter(
+            t => !sendTransactionFeature.itemTypes!.includes(t)
+        );
+        if (unsupportedTypes.length) {
+            throw new WalletNotSupportFeatureError(
+                `Wallet doesn't support item types: ${unsupportedTypes.join(', ')} in SendTransaction.`,
                 {
                     cause: {
                         requiredFeature: { featureName: 'SendTransaction', value: requiredFeature }
@@ -92,6 +131,85 @@ export function checkSignDataSupport(
     }
 }
 
+export function checkSignMessageSupport(
+    features: Feature[],
+    options: {
+        requiredMessagesNumber: number;
+        requireExtraCurrencies: boolean;
+        requiredItemTypes?: StructuredItemType[];
+    }
+): never | void {
+    const signMessageFeature = findFeature(features, 'SignMessage');
+
+    const requiredFeature: RequiredSignMessageFeature = {
+        minMessages: options.requiredMessagesNumber,
+        extraCurrencyRequired: options.requireExtraCurrencies,
+        itemTypes: options.requiredItemTypes
+    };
+
+    if (!signMessageFeature) {
+        throw new WalletNotSupportFeatureError("Wallet doesn't support SignMessage feature.", {
+            cause: { requiredFeature: { featureName: 'SignMessage', value: requiredFeature } }
+        });
+    }
+
+    if (options.requireExtraCurrencies && !signMessageFeature.extraCurrencySupported) {
+        throw new WalletNotSupportFeatureError(
+            `Wallet is not able to handle such SignMessage request. Extra currencies support is required.`,
+            {
+                cause: {
+                    requiredFeature: { featureName: 'SignMessage', value: requiredFeature }
+                }
+            }
+        );
+    }
+
+    if (options.requiredItemTypes?.length) {
+        if (!signMessageFeature.itemTypes) {
+            throw new WalletNotSupportFeatureError(
+                `Wallet doesn't support structured items in SignMessage.`,
+                {
+                    cause: {
+                        requiredFeature: { featureName: 'SignMessage', value: requiredFeature }
+                    }
+                }
+            );
+        }
+
+        const unsupportedTypes = options.requiredItemTypes.filter(
+            t => !signMessageFeature.itemTypes!.includes(t)
+        );
+        if (unsupportedTypes.length) {
+            throw new WalletNotSupportFeatureError(
+                `Wallet doesn't support item types: ${unsupportedTypes.join(', ')} in SignMessage.`,
+                {
+                    cause: {
+                        requiredFeature: { featureName: 'SignMessage', value: requiredFeature }
+                    }
+                }
+            );
+        }
+    }
+
+    if (signMessageFeature.maxMessages !== undefined) {
+        if (signMessageFeature.maxMessages < options.requiredMessagesNumber) {
+            throw new WalletNotSupportFeatureError(
+                `Wallet is not able to handle such SignMessage request. Max support messages number is ${signMessageFeature.maxMessages}, but ${options.requiredMessagesNumber} is required.`,
+                {
+                    cause: {
+                        requiredFeature: { featureName: 'SignMessage', value: requiredFeature }
+                    }
+                }
+            );
+        }
+        return;
+    }
+
+    logWarning(
+        "Connected wallet didn't provide information about max allowed messages in the SignMessage request. Request may be rejected by the wallet."
+    );
+}
+
 export function checkRequiredWalletFeatures(
     features: Feature[],
     walletsRequiredFeatures?: RequiredFeatures
@@ -100,7 +218,7 @@ export function checkRequiredWalletFeatures(
         return true;
     }
 
-    const { sendTransaction, signData } = walletsRequiredFeatures;
+    const { sendTransaction, signData, signMessage, embeddedRequest } = walletsRequiredFeatures;
 
     if (sendTransaction) {
         const feature = findFeature(features, 'SendTransaction');
@@ -120,6 +238,24 @@ export function checkRequiredWalletFeatures(
         }
 
         if (!checkSignData(feature, signData)) {
+            return false;
+        }
+    }
+
+    if (signMessage) {
+        const feature = findFeature(features, 'SignMessage');
+        if (!feature) {
+            return false;
+        }
+
+        if (!checkSignMessage(feature, signMessage)) {
+            return false;
+        }
+    }
+
+    if (embeddedRequest) {
+        const feature = findFeature(features, 'EmbeddedRequest');
+        if (!feature) {
             return false;
         }
     }
@@ -149,7 +285,29 @@ function checkSendTransaction(
     const correctExtraCurrency =
         !requiredFeature.extraCurrencyRequired || feature.extraCurrencySupported;
 
-    return !!(correctMessagesNumber && correctExtraCurrency);
+    const correctItemTypes =
+        !requiredFeature.itemTypes?.length ||
+        (feature.itemTypes && requiredFeature.itemTypes.every(t => feature.itemTypes!.includes(t)));
+
+    return !!(correctMessagesNumber && correctExtraCurrency && correctItemTypes);
+}
+
+function checkSignMessage(
+    feature: SignMessageFeature,
+    requiredFeature: RequiredSignMessageFeature
+): boolean {
+    const correctMessagesNumber =
+        requiredFeature.minMessages === undefined ||
+        requiredFeature.minMessages <= feature.maxMessages;
+
+    const correctExtraCurrency =
+        !requiredFeature.extraCurrencyRequired || feature.extraCurrencySupported;
+
+    const correctItemTypes =
+        !requiredFeature.itemTypes?.length ||
+        (feature.itemTypes && requiredFeature.itemTypes.every(t => feature.itemTypes!.includes(t)));
+
+    return !!(correctMessagesNumber && correctExtraCurrency && correctItemTypes);
 }
 
 function checkSignData(

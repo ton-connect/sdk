@@ -5,7 +5,8 @@ import {
     validateSendTransactionRequest,
     validateConnectAdditionalRequest,
     validateSignDataPayload,
-    validateTonProofItemReply
+    validateTonProofItemReply,
+    validateEmbeddedRequest
 } from 'src/validation/schemas';
 import { toUserFriendlyAddress } from 'src/utils/address';
 
@@ -110,12 +111,12 @@ describe('validation/schemas', () => {
 
         it('requires non-empty messages', () => {
             const result1 = validateSendTransactionRequest({ validUntil: 1 } as unknown);
-            expect(result1).toBe("'messages' is required");
+            expect(result1).toBe("Request must contain 'messages' or 'items'");
             const result2 = validateSendTransactionRequest({
                 validUntil: 1,
                 messages: []
             } as unknown);
-            expect(result2).toBe("'messages' is required");
+            expect(result2).toBe("'messages' must not be empty");
         });
 
         it('rejects non-object message', () => {
@@ -881,6 +882,79 @@ describe('validation/schemas', () => {
                 }
             });
             expect(result).toBe("Invalid 'proof.signature' format");
+        });
+    });
+
+    describe('validateEmbeddedRequest', () => {
+        const validSendTransaction = {
+            method: 'sendTransaction',
+            request: {
+                validUntil: Math.floor(Date.now() / 1000) + 60,
+                messages: [{ address: USER_FRIENDLY_ADDRESS, amount: '1000' }]
+            }
+        };
+
+        it('accepts a valid sendTransaction embedded request', () => {
+            expect(validateEmbeddedRequest(validSendTransaction)).toBeNull();
+        });
+
+        it('accepts a valid signMessage embedded request', () => {
+            expect(
+                validateEmbeddedRequest({
+                    method: 'signMessage',
+                    request: validSendTransaction.request
+                })
+            ).toBeNull();
+        });
+
+        it('accepts a valid signData embedded request', () => {
+            expect(
+                validateEmbeddedRequest({
+                    method: 'signData',
+                    request: { type: 'text', text: 'hello' }
+                })
+            ).toBeNull();
+        });
+
+        it('rejects non-object input', () => {
+            expect(validateEmbeddedRequest(null)).toBe('Embedded request must be an object');
+            expect(validateEmbeddedRequest('foo')).toBe('Embedded request must be an object');
+        });
+
+        it('rejects extra top-level properties', () => {
+            expect(validateEmbeddedRequest({ ...validSendTransaction, garbage: 'x' })).toBe(
+                'Embedded request contains extra properties'
+            );
+        });
+
+        it('requires the `method` field', () => {
+            expect(validateEmbeddedRequest({ request: validSendTransaction.request })).toBe(
+                "Embedded request: 'method' is required"
+            );
+        });
+
+        it('requires the `request` field', () => {
+            expect(validateEmbeddedRequest({ method: 'sendTransaction' })).toBe(
+                "Embedded request: 'request' is required"
+            );
+        });
+
+        it('rejects unknown methods', () => {
+            expect(validateEmbeddedRequest({ method: 'disconnect', request: {} })).toBe(
+                "Invalid 'method' value: disconnect"
+            );
+        });
+
+        it('prefixes inner validation errors with the method name', () => {
+            const result = validateEmbeddedRequest({
+                method: 'sendTransaction',
+                request: { validUntil: 1 } // missing messages/items
+            });
+            expect(result).toMatch(/^Embedded sendTransaction:/);
+        });
+
+        it('returns null when the inner request validates cleanly', () => {
+            expect(validateEmbeddedRequest(validSendTransaction)).toBeNull();
         });
     });
 });

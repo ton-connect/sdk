@@ -7,6 +7,15 @@ import { InMemoryStorage } from 'src/app/models/in-memory-storage';
 import { TonConnectUIError } from 'src/errors';
 import { logDebug } from 'src/app/utils/log';
 import { setLastOpenedLink } from 'src/app/state/modals-state';
+import { removeEmbeddedRequestFromUniversalLink } from 'src/app/utils/url-strategy-helpers';
+
+// NOTE: this duplicates `maxUrlLength` in
+// packages/sdk/src/provider/bridge/bridge-provider.ts. The duplication is a
+// consequence of an architectural shortcoming — the SDK owns universal-link
+// generation (and enforces its own length cap there), while the UI layer
+// independently re-checks the produced link before opening it. Until the
+// length policy is centralised, both constants must be kept in sync.
+export const MAX_LINK_LENGTH = 1024;
 
 /**
  * Opens a link in a new tab.
@@ -14,6 +23,9 @@ import { setLastOpenedLink } from 'src/app/state/modals-state';
  * @param target
  */
 export function openLink(href: string, target = '_self'): void {
+    if (href.length > MAX_LINK_LENGTH) {
+        href = removeEmbeddedRequestFromUniversalLink(href);
+    }
     // TODO: should be extracted to upper layer
     setLastOpenedLink({ link: href });
     logDebug('openLink', href, target);

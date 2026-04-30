@@ -1,5 +1,7 @@
 import { ChainId } from '../../CHAIN';
 import { DeviceInfo } from '../../device-info';
+import { WalletResponse } from '../wallet-response';
+import { RpcMethod } from '../../rpc-method';
 
 export type ConnectEvent = ConnectEventSuccess | ConnectEventError;
 
@@ -10,6 +12,12 @@ export interface ConnectEventSuccess {
         items: ConnectItemReply[];
         device: DeviceInfo;
     };
+
+    /**
+     * Response to the embedded app request (deep link request).
+     * Present only if the wallet processed an `e` parameter from the connect URL.
+     */
+    response?: WalletResponse<RpcMethod>;
 }
 
 export interface ConnectEventError {

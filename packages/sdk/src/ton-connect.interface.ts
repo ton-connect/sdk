@@ -2,6 +2,8 @@ import { ChainId } from '@tonconnect/protocol';
 import { TonConnectError } from 'src/errors';
 import {
     Account,
+    EmbeddedRequest,
+    SignMessageRequest,
     Wallet,
     WalletConnectionSource,
     WalletConnectionSourceHTTP,
@@ -10,13 +12,15 @@ import {
 import {
     SendTransactionRequest,
     SendTransactionResponse,
-    SignDataResponse
+    SignDataResponse,
+    SignMessageResponse
 } from 'src/models/methods';
 import { ConnectAdditionalRequest } from 'src/models/methods/connect/connect-additional-request';
 import { WalletInfo } from 'src/models/wallet/wallet-info';
 import { WalletConnectionSourceJS } from 'src/models/wallet/wallet-connection-source';
 import { SignDataPayload } from '@tonconnect/protocol';
 import { OptionalTraceable } from 'src/utils/types';
+import { ConsumableLike } from 'src/utils/consumable';
 
 export interface ITonConnect {
     /**
@@ -63,6 +67,7 @@ export interface ITonConnect {
         options?: OptionalTraceable<{
             openingDeadlineMS?: number;
             signal?: AbortSignal;
+            embeddedRequest?: ConsumableLike<EmbeddedRequest>;
         }>
     ): T extends WalletConnectionSourceJS
         ? void
@@ -131,6 +136,21 @@ export interface ITonConnect {
             signal?: AbortSignal;
         }>
     ): Promise<OptionalTraceable<SignDataResponse>>;
+
+    /**
+     * Asks connected wallet to sign the message without sending it to the blockchain.
+     * @param message message to sign (same structure as transaction).
+     * @param options (optional) onRequestSent callback and abort signal.
+     * @returns signed internal message boc.
+     * If user rejects signing, method will throw the corresponding error.
+     */
+    signMessage(
+        message: SignMessageRequest,
+        options?: OptionalTraceable<{
+            onRequestSent?: () => void;
+            signal?: AbortSignal;
+        }>
+    ): Promise<OptionalTraceable<SignMessageResponse>>;
 
     /**
      * Gets the current session ID if available.

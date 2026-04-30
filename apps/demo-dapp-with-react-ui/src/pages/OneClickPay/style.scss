@@ -1,0 +1,533 @@
+// Styles inspired by ton.org: light theme, generous whitespace, the official
+// TON blue (#0098EA) for accents, big bold display type, soft rounded cards,
+// subtle shadows. Scoped under `.one-click-pay` so it does not leak into the
+// rest of the demo.
+
+$ton-blue: #0098ea;
+$ton-blue-hover: #0086d1;
+$ton-blue-active: #0076b8;
+$ink: #000814;
+$ink-2: #1b2838;
+$muted: #6b7a8a;
+$muted-soft: #9aa6b2;
+$surface: #ffffff;
+$surface-soft: #f5f8fb;
+$surface-tint: #eaf4fc;
+$hairline: #e4ebf2;
+
+@mixin ton-font {
+    font-family:
+        'Inter',
+        -apple-system,
+        BlinkMacSystemFont,
+        'Segoe UI',
+        Roboto,
+        sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+}
+
+.one-click-pay {
+    @include ton-font;
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 56px 20px;
+    color: $ink;
+    background: $surface;
+    overflow: hidden;
+
+    // ── Background: soft ton-blue halo in the corners ────────────────────
+    &__bg {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        background:
+            radial-gradient(600px 320px at 8% 0%, rgba(0, 152, 234, 0.10), transparent 70%),
+            radial-gradient(500px 280px at 100% 100%, rgba(0, 152, 234, 0.08), transparent 70%),
+            $surface;
+    }
+
+    // ── Main card ────────────────────────────────────────────────────────
+    &__card {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        max-width: 520px;
+        padding: 40px;
+        border-radius: 24px;
+        background: $surface;
+        border: 1px solid $hairline;
+        box-shadow:
+            0 1px 2px rgba(15, 23, 38, 0.04),
+            0 24px 48px -16px rgba(0, 152, 234, 0.12);
+    }
+
+    // ── Header ───────────────────────────────────────────────────────────
+    &__head {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 16px;
+        align-items: center;
+        margin-bottom: 32px;
+    }
+
+    &__diamond {
+        width: 48px;
+        height: 48px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 14px;
+        background: $surface-tint;
+
+        svg {
+            width: 28px;
+            height: 28px;
+        }
+    }
+
+    &__title {
+        font-size: 26px;
+        font-weight: 700;
+        margin: 0;
+        letter-spacing: -0.02em;
+        color: $ink;
+        line-height: 1.15;
+    }
+
+    &__subtitle {
+        font-size: 14px;
+        line-height: 1.5;
+        margin: 4px 0 0;
+        color: $muted;
+    }
+
+    // ── Disconnect (top-right of header) ─────────────────────────────────
+    &__disconnect {
+        @include ton-font;
+        align-self: start;
+        grid-column: 3;
+        grid-row: 1 / span 2;
+        padding: 8px 14px;
+        font-size: 13px;
+        font-weight: 500;
+        color: $muted;
+        background: transparent;
+        border: 1px solid $hairline;
+        border-radius: 999px;
+        cursor: pointer;
+        transition:
+            color 140ms ease,
+            border-color 140ms ease,
+            background 140ms ease;
+
+        &:hover:not(:disabled) {
+            color: $ink;
+            border-color: $muted-soft;
+            background: $surface-soft;
+        }
+
+        &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    }
+
+    &__wallet-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 10px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: $surface-tint;
+        font-size: 12px;
+        font-weight: 500;
+        color: $ton-blue-active;
+
+        &::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: $ton-blue;
+            box-shadow: 0 0 0 3px rgba(0, 152, 234, 0.18);
+        }
+    }
+
+    // ── Fields ───────────────────────────────────────────────────────────
+    &__label {
+        display: block;
+        margin-bottom: 20px;
+
+        > span {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: $muted;
+            margin-bottom: 8px;
+        }
+    }
+
+    &__amount-row &__label {
+        margin-bottom: 0;
+    }
+
+    &__amount-field {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+        padding: 18px 22px;
+        background: $surface-soft;
+        border-radius: 16px;
+        border: 1px solid $hairline;
+        transition:
+            border-color 140ms ease,
+            box-shadow 140ms ease,
+            background 140ms ease;
+
+        &:focus-within {
+            background: $surface;
+            border-color: $ton-blue;
+            box-shadow: 0 0 0 4px rgba(0, 152, 234, 0.12);
+        }
+
+        input {
+            flex: 1 1 auto;
+            min-width: 0;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: $ink;
+            font-size: 36px;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            @include ton-font;
+
+            &::placeholder {
+                color: $muted-soft;
+            }
+        }
+    }
+
+    &__ticker {
+        font-size: 16px;
+        font-weight: 600;
+        color: $muted;
+    }
+
+    &__recipient-row {
+        margin: 20px 0 28px;
+    }
+
+    &__recipient {
+        @include ton-font;
+        width: 100%;
+        padding: 14px 16px;
+        background: $surface-soft;
+        border-radius: 12px;
+        border: 1px solid $hairline;
+        color: $ink;
+        font-family:
+            'JetBrains Mono',
+            'SF Mono',
+            ui-monospace,
+            'SFMono-Regular',
+            Menlo,
+            monospace;
+        font-size: 13px;
+        outline: none;
+        transition:
+            border-color 140ms ease,
+            box-shadow 140ms ease,
+            background 140ms ease;
+        box-sizing: border-box;
+
+        &:focus {
+            background: $surface;
+            border-color: $ton-blue;
+            box-shadow: 0 0 0 4px rgba(0, 152, 234, 0.12);
+        }
+    }
+
+    // ── Stepper ──────────────────────────────────────────────────────────
+    &__steps {
+        list-style: none;
+        margin: 0 0 16px;
+        padding: 14px 8px;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 4px;
+        background: $surface-soft;
+        border-radius: 14px;
+        border: 1px solid $hairline;
+    }
+
+    &__step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        font-size: 11px;
+        color: $muted-soft;
+        transition: color 200ms ease;
+        text-align: center;
+
+        &--active {
+            color: $ink;
+
+            .one-click-pay__step-dot {
+                background: $ton-blue;
+                box-shadow: 0 0 0 4px rgba(0, 152, 234, 0.18);
+                animation: one-click-pay-pulse 1.4s ease-in-out infinite;
+            }
+        }
+
+        &--done {
+            color: $ink-2;
+
+            .one-click-pay__step-dot {
+                background: $ton-blue;
+            }
+        }
+    }
+
+    &__step-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #d7dee6;
+        transition: all 200ms ease;
+    }
+
+    &__step-label {
+        font-weight: 500;
+        letter-spacing: 0.01em;
+    }
+
+    &__hint {
+        margin: 0 0 18px;
+        font-size: 13px;
+        color: $muted;
+        text-align: center;
+    }
+
+    // ── Result card (success / error) ────────────────────────────────────
+    &__result {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 14px;
+        padding: 18px 20px;
+        border-radius: 16px;
+        margin-bottom: 20px;
+        align-items: flex-start;
+
+        h2 {
+            font-size: 15px;
+            margin: 0 0 4px;
+            font-weight: 700;
+            color: $ink;
+            letter-spacing: -0.01em;
+        }
+
+        p {
+            font-size: 13px;
+            margin: 0;
+            color: $ink-2;
+            line-height: 1.5;
+        }
+
+        code {
+            font-family:
+                'JetBrains Mono',
+                'SF Mono',
+                ui-monospace,
+                monospace;
+            font-size: 12px;
+            padding: 1px 6px;
+            border-radius: 6px;
+            background: rgba(0, 152, 234, 0.10);
+            color: $ton-blue-active;
+        }
+
+        &--ok {
+            background: $surface-tint;
+            border: 1px solid rgba(0, 152, 234, 0.20);
+
+            .one-click-pay__result-badge {
+                background: $ton-blue;
+                color: #fff;
+            }
+        }
+
+        &--err {
+            background: #fff3f3;
+            border: 1px solid #ffd4d4;
+
+            .one-click-pay__result-badge {
+                background: #e6424c;
+                color: #fff;
+            }
+
+            h2 {
+                color: #b02029;
+            }
+
+            p {
+                color: #7a2a30;
+                word-break: break-word;
+            }
+        }
+    }
+
+    &__result-badge {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 14px;
+        flex-shrink: 0;
+    }
+
+    &__explorer {
+        display: inline-block;
+        margin-top: 10px;
+        font-size: 13px;
+        color: $ton-blue;
+        text-decoration: none;
+        font-weight: 600;
+
+        &:hover {
+            color: $ton-blue-hover;
+            text-decoration: underline;
+        }
+    }
+
+    // ── CTA button ───────────────────────────────────────────────────────
+    &__cta {
+        @include ton-font;
+        display: block;
+        width: 100%;
+        padding: 16px 24px;
+        border-radius: 14px;
+        border: none;
+        font-size: 16px;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+        cursor: pointer;
+        background: $ton-blue;
+        color: #fff;
+        box-shadow: 0 6px 16px rgba(0, 152, 234, 0.28);
+        transition:
+            background 160ms ease,
+            transform 120ms ease,
+            box-shadow 200ms ease;
+
+        &:hover:not(:disabled) {
+            background: $ton-blue-hover;
+            transform: translateY(-1px);
+            box-shadow: 0 10px 24px rgba(0, 152, 234, 0.32);
+        }
+
+        &:active:not(:disabled) {
+            background: $ton-blue-active;
+            transform: translateY(0);
+            box-shadow: 0 4px 10px rgba(0, 152, 234, 0.24);
+        }
+
+        &:disabled {
+            cursor: not-allowed;
+            background: #c9d3dd;
+            box-shadow: none;
+            color: #fff;
+        }
+    }
+
+    &__foot {
+        margin-top: 22px;
+        font-size: 12px;
+        text-align: center;
+        color: $muted;
+        line-height: 1.55;
+
+        a {
+            color: $ton-blue;
+            text-decoration: none;
+            font-weight: 500;
+
+            &:hover {
+                color: $ton-blue-hover;
+                text-decoration: underline;
+            }
+        }
+
+        code {
+            font-family:
+                'JetBrains Mono',
+                'SF Mono',
+                ui-monospace,
+                monospace;
+            font-size: 11px;
+            padding: 1px 6px;
+            border-radius: 4px;
+            background: $surface-soft;
+            border: 1px solid $hairline;
+            color: $ink-2;
+        }
+    }
+}
+
+@keyframes one-click-pay-pulse {
+    0%,
+    100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.25);
+    }
+}
+
+@media (max-width: 540px) {
+    .one-click-pay {
+        padding: 24px 14px;
+
+        &__card {
+            padding: 26px 20px;
+            border-radius: 20px;
+        }
+
+        &__head {
+            grid-template-columns: auto 1fr;
+            row-gap: 10px;
+        }
+
+        &__disconnect {
+            grid-column: 1 / -1;
+            grid-row: auto;
+            justify-self: start;
+            align-self: auto;
+        }
+
+        &__amount-field input {
+            font-size: 28px;
+        }
+
+        &__title {
+            font-size: 22px;
+        }
+
+        &__steps {
+            font-size: 10px;
+        }
+    }
+}

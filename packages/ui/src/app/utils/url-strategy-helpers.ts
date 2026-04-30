@@ -631,6 +631,41 @@ function addQueryParametersIfNotPresented(
     return parsed.toString();
 }
 
+export function removeEmbeddedRequestFromUniversalLink(universalLink: string) {
+    return removeParamsFromUniversalLink(universalLink, ['e']);
+}
+
+export function removeParamsFromUniversalLink(universalLink: string, params: string[]): string {
+    if (!isTelegramUrl(universalLink)) {
+        return removeQueryParameters(universalLink, params);
+    }
+
+    const directLink = convertToTGDirectLink(universalLink);
+    const directLinkUrl = new URL(directLink);
+
+    const previousStartApp = decodeTelegramUrlParameters(
+        directLinkUrl.searchParams.get('startapp') ?? ''
+    );
+
+    let searchParams = buildSearchParams(previousStartApp);
+    for (const param of params) {
+        searchParams.delete(param);
+    }
+    const startApp = searchParams.toString().replace('=&', '&'); // ensure startapp param looks like "tonconnect&v=2" instead of "tonconnect=&v=2"
+
+    directLinkUrl.searchParams.set('startapp', encodeTelegramUrlParameters(startApp));
+
+    return directLinkUrl.toString();
+}
+
+function removeQueryParameters(url: string, params: string[]) {
+    const parsed = new URL(url);
+    for (const param of params) {
+        parsed.searchParams.delete(param);
+    }
+    return parsed.toString();
+}
+
 /**
  * Converts a universal link to a direct link.
  * @param universalLink

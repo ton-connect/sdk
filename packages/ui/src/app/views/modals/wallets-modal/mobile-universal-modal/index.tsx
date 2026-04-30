@@ -1,4 +1,8 @@
-import { ConnectAdditionalRequest, isWalletInfoRemote } from '@tonconnect/sdk';
+import {
+    ConnectAdditionalRequest,
+    isWalletInfoRemote,
+    checkRequiredWalletFeatures
+} from '@tonconnect/sdk';
 import { Component, createMemo, createSignal, For, Show } from 'solid-js';
 import { AtWalletIcon, FourWalletsItem, QRIcon, WalletItem } from 'src/app/components';
 import {
@@ -17,11 +21,16 @@ import { copyToClipboard } from 'src/app/utils/copy-to-clipboard';
 import { TonConnectUIError } from 'src/errors';
 import { MobileUniversalQR } from './mobile-universal-qr';
 import { Translation } from 'src/app/components/typography/Translation';
-import { redirectToTelegram, redirectToWallet } from 'src/app/utils/url-strategy-helpers';
+import {
+    redirectToTelegram,
+    redirectToWallet,
+    removeEmbeddedRequestFromUniversalLink
+} from 'src/app/utils/url-strategy-helpers';
 import { bridgesIsEqual, getUniqueBridges } from 'src/app/utils/bridge';
 import { WalletUlContainer } from 'src/app/components/wallet-item/style';
 import { UIWalletInfo } from 'src/app/models/ui-wallet-info';
 import { WalletsModalState } from 'src/models';
+import { logDebug } from 'src/app/utils/log';
 
 interface MobileUniversalModalProps {
     walletsList: UIWalletInfo[];
@@ -55,15 +64,35 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
         null
     );
 
-    const getUniversalLink = (): string => {
-        if (!universalLink()) {
-            setUniversalLink(
-                connector.connect(walletsBridges(), props.additionalRequest, {
-                    traceId: props.walletModalState.traceId
-                })
-            );
+    const getUniversalLink = (options: { useEmbeddedRequest: boolean }): string => {
+        let link = universalLink();
+        let wasEmpty = !link;
+
+        if (!link) {
+            const embeddedRequest =
+                'embeddedRequest' in props.walletModalState
+                    ? props.walletModalState.embeddedRequest
+                    : undefined;
+
+            link = connector.connect(walletsBridges(), props.additionalRequest, {
+                traceId: props.walletModalState.traceId,
+                embeddedRequest: embeddedRequest ?? undefined
+            });
         }
-        return universalLink()!;
+
+        const linkWithoutRequest = removeEmbeddedRequestFromUniversalLink(link);
+
+        const linkToStore = options.useEmbeddedRequest ? linkWithoutRequest : link;
+        const linkToReturn = options.useEmbeddedRequest ? link : linkWithoutRequest;
+
+        const wasConsumed = linkToReturn !== linkToStore;
+        if (wasConsumed || wasEmpty) {
+            setUniversalLink(linkToStore);
+        }
+
+        logDebug('getUniversalLink', linkToReturn);
+
+        return linkToReturn;
     };
 
     setLastSelectedWalletInfo({ openMethod: 'universal-link' });
@@ -77,7 +106,7 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
             clearTimeout(isCopiedShown());
         }
 
-        await copyToClipboard(getUniversalLink());
+        await copyToClipboard(getUniversalLink({ useEmbeddedRequest: false }));
         const timeoutId = setTimeout(() => setIsCopiedShown(undefined), 1500);
         setIsCopiedShown(timeoutId);
     };
@@ -87,7 +116,7 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
         setFirstClick(false);
 
         redirectToWallet(
-            getUniversalLink(),
+            getUniversalLink({ useEmbeddedRequest: true }),
             undefined,
             {
                 returnStrategy: appState.returnStrategy,
@@ -109,13 +138,25 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
             throw new TonConnectUIError('@wallet bot not found in the wallets list');
         }
 
+        const walletSupportsEmbeddedRequest = checkRequiredWalletFeatures(atWallet.features ?? [], {
+            embeddedRequest: {}
+        });
+
+        const embeddedRequest =
+            walletSupportsEmbeddedRequest && 'embeddedRequest' in props.walletModalState
+                ? props.walletModalState.embeddedRequest
+                : undefined;
+
         const walletLink = connector.connect(
             {
                 bridgeUrl: atWallet.bridgeUrl,
                 universalLink: atWallet.universalLink
             },
             props.additionalRequest,
-            { traceId: props.walletModalState.traceId }
+            {
+                traceId: props.walletModalState.traceId,
+                embeddedRequest: embeddedRequest ?? undefined
+            }
         );
 
         const forceRedirect = !firstClick();
@@ -171,7 +212,7 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
             <Show when={showQR()}>
                 <StyledLeftActionButton icon="arrow" onClick={onCloseQR} />
                 <MobileUniversalQR
-                    universalLink={getUniversalLink()}
+                    universalLink={getUniversalLink({ useEmbeddedRequest: false })}
                     isCopiedShown={isCopiedShown()}
                     onOpenLink={onSelectUniversal}
                     onCopy={onCopy}

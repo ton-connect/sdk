@@ -10,6 +10,7 @@ import { TonProofDemoApi } from '../../TonProofDemoApi';
 export function SignDataTester() {
     const wallet = useTonWallet();
     const [tonConnectUi] = useTonConnectUI();
+    const [embeddedRequest, setEmbeddedRequest] = useState(false);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [signDataRequest, setSignDataRequest] = useState<any>(null);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -33,7 +34,16 @@ export function SignDataTester() {
             setSignDataRequest(requestPayload);
             console.log('📤 Sign Data Request (Text):', requestPayload);
 
-            const result = await tonConnectUi.signData(requestPayload);
+            const result = await tonConnectUi.signData(requestPayload, {
+                onConnected: embeddedRequest
+                    ? (send, { dispatched }) => {
+                          if (dispatched && !confirm('Sign data twice?')) {
+                              throw new Error('Sign data twice');
+                          }
+                          return send();
+                      }
+                    : undefined
+            });
 
             setSignDataResponse(result);
             console.log('📥 Sign Data Response (Text):', result);
@@ -72,7 +82,16 @@ export function SignDataTester() {
             setSignDataRequest(requestPayload);
             console.log('📤 Sign Data Request (Binary):', requestPayload);
 
-            const result = await tonConnectUi.signData(requestPayload);
+            const result = await tonConnectUi.signData(requestPayload, {
+                onConnected: embeddedRequest
+                    ? (send, { dispatched }) => {
+                          if (dispatched && !confirm('Sign data twice?')) {
+                              throw new Error('Sign data twice');
+                          }
+                          return send();
+                      }
+                    : undefined
+            });
 
             setSignDataResponse(result);
             console.log('📥 Sign Data Response (Binary):', result);
@@ -117,7 +136,16 @@ export function SignDataTester() {
             setSignDataRequest(requestPayload);
             console.log('📤 Sign Data Request (Cell):', requestPayload);
 
-            const result = await tonConnectUi.signData(requestPayload);
+            const result = await tonConnectUi.signData(requestPayload, {
+                onConnected: embeddedRequest
+                    ? (send, { dispatched }) => {
+                          if (dispatched && !confirm('Sign data twice?')) {
+                              throw new Error('Sign data twice');
+                          }
+                          return send();
+                      }
+                    : undefined
+            });
 
             setSignDataResponse(result);
             console.log('📥 Sign Data Response (Cell):', result);
@@ -147,7 +175,18 @@ export function SignDataTester() {
                 verification
             </div>
 
-            {wallet ? (
+            <label
+                style={{ margin: '12px 0 0 2px', color: '#b8d4f1', fontWeight: 500, fontSize: 15 }}
+            >
+                <input
+                    type="checkbox"
+                    checked={embeddedRequest}
+                    onChange={e => setEmbeddedRequest(e.target.checked)}
+                />
+                Embed request in connect
+            </label>
+
+            {wallet || embeddedRequest ? (
                 <div className="sign-data-tester__buttons">
                     <button onClick={handleTextSign}>Sign Text</button>
                     <button onClick={handleBinarySign}>Sign Binary</button>

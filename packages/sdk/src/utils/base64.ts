@@ -4,3 +4,7 @@ export function normalizeBase64(data: string | undefined): string | undefined {
     const paddedLength = data.length + ((4 - (data.length % 4)) % 4);
     return data.replace(/-/g, '+').replace(/_/g, '/').padEnd(paddedLength, '=');
 }
+
+export function toBase64Url(base64: string): string {
+    return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}

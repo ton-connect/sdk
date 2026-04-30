@@ -1,14 +1,17 @@
 import {
     Account,
+    EmbeddedRequest,
     BrowserEventDispatcher,
     ConnectAdditionalRequest,
     OptionalTraceable,
     RequiredFeatures,
     SignDataPayload,
     SignDataResponse,
+    SignMessageResponse,
     Traceable,
     UUIDv7,
-    WalletInfoCurrentlyEmbedded
+    WalletInfoCurrentlyEmbedded,
+    Consumable
 } from '@tonconnect/sdk';
 import {
     isTelegramUrl,
@@ -24,6 +27,7 @@ import {
     SessionCrypto,
     ChainId
 } from '@tonconnect/sdk';
+import type { SignMessageRequest } from '@tonconnect/sdk';
 import { widgetController } from 'src/app/widget-controller';
 import { TonConnectUIError } from 'src/errors/ton-connect-ui.error';
 import { TonConnectUiCreateOptions } from 'src/models/ton-connect-ui-create-options';
@@ -39,7 +43,7 @@ import { setBorderRadius, setColors, setTheme } from 'src/app/state/theme-state'
 import { mergeOptions } from 'src/app/utils/options';
 import { appState, setAppState } from 'src/app/state/app.state';
 import { unwrap } from 'solid-js/store';
-import { Action, setLastSelectedWalletInfo } from 'src/app/state/modals-state';
+import { Action, ActionName, setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { ActionConfiguration, StrictActionConfiguration } from 'src/models/action-configuration';
 import { ConnectedWallet, WalletInfoWithOpenMethod } from 'src/models/connected-wallet';
 import { applyWalletsListConfiguration, eqWalletName } from 'src/app/utils/wallets';
@@ -66,6 +70,7 @@ import {
     WALLET_CONNECT_WALLET_NAME
 } from 'src/app/env/WALLET_CONNECT';
 import { IMG } from 'src/app/env/IMG';
+import { PickRequired } from 'src/utils/pick-required';
 
 export class TonConnectUI {
     public static getWallets(): Promise<WalletInfo[]> {
@@ -115,6 +120,8 @@ export class TonConnectUI {
      * Manages the modal window state.
      */
     public readonly modal: WalletsModal;
+
+    private readonly modalManager: WalletsModalManager;
 
     /**
      * Manages the single wallet modal window state.
@@ -255,7 +262,7 @@ export class TonConnectUI {
             tonConnectUiVersion: tonConnectUiVersion
         });
 
-        this.modal = new WalletsModalManager({
+        this.modalManager = new WalletsModalManager({
             connector: this.connector,
             tracker: this.tracker,
             setConnectRequestParametersCallback: (
@@ -264,6 +271,7 @@ export class TonConnectUI {
                 this.connectRequestParametersCallback = callback;
             }
         });
+        this.modal = this.modalManager;
 
         this.singleWalletModal = new SingleWalletModalManager({
             connector: this.connector,
@@ -482,137 +490,49 @@ export class TonConnectUI {
      */
     public async sendTransaction(
         tx: SendTransactionRequest,
-        options?: ActionConfiguration &
-            OptionalTraceable<{
-                onRequestSent?: (redirectToWallet: () => void) => void;
-            }>
+        options?: ActionOptions<SendTransactionResponse>
     ): Promise<OptionalTraceable<SendTransactionResponse>> {
         const traceId = options?.traceId ?? UUIDv7();
 
         this.tracker.trackTransactionSentForSignature(this.wallet, tx);
+
+        const handlers = {
+            onAbort: () => {
+                this.tracker.trackTransactionSigningFailed(
+                    this.wallet,
+                    tx,
+                    'Transaction was cancelled'
+                );
+                return new TonConnectUIError('Transaction was not sent');
+            },
+            sendRequestBuilder: options => async () => {
+                const result = await this.connector.sendTransaction(tx, options);
+                this.tracker.trackTransactionSigned(this.wallet, tx, result);
+                return result;
+            }
+        } satisfies BridgeFlowHandlers<SendTransactionResponse>;
+
+        const action = {
+            before: 'confirm-transaction',
+            success: 'transaction-sent',
+            error: 'transaction-canceled'
+        } satisfies BridgeFlowAction;
+
+        if (!this.connected && options?.onConnected) {
+            return this.initiateEmbeddedRequestFlow(
+                { method: 'sendTransaction', request: tx },
+                handlers,
+                action,
+                { ...options, onConnected: options.onConnected, traceId }
+            );
+        }
 
         if (!this.connected) {
             this.tracker.trackTransactionSigningFailed(this.wallet, tx, 'Wallet was not connected');
             throw new TonConnectUIError('Connect wallet to send a transaction.');
         }
 
-        if (isInTMA()) {
-            sendExpand();
-        }
-
-        const { notifications, modals, returnStrategy, twaReturnUrl } =
-            this.getModalsAndNotificationsConfiguration(options);
-
-        const sessionId = await this.getSessionId();
-
-        widgetController.setAction({
-            name: 'confirm-transaction',
-            showNotification: notifications.includes('before'),
-            openModal: modals.includes('before'),
-            sent: false,
-            sessionId: sessionId || undefined,
-            traceId
-        });
-
-        const abortController = new AbortController();
-
-        const onRequestSent = (): void => {
-            if (abortController.signal.aborted) {
-                return;
-            }
-
-            widgetController.setAction({
-                name: 'confirm-transaction',
-                showNotification: notifications.includes('before'),
-                openModal: modals.includes('before'),
-                sent: true,
-                sessionId: sessionId || undefined,
-                traceId
-            });
-
-            this.redirectAfterRequestSent({
-                returnStrategy,
-                twaReturnUrl,
-                sessionId: sessionId || undefined,
-                traceId
-            });
-
-            let firstClick = true;
-            const redirectToWallet = async () => {
-                if (abortController.signal.aborted) {
-                    return;
-                }
-
-                const forceRedirect = !firstClick;
-                firstClick = false;
-
-                await this.redirectAfterRequestSent({
-                    returnStrategy,
-                    twaReturnUrl,
-                    forceRedirect,
-                    sessionId: sessionId || undefined,
-                    traceId
-                });
-            };
-
-            options?.onRequestSent?.(redirectToWallet);
-        };
-
-        const unsubscribe = this.onTransactionModalStateChange(action => {
-            if (action?.openModal) {
-                return;
-            }
-
-            unsubscribe();
-            if (!action) {
-                abortController.abort();
-            }
-        });
-
-        try {
-            const result = await this.waitForSendTransaction(
-                {
-                    transaction: tx,
-                    signal: abortController.signal,
-                    traceId
-                },
-                onRequestSent
-            );
-
-            this.tracker.trackTransactionSigned(this.wallet, tx, result);
-
-            widgetController.setAction({
-                name: 'transaction-sent',
-                showNotification: notifications.includes('success'),
-                openModal: modals.includes('success'),
-                traceId
-            });
-
-            return result;
-        } catch (e) {
-            if (e instanceof WalletNotSupportFeatureError) {
-                widgetController.clearAction();
-                widgetController.openWalletNotSupportFeatureModal(e.cause, { traceId });
-
-                throw e;
-            }
-
-            widgetController.setAction({
-                name: 'transaction-canceled',
-                showNotification: notifications.includes('error'),
-                openModal: modals.includes('error'),
-                traceId
-            });
-
-            if (e instanceof TonConnectError) {
-                throw e;
-            } else {
-                console.error(e);
-                throw new TonConnectUIError('Unhandled error:' + e);
-            }
-        } finally {
-            unsubscribe();
-        }
+        return this.initiateBridgeFlow(handlers, action, { ...options, traceId });
     }
 
     /**
@@ -621,134 +541,87 @@ export class TonConnectUI {
      */
     public async signData(
         data: SignDataPayload,
-        options?: OptionalTraceable<{ onRequestSent?: (redirectToWallet: () => void) => void }>
+        options?: ActionOptions<SignDataResponse>
     ): Promise<SignDataResponse> {
         const traceId = options?.traceId ?? UUIDv7();
 
         this.tracker.trackDataSentForSignature(this.wallet, data);
 
+        const handlers = {
+            onAbort: () => {
+                this.tracker.trackDataSigningFailed(this.wallet, data, 'SignData was cancelled');
+                return new TonConnectUIError('SignData was not sent');
+            },
+            sendRequestBuilder: options => async () => {
+                const result = await this.connector.signData(data, options);
+                this.tracker.trackDataSigned(this.wallet, data, result);
+                return result;
+            }
+        } satisfies BridgeFlowHandlers<SignDataResponse>;
+
+        const action = {
+            before: 'confirm-sign-data',
+            success: 'data-signed',
+            error: 'sign-data-canceled'
+        } satisfies BridgeFlowAction;
+
+        if (!this.connected && options?.onConnected) {
+            return this.initiateEmbeddedRequestFlow(
+                { method: 'signData', request: data },
+                handlers,
+                action,
+                { ...options, onConnected: options.onConnected, traceId }
+            );
+        }
+
         if (!this.connected) {
             this.tracker.trackDataSigningFailed(this.wallet, data, 'Wallet was not connected');
-            throw new TonConnectUIError('Connect wallet to send a transaction.');
+            throw new TonConnectUIError('Connect wallet to sign data.');
         }
 
-        if (isInTMA()) {
-            sendExpand();
-        }
+        return this.initiateBridgeFlow(handlers, action, { ...options, traceId });
+    }
 
-        const { notifications, modals, returnStrategy, twaReturnUrl } =
-            this.getModalsAndNotificationsConfiguration();
+    /**
+     * Signs a message built from a transaction request and returns the signed internal message BoC.
+     * @param message transaction-like request describing the internal message to sign.
+     * @param options modal and notifications behaviour settings.
+     */
+    public async signMessage(
+        message: SignMessageRequest,
+        options?: ActionOptions<SignMessageResponse>
+    ): Promise<OptionalTraceable<SignMessageResponse>> {
+        const traceId = options?.traceId ?? UUIDv7();
 
-        const sessionId = await this.getSessionId();
-
-        widgetController.setAction({
-            name: 'confirm-sign-data',
-            showNotification: notifications.includes('before'),
-            openModal: modals.includes('before'),
-            signed: false,
-            sessionId: sessionId || undefined,
-            traceId
-        });
-
-        const abortController = new AbortController();
-
-        const onRequestSent = (): void => {
-            if (abortController.signal.aborted) {
-                return;
+        const handlers = {
+            onAbort: () => {
+                return new TonConnectUIError('SignMessage was not sent');
+            },
+            sendRequestBuilder: options => async () => {
+                return await this.connector.signMessage(message, options);
             }
+        } satisfies BridgeFlowHandlers<SignMessageResponse>;
 
-            widgetController.setAction({
-                name: 'confirm-sign-data',
-                showNotification: notifications.includes('before'),
-                openModal: modals.includes('before'),
-                signed: true,
-                sessionId: sessionId || undefined,
-                traceId
-            });
+        const action = {
+            before: 'confirm-sign-message',
+            success: 'message-signed',
+            error: 'sign-message-canceled'
+        } satisfies BridgeFlowAction;
 
-            this.redirectAfterRequestSent({
-                returnStrategy,
-                twaReturnUrl,
-                sessionId: sessionId || undefined,
-                traceId
-            });
-
-            let firstClick = true;
-            const redirectToWallet = () => {
-                if (abortController.signal.aborted) {
-                    return;
-                }
-
-                const forceRedirect = !firstClick;
-                firstClick = false;
-
-                this.redirectAfterRequestSent({
-                    returnStrategy,
-                    twaReturnUrl,
-                    forceRedirect,
-                    sessionId: sessionId || undefined,
-                    traceId
-                });
-            };
-
-            options?.onRequestSent?.(redirectToWallet);
-        };
-
-        const unsubscribe = this.onTransactionModalStateChange(action => {
-            if (action?.openModal) {
-                return;
-            }
-
-            unsubscribe();
-            if (!action) {
-                abortController.abort();
-            }
-        });
-
-        try {
-            const result = await this.waitForSignData(
-                {
-                    data,
-                    signal: new AbortController().signal,
-                    traceId
-                },
-                onRequestSent
+        if (!this.connected && options?.onConnected) {
+            return this.initiateEmbeddedRequestFlow(
+                { method: 'signMessage', request: message },
+                handlers,
+                action,
+                { ...options, onConnected: options.onConnected, traceId }
             );
-
-            this.tracker.trackDataSigned(this.wallet, data, result);
-
-            widgetController.setAction({
-                name: 'data-signed',
-                showNotification: notifications.includes('success'),
-                openModal: modals.includes('success'),
-                traceId
-            });
-
-            return result;
-        } catch (e) {
-            if (e instanceof WalletNotSupportFeatureError) {
-                widgetController.clearAction();
-                widgetController.openWalletNotSupportFeatureModal(e.cause, { traceId });
-
-                throw e;
-            }
-
-            widgetController.setAction({
-                name: 'sign-data-canceled',
-                showNotification: notifications.includes('error'),
-                openModal: modals.includes('error'),
-                traceId
-            });
-
-            if (e instanceof TonConnectError) {
-                throw e;
-            } else {
-                console.error(e);
-                throw new TonConnectUIError('Unhandled error:' + e);
-            }
-        } finally {
-            unsubscribe();
         }
+
+        if (!this.connected) {
+            throw new TonConnectUIError('Connect wallet to sign a message.');
+        }
+
+        return this.initiateBridgeFlow(handlers, action, { ...options, traceId });
     }
 
     /**
@@ -961,116 +834,224 @@ export class TonConnectUI {
         });
     }
 
-    /**
-     * Waits for a transaction to be sent based on provided options, returning the transaction response.
-     * @param options - Configuration for transaction statuses and errors handling.
-     * @options.transaction - Transaction to send.
-     * @options.ignoreErrors - If true, ignores errors during waiting, waiting continues until a valid transaction is sent. Default is false.
-     * @options.abortSignal - Optional AbortSignal for external cancellation. Throws TonConnectUIError if aborted.
-     * @param onRequestSent (optional) will be called after the transaction is sent to the wallet.
-     * @throws TonConnectUIError if waiting is aborted or no valid transaction response is received and ignoreErrors is false.
-     * @internal
-     */
-    private async waitForSendTransaction(
-        options: WaitSendTransactionOptions,
-        onRequestSent?: () => void
-    ): Promise<OptionalTraceable<SendTransactionResponse>> {
-        return new Promise((resolve, reject) => {
-            const { transaction, signal } = options;
+    private async initiateEmbeddedRequestFlow<TResponse>(
+        embeddedRequest: EmbeddedRequest,
+        handlers: BridgeFlowHandlers<TResponse>,
+        action: BridgeFlowAction,
+        options: PickRequired<ActionOptions<TResponse>, 'traceId' | 'onConnected'>
+    ): Promise<TResponse> {
+        const consumable = new Consumable(embeddedRequest);
 
-            if (signal.aborted) {
-                this.tracker.trackTransactionSigningFailed(
-                    this.wallet,
-                    transaction,
-                    'Transaction was cancelled'
-                );
-                return reject(new TonConnectUIError('Transaction was not sent'));
+        const abortController = new AbortController();
+
+        await this.modalManager.open({
+            traceId: options.traceId,
+            embeddedRequest: consumable
+        });
+
+        const unsubscribe = this.onModalStateChange(state => {
+            if (state.status === 'opened') {
+                return;
             }
 
-            const onTransactionHandler = async (
-                transaction: OptionalTraceable<SendTransactionResponse>
-            ): Promise<void> => {
-                resolve(transaction);
-            };
+            unsubscribe();
+            if (state.closeReason === 'action-cancelled') {
+                abortController.abort();
+            }
+        });
 
-            const onErrorsHandler = (reason: TonConnectError): void => {
-                reject(reason);
-            };
+        const connectedWallet = await this.waitForWalletConnection({
+            ignoreErrors: true,
+            signal: abortController.signal,
+            traceId: options.traceId
+        });
 
-            const onCanceledHandler = (): void => {
-                this.tracker.trackTransactionSigningFailed(
-                    this.wallet,
-                    transaction,
-                    'Transaction was cancelled'
-                );
-                reject(new TonConnectUIError('Transaction was not sent'));
-            };
+        const response = connectedWallet.embeddedResponse;
+        if (response) {
+            const { notifications, modals } = this.getModalsAndNotificationsConfiguration(options);
 
-            signal.addEventListener('abort', onCanceledHandler, { once: true });
-
-            this.connector
-                .sendTransaction(transaction, {
-                    onRequestSent: onRequestSent,
-                    signal: signal,
+            if (!response.ok) {
+                widgetController.setAction({
+                    name: action.error,
+                    showNotification: notifications.includes('error'),
+                    openModal: modals.includes('error'),
                     traceId: options.traceId
-                })
-                .then(result => {
-                    signal.removeEventListener('abort', onCanceledHandler);
-                    return onTransactionHandler(result);
-                })
-                .catch(reason => {
-                    signal.removeEventListener('abort', onCanceledHandler);
-                    return onErrorsHandler(reason);
                 });
+
+                throw new TonConnectUIError(
+                    response.error.message || 'Wallet rejected the embedded request'
+                );
+            }
+
+            widgetController.setAction({
+                name: action.success,
+                showNotification: notifications.includes('success'),
+                openModal: modals.includes('success'),
+                traceId: options.traceId
+            });
+
+            return response.result as TResponse;
+        }
+
+        const dispatched = consumable.consumed;
+        return await options.onConnected(() => this.initiateBridgeFlow(handlers, action, options), {
+            dispatched
         });
     }
 
-    /**
-     * Waits for a transaction to be sent based on provided options, returning the transaction response.
-     * @param options - Configuration for transaction statuses and errors handling.
-     * @options.transaction - Transaction to send.
-     * @options.ignoreErrors - If true, ignores errors during waiting, waiting continues until a valid transaction is sent. Default is false.
-     * @options.abortSignal - Optional AbortSignal for external cancellation. Throws TonConnectUIError if aborted.
-     * @param onRequestSent (optional) will be called after the transaction is sent to the wallet.
-     * @throws TonConnectUIError if waiting is aborted or no valid transaction response is received and ignoreErrors is false.
-     * @internal
-     */
-    private async waitForSignData(
-        options: WaitSignDataOptions,
-        onRequestSent?: () => void
-    ): Promise<SignDataResponse> {
-        return new Promise((resolve, reject) => {
-            const { data, signal } = options;
+    private async initiateBridgeFlow<TResponse>(
+        handlers: BridgeFlowHandlers<TResponse>,
+        action: BridgeFlowAction,
+        options: Traceable<ActionOptions<TResponse>>
+    ): Promise<TResponse> {
+        if (isInTMA()) {
+            sendExpand();
+        }
 
-            if (signal.aborted) {
-                this.tracker.trackDataSigningFailed(this.wallet, data, 'SignData was cancelled');
-                return reject(new TonConnectUIError('SignData was not sent'));
+        const { notifications, modals, returnStrategy, twaReturnUrl } =
+            this.getModalsAndNotificationsConfiguration(options);
+
+        const sessionId = await this.getSessionId();
+
+        widgetController.setAction({
+            name: action.before,
+            showNotification: notifications.includes('before'),
+            openModal: modals.includes('before'),
+            executed: false,
+            sessionId: sessionId || undefined,
+            traceId: options.traceId,
+            returnStrategy,
+            twaReturnUrl
+        });
+
+        const abortController = new AbortController();
+
+        const onRequestSent = (): void => {
+            if (abortController.signal.aborted) {
+                return;
             }
 
-            const onSignHandler = async (data: SignDataResponse): Promise<void> => {
-                resolve(data);
+            widgetController.setAction({
+                name: action.before,
+                showNotification: notifications.includes('before'),
+                openModal: modals.includes('before'),
+                executed: true,
+                sessionId: sessionId || undefined,
+                traceId: options.traceId,
+                returnStrategy,
+                twaReturnUrl
+            });
+
+            this.redirectAfterRequestSent({
+                returnStrategy,
+                twaReturnUrl,
+                sessionId: sessionId || undefined,
+                traceId: options.traceId
+            });
+
+            let firstClick = true;
+            const redirectToWallet = async () => {
+                if (abortController.signal.aborted) {
+                    return;
+                }
+
+                const forceRedirect = !firstClick;
+                firstClick = false;
+
+                await this.redirectAfterRequestSent({
+                    returnStrategy,
+                    twaReturnUrl,
+                    forceRedirect,
+                    sessionId: sessionId || undefined,
+                    traceId: options.traceId
+                });
             };
 
-            const onErrorsHandler = (reason: TonConnectError): void => {
-                reject(reason);
-            };
+            options?.onRequestSent?.(redirectToWallet);
+        };
+
+        const unsubscribe = this.onTransactionModalStateChange(action => {
+            if (action?.openModal) {
+                return;
+            }
+
+            unsubscribe();
+            if (!action) {
+                abortController.abort();
+            }
+        });
+
+        try {
+            const result = await this.runConnectorRequestWithAbortHandling(
+                abortController.signal,
+                handlers.onAbort,
+                handlers.sendRequestBuilder({
+                    onRequestSent,
+                    signal: abortController.signal,
+                    traceId: options.traceId
+                })
+            );
+
+            widgetController.setAction({
+                name: action.success,
+                showNotification: notifications.includes('success'),
+                openModal: modals.includes('success'),
+                traceId: options.traceId
+            });
+
+            return result;
+        } catch (e) {
+            if (e instanceof WalletNotSupportFeatureError) {
+                widgetController.clearAction();
+                widgetController.openWalletNotSupportFeatureModal(e.cause, {
+                    traceId: options.traceId
+                });
+
+                throw e;
+            }
+
+            widgetController.setAction({
+                name: action.error,
+                showNotification: notifications.includes('error'),
+                openModal: modals.includes('error'),
+                traceId: options.traceId
+            });
+
+            if (e instanceof TonConnectError) {
+                throw e;
+            } else {
+                console.error(e);
+                throw new TonConnectUIError('Unhandled error:' + e);
+            }
+        } finally {
+            unsubscribe();
+        }
+    }
+
+    private async runConnectorRequestWithAbortHandling<T>(
+        signal: AbortSignal,
+        onAborted: () => TonConnectUIError,
+        call: () => Promise<T>
+    ): Promise<T> {
+        return new Promise<T>((resolve, reject) => {
+            if (signal.aborted) {
+                return reject(onAborted());
+            }
 
             const onCanceledHandler = (): void => {
-                this.tracker.trackDataSigningFailed(this.wallet, data, 'SignData was cancelled');
-                reject(new TonConnectUIError('SignData was not sent'));
+                reject(onAborted());
             };
 
             signal.addEventListener('abort', onCanceledHandler, { once: true });
 
-            this.connector
-                .signData(data, { onRequestSent: onRequestSent, signal: signal })
+            call()
                 .then(result => {
-                    // signal.removeEventListener('abort', onCanceledHandler);
-                    return onSignHandler(result);
+                    signal.removeEventListener('abort', onCanceledHandler);
+                    resolve(result);
                 })
                 .catch(reason => {
-                    // signal.removeEventListener('abort', onCanceledHandler);
-                    return onErrorsHandler(reason);
+                    signal.removeEventListener('abort', onCanceledHandler);
+                    reject(reason);
                 });
         });
     }
@@ -1249,17 +1230,29 @@ export class TonConnectUI {
     }
 }
 
+type ActionOptions<TResponse> = ActionConfiguration &
+    OptionalTraceable<{
+        onRequestSent?: (redirectToWallet: () => void) => void;
+        onConnected?: (
+            send: () => Promise<TResponse>,
+            context: { dispatched: boolean }
+        ) => Promise<TResponse>;
+    }>;
+
+type BridgeFlowHandlers<TResponse> = {
+    onAbort: () => TonConnectUIError;
+    sendRequestBuilder: (
+        options: OptionalTraceable<{ onRequestSent?: () => void; signal?: AbortSignal }>
+    ) => () => Promise<TResponse>;
+};
+
+type BridgeFlowAction = {
+    before: ActionName;
+    success: ActionName;
+    error: ActionName;
+};
+
 type WaitWalletConnectionOptions = Traceable<{
     ignoreErrors?: boolean;
     signal?: AbortSignal | null;
-}>;
-
-type WaitSendTransactionOptions = Traceable<{
-    transaction: SendTransactionRequest;
-    signal: AbortSignal;
-}>;
-
-type WaitSignDataOptions = Traceable<{
-    data: SignDataPayload;
-    signal: AbortSignal;
 }>;

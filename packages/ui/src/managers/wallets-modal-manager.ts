@@ -6,6 +6,7 @@ import {
 } from 'src/app/state/modals-state';
 import { createEffect, on } from 'solid-js';
 import {
+    EmbeddedRequest,
     ConnectAdditionalRequest,
     isConnectUrl,
     isWalletInfoCurrentlyEmbedded,
@@ -13,7 +14,8 @@ import {
     OptionalTraceable,
     Traceable,
     UUIDv7,
-    WalletInfoCurrentlyEmbedded
+    WalletInfoCurrentlyEmbedded,
+    Consumable
 } from '@tonconnect/sdk';
 import { appState } from 'src/app/state/app.state';
 import { widgetController } from 'src/app/widget-controller';
@@ -144,7 +146,9 @@ export class WalletsModalManager implements WalletsModal {
     /**
      * Opens the modal window.
      */
-    public async open(options?: OptionalTraceable): Promise<void> {
+    public async open(
+        options?: OptionalTraceable<{ embeddedRequest?: Consumable<EmbeddedRequest> }>
+    ): Promise<void> {
         const traceId = options?.traceId ?? UUIDv7();
 
         this.tracker.trackConnectionStarted();
@@ -154,7 +158,7 @@ export class WalletsModalManager implements WalletsModal {
         if (embeddedWallet) {
             return this.connectEmbeddedWallet(embeddedWallet, { traceId });
         } else {
-            return this.openWalletsModal({ traceId });
+            return this.openWalletsModal({ traceId, embeddedRequest: options?.embeddedRequest });
         }
     }
 
@@ -208,12 +212,17 @@ export class WalletsModalManager implements WalletsModal {
      * Opens the modal window to connect to an external wallet, and waits when modal window is opened.
      * @internal
      */
-    private async openWalletsModal(options: Traceable): Promise<void> {
+    private async openWalletsModal(
+        options: Traceable & { embeddedRequest?: Consumable<EmbeddedRequest> }
+    ): Promise<void> {
         if (isInTMA()) {
             sendExpand();
         }
 
-        widgetController.openWalletsModal({ traceId: options.traceId });
+        widgetController.openWalletsModal({
+            traceId: options.traceId,
+            embeddedRequest: options.embeddedRequest
+        });
 
         return new Promise<void>(resolve => {
             const unsubscribe = this.onStateChange(state => {
