@@ -66,6 +66,21 @@ export function TxForm() {
         setTx(value.updated_src as SendTransactionRequest);
     }, []);
 
+    const buildNftItemsPayload = (): SendTransactionRequest => {
+        const newOwner =
+            wallet?.account?.address ?? 'TODO: connect a wallet to fill the new owner address';
+        return {
+            validUntil: Math.floor(Date.now() / 1000) + 600,
+            items: [
+                {
+                    type: 'nft',
+                    nftAddress: 'TODO: paste NFT item contract address',
+                    newOwner
+                }
+            ]
+        };
+    };
+
     const handleSignMessage = async () => {
         setSignResult(null);
         setSignLoading(true);
@@ -125,6 +140,7 @@ export function TxForm() {
             <h3>Configure and send transaction</h3>
             <button onClick={() => setTx(defaultTx)}>Set message payload</button>
             <button onClick={() => setTx(defaultTxWithMessages)}>Set items payload</button>
+            <button onClick={() => setTx(buildNftItemsPayload())}>Set NFT items payload</button>
             <label
                 style={{ margin: '12px 0 0 2px', color: '#b8d4f1', fontWeight: 500, fontSize: 15 }}
             >
