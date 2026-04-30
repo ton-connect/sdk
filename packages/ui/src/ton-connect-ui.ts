@@ -868,11 +868,27 @@ export class TonConnectUI {
 
         const response = connectedWallet.embeddedResponse;
         if (response) {
+            const { notifications, modals } = this.getModalsAndNotificationsConfiguration(options);
+
             if (!response.ok) {
+                widgetController.setAction({
+                    name: action.error,
+                    showNotification: notifications.includes('error'),
+                    openModal: modals.includes('error'),
+                    traceId: options.traceId
+                });
+
                 throw new TonConnectUIError(
                     response.error.message || 'Wallet rejected the embedded request'
                 );
             }
+
+            widgetController.setAction({
+                name: action.success,
+                showNotification: notifications.includes('success'),
+                openModal: modals.includes('success'),
+                traceId: options.traceId
+            });
 
             return response.result as TResponse;
         }
