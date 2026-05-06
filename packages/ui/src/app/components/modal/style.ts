@@ -54,6 +54,8 @@ export const ModalBodyStyled = styled.div`
 
     ${media('mobile')} {
         width: 100%;
+        border-radius: ${props => borders[props.theme!.borderRadius]}
+            ${props => borders[props.theme!.borderRadius]} 0 0;
     }
 `;
 
