@@ -19,6 +19,8 @@ import { createMacrotask, getUserAgent } from 'src/app/utils/web-api';
  * </div>
  * ```
  */
+let nextAndroidBackHandlerId = 1;
+
 export default function androidBackHandler(
     _: Element,
     config: Accessor<{
@@ -40,10 +42,16 @@ export default function androidBackHandler(
     }
 
     // Create a point that the back button can target by pushing a new state into the browser's history stack.
-    window.history.pushState(ROUTE_STATE, '');
+    // Tag the state with a per-instance id so cleanup can verify that the current top-of-history entry
+    // is the one this directive instance pushed, not one pushed by a later modal that mounted on top.
+    const myId = nextAndroidBackHandlerId++;
+    window.history.pushState({ ...ROUTE_STATE, [ROUTE_STATE_ID_KEY]: myId }, '');
+
+    let popstateAlreadyFired = false;
 
     // Handle the 'popstate' event triggered by the back button press.
     const popstateHandler = (event: PopStateEvent): void => {
+        popstateAlreadyFired = true;
         // Prevent the browser's default back navigation,
         event.preventDefault();
         // and instead call a provided function to handle the modal dismissal.
@@ -56,13 +64,19 @@ export default function androidBackHandler(
         // Remove the 'popstate' event handler.
         window.removeEventListener('popstate', popstateHandler);
 
+        // If the user already pressed back, our pushed entry has been popped — nothing to clean up.
+        if (popstateAlreadyFired) {
+            return;
+        }
+
         // Create a macrotask using `requestAnimationFrame()` to ensure that any pending microtasks,
         // such as asynchronous operations from other developers (e.g., tracking wallet connection status
         // and calling `history.pushState()), are completed before we proceed with cleaning up the history state.
         createMacrotask(() => {
-            // If the current history state is the one that was added by this directive,
-            if (window.history.state?.[ROUTE_STATE_KEY] === true) {
-                // navigate back in the browser's history to clean up the state.
+            // Only call history.back() if the current top-of-history is the entry WE pushed.
+            // If another androidBackHandler instance pushed on top of us, leave history alone —
+            // popping it would fire that directive's popstate handler and dismiss the wrong modal.
+            if (window.history.state?.[ROUTE_STATE_ID_KEY] === myId) {
                 window.history.back();
             }
         });
@@ -84,6 +98,12 @@ declare module 'solid-js' {
  * Unique identifier for the history entry that is added by this directive.
  */
 const ROUTE_STATE_KEY = 'androidBackHandler';
+
+/**
+ * Per-instance id key used to distinguish history entries pushed by different
+ * directive instances (so cleanup of one modal doesn't pop another modal's entry).
+ */
+const ROUTE_STATE_ID_KEY = 'androidBackHandlerId';
 
 /**
  * The state for the history entry that is added by this directive.
