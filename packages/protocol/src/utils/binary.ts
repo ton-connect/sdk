@@ -14,7 +14,7 @@ export function concatUint8Arrays(buffer1: Uint8Array, buffer2: Uint8Array): Uin
  * is `array[0..index)` and the suffix is `array[index..end)`. Used by
  * {@link SessionCrypto.decrypt} to peel the nonce off a received ciphertext.
  *
- * @throws {Error} when `index` is at or past the end of `array`.
+ * @throws {@link Error} when `index` is at or past the end of `array`.
  */
 export function splitToUint8Arrays(array: Uint8Array, index: number): [Uint8Array, Uint8Array] {
     if (index >= array.length) {
@@ -40,7 +40,7 @@ export function toHexString(byteArray: Uint8Array): string {
 /**
  * Decode a hex string into a byte buffer. Inverse of {@link toHexString}.
  *
- * @throws {Error} when the input has an odd length.
+ * @throws {@link Error} when the input has an odd length.
  */
 export function hexToByteArray(hexString: string): Uint8Array {
     if (hexString.length % 2 !== 0) {

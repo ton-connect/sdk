@@ -24,7 +24,7 @@ export class SessionCrypto {
     /**
      * @param keyPair previously persisted key pair (e.g. from
      * {@link stringifyKeypair}). Omit to generate a fresh pair.
-     * @throws {Error} when a provided `keyPair` contains an odd-length hex string
+     * @throws {@link Error} when a provided `keyPair` contains an odd-length hex string
      * (passed through to {@link hexToByteArray}).
      */
     constructor(keyPair?: KeyPair) {
@@ -76,7 +76,7 @@ export class SessionCrypto {
      * @param message ciphertext prefixed with the 24-byte nonce.
      * @param senderPublicKey peer's Curve25519 public key (32 bytes).
      * @returns the original UTF-8 plaintext.
-     * @throws {Error} when authentication fails (wrong key, corrupted bytes).
+     * @throws {@link Error} when authentication fails (wrong key, corrupted bytes).
      */
     public decrypt(message: Uint8Array, senderPublicKey: Uint8Array): string {
         const [nonce, internalMessage] = splitToUint8Arrays(message, this.nonceLength);
