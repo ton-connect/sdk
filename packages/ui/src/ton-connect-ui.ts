@@ -149,7 +149,7 @@ export class TonConnectUI {
     private readonly transactionModal: TransactionModalManager;
 
     /**
-     * Promise that resolves after end of the connection restoring process (promise will fire after `onStatusChange`,
+     * Promise that resolves after end of the connection restoring process (promise fires after `onStatusChange`,
      * so you can get actual information about wallet and session after when promise resolved).
      * Resolved value `true`/`false` indicates if the session was restored successfully.
      */
@@ -184,7 +184,7 @@ export class TonConnectUI {
     }
 
     /**
-     * Set and apply new UI options. Object with partial options should be passed. Passed options will be merged with current options.
+     * Set and apply new UI options. Object with partial options should be passed. Passed options are merged with current options.
      * @param options
      */
     public set uiOptions(options: TonConnectUiOptions) {
@@ -341,8 +341,8 @@ export class TonConnectUI {
     /**
      * Use it to customize ConnectRequest and add `tonProof` payload.
      * You can call it multiple times to set updated tonProof payload if previous one is outdated.
-     * If `connectRequestParameters.state === 'loading'` loader will appear instead of the qr code in the wallets modal.
-     * If `connectRequestParameters.state` was changed to 'ready' or its value has been changed, QR will be re-rendered.
+     * If `connectRequestParameters.state === 'loading'` a loader appears instead of the qr code in the wallets modal.
+     * If `connectRequestParameters.state` was changed to 'ready' or its value has been changed, the QR is re-rendered.
      */
     public setConnectRequestParameters(
         connectRequestParameters: Loadable<ConnectAdditionalRequest> | undefined | null
@@ -355,7 +355,7 @@ export class TonConnectUI {
 
     /**
      * Set desired network for the connection. Can only be set before connecting.
-     * If wallet connects with a different chain, the SDK will throw an error and abort connection.
+     * If wallet connects with a different chain, the SDK throws an error and aborts connection.
      * @param network desired network id (e.g., '-239', '-3', or custom). Pass undefined to allow any network.
      */
     public setConnectionNetwork(network?: ChainId): void {

@@ -11,7 +11,7 @@ export interface TonConnectUiOptions {
     uiPreferences?: UIPreferences;
 
     /**
-     * HTML element id to attach the wallet connect button. If not passed button won't appear.
+     * HTML element id to attach the wallet connect button. If not passed the button does not appear.
      * @default null.
      */
     buttonRootId?: string | null;
@@ -28,12 +28,12 @@ export interface TonConnectUiOptions {
     walletsListConfiguration?: WalletsListConfiguration;
 
     /**
-     * Required features for wallets. If wallet doesn't support required features, it will be disabled.
+     * Required features for wallets. If a wallet doesn't support the required features, it is disabled.
      */
     walletsRequiredFeatures?: RequiredFeatures;
 
     /**
-     * Preferred features for wallets. If wallet doesn't support preferred features, it will be moved to the end of the list.
+     * Preferred features for wallets. If a wallet doesn't support the preferred features, it is moved to the end of the list.
      */
     walletsPreferredFeatures?: RequiredFeatures;
 

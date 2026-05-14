@@ -8,8 +8,8 @@ export type TonConnectUiCreateOptions =
 
 export interface TonConnectUiOptionsWithManifest extends TonConnectUiCreateOptionsBase {
     /**
-     * Url to the [manifest]{@link https://github.com/ton-connect/docs/blob/main/requests-responses.md#app-manifest} with the Dapp metadata that will be displayed in the user's wallet.
-     * If not passed, manifest from `${window.location.origin}/tonconnect-manifest.json` will be taken.
+     * Url to the [manifest]{@link https://github.com/ton-connect/docs/blob/main/requests-responses.md#app-manifest} with the Dapp metadata that is displayed in the user's wallet.
+     * If not passed, the manifest from `${window.location.origin}/tonconnect-manifest.json` is used.
      */
     manifestUrl?: string;
 }
@@ -29,7 +29,7 @@ export interface TonConnectUiCreateOptionsBase extends TonConnectUiOptions {
     restoreConnection?: boolean;
 
     /**
-     * HTML element id to attach the modal window element. If not passed, `div#tc-widget-root` in the end of the <body> will be added and used.
+     * HTML element id to attach the modal window element. If not passed, `div#tc-widget-root` is appended to the end of `<body>` and used.
      * @default `div#tc-widget-root`.
      */
     widgetRootId?: string;

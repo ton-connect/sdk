@@ -42,7 +42,7 @@ export function openLinkBlank(href: string): void {
 
 /**
  * Open a deeplink in the same tab and fallback to a direct link after 200 ms.
- * In Safari, the fallback will not work.
+ * In Safari, the fallback does not work.
  * @param href
  * @param fallback
  */
