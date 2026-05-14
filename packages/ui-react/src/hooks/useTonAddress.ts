@@ -3,7 +3,7 @@ import { useTonWallet } from './useTonWallet';
 import { useMemo } from 'react';
 
 /**
- * Use it to get user's current ton wallet address. If wallet is not connected hook will return empty string.
+ * Use it to get the user's current TON wallet address. Returns an empty string when no wallet is connected.
  * @param [userFriendly=true] allows to choose format of the address.
  */
 export function useTonAddress(userFriendly = true): string {

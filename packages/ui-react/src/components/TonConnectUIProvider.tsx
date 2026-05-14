@@ -23,8 +23,8 @@ export type TonConnectUIProviderProps = {
 
 export interface TonConnectUIProviderPropsWithManifest {
     /**
-     * Url to the [manifest]{@link https://github.com/ton-connect/docs/blob/main/requests-responses.md#app-manifest} with the Dapp metadata that will be displayed in the user's wallet.
-     * If not passed, manifest from `${window.location.origin}/tonconnect-manifest.json` will be taken.
+     * Url to the [manifest]{@link https://github.com/ton-connect/docs/blob/main/requests-responses.md#app-manifest} with the Dapp metadata that is displayed in the user's wallet.
+     * If not passed, the manifest is loaded from `${window.location.origin}/tonconnect-manifest.json`.
      */
     manifestUrl: string;
 }
@@ -41,8 +41,8 @@ export interface TonConnectUIProviderPropsWithInstance {
      * TonConnectUI instance. Can be helpful if TonConnectUI instance is used outside of React context.
      *
      * Note: TonConnect UI works as a singleton.
-     * If you pass a custom instance, it will be stored in the global singleton
-     * and reused by the library.
+     * A custom instance is stored in the global singleton on first render
+     * and reused by the library on subsequent renders.
      */
     instance: TonConnectUI;
 }
@@ -61,7 +61,7 @@ export interface TonConnectUIProviderPropsBase {
     language: Locales;
 
     /**
-     * HTML element id to attach the modal window element. If not passed, `div#tc-widget-root` in the end of the <body> will be added and used.
+     * HTML element id to attach the modal window element. If not passed, the library appends `div#tc-widget-root` to the end of `<body>` and uses it.
      * @default `div#tc-widget-root`.
      */
     widgetRootId: string;

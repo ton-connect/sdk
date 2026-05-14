@@ -3,7 +3,7 @@ import { ConnectedWallet, Wallet, WalletInfoWithOpenMethod } from '@tonconnect/u
 import { useTonConnectUI } from './useTonConnectUI';
 
 /**
- * Use it to get user's current ton wallet. If wallet is not connected hook will return null.
+ * Use it to get the user's current TON wallet. Returns `null` when no wallet is connected.
  */
 export function useTonWallet(): Wallet | (Wallet & WalletInfoWithOpenMethod) | null {
     const [tonConnectUI] = useTonConnectUI();
