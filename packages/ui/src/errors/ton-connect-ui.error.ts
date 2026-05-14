@@ -17,8 +17,8 @@ export class TonConnectUIError extends TonConnectError {
      *   (inherited from {@link TonConnectError}).
      * @param options standard ES `Error` options.
      */
-    constructor(...args: ConstructorParameters<typeof Error>) {
-        super(...args);
+    constructor(message?: string, options?: ErrorOptions) {
+        super(message, options);
 
         Object.setPrototypeOf(this, TonConnectUIError.prototype);
     }

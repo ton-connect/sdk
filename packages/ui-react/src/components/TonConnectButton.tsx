@@ -4,8 +4,14 @@ import { useTonConnectUI } from '../hooks/useTonConnectUI';
 const buttonRootId = 'ton-connect-button';
 
 export interface TonConnectButtonProps {
+    /**
+     * CSS class to add to the button container.
+     */
     className?: string;
 
+    /**
+     * Inline style to add to the button container.
+     */
     style?: CSSProperties;
 }
 
@@ -30,11 +36,9 @@ const TonConnectButtonComponent: FunctionComponent<TonConnectButtonProps> = ({
 };
 
 /**
- * TonConnect Button is universal UI component for initializing connection. After wallet is connected it transforms to a wallet menu.
- * Place it in the top right corner of your app.
- * @param className css class to add to the button container.
- * @param style style to add to the button container.
- * @constructor
+ * TonConnect Button is a universal UI component for initializing connection.
+ * After a wallet connects, it transforms into a wallet menu. Place it in the
+ * top right corner of your app. Props on {@link TonConnectButtonProps}.
  */
 const TonConnectButton = memo(TonConnectButtonComponent);
 

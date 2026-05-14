@@ -265,8 +265,7 @@ export class TonConnect implements ITonConnect {
     /**
      * Generates universal link for an external wallet and subscribes to the wallet's bridge, or sends connect request to the injected wallet.
      * @param wallet wallet's bridge url and universal link for an external wallet or jsBridge key for the injected wallet.
-     * @param request additional request to pass to the wallet while connecting (currently only ton_proof is available).
-     * @param options openingDeadlineMS sets the connection opening deadline; signal aborts the connection.
+     * @param options openingDeadlineMS sets the connection opening deadline; signal aborts the connection. Pass `ton_proof` and other connect-additional-request fields via `options.request`.
      * @returns universal link if external wallet was passed or void for the injected wallet.
      * @throws {@link WalletAlreadyConnectedError} a wallet is already connected — disconnect first.
      * @throws {@link TonConnectError} the connect-additional-request or embedded request failed validation, or the connection was aborted via `options.signal`.

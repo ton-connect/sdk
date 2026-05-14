@@ -15,6 +15,11 @@ import { isClientSide } from '../utils/web';
 export const TonConnectUIContext = createContext<TonConnectUI | null>(null);
 
 export type TonConnectUIProviderProps = {
+    /**
+     * Children of the provider. The TonConnect UI context is available to
+     * every descendant — place hooks (`useTonConnectUI`, `useTonAddress`,
+     * etc.) and `<TonConnectButton>` anywhere inside this subtree.
+     */
     children: ReactNode;
 } & (
     | Partial<
@@ -136,11 +141,10 @@ const TonConnectUIProviderComponent: FunctionComponent<TonConnectUIProviderProps
 };
 
 /**
- * Add TonConnectUIProvider to the root of the app. You can specify UI options using props.
- * All TonConnect UI hooks calls and `<TonConnectButton />` component must be placed inside `<TonConnectUIProvider>`.
- * @param children JSX to insert.
- * @param options additional options.
- * @constructor
+ * Add `TonConnectUIProvider` at the root of your app. Specify UI options
+ * through its props. Every TonConnect UI hook call and `<TonConnectButton />`
+ * must live somewhere inside this provider. Props on
+ * {@link TonConnectUIProviderProps}.
  */
 const TonConnectUIProvider = memo(TonConnectUIProviderComponent);
 
