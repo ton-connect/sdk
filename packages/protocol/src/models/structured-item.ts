@@ -1,9 +1,10 @@
 /**
  * Wire-format structured items used inside JSON-RPC payloads and embedded-request
- * expansion. These match the shape that travels over the bridge / URL — field
- * casing follows the protocol (e.g. `extra_currency` snake_case).
+ * expansion. These match the shape that travels over the bridge / URL.
  *
- * The rich, user-facing counterparts (with camelCase fields) live in the SDK.
+ * Field names follow the protocol verbatim: structured-item fields are
+ * camelCase (e.g. `attachAmount`, `forwardPayload`); the legacy snake_case keys
+ * (`extra_currency`) appear only where the original spec defined them.
  */
 
 export interface RpcTonItem {

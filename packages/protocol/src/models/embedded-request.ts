@@ -4,10 +4,11 @@ import { AppRequest } from './app-message';
 import { RpcJettonItem, RpcNftItem, RpcStructuredItem, RpcTonItem } from './structured-item';
 
 // ────────────────────────────────────────────────────────────────────────────
-//  Wire types — compact, URL-encoded shape of an RPC request embedded in the
-//  connect URL as the `e` query parameter. Every field is abbreviated to
-//  minimise URL length; the protocol `decodeEmbeddedRequestParam` / `decodeWireEmbeddedRequest`
-//  helpers convert these back to the standard JSON-RPC `AppRequest` shape.
+//  Wire types — compact shape of an RPC request embedded in the connect URL as
+//  the `e` query parameter (Base64-URL-encoded JSON). Every field is
+//  abbreviated to minimise URL length; `decodeEmbeddedRequestParam` and
+//  `decodeWireEmbeddedRequest` expand them back into the standard JSON-RPC
+//  `AppRequest` shape (without `id`, since embedded requests carry none).
 // ────────────────────────────────────────────────────────────────────────────
 
 /**
@@ -25,17 +26,20 @@ export type WireEmbeddedRequest = WireSendTransaction | WireSignMessage | WireSi
  * never both.
  */
 export interface WireSendTransaction {
-    /** method discriminator: `sendTransaction` */
+    /** Method discriminator: `sendTransaction`. */
     m: 'st';
-    /** from — sender address (optional; defaults to connected account) */
+    /**
+     * `from` — sender address. When omitted, the wallet lets the user pick the
+     * sender at approval time; when set, the wallet pins to this address.
+     */
     f?: string;
-    /** network — TON chain id (e.g. `"-239"` for mainnet) */
+    /** `network` — TON chain id (e.g. `"-239"` for mainnet). */
     n?: string;
-    /** valid_until — unix epoch seconds */
+    /** `valid_until` — unix epoch seconds after which the wallet rejects the request. */
     vu?: number;
-    /** raw messages (mutually exclusive with `i`) */
+    /** Raw `messages` array (mutually exclusive with `i`). */
     ms?: WireMessage[];
-    /** structured items (mutually exclusive with `ms`) */
+    /** Structured `items` array (mutually exclusive with `ms`). */
     i?: WireItem[];
 }
 
@@ -44,17 +48,20 @@ export interface WireSendTransaction {
  * Same shape as {@link WireSendTransaction}; only the method discriminator differs.
  */
 export interface WireSignMessage {
-    /** method discriminator: `signMessage` */
+    /** Method discriminator: `signMessage`. */
     m: 'sm';
-    /** from — sender address */
+    /**
+     * `from` — sender address. When omitted, the wallet lets the user pick the
+     * sender at approval time; when set, the wallet pins to this address.
+     */
     f?: string;
-    /** network — TON chain id */
+    /** `network` — TON chain id. */
     n?: string;
-    /** valid_until — unix epoch seconds */
+    /** `valid_until` — unix epoch seconds after which the wallet rejects the request. */
     vu?: number;
-    /** raw messages (mutually exclusive with `i`) */
+    /** Raw `messages` array (mutually exclusive with `i`). */
     ms?: WireMessage[];
-    /** structured items (mutually exclusive with `ms`) */
+    /** Structured `items` array (mutually exclusive with `ms`). */
     i?: WireItem[];
 }
 
@@ -63,11 +70,14 @@ export interface WireSignMessage {
  * Discriminated on `t` (payload type): `text` | `binary` | `cell`.
  */
 export type WireSignData = {
-    /** method discriminator: `signData` */
+    /** Method discriminator: `signData`. */
     m: 'sd';
-    /** network — TON chain id */
+    /** `network` — TON chain id. */
     n?: string;
-    /** from — sender address */
+    /**
+     * `from` — signer address. When omitted, the wallet lets the user pick the
+     * signer at signing time; when set, the wallet pins to this address.
+     */
     f?: string;
 } & (WireSignDataText | WireSignDataBinary | WireSignDataCell);
 
