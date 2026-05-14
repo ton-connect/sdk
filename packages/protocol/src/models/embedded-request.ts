@@ -380,8 +380,11 @@ export function decodeWireEmbeddedRequest(wire: WireEmbeddedRequest): DecodedEmb
  *
  * The `e` value is `base64url(JSON.stringify(WireEmbeddedRequest))`.
  *
- * @throws {URIError} when `reqParam` contains malformed percent-encoding.
- * @throws {SyntaxError} when the decoded value is not valid JSON.
+ * @throws {@link TypeError} when `reqParam` is not a valid Base64 string after
+ * URL-safe normalisation (i.e. `nacl.decodeBase64` rejects it).
+ * @throws {@link URIError} when the decoded bytes do not form a valid UTF-8
+ * sequence (thrown by `decodeURIComponent` inside `nacl.encodeUTF8`).
+ * @throws {@link SyntaxError} when the decoded text is not valid JSON.
  */
 export function decodeEmbeddedRequestParam(reqParam: string): DecodedEmbeddedRequest {
     const json = fromBase64Url(reqParam);
