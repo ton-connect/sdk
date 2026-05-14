@@ -50,7 +50,7 @@ export interface TonConnectUIProviderPropsWithInstance {
 export interface TonConnectUIProviderPropsBase {
     /**
      * Try to restore existing session and reconnect to the corresponding wallet.
-     * @default true.
+     * @default true
      */
     restoreConnection: boolean;
 
@@ -62,7 +62,7 @@ export interface TonConnectUIProviderPropsBase {
 
     /**
      * HTML element id to attach the modal window element. If not passed, the library appends `div#tc-widget-root` to the end of `<body>` and uses it.
-     * @default `div#tc-widget-root`.
+     * @default `div#tc-widget-root`
      */
     widgetRootId: string;
 
