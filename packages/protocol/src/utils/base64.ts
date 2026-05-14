@@ -60,8 +60,30 @@ function decode(
     };
 }
 
+/**
+ * Base64 codec used across the protocol — small wrapper around `tweetnacl-util`
+ * that adds object/JSON support and an optional `urlSafe` mode for values
+ * embedded in URLs.
+ *
+ * `decode` returns a lazy view: call `.toString()`, `.toObject<T>()`, or
+ * `.toUint8Array()` to materialise the decoded bytes once.
+ */
 export const Base64 = {
+    /**
+     * Encode a string, object (JSON-stringified), or raw bytes as Base64.
+     *
+     * @param value source value — `Uint8Array`, `string`, or any JSON-serialisable object.
+     * @param urlSafe percent-encode the output for safe inclusion in URLs.
+     */
     encode,
+    /**
+     * Decode a Base64 string into a lazy accessor. Call `.toString()` for the
+     * UTF-8 text, `.toObject<T>()` to `JSON.parse` it (returns `null` on
+     * invalid JSON), or `.toUint8Array()` for the raw bytes.
+     *
+     * @param value Base64 input (possibly percent-encoded if `urlSafe`).
+     * @param urlSafe inverse of the `urlSafe` flag used to encode the value.
+     */
     decode
 };
 
