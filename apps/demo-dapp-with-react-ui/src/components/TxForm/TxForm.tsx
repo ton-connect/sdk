@@ -5,6 +5,7 @@ import './style.scss';
 import { SendTransactionRequest, useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { TonProofDemoApi } from '../../TonProofDemoApi';
 import { CHAIN } from '@tonconnect/ui-react';
+import { useOpenWalletPrompt } from '../../hooks/useOpenWalletPrompt';
 
 // In this example, we are using a predefined smart contract state initialization (`stateInit`)
 // to interact with an "EchoContract". This contract is designed to send the value back to the sender,
@@ -61,6 +62,7 @@ export function TxForm() {
 
     const wallet = useTonWallet();
     const [tonConnectUi] = useTonConnectUI();
+    const { openModal, modal } = useOpenWalletPrompt();
 
     const onChange = useCallback((value: InteractionProps) => {
         setTx(value.updated_src as SendTransactionRequest);
@@ -87,11 +89,14 @@ export function TxForm() {
         try {
             const result = await tonConnectUi.signMessage(tx, {
                 onConnected: withConnect
-                    ? (send, { dispatched }) => {
-                          if (dispatched && !confirm('Sign message twice?')) {
-                              throw new Error('Sign message twice');
-                          }
-                          return send();
+                    ? async (send, { dispatched }) => {
+                          if (!dispatched) return send();
+
+                          const confirmed = await openModal({
+                              label: 'Sign anyway and open wallet'
+                          });
+                          if (!confirmed) throw new Error('Sign message twice');
+                          return send({ onRequestSent: redirectToWallet => redirectToWallet() });
                       }
                     : undefined
             });
@@ -111,11 +116,14 @@ export function TxForm() {
         try {
             const transaction = await tonConnectUi.sendTransaction(tx, {
                 onConnected: withConnect
-                    ? (send, { dispatched }) => {
-                          if (dispatched && !confirm('Send message twice?')) {
-                              throw new Error('Send message twice');
-                          }
-                          return send();
+                    ? async (send, { dispatched }) => {
+                          if (!dispatched) return send();
+
+                          const confirmed = await openModal({
+                              label: 'Send anyway and open wallet'
+                          });
+                          if (!confirmed) throw new Error('Send message twice');
+                          return send({ onRequestSent: redirectToWallet => redirectToWallet() });
                       }
                     : undefined
             });
@@ -213,6 +221,8 @@ export function TxForm() {
                     Connect wallet to send the transaction
                 </button>
             )}
+
+            {modal}
 
             {txResult && (
                 <>

@@ -535,7 +535,11 @@ export class TonConnectUI {
             throw new TonConnectUIError('Connect wallet to send a transaction.');
         }
 
-        return this.initiateBridgeFlow(handlers, kind, { ...options, traceId });
+        return this.initiateBridgeFlow(handlers, kind, {
+            ...options,
+            traceId,
+            skipAutoRedirect: false
+        });
     }
 
     /**
@@ -578,7 +582,11 @@ export class TonConnectUI {
             throw new TonConnectUIError('Connect wallet to sign data.');
         }
 
-        return this.initiateBridgeFlow(handlers, kind, { ...options, traceId });
+        return this.initiateBridgeFlow(handlers, kind, {
+            ...options,
+            traceId,
+            skipAutoRedirect: false
+        });
     }
 
     /**
@@ -616,7 +624,11 @@ export class TonConnectUI {
             throw new TonConnectUIError('Connect wallet to sign a message.');
         }
 
-        return this.initiateBridgeFlow(handlers, kind, { ...options, traceId });
+        return this.initiateBridgeFlow(handlers, kind, {
+            ...options,
+            traceId,
+            skipAutoRedirect: false
+        });
     }
 
     /**
@@ -889,15 +901,21 @@ export class TonConnectUI {
         }
 
         const dispatched = consumable.consumed;
-        return await options.onConnected(() => this.initiateBridgeFlow(handlers, kind, options), {
-            dispatched
-        });
+        return await options.onConnected(
+            sendOptions =>
+                this.initiateBridgeFlow(handlers, kind, {
+                    ...options,
+                    ...sendOptions,
+                    skipAutoRedirect: true
+                }),
+            { dispatched }
+        );
     }
 
     private async initiateBridgeFlow<TResponse>(
         handlers: BridgeFlowHandlers<TResponse>,
         kind: ActionKind,
-        options: Traceable<ActionOptions<TResponse>>
+        options: Traceable<ActionOptions<TResponse>> & { skipAutoRedirect: boolean }
     ): Promise<TResponse> {
         if (isInTMA()) {
             sendExpand();
@@ -937,12 +955,14 @@ export class TonConnectUI {
                 twaReturnUrl
             });
 
-            this.redirectAfterRequestSent({
-                returnStrategy,
-                twaReturnUrl,
-                sessionId: sessionId || undefined,
-                traceId: options.traceId
-            });
+            if (!options.skipAutoRedirect) {
+                this.redirectAfterRequestSent({
+                    returnStrategy,
+                    twaReturnUrl,
+                    sessionId: sessionId || undefined,
+                    traceId: options.traceId
+                });
+            }
 
             let firstClick = true;
             const redirectToWallet = async () => {
@@ -1227,9 +1247,21 @@ export class TonConnectUI {
 
 type ActionOptions<TResponse> = ActionConfiguration &
     OptionalTraceable<{
+        /**
+         * Fires once the bridge accepts the request. Receives a `redirectToWallet`
+         * function the dApp can wire to its own "Open wallet" button.
+         */
         onRequestSent?: (redirectToWallet: () => void) => void;
+        /**
+         * Called when the embedded request was not consumed by the wallet and the
+         * SDK falls back to the bridge flow. `send` accepts the same options as
+         * `sendTransaction`/`signData`/`signMessage` (minus `onConnected`); any
+         * fields passed override the outer call for this dispatch.
+         */
         onConnected?: (
-            send: () => Promise<TResponse>,
+            send: (
+                sendOptions?: Omit<ActionOptions<TResponse>, 'onConnected'>
+            ) => Promise<TResponse>,
             context: { dispatched: boolean }
         ) => Promise<TResponse>;
     }>;

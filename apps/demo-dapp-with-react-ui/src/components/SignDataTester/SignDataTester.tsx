@@ -5,12 +5,27 @@ import { beginCell } from '@ton/ton';
 import { useState } from 'react';
 import ReactJson from 'react-json-view';
 import { TonProofDemoApi } from '../../TonProofDemoApi';
+import { useOpenWalletPrompt } from '../../hooks/useOpenWalletPrompt';
 
 // Component to test SignData functionality
 export function SignDataTester() {
     const wallet = useTonWallet();
     const [tonConnectUi] = useTonConnectUI();
     const [embeddedRequest, setEmbeddedRequest] = useState(false);
+    const { openModal, modal } = useOpenWalletPrompt();
+
+    const onConnected = async <T,>(
+        send: (opts?: { onRequestSent?: (redirectToWallet: () => void) => void }) => Promise<T>,
+        { dispatched }: { dispatched: boolean }
+    ): Promise<T> => {
+        if (!dispatched) return send();
+
+        const confirmed = await openModal({
+            label: 'Sign anyway and open wallet'
+        });
+        if (!confirmed) throw new Error('Sign data twice');
+        return send({ onRequestSent: redirectToWallet => redirectToWallet() });
+    };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [signDataRequest, setSignDataRequest] = useState<any>(null);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -35,14 +50,7 @@ export function SignDataTester() {
             console.log('📤 Sign Data Request (Text):', requestPayload);
 
             const result = await tonConnectUi.signData(requestPayload, {
-                onConnected: embeddedRequest
-                    ? (send, { dispatched }) => {
-                          if (dispatched && !confirm('Sign data twice?')) {
-                              throw new Error('Sign data twice');
-                          }
-                          return send();
-                      }
-                    : undefined
+                onConnected: embeddedRequest ? onConnected : undefined
             });
 
             setSignDataResponse(result);
@@ -83,14 +91,7 @@ export function SignDataTester() {
             console.log('📤 Sign Data Request (Binary):', requestPayload);
 
             const result = await tonConnectUi.signData(requestPayload, {
-                onConnected: embeddedRequest
-                    ? (send, { dispatched }) => {
-                          if (dispatched && !confirm('Sign data twice?')) {
-                              throw new Error('Sign data twice');
-                          }
-                          return send();
-                      }
-                    : undefined
+                onConnected: embeddedRequest ? onConnected : undefined
             });
 
             setSignDataResponse(result);
@@ -137,14 +138,7 @@ export function SignDataTester() {
             console.log('📤 Sign Data Request (Cell):', requestPayload);
 
             const result = await tonConnectUi.signData(requestPayload, {
-                onConnected: embeddedRequest
-                    ? (send, { dispatched }) => {
-                          if (dispatched && !confirm('Sign data twice?')) {
-                              throw new Error('Sign data twice');
-                          }
-                          return send();
-                      }
-                    : undefined
+                onConnected: embeddedRequest ? onConnected : undefined
             });
 
             setSignDataResponse(result);
@@ -237,6 +231,8 @@ export function SignDataTester() {
                     </div>
                 </div>
             )}
+
+            {modal}
         </div>
     );
 }
