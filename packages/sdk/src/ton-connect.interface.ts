@@ -129,6 +129,28 @@ export interface ITonConnect {
         onRequestSent?: () => void
     ): Promise<OptionalTraceable<SendTransactionResponse>>;
 
+    /**
+     * Asks the connected wallet to sign an arbitrary payload (text, binary, or
+     * structured cell) and return the user's signature. The payload is not
+     * broadcast to the blockchain — only signed.
+     * @param data payload to sign. The `type` discriminator selects the
+     *   payload form (`'text'`, `'binary'`, or `'cell'`).
+     * @param options `onRequestSent` fires once the request has been
+     *   dispatched to the wallet; `signal` aborts the in-flight signing
+     *   request.
+     * @returns the signed payload together with the signer address, the
+     *   domain the dApp was opened under, and the wallet-stamped timestamp.
+     * @throws {WalletNotConnectedError} no wallet is currently connected.
+     * @throws {WalletNotSupportFeatureError} the connected wallet does not
+     *   advertise support for the requested payload type via its `signData`
+     *   feature.
+     * @throws {WalletWrongNetworkError} the wallet's `account.chain` differs
+     *   from the network on `data`.
+     * @throws {UserRejectsError} the user rejected the request in the wallet UI.
+     * @throws {BadRequestError} the wallet rejected the payload as malformed.
+     * @throws {TonConnectError} `data` failed validation or the request was
+     *   aborted via `options.signal`.
+     */
     signData(
         data: SignDataPayload,
         options?: OptionalTraceable<{
