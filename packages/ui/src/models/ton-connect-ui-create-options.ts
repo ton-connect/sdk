@@ -8,7 +8,7 @@ export type TonConnectUiCreateOptions =
 
 export interface TonConnectUiOptionsWithManifest extends TonConnectUiCreateOptionsBase {
     /**
-     * Url to the [manifest]{@link https://github.com/ton-connect/docs/blob/main/requests-responses.md#app-manifest} with the Dapp metadata that is displayed in the user's wallet.
+     * URL to the [manifest]{@link https://github.com/ton-connect/docs/blob/main/requests-responses.md#app-manifest} with the dApp metadata that is displayed in the user's wallet.
      * If not passed, the manifest from `${window.location.origin}/tonconnect-manifest.json` is used.
      */
     manifestUrl?: string;
