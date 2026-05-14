@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 
 /**
  * Use it to get the user's current TON wallet address. Returns an empty string when no wallet is connected.
- * @param [userFriendly=true] allows to choose format of the address.
+ * @param userFriendly allows to choose format of the address. Defaults to `true`.
  */
 export function useTonAddress(userFriendly = true): string {
     const wallet = useTonWallet();

@@ -109,7 +109,7 @@ let tonConnectUI: TonConnectUI | null = null;
  * Add TonConnectUIProvider to the root of the app. You can specify UI options using props.
  * All TonConnect UI hooks calls and `<TonConnectButton />` component must be placed inside `<TonConnectUIProvider>`.
  * @param children JSX to insert.
- * @param [options] additional options.
+ * @param options additional options.
  * @constructor
  */
 const TonConnectUIProvider: FunctionComponent<TonConnectUIProviderProps> = ({
