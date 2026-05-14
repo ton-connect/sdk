@@ -86,6 +86,10 @@ import { IMG } from 'src/app/env/IMG';
 import { PickRequired } from 'src/utils/pick-required';
 
 export class TonConnectUI {
+    /**
+     * Returns the list of available wallets.
+     * @returns Promise that resolves to an array of {@link WalletInfo} objects.
+     */
     public static getWallets(): Promise<WalletInfo[]> {
         return TonConnect.getWallets();
     }
@@ -110,12 +114,20 @@ export class TonConnectUI {
 
     private _walletsRequiredFeatures?: RequiredFeatures;
 
+    /**
+     * Required features that wallets must support to appear in the wallets list.
+     * Wallets not supporting these features are excluded from the UI.
+     */
     public get walletsRequiredFeatures(): RequiredFeatures | undefined {
         return this._walletsRequiredFeatures;
     }
 
     private _walletsPreferredFeatures?: RequiredFeatures;
 
+    /**
+     * Preferred features used to sort and rank wallets in the wallets list.
+     * Wallets supporting these features appear first in the UI.
+     */
     public get walletsPreferredFeatures(): RequiredFeatures | undefined {
         return this._walletsPreferredFeatures;
     }
@@ -184,8 +196,9 @@ export class TonConnectUI {
     }
 
     /**
-     * Set and apply new UI options. Object with partial options should be passed. Passed options are merged with current options.
-     * @param options
+     * Sets and applies new UI options. Pass a partial options object; it is merged with the current options.
+     * @param options - Partial UI options to apply.
+     * @throws {@link TonConnectUIError} when `options.buttonRootId` is set but the element does not exist in the document.
      */
     public set uiOptions(options: TonConnectUiOptions) {
         this.checkButtonRootExist(options.buttonRootId);
@@ -251,6 +264,11 @@ export class TonConnectUI {
     }
 
     // TODO: `actionsConfiguration.twaReturnUrl` is used only in `connectWallet` method, but it's not used in `sendTransaction` method, NEED TO FIX IT
+    /**
+     * Creates a new TonConnectUI instance and mounts the widget into the DOM.
+     * @param options - Creation options. Either `manifestUrl` or `connector` must be provided.
+     * @throws {@link TonConnectUIError} when neither `manifestUrl` nor `connector` is specified in `options`.
+     */
     constructor(options?: TonConnectUiCreateOptions) {
         let eventDispatcher = options?.eventDispatcher ?? new BrowserEventDispatcher();
 
@@ -370,8 +388,10 @@ export class TonConnectUI {
     }
 
     /**
-     * Subscribe to connection status change.
-     * @return function which has to be called to unsubscribe.
+     * Subscribes to connection status changes.
+     * @param callback - Called with the connected wallet on connect, or `null` on disconnect.
+     * @param errorsHandler - Optional handler called when a {@link TonConnectError} occurs.
+     * @returns Unsubscribe function — call it to stop receiving status updates.
      */
     public onStatusChange(
         callback: (wallet: ConnectedWallet | null) => void,
@@ -466,8 +486,9 @@ export class TonConnectUI {
     /**
      * @deprecated Use `tonConnectUI.openModal()` instead. Will be removed in the next major version.
      * Opens the modal window and handles a wallet connection.
-     * @return Connected wallet.
-     * @throws TonConnectUIError if connection was aborted.
+     * @param options - Optional tracing options.
+     * @returns Promise that resolves to the connected wallet.
+     * @throws {@link TonConnectUIError} when the connection is aborted or the user cancels.
      */
     public async connectWallet(options?: OptionalTraceable): Promise<ConnectedWallet> {
         const traceId = options?.traceId ?? UUIDv7();
@@ -483,7 +504,9 @@ export class TonConnectUI {
     }
 
     /**
-     * Disconnect wallet and clean localstorage.
+     * Disconnects the wallet and clears stored session data.
+     * @param options - Optional tracing options.
+     * @returns Promise that resolves when the disconnect is complete.
      */
     public disconnect(options?: OptionalTraceable): Promise<void> {
         const traceId = options?.traceId ?? UUIDv7();
@@ -520,6 +543,9 @@ export class TonConnectUI {
      * @param tx transaction to send.
      * @param options modal and notifications behaviour settings; set `enableEmbeddedRequest: true`
      * to opt into the connect-and-send flow described above.
+     * @returns Promise that resolves to the transaction response.
+     * @throws {@link TonConnectUIError} when no wallet is connected and `options.onConnected` is not provided.
+     * @throws {@link TonConnectUIError} when the user cancels the transaction in the modal.
      */
     public async sendTransaction(
         tx: SendTransactionRequest,
@@ -603,6 +629,9 @@ export class TonConnectUI {
      * @param data data to sign.
      * @param options modal and notifications behaviour settings; set `enableEmbeddedRequest: true`
      * to opt into the connect-and-sign flow described above.
+     * @returns Promise that resolves to the sign-data response including the signature.
+     * @throws {@link TonConnectUIError} when no wallet is connected and `options.onConnected` is not provided.
+     * @throws {@link TonConnectUIError} when the user cancels the signing in the modal.
      */
     public async signData(
         data: SignDataPayload,
@@ -680,6 +709,9 @@ export class TonConnectUI {
      * @param message transaction-like request describing the internal message to sign.
      * @param options modal and notifications behaviour settings; set `enableEmbeddedRequest: true`
      * to opt into the connect-and-sign flow described above.
+     * @returns Promise that resolves to the sign-message response including the signed BoC.
+     * @throws {@link TonConnectUIError} when no wallet is connected and `options.onConnected` is not provided.
+     * @throws {@link TonConnectUIError} when the user cancels the signing in the modal.
      */
     public async signMessage(
         message: SignMessageRequest,
