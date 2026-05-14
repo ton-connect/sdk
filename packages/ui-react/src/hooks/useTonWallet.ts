@@ -4,6 +4,7 @@ import { useTonConnectUI } from './useTonConnectUI';
 
 /**
  * Use it to get the user's current TON wallet. Returns `null` when no wallet is connected.
+ * @throws {TonConnectProviderNotSetError} when called on the client side without a `<TonConnectUIProvider>` ancestor.
  */
 export function useTonWallet(): Wallet | (Wallet & WalletInfoWithOpenMethod) | null {
     const [tonConnectUI] = useTonConnectUI();

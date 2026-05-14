@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 
 /**
  * Use it to get access to the open/close modal functions.
+ * @throws {TonConnectProviderNotSetError} when called on the client side without a `<TonConnectUIProvider>` ancestor.
  */
 export function useTonConnectModal(): Omit<WalletsModal, 'onStateChange'> {
     const [tonConnectUI] = useTonConnectUI();

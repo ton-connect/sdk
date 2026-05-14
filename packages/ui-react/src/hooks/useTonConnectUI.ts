@@ -6,6 +6,7 @@ import { isServerSide } from '../utils/web';
 
 /**
  * Use it to get access to the `TonConnectUI` instance and UI options updating function.
+ * @throws {TonConnectProviderNotSetError} when called on the client side without a `<TonConnectUIProvider>` ancestor. On the server side the hook returns a no-op tuple instead.
  */
 export function useTonConnectUI(): [TonConnectUI, (options: TonConnectUiOptions) => void] {
     const tonConnectUI = useContext(TonConnectUIContext);
