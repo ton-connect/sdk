@@ -9,6 +9,14 @@ const testOnlyTag = 0x80;
  * Converts raw TON address to no-bounceable user-friendly format. [See details]{@link https://ton.org/docs/learn/overviews/addresses#user-friendly-address}
  * @param hexAddress raw TON address formatted as "0:<hex string without 0x>".
  * @param [testOnly=false] convert address to test-only form. [See details]{@link https://ton.org/docs/learn/overviews/addresses#user-friendly-address}
+ * @example
+ * // Mainnet, non-bounceable form (UQ-prefix).
+ * toUserFriendlyAddress('0:b97df5ef066ef7b80fc23dd9e2a02d6c620a76c4b81f3923ed8e94e2ae00f53b');
+ * // -> 'UQC5ffXvBm73uA_CPdniqgLWxiCnbEuB85I-2OlOKuAPU3kF'
+ *
+ * // Same address, test-only (0Q-prefix).
+ * toUserFriendlyAddress('0:b97df5ef066ef7b80fc23dd9e2a02d6c620a76c4b81f3923ed8e94e2ae00f53b', true);
+ * // -> '0QC5ffXvBm73uA_CPdniqgLWxiCnbEuB85I-2OlOKuAPU0SB'
  */
 export function toUserFriendlyAddress(hexAddress: string, testOnly = false): string {
     const { wc, hex } = parseHexAddress(hexAddress);
@@ -36,6 +44,10 @@ export function toUserFriendlyAddress(hexAddress: string, testOnly = false): str
  * Validates if the address is in user-friendly format by attempting to parse it.
  * @param address address to validate
  * @returns true if the address is valid user-friendly format, false otherwise
+ * @example
+ * isValidUserFriendlyAddress('UQC5ffXvBm73uA_CPdniqgLWxiCnbEuB85I-2OlOKuAPU3kF');  // -> true
+ * isValidUserFriendlyAddress('0:b97df5ef066ef7b80fc23dd9e2a02d6c620a76c4b81f3923ed8e94e2ae00f53b');  // -> false (raw form)
+ * isValidUserFriendlyAddress('not-an-address');  // -> false
  */
 export function isValidUserFriendlyAddress(address: string): boolean {
     try {
@@ -50,6 +62,10 @@ export function isValidUserFriendlyAddress(address: string): boolean {
  * Validates if the address is in raw hex format (e.g., "0:1234..." or "-1:1234...").
  * @param address address to validate
  * @returns true if the address is valid raw format, false otherwise
+ * @example
+ * isValidRawAddress('0:b97df5ef066ef7b80fc23dd9e2a02d6c620a76c4b81f3923ed8e94e2ae00f53b');  // -> true
+ * isValidRawAddress('-1:b97df5ef066ef7b80fc23dd9e2a02d6c620a76c4b81f3923ed8e94e2ae00f53b'); // -> true (masterchain)
+ * isValidRawAddress('UQC5ffXvBm73uA_CPdniqgLWxiCnbEuB85I-2OlOKuAPU3kF');  // -> false (user-friendly form)
  */
 export function isValidRawAddress(address: string): boolean {
     try {
@@ -68,6 +84,14 @@ export function toRawAddress({ wc, hex }: { wc: number; hex: string }): string {
  * Parses user-friendly address and returns its components.
  * @param address user-friendly address
  * @returns parsed address components
+ * @example
+ * parseUserFriendlyAddress('UQC5ffXvBm73uA_CPdniqgLWxiCnbEuB85I-2OlOKuAPU3kF');
+ * // -> {
+ * //   wc: 0,
+ * //   hex: 'b97df5ef066ef7b80fc23dd9e2a02d6c620a76c4b81f3923ed8e94e2ae00f53b',
+ * //   testOnly: false,
+ * //   isBounceable: false
+ * // }
  */
 export function parseUserFriendlyAddress(address: string): {
     wc: 0 | -1;
