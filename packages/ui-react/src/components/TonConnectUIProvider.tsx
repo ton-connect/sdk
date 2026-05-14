@@ -9,6 +9,9 @@ import {
 import type { ITonConnect, RequiredFeatures, AnalyticsSettings } from '@tonconnect/ui';
 import { isClientSide } from '../utils/web';
 
+/**
+ * @internal
+ */
 export const TonConnectUIContext = createContext<TonConnectUI | null>(null);
 
 export type TonConnectUIProviderProps = {
@@ -105,14 +108,7 @@ export interface TonConnectUIProviderPropsBase {
 
 let tonConnectUI: TonConnectUI | null = null;
 
-/**
- * Add TonConnectUIProvider to the root of the app. You can specify UI options using props.
- * All TonConnect UI hooks calls and `<TonConnectButton />` component must be placed inside `<TonConnectUIProvider>`.
- * @param children JSX to insert.
- * @param options additional options.
- * @constructor
- */
-const TonConnectUIProvider: FunctionComponent<TonConnectUIProviderProps> = ({
+const TonConnectUIProviderComponent: FunctionComponent<TonConnectUIProviderProps> = ({
     children,
     ...options
 }) => {
@@ -139,4 +135,13 @@ const TonConnectUIProvider: FunctionComponent<TonConnectUIProviderProps> = ({
     );
 };
 
-export default memo(TonConnectUIProvider);
+/**
+ * Add TonConnectUIProvider to the root of the app. You can specify UI options using props.
+ * All TonConnect UI hooks calls and `<TonConnectButton />` component must be placed inside `<TonConnectUIProvider>`.
+ * @param children JSX to insert.
+ * @param options additional options.
+ * @constructor
+ */
+const TonConnectUIProvider = memo(TonConnectUIProviderComponent);
+
+export default TonConnectUIProvider;
