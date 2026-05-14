@@ -40,6 +40,7 @@ export interface ITonConnect {
 
     /**
      * Returns available wallets list.
+     * @throws {FetchWalletsError} the wallets list could not be fetched or parsed.
      */
     getWallets(): Promise<WalletInfo[]>;
 
@@ -60,6 +61,8 @@ export interface ITonConnect {
      * @param request (optional) additional request to pass to the wallet while connect (currently only ton_proof is available).
      * @param options (optional) options
      * @returns universal link if external wallet was passed or void for the injected wallet.
+     * @throws {WalletAlreadyConnectedError} a wallet is already connected — disconnect first.
+     * @throws {TonConnectError} the connect-additional-request or embedded request failed validation, or the connection was aborted via `options.signal`.
      */
     connect<T extends WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[]>(
         wallet: T,
@@ -100,11 +103,14 @@ export interface ITonConnect {
      * Set desired network for the connection. Can only be set before connecting.
      * If the wallet connects with a different chain, the SDK throws an error and aborts the connection.
      * @param network desired network id (e.g., '-239', '-3', or custom). Pass undefined to allow any network.
+     * @throws {TonConnectError} a wallet is already connected — disconnect before changing the desired network.
      */
     setConnectionNetwork(network?: ChainId): void;
 
     /**
      * Disconnect from the connected wallet and drop the current session.
+     * @throws {WalletNotConnectedError} no wallet is currently connected.
+     * @throws {TonConnectError} the request was aborted via `options.signal`.
      */
     disconnect(options?: OptionalTraceable<{ signal?: AbortSignal }>): Promise<void>;
 
@@ -113,7 +119,13 @@ export interface ITonConnect {
      * @param transaction transaction to send.
      * @param options (optional) onRequestSent callback will be called after the transaction is sent and signal to abort the request.
      * @returns signed transaction boc that allows you to find the transaction in the blockchain.
+     * @throws {WalletNotConnectedError} no wallet is currently connected.
+     * @throws {WalletNotSupportFeatureError} the connected wallet does not advertise support for the requested transaction shape (messages, items, or extra currencies).
+     * @throws {WalletWrongNetworkError} the wallet's `account.chain` differs from the network on `transaction`.
      * @throws {UserRejectsError} the user rejected the transaction in the wallet UI.
+     * @throws {BadRequestError} the wallet rejected the request as malformed.
+     * @throws {UnknownAppError} the wallet does not recognise this dApp session.
+     * @throws {TonConnectError} `transaction` failed validation or the request was aborted via `options.signal`.
      */
     sendTransaction(
         transaction: SendTransactionRequest,
@@ -164,7 +176,13 @@ export interface ITonConnect {
      * @param message message to sign (same structure as transaction).
      * @param options (optional) onRequestSent callback and abort signal.
      * @returns signed internal message boc.
+     * @throws {WalletNotConnectedError} no wallet is currently connected.
+     * @throws {WalletNotSupportFeatureError} the connected wallet does not advertise support for the requested message shape via its `signMessage` feature.
+     * @throws {WalletWrongNetworkError} the wallet's `account.chain` differs from the network on `message`.
      * @throws {UserRejectsError} the user rejected the request in the wallet UI.
+     * @throws {BadRequestError} the wallet rejected the request as malformed.
+     * @throws {UnknownAppError} the wallet does not recognise this dApp session.
+     * @throws {TonConnectError} `message` failed validation or the request was aborted via `options.signal`.
      */
     signMessage(
         message: SignMessageRequest,
