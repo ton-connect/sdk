@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react';
  * states. The returned `state` matches the latest reported value, or
  * `null` until the underlying instance is ready.
  *
- * @throws {TonConnectProviderNotSetError} when called on the client side without a `<TonConnectUIProvider>` ancestor.
+ * @throws {@link TonConnectProviderNotSetError} when called on the client side without a `<TonConnectUIProvider>` ancestor.
  * @example
  * function ConnectCta() {
  *     const { state, open, close } = useTonConnectModal();

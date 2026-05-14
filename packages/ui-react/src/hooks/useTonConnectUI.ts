@@ -11,7 +11,7 @@ import { isServerSide } from '../utils/web';
  * `tonConnectUI.uiOptions`; call it to switch language, theme, return
  * strategy, or other UI preferences at runtime.
  *
- * @throws {TonConnectProviderNotSetError} when called on the client side without a `<TonConnectUIProvider>` ancestor. On the server side the hook returns a no-op tuple instead.
+ * @throws {@link TonConnectProviderNotSetError} when called on the client side without a `<TonConnectUIProvider>` ancestor. On the server side the hook returns a no-op tuple instead.
  * @example
  * function ConnectButton() {
  *     const [tonConnectUI, setOptions] = useTonConnectUI();

@@ -8,7 +8,7 @@ import { useTonConnectUI } from './useTonConnectUI';
  * Subscribes to `tonConnectUI.onStatusChange` internally, so the component
  * re-renders whenever the user connects, disconnects, or switches accounts.
  *
- * @throws {TonConnectProviderNotSetError} when called on the client side without a `<TonConnectUIProvider>` ancestor.
+ * @throws {@link TonConnectProviderNotSetError} when called on the client side without a `<TonConnectUIProvider>` ancestor.
  * @example
  * function WalletStatus() {
  *     const wallet = useTonWallet();

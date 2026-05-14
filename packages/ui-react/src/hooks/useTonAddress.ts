@@ -11,7 +11,7 @@ import { useMemo } from 'react';
  * `0:<hex>` form straight from `wallet.account.address`.
  *
  * @param userFriendly allows to choose format of the address. Defaults to `true`.
- * @throws {TonConnectProviderNotSetError} when called on the client side without a `<TonConnectUIProvider>` ancestor.
+ * @throws {@link TonConnectProviderNotSetError} when called on the client side without a `<TonConnectUIProvider>` ancestor.
  * @example
  * function AddressLabel() {
  *     const userFriendly = useTonAddress();

@@ -10,7 +10,7 @@ import { useTonConnectUI } from './useTonConnectUI';
  * a "Connect wallet" CTA before a session restore has had a chance to
  * complete.
  *
- * @throws {TonConnectProviderNotSetError} when called on the client side without a `<TonConnectUIProvider>` ancestor.
+ * @throws {@link TonConnectProviderNotSetError} when called on the client side without a `<TonConnectUIProvider>` ancestor.
  * @example
  * function App() {
  *     const restored = useIsConnectionRestored();
