@@ -227,8 +227,9 @@ export class TonConnect implements ITonConnect {
     }
 
     /**
-     * Returns available wallets list.
-     * @throws {FetchWalletsError} the wallets list could not be fetched or parsed.
+     * Returns the available wallets list. The internal wallets-list manager
+     * falls back to a bundled list if the configured `walletsListSource` is
+     * unreachable, so this method does not throw `FetchWalletsError`.
      */
     public getWallets(): Promise<WalletInfo[]> {
         return this.walletsList.getWallets();
@@ -721,6 +722,7 @@ export class TonConnect implements ITonConnect {
      *   from the network on `data`.
      * @throws {UserRejectsError} the user rejected the request in the wallet UI.
      * @throws {BadRequestError} the wallet rejected the payload as malformed.
+     * @throws {UnknownAppError} the wallet does not recognise this dApp session.
      * @throws {TonConnectError} `data` failed validation or the request was
      *   aborted via `options.signal`.
      */
@@ -820,6 +822,7 @@ export class TonConnect implements ITonConnect {
      *   from the network on `message`.
      * @throws {UserRejectsError} the user rejected the request in the wallet UI.
      * @throws {BadRequestError} the wallet rejected the message as malformed.
+     * @throws {UnknownAppError} the wallet does not recognise this dApp session.
      * @throws {TonConnectError} `message` failed validation or the request was
      *   aborted via `options.signal`.
      */

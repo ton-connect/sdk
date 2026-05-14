@@ -39,8 +39,10 @@ export interface ITonConnect {
     wallet: Wallet | null;
 
     /**
-     * Returns available wallets list.
-     * @throws {FetchWalletsError} the wallets list could not be fetched or parsed.
+     * Returns the available wallets list. Implementations that wrap a remote
+     * registry are expected to fall back to a bundled list on fetch failure,
+     * so callers should not rely on this method rejecting with a
+     * `FetchWalletsError`.
      */
     getWallets(): Promise<WalletInfo[]>;
 
@@ -160,6 +162,7 @@ export interface ITonConnect {
      *   from the network on `data`.
      * @throws {UserRejectsError} the user rejected the request in the wallet UI.
      * @throws {BadRequestError} the wallet rejected the payload as malformed.
+     * @throws {UnknownAppError} the wallet does not recognise this dApp session.
      * @throws {TonConnectError} `data` failed validation or the request was
      *   aborted via `options.signal`.
      */
