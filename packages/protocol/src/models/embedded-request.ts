@@ -379,6 +379,9 @@ export function decodeWireEmbeddedRequest(wire: WireEmbeddedRequest): DecodedEmb
  * the same shape as a bridge `AppRequest` (without `id`).
  *
  * The `e` value is `base64url(JSON.stringify(WireEmbeddedRequest))`.
+ *
+ * @throws {URIError} when `reqParam` contains malformed percent-encoding.
+ * @throws {SyntaxError} when the decoded value is not valid JSON.
  */
 export function decodeEmbeddedRequestParam(reqParam: string): DecodedEmbeddedRequest {
     const json = fromBase64Url(reqParam);

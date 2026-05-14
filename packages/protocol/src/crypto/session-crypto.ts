@@ -24,6 +24,8 @@ export class SessionCrypto {
     /**
      * @param keyPair previously persisted key pair (e.g. from
      * {@link stringifyKeypair}). Omit to generate a fresh pair.
+     * @throws {Error} when a provided `keyPair` contains an odd-length hex string
+     * (passed through to {@link hexToByteArray}).
      */
     constructor(keyPair?: KeyPair) {
         this.keyPair = keyPair ? this.createKeypairFromString(keyPair) : this.createKeypair();
