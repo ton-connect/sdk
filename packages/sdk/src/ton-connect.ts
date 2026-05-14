@@ -237,7 +237,7 @@ export class TonConnect implements ITonConnect {
     /**
      * Allows to subscribe to connection status changes and handle connection errors.
      * @param callback fires after the connection status changes, receiving the active wallet or null.
-     * @param errorsHandler (optional) fires with a TonConnectError instance when a connect error is received.
+     * @param errorsHandler fires with a TonConnectError instance when a connect error is received.
      * @returns unsubscribe callback.
      */
     public onStatusChange(
@@ -264,8 +264,8 @@ export class TonConnect implements ITonConnect {
     /**
      * Generates universal link for an external wallet and subscribes to the wallet's bridge, or sends connect request to the injected wallet.
      * @param wallet wallet's bridge url and universal link for an external wallet or jsBridge key for the injected wallet.
-     * @param request (optional) additional request to pass to the wallet while connect (currently only ton_proof is available).
-     * @param options (optional) openingDeadlineMS for the connection opening deadline and signal for the connection abort.
+     * @param request additional request to pass to the wallet while connecting (currently only ton_proof is available).
+     * @param options openingDeadlineMS sets the connection opening deadline; signal aborts the connection.
      * @returns universal link if external wallet was passed or void for the injected wallet.
      * @throws {WalletAlreadyConnectedError} a wallet is already connected — disconnect first.
      * @throws {TonConnectError} the connect-additional-request or embedded request failed validation, or the connection was aborted via `options.signal`.
@@ -550,7 +550,7 @@ export class TonConnect implements ITonConnect {
     /**
      * Asks connected wallet to sign and send the transaction.
      * @param transaction transaction to send.
-     * @param options (optional) onRequestSent will be called after the request was sent to the wallet and signal for the transaction abort.
+     * @param options onRequestSent fires after the request is sent to the wallet; signal aborts the transaction.
      * @returns signed transaction boc that allows you to find the transaction in the blockchain.
      * @throws {WalletNotConnectedError} no wallet is currently connected.
      * @throws {WalletNotSupportFeatureError} the connected wallet does not advertise support for the requested transaction shape (messages, items, or extra currencies).

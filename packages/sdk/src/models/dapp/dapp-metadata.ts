@@ -14,7 +14,7 @@ export interface DappMetadata {
 
     /**
      * dApp URL. Identifies the dApp; the wallet opens this URL when the user taps the dApp icon.
-     * It is recommended to pass url without closing slash, e.g. 'https://mydapp.com' instead of 'https://mydapp.com/'.
+     * Pass the URL without a trailing slash, e.g. 'https://mydapp.com' rather than 'https://mydapp.com/'.
      * Defaults to `window.location.origin`; the TonConnect constructor throws
      * `DappMetadataError` when neither `url` nor `window.location.origin` is available
      * (e.g., in a Node.js environment without an explicit manifest URL).
