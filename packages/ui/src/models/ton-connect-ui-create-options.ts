@@ -24,19 +24,19 @@ export interface TonConnectUiOptionsWithConnector extends TonConnectUiCreateOpti
 export interface TonConnectUiCreateOptionsBase extends TonConnectUiOptions {
     /**
      * Try to restore existing session and reconnect to the corresponding wallet.
-     * @default true.
+     * @default true
      */
     restoreConnection?: boolean;
 
     /**
      * HTML element id to attach the modal window element. If not passed, `div#tc-widget-root` is appended to the end of `<body>` and used.
-     * @default `div#tc-widget-root`.
+     * @default `'tc-widget-root'`
      */
     widgetRootId?: string;
 
     /**
      * Event dispatcher to track user actions. By default, it uses `window.dispatchEvent` for browser environment.
-     * @default BrowserEventDispatcher.
+     * @default `new BrowserEventDispatcher()`
      */
     eventDispatcher?: EventDispatcher<UserActionEvent | SdkActionEvent>;
 }

@@ -119,7 +119,7 @@ export class SingleWalletModalManager implements SingleWalletModal {
 
     /**
      * Closes the modal window.
-     * @default 'action-cancelled'
+     * @param reason close reason. Defaults to `'action-cancelled'`.
      */
     public close(reason: WalletsModalCloseReason = 'action-cancelled'): void {
         if (reason === 'action-cancelled') {

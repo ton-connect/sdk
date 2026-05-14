@@ -4,8 +4,8 @@ import { PartialColorsSet } from 'src/models/colors-set';
 
 export interface UIPreferences {
     /**
-     * Color theme for the UI elements.
-     * @default SYSTEM theme.
+     * Color theme for the UI elements. When set to `'SYSTEM'` the theme follows the OS preference.
+     * @default 'SYSTEM'
      */
     theme?: Theme;
 

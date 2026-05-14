@@ -12,13 +12,13 @@ export interface TonConnectUiOptions {
 
     /**
      * HTML element id to attach the wallet connect button. If not passed the button does not appear.
-     * @default null.
+     * @default null
      */
     buttonRootId?: string | null;
 
     /**
      * Language for the phrases in the UI elements.
-     * @default system
+     * @default 'en'
      */
     language?: Locales;
 
