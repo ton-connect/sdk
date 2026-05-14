@@ -20,7 +20,7 @@ export interface WalletInfoBase {
     imageUrl: string;
 
     /**
-     * Will be used in the protocol later.
+     * TON DNS name of the wallet. Reserved for future protocol use.
      */
     tondns?: string;
 

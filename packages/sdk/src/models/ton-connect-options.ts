@@ -17,8 +17,8 @@ export interface AnalyticsSettings {
  */
 export interface TonConnectOptions {
     /**
-     * Url to the [manifest]{@link https://github.com/ton-connect/docs/blob/main/requests-responses.md#app-manifest} with the Dapp metadata that will be displayed in the user's wallet.
-     * If not passed, manifest from `${window.location.origin}/tonconnect-manifest.json` will be taken.
+     * Url to the [manifest]{@link https://github.com/ton-connect/docs/blob/main/requests-responses.md#app-manifest} with the Dapp metadata that the wallet displays to the user.
+     * If not passed, the SDK loads the manifest from `${window.location.origin}/tonconnect-manifest.json`.
      */
     manifestUrl?: string;
 

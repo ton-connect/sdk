@@ -235,8 +235,8 @@ export class TonConnect implements ITonConnect {
 
     /**
      * Allows to subscribe to connection status changes and handle connection errors.
-     * @param callback will be called after connections status changes with actual wallet or null.
-     * @param errorsHandler (optional) will be called with some instance of TonConnectError when connect error is received.
+     * @param callback fires after the connection status changes, receiving the active wallet or null.
+     * @param errorsHandler (optional) fires with a TonConnectError instance when a connect error is received.
      * @returns unsubscribe callback.
      */
     public onStatusChange(
@@ -894,7 +894,7 @@ export class TonConnect implements ITonConnect {
 
     /**
      * Set desired network for the connection. Can only be set before connecting.
-     * If wallet connects with a different chain, the SDK will throw an error and abort connection.
+     * If the wallet connects with a different chain, the SDK throws an error and aborts the connection.
      * @param network desired network id (e.g., '-239', '-3', or custom). Pass undefined to allow any network.
      */
     public setConnectionNetwork(network?: ChainId): void {

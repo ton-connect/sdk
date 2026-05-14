@@ -12,7 +12,7 @@ export interface DappMetadata {
     icon: string;
 
     /**
-     * Dapp URL. Will be used as the dapp identifier. Will be used to open the dapp after click to its icon in the wallet.
+     * Dapp URL. Identifies the dapp; the wallet opens this URL when the user taps the dapp icon.
      * It is recommended to pass url without closing slash, e.g. 'https://mydapp.com' instead of 'https://mydapp.com/'.
      * @default `window.location.origin` if exists, otherwise (if not explicitly specified) an error will be thrown.
      */
