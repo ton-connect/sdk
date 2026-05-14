@@ -15,7 +15,7 @@ export interface WalletInfoBase {
     appName: string;
 
     /**
-     * Url to the icon of the wallet. Resolution 288×288px. On non-transparent background, without rounded corners. PNG format.
+     * URL to the icon of the wallet. Resolution 288×288px. On non-transparent background, without rounded corners. PNG format.
      */
     imageUrl: string;
 
@@ -64,7 +64,7 @@ export interface WalletInfoRemote extends WalletInfoBase {
     deepLink?: string;
 
     /**
-     * Url of the wallet's implementation of the [HTTP bridge]{@link https://github.com/ton-connect/docs/blob/main/bridge.md#http-bridge}.
+     * URL of the wallet's implementation of the [HTTP bridge]{@link https://github.com/ton-connect/docs/blob/main/bridge.md#http-bridge}.
      */
     bridgeUrl: string;
 }
@@ -84,7 +84,7 @@ export interface WalletInfoInjectable extends WalletInfoBase {
     injected: boolean;
 
     /**
-     * Indicates if the dapp is opened inside this wallet's browser.
+     * Indicates if the dApp is opened inside this wallet's browser.
      */
     embedded: boolean;
 }

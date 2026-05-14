@@ -212,7 +212,7 @@ export class TonConnect implements ITonConnect {
 
         if (!this.dappSettings.manifestUrl) {
             throw new DappMetadataError(
-                'Dapp tonconnect-manifest.json must be specified if window.location.origin is undefined. See more https://github.com/ton-connect/docs/blob/main/requests-responses.md#app-manifest'
+                'dApp tonconnect-manifest.json must be specified if window.location.origin is undefined. See more https://github.com/ton-connect/docs/blob/main/requests-responses.md#app-manifest'
             );
         }
 
@@ -1027,7 +1027,7 @@ export class TonConnect implements ITonConnect {
 
     /**
      * Pause bridge HTTP connection. Might be helpful, if you want to pause connections while browser tab is unfocused,
-     * or if you use SDK with NodeJS and want to save server resources.
+     * or if you use SDK with Node.js and want to save server resources.
      */
     public pauseConnection(): void {
         if (this.provider?.type !== 'http') {

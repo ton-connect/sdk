@@ -17,13 +17,13 @@ export interface AnalyticsSettings {
  */
 export interface TonConnectOptions {
     /**
-     * Url to the [manifest]{@link https://github.com/ton-connect/docs/blob/main/requests-responses.md#app-manifest} with the Dapp metadata that the wallet displays to the user.
+     * URL to the [manifest]{@link https://github.com/ton-connect/docs/blob/main/requests-responses.md#app-manifest} with the dApp metadata that the wallet displays to the user.
      * If not passed, the SDK loads the manifest from `${window.location.origin}/tonconnect-manifest.json`.
      */
     manifestUrl?: string;
 
     /**
-     * Storage to save protocol data. For browser default is `localStorage`. If you use SDK with nodeJS, you have to specify this field.
+     * Storage to save protocol data. For browser default is `localStorage`. If you use SDK with Node.js, you have to specify this field.
      */
     storage?: IStorage;
 

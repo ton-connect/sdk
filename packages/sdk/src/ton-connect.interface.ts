@@ -90,7 +90,7 @@ export interface ITonConnect {
 
     /**
      * Pause bridge HTTP connection. Might be helpful, if you want to pause connections while browser tab is unfocused,
-     * or if you use SDK with NodeJS and want to save server resources.
+     * or if you use SDK with Node.js and want to save server resources.
      */
     pauseConnection(): void;
 
