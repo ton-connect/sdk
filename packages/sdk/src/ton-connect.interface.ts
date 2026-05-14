@@ -113,7 +113,7 @@ export interface ITonConnect {
      * @param transaction transaction to send.
      * @param options (optional) onRequestSent callback will be called after the transaction is sent and signal to abort the request.
      * @returns signed transaction boc that allows you to find the transaction in the blockchain.
-     * If user rejects transaction, method will throw the corresponding error.
+     * @throws {UserRejectsError} the user rejected the transaction in the wallet UI.
      */
     sendTransaction(
         transaction: SendTransactionRequest,
@@ -164,7 +164,7 @@ export interface ITonConnect {
      * @param message message to sign (same structure as transaction).
      * @param options (optional) onRequestSent callback and abort signal.
      * @returns signed internal message boc.
-     * If user rejects signing, method will throw the corresponding error.
+     * @throws {UserRejectsError} the user rejected the request in the wallet UI.
      */
     signMessage(
         message: SignMessageRequest,

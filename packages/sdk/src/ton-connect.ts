@@ -549,7 +549,7 @@ export class TonConnect implements ITonConnect {
      * @param transaction transaction to send.
      * @param options (optional) onRequestSent will be called after the request was sent to the wallet and signal for the transaction abort.
      * @returns signed transaction boc that allows you to find the transaction in the blockchain.
-     * If user rejects transaction, method will throw the corresponding error.
+     * @throws {UserRejectsError} the user rejected the transaction in the wallet UI.
      */
     public sendTransaction(
         transaction: SendTransactionRequest,
