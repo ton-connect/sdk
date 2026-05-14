@@ -17,7 +17,7 @@ export interface TonConnectUiOptions {
     buttonRootId?: string | null;
 
     /**
-     * Language for the phrases it the UI elements.
+     * Language for the phrases in the UI elements.
      * @default system
      */
     language?: Locales;

@@ -149,7 +149,7 @@ export class TonConnectUI {
     private readonly transactionModal: TransactionModalManager;
 
     /**
-     * Promise that resolves after end of th connection restoring process (promise will fire after `onStatusChange`,
+     * Promise that resolves after end of the connection restoring process (promise will fire after `onStatusChange`,
      * so you can get actual information about wallet and session after when promise resolved).
      * Resolved value `true`/`false` indicates if the session was restored successfully.
      */
@@ -170,7 +170,7 @@ export class TonConnectUI {
     }
 
     /**
-     * Curren connected wallet app and its info or null.
+     * Current connected wallet app and its info or null.
      */
     public get wallet(): Wallet | (Wallet & WalletInfoWithOpenMethod) | null {
         if (!this.connector.wallet) {
@@ -340,9 +340,9 @@ export class TonConnectUI {
 
     /**
      * Use it to customize ConnectRequest and add `tonProof` payload.
-     * You can call it multiply times to set updated tonProof payload if previous one is outdated.
+     * You can call it multiple times to set updated tonProof payload if previous one is outdated.
      * If `connectRequestParameters.state === 'loading'` loader will appear instead of the qr code in the wallets modal.
-     * If `connectRequestParameters.state` was changed to 'ready' or it's value has been changed, QR will be re-rendered.
+     * If `connectRequestParameters.state` was changed to 'ready' or its value has been changed, QR will be re-rendered.
      */
     public setConnectRequestParameters(
         connectRequestParameters: Loadable<ConnectAdditionalRequest> | undefined | null

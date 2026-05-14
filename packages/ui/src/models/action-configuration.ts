@@ -21,7 +21,7 @@ export interface ActionConfiguration {
 
     /**
      * Specifies return url for TWA-TWA connections.
-     * This will be applied as a return strategy if dApp is opened as a TWA and user selects TWA wallet (overrides `returnStrategy` if).
+     * This will be applied as a return strategy if dApp is opened as a TWA and user selects TWA wallet (overrides `returnStrategy` if set).
      */
     twaReturnUrl?: `${string}://${string}`;
 
