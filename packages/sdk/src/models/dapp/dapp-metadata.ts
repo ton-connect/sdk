@@ -1,7 +1,7 @@
 export interface DappMetadata {
     /**
      * Dapp name. Might be simple, will not be used as identifier.
-     * @default `document.title` if exists, 'Unknown dapp' overwise
+     * @default `document.title` if exists, 'Unknown dapp' otherwise
      */
     name: string;
 

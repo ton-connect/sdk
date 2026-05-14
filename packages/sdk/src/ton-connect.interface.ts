@@ -104,7 +104,7 @@ export interface ITonConnect {
     setConnectionNetwork(network?: ChainId): void;
 
     /**
-     * Disconnect form thw connected wallet and drop current session.
+     * Disconnect from the connected wallet and drop the current session.
      */
     disconnect(options?: OptionalTraceable<{ signal?: AbortSignal }>): Promise<void>;
 

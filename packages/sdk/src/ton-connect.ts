@@ -862,7 +862,7 @@ export class TonConnect implements ITonConnect {
     }
 
     /**
-     * Disconnect form thw connected wallet and drop current session.
+     * Disconnect from the connected wallet and drop the current session.
      */
     public async disconnect(options?: OptionalTraceable<{ signal?: AbortSignal }>): Promise<void> {
         if (!this.connected) {
