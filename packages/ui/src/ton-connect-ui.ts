@@ -268,6 +268,7 @@ export class TonConnectUI {
      * Creates a new TonConnectUI instance and mounts the widget into the DOM.
      * @param options - Creation options. Either `manifestUrl` or `connector` must be provided.
      * @throws {@link TonConnectUIError} when neither `manifestUrl` nor `connector` is specified in `options`.
+     * @throws {@link TonConnectUIError} when `options.buttonRootId` is set but the element does not exist in the document (the constructor applies the initial UI options).
      */
     constructor(options?: TonConnectUiCreateOptions) {
         let eventDispatcher = options?.eventDispatcher ?? new BrowserEventDispatcher();
@@ -546,6 +547,7 @@ export class TonConnectUI {
      * @returns Promise that resolves to the transaction response.
      * @throws {@link TonConnectUIError} when no wallet is connected and `options.onConnected` is not provided.
      * @throws {@link TonConnectUIError} when the user cancels the transaction in the modal.
+     * @throws {@link TonConnectError} subclasses raised by the underlying SDK call (e.g. `WalletWrongNetworkError`, `WalletNotSupportFeatureError`, `UserRejectsError`, `BadRequestError`, `UnknownAppError`) are propagated unchanged.
      */
     public async sendTransaction(
         tx: SendTransactionRequest,
@@ -632,6 +634,7 @@ export class TonConnectUI {
      * @returns Promise that resolves to the sign-data response including the signature.
      * @throws {@link TonConnectUIError} when no wallet is connected and `options.onConnected` is not provided.
      * @throws {@link TonConnectUIError} when the user cancels the signing in the modal.
+     * @throws {@link TonConnectError} subclasses raised by the underlying SDK call (e.g. `WalletNotSupportFeatureError`, `UserRejectsError`, `BadRequestError`) are propagated unchanged.
      */
     public async signData(
         data: SignDataPayload,
@@ -712,6 +715,7 @@ export class TonConnectUI {
      * @returns Promise that resolves to the sign-message response including the signed BoC.
      * @throws {@link TonConnectUIError} when no wallet is connected and `options.onConnected` is not provided.
      * @throws {@link TonConnectUIError} when the user cancels the signing in the modal.
+     * @throws {@link TonConnectError} subclasses raised by the underlying SDK call are propagated unchanged.
      */
     public async signMessage(
         message: SignMessageRequest,
