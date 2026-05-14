@@ -12,11 +12,11 @@ const testOnlyTag = 0x80;
  * @example
  * // Mainnet, non-bounceable form (UQ-prefix).
  * toUserFriendlyAddress('0:b97df5ef066ef7b80fc23dd9e2a02d6c620a76c4b81f3923ed8e94e2ae00f53b');
- * // -> 'UQC5ffXvBm73uA_CPdniqgLWxiCnbEuB85I-2OlOKuAPU3kF'
+ * // -> 'UQC5ffXvBm73uA_CPdnioC1sYgp2xLgfOSPtjpTirgD1Ozvy'
  *
  * // Same address, test-only (0Q-prefix).
  * toUserFriendlyAddress('0:b97df5ef066ef7b80fc23dd9e2a02d6c620a76c4b81f3923ed8e94e2ae00f53b', true);
- * // -> '0QC5ffXvBm73uA_CPdniqgLWxiCnbEuB85I-2OlOKuAPU0SB'
+ * // -> '0QC5ffXvBm73uA_CPdnioC1sYgp2xLgfOSPtjpTirgD1O4B4'
  */
 export function toUserFriendlyAddress(hexAddress: string, testOnly = false): string {
     const { wc, hex } = parseHexAddress(hexAddress);
@@ -45,7 +45,7 @@ export function toUserFriendlyAddress(hexAddress: string, testOnly = false): str
  * @param address address to validate
  * @returns true if the address is valid user-friendly format, false otherwise
  * @example
- * isValidUserFriendlyAddress('UQC5ffXvBm73uA_CPdniqgLWxiCnbEuB85I-2OlOKuAPU3kF');  // -> true
+ * isValidUserFriendlyAddress('UQC5ffXvBm73uA_CPdnioC1sYgp2xLgfOSPtjpTirgD1Ozvy');  // -> true
  * isValidUserFriendlyAddress('0:b97df5ef066ef7b80fc23dd9e2a02d6c620a76c4b81f3923ed8e94e2ae00f53b');  // -> false (raw form)
  * isValidUserFriendlyAddress('not-an-address');  // -> false
  */
@@ -65,7 +65,7 @@ export function isValidUserFriendlyAddress(address: string): boolean {
  * @example
  * isValidRawAddress('0:b97df5ef066ef7b80fc23dd9e2a02d6c620a76c4b81f3923ed8e94e2ae00f53b');  // -> true
  * isValidRawAddress('-1:b97df5ef066ef7b80fc23dd9e2a02d6c620a76c4b81f3923ed8e94e2ae00f53b'); // -> true (masterchain)
- * isValidRawAddress('UQC5ffXvBm73uA_CPdniqgLWxiCnbEuB85I-2OlOKuAPU3kF');  // -> false (user-friendly form)
+ * isValidRawAddress('UQC5ffXvBm73uA_CPdnioC1sYgp2xLgfOSPtjpTirgD1Ozvy');  // -> false (user-friendly form)
  */
 export function isValidRawAddress(address: string): boolean {
     try {
@@ -85,7 +85,7 @@ export function toRawAddress({ wc, hex }: { wc: number; hex: string }): string {
  * @param address user-friendly address
  * @returns parsed address components
  * @example
- * parseUserFriendlyAddress('UQC5ffXvBm73uA_CPdniqgLWxiCnbEuB85I-2OlOKuAPU3kF');
+ * parseUserFriendlyAddress('UQC5ffXvBm73uA_CPdnioC1sYgp2xLgfOSPtjpTirgD1Ozvy');
  * // -> {
  * //   wc: 0,
  * //   hex: 'b97df5ef066ef7b80fc23dd9e2a02d6c620a76c4b81f3923ed8e94e2ae00f53b',
