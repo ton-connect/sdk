@@ -20,7 +20,7 @@ export interface SendTransactionRequestBase {
 
 export interface SendTransactionRequestWithMessages extends SendTransactionRequestBase {
     /**
-     * Messages to send: min is 1, max is 4.
+     * Messages to send: min is 1, max is 255.
      */
     messages: {
         /**
