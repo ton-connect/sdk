@@ -16,7 +16,12 @@ export default [
       replace({
         TON_CONNECT_SDK_VERSION: JSON.stringify(version)
       }),
-      typescript()
+      typescript({
+        compilerOptions: {
+          declaration: false,
+          outDir: "./lib/esm"
+        }
+      })
     ],
     external: ["@tonconnect/protocol", "@tonconnect/isomorphic-fetch", "@tonconnect/isomorphic-eventsource"]
   },
@@ -31,7 +36,12 @@ export default [
       replace({
         TON_CONNECT_SDK_VERSION: JSON.stringify(version)
       }),
-      typescript()
+      typescript({
+        compilerOptions: {
+          declaration: false,
+          outDir: "./lib/cjs"
+        }
+      })
     ],
     external: ["@tonconnect/protocol", "@tonconnect/isomorphic-fetch", "@tonconnect/isomorphic-eventsource"]
   }

@@ -8,7 +8,7 @@ export default [
             file: './lib/esm/index.mjs',
             sourcemap: true
         },
-        plugins: [typescript({ compilerOptions: { declaration: false, declarationDir: undefined } })],
+        plugins: [typescript({ compilerOptions: { declaration: false, declarationDir: undefined, outDir: './lib/esm' } })],
         external: ['tweetnacl', 'tweetnacl-util']
     },
     {
@@ -18,7 +18,7 @@ export default [
             file: './lib/cjs/index.cjs',
             sourcemap: true
         },
-        plugins: [typescript({ compilerOptions: { declaration: false, declarationDir: undefined } })],
+        plugins: [typescript({ compilerOptions: { declaration: false, declarationDir: undefined, outDir: './lib/cjs' } })],
         external: ['tweetnacl', 'tweetnacl-util']
     }
 ];
