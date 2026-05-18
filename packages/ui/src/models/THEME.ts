@@ -3,4 +3,4 @@ export enum THEME {
     LIGHT = 'LIGHT'
 }
 
-export type Theme = THEME | 'SYSTEM';
+export type Theme = `${THEME}` | 'SYSTEM';
