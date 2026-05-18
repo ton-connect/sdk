@@ -8,11 +8,14 @@ import * as packageJson from './package.json';
 
 const version = packageJson.version;
 
+const isTest = !!process.env.VITEST;
+
 export default defineConfig({
     plugins: [
-        devtools({
-            autoname: true
-        }),
+        !isTest &&
+            devtools({
+                autoname: true
+            }),
         solidPlugin({ extensions: ['ts'] })
     ],
     resolve: {
@@ -66,6 +69,10 @@ export default defineConfig({
     test: {
         typecheck: {
             tsconfig: './tsconfig.test.json'
+        },
+        coverage: {
+            provider: 'istanbul',
+            reporter: ['text', 'lcov']
         }
     }
 });
