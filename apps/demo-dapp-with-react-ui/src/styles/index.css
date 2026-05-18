@@ -1,0 +1,185 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* Tokens copied from @ton/appkit-react styles — kept inline since the package
+   is not installed in this app. Keep in sync with packages/appkit-react/src/styles/index.css. */
+:where(:root) {
+  /* Font */
+  --ta-font-family: -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica Neue', Arial, Tahoma, Verdana, sans-serif;
+  --ta-font-family-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  /* Typography */
+  --ta-display-large-size: 64px;
+  --ta-display-large-weight: 800;
+  --ta-display-large-line-height: 70px;
+
+  --ta-display-size: 40px;
+  --ta-display-weight: 800;
+  --ta-display-line-height: 44px;
+
+  --ta-headline-size: 28px;
+  --ta-headline-weight: 700;
+  --ta-headline-line-height: 32px;
+
+  --ta-title-size: 20px;
+  --ta-title-weight: 700;
+  --ta-title-line-height: 24px;
+
+  --ta-body-size: 16px;
+  --ta-body-medium-weight: 500;
+  --ta-body-regular-weight: 400;
+  --ta-body-semibold-weight: 600;
+  --ta-body-medium-line-height: 20px;
+  --ta-body-regular-line-height: 24px;
+
+  --ta-label-size: 14px;
+  --ta-label-regular-weight: 400;
+  --ta-label-semibold-weight: 600;
+  --ta-label-medium-weight: 500;
+  --ta-label-line-height: 18px;
+
+  --ta-footnote-size: 12px;
+  --ta-footnote-regular-weight: 400;
+  --ta-footnote-caps-weight: 600;
+  --ta-footnote-line-height: 16px;
+
+  --ta-caption-size: 11px;
+  --ta-caption-weight: 600;
+  --ta-caption-line-height: 12px;
+
+  --ta-input-s-size: 16px;
+  --ta-input-s-weight: 400;
+  --ta-input-s-line-height: 24px;
+
+  --ta-input-m-size: 24px;
+  --ta-input-m-weight: 600;
+  --ta-input-m-line-height: 30px;
+
+  --ta-input-l-size: 32px;
+  --ta-input-l-weight: 700;
+  --ta-input-l-line-height: 40px;
+
+  --ta-input-xl-size: 60px;
+  --ta-input-xl-weight: 700;
+  --ta-input-xl-line-height: 68px;
+
+  --ta-input-xl-symbol-size: 40px;
+  --ta-input-xl-symbol-weight: 700;
+  --ta-input-xl-symbol-line-height: 100%;
+
+  /* Colors */
+  --ta-color-primary: #0098EA;
+  --ta-color-primary-foreground: #FFFFFF;
+  --ta-color-primary-light: rgba(0, 152, 234, 0.1);
+  --ta-color-error: #FF3B30;
+  --ta-color-success: #34C759;
+  --ta-color-text: #121214;
+  --ta-color-text-secondary: #60606E;
+  --ta-color-text-tertiary: #909DAB;
+  --ta-color-background: #FFFFFF;
+  --ta-color-background-secondary: #F1F3F5;
+  --ta-color-background-tertiary: #E0E5EA;
+  --ta-color-background-bezeled: rgba(0, 122, 255, 0.10);
+  --ta-color-block: var(--ta-color-background);
+  --ta-color-block-foreground: var(--ta-color-text);
+  --ta-color-skeleton-shimmer: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.4) 20%,
+    rgba(255, 255, 255, 0.6) 60%,
+    rgba(255, 255, 255, 0) 100%
+  );
+
+  /* Static Colors */
+  --ta-color-white: #ffffff;
+  --ta-color-black: #000000;
+  --ta-color-ton: #0098EB;
+
+  /* Border Radius */
+  --ta-border-radius-s: 4px;
+  --ta-border-radius-m: 8px;
+  --ta-border-radius-l: 12px;
+  --ta-border-radius-xl: 16px;
+  --ta-border-radius-2xl: 20px;
+  --ta-border-radius-full: 9999px;
+
+  /* Border Width */
+  --ta-border-width-s: 1px;
+  --ta-border-width-m: 2px;
+}
+
+:where([data-ta-theme='dark']) {
+  --ta-color-primary: #0098EA;
+  --ta-color-primary-foreground: #FFFFFF;
+  --ta-color-error: #FF3B30;
+  --ta-color-success: #30D158;
+  --ta-color-text: #FFFFFF;
+  --ta-color-text-secondary: #909DAB;
+  --ta-color-text-tertiary: #7A8999;
+  --ta-color-background: #121214;
+  --ta-color-background-secondary: #222224;
+  --ta-color-background-tertiary: #2D2D2F;
+  --ta-color-background-bezeled: rgba(0, 122, 255, 0.10);
+  --ta-color-block: var(--ta-color-background);
+  --ta-color-block-foreground: var(--ta-color-text);
+  --ta-color-skeleton-shimmer: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.05) 20%,
+    rgba(255, 255, 255, 0.1) 60%,
+    rgba(255, 255, 255, 0) 100%
+  );
+}
+
+:root {
+  --font-sans: "Inter", system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --radius: 0.625rem;
+
+  /* Colors aliased from appkit-react tokens above */
+  --primary: var(--ta-color-primary);
+  --primary-foreground: var(--ta-color-primary-foreground);
+  --primary-light: var(--ta-color-primary-light);
+  --error: var(--ta-color-error);
+  --success: var(--ta-color-success);
+  --background: var(--ta-color-background);
+  --foreground: var(--ta-color-text);
+  --secondary: var(--ta-color-background-secondary);
+  --secondary-foreground: var(--ta-color-text-secondary);
+  --tertiary: var(--ta-color-background-tertiary);
+  --tertiary-foreground: var(--ta-color-text-tertiary);
+  --background-bezeled: var(--ta-color-background-bezeled);
+  --skeleton-shimmer: var(--ta-color-skeleton-shimmer);
+  --white: var(--ta-color-white);
+  --black: var(--ta-color-black);
+  --ton: var(--ta-color-ton);
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-light: var(--primary-light);
+  --color-error: var(--error);
+  --color-success: var(--success);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-tertiary: var(--tertiary);
+  --color-tertiary-foreground: var(--tertiary-foreground);
+  --color-background-bezeled: var(--background-bezeled);
+  --color-white: var(--white);
+  --color-black: var(--black);
+  --color-ton: var(--ton);
+
+  --font-sans: "Inter", sans-serif;
+}
