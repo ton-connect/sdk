@@ -1,5 +1,16 @@
 # Changelog @tonconnect/sdk
 
+## 4.0.0-beta.2
+
+### Major Changes
+
+- TON Connect V3 — sign message, embedded requests, structure items.
+
+### Patch Changes
+
+- Updated dependencies
+    - @tonconnect/protocol@3.0.0-beta.2
+
 ## 3.5.0-alpha.1
 
 ### Minor Changes
