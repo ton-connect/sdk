@@ -1,5 +1,6 @@
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { toNano } from '@ton/core';
+import { Wallet } from 'lucide-react';
 
 import {
     // buildSuccessMerkleProof,
@@ -8,10 +9,10 @@ import {
     buildVerifyMerkleUpdate
 } from '@/server/utils/exotic';
 import { Button } from '@/core/components/ui/button';
+import { EmptyState } from '@/core/components/empty-state';
 import { TonProofDemoApi } from '@/core/lib/ton-proof-demo-api';
 
 const merkleExampleAddress = 'EQD_5KMZVIqzYY91-t5CdRD_V71wRrVzxDXu9n2XEwz2wwdv';
-// const merkleProofBody = buildVerifyMerkleProof(buildSuccessMerkleProof());
 const merkleUpdateBody = buildVerifyMerkleUpdate(buildSuccessMerkleUpdate());
 
 export const MerkleExample = () => {
@@ -41,19 +42,23 @@ export const MerkleExample = () => {
         await tonConnectUI.sendTransaction(myTransaction);
     };
 
+    if (!wallet) {
+        return (
+            <EmptyState
+                icon={Wallet}
+                title="Connect a wallet"
+                description="A connected wallet is required to send a merkle proof or update transaction."
+                action={
+                    <Button onClick={() => tonConnectUI.openModal()}>Connect wallet</Button>
+                }
+            />
+        );
+    }
+
     return (
-        <div className="mt-[60px] flex w-full flex-col items-center gap-5 p-5">
-            <h3 className="text-foreground/80">Merkle proof/update</h3>
-            {wallet ? (
-                <div className="flex flex-wrap justify-center gap-5">
-                    <Button onClick={handleMerkleProofClick}>Send merkle proof</Button>
-                    <Button onClick={handleMerkleUpdateClick}>Send merkle update</Button>
-                </div>
-            ) : (
-                <div className="text-[18px] leading-5 text-primary">
-                    Connect wallet to send transaction
-                </div>
-            )}
+        <div className="flex flex-wrap justify-center gap-3">
+            <Button onClick={handleMerkleProofClick}>Send merkle proof</Button>
+            <Button onClick={handleMerkleUpdateClick}>Send merkle update</Button>
         </div>
     );
 };

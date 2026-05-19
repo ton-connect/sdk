@@ -23,7 +23,7 @@ const BORDER_OPTIONS = ['m', 's', 'none'];
 const BOOL_OPTIONS = ['true', 'false'];
 
 const renderTrigger = (label: string) => (
-    <Select.Trigger variant="gray" size="m" borderRadius="l">
+    <Select.Trigger variant="gray" size="s" borderRadius="l">
         {label}
         <ChevronDownIcon size={16} />
     </Select.Trigger>
@@ -193,7 +193,7 @@ export const DevPanel = () => {
             <ColorsModal />
 
             <div className="w-[220px]">
-                <Input>
+                <Input size="s">
                     <Input.Header>
                         <Input.Title>return strategy</Input.Title>
                     </Input.Header>
@@ -208,7 +208,7 @@ export const DevPanel = () => {
             </div>
 
             <div className="w-[220px]">
-                <Input>
+                <Input size="s">
                     <Input.Header>
                         <Input.Title>skip redirect (ios / never / always)</Input.Title>
                     </Input.Header>

@@ -133,12 +133,19 @@ export function TransferUsdt() {
     const balanceSkeleton = <Skeleton className="inline-block h-[18px] w-[80px]" />;
 
     return (
-        <div className="mt-8 flex flex-col items-center gap-2.5 p-5 [&_a]:text-primary [&_h3]:m-0 [&_h3]:text-foreground/80 [&_h4]:m-0 [&_h4]:text-foreground/80">
-            <h3>USDT Sending example</h3>
-            <h4>USDT Balance: {loading ? balanceSkeleton : usdtBalance}</h4>
-            <h4>TON Balance: {tonBalance ?? balanceSkeleton}</h4>
-            <div className="flex w-[500px] max-w-full flex-col gap-2.5">
-                <Input>
+        <>
+            <div className="flex flex-col gap-1 text-sm text-foreground">
+                <div className="flex items-center gap-2">
+                    <span className="text-secondary-foreground">USDT Balance:</span>
+                    {loading ? balanceSkeleton : (usdtBalance ?? '—')}
+                </div>
+                <div className="flex items-center gap-2">
+                    <span className="text-secondary-foreground">TON Balance:</span>
+                    {tonBalance ?? balanceSkeleton}
+                </div>
+            </div>
+            <div className="flex flex-col gap-3">
+                <Input size="s">
                     <Input.Header>
                         <Input.Title>USDT Amount</Input.Title>
                     </Input.Header>
@@ -146,7 +153,7 @@ export function TransferUsdt() {
                         <Input.Input value={amount} onChange={e => setAmount(e.target.value)} />
                     </Input.Field>
                 </Input>
-                <Input>
+                <Input size="s">
                     <Input.Header>
                         <Input.Title>Destination</Input.Title>
                     </Input.Header>
@@ -158,24 +165,28 @@ export function TransferUsdt() {
                     </Input.Field>
                 </Input>
                 <div className="flex flex-col gap-1 text-sm text-foreground">
-                    <span className="flex items-center gap-2">
+                    <span className="flex items-center gap-2 text-secondary-foreground">
                         Sender Jetton Wallet {loading && balanceSkeleton}
                     </span>
-                    <a target="_blank" href={`https://tonviewer.com/${jettonWallet}`}>
+                    <a
+                        className="break-all text-primary"
+                        target="_blank"
+                        href={`https://tonviewer.com/${jettonWallet}`}
+                    >
                         {jettonWallet}
                     </a>
                 </div>
             </div>
 
             {wallet ? (
-                <Button className="mt-4" onClick={handleSend} loading={loading}>
+                <Button onClick={handleSend} loading={loading}>
                     Send USDT
                 </Button>
             ) : (
-                <Button className="mt-4" onClick={() => tonConnectUi.openModal()}>
+                <Button onClick={() => tonConnectUi.openModal()}>
                     Connect wallet to send USDT
                 </Button>
             )}
-        </div>
+        </>
     );
 }

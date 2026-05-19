@@ -5,6 +5,7 @@ import { CHAIN, SendTransactionRequest, useTonConnectUI, useTonWallet } from '@t
 
 import { Button } from '@/core/components/ui/button';
 import { Skeleton } from '@/core/components/ui/skeleton';
+import { ResultPanel } from '@/core/components/result-panel';
 import { TonProofDemoApi } from '@/core/lib/ton-proof-demo-api';
 
 // In this example, we are using a predefined smart contract state initialization (`stateInit`)
@@ -50,9 +51,7 @@ type RetryPrompt =
     | { kind: 'sendTx'; dispatched: boolean }
     | { kind: 'signMessage'; dispatched: boolean };
 
-const CHECKBOX_LABEL_CLS = 'ml-[2px] mt-3 text-[15px] font-medium text-secondary-foreground';
-const JSON_LABEL_CLS =
-    'mb-[6px] ml-[2px] mt-[18px] self-start text-[15px] font-medium tracking-[0.01em] text-secondary-foreground';
+const CHECKBOX_LABEL_CLS = 'flex items-center gap-2 text-[15px] font-medium text-secondary-foreground';
 
 export function TxForm() {
     const [tx, setTx] = useState(defaultTx);
@@ -157,13 +156,13 @@ export function TxForm() {
     };
 
     return (
-        <div className="flex w-full flex-1 flex-col items-center gap-5 p-5">
-            <h3 className="text-[28px] text-foreground/80">Configure and send transaction</h3>
+        <>
             <div className="flex flex-wrap justify-center gap-3">
                 <Button onClick={() => setTx(defaultTx)}>Set message payload</Button>
                 <Button onClick={() => setTx(defaultTxWithMessages)}>Set items payload</Button>
                 <Button onClick={() => setTx(buildNftItemsPayload())}>Set NFT items payload</Button>
             </div>
+
             <label className={CHECKBOX_LABEL_CLS}>
                 <input
                     type="checkbox"
@@ -186,13 +185,12 @@ export function TxForm() {
                     type="checkbox"
                     checked={waitForTx}
                     onChange={e => setWaitForTx(e.target.checked)}
-                    className="mr-2"
                 />
                 Wait for transaction confirmation
             </label>
 
             {waitForTx && (
-                <div className="ml-[2px] mt-2 flex items-center gap-2 text-[15px] text-secondary-foreground">
+                <div className="flex items-center gap-2 text-[15px] text-secondary-foreground">
                     {waitingTx ? (
                         <>
                             <span>Waiting for transaction confirmation...</span>
@@ -229,7 +227,7 @@ export function TxForm() {
 
             {retryPrompt && (
                 <div
-                    className={`my-3 rounded-lg border p-3 text-sm leading-[1.45] text-foreground ${
+                    className={`rounded-lg border p-3 text-sm leading-[1.45] text-foreground ${
                         retryPrompt.dispatched
                             ? 'border-error/40 bg-error/15'
                             : 'border-primary/40 bg-primary/10'
@@ -271,22 +269,16 @@ export function TxForm() {
             )}
 
             {txResult && (
-                <>
-                    <div className={JSON_LABEL_CLS}>Transaction</div>
-                    <div className="w-full">
-                        <ReactJson src={txResult} name={false} theme="ocean" collapsed={false} />
-                    </div>
-                </>
+                <ResultPanel title="Transaction">
+                    <ReactJson src={txResult} name={false} theme="ocean" collapsed={false} />
+                </ResultPanel>
             )}
 
             {signResult && (
-                <>
-                    <div className={JSON_LABEL_CLS}>Sign Message Result</div>
-                    <div className="w-full">
-                        <ReactJson src={signResult} name={false} theme="ocean" collapsed={false} />
-                    </div>
-                </>
+                <ResultPanel title="Sign Message Result">
+                    <ReactJson src={signResult} name={false} theme="ocean" collapsed={false} />
+                </ResultPanel>
             )}
-        </div>
+        </>
     );
 }

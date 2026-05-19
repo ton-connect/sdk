@@ -5,6 +5,7 @@ import { Button } from '@/core/components/ui/button';
 import { Input } from '@/core/components/ui/input';
 import { Select } from '@/core/components/ui/select';
 import { ChevronDownIcon } from '@/core/components/ui/icons';
+import { ResultPanel } from '@/core/components/result-panel';
 import { TonProofDemoApi } from '@/core/lib/ton-proof-demo-api';
 
 export const FindTransactionDemo = () => {
@@ -40,51 +41,45 @@ export const FindTransactionDemo = () => {
     };
 
     return (
-        <div className="mx-auto mt-[60px] flex w-full flex-col items-center gap-5 px-7 pb-6 pt-7">
-            <h3 className="text-foreground/80">Find Transaction by External-in Message BOC</h3>
-            <div className="flex w-full max-w-[600px] flex-col gap-4">
-                <Input>
-                    <Input.Header>
-                        <Input.Title>External-in message BOC</Input.Title>
-                    </Input.Header>
-                    <Input.Field>
-                        <Input.Input
-                            type="text"
-                            placeholder="Paste base64 BOC"
-                            value={boc}
-                            onChange={e => setBoc(e.target.value)}
-                        />
-                    </Input.Field>
-                </Input>
-                <div className="flex w-full items-center gap-3">
-                    <span className="text-sm font-medium text-secondary-foreground">Network:</span>
-                    <Select.Root
-                        value={network}
-                        onValueChange={v => setNetwork(v as 'mainnet' | 'testnet')}
-                    >
-                        <Select.Trigger variant="gray" size="m" borderRadius="l">
-                            {network}
-                            <ChevronDownIcon size={16} />
-                        </Select.Trigger>
-                        <Select.Content>
-                            <Select.Item value="mainnet">mainnet</Select.Item>
-                            <Select.Item value="testnet">testnet</Select.Item>
-                        </Select.Content>
-                    </Select.Root>
-                </div>
-                <Button onClick={handleFindTx} disabled={txLoading || !boc}>
-                    {txLoading ? 'Searching...' : 'Find Transaction'}
-                </Button>
-                {txError && <div className="text-error">{txError}</div>}
+        <>
+            <Input size="s">
+                <Input.Header>
+                    <Input.Title>External-in message BOC</Input.Title>
+                </Input.Header>
+                <Input.Field>
+                    <Input.Input
+                        type="text"
+                        placeholder="Paste base64 BOC"
+                        value={boc}
+                        onChange={e => setBoc(e.target.value)}
+                    />
+                </Input.Field>
+            </Input>
+            <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-secondary-foreground">Network:</span>
+                <Select.Root
+                    value={network}
+                    onValueChange={v => setNetwork(v as 'mainnet' | 'testnet')}
+                >
+                    <Select.Trigger variant="gray" size="s" borderRadius="l">
+                        {network}
+                        <ChevronDownIcon size={16} />
+                    </Select.Trigger>
+                    <Select.Content>
+                        <Select.Item value="mainnet">mainnet</Select.Item>
+                        <Select.Item value="testnet">testnet</Select.Item>
+                    </Select.Content>
+                </Select.Root>
             </div>
+            <Button onClick={handleFindTx} disabled={txLoading || !boc}>
+                {txLoading ? 'Searching...' : 'Find Transaction'}
+            </Button>
+            {txError && <div className="text-sm text-error">{txError}</div>}
             {txResult !== null && (
-                <>
-                    <div className="mb-[6px] ml-[2px] mt-[18px] self-start text-[15px] font-medium tracking-[0.01em] text-secondary-foreground">
-                        Transaction
-                    </div>
+                <ResultPanel title="Transaction">
                     <ReactJson src={txResult} name={false} theme="ocean" collapsed={false} />
-                </>
+                </ResultPanel>
             )}
-        </div>
+        </>
     );
 };

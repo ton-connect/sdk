@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import ReactJson from 'react-json-view';
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
+import { ShieldCheck } from 'lucide-react';
 
 import { Button } from '@/core/components/ui/button';
+import { EmptyState } from '@/core/components/empty-state';
+import { ResultPanel } from '@/core/components/result-panel';
 import { TonProofDemoApi } from '@/core/lib/ton-proof-demo-api';
 import useInterval from '@/core/hooks/use-interval';
 
@@ -69,27 +72,26 @@ export const TonProofDemo = () => {
     }, [wallet]);
 
     if (!authorized) {
-        return null;
+        return (
+            <EmptyState
+                icon={ShieldCheck}
+                title="Authenticate to continue"
+                description="Connect your wallet and approve the ton_proof challenge to call the demo backend."
+                action={
+                    <Button onClick={() => tonConnectUI.openModal()}>Connect wallet</Button>
+                }
+            />
+        );
     }
 
     return (
-        <div className="mt-[60px] flex w-full flex-col items-center gap-5 p-5">
-            <h3 className="text-foreground/80">Demo backend API with ton_proof verification</h3>
-            {authorized ? (
-                <Button onClick={handleClick}>Call backend getAccountInfo()</Button>
-            ) : (
-                <div className="text-[18px] leading-5 text-primary">Connect wallet to call API</div>
-            )}
+        <>
+            <Button onClick={handleClick}>Call backend getAccountInfo()</Button>
             {data && Object.keys(data).length > 0 && (
-                <>
-                    <div className="mb-[6px] ml-[2px] mt-[18px] self-start text-[15px] font-medium tracking-[0.01em] text-secondary-foreground">
-                        Response
-                    </div>
-                    <div className="w-full">
-                        <ReactJson src={data} name={false} theme="ocean" collapsed={false} />
-                    </div>
-                </>
+                <ResultPanel title="Response">
+                    <ReactJson src={data} name={false} theme="ocean" collapsed={false} />
+                </ResultPanel>
             )}
-        </div>
+        </>
     );
 };

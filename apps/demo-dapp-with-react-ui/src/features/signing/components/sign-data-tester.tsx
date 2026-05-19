@@ -10,6 +10,7 @@ import { useState } from 'react';
 import ReactJson from 'react-json-view';
 
 import { Button } from '@/core/components/ui/button';
+import { ResultPanel } from '@/core/components/result-panel';
 import { TonProofDemoApi } from '@/core/lib/ton-proof-demo-api';
 
 const textPayload = (): SignDataPayload => ({
@@ -37,9 +38,6 @@ const cellPayload = (): SignDataPayload => {
 // already have signed the request and the signature is just lost in transit. Surface a button the
 // user can press deliberately and warn loudly in the dangerous case.
 type RetryPrompt = { payload: SignDataPayload; label: string; dispatched: boolean };
-
-const JSON_LABEL_CLS =
-    'mb-[6px] ml-[2px] mt-[18px] self-start text-[15px] font-medium tracking-[0.01em] text-secondary-foreground';
 
 export function SignDataTester() {
     const wallet = useTonWallet();
@@ -92,15 +90,8 @@ export function SignDataTester() {
     };
 
     return (
-        <div className="mt-[60px] flex w-full flex-col items-center gap-5 p-5">
-            <h3 className="text-foreground/80">Sign Data Test & Verification</h3>
-
-            <div className="text-[18px] text-foreground/80">
-                Test different types of data signing: text, binary, and cell formats with signature
-                verification
-            </div>
-
-            <label className="ml-[2px] mt-3 text-[15px] font-medium text-secondary-foreground">
+        <>
+            <label className="flex items-center gap-2 text-[15px] font-medium text-secondary-foreground">
                 <input
                     type="checkbox"
                     checked={embeddedRequest}
@@ -109,36 +100,36 @@ export function SignDataTester() {
                 Embed request in connect
             </label>
 
-            {wallet || embeddedRequest ? (
-                <div className="flex flex-wrap justify-center gap-5">
-                    <Button
-                        onClick={() => requestSign(textPayload(), 'Text')}
-                        disabled={Boolean(retryPrompt)}
-                    >
-                        Sign Text
-                    </Button>
-                    <Button
-                        onClick={() => requestSign(binaryPayload(), 'Binary')}
-                        disabled={Boolean(retryPrompt)}
-                    >
-                        Sign Binary
-                    </Button>
-                    <Button
-                        onClick={() => requestSign(cellPayload(), 'Cell')}
-                        disabled={Boolean(retryPrompt)}
-                    >
-                        Sign Cell
-                    </Button>
-                </div>
-            ) : (
-                <div className="text-[18px] leading-5 text-primary">
-                    Connect wallet to test signing
-                </div>
+            <div className="flex flex-wrap justify-center gap-3">
+                <Button
+                    onClick={() => requestSign(textPayload(), 'Text')}
+                    disabled={Boolean(retryPrompt) || (!wallet && !embeddedRequest)}
+                >
+                    Sign Text
+                </Button>
+                <Button
+                    onClick={() => requestSign(binaryPayload(), 'Binary')}
+                    disabled={Boolean(retryPrompt) || (!wallet && !embeddedRequest)}
+                >
+                    Sign Binary
+                </Button>
+                <Button
+                    onClick={() => requestSign(cellPayload(), 'Cell')}
+                    disabled={Boolean(retryPrompt) || (!wallet && !embeddedRequest)}
+                >
+                    Sign Cell
+                </Button>
+            </div>
+
+            {!wallet && !embeddedRequest && (
+                <p className="text-sm text-secondary-foreground">
+                    Connect a wallet, or toggle <em>Embed request in connect</em> to test signing.
+                </p>
             )}
 
             {retryPrompt && (
                 <div
-                    className={`my-3 rounded-lg border p-3 text-sm leading-[1.45] text-[#f0f6fb] ${
+                    className={`rounded-lg border p-3 text-sm leading-[1.45] text-foreground ${
                         retryPrompt.dispatched
                             ? 'border-error/40 bg-error/15'
                             : 'border-primary/40 bg-primary/10'
@@ -179,46 +170,32 @@ export function SignDataTester() {
             )}
 
             {signDataRequest && (
-                <div className="w-full max-w-[800px] text-left">
-                    <div className={JSON_LABEL_CLS}>📤 Sign Data Request</div>
-                    <div className="w-full">
-                        <ReactJson
-                            src={signDataRequest}
-                            name={false}
-                            theme="ocean"
-                            collapsed={false}
-                        />
-                    </div>
-                </div>
+                <ResultPanel title="📤 Sign Data Request">
+                    <ReactJson src={signDataRequest} name={false} theme="ocean" collapsed={false} />
+                </ResultPanel>
             )}
 
             {signDataResponse && (
-                <div className="w-full max-w-[800px] text-left">
-                    <div className={JSON_LABEL_CLS}>📥 Sign Data Response</div>
-                    <div className="w-full">
-                        <ReactJson
-                            src={signDataResponse}
-                            name={false}
-                            theme="ocean"
-                            collapsed={false}
-                        />
-                    </div>
-                </div>
+                <ResultPanel title="📥 Sign Data Response">
+                    <ReactJson
+                        src={signDataResponse}
+                        name={false}
+                        theme="ocean"
+                        collapsed={false}
+                    />
+                </ResultPanel>
             )}
 
             {verificationResult && (
-                <div className="w-full max-w-[800px] text-left">
-                    <div className={JSON_LABEL_CLS}>✅ Verification Result</div>
-                    <div className="w-full">
-                        <ReactJson
-                            src={verificationResult}
-                            name={false}
-                            theme="ocean"
-                            collapsed={false}
-                        />
-                    </div>
-                </div>
+                <ResultPanel title="✅ Verification Result">
+                    <ReactJson
+                        src={verificationResult}
+                        name={false}
+                        theme="ocean"
+                        collapsed={false}
+                    />
+                </ResultPanel>
             )}
-        </div>
+        </>
     );
 }

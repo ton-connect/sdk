@@ -5,6 +5,7 @@ import { Address } from '@ton/core';
 
 import { Button } from '@/core/components/ui/button';
 import { Input } from '@/core/components/ui/input';
+import { ResultPanel } from '@/core/components/result-panel';
 import { sendItems } from '../lib/gasless-items';
 import { sendMessages } from '../lib/gasless-messages';
 
@@ -68,16 +69,9 @@ export function GaslessDemo() {
     };
 
     return (
-        <div className="mt-[60px] flex flex-col items-center gap-4 p-5">
-            <h3 id="gasless-usdt" className="m-0 text-foreground/80">
-                Gasless USDT Transfer
-            </h3>
-            <p className="m-0 max-w-[600px] text-center text-[15px] text-foreground/60">
-                Transfer jettons without TON in wallet — fee is paid in the jetton itself.
-            </p>
-
-            <div className="flex w-[500px] max-w-full flex-col gap-2.5">
-                <Input>
+        <>
+            <div className="flex flex-col gap-3">
+                <Input size="s">
                     <Input.Header>
                         <Input.Title>Destination</Input.Title>
                     </Input.Header>
@@ -89,7 +83,7 @@ export function GaslessDemo() {
                         />
                     </Input.Field>
                 </Input>
-                <Input>
+                <Input size="s">
                     <Input.Header>
                         <Input.Title>Amount (nano jettons)</Input.Title>
                     </Input.Header>
@@ -103,7 +97,7 @@ export function GaslessDemo() {
                 </Input>
             </div>
 
-            <div className="mt-2 flex flex-wrap justify-center gap-4">
+            <div className="flex flex-wrap justify-center gap-3">
                 {wallet ? (
                     <>
                         <Button onClick={handleGaslessItems}>Sign gasless items</Button>
@@ -120,8 +114,7 @@ export function GaslessDemo() {
             {error && <div className="text-sm text-error">Error: {error}</div>}
 
             {result && (
-                <div className="w-full max-w-[600px] text-left">
-                    <h4 className="mb-2 text-[15px] text-foreground/90">Result</h4>
+                <ResultPanel title="Result">
                     <ReactJson
                         src={result}
                         name={false}
@@ -129,8 +122,8 @@ export function GaslessDemo() {
                         collapsed={false}
                         style={{ borderRadius: 8, padding: 10, fontSize: 12 }}
                     />
-                </div>
+                </ResultPanel>
             )}
-        </div>
+        </>
     );
 }

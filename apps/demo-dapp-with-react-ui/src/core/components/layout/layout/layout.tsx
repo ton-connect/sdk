@@ -39,6 +39,7 @@ import { NetworkPicker } from '@/features/network';
 interface LayoutProps {
     children: ReactNode;
     title?: string | ReactNode;
+    subtitle?: ReactNode;
 }
 
 type NavLinkSpec = { to: string; label: string; icon: ComponentType<{ className?: string }> };
@@ -170,36 +171,35 @@ const AppSidebar: FC = () => {
     );
 };
 
-export const Layout: FC<LayoutProps> = ({ children, title }) => {
+export const Layout: FC<LayoutProps> = ({ children, title, subtitle }) => {
     return (
         <SidebarProvider>
             <AppSidebar />
 
             <SidebarInset>
                 <header className="sticky top-0 z-10 flex h-14 items-center gap-3 border-b border-tertiary bg-background/80 px-4 backdrop-blur">
-                    <div className="hidden text-lg font-semibold md:flex md:items-center md:justify-center">
+                    <div className="md:hidden">
+                        <SidebarTrigger />
+                    </div>
+                    <div className="flex items-center text-lg font-semibold">
                         {typeof title === 'string' ? <h1>{title}</h1> : title}
                     </div>
 
-                    <div className="ml-auto">
+                    <div className="ml-auto flex items-center gap-2">
                         <TonConnectButton />
-                    </div>
-                    <ThemeSwitcher />
-                    <div className="md:hidden">
-                        <SidebarTrigger />
+                        <ThemeSwitcher />
                     </div>
                 </header>
 
                 <main className="mx-auto w-full max-w-4xl flex-1 p-4">
-                    <div className="flex w-full items-center justify-start md:hidden">
-                        {typeof title === 'string' ? (
-                            <h1 className="mb-2 text-lg font-semibold">{title}</h1>
-                        ) : (
-                            title
+                    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 py-6">
+                        {subtitle && (
+                            <p className="text-[15px] leading-relaxed text-secondary-foreground">
+                                {subtitle}
+                            </p>
                         )}
+                        {children}
                     </div>
-
-                    {children}
                 </main>
 
                 <footer className="pb-4 pt-2 text-center text-xs text-tertiary-foreground">

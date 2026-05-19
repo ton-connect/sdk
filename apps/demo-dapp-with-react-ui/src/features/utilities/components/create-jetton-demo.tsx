@@ -1,8 +1,11 @@
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { useState } from 'react';
 import ReactJson from 'react-json-view';
+import { Wallet } from 'lucide-react';
 
 import { Button } from '@/core/components/ui/button';
+import { EmptyState } from '@/core/components/empty-state';
+import { ResultPanel } from '@/core/components/result-panel';
 import { CreateJettonRequestDto } from '@/server/dto/create-jetton-request-dto';
 import { TonProofDemoApi } from '@/core/lib/ton-proof-demo-api';
 
@@ -32,26 +35,27 @@ export const CreateJettonDemo = () => {
         }
     };
 
+    if (!wallet) {
+        return (
+            <EmptyState
+                icon={Wallet}
+                title="Connect a wallet"
+                description="A connected wallet is required to mint the demo jetton on-chain."
+                action={
+                    <Button onClick={() => tonConnectUI.openModal()}>Connect wallet</Button>
+                }
+            />
+        );
+    }
+
     return (
-        <div className="mt-[60px] flex w-full flex-col items-center gap-5 p-5">
-            <h3 className="text-foreground/80">Create Jetton</h3>
-            {wallet ? (
-                <Button onClick={handleClick}>Send create jetton</Button>
-            ) : (
-                <div className="text-[18px] leading-5 text-primary">
-                    Connect wallet to send transaction
-                </div>
-            )}
+        <>
+            <Button onClick={handleClick}>Send create jetton</Button>
             {data && Object.keys(data).length > 0 && (
-                <>
-                    <div className="mb-[6px] ml-[2px] mt-[18px] self-start text-[15px] font-medium tracking-[0.01em] text-secondary-foreground">
-                        Response
-                    </div>
-                    <div className="w-full">
-                        <ReactJson src={data} name={false} theme="ocean" collapsed={false} />
-                    </div>
-                </>
+                <ResultPanel title="Response">
+                    <ReactJson src={data} name={false} theme="ocean" collapsed={false} />
+                </ResultPanel>
             )}
-        </div>
+        </>
     );
 };

@@ -33,7 +33,7 @@ export function NetworkPicker() {
 
     return (
         <Select.Root value={value} onValueChange={setDesired} disabled={!!wallet}>
-            <Select.Trigger variant="gray" size="m" borderRadius="l" disabled={!!wallet}>
+            <Select.Trigger variant="gray" size="s" borderRadius="l" disabled={!!wallet}>
                 {label}
                 <ChevronDownIcon size={16} />
             </Select.Trigger>
