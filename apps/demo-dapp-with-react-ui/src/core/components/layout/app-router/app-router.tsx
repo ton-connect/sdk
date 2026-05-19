@@ -1,4 +1,7 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+
+import { PreserveSearchNavigate } from '@/core/components/router/preserve-search-navigate';
+import { TonConnectSettingsSync } from '@/features/dev-settings/components/ton-connect-settings-sync';
 
 import {
     BatchLimitsPage,
@@ -18,8 +21,9 @@ import {
 export const AppRouter = () => {
     return (
         <BrowserRouter>
+            <TonConnectSettingsSync />
             <Routes>
-                <Route path="/" element={<Navigate to="/tx-form" replace />} />
+                <Route path="/" element={<PreserveSearchNavigate to="/tx-form" replace />} />
                 <Route path="/tx-form" element={<TxFormPage />} />
                 <Route path="/gasless" element={<GaslessPage />} />
                 <Route path="/batch-limits" element={<BatchLimitsPage />} />
@@ -32,7 +36,7 @@ export const AppRouter = () => {
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="/iframe" element={<IframePage />} />
                 <Route path="/iframe/iframe" element={<IframeIframePage />} />
-                <Route path="*" element={<Navigate to="/tx-form" replace />} />
+                <Route path="*" element={<PreserveSearchNavigate to="/tx-form" replace />} />
             </Routes>
         </BrowserRouter>
     );

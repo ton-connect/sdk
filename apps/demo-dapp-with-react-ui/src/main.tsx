@@ -5,15 +5,12 @@ import '@/core/styles/index.css';
 import eruda from 'eruda';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { enableQaMode } from '@tonconnect/ui-react';
-
-import { App } from '@/app';
+import { App } from '@/App';
+import { initQaModeFromUrl } from '@/core/utils/qa-mode-from-url';
 import { runSingleInstance } from '@/core/utils/run-single-instance';
 import { getTonconnectVersion } from '@/core/utils/get-tonconnect-version';
 
-if (import.meta.env.VITE_QA_MODE === 'enable') {
-    enableQaMode();
-}
+initQaModeFromUrl();
 
 getTonconnectVersion();
 

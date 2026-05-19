@@ -157,9 +157,7 @@ export function SignDataTester() {
                         )}
                     </p>
                     <div className="flex gap-2">
-                        <Button
-                            onClick={() => requestSign(retryPrompt.payload, retryPrompt.label)}
-                        >
+                        <Button onClick={() => requestSign(retryPrompt.payload, retryPrompt.label)}>
                             Retry signing ({retryPrompt.label})
                         </Button>
                         <Button variant="ghost" onClick={() => setRetryPrompt(null)}>

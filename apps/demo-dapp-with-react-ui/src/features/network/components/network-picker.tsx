@@ -13,7 +13,11 @@ const NETWORK_LABELS: Record<string, string> = {
     [CHAIN_TETRA]: 'Tetra'
 };
 
-export function NetworkPicker() {
+interface NetworkPickerProps {
+    triggerClassName?: string;
+}
+
+export function NetworkPicker({ triggerClassName }: NetworkPickerProps = {}) {
     const [tonConnectUI] = useTonConnectUI();
     const wallet = useTonWallet();
     const [desired, setDesired] = useQueryState('chain');
@@ -33,9 +37,16 @@ export function NetworkPicker() {
 
     return (
         <Select.Root value={value} onValueChange={setDesired} disabled={!!wallet}>
-            <Select.Trigger variant="gray" size="s" borderRadius="l" disabled={!!wallet}>
-                {label}
-                <ChevronDownIcon size={16} />
+            <Select.Trigger
+                variant="gray"
+                size="s"
+                borderRadius="l"
+                fullWidth
+                disabled={!!wallet}
+                className={triggerClassName}
+            >
+                <span className="truncate text-left">{label}</span>
+                <ChevronDownIcon size={16} className="shrink-0" />
             </Select.Trigger>
             <Select.Content>
                 <Select.Item value="">Any Network</Select.Item>

@@ -77,9 +77,7 @@ export const TonProofDemo = () => {
                 icon={ShieldCheck}
                 title="Authenticate to continue"
                 description="Connect your wallet and approve the ton_proof challenge to call the demo backend."
-                action={
-                    <Button onClick={() => tonConnectUI.openModal()}>Connect wallet</Button>
-                }
+                action={<Button onClick={() => tonConnectUI.openModal()}>Connect wallet</Button>}
             />
         );
     }

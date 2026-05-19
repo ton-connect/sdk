@@ -40,32 +40,38 @@ const DialogPortal: FC<DialogPortalProps> = ({ children, container }) => {
     return createPortal(children, container ?? document.body);
 };
 
-const DialogOverlay = forwardRef<ComponentRef<'div'>, ComponentPropsWithoutRef<'div'>>((props, ref) => {
-    useEffect(() => {
-        document.body.style.overflow = 'hidden';
-        return () => {
-            document.body.style.overflow = '';
-        };
-    }, []);
+const DialogOverlay = forwardRef<ComponentRef<'div'>, ComponentPropsWithoutRef<'div'>>(
+    (props, ref) => {
+        useEffect(() => {
+            document.body.style.overflow = 'hidden';
+            return () => {
+                document.body.style.overflow = '';
+            };
+        }, []);
 
-    return <div {...props} ref={ref} />;
-});
+        return <div {...props} ref={ref} />;
+    }
+);
 
 DialogOverlay.displayName = 'DialogOverlay';
 
-const DialogContent = forwardRef<ComponentRef<'div'>, ComponentPropsWithoutRef<'div'>>((props, ref) => {
-    const { onOpenChange, titleId } = useDialogContext();
+const DialogContent = forwardRef<ComponentRef<'div'>, ComponentPropsWithoutRef<'div'>>(
+    (props, ref) => {
+        const { onOpenChange, titleId } = useDialogContext();
 
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') onOpenChange(false);
-        };
-        document.addEventListener('keydown', handleKeyDown);
-        return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [onOpenChange]);
+        useEffect(() => {
+            const handleKeyDown = (e: KeyboardEvent) => {
+                if (e.key === 'Escape') onOpenChange(false);
+            };
+            document.addEventListener('keydown', handleKeyDown);
+            return () => document.removeEventListener('keydown', handleKeyDown);
+        }, [onOpenChange]);
 
-    return <div role="dialog" aria-modal="true" aria-labelledby={titleId} {...props} ref={ref} />;
-});
+        return (
+            <div role="dialog" aria-modal="true" aria-labelledby={titleId} {...props} ref={ref} />
+        );
+    }
+);
 
 DialogContent.displayName = 'DialogContent';
 
@@ -84,13 +90,13 @@ const DialogClose = forwardRef<ComponentRef<'button'>, ComponentPropsWithoutRef<
                 type="button"
                 {...props}
                 ref={ref}
-                onClick={(e) => {
+                onClick={e => {
                     onClick?.(e);
                     onOpenChange(false);
                 }}
             />
         );
-    },
+    }
 );
 
 DialogClose.displayName = 'DialogClose';
@@ -101,5 +107,5 @@ export const Dialog = {
     Overlay: DialogOverlay,
     Content: DialogContent,
     Title: DialogTitle,
-    Close: DialogClose,
+    Close: DialogClose
 };
