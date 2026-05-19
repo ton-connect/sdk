@@ -2,12 +2,12 @@ import { THEME } from '@tonconnect/ui-react';
 import { RotateCcw } from 'lucide-react';
 import type { ReactNode } from 'react';
 
-import { Button } from '@/core/components/ui/button';
-import { Checkbox } from '@/core/components/ui/checkbox';
-import { Input } from '@/core/components/ui/input';
-import { Select } from '@/core/components/ui/select';
-import { ChevronDownIcon } from '@/core/components/ui/icons';
-import { NetworkPicker } from '@/features/network';
+import { Button } from '../../../core/components/ui/button/index';
+import { Checkbox } from '../../../core/components/ui/checkbox/index';
+import { Input } from '../../../core/components/ui/input/index';
+import { Select } from '../../../core/components/ui/select/index';
+import { ChevronDownIcon } from '../../../core/components/ui/icons/index';
+import { NetworkPicker } from '../../network/index';
 import type { ActionTrigger, SkipRedirect } from '../lib/settings-url';
 import {
     WALLET_FEATURES_PRESETS,

@@ -1,5 +1,5 @@
-import { Layout } from '@/core/components';
-import { MerkleExample } from '@/features/utilities';
+import { Layout } from '../core/components/index';
+import { MerkleExample } from '../features/utilities/index';
 
 export const MerklePage = () => (
     <Layout

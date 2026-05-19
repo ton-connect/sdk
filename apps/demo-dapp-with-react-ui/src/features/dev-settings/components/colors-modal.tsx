@@ -3,9 +3,9 @@ import { THEME, useTonConnectUI } from '@tonconnect/ui-react';
 import { Palette, RotateCcw } from 'lucide-react';
 import { useState } from 'react';
 
-import { Button } from '@/core/components/ui/button';
-import { Modal } from '@/core/components/ui/modal';
-import { cn } from '@/core/lib/utils';
+import { Button } from '../../../core/components/ui/button/index';
+import { Modal } from '../../../core/components/ui/modal/index';
+import { cn } from '../../../core/lib/utils';
 import { getDefaultColorsForTheme } from '../lib/default-colors';
 import { ColorsSelect } from './colors-select';
 

@@ -3,11 +3,11 @@ import ReactJson from 'react-json-view';
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { ShieldCheck } from 'lucide-react';
 
-import { Button } from '@/core/components/ui/button';
-import { EmptyState } from '@/core/components/empty-state';
-import { ResultPanel } from '@/core/components/result-panel';
-import { TonProofDemoApi } from '@/core/lib/ton-proof-demo-api';
-import useInterval from '@/core/hooks/use-interval';
+import { Button } from '../../../core/components/ui/button/index';
+import { EmptyState } from '../../../core/components/empty-state/index';
+import { ResultPanel } from '../../../core/components/result-panel/index';
+import { TonProofDemoApi } from '../../../core/lib/ton-proof-demo-api';
+import useInterval from '../../../core/hooks/use-interval';
 
 export const TonProofDemo = () => {
     const firstProofLoading = useRef<boolean>(true);

@@ -3,11 +3,11 @@ import { beginCell } from '@ton/ton';
 import ReactJson, { InteractionProps } from 'react-json-view';
 import { CHAIN, SendTransactionRequest, useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 
-import { Button } from '@/core/components/ui/button';
-import { Checkbox } from '@/core/components/ui/checkbox';
-import { Skeleton } from '@/core/components/ui/skeleton';
-import { ResultPanel } from '@/core/components/result-panel';
-import { TonProofDemoApi } from '@/core/lib/ton-proof-demo-api';
+import { Button } from '../../../core/components/ui/button/index';
+import { Checkbox } from '../../../core/components/ui/checkbox/index';
+import { Skeleton } from '../../../core/components/ui/skeleton/index';
+import { ResultPanel } from '../../../core/components/result-panel/index';
+import { TonProofDemoApi } from '../../../core/lib/ton-proof-demo-api';
 
 // In this example, we are using a predefined smart contract state initialization (`stateInit`)
 // to interact with an "EchoContract". This contract is designed to send the value back to the sender,

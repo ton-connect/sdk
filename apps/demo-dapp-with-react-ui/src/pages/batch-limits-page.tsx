@@ -1,5 +1,5 @@
-import { Layout } from '@/core/components';
-import { WalletBatchLimitsTester } from '@/features/transactions';
+import { Layout } from '../core/components/index';
+import { WalletBatchLimitsTester } from '../features/transactions/index';
 
 export const BatchLimitsPage = () => (
     <Layout
