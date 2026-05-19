@@ -37,33 +37,31 @@ export function ValidUntilField({
                     {timer.display}
                 </span>
             </Input.Header>
-            <div className="flex flex-wrap gap-2">
-                <div className="min-w-[140px] flex-1">
-                    <Input.Field>
-                        <Input.Input
-                            type="number"
-                            value={validUntil}
-                            onChange={e => onChange(parseInt(e.target.value) || 0)}
-                        />
-                    </Input.Field>
-                </div>
-                <div className="flex flex-wrap gap-1">
-                    <Button variant="ghost" size="s" onClick={() => onSetFromNow(-600)}>
-                        −10m
-                    </Button>
-                    <Button variant="ghost" size="s" onClick={() => onSetFromNow(-300)}>
-                        −5m
-                    </Button>
-                    <Button variant="ghost" size="s" onClick={() => onSetFromNow(60)}>
-                        +1m
-                    </Button>
-                    <Button variant="ghost" size="s" onClick={() => onSetFromNow(300)}>
-                        +5m
-                    </Button>
-                    <Button variant="ghost" size="s" onClick={() => onSetFromNow(43_200)}>
-                        +12h
-                    </Button>
-                </div>
+
+            <Input.Field>
+                <Input.Input
+                    type="number"
+                    value={validUntil}
+                    onChange={e => onChange(parseInt(e.target.value) || 0)}
+                />
+            </Input.Field>
+
+            <div className="flex flex-wrap gap-2 pt-1">
+                <Button variant="bezeled" size="xs" onClick={() => onSetFromNow(-600)}>
+                    −10m
+                </Button>
+                <Button variant="bezeled" size="xs" onClick={() => onSetFromNow(-300)}>
+                    −5m
+                </Button>
+                <Button variant="bezeled" size="xs" onClick={() => onSetFromNow(60)}>
+                    +1m
+                </Button>
+                <Button variant="bezeled" size="xs" onClick={() => onSetFromNow(300)}>
+                    +5m
+                </Button>
+                <Button variant="bezeled" size="xs" onClick={() => onSetFromNow(43_200)}>
+                    +12h
+                </Button>
             </div>
         </Input>
     );

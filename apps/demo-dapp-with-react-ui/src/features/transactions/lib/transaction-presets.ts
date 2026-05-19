@@ -1,4 +1,11 @@
+/**
+ * In-memory form draft for a single message. `id` is a stable identifier used
+ * as React key and as map-key for amount-unit / collapsible-expanded state — so
+ * those don't drift when messages get reordered or removed mid-list. The id is
+ * NOT part of the outgoing TonConnect payload (build-outgoing-messages strips it).
+ */
 export interface TransactionMessage {
+    id: string;
     address: string;
     amount: string; // Always stored in nanotons
     stateInit?: string;
@@ -6,6 +13,26 @@ export interface TransactionMessage {
 }
 
 export type AmountUnit = 'TON' | 'nano';
+
+/** Generate a stable id for a fresh in-memory message. */
+export const newMessageId = (): string =>
+    typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+        ? crypto.randomUUID()
+        : Math.random().toString(36).slice(2);
+
+/** A frozen snapshot of a send attempt — request + wallet response (or error). */
+export interface OperationResult {
+    id: string;
+    timestamp: number;
+    /** The exact request JSON sent to the wallet (for replay / debug). */
+    requestSnapshot: string;
+    /** Pretty-printed wallet response or `{ error: string }`. */
+    response: string;
+    status: 'success' | 'error';
+    errorMessage?: string;
+    boc?: string;
+    validUntil?: number;
+}
 
 export const PRESETS = {
     simple: {

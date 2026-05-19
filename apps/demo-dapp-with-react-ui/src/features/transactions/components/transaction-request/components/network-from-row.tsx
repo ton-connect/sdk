@@ -1,3 +1,5 @@
+import { ClipboardPaste } from 'lucide-react';
+
 import { Input } from '@/core/components/ui/input';
 
 interface NetworkFromRowProps {
@@ -17,6 +19,16 @@ export function NetworkFromRow({
     walletNetwork,
     isConnectionRestored
 }: NetworkFromRowProps) {
+    const pasteFromClipboard = async () => {
+        try {
+            const text = await navigator.clipboard.readText();
+            if (text) onFromChange(text.trim());
+        } catch (error) {
+            // permission denied / clipboard unavailable — silent
+            console.warn('Clipboard read failed', error);
+        }
+    };
+
     return (
         <div className="grid gap-3 md:grid-cols-2">
             <Input size="s">
@@ -46,6 +58,16 @@ export function NetworkFromRow({
                         onChange={e => onFromChange(e.target.value)}
                         placeholder="Sender address"
                     />
+                    <Input.Slot side="right">
+                        <button
+                            type="button"
+                            onClick={pasteFromClipboard}
+                            aria-label="Paste from clipboard"
+                            className="inline-flex cursor-pointer items-center justify-center rounded p-1 text-secondary-foreground transition-colors hover:bg-tertiary hover:text-foreground"
+                        >
+                            <ClipboardPaste className="size-4" />
+                        </button>
+                    </Input.Slot>
                 </Input.Field>
             </Input>
         </div>

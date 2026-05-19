@@ -19,8 +19,9 @@ interface MessageCardProps {
     onAmountChange: (value: string) => void;
     amountUnit: AmountUnit;
     onAmountUnitChange: (unit: AmountUnit) => void;
-    expanded: boolean;
-    onToggleExpand: () => void;
+    /** `undefined` = use default (auto-open if payload/stateInit is non-empty). */
+    expanded: boolean | undefined;
+    onExpandedChange: (open: boolean) => void;
 }
 
 export function MessageCard({
@@ -34,15 +35,20 @@ export function MessageCard({
     amountUnit,
     onAmountUnitChange,
     expanded,
-    onToggleExpand
+    onExpandedChange
 }: MessageCardProps) {
+    // Default-open when there's existing content; once the user toggles, their
+    // explicit choice wins (regardless of content).
     const hasContent = !!message.payload || !!message.stateInit;
-    const isOpen = hasContent || expanded;
+    const isOpen = expanded ?? hasContent;
 
     return (
-        <div className="flex flex-col gap-3 rounded-lg border border-tertiary p-3">
-            <div className="flex items-center justify-between">
-                <span className="font-medium mb-2">Message {index + 1}</span>
+        <div className="flex flex-col gap-3 pb-4">
+            <div className="flex items-center justify-between gap-2 relative border-b border-t border-tertiary py-3 mb-2">
+                <div className="text-sm font-bold flex items-center justify-center h-7">
+                    <span>Message {index + 1}</span>
+                </div>
+
                 {canRemove && (
                     <Button
                         variant="ghost"
@@ -50,7 +56,7 @@ export function MessageCard({
                         aria-label="Remove message"
                         onClick={onRemove}
                     >
-                        <Trash2 className="size-3" />
+                        <Trash2 className="size-4" />
                     </Button>
                 )}
             </div>
@@ -97,8 +103,8 @@ export function MessageCard({
                 </div>
             </Input>
 
-            <Collapsible open={isOpen} onOpenChange={() => !hasContent && onToggleExpand()}>
-                <Collapsible.Trigger className={hasContent ? 'cursor-default' : ''}>
+            <Collapsible open={isOpen} onOpenChange={onExpandedChange}>
+                <Collapsible.Trigger>
                     {isOpen ? (
                         <ChevronDown className="size-4" />
                     ) : (

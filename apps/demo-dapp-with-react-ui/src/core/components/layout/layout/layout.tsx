@@ -181,7 +181,7 @@ export const Layout: FC<LayoutProps> = ({ children, title, subtitle }) => {
                 </header>
 
                 <main className="mx-auto w-full max-w-4xl flex-1 p-4">
-                    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 py-6">
+                    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 py-2 md:py-6">
                         <div className="flex w-full items-center justify-start md:hidden">
                             {typeof title === 'string' ? (
                                 <h1 className="text-lg font-semibold">{title}</h1>

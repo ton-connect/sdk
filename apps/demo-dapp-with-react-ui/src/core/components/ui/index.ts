@@ -10,6 +10,7 @@ export { Checkbox } from './checkbox';
 export type { CheckboxProps } from './checkbox';
 export { RadioGroup } from './radio-group';
 export { Collapsible } from './collapsible';
+export { Tabs } from './tabs';
 export { Textarea } from './textarea';
 export type { TextareaProps } from './textarea';
 export { JsonView } from './json-view';

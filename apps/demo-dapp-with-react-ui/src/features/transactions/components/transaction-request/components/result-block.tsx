@@ -4,7 +4,7 @@ import { Button } from '@/core/components/ui/button';
 import { JsonView } from '@/core/components/ui/json-view';
 import { ResultPanel } from '@/core/components/result-panel';
 
-import type { OperationResult } from '../../../hooks/use-transaction';
+import type { OperationResult } from '../../../lib/transaction-presets';
 
 interface ResultBlockProps {
     result: OperationResult;
