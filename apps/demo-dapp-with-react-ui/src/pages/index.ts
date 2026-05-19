@@ -1,3 +1,12 @@
-export { HomePage } from './home-page';
+export { TxFormPage } from './tx-form-page';
+export { GaslessPage } from './gasless-page';
+export { BatchLimitsPage } from './batch-limits-page';
+export { TransferUsdtPage } from './transfer-usdt-page';
+export { SignDataPage } from './sign-data-page';
+export { TonProofPage } from './ton-proof-page';
+export { FindTxPage } from './find-tx-page';
+export { MerklePage } from './merkle-page';
+export { CreateJettonPage } from './create-jetton-page';
+export { SettingsPage } from './settings-page';
 export { OneClickPayPage } from './one-click-pay-page';
 export { IframePage, IframeIframePage } from './iframe-page';

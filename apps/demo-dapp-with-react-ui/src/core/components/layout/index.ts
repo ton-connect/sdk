@@ -1,4 +1,3 @@
-export { Header } from './header';
 export { Layout } from './layout';
 export { AppRouter } from './app-router';
 export { ThemeProvider, ThemeProviderContext } from './theme-provider';

@@ -1,1 +1,1 @@
-export { Header, Layout, AppRouter, ThemeProvider, ThemeSwitcher } from './layout';
+export { Layout, AppRouter, ThemeProvider, ThemeSwitcher } from './layout';
