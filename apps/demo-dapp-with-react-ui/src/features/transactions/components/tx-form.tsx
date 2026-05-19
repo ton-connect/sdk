@@ -52,7 +52,8 @@ type RetryPrompt =
     | { kind: 'sendTx'; dispatched: boolean }
     | { kind: 'signMessage'; dispatched: boolean };
 
-const CHECKBOX_LABEL_CLS = 'flex cursor-pointer items-center gap-2 text-[15px] font-medium text-secondary-foreground';
+const CHECKBOX_LABEL_CLS =
+    'flex cursor-pointer items-center gap-2 text-[15px] font-medium text-secondary-foreground';
 
 export function TxForm() {
     const [tx, setTx] = useState(defaultTx);
@@ -165,10 +166,7 @@ export function TxForm() {
             </div>
 
             <label className={CHECKBOX_LABEL_CLS}>
-                <Checkbox
-                    checked={withConnect}
-                    onCheckedChange={v => setWithConnect(v === true)}
-                />
+                <Checkbox checked={withConnect} onCheckedChange={v => setWithConnect(v === true)} />
                 Embed request in connect
             </label>
 
@@ -181,10 +179,7 @@ export function TxForm() {
             />
 
             <label className={CHECKBOX_LABEL_CLS}>
-                <Checkbox
-                    checked={waitForTx}
-                    onCheckedChange={v => setWaitForTx(v === true)}
-                />
+                <Checkbox checked={waitForTx} onCheckedChange={v => setWaitForTx(v === true)} />
                 Wait for transaction confirmation
             </label>
 

@@ -42,7 +42,7 @@ const SelectRoot: FC<SelectRootProps> = ({
     defaultOpen = false,
     onOpenChange,
     disabled,
-    children,
+    children
 }) => {
     const [uncontrolledValue, setUncontrolledValue] = useState<string | undefined>(defaultValue);
     const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
@@ -60,7 +60,7 @@ const SelectRoot: FC<SelectRootProps> = ({
             if (!isOpenControlled) setUncontrolledOpen(next);
             onOpenChange?.(next);
         },
-        [isOpenControlled, onOpenChange],
+        [isOpenControlled, onOpenChange]
     );
 
     const handleValueChange = useCallback(
@@ -68,7 +68,7 @@ const SelectRoot: FC<SelectRootProps> = ({
             if (!isValueControlled) setUncontrolledValue(next);
             onValueChange?.(next);
         },
-        [isValueControlled, onValueChange],
+        [isValueControlled, onValueChange]
     );
 
     const ctx = useMemo(
@@ -79,9 +79,9 @@ const SelectRoot: FC<SelectRootProps> = ({
             setOpen,
             disabled,
             triggerRef,
-            contentRef,
+            contentRef
         }),
-        [value, handleValueChange, open, setOpen, disabled],
+        [value, handleValueChange, open, setOpen, disabled]
     );
 
     return <SelectContext.Provider value={ctx}>{children}</SelectContext.Provider>;
@@ -100,7 +100,7 @@ const SelectTrigger = forwardRef<ComponentRef<'button'>, SelectTriggerProps>(
                 if (typeof forwardedRef === 'function') forwardedRef(node);
                 else if (forwardedRef) forwardedRef.current = node;
             },
-            [ctx.triggerRef, forwardedRef],
+            [ctx.triggerRef, forwardedRef]
         );
 
         return (
@@ -111,7 +111,7 @@ const SelectTrigger = forwardRef<ComponentRef<'button'>, SelectTriggerProps>(
                 aria-expanded={ctx.open}
                 data-state={ctx.open ? 'open' : 'closed'}
                 disabled={isDisabled}
-                onClick={(event) => {
+                onClick={event => {
                     onClick?.(event);
                     if (!event.defaultPrevented) ctx.setOpen(!ctx.open);
                 }}
@@ -120,7 +120,7 @@ const SelectTrigger = forwardRef<ComponentRef<'button'>, SelectTriggerProps>(
                 {children}
             </Button>
         );
-    },
+    }
 );
 
 SelectTrigger.displayName = 'SelectTrigger';
@@ -159,7 +159,7 @@ const SelectContent: FC<SelectContentProps> = ({
             top: rect.bottom + sideOffset,
             left: align === 'end' ? undefined : rect.left,
             right: align === 'end' ? window.innerWidth - rect.right : undefined,
-            minWidth: rect.width,
+            minWidth: rect.width
         });
     }, [align, sideOffset, triggerRef]);
 
@@ -220,13 +220,13 @@ const SelectContent: FC<SelectContentProps> = ({
                 left: position.left,
                 right: position.right,
                 minWidth: position.minWidth,
-                ...style,
+                ...style
             }}
             {...props}
         >
             {children}
         </div>,
-        document.body,
+        document.body
     );
 };
 
@@ -250,7 +250,7 @@ const SelectItem = forwardRef<ComponentRef<'div'>, SelectItemProps>(
                 data-disabled={disabled || undefined}
                 tabIndex={disabled ? -1 : 0}
                 className={clsx(styles.item, className)}
-                onClick={(event) => {
+                onClick={event => {
                     onClick?.(event);
                     if (event.defaultPrevented || disabled) return;
                     ctx.onValueChange(value);
@@ -261,7 +261,7 @@ const SelectItem = forwardRef<ComponentRef<'div'>, SelectItemProps>(
                 {children}
             </div>
         );
-    },
+    }
 );
 
 SelectItem.displayName = 'SelectItem';
@@ -270,5 +270,5 @@ export const Select = {
     Root: SelectRoot,
     Trigger: SelectTrigger,
     Content: SelectContent,
-    Item: SelectItem,
+    Item: SelectItem
 };

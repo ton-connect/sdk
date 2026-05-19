@@ -73,9 +73,7 @@ export function WalletBatchLimitsTester() {
                 icon={Wallet}
                 title="Connect a wallet"
                 description="A connected wallet is required to send a batch of messages."
-                action={
-                    <Button onClick={() => tonConnectUi.openModal()}>Connect wallet</Button>
-                }
+                action={<Button onClick={() => tonConnectUi.openModal()}>Connect wallet</Button>}
             />
         );
     }

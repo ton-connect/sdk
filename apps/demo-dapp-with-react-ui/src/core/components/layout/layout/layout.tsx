@@ -17,6 +17,8 @@ import {
 import { Link, NavLink } from 'react-router-dom';
 import type { ComponentType, FC, ReactNode } from 'react';
 
+import { usePreserveSearch } from '@/core/hooks/use-preserve-search';
+
 import {
     Sidebar,
     SidebarContent,
@@ -82,6 +84,7 @@ const EXTERNAL_LINKS: readonly {
 
 const AppSidebar: FC = () => {
     const { setOpenMobile, isMobile } = useSidebar();
+    const withSearch = usePreserveSearch();
 
     const closeOnMobile = () => {
         if (isMobile) setOpenMobile(false);
@@ -91,7 +94,7 @@ const AppSidebar: FC = () => {
         <Sidebar>
             <SidebarHeader>
                 <Link
-                    to="/tx-form"
+                    to={withSearch('/tx-form')}
                     onClick={closeOnMobile}
                     className="flex items-center gap-2 px-2 py-1.5"
                 >
@@ -107,7 +110,7 @@ const AppSidebar: FC = () => {
                         <SidebarMenu>
                             {group.links.map(({ to, label, icon: Icon }) => (
                                 <SidebarMenuItem key={to}>
-                                    <NavLink to={to} end onClick={closeOnMobile}>
+                                    <NavLink to={withSearch(to)} end onClick={closeOnMobile}>
                                         {({ isActive }) => (
                                             <SidebarMenuButton isActive={isActive}>
                                                 <Icon />
@@ -138,7 +141,7 @@ const AppSidebar: FC = () => {
                         </SidebarMenuItem>
                     ))}
                     <SidebarMenuItem>
-                        <NavLink to="/settings" end onClick={closeOnMobile}>
+                        <NavLink to={withSearch('/settings')} end onClick={closeOnMobile}>
                             {({ isActive }) => (
                                 <SidebarMenuButton isActive={isActive}>
                                     <Settings />
@@ -159,7 +162,10 @@ export const Layout: FC<LayoutProps> = ({ children, title, subtitle }) => {
             <AppSidebar />
 
             <SidebarInset>
-                <header className="sticky top-0 z-10 flex h-14 items-center gap-3 border-b border-tertiary bg-background/80 px-4 backdrop-blur">
+                <header
+                    data-app-chrome-header
+                    className="sticky top-0 z-10 flex h-14 items-center gap-3 border-b border-tertiary bg-background/80 px-4 backdrop-blur"
+                >
                     <AppLogo className="size-8 md:hidden" />
                     <div className="hidden text-lg font-semibold md:flex md:items-center md:justify-center">
                         {typeof title === 'string' ? <h1>{title}</h1> : title}

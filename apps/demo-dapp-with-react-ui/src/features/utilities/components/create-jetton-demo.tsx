@@ -41,9 +41,7 @@ export const CreateJettonDemo = () => {
                 icon={Wallet}
                 title="Connect a wallet"
                 description="A connected wallet is required to mint the demo jetton on-chain."
-                action={
-                    <Button onClick={() => tonConnectUI.openModal()}>Connect wallet</Button>
-                }
+                action={<Button onClick={() => tonConnectUI.openModal()}>Connect wallet</Button>}
             />
         );
     }

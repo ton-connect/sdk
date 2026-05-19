@@ -42,11 +42,11 @@ const SidebarProvider = ({ className, style, children, ...props }: React.Compone
     const isMobile = useIsMobile();
     const [openMobile, setOpenMobile] = React.useState(false);
 
-    const toggleSidebar = React.useCallback(() => setOpenMobile((open) => !open), []);
+    const toggleSidebar = React.useCallback(() => setOpenMobile(open => !open), []);
 
     const value = React.useMemo<SidebarContextProps>(
         () => ({ openMobile, setOpenMobile, isMobile, toggleSidebar }),
-        [openMobile, isMobile, toggleSidebar],
+        [openMobile, isMobile, toggleSidebar]
     );
 
     return (
@@ -78,7 +78,9 @@ const Sidebar = ({ className, children }: React.ComponentProps<'div'>) => {
                         <SheetTitle>Sidebar</SheetTitle>
                         <SheetDescription>Sidebar navigation.</SheetDescription>
                     </SheetHeader>
-                    <div className="flex h-full w-full min-w-0 flex-col overflow-x-hidden">{children}</div>
+                    <div className="flex h-full w-full min-w-0 flex-col overflow-x-hidden">
+                        {children}
+                    </div>
                 </SheetContent>
             </Sheet>
         );
@@ -89,7 +91,7 @@ const Sidebar = ({ className, children }: React.ComponentProps<'div'>) => {
             data-slot="sidebar"
             className={cn(
                 'sticky top-0 hidden h-svh w-(--sidebar-width) shrink-0 flex-col border-r border-tertiary bg-background text-foreground md:flex',
-                className,
+                className
             )}
         >
             {children}
@@ -105,7 +107,7 @@ const SidebarTrigger = ({ className, onClick, ...props }: React.ComponentProps<t
             size="icon"
             variant="ghost"
             className={className}
-            onClick={(event) => {
+            onClick={event => {
                 onClick?.(event);
                 toggleSidebar();
             }}
@@ -118,29 +120,56 @@ const SidebarTrigger = ({ className, onClick, ...props }: React.ComponentProps<t
 };
 
 const SidebarInset = ({ className, ...props }: React.ComponentProps<'main'>) => {
-    return <main data-slot="sidebar-inset" className={cn('flex min-w-0 flex-1 flex-col', className)} {...props} />;
+    return (
+        <main
+            data-slot="sidebar-inset"
+            className={cn('flex min-w-0 flex-1 flex-col', className)}
+            {...props}
+        />
+    );
 };
 
 const SidebarHeader = ({ className, ...props }: React.ComponentProps<'div'>) => {
-    return <div data-slot="sidebar-header" className={cn('flex flex-col gap-2 p-2', className)} {...props} />;
+    return (
+        <div
+            data-slot="sidebar-header"
+            className={cn('flex flex-col gap-2 p-2', className)}
+            {...props}
+        />
+    );
 };
 
 const SidebarFooter = ({ className, ...props }: React.ComponentProps<'div'>) => {
-    return <div data-slot="sidebar-footer" className={cn('flex flex-col gap-2 p-2', className)} {...props} />;
+    return (
+        <div
+            data-slot="sidebar-footer"
+            className={cn('flex flex-col gap-2 p-2', className)}
+            {...props}
+        />
+    );
 };
 
 const SidebarContent = ({ className, ...props }: React.ComponentProps<'div'>) => {
     return (
         <div
             data-slot="sidebar-content"
-            className={cn('flex min-h-0 flex-1 flex-col gap-2 overflow-x-hidden overflow-y-auto', className)}
+            className={cn(
+                'flex min-h-0 flex-1 flex-col gap-2 overflow-x-hidden overflow-y-auto',
+                className
+            )}
             {...props}
         />
     );
 };
 
 const SidebarGroup = ({ className, ...props }: React.ComponentProps<'div'>) => {
-    return <div data-slot="sidebar-group" className={cn('flex w-full min-w-0 flex-col p-2', className)} {...props} />;
+    return (
+        <div
+            data-slot="sidebar-group"
+            className={cn('flex w-full min-w-0 flex-col p-2', className)}
+            {...props}
+        />
+    );
 };
 
 const SidebarGroupLabel = ({ className, ...props }: React.ComponentProps<'div'>) => {
@@ -149,7 +178,7 @@ const SidebarGroupLabel = ({ className, ...props }: React.ComponentProps<'div'>)
             data-slot="sidebar-group-label"
             className={cn(
                 'px-2 pb-1 text-[10px] font-medium uppercase tracking-wide text-tertiary-foreground',
-                className,
+                className
             )}
             {...props}
         />
@@ -167,7 +196,13 @@ const SidebarSeparator = ({ className, ...props }: React.ComponentProps<typeof S
 };
 
 const SidebarMenu = ({ className, ...props }: React.ComponentProps<'ul'>) => {
-    return <ul data-slot="sidebar-menu" className={cn('flex w-full min-w-0 flex-col gap-1', className)} {...props} />;
+    return (
+        <ul
+            data-slot="sidebar-menu"
+            className={cn('flex w-full min-w-0 flex-col gap-1', className)}
+            {...props}
+        />
+    );
 };
 
 const SidebarMenuItem = ({ className, ...props }: React.ComponentProps<'li'>) => {
@@ -211,5 +246,5 @@ export {
     SidebarProvider,
     SidebarSeparator,
     SidebarTrigger,
-    useSidebar,
+    useSidebar
 };

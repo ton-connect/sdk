@@ -27,7 +27,7 @@ export const Skeleton = forwardRef<HTMLDivElement, SkeletonProps>(
                 {...props}
             />
         );
-    },
+    }
 );
 
 Skeleton.displayName = 'Skeleton';

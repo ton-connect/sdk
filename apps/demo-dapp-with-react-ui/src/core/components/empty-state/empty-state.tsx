@@ -18,12 +18,19 @@ interface EmptyStateProps extends ComponentProps<'div'> {
     action?: ReactNode;
 }
 
-export const EmptyState: FC<EmptyStateProps> = ({ icon: Icon, title, description, action, className, ...props }) => {
+export const EmptyState: FC<EmptyStateProps> = ({
+    icon: Icon,
+    title,
+    description,
+    action,
+    className,
+    ...props
+}) => {
     return (
         <div
             className={cn(
                 'flex flex-col items-center justify-center gap-4 rounded-2xl bg-secondary px-6 py-16 text-center',
-                className,
+                className
             )}
             {...props}
         >

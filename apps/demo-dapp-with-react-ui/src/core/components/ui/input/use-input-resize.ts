@@ -21,7 +21,7 @@ export interface ResizeMetrics {
 export const readResizeMetrics = (
     maxSpan: HTMLSpanElement,
     minSpan: HTMLSpanElement,
-    input: HTMLInputElement,
+    input: HTMLInputElement
 ): ResizeMetrics => {
     const maxStyle = getComputedStyle(maxSpan);
     const maxFontSize = parseFloat(maxStyle.fontSize);
@@ -31,7 +31,7 @@ export const readResizeMetrics = (
         maxFontSize,
         minFontSize: parseFloat(getComputedStyle(minSpan).fontSize),
         lineHeightRatio,
-        parentFontSize: parseFloat(getComputedStyle(input.parentElement!).fontSize),
+        parentFontSize: parseFloat(getComputedStyle(input.parentElement!).fontSize)
     };
 };
 
@@ -49,7 +49,11 @@ interface UseInputResizeResult {
     adjustSize: () => void;
 }
 
-export const useInputResize = ({ resizable, contextSize, value }: UseInputResizeOptions): UseInputResizeResult => {
+export const useInputResize = ({
+    resizable,
+    contextSize,
+    value
+}: UseInputResizeOptions): UseInputResizeResult => {
     const inputRef = useRef<HTMLInputElement>(null);
     const measureMaxRef = useRef<HTMLSpanElement>(null);
     const measureMinRef = useRef<HTMLSpanElement>(null);
@@ -57,7 +61,8 @@ export const useInputResize = ({ resizable, contextSize, value }: UseInputResize
     const lineHeightRatioRef = useRef<number>(1.25);
 
     const adjustSize = () => {
-        if (!resizable || !inputRef.current || !measureMaxRef.current || !measureMinRef.current) return;
+        if (!resizable || !inputRef.current || !measureMaxRef.current || !measureMinRef.current)
+            return;
         const availableWidth = inputRef.current.clientWidth;
         if (availableWidth === 0) return;
 
@@ -65,7 +70,7 @@ export const useInputResize = ({ resizable, contextSize, value }: UseInputResize
         const { maxFontSize, minFontSize, lineHeightRatio, parentFontSize } = readResizeMetrics(
             measureMaxRef.current,
             measureMinRef.current,
-            inputRef.current,
+            inputRef.current
         );
 
         const ratio = textWidth > 0 ? availableWidth / textWidth : 1;

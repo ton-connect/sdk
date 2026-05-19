@@ -2,6 +2,7 @@ import { TonConnectUIProvider } from '@tonconnect/ui-react';
 
 import { AppRouter, ThemeProvider } from '@/core/components';
 import { tonConnectManifestUrl, tonConnectUiPreferences } from '@/core/configs/app-kit';
+import { getProviderAnalyticsSettingsFromLocation } from '@/features/dev-settings/lib/settings-url';
 
 export const App = () => {
     return (
@@ -9,6 +10,7 @@ export const App = () => {
             <TonConnectUIProvider
                 manifestUrl={tonConnectManifestUrl}
                 uiPreferences={tonConnectUiPreferences}
+                analytics={getProviderAnalyticsSettingsFromLocation()}
             >
                 <AppRouter />
             </TonConnectUIProvider>

@@ -59,7 +59,7 @@ const Container: FC<InputContainerProps> = ({
 }) => {
     const contextValue = useMemo(
         () => ({ size, variant, disabled, error, loading, resizable }),
-        [size, variant, disabled, error, loading, resizable],
+        [size, variant, disabled, error, loading, resizable]
     );
 
     return (
@@ -71,7 +71,7 @@ const Container: FC<InputContainerProps> = ({
                     disabled && styles.disabled,
                     error && styles.error,
                     loading && styles.loading,
-                    className,
+                    className
                 )}
                 {...props}
             >
@@ -119,14 +119,19 @@ const Slot: FC<InputSlotProps> = ({ side, className, children, ...props }) => (
 
 export type InputControlProps = ComponentProps<'input'>;
 
-const InputControl: FC<InputControlProps> = ({ className, disabled: propsDisabled, onChange, ...props }) => {
+const InputControl: FC<InputControlProps> = ({
+    className,
+    disabled: propsDisabled,
+    onChange,
+    ...props
+}) => {
     const { size: contextSize, disabled: contextDisabled, loading, resizable } = useInputContext();
     const disabled = propsDisabled || contextDisabled;
 
     const { inputRef, measureMaxRef, measureMinRef, resizeStyle, adjustSize } = useInputResize({
         resizable,
         contextSize,
-        value: props.value,
+        value: props.value
     });
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -159,7 +164,11 @@ const InputControl: FC<InputControlProps> = ({ className, disabled: propsDisable
                         {text}
                     </span>
                     {/* Empty span — only used to read minFontSize from CSS variable via computed style */}
-                    <span ref={measureMinRef} className={clsx(styles.inputMeasure, styles.input_s)} aria-hidden />
+                    <span
+                        ref={measureMinRef}
+                        className={clsx(styles.inputMeasure, styles.input_s)}
+                        aria-hidden
+                    />
                 </>
             )}
             <input
@@ -190,5 +199,5 @@ export const Input = Object.assign(Container, {
     Field,
     Slot,
     Input: InputControl,
-    Caption,
+    Caption
 });

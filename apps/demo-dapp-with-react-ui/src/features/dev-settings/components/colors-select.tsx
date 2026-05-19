@@ -1,99 +1,95 @@
-import { ColorsSet, THEME, useTonConnectUI } from '@tonconnect/ui-react';
+import type { ColorsSet, Theme } from '@tonconnect/ui-react';
+import { useTonConnectUI } from '@tonconnect/ui-react';
 import { FunctionComponent, useEffect, useState } from 'react';
 
-const defaultColors = {
-    [THEME.LIGHT]: {
-        constant: {
-            black: '#000000',
-            white: '#FFFFFF'
-        },
-        connectButton: {
-            background: '#0098EA',
-            foreground: '#FFFFFF'
-        },
-        accent: '#0098EA',
-        telegramButton: '#0098EA',
-        icon: {
-            primary: '#0F0F0F',
-            secondary: '#7A8999',
-            tertiary: '#C1CAD2',
-            success: '#29CC6A',
-            error: '#F5A73B'
-        },
-        background: {
-            primary: '#FFFFFF',
-            secondary: '#F1F3F5',
-            segment: '#FFFFFF',
-            tint: '#F1F3F5',
-            qr: '#F1F3F5'
-        },
-        text: {
-            primary: '#0F0F0F',
-            secondary: '#6A7785'
-        }
-    },
-    [THEME.DARK]: {
-        constant: {
-            black: '#000000',
-            white: '#FFFFFF'
-        },
-        connectButton: {
-            background: '#0098EA',
-            foreground: '#FFFFFF'
-        },
-        accent: '#E5E5EA',
-        telegramButton: '#31A6F5',
-        icon: {
-            primary: '#E5E5EA',
-            secondary: '#909099',
-            tertiary: '#434347',
-            success: '#29CC6A',
-            error: '#F5A73B'
-        },
-        background: {
-            primary: '#121214',
-            secondary: '#18181A',
-            segment: '#262629',
-            tint: '#222224',
-            qr: '#F1F3F5'
-        },
-        text: {
-            primary: '#E5E5EA',
-            secondary: '#7D7D85'
-        }
-    }
-};
+import { getDefaultColorsForTheme } from '../lib/default-colors';
+import { ColorField } from './color-field';
 
 export interface ColorsSelectProps {
-    theme: THEME;
+    theme: Theme;
+    colorsSet?: Partial<Record<Theme, ColorsSet>>;
+    onColorsSetChange: (colorsSet: Partial<Record<Theme, ColorsSet>>) => void;
 }
-export const ColorsSelect: FunctionComponent<ColorsSelectProps> = ({ theme }) => {
-    // eslint-disable-next-line unused-imports/no-unused-vars
-    const [_, setOptions] = useTonConnectUI();
-    const [colors, setColors] = useState<ColorsSet>(defaultColors[theme]);
+
+const SECTION_ORDER = [
+    'connectButton',
+    'accent',
+    'telegramButton',
+    'text',
+    'background',
+    'icon',
+    'constant'
+] as const;
+
+type SectionKey = (typeof SECTION_ORDER)[number];
+
+type ColorFieldEntry = {
+    sectionKey: SectionKey;
+    nestedKey?: string;
+    value: string;
+};
+
+const SECTION_LABELS: Record<string, string> = {
+    connectButton: 'Connect button',
+    accent: 'Accent',
+    telegramButton: 'Telegram button',
+    text: 'Text',
+    background: 'Background',
+    icon: 'Icons',
+    constant: 'Constants'
+};
+
+const TOKEN_LABELS: Record<string, string> = {
+    background: 'Background',
+    foreground: 'Foreground',
+    primary: 'Primary',
+    secondary: 'Secondary',
+    tertiary: 'Tertiary',
+    segment: 'Segment',
+    tint: 'Tint',
+    qr: 'QR',
+    success: 'Success',
+    error: 'Error',
+    black: 'Black',
+    white: 'White'
+};
+
+function formatTokenLabel(key: string): string {
+    return TOKEN_LABELS[key] ?? key.replace(/([A-Z])/g, ' $1').replace(/^./, c => c.toUpperCase());
+}
+
+export const ColorsSelect: FunctionComponent<ColorsSelectProps> = ({
+    theme,
+    colorsSet,
+    onColorsSetChange
+}) => {
+    const [, setOptions] = useTonConnectUI();
+    const [colors, setColors] = useState<ColorsSet>(
+        () => colorsSet?.[theme] ?? getDefaultColorsForTheme(theme)
+    );
 
     useEffect(() => {
-        setColors(defaultColors[theme]);
-    }, [theme]);
+        setColors(colorsSet?.[theme] ?? getDefaultColorsForTheme(theme));
+    }, [theme, colorsSet]);
 
-    const onChange = (value: string, property1: string, property2?: string) => {
+    const commitColors = (nextColors: ColorsSet) => {
         setOptions({
             uiPreferences: {
                 colorsSet: {
-                    [theme]: {
-                        [property1]: property2
-                            ? {
-                                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                  ...(colors as any)[property1],
-                                  [property2]: value
-                              }
-                            : value
-                    }
+                    [theme]: nextColors
                 }
             }
         });
 
-        setColors(colors => ({
+        setColors(nextColors);
+        onColorsSetChange({
+            ...colorsSet,
+            [theme]: nextColors
+        });
+    };
+
+    const onChange = (value: string, property1: string, property2?: string) => {
+        const nextColors: ColorsSet = {
             ...colors,
             [property1]: property2
                 ? {
@@ -102,56 +98,56 @@ export const ColorsSelect: FunctionComponent<ColorsSelectProps> = ({ theme }) =>
                       [property2]: value
                   }
                 : value
-        }));
-
-        defaultColors[theme] = {
-            ...defaultColors[theme],
-            [property1]: property2
-                ? {
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      ...(colors as any)[property1],
-                      [property2]: value
-                  }
-                : value
         };
+        commitColors(nextColors);
     };
 
-    return (
-        <div className="[&>div]:mb-5 [&>div>label]:mr-[10px] [&>div>span]:mr-[14px] [&>div>span]:font-bold">
-            {Object.entries(colors).map(([key1, value1]) => {
-                if (typeof value1 === 'object') {
-                    return (
-                        <div key={key1}>
-                            <span>{key1}:</span>
-                            {Object.entries(value1).map(([key2, _value2]) => (
-                                <label key={key1 + key2}>
-                                    {key2}
-                                    <input
-                                        type="color"
-                                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                        value={(colors as any)[key1][key2]}
-                                        onChange={e => onChange(e.target.value, key1, key2)}
-                                    />
-                                </label>
-                            ))}
-                        </div>
-                    );
-                }
+    const entries: ColorFieldEntry[] = SECTION_ORDER.flatMap((sectionKey): ColorFieldEntry[] => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const sectionValue = (colors as any)[sectionKey];
+        if (sectionValue === undefined) {
+            return [];
+        }
 
-                return (
-                    <div>
-                        <span>{key1}:</span>
-                        <label>
-                            <input
-                                type="color"
-                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                value={(colors as any)[key1]}
-                                onChange={e => onChange(e.target.value, key1)}
-                            />
-                        </label>
-                    </div>
-                );
-            })}
-        </div>
-    );
+        if (typeof sectionValue === 'object') {
+            return Object.keys(sectionValue).map(nestedKey => ({
+                sectionKey,
+                nestedKey,
+                value: sectionValue[nestedKey] as string
+            }));
+        }
+
+        return [{ sectionKey, value: sectionValue as string }];
+    });
+
+    const sections = SECTION_ORDER.map(sectionKey => {
+        const fields = entries.filter(entry => entry.sectionKey === sectionKey);
+        if (fields.length === 0) {
+            return null;
+        }
+
+        return (
+            <section key={sectionKey} className="flex flex-col gap-2.5">
+                <h3 className="text-[11px] font-semibold uppercase tracking-[0.08em] text-secondary-foreground">
+                    {SECTION_LABELS[sectionKey] ?? sectionKey}
+                </h3>
+                <div className="grid gap-2 sm:grid-cols-2">
+                    {fields.map(field => (
+                        <ColorField
+                            key={`${field.sectionKey}-${field.nestedKey ?? 'value'}`}
+                            label={
+                                field.nestedKey
+                                    ? formatTokenLabel(field.nestedKey)
+                                    : formatTokenLabel(field.sectionKey)
+                            }
+                            value={field.value}
+                            onChange={value => onChange(value, field.sectionKey, field.nestedKey)}
+                        />
+                    ))}
+                </div>
+            </section>
+        );
+    });
+
+    return <div className="flex flex-col gap-5">{sections}</div>;
 };
