@@ -1,202 +1,92 @@
-import { useCallback, useMemo, useState } from 'react';
-import { useIsConnectionRestored, useTonWallet } from '@tonconnect/ui-react';
-import { fromNano, toNano } from '@ton/core';
+import { useCallback, useState } from 'react';
+import type { SendTransactionRequest } from '@tonconnect/ui-react';
 
-import {
-    newMessageId,
-    PRESETS,
-    type AmountUnit,
-    type PresetKey,
-    type TransactionMessage
-} from '../../../lib/transaction-presets';
-import { buildOutgoingMessages } from '../utils';
+import { buildDefaultTx } from '../../../lib/transaction-presets';
 
-const DEFAULT_ADDRESS = 'EQCKWpx7cNMpvmcN5ObM5lLUZHZRFKqYA4xmw9jOry0ZsF9M';
+export type RequestMode = 'send' | 'sign';
 
-const initialMessage = (): TransactionMessage => ({
-    id: newMessageId(),
-    address: DEFAULT_ADDRESS,
-    amount: '5000000',
-    stateInit: '',
-    payload: ''
-});
+const stringify = (value: SendTransactionRequest): string => JSON.stringify(value, null, 2);
 
 /**
- * Owns the in-memory transaction-request form state and the derived
- * `requestJson` preview. Mutators are id-based (no array-index drift on
- * remove/reorder). The hook also surfaces the wallet-network proxy and the
- * connection-restored flag used by the form's field components.
+ * Holds the transaction-request as a parsed object (single source of truth) plus
+ * a string buffer that backs the JSON editor for in-flight typing. Form-side
+ * mutations rewrite both. Editor-side input updates the buffer and re-parses on
+ * each keystroke; an invalid parse keeps the object intact but flags `isInvalid`.
+ *
+ * Also owns the two flags that wrap the wallet call: `withConnect` (embed the
+ * request in the connect URL) and `waitForTx` (poll on-chain after send).
  */
-export function useTransactionForm() {
-    const wallet = useTonWallet();
-    const isConnectionRestored = useIsConnectionRestored();
+export const useTransactionForm = () => {
+    const [tx, setTx] = useState<SendTransactionRequest>(buildDefaultTx);
+    const [draft, setDraft] = useState<string>(() => stringify(tx));
+    const [isInvalid, setIsInvalid] = useState(false);
 
-    const [validUntil, setValidUntil] = useState(() => Math.floor(Date.now() / 1000) + 86400);
-    const [network, setNetwork] = useState('');
-    const [from, setFrom] = useState('');
-    const [messages, setMessages] = useState<TransactionMessage[]>(() => [initialMessage()]);
-    const [amountUnits, setAmountUnits] = useState<Record<string, AmountUnit>>({});
+    const [mode, setMode] = useState<RequestMode>('send');
+    const [withConnect, setWithConnect] = useState(false);
+    const [waitForTx, setWaitForTx] = useState(false);
 
-    const walletNetwork = useMemo(
-        () => (isConnectionRestored && wallet?.account?.chain ? String(wallet.account.chain) : ''),
-        [isConnectionRestored, wallet?.account?.chain]
-    );
-
-    const requestJson = useMemo(() => {
-        const effectiveNetwork = network || walletNetwork;
-        const tx: Record<string, unknown> = {
-            validUntil,
-            messages: buildOutgoingMessages(messages)
-        };
-        if (effectiveNetwork) tx.network = effectiveNetwork;
-        if (from) tx.from = from;
-        return JSON.stringify(tx, null, 2);
-    }, [validUntil, network, from, messages, walletNetwork]);
-
-    const setValidUntilFromNow = useCallback((seconds: number) => {
-        setValidUntil(Math.floor(Date.now() / 1000) + seconds);
+    /** Replace the whole tx (preset load, reset). Buffer follows. */
+    const replaceTx = useCallback((next: SendTransactionRequest) => {
+        setTx(next);
+        setDraft(stringify(next));
+        setIsInvalid(false);
     }, []);
 
-    const reset = useCallback(() => {
-        setValidUntil(Math.floor(Date.now() / 1000) + 86400);
-        setNetwork('');
-        setFrom('');
-        setMessages([initialMessage()]);
-        setAmountUnits({});
-    }, []);
-
-    const getDisplayAmount = useCallback(
-        (id: string): string => {
-            const unit = amountUnits[id] || 'TON';
-            const nanoAmount = messages.find(m => m.id === id)?.amount || '0';
-            if (unit === 'TON') return fromNano(nanoAmount);
-            return nanoAmount;
-        },
-        [messages, amountUnits]
-    );
-
-    const setMessageAmount = useCallback((id: string, displayValue: string, unit: AmountUnit) => {
+    /** Editor change: update buffer, re-parse, swap `tx` if the JSON is valid. */
+    const onDraftChange = useCallback((next: string) => {
+        setDraft(next);
         try {
-            const nanoValue =
-                unit === 'TON' ? toNano(displayValue || '0').toString() : displayValue;
-            setMessages(prev => prev.map(m => (m.id === id ? { ...m, amount: nanoValue } : m)));
+            const parsed = JSON.parse(next);
+            if (parsed && typeof parsed === 'object') {
+                setTx(parsed as SendTransactionRequest);
+                setIsInvalid(false);
+            } else {
+                setIsInvalid(true);
+            }
         } catch {
-            // invalid number — ignore
+            setIsInvalid(true);
         }
     }, []);
 
-    const getAmountUnit = useCallback(
-        (id: string): AmountUnit => amountUnits[id] || 'TON',
-        [amountUnits]
-    );
-
-    const setAmountUnit = useCallback((id: string, unit: AmountUnit) => {
-        setAmountUnits(prev => ({ ...prev, [id]: unit }));
-    }, []);
-
-    const loadPreset = useCallback((key: PresetKey) => {
-        const preset = PRESETS[key];
-        setValidUntil(Math.floor(Date.now() / 1000) + preset.validUntil);
-        setNetwork('');
-        setFrom(preset.from);
-        setMessages(
-            preset.messages.map(msg => ({
-                id: newMessageId(),
-                address: msg.address,
-                amount: msg.amount,
-                stateInit: '',
-                payload: 'payload' in msg ? (msg as { payload: string }).payload : ''
-            }))
-        );
-        setAmountUnits({});
-    }, []);
-
-    const addMessage = useCallback(() => {
-        setMessages(prev => [
-            ...prev,
-            {
-                id: newMessageId(),
-                address: '',
-                amount: toNano('0.001').toString(),
-                stateInit: '',
-                payload: ''
-            }
-        ]);
-    }, []);
-
-    const removeMessage = useCallback((id: string) => {
-        setMessages(prev => (prev.length > 1 ? prev.filter(m => m.id !== id) : prev));
-        setAmountUnits(prev => {
-            if (!(id in prev)) return prev;
-            const next = { ...prev };
-            delete next[id];
+    /** Form-side mutator for `validUntil`. Rewrites both the object and the buffer. */
+    const setValidUntil = useCallback((nextValidUntil: number) => {
+        setTx(prev => {
+            const next = { ...prev, validUntil: nextValidUntil };
+            setDraft(stringify(next));
+            setIsInvalid(false);
             return next;
         });
     }, []);
 
-    const updateMessage = useCallback(
-        (id: string, field: keyof TransactionMessage, value: string) => {
-            setMessages(prev => prev.map(m => (m.id === id ? { ...m, [field]: value } : m)));
-        },
-        []
+    const setValidUntilFromNow = useCallback(
+        (seconds: number) => setValidUntil(Math.floor(Date.now() / 1000) + seconds),
+        [setValidUntil]
     );
 
-    const setFromJson = useCallback((json: string) => {
-        try {
-            const data = JSON.parse(json);
-            if (data.validUntil) setValidUntil(data.validUntil);
-            if (data.network !== undefined) setNetwork(data.network);
-            if (data.from !== undefined) setFrom(data.from);
-            if (Array.isArray(data.messages)) {
-                const newMessages: TransactionMessage[] = data.messages.map(
-                    (msg: Record<string, string>) => ({
-                        id: newMessageId(),
-                        address: msg.address || '',
-                        amount: msg.amount || '0',
-                        stateInit: msg.stateInit || '',
-                        payload: msg.payload || ''
-                    })
-                );
-                setMessages(newMessages);
-                // JSON amounts are nanotons — default unit display to nano per row.
-                const newUnits: Record<string, AmountUnit> = {};
-                newMessages.forEach(m => {
-                    newUnits[m.id] = 'nano';
-                });
-                setAmountUnits(newUnits);
-            }
-        } catch {
-            // invalid json — ignore
-        }
-    }, []);
+    const reset = useCallback(() => {
+        const fresh = buildDefaultTx();
+        replaceTx(fresh);
+        setMode('send');
+        setWithConnect(false);
+        setWaitForTx(false);
+    }, [replaceTx]);
 
     return {
-        // primary form state
-        validUntil,
+        tx,
+        draft,
+        isInvalid,
+        onDraftChange,
+        replaceTx,
         setValidUntil,
         setValidUntilFromNow,
-        network,
-        setNetwork,
-        from,
-        setFrom,
-        messages,
-        // amount helpers (per-message id)
-        getDisplayAmount,
-        setMessageAmount,
-        getAmountUnit,
-        setAmountUnit,
-        // collection mutators (per-message id)
-        addMessage,
-        removeMessage,
-        updateMessage,
-        // bulk mutators
-        loadPreset,
         reset,
-        setFromJson,
+        mode,
+        setMode,
+        withConnect,
+        setWithConnect,
+        waitForTx,
+        setWaitForTx,
         // derived
-        requestJson,
-        // wallet proxies (consumed by NetworkFromRow)
-        walletNetwork,
-        isConnectionRestored
+        validUntil: tx.validUntil
     };
-}
+};

@@ -1,0 +1,11 @@
+.settingsButton {
+  flex-shrink: 0;
+  width: 50px;
+  height: 50px;
+  aspect-ratio: 1 / 1;
+}
+
+.settingsButton svg {
+  width: 24px;
+  height: 24px;
+}

@@ -1,16 +1,14 @@
 import { useMemo } from 'react';
-import { highlight, languages } from 'prismjs/components/prism-core';
-import 'prismjs/components/prism-json';
+import type { ComponentProps } from 'react';
 
-import { cn } from '@/core/lib/utils';
+import { JsonEditor } from '@/core/components/ui/json-editor';
 
-interface JsonViewProps {
+interface JsonViewProps extends Omit<ComponentProps<'div'>, 'onChange'> {
     /** Either a JSON string or any value to be JSON.stringify-ed. */
     src: unknown;
-    className?: string;
 }
 
-export function JsonView({ src, className }: JsonViewProps) {
+export const JsonView = ({ src, ...props }: JsonViewProps) => {
     const text = useMemo(() => {
         if (typeof src === 'string') return src;
         try {
@@ -20,16 +18,5 @@ export function JsonView({ src, className }: JsonViewProps) {
         }
     }, [src]);
 
-    const html = useMemo(() => highlight(text, languages.json, 'json'), [text]);
-
-    return (
-        <pre
-            className={cn(
-                'prism-json-editor max-h-[400px] overflow-auto rounded-md border border-tertiary bg-secondary/40 p-3 font-mono text-sm leading-relaxed',
-                className
-            )}
-        >
-            <code dangerouslySetInnerHTML={{ __html: html }} />
-        </pre>
-    );
-}
+    return <JsonEditor value={text} readOnly {...props} />;
+};

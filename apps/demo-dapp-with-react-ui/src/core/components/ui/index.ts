@@ -14,4 +14,8 @@ export { Tabs } from './tabs';
 export { Textarea } from './textarea';
 export type { TextareaProps } from './textarea';
 export { JsonView } from './json-view';
+export { JsonEditor } from './json-editor';
+export type { JsonEditorProps } from './json-editor';
+export { SettingsButton } from './settings-button';
+export type { SettingsButtonProps } from './settings-button';
 export * from './icons';

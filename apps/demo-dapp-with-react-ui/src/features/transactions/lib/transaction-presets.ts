@@ -1,95 +1,83 @@
-/**
- * In-memory form draft for a single message. `id` is a stable identifier used
- * as React key and as map-key for amount-unit / collapsible-expanded state — so
- * those don't drift when messages get reordered or removed mid-list. The id is
- * NOT part of the outgoing TonConnect payload (build-outgoing-messages strips it).
- */
-export interface TransactionMessage {
-    id: string;
-    address: string;
-    amount: string; // Always stored in nanotons
-    stateInit?: string;
-    payload?: string;
+import { beginCell } from '@ton/ton';
+import type { SendTransactionRequest } from '@tonconnect/ui-react';
+
+const defaultBody = beginCell().storeUint(0, 32).storeStringTail('Hello!').endCell();
+
+const ECHO_STATE_INIT =
+    'te6cckEBBAEAOgACATQCAQAAART/APSkE/S88sgLAwBI0wHQ0wMBcbCRW+D6QDBwgBDIywVYzxYh+gLLagHPFsmAQPsAlxCarA==';
+
+const ECHO_ADDRESS = 'EQCKWpx7cNMpvmcN5ObM5lLUZHZRFKqYA4xmw9jOry0ZsF9M';
+const JETTON_MASTER = 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs';
+
+const VALID_UNTIL_DEFAULT_SEC = 600;
+
+/** Single message + stateInit + payload (echo contract demo). */
+export const buildDefaultTx = (): SendTransactionRequest => ({
+    validUntil: Math.floor(Date.now() / 1000) + VALID_UNTIL_DEFAULT_SEC,
+    messages: [
+        {
+            address: ECHO_ADDRESS,
+            amount: '5000000',
+            payload: defaultBody.toBoc().toString('base64'),
+            stateInit: ECHO_STATE_INIT
+        }
+    ]
+});
+
+/** Items-shaped request: a ton transfer + a jetton transfer. */
+export const buildItemsTx = (): SendTransactionRequest => ({
+    validUntil: Math.floor(Date.now() / 1000) + VALID_UNTIL_DEFAULT_SEC,
+    items: [
+        {
+            type: 'ton',
+            address: ECHO_ADDRESS,
+            amount: '5000000',
+            payload: defaultBody.toBoc().toString('base64'),
+            stateInit: ECHO_STATE_INIT
+        },
+        {
+            type: 'jetton',
+            master: JETTON_MASTER,
+            amount: '50000',
+            destination: ECHO_ADDRESS
+        }
+    ]
+});
+
+/** Items-shaped NFT transfer request. `newOwner` is filled by the caller. */
+export const buildNftItemsTx = (newOwner?: string): SendTransactionRequest => ({
+    validUntil: Math.floor(Date.now() / 1000) + VALID_UNTIL_DEFAULT_SEC,
+    items: [
+        {
+            type: 'nft',
+            nftAddress: 'TODO: paste NFT item contract address',
+            newOwner: newOwner ?? 'TODO: connect a wallet to fill the new owner address'
+        }
+    ]
+});
+
+export type PresetKey = 'default-tx' | 'items-tx' | 'nft-items-tx';
+
+export interface PresetDescriptor {
+    id: PresetKey;
+    name: string;
+    description: string;
 }
 
-export type AmountUnit = 'TON' | 'nano';
-
-/** Generate a stable id for a fresh in-memory message. */
-export const newMessageId = (): string =>
-    typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
-        ? crypto.randomUUID()
-        : Math.random().toString(36).slice(2);
-
-/** A frozen snapshot of a send attempt — request + wallet response (or error). */
-export interface OperationResult {
-    id: string;
-    timestamp: number;
-    /** The exact request JSON sent to the wallet (for replay / debug). */
-    requestSnapshot: string;
-    /** Pretty-printed wallet response or `{ error: string }`. */
-    response: string;
-    status: 'success' | 'error';
-    errorMessage?: string;
-    boc?: string;
-    validUntil?: number;
-}
-
-export const PRESETS = {
-    simple: {
-        name: 'Simple Transfer',
-        description: 'Basic TON transfer to any address',
-        validUntil: 600,
-        from: '',
-        messages: [
-            {
-                address: 'EQCKWpx7cNMpvmcN5ObM5lLUZHZRFKqYA4xmw9jOry0ZsF9M',
-                amount: '5000000'
-            }
-        ]
+export const PRESETS: readonly PresetDescriptor[] = [
+    {
+        id: 'default-tx',
+        name: 'Single message',
+        description: 'One TON transfer with payload + stateInit (echo contract).'
     },
-    withPayload: {
-        name: 'Transfer with Comment',
-        description: 'Include a text message with your transfer',
-        validUntil: 600,
-        from: '',
-        messages: [
-            {
-                address: 'EQCKWpx7cNMpvmcN5ObM5lLUZHZRFKqYA4xmw9jOry0ZsF9M',
-                amount: '10000000',
-                payload: 'te6cckEBAQEADAAMABQAAAAASGVsbG8h'
-            }
-        ]
+    {
+        id: 'items-tx',
+        name: 'Items: TON + Jetton',
+        description: 'Items-shaped request combining a TON transfer and a Jetton transfer.'
     },
-    multiMessage: {
-        name: 'Multiple Messages',
-        description: 'Send TON to 2+ recipients in one transaction',
-        validUntil: 600,
-        from: '',
-        messages: [
-            {
-                address: 'EQCKWpx7cNMpvmcN5ObM5lLUZHZRFKqYA4xmw9jOry0ZsF9M',
-                amount: '5000000'
-            },
-            {
-                address: 'EQCD39VS5jcptHL8vMjEXrzGaRcCVYto7HUn4bpAOg8xqB2N',
-                amount: '3000000'
-            }
-        ]
-    },
-    jetton: {
-        name: 'Jetton Transfer',
-        description: 'Send fungible tokens (Jettons)',
-        validUntil: 600,
-        from: '',
-        messages: [
-            {
-                address: 'EQCKWpx7cNMpvmcN5ObM5lLUZHZRFKqYA4xmw9jOry0ZsF9M',
-                amount: '50000000',
-                payload:
-                    'te6cckEBAgEAqwAB4YgBQzYIKlMZvqYGaO2k3+YDIZGkqnSBfSYvklMpBnmOTLbgIUMWCCpTGb6mBmjtpN/mAyGRpKp0gX0mL5JTKQZJjky2wAAAAAAAAAAAAAAAAAEBAGRURVNUIFRSQU5TRkVSIFRPIEpFVFRPTiBXQUxMRVQgV0lUSCBDT01NRU5U'
-            }
-        ]
+    {
+        id: 'nft-items-tx',
+        name: 'NFT transfer',
+        description: 'Items-shaped request transferring an NFT to the connected wallet.'
     }
-} as const;
-
-export type PresetKey = keyof typeof PRESETS;
+];
