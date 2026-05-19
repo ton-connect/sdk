@@ -7,7 +7,7 @@ import { Loadable } from 'src/models/loadable';
 
 export type AppState = {
     connector: ITonConnect;
-    buttonRootId: string | null;
+    buttonRootId: string | null | string[];
     language: Locales;
     walletsListConfiguration: WalletsListConfiguration | {};
     connectRequestParameters?: Loadable<ConnectAdditionalRequest> | null;
