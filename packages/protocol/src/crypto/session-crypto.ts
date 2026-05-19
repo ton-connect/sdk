@@ -2,13 +2,52 @@ import { KeyPair } from './key-pair';
 import { concatUint8Arrays, hexToByteArray, splitToUint8Arrays, toHexString } from '../utils';
 import nacl, { BoxKeyPair } from 'tweetnacl';
 
+/**
+ * Implements the TON Connect session-encryption protocol on top of NaCl's
+ * `crypto_box`.
+ *
+ * Use `SessionCrypto` on the wallet side to encrypt outgoing
+ * {@link WalletMessage} and decrypt incoming {@link AppMessage} on the bridge.
+ *
+ * @example
+ * ```ts
+ * import { SessionCrypto, Base64, hexToByteArray } from '@tonconnect/protocol';
+ *
+ * // Generate a fresh session
+ * const session = new SessionCrypto();
+ * const myClientId = session.sessionId;  // hex public key (sent to the dApp)
+ *
+ * // Encrypt an outgoing message for the dApp
+ * const ciphertext = session.encrypt(
+ *     JSON.stringify(walletResponse),
+ *     hexToByteArray(dAppClientId)
+ * );
+ *
+ * // Decrypt an incoming message from the dApp
+ * const plaintext = session.decrypt(
+ *     Base64.decode(bridgeMessage.message).toUint8Array(),
+ *     hexToByteArray(bridgeMessage.from)
+ * );
+ * ```
+ *
+ * @see [Session protocol (Session spec)](https://github.com/ton-blockchain/ton-connect/blob/main/spec/session.md)
+ */
 export class SessionCrypto {
     private readonly nonceLength = 24;
 
     private readonly keyPair: BoxKeyPair;
 
+    /**
+     * Bridge-level `client_id` — the public key as a 64-character
+     * lowercase hex string. Share with the peer during connect; treat as
+     * semi-private (do not publish broadly).
+     */
     public readonly sessionId: string;
 
+    /**
+     * Reuse an existing {@link KeyPair} (resuming a session) or generate a
+     * fresh one (`crypto_box.keyPair()`) when omitted.
+     */
     constructor(keyPair?: KeyPair) {
         this.keyPair = keyPair ? this.createKeypairFromString(keyPair) : this.createKeypair();
         this.sessionId = toHexString(this.keyPair.publicKey);
@@ -29,6 +68,11 @@ export class SessionCrypto {
         return nacl.randomBytes(this.nonceLength);
     }
 
+    /**
+     * Encrypt `message` for `receiverPublicKey` using a fresh 24-byte random
+     * nonce. Returns `nonce || ciphertext` — the format the bridge
+     * `POST /message` body expects.
+     */
     public encrypt(message: string, receiverPublicKey: Uint8Array): Uint8Array {
         const encodedMessage = new TextEncoder().encode(message);
         const nonce = this.createNonce();
@@ -41,6 +85,11 @@ export class SessionCrypto {
         return concatUint8Arrays(nonce, encrypted);
     }
 
+    /**
+     * Decrypt the `nonce || ciphertext` blob received from the bridge.
+     * Throws if `nacl.box.open` rejects the message — wrong key, truncated
+     * input or tampered ciphertext.
+     */
     public decrypt(message: Uint8Array, senderPublicKey: Uint8Array): string {
         const [nonce, internalMessage] = splitToUint8Arrays(message, this.nonceLength);
 
@@ -60,6 +109,10 @@ export class SessionCrypto {
         return new TextDecoder().decode(decrypted);
     }
 
+    /**
+     * Export the underlying keypair as a {@link KeyPair} of hex strings.
+     * Persist this in dApp / wallet storage to resume the session later.
+     */
     public stringifyKeypair(): KeyPair {
         return {
             publicKey: toHexString(this.keyPair.publicKey),

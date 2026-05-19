@@ -6,7 +6,6 @@
  * plus `valid_until`, `network`, and `from`).
  */
 export interface SendTransactionRpcRequest {
-    /** method discriminator */
     method: 'sendTransaction';
     /** single-element tuple: the JSON-stringified transaction payload */
     params: [string];

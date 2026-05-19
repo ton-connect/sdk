@@ -6,7 +6,6 @@
  * discriminated shapes (`text`, `binary`, `cell`).
  */
 export interface SignDataRpcRequest {
-    /** method discriminator */
     method: 'signData';
     /** single-element tuple: the JSON-stringified sign-data payload */
     params: [string];
