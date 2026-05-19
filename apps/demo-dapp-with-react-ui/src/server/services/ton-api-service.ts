@@ -1,7 +1,7 @@
 import { Address, TonClient4 } from '@ton/ton';
 import { CHAIN, ChainId } from '@tonconnect/ui-react';
 import { Buffer } from 'buffer';
-import { CHAIN_TETRA } from '../../utils/network';
+import { CHAIN_TETRA } from '@/core/utils/network';
 import { TonApiClient } from '@ton-api/client';
 
 function isTonApiClient(client: TonClient4 | TonApiClient): client is TonApiClient {

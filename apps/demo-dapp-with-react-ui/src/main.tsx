@@ -1,15 +1,15 @@
-import './patch-local-storage-for-github-pages';
-import './polyfills';
-import eruda from 'eruda';
+import '@/patch-local-storage-for-github-pages';
+import '@/polyfills';
+import '@/core/styles/index.css';
 
-import React, { StrictMode } from 'react';
+import eruda from 'eruda';
+import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
-import App from './App';
-import './styles/index.css';
-import { runSingleInstance } from './utils/run-single-instance';
 import { enableQaMode } from '@tonconnect/ui-react';
-import { getTonconnectVersion } from './utils/get-tonconnect-version';
+
+import { App } from '@/app';
+import { runSingleInstance } from '@/core/utils/run-single-instance';
+import { getTonconnectVersion } from '@/core/utils/get-tonconnect-version';
 
 if (import.meta.env.VITE_QA_MODE === 'enable') {
     enableQaMode();
@@ -23,7 +23,7 @@ async function enableMocking() {
     const host = document.baseURI.replace(/\/$/, '');
 
     return new Promise(async resolve => {
-        const { worker } = await import('./server/worker');
+        const { worker } = await import('@/server/worker');
 
         const startMockWorker = () =>
             worker.start({
@@ -73,9 +73,7 @@ enableMocking().then(() => {
     const root = createRoot(container);
     root.render(
         <StrictMode>
-            <BrowserRouter>
-                <App />
-            </BrowserRouter>
+            <App />
         </StrictMode>
     );
 });
