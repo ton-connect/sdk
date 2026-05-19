@@ -116,19 +116,9 @@ export function OneClickPay() {
 
     return (
         <div
-            className={`relative flex min-h-screen items-center justify-center overflow-hidden bg-white px-5 py-14 text-[#000814] max-[540px]:px-3.5 max-[540px]:py-6 ${TON_FONT_CLS}`}
+            className={`relative flex min-h-full items-center justify-center px-5 py-14 text-foreground max-[540px]:px-3.5 max-[540px]:py-6 ${TON_FONT_CLS}`}
         >
-            {/* Soft TON-blue halos in the corners */}
-            <div
-                className="pointer-events-none absolute inset-0 z-0 bg-white"
-                style={{
-                    background:
-                        'radial-gradient(600px 320px at 8% 0%, rgba(0, 152, 234, 0.10), transparent 70%), radial-gradient(500px 280px at 100% 100%, rgba(0, 152, 234, 0.08), transparent 70%), #ffffff'
-                }}
-                aria-hidden
-            />
-
-            <main className="relative z-[1] w-full max-w-[520px] rounded-[24px] border border-[#e4ebf2] bg-white p-10 shadow-[0_1px_2px_rgba(15,23,38,0.04),0_24px_48px_-16px_rgba(0,152,234,0.12)] max-[540px]:rounded-[20px] max-[540px]:px-5 max-[540px]:py-[26px]">
+            <main className="relative z-[1] w-full max-w-[520px] rounded-[24px] border border-tertiary bg-background p-10 shadow-[0_1px_2px_rgba(15,23,38,0.04),0_24px_48px_-16px_rgba(0,152,234,0.12)] max-[540px]:rounded-[20px] max-[540px]:px-5 max-[540px]:py-[26px]">
                 <header className="mb-8 grid grid-cols-[auto_1fr_auto] items-center gap-4 max-[540px]:grid-cols-[auto_1fr] max-[540px]:gap-y-2.5">
                     <div
                         className="inline-flex h-12 w-12 items-center justify-center rounded-[14px] bg-[#eaf4fc]"
