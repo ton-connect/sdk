@@ -9,4 +9,7 @@ export { Skeleton } from './skeleton';
 export { Checkbox } from './checkbox';
 export type { CheckboxProps } from './checkbox';
 export { RadioGroup } from './radio-group';
+export { Collapsible } from './collapsible';
+export { Textarea } from './textarea';
+export type { TextareaProps } from './textarea';
 export * from './icons';
