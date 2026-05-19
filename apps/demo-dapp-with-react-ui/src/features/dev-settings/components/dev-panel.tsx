@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react';
 import { Input } from '@/core/components/ui/input';
 import { Select } from '@/core/components/ui/select';
 import { ChevronDownIcon } from '@/core/components/ui/icons';
+import { NetworkPicker } from '@/features/network';
 import { ColorsModal } from './colors-modal';
 
 const LANG_OPTIONS = ['en', 'ru'];
@@ -102,7 +103,11 @@ export const DevPanel = () => {
     }, [enableAndroidBackHandler]);
 
     return (
-        <footer className="flex flex-wrap items-center justify-end gap-5 border-t border-tertiary p-5 text-foreground">
+        <div className="flex flex-wrap items-end gap-5 text-foreground">
+            <div className="flex flex-col gap-1">
+                <label className="text-xs text-secondary-foreground">network</label>
+                <NetworkPicker />
+            </div>
             <div className="flex flex-col gap-1">
                 <label className="text-xs text-secondary-foreground">language</label>
                 <Select.Root value={language} onValueChange={onLangChange}>
@@ -221,6 +226,6 @@ export const DevPanel = () => {
                     </Input.Field>
                 </Input>
             </div>
-        </footer>
+        </div>
     );
 };

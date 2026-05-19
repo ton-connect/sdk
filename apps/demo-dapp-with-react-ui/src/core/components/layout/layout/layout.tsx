@@ -33,8 +33,8 @@ import {
     SidebarTrigger,
     useSidebar
 } from '@/core/components/sidebar';
+import { AppLogo } from '../app-logo';
 import { ThemeSwitcher } from '@/core/components/layout/theme-switcher';
-import { NetworkPicker } from '@/features/network';
 
 interface LayoutProps {
     children: ReactNode;
@@ -46,11 +46,9 @@ type NavLinkSpec = { to: string; label: string; icon: ComponentType<{ className?
 
 const NAV_GROUPS: readonly { label?: string; links: readonly NavLinkSpec[] }[] = [
     {
-        links: [{ to: '/tx-form', label: 'Send transaction', icon: Send }]
-    },
-    {
         label: 'Transactions',
         links: [
+            { to: '/tx-form', label: 'Send transaction', icon: Send },
             { to: '/gasless', label: 'Gasless USDT', icon: Zap },
             { to: '/batch-limits', label: 'Batch limits', icon: Sparkles },
             { to: '/transfer-usdt', label: 'Transfer USDT', icon: CircleDollarSign }
@@ -70,10 +68,6 @@ const NAV_GROUPS: readonly { label?: string; links: readonly NavLinkSpec[] }[] =
             { to: '/merkle', label: 'Merkle proof', icon: TreePine },
             { to: '/create-jetton', label: 'Create jetton', icon: Wallet }
         ]
-    },
-    {
-        label: 'Tools',
-        links: [{ to: '/pay', label: 'One-click pay', icon: Sparkles }]
     }
 ];
 
@@ -101,10 +95,8 @@ const AppSidebar: FC = () => {
                     onClick={closeOnMobile}
                     className="flex items-center gap-2 px-2 py-1.5"
                 >
-                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground font-bold">
-                        T
-                    </span>
-                    <span className="text-base font-bold text-foreground">TON Connect demo</span>
+                    <AppLogo className="size-7" />
+                    <span className="text-base font-bold text-foreground">TON Connect Demo</span>
                 </Link>
             </SidebarHeader>
 
@@ -128,23 +120,6 @@ const AppSidebar: FC = () => {
                         </SidebarMenu>
                     </SidebarGroup>
                 ))}
-
-                <SidebarSeparator />
-
-                <SidebarGroup>
-                    <SidebarMenu>
-                        <SidebarMenuItem>
-                            <NavLink to="/settings" end onClick={closeOnMobile}>
-                                {({ isActive }) => (
-                                    <SidebarMenuButton isActive={isActive}>
-                                        <Settings />
-                                        <span>Settings</span>
-                                    </SidebarMenuButton>
-                                )}
-                            </NavLink>
-                        </SidebarMenuItem>
-                    </SidebarMenu>
-                </SidebarGroup>
             </SidebarContent>
 
             <SidebarSeparator />
@@ -162,10 +137,17 @@ const AppSidebar: FC = () => {
                             </SidebarMenuButton>
                         </SidebarMenuItem>
                     ))}
+                    <SidebarMenuItem>
+                        <NavLink to="/settings" end onClick={closeOnMobile}>
+                            {({ isActive }) => (
+                                <SidebarMenuButton isActive={isActive}>
+                                    <Settings />
+                                    <span>Settings</span>
+                                </SidebarMenuButton>
+                            )}
+                        </NavLink>
+                    </SidebarMenuItem>
                 </SidebarMenu>
-                <div className="px-2 py-2">
-                    <NetworkPicker />
-                </div>
             </SidebarFooter>
         </Sidebar>
     );

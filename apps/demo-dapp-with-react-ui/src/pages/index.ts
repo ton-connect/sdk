@@ -8,5 +8,4 @@ export { FindTxPage } from './find-tx-page';
 export { MerklePage } from './merkle-page';
 export { CreateJettonPage } from './create-jetton-page';
 export { SettingsPage } from './settings-page';
-export { OneClickPayPage } from './one-click-pay-page';
 export { IframePage, IframeIframePage } from './iframe-page';

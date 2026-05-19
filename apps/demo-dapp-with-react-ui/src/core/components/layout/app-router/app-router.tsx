@@ -8,7 +8,6 @@ import {
     IframeIframePage,
     IframePage,
     MerklePage,
-    OneClickPayPage,
     SettingsPage,
     SignDataPage,
     TonProofPage,
@@ -31,7 +30,6 @@ export const AppRouter = () => {
                 <Route path="/merkle" element={<MerklePage />} />
                 <Route path="/create-jetton" element={<CreateJettonPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
-                <Route path="/pay" element={<OneClickPayPage />} />
                 <Route path="/iframe" element={<IframePage />} />
                 <Route path="/iframe/iframe" element={<IframeIframePage />} />
                 <Route path="*" element={<Navigate to="/tx-form" replace />} />

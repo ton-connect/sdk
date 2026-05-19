@@ -225,17 +225,3 @@
   }
 }
 
-/* OneClickPay step-dot pulse animation. */
-@keyframes one-click-pay-pulse {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.25);
-  }
-}
-
-.animate-one-click-pay-pulse {
-  animation: one-click-pay-pulse 1.4s ease-in-out infinite;
-}
