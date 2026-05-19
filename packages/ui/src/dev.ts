@@ -31,7 +31,8 @@ async function dev(): Promise<void> {
                     imageUrl: 'https://tonkeeper.com/assets/tonconnect-icon.png',
                     platforms: ['ios']
                 }
-            ]
+            ],
+            excludeWallets: ['xtonwallet']
         }*/
     });
 
