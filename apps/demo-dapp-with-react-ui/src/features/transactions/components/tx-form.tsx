@@ -4,6 +4,7 @@ import ReactJson, { InteractionProps } from 'react-json-view';
 import { CHAIN, SendTransactionRequest, useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 
 import { Button } from '@/core/components/ui/button';
+import { Checkbox } from '@/core/components/ui/checkbox';
 import { Skeleton } from '@/core/components/ui/skeleton';
 import { ResultPanel } from '@/core/components/result-panel';
 import { TonProofDemoApi } from '@/core/lib/ton-proof-demo-api';
@@ -51,7 +52,7 @@ type RetryPrompt =
     | { kind: 'sendTx'; dispatched: boolean }
     | { kind: 'signMessage'; dispatched: boolean };
 
-const CHECKBOX_LABEL_CLS = 'flex items-center gap-2 text-[15px] font-medium text-secondary-foreground';
+const CHECKBOX_LABEL_CLS = 'flex cursor-pointer items-center gap-2 text-[15px] font-medium text-secondary-foreground';
 
 export function TxForm() {
     const [tx, setTx] = useState(defaultTx);
@@ -164,10 +165,9 @@ export function TxForm() {
             </div>
 
             <label className={CHECKBOX_LABEL_CLS}>
-                <input
-                    type="checkbox"
+                <Checkbox
                     checked={withConnect}
-                    onChange={e => setWithConnect(e.target.checked)}
+                    onCheckedChange={v => setWithConnect(v === true)}
                 />
                 Embed request in connect
             </label>
@@ -181,10 +181,9 @@ export function TxForm() {
             />
 
             <label className={CHECKBOX_LABEL_CLS}>
-                <input
-                    type="checkbox"
+                <Checkbox
                     checked={waitForTx}
-                    onChange={e => setWaitForTx(e.target.checked)}
+                    onCheckedChange={v => setWaitForTx(v === true)}
                 />
                 Wait for transaction confirmation
             </label>

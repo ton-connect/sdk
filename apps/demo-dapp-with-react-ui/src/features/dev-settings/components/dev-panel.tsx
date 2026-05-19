@@ -8,6 +8,7 @@ import {
 } from '@tonconnect/ui-react';
 import { useEffect, useState } from 'react';
 
+import { Checkbox } from '@/core/components/ui/checkbox';
 import { Input } from '@/core/components/ui/input';
 import { Select } from '@/core/components/ui/select';
 import { ChevronDownIcon } from '@/core/components/ui/icons';
@@ -170,11 +171,13 @@ export const DevPanel = () => {
             <div className="flex flex-col gap-1">
                 <span className="text-xs font-bold text-foreground">modals</span>
                 {['before', 'success', 'error'].map((label, idx) => (
-                    <label key={label} className="flex items-center gap-2 text-sm text-foreground">
-                        <input
-                            type="checkbox"
+                    <label
+                        key={label}
+                        className="flex cursor-pointer items-center gap-2 text-sm text-foreground"
+                    >
+                        <Checkbox
                             checked={checkboxes[idx]}
-                            onChange={() => onCheckboxChange(idx)}
+                            onCheckedChange={() => onCheckboxChange(idx)}
                         />
                         {label}
                     </label>
@@ -184,11 +187,13 @@ export const DevPanel = () => {
             <div className="flex flex-col gap-1">
                 <span className="text-xs font-bold text-foreground">notifications</span>
                 {['before', 'success', 'error'].map((label, idx) => (
-                    <label key={label} className="flex items-center gap-2 text-sm text-foreground">
-                        <input
-                            type="checkbox"
+                    <label
+                        key={label}
+                        className="flex cursor-pointer items-center gap-2 text-sm text-foreground"
+                    >
+                        <Checkbox
                             checked={checkboxes[idx + 3]}
-                            onChange={() => onCheckboxChange(idx + 3)}
+                            onCheckedChange={() => onCheckboxChange(idx + 3)}
                         />
                         {label}
                     </label>

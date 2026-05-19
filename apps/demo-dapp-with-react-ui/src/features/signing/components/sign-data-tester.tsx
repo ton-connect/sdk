@@ -10,6 +10,7 @@ import { useState } from 'react';
 import ReactJson from 'react-json-view';
 
 import { Button } from '@/core/components/ui/button';
+import { Checkbox } from '@/core/components/ui/checkbox';
 import { ResultPanel } from '@/core/components/result-panel';
 import { TonProofDemoApi } from '@/core/lib/ton-proof-demo-api';
 
@@ -91,11 +92,10 @@ export function SignDataTester() {
 
     return (
         <>
-            <label className="flex items-center gap-2 text-[15px] font-medium text-secondary-foreground">
-                <input
-                    type="checkbox"
+            <label className="flex cursor-pointer items-center gap-2 text-[15px] font-medium text-secondary-foreground">
+                <Checkbox
                     checked={embeddedRequest}
-                    onChange={e => setEmbeddedRequest(e.target.checked)}
+                    onCheckedChange={v => setEmbeddedRequest(v === true)}
                 />
                 Embed request in connect
             </label>
