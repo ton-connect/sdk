@@ -1,7 +1,7 @@
 import { forwardRef } from 'react';
-import ReactJson from 'react-json-view';
 
 import { Button } from '@/core/components/ui/button';
+import { JsonView } from '@/core/components/ui/json-view';
 import { ResultPanel } from '@/core/components/result-panel';
 
 import type { OperationResult } from '../../../hooks/use-transaction';
@@ -34,12 +34,7 @@ export const ResultBlock = forwardRef<HTMLDivElement, ResultBlockProps>(
                     </div>
                 </div>
                 <ResultPanel title="Response">
-                    <ReactJson
-                        src={JSON.parse(result.response)}
-                        name={false}
-                        theme="ocean"
-                        collapsed={false}
-                    />
+                    <JsonView src={result.response} />
                 </ResultPanel>
             </div>
         );

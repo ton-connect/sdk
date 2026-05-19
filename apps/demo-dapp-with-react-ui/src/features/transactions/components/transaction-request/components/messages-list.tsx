@@ -32,7 +32,7 @@ export function MessagesList({
     return (
         <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between">
-                <span className="text-xs text-secondary-foreground">Messages</span>
+                <span className="text-md font-bold">Messages</span>
                 <Button variant="secondary" size="s" onClick={onAdd}>
                     <Plus className="size-3" />
                     Add

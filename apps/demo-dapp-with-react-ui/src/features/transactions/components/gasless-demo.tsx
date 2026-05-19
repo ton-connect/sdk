@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
-import ReactJson from 'react-json-view';
+import { JsonView } from '@/core/components/ui/json-view';
 import { Address } from '@ton/core';
 
 import { Button } from '@/core/components/ui/button';
@@ -115,13 +115,7 @@ export function GaslessDemo() {
 
             {result && (
                 <ResultPanel title="Result">
-                    <ReactJson
-                        src={result}
-                        name={false}
-                        theme="ocean"
-                        collapsed={false}
-                        style={{ borderRadius: 8, padding: 10, fontSize: 12 }}
-                    />
+                    <JsonView src={result} />
                 </ResultPanel>
             )}
         </>

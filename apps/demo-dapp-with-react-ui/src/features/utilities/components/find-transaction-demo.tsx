@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import ReactJson from 'react-json-view';
+import { JsonView } from '@/core/components/ui/json-view';
 
 import { Button } from '@/core/components/ui/button';
 import { Input } from '@/core/components/ui/input';
@@ -77,7 +77,7 @@ export const FindTransactionDemo = () => {
             {txError && <div className="text-sm text-error">{txError}</div>}
             {txResult !== null && (
                 <ResultPanel title="Transaction">
-                    <ReactJson src={txResult} name={false} theme="ocean" collapsed={false} />
+                    <JsonView src={txResult} />
                 </ResultPanel>
             )}
         </>

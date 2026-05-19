@@ -23,12 +23,14 @@ export function ValidUntilField({
     timer
 }: ValidUntilFieldProps) {
     return (
-        <div className="flex flex-col gap-2">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="text-xs text-secondary-foreground">Valid Until</span>
+        <Input size="s">
+            <Input.Header>
+                <Input.Title>Valid Until</Input.Title>
                 <span
                     className={`inline-flex items-center gap-1.5 font-mono text-xs ${
-                        timer.status === 'expired' ? 'text-error' : 'text-secondary-foreground'
+                        timer.status === 'expired'
+                            ? 'text-error'
+                            : 'text-secondary-foreground'
                     }`}
                 >
                     <span
@@ -36,18 +38,16 @@ export function ValidUntilField({
                     />
                     {timer.display}
                 </span>
-            </div>
+            </Input.Header>
             <div className="flex flex-wrap gap-2">
                 <div className="min-w-[140px] flex-1">
-                    <Input size="s">
-                        <Input.Field>
-                            <Input.Input
-                                type="number"
-                                value={validUntil}
-                                onChange={e => onChange(parseInt(e.target.value, 10) || 0)}
-                            />
-                        </Input.Field>
-                    </Input>
+                    <Input.Field>
+                        <Input.Input
+                            type="number"
+                            value={validUntil}
+                            onChange={e => onChange(parseInt(e.target.value, 10) || 0)}
+                        />
+                    </Input.Field>
                 </div>
                 <div className="flex flex-wrap gap-1">
                     <Button variant="ghost" size="s" onClick={() => onSetFromNow(-600)}>
@@ -67,6 +67,6 @@ export function ValidUntilField({
                     </Button>
                 </div>
             </div>
-        </div>
+        </Input>
     );
 }

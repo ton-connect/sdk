@@ -12,4 +12,5 @@ export { RadioGroup } from './radio-group';
 export { Collapsible } from './collapsible';
 export { Textarea } from './textarea';
 export type { TextareaProps } from './textarea';
+export { JsonView } from './json-view';
 export * from './icons';

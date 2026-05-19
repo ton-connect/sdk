@@ -1,0 +1,55 @@
+/* Mirrors the .field block from input.module.css so a Textarea slots into the
+   same Input compound visually. */
+.field {
+    display: flex;
+    background: var(--ta-color-background-secondary);
+    border: var(--ta-border-width-m) solid transparent;
+    border-radius: var(--ta-border-radius-l);
+    transition: border-color 0.2s;
+    overflow: hidden;
+    position: relative;
+    padding: 14px;
+}
+
+.field:focus-within {
+    border-color: var(--ta-color-primary);
+}
+
+.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.error {
+    border-color: var(--ta-color-error);
+}
+
+.textarea {
+    flex: 1;
+    min-width: 0;
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--ta-color-text);
+    font-family: var(--ta-font-family);
+    width: 100%;
+    padding: 0;
+    resize: vertical;
+}
+
+.textarea::placeholder {
+    color: var(--ta-color-text-secondary);
+    opacity: 0.6;
+}
+
+.size_s {
+    composes: inputS from "../../../styles/typography.module.css";
+}
+
+.size_m {
+    composes: inputM from "../../../styles/typography.module.css";
+}
+
+.size_l {
+    composes: inputL from "../../../styles/typography.module.css";
+}

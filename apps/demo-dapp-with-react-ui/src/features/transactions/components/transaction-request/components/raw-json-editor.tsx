@@ -21,8 +21,9 @@ export function RawJsonEditor({ value, onChange, syntaxError }: RawJsonEditorPro
                     style={{
                         fontFamily:
                             'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-                        fontSize: 13,
-                        minHeight: 200
+                        fontSize: 14,
+                        minHeight: 200,
+                        lineHeight: 1.625
                     }}
                 />
             </div>

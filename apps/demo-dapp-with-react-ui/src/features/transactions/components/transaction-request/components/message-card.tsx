@@ -42,7 +42,7 @@ export function MessageCard({
     return (
         <div className="flex flex-col gap-3 rounded-lg border border-tertiary p-3">
             <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-foreground">Message {index + 1}</span>
+                <span className="font-medium mb-2">Message {index + 1}</span>
                 {canRemove && (
                     <Button
                         variant="ghost"
@@ -59,6 +59,7 @@ export function MessageCard({
                 <Input.Header>
                     <Input.Title>Address</Input.Title>
                 </Input.Header>
+
                 <Input.Field>
                     <Input.Input
                         value={message.address}
@@ -68,20 +69,18 @@ export function MessageCard({
                 </Input.Field>
             </Input>
 
-            <div className="flex flex-col gap-1">
-                <span className="text-xs text-secondary-foreground">Amount</span>
-                <div className="flex gap-2">
-                    <div className="flex-1">
-                        <Input size="s">
-                            <Input.Field>
-                                <Input.Input
-                                    value={displayAmount}
-                                    onChange={e => onAmountChange(e.target.value)}
-                                    placeholder={amountUnit === 'TON' ? '0.001' : '1000000'}
-                                />
-                            </Input.Field>
-                        </Input>
-                    </div>
+            <Input size="s">
+                <Input.Header>
+                    <Input.Title>Amount</Input.Title>
+                </Input.Header>
+                <div className="flex w-full gap-2">
+                    <Input.Field className="w-full">
+                        <Input.Input
+                            value={displayAmount}
+                            onChange={e => onAmountChange(e.target.value)}
+                            placeholder={amountUnit === 'TON' ? '0.001' : '1000000'}
+                        />
+                    </Input.Field>
                     <Select.Root
                         value={amountUnit}
                         onValueChange={v => onAmountUnitChange(v as AmountUnit)}
@@ -96,7 +95,7 @@ export function MessageCard({
                         </Select.Content>
                     </Select.Root>
                 </div>
-            </div>
+            </Input>
 
             <Collapsible open={isOpen} onOpenChange={() => !hasContent && onToggleExpand()}>
                 <Collapsible.Trigger className={hasContent ? 'cursor-default' : ''}>
@@ -107,27 +106,31 @@ export function MessageCard({
                     )}
                     Payload, State Init
                 </Collapsible.Trigger>
+
                 <Collapsible.Content className="flex flex-col gap-2 pt-2">
-                    <div className="flex flex-col gap-1">
-                        <span className="text-xs text-secondary-foreground">Payload</span>
+                    <Input size="s">
+                        <Input.Header>
+                            <Input.Title>Payload</Input.Title>
+                        </Input.Header>
                         <Textarea
                             value={message.payload ?? ''}
                             onChange={e => onUpdate('payload', e.target.value)}
                             placeholder="Transaction payload (base64)"
                             rows={2}
-                            className="font-mono text-xs"
                         />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                        <span className="text-xs text-secondary-foreground">State Init</span>
+                    </Input>
+
+                    <Input size="s">
+                        <Input.Header>
+                            <Input.Title>State Init</Input.Title>
+                        </Input.Header>
                         <Textarea
                             value={message.stateInit ?? ''}
                             onChange={e => onUpdate('stateInit', e.target.value)}
                             placeholder="State init (base64)"
                             rows={2}
-                            className="font-mono text-xs"
                         />
-                    </div>
+                    </Input>
                 </Collapsible.Content>
             </Collapsible>
         </div>

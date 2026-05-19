@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import ReactJson from 'react-json-view';
+import { JsonView } from '@/core/components/ui/json-view';
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { ShieldCheck } from 'lucide-react';
 
@@ -89,7 +89,7 @@ export const TonProofDemo = () => {
             <Button onClick={handleClick}>Call backend getAccountInfo()</Button>
             {data && Object.keys(data).length > 0 && (
                 <ResultPanel title="Response">
-                    <ReactJson src={data} name={false} theme="ocean" collapsed={false} />
+                    <JsonView src={data} />
                 </ResultPanel>
             )}
         </>

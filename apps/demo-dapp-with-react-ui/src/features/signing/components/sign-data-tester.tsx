@@ -7,7 +7,7 @@ import {
 } from '@tonconnect/ui-react';
 import { beginCell } from '@ton/ton';
 import { useState } from 'react';
-import ReactJson from 'react-json-view';
+import { JsonView } from '@/core/components/ui/json-view';
 
 import { Button } from '@/core/components/ui/button';
 import { Checkbox } from '@/core/components/ui/checkbox';
@@ -171,29 +171,19 @@ export function SignDataTester() {
 
             {signDataRequest && (
                 <ResultPanel title="📤 Sign Data Request">
-                    <ReactJson src={signDataRequest} name={false} theme="ocean" collapsed={false} />
+                    <JsonView src={signDataRequest} />
                 </ResultPanel>
             )}
 
             {signDataResponse && (
                 <ResultPanel title="📥 Sign Data Response">
-                    <ReactJson
-                        src={signDataResponse}
-                        name={false}
-                        theme="ocean"
-                        collapsed={false}
-                    />
+                    <JsonView src={signDataResponse} />
                 </ResultPanel>
             )}
 
             {verificationResult && (
                 <ResultPanel title="✅ Verification Result">
-                    <ReactJson
-                        src={verificationResult}
-                        name={false}
-                        theme="ocean"
-                        collapsed={false}
-                    />
+                    <JsonView src={verificationResult} />
                 </ResultPanel>
             )}
         </>
