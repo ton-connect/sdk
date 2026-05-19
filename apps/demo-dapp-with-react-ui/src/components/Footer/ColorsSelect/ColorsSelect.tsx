@@ -1,6 +1,5 @@
 import { ColorsSet, THEME, useTonConnectUI } from '@tonconnect/ui-react';
 import { FunctionComponent, useEffect, useState } from 'react';
-import './style.scss';
 
 const defaultColors = {
     [THEME.LIGHT]: {
@@ -118,7 +117,7 @@ export const ColorsSelect: FunctionComponent<ColorsSelectProps> = ({ theme }) =>
     };
 
     return (
-        <div className="colors-container">
+        <div className="[&>div]:mb-5 [&>div>label]:mr-[10px] [&>div>span]:mr-[14px] [&>div>span]:font-bold">
             {Object.entries(colors).map(([key1, value1]) => {
                 if (typeof value1 === 'object') {
                     return (

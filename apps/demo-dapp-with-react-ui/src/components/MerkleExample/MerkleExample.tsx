@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { toNano } from '@ton/core';
 import {
@@ -9,7 +7,6 @@ import {
     buildVerifyMerkleUpdate
 } from '../../server/utils/exotic';
 
-import './style.scss';
 import { TonProofDemoApi } from '../../TonProofDemoApi';
 
 const merkleExampleAddress = 'EQD_5KMZVIqzYY91-t5CdRD_V71wRrVzxDXu9n2XEwz2wwdv';
@@ -44,15 +41,21 @@ export const MerkleExample = () => {
     };
 
     return (
-        <div className="merkle-proof-demo">
-            <h3>Merkle proof/update</h3>
+        <div className="mt-[60px] flex w-full flex-col items-center gap-5 p-5">
+            <h3 className="text-white/80">Merkle proof/update</h3>
             {wallet ? (
-                <div className={'merkle-proof-demo__buttons'}>
-                    <button onClick={handleMerkleProofClick}>Send merkle proof</button>
-                    <button onClick={handleMerkleUpdateClick}>Send merkle update</button>
+                <div className="flex flex-wrap justify-center gap-5">
+                    <button className="demo-btn" onClick={handleMerkleProofClick}>
+                        Send merkle proof
+                    </button>
+                    <button className="demo-btn" onClick={handleMerkleUpdateClick}>
+                        Send merkle update
+                    </button>
                 </div>
             ) : (
-                <div className="ton-proof-demo__error">Connect wallet to send transaction</div>
+                <div className="text-[18px] leading-5 text-[rgba(102,170,238,0.91)]">
+                    Connect wallet to send transaction
+                </div>
             )}
         </div>
     );

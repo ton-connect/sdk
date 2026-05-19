@@ -1,7 +1,6 @@
 import { useCallback, useState } from 'react';
 import { beginCell } from '@ton/ton';
 import ReactJson, { InteractionProps } from 'react-json-view';
-import './style.scss';
 import { SendTransactionRequest, useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { TonProofDemoApi } from '../../TonProofDemoApi';
 import { CHAIN } from '@tonconnect/ui-react';
@@ -18,9 +17,7 @@ const defaultTx: SendTransactionRequest = {
         {
             address: 'EQCKWpx7cNMpvmcN5ObM5lLUZHZRFKqYA4xmw9jOry0ZsF9M',
             amount: '5000000',
-            // (optional) Body in boc base64 format.
             payload: defaultBody.toBoc().toString('base64'),
-            // (optional) State init in boc base64 format.
             stateInit:
                 'te6cckEBBAEAOgACATQCAQAAART/APSkE/S88sgLAwBI0wHQ0wMBcbCRW+D6QDBwgBDIywVYzxYh+gLLagHPFsmAQPsAlxCarA=='
         }
@@ -34,9 +31,7 @@ const defaultTxWithMessages: SendTransactionRequest = {
             type: 'ton',
             address: 'EQCKWpx7cNMpvmcN5ObM5lLUZHZRFKqYA4xmw9jOry0ZsF9M',
             amount: '5000000',
-            // (optional) Body in boc base64 format.
             payload: defaultBody.toBoc().toString('base64'),
-            // (optional) State init in boc base64 format.
             stateInit:
                 'te6cckEBBAEAOgACATQCAQAAART/APSkE/S88sgLAwBI0wHQ0wMBcbCRW+D6QDBwgBDIywVYzxYh+gLLagHPFsmAQPsAlxCarA=='
         },
@@ -49,13 +44,13 @@ const defaultTxWithMessages: SendTransactionRequest = {
     ]
 };
 
-// When `enableEmbeddedRequest: true` returns `hasResponse: false`, the connect happened but no
-// signed result came back. The dApp must NOT auto-retry: with `dispatched: true` the wallet may
-// already have processed the request and submitting it again will duplicate it. Surface a button
-// the user can press deliberately, with stronger wording in the dangerous case.
 type RetryPrompt =
     | { kind: 'sendTx'; dispatched: boolean }
     | { kind: 'signMessage'; dispatched: boolean };
+
+const CHECKBOX_LABEL_CLS = 'ml-[2px] mt-3 text-[15px] font-medium text-[#b8d4f1]';
+const JSON_LABEL_CLS =
+    'mb-[6px] ml-[2px] mt-[18px] self-start text-[15px] font-medium tracking-[0.01em] text-[#b8d4f1]';
 
 export function TxForm() {
     const [tx, setTx] = useState(defaultTx);
@@ -98,22 +93,10 @@ export function TxForm() {
         try {
             let transaction;
             if (withConnect) {
-                // Opt into the embedded-request flow. When the wallet is not connected, the SDK
-                // opens the connect modal with the request folded into the connect URL; when it
-                // is connected, the SDK runs the normal bridge flow and wraps the result in the
-                // same `{ hasResponse: true, response }` envelope.
                 const embedded = await tonConnectUi.sendTransaction(tx, {
                     enableEmbeddedRequest: true
                 });
                 if (!embedded.hasResponse) {
-                    // The wallet connected but didn't return a signed transaction. Never retry
-                    // inline — show the user a button instead (see the warning block below).
-                    // When `dispatched: true`, the request was already delivered to the wallet
-                    // via the connect URL, so before re-prompting, the dApp can also poll
-                    // on-chain for the expected transfer (e.g. with the same
-                    // `TonProofDemoApi.waitForTransaction`-style logic used by the "Wait for
-                    // transaction confirmation" toggle below) to detect whether the wallet
-                    // already processed the request and avoid a double send.
                     setRetryPrompt({
                         kind: 'sendTx',
                         dispatched: embedded.connectResult.dispatched
@@ -152,10 +135,6 @@ export function TxForm() {
                     enableEmbeddedRequest: true
                 });
                 if (!embedded.hasResponse) {
-                    // Same caveat as sendTransaction: do not retry silently when
-                    // `dispatched: true`. Consider an on-chain check (using your dApp's existing
-                    // transaction lookup) to detect whether the wallet already processed the
-                    // request before re-prompting.
                     setRetryPrompt({
                         kind: 'signMessage',
                         dispatched: embedded.connectResult.dispatched
@@ -176,14 +155,18 @@ export function TxForm() {
     };
 
     return (
-        <div className="send-tx-form">
-            <h3>Configure and send transaction</h3>
-            <button onClick={() => setTx(defaultTx)}>Set message payload</button>
-            <button onClick={() => setTx(defaultTxWithMessages)}>Set items payload</button>
-            <button onClick={() => setTx(buildNftItemsPayload())}>Set NFT items payload</button>
-            <label
-                style={{ margin: '12px 0 0 2px', color: '#b8d4f1', fontWeight: 500, fontSize: 15 }}
-            >
+        <div className="flex w-full flex-1 flex-col items-center gap-5 p-5">
+            <h3 className="text-[28px] text-white/80">Configure and send transaction</h3>
+            <button className="demo-btn" onClick={() => setTx(defaultTx)}>
+                Set message payload
+            </button>
+            <button className="demo-btn" onClick={() => setTx(defaultTxWithMessages)}>
+                Set items payload
+            </button>
+            <button className="demo-btn" onClick={() => setTx(buildNftItemsPayload())}>
+                Set NFT items payload
+            </button>
+            <label className={CHECKBOX_LABEL_CLS}>
                 <input
                     type="checkbox"
                     checked={withConnect}
@@ -200,38 +183,22 @@ export function TxForm() {
                 onDelete={onChange}
             />
 
-            <label
-                style={{ margin: '12px 0 0 2px', color: '#b8d4f1', fontWeight: 500, fontSize: 15 }}
-            >
+            <label className={CHECKBOX_LABEL_CLS}>
                 <input
                     type="checkbox"
                     checked={waitForTx}
                     onChange={e => setWaitForTx(e.target.checked)}
-                    style={{ marginRight: 8 }}
+                    className="mr-2"
                 />
                 Wait for transaction confirmation
             </label>
 
             {waitForTx && (
-                <div style={{ margin: '8px 0 0 2px', color: '#b8d4f1', fontSize: 15 }}>
+                <div className="ml-[2px] mt-2 text-[15px] text-[#b8d4f1]">
                     {waitingTx ? (
                         <>
-                            <span style={{ marginRight: 8 }}>
-                                Waiting for transaction confirmation...
-                            </span>
-                            <span
-                                className="loader"
-                                style={{
-                                    display: 'inline-block',
-                                    width: 18,
-                                    height: 18,
-                                    border: '3px solid #66aaee',
-                                    borderTop: '3px solid transparent',
-                                    borderRadius: '50%',
-                                    animation: 'spin 1s linear infinite',
-                                    verticalAlign: 'middle'
-                                }}
-                            ></span>
+                            <span className="mr-2">Waiting for transaction confirmation...</span>
+                            <span className="inline-block h-[18px] w-[18px] animate-spin rounded-full border-[3px] border-[#66aaee] border-t-transparent align-middle" />
                         </>
                     ) : (
                         <span>The transaction will be automatically found and shown below</span>
@@ -242,12 +209,14 @@ export function TxForm() {
             {wallet || withConnect ? (
                 <>
                     <button
+                        className="demo-btn"
                         onClick={handleSendTx}
                         disabled={loading || waitingTx || Boolean(retryPrompt)}
                     >
                         {loading ? 'Sending...' : 'Send transaction'}
                     </button>
                     <button
+                        className="demo-btn"
                         onClick={handleSignMessage}
                         disabled={signLoading || Boolean(retryPrompt)}
                     >
@@ -255,28 +224,23 @@ export function TxForm() {
                     </button>
                 </>
             ) : (
-                <button onClick={() => tonConnectUi.openModal()}>
+                <button className="demo-btn" onClick={() => tonConnectUi.openModal()}>
                     Connect wallet to send the transaction
                 </button>
             )}
 
             {retryPrompt && (
                 <div
-                    style={{
-                        margin: '12px 0',
-                        padding: 12,
-                        borderRadius: 8,
-                        background: retryPrompt.dispatched ? '#5a2424' : '#1f3a52',
-                        color: '#f0f6fb',
-                        border: `1px solid ${retryPrompt.dispatched ? '#c14a4a' : '#3a6a90'}`,
-                        fontSize: 14,
-                        lineHeight: 1.45
-                    }}
+                    className={`my-3 rounded-lg border p-3 text-sm leading-[1.45] text-[#f0f6fb] ${
+                        retryPrompt.dispatched
+                            ? 'border-[#c14a4a] bg-[#5a2424]'
+                            : 'border-[#3a6a90] bg-[#1f3a52]'
+                    }`}
                 >
                     <strong>
                         {retryPrompt.dispatched ? '⚠️ Possible duplicate' : 'Request not delivered'}
                     </strong>
-                    <p style={{ margin: '6px 0 10px' }}>
+                    <p className="mb-2.5 mt-1.5">
                         {retryPrompt.dispatched ? (
                             <>
                                 The {retryPrompt.kind === 'sendTx' ? 'transaction' : 'message'} was
@@ -293,13 +257,14 @@ export function TxForm() {
                         )}
                     </p>
                     <button
+                        className="demo-btn"
                         onClick={retryPrompt.kind === 'sendTx' ? handleSendTx : handleSignMessage}
                     >
                         Retry {retryPrompt.kind === 'sendTx' ? 'transaction' : 'message signing'}
                     </button>
                     <button
+                        className="demo-btn ml-2 bg-transparent"
                         onClick={() => setRetryPrompt(null)}
-                        style={{ marginLeft: 8, background: 'transparent' }}
                     >
                         Dismiss
                     </button>
@@ -308,8 +273,8 @@ export function TxForm() {
 
             {txResult && (
                 <>
-                    <div className="find-transaction-demo__json-label">Transaction</div>
-                    <div className="find-transaction-demo__json-view">
+                    <div className={JSON_LABEL_CLS}>Transaction</div>
+                    <div className="w-full">
                         <ReactJson src={txResult} name={false} theme="ocean" collapsed={false} />
                     </div>
                 </>
@@ -317,19 +282,12 @@ export function TxForm() {
 
             {signResult && (
                 <>
-                    <div className="find-transaction-demo__json-label">Sign Message Result</div>
-                    <div className="find-transaction-demo__json-view">
+                    <div className={JSON_LABEL_CLS}>Sign Message Result</div>
+                    <div className="w-full">
                         <ReactJson src={signResult} name={false} theme="ocean" collapsed={false} />
                     </div>
                 </>
             )}
-
-            <style>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
         </div>
     );
 }

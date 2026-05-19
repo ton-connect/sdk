@@ -1,7 +1,6 @@
 import { THEME } from '@tonconnect/ui-react';
 import { useState } from 'react';
 import { ColorsSelect } from '../ColorsSelect/ColorsSelect';
-import './style.scss';
 
 export const ColorsModal = () => {
     const [opened, setOpened] = useState(false);
@@ -11,9 +10,9 @@ export const ColorsModal = () => {
         <>
             <button onClick={() => setOpened(true)}>change colors</button>
             {opened && (
-                <div className="modal">
+                <div className="fixed inset-0 z-[10000000] bg-[rgb(16,22,31)] p-5 text-white [&>button]:float-right">
                     <button onClick={() => setOpened(false)}>close</button>
-                    <div className="modal__toggle">
+                    <div className="flex justify-center gap-5 [&>a]:text-white">
                         <a
                             href="#"
                             style={{ color: theme === THEME.LIGHT ? 'blue' : 'white' }}

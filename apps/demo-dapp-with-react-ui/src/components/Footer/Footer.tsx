@@ -6,7 +6,6 @@ import {
     THEME,
     useTonConnectUI
 } from '@tonconnect/ui-react';
-import './footer.scss';
 import { useEffect, useState } from 'react';
 import { ColorsModal } from './ColorsModal/ColorsModal';
 
@@ -81,7 +80,7 @@ export const Footer = () => {
     }, [enableAndroidBackHandler]);
 
     return (
-        <footer className="footer">
+        <footer className="flex flex-wrap items-center justify-end gap-5 p-5 [&>div>label]:mr-[5px] [&>div>label]:text-white">
             <div>
                 <label>language</label>
                 <select onChange={e => onLangChange(e.target.value)}>
@@ -119,7 +118,7 @@ export const Footer = () => {
                 </select>
             </div>
 
-            <div className="footer-checkbox-container">
+            <div className="flex flex-col [&>input]:ml-[3px] [&>span]:mb-1 [&>span]:font-bold [&>span]:text-white">
                 <span>modals</span>
                 <label>
                     before
@@ -147,7 +146,7 @@ export const Footer = () => {
                 </label>
             </div>
 
-            <div className="footer-checkbox-container">
+            <div className="flex flex-col [&>input]:ml-[3px] [&>span]:mb-1 [&>span]:font-bold [&>span]:text-white">
                 <span>notifications</span>
                 <label>
                     before
@@ -183,7 +182,7 @@ export const Footer = () => {
                 <label>
                     return strategy:
                     <input
-                        style={{ width: '200px' }}
+                        className="w-[200px]"
                         value={returnStrategy}
                         onChange={e => setReturnStrategy(e.target.value)}
                         onBlur={onReturnStrategyInputBlur}
@@ -196,7 +195,7 @@ export const Footer = () => {
                     <div>skip redirect to wallet:</div>
                     <div>('ios', 'never', 'always')</div>
                     <input
-                        style={{ width: '200px' }}
+                        className="w-[200px]"
                         value={skipRedirect}
                         onChange={e => setSkipRedirect(e.target.value)}
                         onBlur={onSkipRedirectInputBlur}

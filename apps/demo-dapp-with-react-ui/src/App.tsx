@@ -1,4 +1,3 @@
-import './App.scss';
 import { THEME, TonConnectUIProvider, initializeWalletConnect } from '@tonconnect/ui-react';
 import { Routes, Route } from 'react-router-dom';
 import { Header } from './components/Header/Header';
@@ -29,7 +28,7 @@ initializeWalletConnect(UniversalConnector, {
 
 function HomePage() {
     return (
-        <div className="app">
+        <div className="flex min-h-full flex-col [&>header]:mb-[10px]">
             <Header />
             <TxForm />
             <GaslessDemo />

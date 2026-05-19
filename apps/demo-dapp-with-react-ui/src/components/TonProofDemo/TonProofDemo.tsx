@@ -1,6 +1,5 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import ReactJson from 'react-json-view';
-import './style.scss';
 import { TonProofDemoApi } from '../../TonProofDemoApi';
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import useInterval from '../../hooks/useInterval';
@@ -72,17 +71,23 @@ export const TonProofDemo = () => {
     }
 
     return (
-        <div className="ton-proof-demo">
-            <h3>Demo backend API with ton_proof verification</h3>
+        <div className="mt-[60px] flex w-full flex-col items-center gap-5 p-5">
+            <h3 className="text-white/80">Demo backend API with ton_proof verification</h3>
             {authorized ? (
-                <button onClick={handleClick}>Call backend getAccountInfo()</button>
+                <button className="demo-btn" onClick={handleClick}>
+                    Call backend getAccountInfo()
+                </button>
             ) : (
-                <div className="ton-proof-demo__error">Connect wallet to call API</div>
+                <div className="text-[18px] leading-5 text-[rgba(102,170,238,0.91)]">
+                    Connect wallet to call API
+                </div>
             )}
             {data && Object.keys(data).length > 0 && (
                 <>
-                    <div className="find-transaction-demo__json-label">Response</div>
-                    <div className="find-transaction-demo__json-view">
+                    <div className="mb-[6px] ml-[2px] mt-[18px] self-start text-[15px] font-medium tracking-[0.01em] text-[#b8d4f1]">
+                        Response
+                    </div>
+                    <div className="w-full">
                         <ReactJson src={data} name={false} theme="ocean" collapsed={false} />
                     </div>
                 </>

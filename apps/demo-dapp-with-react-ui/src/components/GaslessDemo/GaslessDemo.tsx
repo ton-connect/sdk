@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import ReactJson from 'react-json-view';
-import './style.scss';
 import { sendItems } from './gaslessItems';
 import { Address } from '@ton/core';
 import { sendMessages } from './gaslessMessages';
@@ -66,13 +65,15 @@ export function GaslessDemo() {
     };
 
     return (
-        <div className="gasless-demo">
-            <h3 id="gasless-usdt">Gasless USDT Transfer</h3>
-            <p className="gasless-demo__subtitle">
+        <div className="mt-[60px] flex flex-col items-center gap-4 p-5">
+            <h3 id="gasless-usdt" className="m-0 text-white/80">
+                Gasless USDT Transfer
+            </h3>
+            <p className="m-0 max-w-[600px] text-center text-[15px] text-white/60">
                 Transfer jettons without TON in wallet — fee is paid in the jetton itself.
             </p>
 
-            <div className="gasless-demo__form">
+            <div className="flex w-[500px] flex-col gap-2.5 [&_input]:w-full [&_input]:rounded-[10px] [&_input]:border [&_input]:border-[#ccc] [&_input]:px-2.5 [&_input]:py-1.5 [&_input]:text-sm [&_label]:flex [&_label]:flex-col [&_label]:gap-1 [&_label]:text-sm [&_label]:text-white/85">
                 <label>
                     Destination
                     <input
@@ -91,26 +92,38 @@ export function GaslessDemo() {
                 </label>
             </div>
 
-            <div className="gasless-demo__buttons">
+            <div className="mt-2 flex flex-wrap justify-center gap-4">
                 {wallet ? (
                     <>
-                        <button onClick={handleGaslessItems}>Sign gasless items</button>
-                        <button onClick={handleGaslessMessages}>Send gasless messages</button>
+                        <button className="demo-btn" onClick={handleGaslessItems}>
+                            Sign gasless items
+                        </button>
+                        <button className="demo-btn" onClick={handleGaslessMessages}>
+                            Send gasless messages
+                        </button>
                     </>
                 ) : (
-                    <button onClick={() => tonConnectUi.openModal()}>
+                    <button className="demo-btn" onClick={() => tonConnectUi.openModal()}>
                         Connect wallet to send gasless
                     </button>
                 )}
             </div>
 
-            {status && <div className="gasless-demo__status">{status}</div>}
-            {error && <div className="gasless-demo__error">Error: {error}</div>}
+            {status && <div className="text-sm text-white/70">{status}</div>}
+            {error && (
+                <div className="text-sm text-[rgba(238,102,102,0.91)]">Error: {error}</div>
+            )}
 
             {result && (
-                <div className="gasless-demo__debug">
-                    <h4>Result</h4>
-                    <ReactJson src={result} name={false} theme="ocean" collapsed={false} />
+                <div className="w-full max-w-[600px] text-left">
+                    <h4 className="mb-2 text-[15px] text-white/90">Result</h4>
+                    <ReactJson
+                        src={result}
+                        name={false}
+                        theme="ocean"
+                        collapsed={false}
+                        style={{ borderRadius: 8, padding: 10, fontSize: 12 }}
+                    />
                 </div>
             )}
         </div>

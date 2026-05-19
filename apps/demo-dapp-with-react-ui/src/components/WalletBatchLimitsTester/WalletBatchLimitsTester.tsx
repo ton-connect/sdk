@@ -1,5 +1,4 @@
 /* eslint-disable no-console */
-import './style.scss';
 import {
     SendTransactionRequest,
     SignMessageRequest,
@@ -22,11 +21,9 @@ export function WalletBatchLimitsTester() {
     ): SendTransactionRequest & SignMessageRequest => {
         const validUntil = Math.floor(Date.now() / 1000) + 600;
 
-        // Get user's wallet address and convert to non-bounceable format
         let userAddress = '';
         if (wallet && wallet.account) {
             try {
-                // Convert to Address object then to non-bounceable format
                 const address = Address.parse(wallet.account.address);
                 userAddress = address.toString({
                     urlSafe: true,
@@ -38,13 +35,10 @@ export function WalletBatchLimitsTester() {
             }
         }
 
-        // Create array with 'count' messages
         const messages = Array(count)
             .fill(null)
             .map(() => ({
-                // Send to user's own wallet address in non-bounceable format
                 address: userAddress,
-                // Small amount to send in nanoTON (0.00001 TON = 10000 nanoTON)
                 amount: '10000'
             }));
 
@@ -54,7 +48,6 @@ export function WalletBatchLimitsTester() {
         };
     };
 
-    // Run the selected action with specified number of messages
     const handleAction = async (count: number) => {
         const request = generateMultipleMessages(count);
         try {
@@ -71,15 +64,15 @@ export function WalletBatchLimitsTester() {
     };
 
     return (
-        <div className="wallet-batch-limits-tester">
-            <h3>Batch Message Limits Test</h3>
+        <div className="mt-[60px] flex w-full flex-col items-center gap-5 p-5">
+            <h3 className="text-white/80">Batch Message Limits Test</h3>
 
-            <div className="wallet-batch-limits-tester__info">
+            <div className="text-[18px] text-white/80">
                 Send multiple messages to the wallet to test message batching capabilities
             </div>
 
-            <div className="wallet-batch-limits-tester__mode">
-                <label>
+            <div className="flex gap-5 text-base text-white">
+                <label className="flex cursor-pointer items-center gap-1.5">
                     <input
                         type="radio"
                         name="batch-tester-mode"
@@ -89,7 +82,7 @@ export function WalletBatchLimitsTester() {
                     />
                     Send Transaction
                 </label>
-                <label>
+                <label className="flex cursor-pointer items-center gap-1.5">
                     <input
                         type="radio"
                         name="batch-tester-mode"
@@ -102,15 +95,19 @@ export function WalletBatchLimitsTester() {
             </div>
 
             {wallet ? (
-                <div className="wallet-batch-limits-tester__buttons">
+                <div className="flex flex-wrap justify-center gap-5">
                     {[4, 5, 255, 256].map(count => (
-                        <button key={count} onClick={() => handleAction(count)}>
+                        <button
+                            className="demo-btn"
+                            key={count}
+                            onClick={() => handleAction(count)}
+                        >
                             Test with {count} Messages
                         </button>
                     ))}
                 </div>
             ) : (
-                <div className="wallet-batch-limits-tester__error">
+                <div className="text-[18px] leading-5 text-[rgba(102,170,238,0.91)]">
                     Connect wallet to test batch limits
                 </div>
             )}
