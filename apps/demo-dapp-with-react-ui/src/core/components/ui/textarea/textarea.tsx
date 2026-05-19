@@ -14,13 +14,7 @@ export interface TextareaProps extends Omit<ComponentPropsWithoutRef<'textarea'>
 export const Textarea = forwardRef<ComponentRef<'textarea'>, TextareaProps>(
     ({ size = 's', error, disabled, rows = 3, className, ...props }, ref) => {
         return (
-            <div
-                className={clsx(
-                    styles.field,
-                    error && styles.error,
-                    disabled && styles.disabled
-                )}
-            >
+            <div className={clsx(styles.field, error && styles.error, disabled && styles.disabled)}>
                 <textarea
                     ref={ref}
                     rows={rows}

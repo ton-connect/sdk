@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 type Parser<T> = {
     parse: (value: string | null) => T;
@@ -16,36 +17,29 @@ export function useQueryState<T = string>(
     key: string,
     parser: Parser<T> = defaultParser<T>() as Parser<T>
 ) {
-    const getValueFromUrl = (): T => {
-        const params = new URLSearchParams(window.location.search);
-        return parser.parse(params.get(key));
-    };
+    const [searchParams, setSearchParams] = useSearchParams();
 
-    const [state, setState] = useState<T>(getValueFromUrl);
+    const state = parser.parse(searchParams.get(key));
 
-    useEffect(() => {
-        const onPopState = () => {
-            setState(getValueFromUrl());
-        };
+    const setQueryState = useCallback(
+        (value: T) => {
+            setSearchParams(
+                prev => {
+                    const next = new URLSearchParams(prev);
 
-        window.addEventListener('popstate', onPopState);
-        return () => window.removeEventListener('popstate', onPopState);
-    }, []);
+                    if (value === null || value === undefined || value === '') {
+                        next.delete(key);
+                    } else {
+                        next.set(key, parser.serialize(value));
+                    }
 
-    const setQueryState = (value: T) => {
-        const params = new URLSearchParams(window.location.search);
-
-        if (value === null || value === undefined || value === '') {
-            params.delete(key);
-        } else {
-            params.set(key, parser.serialize(value));
-        }
-
-        const newUrl = `${window.location.pathname}?${params.toString()}`;
-        window.history.pushState(null, '', newUrl);
-
-        setState(value);
-    };
+                    return next;
+                },
+                { replace: true }
+            );
+        },
+        [key, parser, setSearchParams]
+    );
 
     return [state, setQueryState] as const;
 }

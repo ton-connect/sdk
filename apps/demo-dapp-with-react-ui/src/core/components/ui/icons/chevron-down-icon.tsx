@@ -21,6 +21,12 @@ export const ChevronDownIcon: FC<IconProps> = ({ size = DEFAULT_ICON_SIZE, ...pr
         aria-hidden="true"
         {...props}
     >
-        <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <path
+            d="M4 6L8 10L12 6"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        />
     </svg>
 );

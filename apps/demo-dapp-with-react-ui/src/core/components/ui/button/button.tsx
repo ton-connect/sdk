@@ -39,7 +39,7 @@ const SIZE_DEFAULT_RADIUS: Record<Exclude<ButtonSize, 'unset'>, ButtonBorderRadi
     s: '2xl',
     m: 'l',
     l: 'xl',
-    icon: 'full',
+    icon: 'full'
 };
 
 const RADIUS_CLASS: Record<ButtonBorderRadius, string> = {
@@ -48,7 +48,7 @@ const RADIUS_CLASS: Record<ButtonBorderRadius, string> = {
     l: 'radiusL',
     xl: 'radiusXl',
     '2xl': 'radius2xl',
-    full: 'radiusFull',
+    full: 'radiusFull'
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -65,7 +65,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             children,
             ...props
         },
-        ref,
+        ref
     ) => {
         const radius = borderRadius ?? (size === 'unset' ? undefined : SIZE_DEFAULT_RADIUS[size]);
 
@@ -80,7 +80,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
                     variant !== 'unstyled' && styles[variant],
                     fullWidth && styles.fullWidth,
                     loading && styles.loading,
-                    className,
+                    className
                 )}
                 {...props}
             >
@@ -94,7 +94,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
                 )}
             </button>
         );
-    },
+    }
 );
 
 Button.displayName = 'Button';

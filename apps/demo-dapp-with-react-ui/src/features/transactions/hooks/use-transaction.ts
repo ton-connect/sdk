@@ -32,9 +32,7 @@ export function useTransaction() {
     const wallet = useTonWallet();
     const isConnectionRestored = useIsConnectionRestored();
 
-    const [validUntil, setValidUntil] = useState(
-        () => Math.floor(Date.now() / 1000) + 86400
-    );
+    const [validUntil, setValidUntil] = useState(() => Math.floor(Date.now() / 1000) + 86400);
     const [network, setNetwork] = useState('');
     const [from, setFrom] = useState('');
     const [messages, setMessages] = useState<TransactionMessage[]>([
@@ -54,9 +52,7 @@ export function useTransaction() {
         setValidUntil(Math.floor(Date.now() / 1000) + 86400);
         setNetwork('');
         setFrom('');
-        setMessages([
-            { address: DEFAULT_ADDRESS, amount: '5000000', stateInit: '', payload: '' }
-        ]);
+        setMessages([{ address: DEFAULT_ADDRESS, amount: '5000000', stateInit: '', payload: '' }]);
         setAmountUnits({});
         setLastResult(null);
     }, []);
@@ -96,10 +92,7 @@ export function useTransaction() {
     }, []);
 
     const walletNetwork = useMemo(
-        () =>
-            isConnectionRestored && wallet?.account?.chain
-                ? String(wallet.account.chain)
-                : '',
+        () => (isConnectionRestored && wallet?.account?.chain ? String(wallet.account.chain) : ''),
         [isConnectionRestored, wallet?.account?.chain]
     );
 
@@ -221,7 +214,7 @@ export function useTransaction() {
                 status: 'error',
                 errorMessage: message
             });
-            // eslint-disable-next-line no-console
+
             console.error('sendTransaction failed', error);
         } finally {
             setIsSending(false);
@@ -285,7 +278,7 @@ export function useTransaction() {
                 status: 'error',
                 errorMessage: message
             });
-            // eslint-disable-next-line no-console
+
             console.error('sendTransaction (raw) failed', error);
         } finally {
             setIsSending(false);

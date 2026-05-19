@@ -40,12 +40,22 @@ export interface ModalProps {
     bodyClassName?: string;
 }
 
-export const Modal: FC<ModalProps> = ({ open, onOpenChange, title, children, className, bodyClassName }) => {
+export const Modal: FC<ModalProps> = ({
+    open,
+    onOpenChange,
+    title,
+    children,
+    className,
+    bodyClassName
+}) => {
     return (
         <Dialog.Root open={open} onOpenChange={onOpenChange}>
             <Dialog.Portal>
                 <Dialog.Overlay className={styles.overlay} onClick={() => onOpenChange?.(false)}>
-                    <Dialog.Content className={clsx(styles.content, className)} onClick={(e) => e.stopPropagation()}>
+                    <Dialog.Content
+                        className={clsx(styles.content, className)}
+                        onClick={e => e.stopPropagation()}
+                    >
                         <div className={styles.header}>
                             {title && <Dialog.Title className={styles.title}>{title}</Dialog.Title>}
                             <Dialog.Close className={styles.close} aria-label="Close">

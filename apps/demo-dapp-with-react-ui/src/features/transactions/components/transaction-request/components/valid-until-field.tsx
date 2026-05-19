@@ -28,9 +28,7 @@ export function ValidUntilField({
                 <Input.Title>Valid Until</Input.Title>
                 <span
                     className={`inline-flex items-center gap-1.5 font-mono text-xs ${
-                        timer.status === 'expired'
-                            ? 'text-error'
-                            : 'text-secondary-foreground'
+                        timer.status === 'expired' ? 'text-error' : 'text-secondary-foreground'
                     }`}
                 >
                     <span
@@ -45,7 +43,7 @@ export function ValidUntilField({
                         <Input.Input
                             type="number"
                             value={validUntil}
-                            onChange={e => onChange(parseInt(e.target.value, 10) || 0)}
+                            onChange={e => onChange(parseInt(e.target.value) || 0)}
                         />
                     </Input.Field>
                 </div>
