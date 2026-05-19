@@ -160,21 +160,29 @@ export const Layout: FC<LayoutProps> = ({ children, title, subtitle }) => {
 
             <SidebarInset>
                 <header className="sticky top-0 z-10 flex h-14 items-center gap-3 border-b border-tertiary bg-background/80 px-4 backdrop-blur">
-                    <div className="md:hidden">
-                        <SidebarTrigger />
-                    </div>
-                    <div className="flex items-center text-lg font-semibold">
+                    <AppLogo className="size-8 md:hidden" />
+                    <div className="hidden text-lg font-semibold md:flex md:items-center md:justify-center">
                         {typeof title === 'string' ? <h1>{title}</h1> : title}
                     </div>
 
-                    <div className="ml-auto flex items-center gap-2">
+                    <div className="ml-auto">
                         <TonConnectButton />
-                        <ThemeSwitcher />
+                    </div>
+                    <ThemeSwitcher />
+                    <div className="md:hidden">
+                        <SidebarTrigger />
                     </div>
                 </header>
 
                 <main className="mx-auto w-full max-w-4xl flex-1 p-4">
                     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 py-6">
+                        <div className="flex w-full items-center justify-start md:hidden">
+                            {typeof title === 'string' ? (
+                                <h1 className="text-lg font-semibold">{title}</h1>
+                            ) : (
+                                title
+                            )}
+                        </div>
                         {subtitle && (
                             <p className="text-[15px] leading-relaxed text-secondary-foreground">
                                 {subtitle}
