@@ -10,6 +10,7 @@ import { useState } from 'react';
 import { Wallet } from 'lucide-react';
 
 import { Button } from '@/core/components/ui/button';
+import { RadioGroup } from '@/core/components/ui/radio-group';
 import { EmptyState } from '@/core/components/empty-state';
 
 type Mode = 'sendTransaction' | 'signMessage';
@@ -82,28 +83,21 @@ export function WalletBatchLimitsTester() {
 
     return (
         <>
-            <div className="flex gap-5 text-base text-foreground">
-                <label className="flex cursor-pointer items-center gap-1.5">
-                    <input
-                        type="radio"
-                        name="batch-tester-mode"
-                        value="sendTransaction"
-                        checked={mode === 'sendTransaction'}
-                        onChange={() => setMode('sendTransaction')}
-                    />
+            <RadioGroup
+                value={mode}
+                onValueChange={v => setMode(v as Mode)}
+                name="batch-tester-mode"
+                className="text-base text-foreground"
+            >
+                <label className="flex cursor-pointer items-center gap-2">
+                    <RadioGroup.Item value="sendTransaction" />
                     Send Transaction
                 </label>
-                <label className="flex cursor-pointer items-center gap-1.5">
-                    <input
-                        type="radio"
-                        name="batch-tester-mode"
-                        value="signMessage"
-                        checked={mode === 'signMessage'}
-                        onChange={() => setMode('signMessage')}
-                    />
+                <label className="flex cursor-pointer items-center gap-2">
+                    <RadioGroup.Item value="signMessage" />
                     Sign Message
                 </label>
-            </div>
+            </RadioGroup>
             <div className="flex flex-wrap justify-center gap-3">
                 {[4, 5, 255, 256].map(count => (
                     <Button key={count} onClick={() => handleAction(count)}>

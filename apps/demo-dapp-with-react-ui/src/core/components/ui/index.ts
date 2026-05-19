@@ -8,4 +8,5 @@ export { Dialog } from './dialog';
 export { Skeleton } from './skeleton';
 export { Checkbox } from './checkbox';
 export type { CheckboxProps } from './checkbox';
+export { RadioGroup } from './radio-group';
 export * from './icons';
