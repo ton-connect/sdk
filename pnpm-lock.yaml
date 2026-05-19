@@ -113,6 +113,9 @@ importers:
       jose:
         specifier: ^6.0.12
         version: 6.0.12
+      lucide-react:
+        specifier: ^0.562.0
+        version: 0.562.0(react@19.1.1)
       msw:
         specifier: 2.10.4
         version: 2.10.4(@types/node@24.2.0)(typescript@5.9.2)
@@ -5872,6 +5875,11 @@ packages:
   lru-cache@6.0.0:
     resolution: {integrity: sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==}
     engines: {node: '>=10'}
+
+  lucide-react@0.562.0:
+    resolution: {integrity: sha512-82hOAu7y0dbVuFfmO4bYF1XEwYk/mEbM5E+b1jgci/udUBEE/R7LF5Ip0CCEmXe8AybRM8L+04eP+LGZeDvkiw==}
+    peerDependencies:
+      react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
   lunr@2.3.9:
     resolution: {integrity: sha512-zTU3DaZaF3Rt9rhN3uBMGQD3dD2/vFQqnvZCDv4dl5iOzq2IZQqTxu90r4E5J+nP70J3ilqVCrbho2eWaeW8Ow==}
@@ -15526,6 +15534,10 @@ snapshots:
   lru-cache@6.0.0:
     dependencies:
       yallist: 4.0.0
+
+  lucide-react@0.562.0(react@19.1.1):
+    dependencies:
+      react: 19.1.1
 
   lunr@2.3.9: {}
 

@@ -1,0 +1,147 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 4px;
+}
+
+.title {
+  composes: bodyMedium from "../../../styles/typography.module.css";
+  color: var(--ta-color-text-secondary);
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--ta-color-background-secondary);
+  border: var(--ta-border-width-m) solid transparent;
+  border-radius: var(--ta-border-radius-l);
+  transition: border-color 0.2s;
+  overflow: hidden;
+  position: relative;
+}
+
+.field:focus-within {
+  border-color: var(--ta-color-primary);
+}
+
+/* Sizes */
+.field {
+  padding: 14px;
+}
+
+/* Variants */
+.variant-unstyled .field {
+  background: none;
+  border: none;
+  padding: 0;
+  min-height: unset;
+  border-radius: 0;
+}
+
+.variant-unstyled .field:focus-within {
+  background: none;
+  border: none;
+}
+
+/* States */
+.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.error .field {
+  border-color: var(--ta-color-error);
+}
+
+.input_s {
+  composes: inputS from "../../../styles/typography.module.css";
+}
+
+.input_m {
+  composes: inputM from "../../../styles/typography.module.css";
+}
+
+.input_l {
+  composes: inputL from "../../../styles/typography.module.css";
+}
+
+.inputSkeleton_s {
+  height: var(--ta-input-s-line-height);
+}
+
+.input_resize_m {
+  font-size: var(--ta-input-m-size);
+  font-weight: var(--ta-input-m-weight);
+}
+
+.input_resize_s {
+  font-size: var(--ta-input-s-size);
+  font-weight: var(--ta-input-s-weight);
+}
+
+.inputSkeleton_m {
+  height: var(--ta-input-m-line-height);
+}
+
+.inputSkeleton_l {
+  height: var(--ta-input-l-line-height);
+}
+
+/* Hidden spans used to measure text width at each size (same idea as Uniswap AmountInput) */
+.inputMeasure {
+  position: absolute;
+  visibility: hidden;
+  white-space: pre;
+  pointer-events: none;
+  font-family: var(--ta-font-family);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--ta-color-text);
+  font-family: var(--ta-font-family);
+  width: 100%;
+  padding: 0;
+}
+
+.input::placeholder {
+  color: var(--ta-color-text-secondary);
+  opacity: 0.6;
+}
+
+.inputSkeleton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+.slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.caption {
+  composes: footnoteRegular from "../../../styles/typography.module.css";
+  padding: 0 4px;
+  color: var(--ta-color-text-secondary);
+}
+
+.errorText {
+  color: var(--ta-color-error);
+}

@@ -1,0 +1,25 @@
+.skeleton {
+  display: inline-block;
+  background-color: var(--ta-color-background-tertiary);
+  border-radius: var(--ta-border-radius-l);
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-100%);
+  background: var(--ta-color-skeleton-shimmer);
+  animation: skeleton-shimmer 1.5s infinite;
+}
+
+@keyframes skeleton-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}

@@ -1,6 +1,8 @@
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { useState } from 'react';
 import ReactJson from 'react-json-view';
+
+import { Button } from '@/core/components/ui/button';
 import { CreateJettonRequestDto } from '@/server/dto/create-jetton-request-dto';
 import { TonProofDemoApi } from '@/core/lib/ton-proof-demo-api';
 
@@ -32,19 +34,17 @@ export const CreateJettonDemo = () => {
 
     return (
         <div className="mt-[60px] flex w-full flex-col items-center gap-5 p-5">
-            <h3 className="text-white/80">Create Jetton</h3>
+            <h3 className="text-foreground/80">Create Jetton</h3>
             {wallet ? (
-                <button className="demo-btn" onClick={handleClick}>
-                    Send create jetton
-                </button>
+                <Button onClick={handleClick}>Send create jetton</Button>
             ) : (
-                <div className="text-[18px] leading-5 text-[rgba(102,170,238,0.91)]">
+                <div className="text-[18px] leading-5 text-primary">
                     Connect wallet to send transaction
                 </div>
             )}
             {data && Object.keys(data).length > 0 && (
                 <>
-                    <div className="mb-[6px] ml-[2px] mt-[18px] self-start text-[15px] font-medium tracking-[0.01em] text-[#b8d4f1]">
+                    <div className="mb-[6px] ml-[2px] mt-[18px] self-start text-[15px] font-medium tracking-[0.01em] text-secondary-foreground">
                         Response
                     </div>
                     <div className="w-full">

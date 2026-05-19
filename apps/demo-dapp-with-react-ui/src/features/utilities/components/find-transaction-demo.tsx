@@ -1,17 +1,11 @@
 import { useState } from 'react';
 import ReactJson from 'react-json-view';
+
+import { Button } from '@/core/components/ui/button';
+import { Input } from '@/core/components/ui/input';
+import { Select } from '@/core/components/ui/select';
+import { ChevronDownIcon } from '@/core/components/ui/icons';
 import { TonProofDemoApi } from '@/core/lib/ton-proof-demo-api';
-
-const INPUT_CLS =
-    'mb-2.5 w-full rounded-[12px] border border-[rgba(102,170,238,0.25)] bg-[rgba(30,40,60,0.7)] px-[14px] py-2.5 text-base text-white shadow-[0_1px_4px_0_rgba(16,22,31,0.08)] outline-none transition-[border-color,box-shadow] duration-200 focus:border-[#66aaee] focus:bg-[rgba(30,40,60,0.92)] focus:shadow-[0_0_0_2px_rgba(102,170,238,0.15)]';
-
-const SELECT_CLS = `appearance-none bg-no-repeat bg-[length:18px_18px] bg-[position:right_12px_center] ${INPUT_CLS}`;
-
-const LABEL_CLS =
-    'mb-[6px] ml-[2px] mt-2.5 block text-[15px] font-medium tracking-[0.01em] text-[#b8d4f1]';
-
-const CARET_BG =
-    "url(\"data:image/svg+xml,%3Csvg width='16' height='16' fill='white' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%2366aaee' stroke-width='2' fill='none' fill-rule='evenodd'/%3E%3C/svg%3E\")";
 
 export const FindTransactionDemo = () => {
     const [boc, setBoc] = useState(
@@ -47,38 +41,45 @@ export const FindTransactionDemo = () => {
 
     return (
         <div className="mx-auto mt-[60px] flex w-full flex-col items-center gap-5 px-7 pb-6 pt-7">
-            <h3 className="text-white/80">Find Transaction by External-in Message BOC</h3>
+            <h3 className="text-foreground/80">Find Transaction by External-in Message BOC</h3>
             <div className="flex w-full max-w-[600px] flex-col gap-4">
-                <textarea
-                    placeholder="Paste external-in message BOC (base64)"
-                    value={boc}
-                    onChange={e => setBoc(e.target.value)}
-                    rows={3}
-                    className="mb-3 min-h-[100px] w-full min-w-full max-w-full resize-y rounded-[14px] border-[1.5px] border-[rgba(102,170,238,0.25)] bg-[rgba(30,40,60,0.8)] px-[18px] py-[14px] font-mono text-sm text-white shadow-[0_2px_8px_0_rgba(16,22,31,0.10)] outline-none transition-[border-color,box-shadow] duration-200 focus:border-[#66aaee] focus:bg-[rgba(30,40,60,0.92)] focus:shadow-[0_0_0_2px_rgba(102,170,238,0.15)]"
-                />
-                <div className="mb-0 flex w-full gap-3">
-                    <label htmlFor="network-select" className={LABEL_CLS}>
-                        Network:
-                    </label>
-                    <select
-                        id="network-select"
-                        className={SELECT_CLS}
-                        style={{ backgroundImage: CARET_BG }}
+                <Input>
+                    <Input.Header>
+                        <Input.Title>External-in message BOC</Input.Title>
+                    </Input.Header>
+                    <Input.Field>
+                        <Input.Input
+                            type="text"
+                            placeholder="Paste base64 BOC"
+                            value={boc}
+                            onChange={e => setBoc(e.target.value)}
+                        />
+                    </Input.Field>
+                </Input>
+                <div className="flex w-full items-center gap-3">
+                    <span className="text-sm font-medium text-secondary-foreground">Network:</span>
+                    <Select.Root
                         value={network}
-                        onChange={e => setNetwork(e.target.value as 'mainnet' | 'testnet')}
+                        onValueChange={v => setNetwork(v as 'mainnet' | 'testnet')}
                     >
-                        <option value="mainnet">mainnet</option>
-                        <option value="testnet">testnet</option>
-                    </select>
+                        <Select.Trigger variant="gray" size="m" borderRadius="l">
+                            {network}
+                            <ChevronDownIcon size={16} />
+                        </Select.Trigger>
+                        <Select.Content>
+                            <Select.Item value="mainnet">mainnet</Select.Item>
+                            <Select.Item value="testnet">testnet</Select.Item>
+                        </Select.Content>
+                    </Select.Root>
                 </div>
-                <button className="demo-btn" onClick={handleFindTx} disabled={txLoading || !boc}>
+                <Button onClick={handleFindTx} disabled={txLoading || !boc}>
                     {txLoading ? 'Searching...' : 'Find Transaction'}
-                </button>
-                {txError && <div className="text-red-500">{txError}</div>}
+                </Button>
+                {txError && <div className="text-error">{txError}</div>}
             </div>
             {txResult !== null && (
                 <>
-                    <div className="mb-[6px] ml-[2px] mt-[18px] self-start text-[15px] font-medium tracking-[0.01em] text-[#b8d4f1]">
+                    <div className="mb-[6px] ml-[2px] mt-[18px] self-start text-[15px] font-medium tracking-[0.01em] text-secondary-foreground">
                         Transaction
                     </div>
                     <ReactJson src={txResult} name={false} theme="ocean" collapsed={false} />

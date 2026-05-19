@@ -192,19 +192,15 @@
   }
 
   body {
+    @apply bg-background text-foreground;
     margin: 0;
-    background-color: rgba(16, 22, 31, 0.92);
-    font-family:
-      -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-      sans-serif;
+    font-family: var(--ta-font-family);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
   code {
-    font-family:
-      source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+    font-family: var(--ta-font-family-mono);
   }
 
   *,
@@ -226,18 +222,6 @@
     font-size: 15px;
     word-break: break-all;
     white-space: pre-wrap;
-  }
-}
-
-@layer components {
-  /* Shared button used across all demo sections.
-     Preserves the original SCSS look while we migrate to Tailwind utilities. */
-  .demo-btn {
-    @apply cursor-pointer rounded-[15px] border-none bg-[rgba(102,170,238,0.91)]
-      px-[15px] py-[7px] text-base leading-5 text-white
-      transition-transform duration-100 ease-in-out
-      hover:scale-[1.03] active:scale-[0.97]
-      disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100;
   }
 }
 

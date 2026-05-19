@@ -1,5 +1,8 @@
 import { THEME } from '@tonconnect/ui-react';
 import { useState } from 'react';
+
+import { Button } from '@/core/components/ui/button';
+import { Modal } from '@/core/components/ui/modal';
 import { ColorsSelect } from './colors-select';
 
 export const ColorsModal = () => {
@@ -8,30 +11,36 @@ export const ColorsModal = () => {
 
     return (
         <>
-            <button onClick={() => setOpened(true)}>change colors</button>
-            {opened && (
-                <div className="fixed inset-0 z-[10000000] bg-[rgb(16,22,31)] p-5 text-white [&>button]:float-right">
-                    <button onClick={() => setOpened(false)}>close</button>
-                    <div className="flex justify-center gap-5 [&>a]:text-white">
-                        <a
-                            href="#"
-                            style={{ color: theme === THEME.LIGHT ? 'blue' : 'white' }}
-                            onClick={() => setTheme(THEME.LIGHT)}
-                        >
-                            LIGHT
-                        </a>
-                        <a
-                            href="#"
-                            style={{ color: theme === THEME.DARK ? 'blue' : 'white' }}
-                            onClick={() => setTheme(THEME.DARK)}
-                        >
-                            DARK
-                        </a>
-                    </div>
-
-                    <ColorsSelect theme={theme} />
+            <Button variant="secondary" onClick={() => setOpened(true)}>
+                change colors
+            </Button>
+            <Modal open={opened} onOpenChange={setOpened} title="Customize colors">
+                <div className="mb-5 flex justify-center gap-5">
+                    <button
+                        type="button"
+                        onClick={() => setTheme(THEME.LIGHT)}
+                        className={`bg-transparent text-sm font-semibold underline-offset-4 ${
+                            theme === THEME.LIGHT
+                                ? 'text-primary underline'
+                                : 'text-foreground/70'
+                        }`}
+                    >
+                        LIGHT
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setTheme(THEME.DARK)}
+                        className={`bg-transparent text-sm font-semibold underline-offset-4 ${
+                            theme === THEME.DARK
+                                ? 'text-primary underline'
+                                : 'text-foreground/70'
+                        }`}
+                    >
+                        DARK
+                    </button>
                 </div>
-            )}
+                <ColorsSelect theme={theme} />
+            </Modal>
         </>
     );
 };

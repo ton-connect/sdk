@@ -8,6 +8,8 @@ import {
 import { beginCell } from '@ton/ton';
 import { useState } from 'react';
 import ReactJson from 'react-json-view';
+
+import { Button } from '@/core/components/ui/button';
 import { TonProofDemoApi } from '@/core/lib/ton-proof-demo-api';
 
 const textPayload = (): SignDataPayload => ({
@@ -37,7 +39,7 @@ const cellPayload = (): SignDataPayload => {
 type RetryPrompt = { payload: SignDataPayload; label: string; dispatched: boolean };
 
 const JSON_LABEL_CLS =
-    'mb-[6px] ml-[2px] mt-[18px] self-start text-[15px] font-medium tracking-[0.01em] text-[#b8d4f1]';
+    'mb-[6px] ml-[2px] mt-[18px] self-start text-[15px] font-medium tracking-[0.01em] text-secondary-foreground';
 
 export function SignDataTester() {
     const wallet = useTonWallet();
@@ -91,14 +93,14 @@ export function SignDataTester() {
 
     return (
         <div className="mt-[60px] flex w-full flex-col items-center gap-5 p-5">
-            <h3 className="text-white/80">Sign Data Test & Verification</h3>
+            <h3 className="text-foreground/80">Sign Data Test & Verification</h3>
 
-            <div className="text-[18px] text-white/80">
+            <div className="text-[18px] text-foreground/80">
                 Test different types of data signing: text, binary, and cell formats with signature
                 verification
             </div>
 
-            <label className="ml-[2px] mt-3 text-[15px] font-medium text-[#b8d4f1]">
+            <label className="ml-[2px] mt-3 text-[15px] font-medium text-secondary-foreground">
                 <input
                     type="checkbox"
                     checked={embeddedRequest}
@@ -109,30 +111,27 @@ export function SignDataTester() {
 
             {wallet || embeddedRequest ? (
                 <div className="flex flex-wrap justify-center gap-5">
-                    <button
-                        className="demo-btn"
+                    <Button
                         onClick={() => requestSign(textPayload(), 'Text')}
                         disabled={Boolean(retryPrompt)}
                     >
                         Sign Text
-                    </button>
-                    <button
-                        className="demo-btn"
+                    </Button>
+                    <Button
                         onClick={() => requestSign(binaryPayload(), 'Binary')}
                         disabled={Boolean(retryPrompt)}
                     >
                         Sign Binary
-                    </button>
-                    <button
-                        className="demo-btn"
+                    </Button>
+                    <Button
                         onClick={() => requestSign(cellPayload(), 'Cell')}
                         disabled={Boolean(retryPrompt)}
                     >
                         Sign Cell
-                    </button>
+                    </Button>
                 </div>
             ) : (
-                <div className="text-[18px] leading-5 text-[rgba(102,170,238,0.91)]">
+                <div className="text-[18px] leading-5 text-primary">
                     Connect wallet to test signing
                 </div>
             )}
@@ -141,8 +140,8 @@ export function SignDataTester() {
                 <div
                     className={`my-3 rounded-lg border p-3 text-sm leading-[1.45] text-[#f0f6fb] ${
                         retryPrompt.dispatched
-                            ? 'border-[#c14a4a] bg-[#5a2424]'
-                            : 'border-[#3a6a90] bg-[#1f3a52]'
+                            ? 'border-error/40 bg-error/15'
+                            : 'border-primary/40 bg-primary/10'
                     }`}
                 >
                     <strong>
@@ -166,18 +165,16 @@ export function SignDataTester() {
                             </>
                         )}
                     </p>
-                    <button
-                        className="demo-btn"
-                        onClick={() => requestSign(retryPrompt.payload, retryPrompt.label)}
-                    >
-                        Retry signing ({retryPrompt.label})
-                    </button>
-                    <button
-                        className="demo-btn ml-2 bg-transparent"
-                        onClick={() => setRetryPrompt(null)}
-                    >
-                        Dismiss
-                    </button>
+                    <div className="flex gap-2">
+                        <Button
+                            onClick={() => requestSign(retryPrompt.payload, retryPrompt.label)}
+                        >
+                            Retry signing ({retryPrompt.label})
+                        </Button>
+                        <Button variant="ghost" onClick={() => setRetryPrompt(null)}>
+                            Dismiss
+                        </Button>
+                    </div>
                 </div>
             )}
 

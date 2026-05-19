@@ -8,6 +8,8 @@ import {
 import { Address } from '@ton/ton';
 import { useState } from 'react';
 
+import { Button } from '@/core/components/ui/button';
+
 type Mode = 'sendTransaction' | 'signMessage';
 
 // Component to test wallet batch message limits for sendTransaction / signMessage
@@ -65,13 +67,13 @@ export function WalletBatchLimitsTester() {
 
     return (
         <div className="mt-[60px] flex w-full flex-col items-center gap-5 p-5">
-            <h3 className="text-white/80">Batch Message Limits Test</h3>
+            <h3 className="text-foreground/80">Batch Message Limits Test</h3>
 
-            <div className="text-[18px] text-white/80">
+            <div className="text-[18px] text-foreground/80">
                 Send multiple messages to the wallet to test message batching capabilities
             </div>
 
-            <div className="flex gap-5 text-base text-white">
+            <div className="flex gap-5 text-base text-foreground">
                 <label className="flex cursor-pointer items-center gap-1.5">
                     <input
                         type="radio"
@@ -97,17 +99,13 @@ export function WalletBatchLimitsTester() {
             {wallet ? (
                 <div className="flex flex-wrap justify-center gap-5">
                     {[4, 5, 255, 256].map(count => (
-                        <button
-                            className="demo-btn"
-                            key={count}
-                            onClick={() => handleAction(count)}
-                        >
+                        <Button key={count} onClick={() => handleAction(count)}>
                             Test with {count} Messages
-                        </button>
+                        </Button>
                     ))}
                 </div>
             ) : (
-                <div className="text-[18px] leading-5 text-[rgba(102,170,238,0.91)]">
+                <div className="text-[18px] leading-5 text-primary">
                     Connect wallet to test batch limits
                 </div>
             )}

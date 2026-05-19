@@ -3,6 +3,8 @@ import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import ReactJson from 'react-json-view';
 import { Address } from '@ton/core';
 
+import { Button } from '@/core/components/ui/button';
+import { Input } from '@/core/components/ui/input';
 import { sendItems } from '../lib/gasless-items';
 import { sendMessages } from '../lib/gasless-messages';
 
@@ -67,57 +69,59 @@ export function GaslessDemo() {
 
     return (
         <div className="mt-[60px] flex flex-col items-center gap-4 p-5">
-            <h3 id="gasless-usdt" className="m-0 text-white/80">
+            <h3 id="gasless-usdt" className="m-0 text-foreground/80">
                 Gasless USDT Transfer
             </h3>
-            <p className="m-0 max-w-[600px] text-center text-[15px] text-white/60">
+            <p className="m-0 max-w-[600px] text-center text-[15px] text-foreground/60">
                 Transfer jettons without TON in wallet — fee is paid in the jetton itself.
             </p>
 
-            <div className="flex w-[500px] flex-col gap-2.5 [&_input]:w-full [&_input]:rounded-[10px] [&_input]:border [&_input]:border-[#ccc] [&_input]:px-2.5 [&_input]:py-1.5 [&_input]:text-sm [&_label]:flex [&_label]:flex-col [&_label]:gap-1 [&_label]:text-sm [&_label]:text-white/85">
-                <label>
-                    Destination
-                    <input
-                        value={destination}
-                        onChange={e => setDestination(e.target.value)}
-                        placeholder="Recipient address"
-                    />
-                </label>
-                <label>
-                    Amount (nano jettons)
-                    <input
-                        value={jettonAmount}
-                        onChange={e => setJettonAmount(e.target.value)}
-                        placeholder="e.g. 1000000 = 1 USDT"
-                    />
-                </label>
+            <div className="flex w-[500px] max-w-full flex-col gap-2.5">
+                <Input>
+                    <Input.Header>
+                        <Input.Title>Destination</Input.Title>
+                    </Input.Header>
+                    <Input.Field>
+                        <Input.Input
+                            value={destination}
+                            onChange={e => setDestination(e.target.value)}
+                            placeholder="Recipient address"
+                        />
+                    </Input.Field>
+                </Input>
+                <Input>
+                    <Input.Header>
+                        <Input.Title>Amount (nano jettons)</Input.Title>
+                    </Input.Header>
+                    <Input.Field>
+                        <Input.Input
+                            value={jettonAmount}
+                            onChange={e => setJettonAmount(e.target.value)}
+                            placeholder="e.g. 1000000 = 1 USDT"
+                        />
+                    </Input.Field>
+                </Input>
             </div>
 
             <div className="mt-2 flex flex-wrap justify-center gap-4">
                 {wallet ? (
                     <>
-                        <button className="demo-btn" onClick={handleGaslessItems}>
-                            Sign gasless items
-                        </button>
-                        <button className="demo-btn" onClick={handleGaslessMessages}>
-                            Send gasless messages
-                        </button>
+                        <Button onClick={handleGaslessItems}>Sign gasless items</Button>
+                        <Button onClick={handleGaslessMessages}>Send gasless messages</Button>
                     </>
                 ) : (
-                    <button className="demo-btn" onClick={() => tonConnectUi.openModal()}>
+                    <Button onClick={() => tonConnectUi.openModal()}>
                         Connect wallet to send gasless
-                    </button>
+                    </Button>
                 )}
             </div>
 
-            {status && <div className="text-sm text-white/70">{status}</div>}
-            {error && (
-                <div className="text-sm text-[rgba(238,102,102,0.91)]">Error: {error}</div>
-            )}
+            {status && <div className="text-sm text-foreground/70">{status}</div>}
+            {error && <div className="text-sm text-error">Error: {error}</div>}
 
             {result && (
                 <div className="w-full max-w-[600px] text-left">
-                    <h4 className="mb-2 text-[15px] text-white/90">Result</h4>
+                    <h4 className="mb-2 text-[15px] text-foreground/90">Result</h4>
                     <ReactJson
                         src={result}
                         name={false}

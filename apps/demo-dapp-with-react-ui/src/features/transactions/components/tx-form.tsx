@@ -1,9 +1,11 @@
 import { useCallback, useState } from 'react';
 import { beginCell } from '@ton/ton';
 import ReactJson, { InteractionProps } from 'react-json-view';
-import { SendTransactionRequest, useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
+import { CHAIN, SendTransactionRequest, useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
+
+import { Button } from '@/core/components/ui/button';
+import { Skeleton } from '@/core/components/ui/skeleton';
 import { TonProofDemoApi } from '@/core/lib/ton-proof-demo-api';
-import { CHAIN } from '@tonconnect/ui-react';
 
 // In this example, we are using a predefined smart contract state initialization (`stateInit`)
 // to interact with an "EchoContract". This contract is designed to send the value back to the sender,
@@ -48,9 +50,9 @@ type RetryPrompt =
     | { kind: 'sendTx'; dispatched: boolean }
     | { kind: 'signMessage'; dispatched: boolean };
 
-const CHECKBOX_LABEL_CLS = 'ml-[2px] mt-3 text-[15px] font-medium text-[#b8d4f1]';
+const CHECKBOX_LABEL_CLS = 'ml-[2px] mt-3 text-[15px] font-medium text-secondary-foreground';
 const JSON_LABEL_CLS =
-    'mb-[6px] ml-[2px] mt-[18px] self-start text-[15px] font-medium tracking-[0.01em] text-[#b8d4f1]';
+    'mb-[6px] ml-[2px] mt-[18px] self-start text-[15px] font-medium tracking-[0.01em] text-secondary-foreground';
 
 export function TxForm() {
     const [tx, setTx] = useState(defaultTx);
@@ -156,16 +158,12 @@ export function TxForm() {
 
     return (
         <div className="flex w-full flex-1 flex-col items-center gap-5 p-5">
-            <h3 className="text-[28px] text-white/80">Configure and send transaction</h3>
-            <button className="demo-btn" onClick={() => setTx(defaultTx)}>
-                Set message payload
-            </button>
-            <button className="demo-btn" onClick={() => setTx(defaultTxWithMessages)}>
-                Set items payload
-            </button>
-            <button className="demo-btn" onClick={() => setTx(buildNftItemsPayload())}>
-                Set NFT items payload
-            </button>
+            <h3 className="text-[28px] text-foreground/80">Configure and send transaction</h3>
+            <div className="flex flex-wrap justify-center gap-3">
+                <Button onClick={() => setTx(defaultTx)}>Set message payload</Button>
+                <Button onClick={() => setTx(defaultTxWithMessages)}>Set items payload</Button>
+                <Button onClick={() => setTx(buildNftItemsPayload())}>Set NFT items payload</Button>
+            </div>
             <label className={CHECKBOX_LABEL_CLS}>
                 <input
                     type="checkbox"
@@ -194,11 +192,11 @@ export function TxForm() {
             </label>
 
             {waitForTx && (
-                <div className="ml-[2px] mt-2 text-[15px] text-[#b8d4f1]">
+                <div className="ml-[2px] mt-2 flex items-center gap-2 text-[15px] text-secondary-foreground">
                     {waitingTx ? (
                         <>
-                            <span className="mr-2">Waiting for transaction confirmation...</span>
-                            <span className="inline-block h-[18px] w-[18px] animate-spin rounded-full border-[3px] border-[#66aaee] border-t-transparent align-middle" />
+                            <span>Waiting for transaction confirmation...</span>
+                            <Skeleton className="h-[18px] w-[120px]" />
                         </>
                     ) : (
                         <span>The transaction will be automatically found and shown below</span>
@@ -207,34 +205,34 @@ export function TxForm() {
             )}
 
             {wallet || withConnect ? (
-                <>
-                    <button
-                        className="demo-btn"
+                <div className="flex flex-wrap justify-center gap-3">
+                    <Button
                         onClick={handleSendTx}
-                        disabled={loading || waitingTx || Boolean(retryPrompt)}
+                        loading={loading}
+                        disabled={waitingTx || Boolean(retryPrompt)}
                     >
-                        {loading ? 'Sending...' : 'Send transaction'}
-                    </button>
-                    <button
-                        className="demo-btn"
+                        Send transaction
+                    </Button>
+                    <Button
                         onClick={handleSignMessage}
-                        disabled={signLoading || Boolean(retryPrompt)}
+                        loading={signLoading}
+                        disabled={Boolean(retryPrompt)}
                     >
-                        {signLoading ? 'Signing...' : 'Sign message'}
-                    </button>
-                </>
+                        Sign message
+                    </Button>
+                </div>
             ) : (
-                <button className="demo-btn" onClick={() => tonConnectUi.openModal()}>
+                <Button onClick={() => tonConnectUi.openModal()}>
                     Connect wallet to send the transaction
-                </button>
+                </Button>
             )}
 
             {retryPrompt && (
                 <div
-                    className={`my-3 rounded-lg border p-3 text-sm leading-[1.45] text-[#f0f6fb] ${
+                    className={`my-3 rounded-lg border p-3 text-sm leading-[1.45] text-foreground ${
                         retryPrompt.dispatched
-                            ? 'border-[#c14a4a] bg-[#5a2424]'
-                            : 'border-[#3a6a90] bg-[#1f3a52]'
+                            ? 'border-error/40 bg-error/15'
+                            : 'border-primary/40 bg-primary/10'
                     }`}
                 >
                     <strong>
@@ -256,18 +254,19 @@ export function TxForm() {
                             </>
                         )}
                     </p>
-                    <button
-                        className="demo-btn"
-                        onClick={retryPrompt.kind === 'sendTx' ? handleSendTx : handleSignMessage}
-                    >
-                        Retry {retryPrompt.kind === 'sendTx' ? 'transaction' : 'message signing'}
-                    </button>
-                    <button
-                        className="demo-btn ml-2 bg-transparent"
-                        onClick={() => setRetryPrompt(null)}
-                    >
-                        Dismiss
-                    </button>
+                    <div className="flex gap-2">
+                        <Button
+                            onClick={
+                                retryPrompt.kind === 'sendTx' ? handleSendTx : handleSignMessage
+                            }
+                        >
+                            Retry{' '}
+                            {retryPrompt.kind === 'sendTx' ? 'transaction' : 'message signing'}
+                        </Button>
+                        <Button variant="ghost" onClick={() => setRetryPrompt(null)}>
+                            Dismiss
+                        </Button>
+                    </div>
                 </div>
             )}
 

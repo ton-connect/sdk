@@ -1,0 +1,37 @@
+.content {
+  z-index: 1100;
+  padding: 4px;
+  background-color: var(--ta-color-background-secondary);
+  border-radius: var(--ta-border-radius-l);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.16);
+  display: flex;
+  flex-direction: column;
+}
+
+.item {
+  composes: bodyMedium from "../../../styles/typography.module.css";
+
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  color: var(--ta-color-text);
+  border-radius: var(--ta-border-radius-m);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  outline: none;
+}
+
+.item:hover,
+.item:focus-visible {
+  background-color: var(--ta-color-background-tertiary);
+}
+
+.item[data-state="checked"] {
+  color: var(--ta-color-primary);
+}
+
+.item[data-disabled] {
+  opacity: 0.4;
+  cursor: default;
+}

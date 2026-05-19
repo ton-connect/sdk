@@ -3,6 +3,10 @@ import { useTonConnectUI, useTonWallet, CHAIN } from '@tonconnect/ui-react';
 import { TonClient, JettonWallet } from '@ton/ton';
 import { Address, beginCell, fromNano, toNano } from '@ton/core';
 import { JettonMinter, storeJettonTransferMessage } from '@ton-community/assets-sdk';
+
+import { Button } from '@/core/components/ui/button';
+import { Input } from '@/core/components/ui/input';
+import { Skeleton } from '@/core/components/ui/skeleton';
 import { retry } from '@/server/utils/transactions-utils';
 import { formatUnits, parseUnits } from '@/core/utils/units';
 
@@ -126,43 +130,51 @@ export function TransferUsdt() {
         });
     };
 
-    const loader = (
-        <span className="inline-block h-[18px] w-[18px] animate-spin rounded-full border-[3px] border-[#66aaee] border-t-transparent align-middle" />
-    );
+    const balanceSkeleton = <Skeleton className="inline-block h-[18px] w-[80px]" />;
 
     return (
-        <div className="mt-8 flex flex-col items-center gap-2.5 p-5 [&_a]:text-[rgba(102,170,238,0.91)] [&_h3]:m-0 [&_h3]:text-white/80 [&_h4]:m-0 [&_h4]:text-white/80">
+        <div className="mt-8 flex flex-col items-center gap-2.5 p-5 [&_a]:text-primary [&_h3]:m-0 [&_h3]:text-foreground/80 [&_h4]:m-0 [&_h4]:text-foreground/80">
             <h3>USDT Sending example</h3>
-            <h4>USDT Balance: {loading ? loader : usdtBalance}</h4>
-            <h4>TON Balance: {tonBalance}</h4>
-            <div className="flex w-[500px] flex-col gap-2.5 [&_input]:w-[500px] [&_input]:rounded-[10px] [&_input]:border [&_input]:border-[#ccc] [&_input]:px-2.5 [&_input]:py-1.5 [&_label]:flex [&_label]:flex-col [&_label]:text-white">
-                <label>
-                    USDT Amount
-                    <input value={amount} onChange={e => setAmount(e.target.value)} />
-                </label>
-                <label>
-                    Destination
-                    <input
-                        value={destination ?? ''}
-                        onChange={e => setDestination(e.target.value)}
-                    />
-                </label>
-                <label>
-                    <div>Sender Jetton Wallet {loading && loader}</div>
+            <h4>USDT Balance: {loading ? balanceSkeleton : usdtBalance}</h4>
+            <h4>TON Balance: {tonBalance ?? balanceSkeleton}</h4>
+            <div className="flex w-[500px] max-w-full flex-col gap-2.5">
+                <Input>
+                    <Input.Header>
+                        <Input.Title>USDT Amount</Input.Title>
+                    </Input.Header>
+                    <Input.Field>
+                        <Input.Input value={amount} onChange={e => setAmount(e.target.value)} />
+                    </Input.Field>
+                </Input>
+                <Input>
+                    <Input.Header>
+                        <Input.Title>Destination</Input.Title>
+                    </Input.Header>
+                    <Input.Field>
+                        <Input.Input
+                            value={destination ?? ''}
+                            onChange={e => setDestination(e.target.value)}
+                        />
+                    </Input.Field>
+                </Input>
+                <div className="flex flex-col gap-1 text-sm text-foreground">
+                    <span className="flex items-center gap-2">
+                        Sender Jetton Wallet {loading && balanceSkeleton}
+                    </span>
                     <a target="_blank" href={`https://tonviewer.com/${jettonWallet}`}>
                         {jettonWallet}
                     </a>
-                </label>
+                </div>
             </div>
 
             {wallet ? (
-                <button className="demo-btn mt-4" onClick={handleSend} disabled={loading}>
-                    {loading ? 'Loading wallet info...' : 'Send USDT'}
-                </button>
+                <Button className="mt-4" onClick={handleSend} loading={loading}>
+                    Send USDT
+                </Button>
             ) : (
-                <button className="demo-btn mt-4" onClick={() => tonConnectUi.openModal()}>
+                <Button className="mt-4" onClick={() => tonConnectUi.openModal()}>
                     Connect wallet to send USDT
-                </button>
+                </Button>
             )}
         </div>
     );

@@ -1,0 +1,137 @@
+.button {
+  appearance: none;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: opacity 0.15s ease-in-out;
+  text-decoration: none;
+  width: fit-content;
+}
+
+.button:hover:not(:disabled):not(.loading) {
+  opacity: 0.85;
+}
+
+.button:active:not(:disabled):not(.loading) {
+  opacity: 0.65;
+}
+
+.button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.loading {
+  cursor: wait;
+}
+
+/* Sizes */
+.l {
+  composes: bodySemibold from "../../../styles/typography.module.css";
+  padding: 12px 16px;
+}
+
+.m {
+  composes: labelSemibold from "../../../styles/typography.module.css";
+  padding: 12px 16px;
+}
+
+.s {
+  composes: labelSemibold from "../../../styles/typography.module.css";
+  padding: 9px 12px;
+}
+
+.icon {
+  composes: labelSemibold from "../../../styles/typography.module.css";
+  aspect-ratio: 1;
+  padding: 6px;
+}
+
+/* Border radius */
+.radiusS {
+  border-radius: var(--ta-border-radius-s);
+}
+
+.radiusM {
+  border-radius: var(--ta-border-radius-m);
+}
+
+.radiusL {
+  border-radius: var(--ta-border-radius-l);
+}
+
+.radiusXl {
+  border-radius: var(--ta-border-radius-xl);
+}
+
+.radius2xl {
+  border-radius: var(--ta-border-radius-2xl);
+}
+
+.radiusFull {
+  border-radius: var(--ta-border-radius-full);
+}
+
+/* Variants */
+.fill {
+  background-color: var(--ta-color-primary);
+  color: var(--ta-color-primary-foreground);
+}
+
+.secondary {
+  background-color: var(--ta-color-background-secondary);
+  color: var(--ta-color-text);
+}
+
+.bezeled {
+  background-color: var(--ta-color-background-bezeled);
+  color: var(--ta-color-primary);
+}
+
+.gray {
+  background-color: var(--ta-color-background-tertiary);
+  color: var(--ta-color-text);
+}
+
+.ghost {
+  background-color: transparent;
+  color: var(--ta-color-text);
+}
+
+.ghost:hover:not(:disabled):not(.loading) {
+  background-color: var(--ta-color-background-tertiary);
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.innerIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: button-spin 0.6s linear infinite;
+}
+
+@keyframes button-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

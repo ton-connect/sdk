@@ -7,9 +7,27 @@ import {
     useTonConnectUI
 } from '@tonconnect/ui-react';
 import { useEffect, useState } from 'react';
+
+import { Input } from '@/core/components/ui/input';
+import { Select } from '@/core/components/ui/select';
+import { ChevronDownIcon } from '@/core/components/ui/icons';
 import { ColorsModal } from './colors-modal';
 
-// const defaultWalletsSelectValue = '["Tonkeeper", "OpenMask"]';
+const LANG_OPTIONS = ['en', 'ru'];
+const THEME_OPTIONS = [
+    { value: THEME.DARK, label: 'dark' },
+    { value: THEME.LIGHT, label: 'light' },
+    { value: 'SYSTEM', label: 'system' }
+];
+const BORDER_OPTIONS = ['m', 's', 'none'];
+const BOOL_OPTIONS = ['true', 'false'];
+
+const renderTrigger = (label: string) => (
+    <Select.Trigger variant="gray" size="m" borderRadius="l">
+        {label}
+        <ChevronDownIcon size={16} />
+    </Select.Trigger>
+);
 
 export const DevPanel = () => {
     const [checkboxes, setCheckboxes] = useState([true, false, false, true, true, true]);
@@ -17,20 +35,26 @@ export const DevPanel = () => {
     const [returnStrategy, setReturnStrategy] = useState('back');
     const [skipRedirect, setSkipRedirect] = useState('ios');
     const [enableAndroidBackHandler, setEnableAndroidBackHandler] = useState(true);
+    const [language, setLanguage] = useState('en');
+    const [theme, setThemeOption] = useState<string>(THEME.DARK);
+    const [borders, setBorders] = useState('m');
 
     // eslint-disable-next-line unused-imports/no-unused-vars
     const [_, setOptions] = useTonConnectUI();
 
     const onLangChange = (lang: string) => {
+        setLanguage(lang);
         setOptions({ language: lang as Locales });
     };
 
-    const onThemeChange = (theme: string) => {
-        setOptions({ uiPreferences: { theme: theme as Theme } });
+    const onThemeChange = (value: string) => {
+        setThemeOption(value);
+        setOptions({ uiPreferences: { theme: value as Theme } });
     };
 
-    const onBordersChange = (borders: string) => {
-        setOptions({ uiPreferences: { borderRadius: borders as BorderRadius } });
+    const onBordersChange = (value: string) => {
+        setBorders(value);
+        setOptions({ uiPreferences: { borderRadius: value as BorderRadius } });
     };
 
     const onCheckboxChange = (position: number) => {
@@ -46,7 +70,6 @@ export const DevPanel = () => {
             setReturnStrategy('back');
             return;
         }
-
         setOptions({ actionsConfiguration: { returnStrategy: returnStrategy as ReturnStrategy } });
     };
 
@@ -55,7 +78,6 @@ export const DevPanel = () => {
             setSkipRedirect('ios');
             return;
         }
-
         setOptions({
             actionsConfiguration: {
                 skipRedirectToWallet: skipRedirect as 'ios' | 'never' | 'always'
@@ -80,127 +102,124 @@ export const DevPanel = () => {
     }, [enableAndroidBackHandler]);
 
     return (
-        <footer className="flex flex-wrap items-center justify-end gap-5 p-5 [&>div>label]:mr-[5px] [&>div>label]:text-white">
-            <div>
-                <label>language</label>
-                <select onChange={e => onLangChange(e.target.value)}>
-                    <option value="en">en</option>
-                    <option value="ru">ru</option>
-                </select>
+        <footer className="flex flex-wrap items-center justify-end gap-5 border-t border-tertiary p-5 text-foreground">
+            <div className="flex flex-col gap-1">
+                <label className="text-xs text-secondary-foreground">language</label>
+                <Select.Root value={language} onValueChange={onLangChange}>
+                    {renderTrigger(language)}
+                    <Select.Content>
+                        {LANG_OPTIONS.map(opt => (
+                            <Select.Item key={opt} value={opt}>
+                                {opt}
+                            </Select.Item>
+                        ))}
+                    </Select.Content>
+                </Select.Root>
             </div>
 
-            <div>
-                <label>theme</label>
-                <select onChange={e => onThemeChange(e.target.value)}>
-                    <option value={THEME.DARK}>dark</option>
-                    <option value={THEME.LIGHT}>light</option>
-                    <option value="SYSTEM">system</option>
-                </select>
+            <div className="flex flex-col gap-1">
+                <label className="text-xs text-secondary-foreground">theme</label>
+                <Select.Root value={theme} onValueChange={onThemeChange}>
+                    {renderTrigger(THEME_OPTIONS.find(o => o.value === theme)?.label ?? theme)}
+                    <Select.Content>
+                        {THEME_OPTIONS.map(opt => (
+                            <Select.Item key={opt.value} value={opt.value}>
+                                {opt.label}
+                            </Select.Item>
+                        ))}
+                    </Select.Content>
+                </Select.Root>
             </div>
 
-            <div>
-                <label>borders</label>
-                <select onChange={e => onBordersChange(e.target.value)}>
-                    <option value="m">m</option>
-                    <option value="s">s</option>
-                    <option value="none">none</option>
-                </select>
+            <div className="flex flex-col gap-1">
+                <label className="text-xs text-secondary-foreground">borders</label>
+                <Select.Root value={borders} onValueChange={onBordersChange}>
+                    {renderTrigger(borders)}
+                    <Select.Content>
+                        {BORDER_OPTIONS.map(opt => (
+                            <Select.Item key={opt} value={opt}>
+                                {opt}
+                            </Select.Item>
+                        ))}
+                    </Select.Content>
+                </Select.Root>
             </div>
 
-            <div>
-                <label>enable android back handler</label>
-                <select
-                    onChange={e => onEnableAndroidBackHandlerChange(e.target.value === 'true')}
+            <div className="flex flex-col gap-1">
+                <label className="text-xs text-secondary-foreground">android back handler</label>
+                <Select.Root
                     value={enableAndroidBackHandler.toString()}
+                    onValueChange={v => onEnableAndroidBackHandlerChange(v === 'true')}
                 >
-                    <option value="true">true</option>
-                    <option value="false">false</option>
-                </select>
+                    {renderTrigger(enableAndroidBackHandler.toString())}
+                    <Select.Content>
+                        {BOOL_OPTIONS.map(opt => (
+                            <Select.Item key={opt} value={opt}>
+                                {opt}
+                            </Select.Item>
+                        ))}
+                    </Select.Content>
+                </Select.Root>
             </div>
 
-            <div className="flex flex-col [&>input]:ml-[3px] [&>span]:mb-1 [&>span]:font-bold [&>span]:text-white">
-                <span>modals</span>
-                <label>
-                    before
-                    <input
-                        type="checkbox"
-                        checked={checkboxes[0]}
-                        onChange={() => onCheckboxChange(0)}
-                    />
-                </label>
-                <label>
-                    success
-                    <input
-                        type="checkbox"
-                        checked={checkboxes[1]}
-                        onChange={() => onCheckboxChange(1)}
-                    />
-                </label>
-                <label>
-                    error
-                    <input
-                        type="checkbox"
-                        checked={checkboxes[2]}
-                        onChange={() => onCheckboxChange(2)}
-                    />
-                </label>
+            <div className="flex flex-col gap-1">
+                <span className="text-xs font-bold text-foreground">modals</span>
+                {['before', 'success', 'error'].map((label, idx) => (
+                    <label key={label} className="flex items-center gap-2 text-sm text-foreground">
+                        <input
+                            type="checkbox"
+                            checked={checkboxes[idx]}
+                            onChange={() => onCheckboxChange(idx)}
+                        />
+                        {label}
+                    </label>
+                ))}
             </div>
 
-            <div className="flex flex-col [&>input]:ml-[3px] [&>span]:mb-1 [&>span]:font-bold [&>span]:text-white">
-                <span>notifications</span>
-                <label>
-                    before
-                    <input
-                        type="checkbox"
-                        checked={checkboxes[3]}
-                        onChange={() => onCheckboxChange(3)}
-                    />
-                </label>
-                <label>
-                    success
-                    <input
-                        type="checkbox"
-                        checked={checkboxes[4]}
-                        onChange={() => onCheckboxChange(4)}
-                    />
-                </label>
-                <label>
-                    error
-                    <input
-                        type="checkbox"
-                        checked={checkboxes[5]}
-                        onChange={() => onCheckboxChange(5)}
-                    />
-                </label>
+            <div className="flex flex-col gap-1">
+                <span className="text-xs font-bold text-foreground">notifications</span>
+                {['before', 'success', 'error'].map((label, idx) => (
+                    <label key={label} className="flex items-center gap-2 text-sm text-foreground">
+                        <input
+                            type="checkbox"
+                            checked={checkboxes[idx + 3]}
+                            onChange={() => onCheckboxChange(idx + 3)}
+                        />
+                        {label}
+                    </label>
+                ))}
             </div>
 
-            <div>
-                <ColorsModal />
+            <ColorsModal />
+
+            <div className="w-[220px]">
+                <Input>
+                    <Input.Header>
+                        <Input.Title>return strategy</Input.Title>
+                    </Input.Header>
+                    <Input.Field>
+                        <Input.Input
+                            value={returnStrategy}
+                            onChange={e => setReturnStrategy(e.target.value)}
+                            onBlur={onReturnStrategyInputBlur}
+                        />
+                    </Input.Field>
+                </Input>
             </div>
 
-            <div>
-                <label>
-                    return strategy:
-                    <input
-                        className="w-[200px]"
-                        value={returnStrategy}
-                        onChange={e => setReturnStrategy(e.target.value)}
-                        onBlur={onReturnStrategyInputBlur}
-                    />
-                </label>
-            </div>
-
-            <div>
-                <label>
-                    <div>skip redirect to wallet:</div>
-                    <div>('ios', 'never', 'always')</div>
-                    <input
-                        className="w-[200px]"
-                        value={skipRedirect}
-                        onChange={e => setSkipRedirect(e.target.value)}
-                        onBlur={onSkipRedirectInputBlur}
-                    />
-                </label>
+            <div className="w-[220px]">
+                <Input>
+                    <Input.Header>
+                        <Input.Title>skip redirect (ios / never / always)</Input.Title>
+                    </Input.Header>
+                    <Input.Field>
+                        <Input.Input
+                            value={skipRedirect}
+                            onChange={e => setSkipRedirect(e.target.value)}
+                            onBlur={onSkipRedirectInputBlur}
+                        />
+                    </Input.Field>
+                </Input>
             </div>
         </footer>
     );

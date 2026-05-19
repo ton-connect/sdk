@@ -1,0 +1,71 @@
+/**
+ * Copyright (c) TonTech.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.content {
+  background-color: var(--ta-color-background);
+  border-radius: var(--ta-border-radius-xl);
+  width: 100%;
+  max-width: 480px;
+  max-height: calc(100vh - 32px);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  outline: none;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 20px 16px;
+}
+
+.title {
+  composes: title from "../../../styles/typography.module.css";
+  margin: 0;
+  color: var(--ta-color-text);
+}
+
+.close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--ta-border-radius-full);
+  border: none;
+  background-color: var(--ta-color-background-secondary);
+  color: var(--ta-color-text-secondary);
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  padding: 0;
+}
+
+.close:hover {
+  opacity: 0.8;
+}
+
+.body {
+  composes: bodyRegular from "../../../styles/typography.module.css";
+  padding: 0 20px 24px;
+  overflow-y: auto;
+  color: var(--ta-color-text);
+}
