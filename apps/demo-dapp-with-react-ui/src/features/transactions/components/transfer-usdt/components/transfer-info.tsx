@@ -15,6 +15,11 @@ interface TransferInfoProps {
     isJettonWalletLoading: boolean;
     tonBalance: string | null;
     isTonBalanceLoading: boolean;
+    /**
+     * Stable prefix for `data-testid` attributes. The root carries the prefix
+     * directly; sub-elements get `${prefix}-network-row`, `${prefix}-ton-balance`, etc.
+     */
+    testIdPrefix: string;
 }
 
 const renderNetwork = (chain: CHAIN | undefined, rawChain: string | undefined): string => {
@@ -35,53 +40,50 @@ export const TransferInfo: FC<TransferInfoProps> = ({
     jettonWallet,
     isJettonWalletLoading,
     tonBalance,
-    isTonBalanceLoading
+    isTonBalanceLoading,
+    testIdPrefix
 }) => (
-    <InfoBlock.Container data-testid="transfer-usdt-info-block">
-        <InfoBlock.Row data-testid="transfer-usdt-info-network-row">
-            <InfoBlock.Label data-testid="transfer-usdt-info-network-label">
-                Network
-            </InfoBlock.Label>
-            <InfoBlock.Value data-testid="transfer-usdt-info-network-value">
+    <InfoBlock.Container data-testid={testIdPrefix}>
+        <InfoBlock.Row data-testid={`${testIdPrefix}-network-row`}>
+            <InfoBlock.Label data-testid={`${testIdPrefix}-network-label`}>Network</InfoBlock.Label>
+            <InfoBlock.Value data-testid={`${testIdPrefix}-network-value`}>
                 {renderNetwork(chain, rawChain)}
             </InfoBlock.Value>
         </InfoBlock.Row>
 
-        <InfoBlock.Row data-testid="transfer-usdt-info-ton-row">
-            <InfoBlock.Label data-testid="transfer-usdt-info-ton-label">
-                TON Balance
-            </InfoBlock.Label>
+        <InfoBlock.Row data-testid={`${testIdPrefix}-ton-row`}>
+            <InfoBlock.Label data-testid={`${testIdPrefix}-ton-label`}>TON Balance</InfoBlock.Label>
             {isTonBalanceLoading ? (
-                <InfoBlock.ValueSkeleton data-testid="transfer-usdt-info-ton-balance-skeleton" />
+                <InfoBlock.ValueSkeleton data-testid={`${testIdPrefix}-ton-balance-skeleton`} />
             ) : (
-                <InfoBlock.Value data-testid="transfer-usdt-info-ton-balance">
+                <InfoBlock.Value data-testid={`${testIdPrefix}-ton-balance`}>
                     {tonBalance ?? '0'} {TON_TICKER}
                 </InfoBlock.Value>
             )}
         </InfoBlock.Row>
 
-        <InfoBlock.Row data-testid="transfer-usdt-info-jetton-wallet-row">
-            <InfoBlock.Label data-testid="transfer-usdt-info-jetton-wallet-label">
+        <InfoBlock.Row data-testid={`${testIdPrefix}-jetton-wallet-row`}>
+            <InfoBlock.Label data-testid={`${testIdPrefix}-jetton-wallet-label`}>
                 Jetton Wallet
             </InfoBlock.Label>
             {isJettonWalletLoading ? (
                 <InfoBlock.ValueSkeleton
                     width={120}
-                    data-testid="transfer-usdt-info-jetton-wallet-skeleton"
+                    data-testid={`${testIdPrefix}-jetton-wallet-skeleton`}
                 />
             ) : jettonWallet && chain ? (
                 <div
                     className="flex items-center gap-1"
-                    data-testid="transfer-usdt-info-jetton-wallet-actions"
+                    data-testid={`${testIdPrefix}-jetton-wallet-actions`}
                 >
-                    <InfoBlock.Value data-testid="transfer-usdt-info-jetton-wallet-value">
+                    <InfoBlock.Value data-testid={`${testIdPrefix}-jetton-wallet-value`}>
                         {shortenAddress(jettonWallet)}
                     </InfoBlock.Value>
                     <CopyButton
                         className="h-5 w-5"
                         value={jettonWallet}
                         aria-label="Copy jetton wallet address"
-                        data-testid="transfer-usdt-info-jetton-wallet-copy"
+                        data-testid={`${testIdPrefix}-jetton-wallet-copy`}
                         iconSize={11}
                     />
                     <a
@@ -90,13 +92,13 @@ export const TransferInfo: FC<TransferInfoProps> = ({
                         rel="noreferrer"
                         href={`${tonviewerBaseByChain[chain]}/${jettonWallet}`}
                         aria-label="View jetton wallet on explorer"
-                        data-testid="transfer-usdt-info-jetton-wallet-explorer"
+                        data-testid={`${testIdPrefix}-jetton-wallet-explorer`}
                     >
                         <ExternalLink size={11} />
                     </a>
                 </div>
             ) : (
-                <InfoBlock.Value data-testid="transfer-usdt-info-jetton-wallet-empty">
+                <InfoBlock.Value data-testid={`${testIdPrefix}-jetton-wallet-empty`}>
                     —
                 </InfoBlock.Value>
             )}

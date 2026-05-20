@@ -83,6 +83,7 @@ export const TransferUsdt = () => {
                 loading={isUsdtBalanceLoading}
                 onMaxClick={handleMax}
                 maxDisabled={isUsdtBalanceLoading || !usdtBalance}
+                testIdPrefix="transfer-usdt-balance"
             />
 
             <Input size="s" data-testid="transfer-usdt-destination-field">
@@ -119,6 +120,7 @@ export const TransferUsdt = () => {
                 isJettonWalletLoading={isJettonWalletLoading}
                 tonBalance={tonBalance}
                 isTonBalanceLoading={isTonBalanceLoading}
+                testIdPrefix="transfer-usdt-info"
             />
 
             {result && (

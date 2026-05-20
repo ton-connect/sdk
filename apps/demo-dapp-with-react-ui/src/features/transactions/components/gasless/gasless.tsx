@@ -92,6 +92,7 @@ export const Gasless = () => {
                 loading={isUsdtBalanceLoading}
                 onMaxClick={handleMax}
                 maxDisabled={isUsdtBalanceLoading || !usdtBalance}
+                testIdPrefix="gasless-balance"
             />
 
             <Input size="s" data-testid="gasless-destination-field">
@@ -109,11 +110,11 @@ export const Gasless = () => {
             </Input>
 
             <RadioCards value={mode} onChange={setMode} data-testid="gasless-mode">
-                <RadioCards.Item value="messages">
+                <RadioCards.Item value="messages" data-testid="gasless-mode-messages">
                     Messages
                     <RadioCards.Tag>Default</RadioCards.Tag>
                 </RadioCards.Item>
-                <RadioCards.Item value="items">
+                <RadioCards.Item value="items" data-testid="gasless-mode-items">
                     Items
                     <RadioCards.Tag>Structured</RadioCards.Tag>
                 </RadioCards.Item>
@@ -137,6 +138,7 @@ export const Gasless = () => {
                 isJettonWalletLoading={isJettonWalletLoading}
                 tonBalance={tonBalance}
                 isTonBalanceLoading={isTonBalanceLoading}
+                testIdPrefix="gasless-info"
             />
 
             {result && (
