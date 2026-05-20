@@ -75,13 +75,14 @@ const INPUT_FIELD_CLASS = `${CONTROL_SURFACE_CLASS} items-center !border-transpa
 const INPUT_CONTROL_CLASS =
     '!text-sm !font-semibold !text-foreground placeholder:!font-normal placeholder:!text-secondary-foreground';
 
-const renderTrigger = (label: string) => (
+const renderTrigger = (label: string, testId: string) => (
     <Select.Trigger
         variant="gray"
         size="s"
         borderRadius="l"
         fullWidth
         className={SELECT_TRIGGER_CLASS}
+        data-testid={testId}
     >
         <span className="truncate text-left">{label}</span>
         <ChevronDownIcon size={16} className="shrink-0" />
@@ -142,9 +143,15 @@ export const DevPanel = () => {
     };
 
     return (
-        <div className="mx-auto flex w-full max-w-3xl flex-col gap-5">
-            <div className="flex w-full flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                <h3 className="mb-3 pl-1 text-lg font-semibold text-foreground md:mb-0">
+        <div className="mx-auto flex w-full max-w-3xl flex-col gap-5" data-testid="settings-panel">
+            <div
+                className="flex w-full flex-col gap-2 md:flex-row md:items-center md:justify-between"
+                data-testid="settings-panel-header"
+            >
+                <h3
+                    className="mb-3 pl-1 text-lg font-semibold text-foreground md:mb-0"
+                    data-testid="settings-panel-title"
+                >
                     Configure TonConnect
                 </h3>
                 <div className="flex w-full flex-col-reverse gap-2 md:w-auto md:flex-row md:items-center">
@@ -175,10 +182,17 @@ export const DevPanel = () => {
                                 setSettings({ language: language as typeof settings.language })
                             }
                         >
-                            {renderTrigger(settings.language.toUpperCase())}
+                            {renderTrigger(
+                                settings.language.toUpperCase(),
+                                'settings-language-trigger'
+                            )}
                             <Select.Content>
                                 {LANG_OPTIONS.map(opt => (
-                                    <Select.Item key={opt} value={opt}>
+                                    <Select.Item
+                                        key={opt}
+                                        value={opt}
+                                        data-testid={`settings-language-item-${opt}`}
+                                    >
                                         {opt.toUpperCase()}
                                     </Select.Item>
                                 ))}
@@ -195,11 +209,16 @@ export const DevPanel = () => {
                         >
                             {renderTrigger(
                                 THEME_OPTIONS.find(o => o.value === settings.theme)?.label ??
-                                    settings.theme
+                                    settings.theme,
+                                'settings-theme-trigger'
                             )}
                             <Select.Content>
                                 {THEME_OPTIONS.map(opt => (
-                                    <Select.Item key={opt.value} value={opt.value}>
+                                    <Select.Item
+                                        key={opt.value}
+                                        value={opt.value}
+                                        data-testid={`settings-theme-item-${opt.value}`}
+                                    >
                                         {opt.label}
                                     </Select.Item>
                                 ))}
@@ -218,11 +237,16 @@ export const DevPanel = () => {
                         >
                             {renderTrigger(
                                 BORDER_OPTIONS.find(o => o.value === settings.borderRadius)
-                                    ?.label ?? settings.borderRadius
+                                    ?.label ?? settings.borderRadius,
+                                'settings-border-radius-trigger'
                             )}
                             <Select.Content>
                                 {BORDER_OPTIONS.map(opt => (
-                                    <Select.Item key={opt.value} value={opt.value}>
+                                    <Select.Item
+                                        key={opt.value}
+                                        value={opt.value}
+                                        data-testid={`settings-border-radius-item-${opt.value}`}
+                                    >
                                         {opt.label}
                                     </Select.Item>
                                 ))}
@@ -263,15 +287,23 @@ export const DevPanel = () => {
                                 }}
                             >
                                 {renderTrigger(
-                                    getReturnStrategyTriggerLabel(settings.returnStrategy)
+                                    getReturnStrategyTriggerLabel(settings.returnStrategy),
+                                    'settings-return-strategy-trigger'
                                 )}
                                 <Select.Content>
                                     {RETURN_STRATEGY_PRESETS.map(opt => (
-                                        <Select.Item key={opt.value} value={opt.value}>
+                                        <Select.Item
+                                            key={opt.value}
+                                            value={opt.value}
+                                            data-testid={`settings-return-strategy-item-${opt.value}`}
+                                        >
                                             {opt.label}
                                         </Select.Item>
                                     ))}
-                                    <Select.Item value={RETURN_STRATEGY_CUSTOM}>
+                                    <Select.Item
+                                        value={RETURN_STRATEGY_CUSTOM}
+                                        data-testid="settings-return-strategy-item-custom"
+                                    >
                                         Custom URL
                                     </Select.Item>
                                 </Select.Content>
@@ -296,6 +328,7 @@ export const DevPanel = () => {
                                                 }
                                             }}
                                             placeholder="https://example.com"
+                                            data-testid="settings-return-strategy-custom-input"
                                         />
                                     </Input.Field>
                                 </Input>
@@ -317,6 +350,7 @@ export const DevPanel = () => {
                                         }
                                     }}
                                     placeholder="https://t.me/…"
+                                    data-testid="settings-twa-return-url-input"
                                 />
                             </Input.Field>
                         </Input>
@@ -333,11 +367,16 @@ export const DevPanel = () => {
                         >
                             {renderTrigger(
                                 SKIP_OPTIONS.find(o => o.value === settings.skipRedirect)?.label ??
-                                    settings.skipRedirect
+                                    settings.skipRedirect,
+                                'settings-skip-redirect-trigger'
                             )}
                             <Select.Content>
                                 {SKIP_OPTIONS.map(opt => (
-                                    <Select.Item key={opt.value} value={opt.value}>
+                                    <Select.Item
+                                        key={opt.value}
+                                        value={opt.value}
+                                        data-testid={`settings-skip-redirect-item-${opt.value}`}
+                                    >
                                         {opt.label}
                                     </Select.Item>
                                 ))}
@@ -353,11 +392,22 @@ export const DevPanel = () => {
                             }
                         >
                             {renderTrigger(
-                                settings.enableAndroidBackHandler ? 'Enabled' : 'Disabled'
+                                settings.enableAndroidBackHandler ? 'Enabled' : 'Disabled',
+                                'settings-android-back-trigger'
                             )}
                             <Select.Content>
-                                <Select.Item value="true">Enabled</Select.Item>
-                                <Select.Item value="false">Disabled</Select.Item>
+                                <Select.Item
+                                    value="true"
+                                    data-testid="settings-android-back-item-true"
+                                >
+                                    Enabled
+                                </Select.Item>
+                                <Select.Item
+                                    value="false"
+                                    data-testid="settings-android-back-item-false"
+                                >
+                                    Disabled
+                                </Select.Item>
                             </Select.Content>
                         </Select.Root>
                     </SettingsField>
@@ -381,6 +431,7 @@ export const DevPanel = () => {
                                         onCheckedChange={() =>
                                             toggleWalletFeaturesPreset('walletsRequiredPresets', id)
                                         }
+                                        data-testid={`settings-wallets-required-${id}`}
                                     />
                                     {label}
                                 </label>
@@ -403,6 +454,7 @@ export const DevPanel = () => {
                                                 id
                                             )
                                         }
+                                        data-testid={`settings-wallets-preferred-${id}`}
                                     />
                                     {label}
                                 </label>
@@ -425,6 +477,7 @@ export const DevPanel = () => {
                                     <Checkbox
                                         checked={settings.modals.includes(key)}
                                         onCheckedChange={() => toggleTrigger('modals', key)}
+                                        data-testid={`settings-modals-${key}`}
                                     />
                                     {label}
                                 </label>
@@ -440,6 +493,7 @@ export const DevPanel = () => {
                                     <Checkbox
                                         checked={settings.notifications.includes(key)}
                                         onCheckedChange={() => toggleTrigger('notifications', key)}
+                                        data-testid={`settings-notifications-${key}`}
                                     />
                                     {label}
                                 </label>
@@ -459,6 +513,7 @@ export const DevPanel = () => {
                         onCheckedChange={checked =>
                             setSettings({ analyticsEnabled: checked === true })
                         }
+                        data-testid="settings-analytics-checkbox"
                     />
                     Send analytics (telemetry)
                 </label>
