@@ -4,6 +4,7 @@ import {
     SendTransactionRequest,
     TonProofItemReplySuccess
 } from '@tonconnect/ui-react';
+import { decodeJwt } from 'jose';
 import '../../patch-local-storage-for-github-pages';
 import { CreateJettonRequestDto } from '../../server/dto/create-jetton-request-dto';
 
@@ -81,6 +82,20 @@ class TonProofDemoApiService {
 
     constructor() {
         this.accessToken = localStorage.getItem(this.accessTokenKey);
+    }
+
+    /** Whether the stored backend JWT belongs to the connected wallet account. */
+    sessionMatchesAccount(account: Account): boolean {
+        if (!this.accessToken) {
+            return false;
+        }
+
+        try {
+            const payload = decodeJwt(this.accessToken) as { address?: string; network?: string };
+            return payload.address === account.address && payload.network === account.chain;
+        } catch {
+            return false;
+        }
     }
 
     private setPayloadToken(payload: string, token: string): void {

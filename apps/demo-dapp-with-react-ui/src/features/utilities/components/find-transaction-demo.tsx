@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { JsonView } from '../../../core/components/ui/json-view';
 
 import { Button } from '../../../core/components/ui/button/index';
 import { Input } from '../../../core/components/ui/input/index';
@@ -75,11 +74,7 @@ export const FindTransactionDemo = () => {
                 {txLoading ? 'Searching...' : 'Find Transaction'}
             </Button>
             {txError && <div className="text-sm text-error">{txError}</div>}
-            {txResult !== null && (
-                <ResultPanel title="Transaction">
-                    <JsonView src={txResult} />
-                </ResultPanel>
-            )}
+            {txResult !== null && <ResultPanel title="Transaction" src={txResult} />}
         </>
     );
 };

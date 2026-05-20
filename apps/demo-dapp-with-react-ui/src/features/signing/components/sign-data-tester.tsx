@@ -7,7 +7,6 @@ import {
 } from '@tonconnect/ui-react';
 import { beginCell } from '@ton/ton';
 import { useState } from 'react';
-import { JsonView } from '../../../core/components/ui/json-view';
 
 import { Button } from '../../../core/components/ui/button/index';
 import { Checkbox } from '../../../core/components/ui/checkbox/index';
@@ -167,22 +166,14 @@ export function SignDataTester() {
                 </div>
             )}
 
-            {signDataRequest && (
-                <ResultPanel title="📤 Sign Data Request">
-                    <JsonView src={signDataRequest} />
-                </ResultPanel>
-            )}
+            {signDataRequest && <ResultPanel title="📤 Sign Data Request" src={signDataRequest} />}
 
             {signDataResponse && (
-                <ResultPanel title="📥 Sign Data Response">
-                    <JsonView src={signDataResponse} />
-                </ResultPanel>
+                <ResultPanel title="📥 Sign Data Response" src={signDataResponse} />
             )}
 
             {verificationResult && (
-                <ResultPanel title="✅ Verification Result">
-                    <JsonView src={verificationResult} />
-                </ResultPanel>
+                <ResultPanel title="✅ Verification Result" src={verificationResult} />
             )}
         </>
     );
