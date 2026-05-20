@@ -1,5 +1,5 @@
-import { Button } from '@/core/components/ui/button';
-import { Input } from '@/core/components/ui/input';
+import { Button } from '../../../../../core/components/ui/button';
+import { Input } from '../../../../../core/components/ui/input';
 
 import type { TimerState, TimerStatus } from '../hooks';
 

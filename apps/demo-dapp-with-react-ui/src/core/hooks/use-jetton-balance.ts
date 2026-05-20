@@ -3,7 +3,7 @@ import { CHAIN, useTonWallet } from '@tonconnect/ui-react';
 import { Address } from '@ton/core';
 import { JettonWallet, TonClient } from '@ton/ton';
 
-import { endpointByChain, isSupportedChain } from '@/core/lib/ton-endpoints';
+import { endpointByChain, isSupportedChain } from '../lib/ton-endpoints';
 
 /**
  * Reads the jetton balance held by `jettonWalletAddress` (the owner's jetton

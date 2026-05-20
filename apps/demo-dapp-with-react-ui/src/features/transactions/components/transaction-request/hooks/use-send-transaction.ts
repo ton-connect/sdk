@@ -6,8 +6,8 @@ import {
     useTonWallet
 } from '@tonconnect/ui-react';
 
-import { TonProofDemoApi } from '@/core/lib/ton-proof-demo-api';
-import { fail, ok, type OperationResult } from '@/core/components/ui/result-block';
+import { fail, ok, type OperationResult } from '../../../../../core/components/ui/result-block';
+import { TonProofDemoApi } from '../../../../../core/lib/ton-proof-demo-api';
 
 /**
  * When `enableEmbeddedRequest: true` returns `hasResponse: false`, the connect

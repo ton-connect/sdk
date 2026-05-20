@@ -1,6 +1,6 @@
 import type { ChangeEvent } from 'react';
 
-import { cn } from '@/core/lib/utils';
+import { cn } from '../../../core/lib/utils';
 
 const HEX_PATTERN = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
 

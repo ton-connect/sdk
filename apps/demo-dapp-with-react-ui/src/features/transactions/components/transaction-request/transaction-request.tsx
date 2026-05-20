@@ -2,12 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { Wallet } from 'lucide-react';
 
-import { Button } from '@/core/components/ui/button';
-import { ButtonWithConnect } from '@/core/components/ui/button-with-connect';
-import { JsonEditor } from '@/core/components/ui/json-editor';
-import { ResultBlock } from '@/core/components/ui/result-block';
-import { SettingsButton } from '@/core/components/ui/settings-button';
-import { EmptyState } from '@/core/components/empty-state';
+import { ButtonWithConnect } from '../../../../core/components/ui/button-with-connect';
+import { ResultBlock } from '../../../../core/components/ui/result-block';
+import { Button } from '../../../../core/components/ui/button';
+import { JsonEditor } from '../../../../core/components/ui/json-editor';
+import { SettingsButton } from '../../../../core/components/ui/settings-button';
+import { EmptyState } from '../../../../core/components/empty-state';
 
 import {
     buildDefaultTx,

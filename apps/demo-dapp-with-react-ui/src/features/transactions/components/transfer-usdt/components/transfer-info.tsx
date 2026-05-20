@@ -2,9 +2,9 @@ import type { FC } from 'react';
 import type { CHAIN } from '@tonconnect/ui-react';
 import { ExternalLink } from 'lucide-react';
 
-import { CopyButton } from '@/core/components/ui/copy-button';
-import { InfoBlock } from '@/core/components/ui/info-block';
-import { tonviewerBaseByChain } from '@/core/lib/ton-endpoints';
+import { CopyButton } from '../../../../../core/components/ui/copy-button';
+import { InfoBlock } from '../../../../../core/components/ui/info-block';
+import { tonviewerBaseByChain } from '../../../../../core/lib/ton-endpoints';
 
 import { NETWORK_LABEL_BY_CHAIN, TON_TICKER } from '../lib/constants';
 

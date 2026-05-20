@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { Address } from '@ton/core';
 
-import { ButtonWithConnect } from '@/core/components/ui/button-with-connect';
-import { CenteredAmountInput } from '@/core/components/ui/centered-amount-input';
-import { Input } from '@/core/components/ui/input';
-import { ResultBlock } from '@/core/components/ui/result-block';
+import { ButtonWithConnect } from '../../../../core/components/ui/button-with-connect';
+import { CenteredAmountInput } from '../../../../core/components/ui/centered-amount-input';
+import { Input } from '../../../../core/components/ui/input';
+import { ResultBlock } from '../../../../core/components/ui/result-block';
 
 import { BalanceBlock } from './components/balance-block';
 import { TransferInfo } from './components/transfer-info';

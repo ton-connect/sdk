@@ -1,9 +1,9 @@
 import { forwardRef } from 'react';
 
-import { Button } from '@/core/components/ui/button';
-import { JsonView } from '@/core/components/ui/json-view';
-import { ResultPanel } from '@/core/components/result-panel';
-import { cn } from '@/core/lib/utils';
+import { Button } from '../button';
+import { JsonView } from '../json-view';
+import { ResultPanel } from '../../result-panel';
+import { cn } from '../../../lib/utils';
 
 /**
  * Outcome of an async wallet operation (send transaction, sign message, jetton

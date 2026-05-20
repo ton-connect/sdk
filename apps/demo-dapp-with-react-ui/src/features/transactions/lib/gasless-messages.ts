@@ -12,7 +12,7 @@ import {
 
 import { TonApiClient } from '@ton-api/client';
 import { TonConnectUI } from '@tonconnect/ui-react';
-import { retry } from '@/core/utils/retry';
+import { retry } from '../../../core/utils/retry';
 
 const ta = new TonApiClient({
     baseUrl: 'https://tonapi.io'

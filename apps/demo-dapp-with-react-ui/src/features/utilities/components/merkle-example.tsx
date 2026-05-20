@@ -7,10 +7,10 @@ import {
     buildSuccessMerkleUpdate,
     // buildVerifyMerkleProof,
     buildVerifyMerkleUpdate
-} from '@/server/utils/exotic';
-import { Button } from '@/core/components/ui/button';
-import { EmptyState } from '@/core/components/empty-state';
-import { TonProofDemoApi } from '@/core/lib/ton-proof-demo-api';
+} from '../../../server/utils/exotic';
+import { Button } from '../../../core/components/ui/button/index';
+import { EmptyState } from '../../../core/components/empty-state/index';
+import { TonProofDemoApi } from '../../../core/lib/ton-proof-demo-api';
 
 const merkleExampleAddress = 'EQD_5KMZVIqzYY91-t5CdRD_V71wRrVzxDXu9n2XEwz2wwdv';
 const merkleUpdateBody = buildVerifyMerkleUpdate(buildSuccessMerkleUpdate());

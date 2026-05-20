@@ -1,13 +1,13 @@
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { useState } from 'react';
-import { JsonView } from '@/core/components/ui/json-view';
+import { JsonView } from '../../../core/components/ui/json-view';
 import { Wallet } from 'lucide-react';
 
-import { Button } from '@/core/components/ui/button';
-import { EmptyState } from '@/core/components/empty-state';
-import { ResultPanel } from '@/core/components/result-panel';
-import { CreateJettonRequestDto } from '@/server/dto/create-jetton-request-dto';
-import { TonProofDemoApi } from '@/core/lib/ton-proof-demo-api';
+import { Button } from '../../../core/components/ui/button/index';
+import { EmptyState } from '../../../core/components/empty-state/index';
+import { ResultPanel } from '../../../core/components/result-panel/index';
+import { CreateJettonRequestDto } from '../../../server/dto/create-jetton-request-dto';
+import { TonProofDemoApi } from '../../../core/lib/ton-proof-demo-api';
 
 const jetton: CreateJettonRequestDto = {
     name: 'Joint Photographic Experts Group',

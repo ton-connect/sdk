@@ -3,8 +3,8 @@ import { useTonConnectUI } from '@tonconnect/ui-react';
 import { Address, beginCell, toNano } from '@ton/core';
 import { storeJettonTransferMessage } from '@ton-community/assets-sdk';
 
-import { fail, ok, type OperationResult } from '@/core/components/ui/result-block';
-import { parseUnits } from '@/core/utils/units';
+import { fail, ok, type OperationResult } from '../../../../../core/components/ui/result-block';
+import { parseUnits } from '../../../../../core/utils/units';
 
 import {
     ATTACHED_AMOUNT_TON,

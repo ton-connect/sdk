@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import type { ComponentProps } from 'react';
 
-import { JsonEditor } from '@/core/components/ui/json-editor';
+import { JsonEditor } from '../json-editor';
 
 interface JsonViewProps extends Omit<ComponentProps<'div'>, 'onChange'> {
     /** Either a JSON string or any value to be JSON.stringify-ed. */

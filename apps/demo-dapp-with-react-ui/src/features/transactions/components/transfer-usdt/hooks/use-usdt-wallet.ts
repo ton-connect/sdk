@@ -4,10 +4,10 @@ import { Address, fromNano } from '@ton/core';
 import { TonClient } from '@ton/ton';
 import { JettonMinter } from '@ton-community/assets-sdk';
 
-import { formatUnits } from '@/core/utils/units';
-import { useJettonBalance } from '@/core/hooks/use-jetton-balance';
-import { useTonBalance } from '@/core/hooks/use-ton-balance';
-import { endpointByChain, isSupportedChain } from '@/core/lib/ton-endpoints';
+import { formatUnits } from '../../../../../core/utils/units';
+import { useJettonBalance } from '../../../../../core/hooks/use-jetton-balance';
+import { useTonBalance } from '../../../../../core/hooks/use-ton-balance';
+import { endpointByChain, isSupportedChain } from '../../../../../core/lib/ton-endpoints';
 
 import { USDT_DECIMALS, USDT_MASTER_BY_CHAIN } from '../lib/constants';
 

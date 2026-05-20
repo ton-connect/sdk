@@ -9,7 +9,7 @@
 import type { ComponentProps, FC, ReactNode } from 'react';
 import type { LucideIcon } from 'lucide-react';
 
-import { cn } from '@/core/lib/utils';
+import { cn } from '../../lib/utils';
 
 interface EmptyStateProps extends ComponentProps<'div'> {
     icon: LucideIcon;

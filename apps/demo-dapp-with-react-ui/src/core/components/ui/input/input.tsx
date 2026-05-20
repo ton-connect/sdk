@@ -8,7 +8,7 @@
 
 import { createContext, useContext, useMemo } from 'react';
 import type { FC, ReactNode, ComponentProps, ChangeEvent } from 'react';
-import { cn } from '@/core/lib/utils';
+import { cn } from '../../../lib/utils';
 
 import { Skeleton } from '../skeleton';
 import { useInputResize } from './use-input-resize';
