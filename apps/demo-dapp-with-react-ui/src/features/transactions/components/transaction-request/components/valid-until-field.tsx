@@ -71,7 +71,7 @@ export const ValidUntilField = ({
                 onClick={() => onSetFromNow(60)}
                 data-testid="tx-request-valid-until-preset-plus-1m"
             >
-                +1m
+                1m
             </Button>
             <Button
                 variant="bezeled"
@@ -79,7 +79,7 @@ export const ValidUntilField = ({
                 onClick={() => onSetFromNow(300)}
                 data-testid="tx-request-valid-until-preset-plus-5m"
             >
-                +5m
+                5m
             </Button>
             <Button
                 variant="bezeled"
@@ -87,7 +87,7 @@ export const ValidUntilField = ({
                 onClick={() => onSetFromNow(43_200)}
                 data-testid="tx-request-valid-until-preset-plus-12h"
             >
-                +12h
+                12h
             </Button>
         </div>
     </Input>

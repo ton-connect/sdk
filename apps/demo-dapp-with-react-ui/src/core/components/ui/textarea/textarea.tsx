@@ -1,6 +1,6 @@
 import { forwardRef } from 'react';
 import type { ComponentPropsWithoutRef, ComponentRef } from 'react';
-import clsx from 'clsx';
+import { cn } from '../../../lib/utils';
 
 import styles from './textarea.module.css';
 
@@ -14,12 +14,12 @@ export interface TextareaProps extends Omit<ComponentPropsWithoutRef<'textarea'>
 export const Textarea = forwardRef<ComponentRef<'textarea'>, TextareaProps>(
     ({ size = 's', error, disabled, rows = 3, className, ...props }, ref) => {
         return (
-            <div className={clsx(styles.field, error && styles.error, disabled && styles.disabled)}>
+            <div className={cn(styles.field, error && styles.error, disabled && styles.disabled)}>
                 <textarea
                     ref={ref}
                     rows={rows}
                     disabled={disabled}
-                    className={clsx(styles.textarea, styles[`size_${size}`], className)}
+                    className={cn(styles.textarea, styles[`size_${size}`], className)}
                     {...props}
                 />
             </div>

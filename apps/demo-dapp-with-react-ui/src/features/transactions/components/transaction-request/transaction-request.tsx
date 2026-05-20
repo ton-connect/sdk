@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { Wallet } from 'lucide-react';
 
+import { ButtonWithConnect } from '../../../../core/components/ui/button-with-connect';
+import { ResultBlock } from '../../../../core/components/ui/result-block';
 import { Button } from '../../../../core/components/ui/button';
 import { JsonEditor } from '../../../../core/components/ui/json-editor';
 import { SettingsButton } from '../../../../core/components/ui/settings-button';
@@ -17,7 +19,6 @@ import {
 import {
     ConfigureHeader,
     ModeField,
-    ResultBlock,
     RetryAlert,
     SettingsModal,
     ValidUntilField,
@@ -128,16 +129,17 @@ export const TransactionRequest = () => {
             />
 
             <div className="flex items-stretch gap-2">
-                <Button
+                <ButtonWithConnect
                     size="l"
                     fullWidth
                     onClick={handleAction}
                     loading={actionLoading}
                     disabled={disableAction}
+                    skipConnectPrompt={form.withConnect}
                     data-testid="tx-request-action-button"
                 >
                     {actionLabel}
-                </Button>
+                </ButtonWithConnect>
                 <SettingsButton
                     onClick={() => setSettingsOpen(true)}
                     data-testid="tx-request-settings-button"
@@ -169,6 +171,7 @@ export const TransactionRequest = () => {
                     title={resultTitle}
                     result={activeResult}
                     onDismiss={dismissActiveResult}
+                    testIdPrefix="tx-request-result"
                 />
             )}
         </div>

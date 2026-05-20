@@ -8,7 +8,7 @@
 
 import { createContext, useContext, useMemo } from 'react';
 import type { FC, ReactNode, ComponentProps, ChangeEvent } from 'react';
-import clsx from 'clsx';
+import { cn } from '../../../lib/utils';
 
 import { Skeleton } from '../skeleton';
 import { useInputResize } from './use-input-resize';
@@ -65,7 +65,7 @@ const Container: FC<InputContainerProps> = ({
     return (
         <InputContext.Provider value={contextValue}>
             <div
-                className={clsx(
+                className={cn(
                     styles.container,
                     styles[`variant-${variant}`],
                     disabled && styles.disabled,
@@ -86,13 +86,13 @@ export interface InputHeaderProps extends ComponentProps<'div'> {
 }
 
 const Header: FC<InputHeaderProps> = ({ className, children, ...props }) => (
-    <div className={clsx(styles.header, className)} {...props}>
+    <div className={cn(styles.header, className)} {...props}>
         {children}
     </div>
 );
 
 const Title: FC<ComponentProps<'span'>> = ({ className, children, ...props }) => (
-    <span className={clsx(styles.title, className)} {...props}>
+    <span className={cn(styles.title, className)} {...props}>
         {children}
     </span>
 );
@@ -102,7 +102,7 @@ export interface InputFieldProps extends ComponentProps<'div'> {
 }
 
 const Field: FC<InputFieldProps> = ({ className, children, ...props }) => (
-    <div className={clsx(styles.field, className)} {...props}>
+    <div className={cn(styles.field, className)} {...props}>
         {children}
     </div>
 );
@@ -112,7 +112,7 @@ export interface InputSlotProps extends ComponentProps<'div'> {
 }
 
 const Slot: FC<InputSlotProps> = ({ side, className, children, ...props }) => (
-    <div className={clsx(styles.slot, side === 'right' && styles.right, className)} {...props}>
+    <div className={cn(styles.slot, side === 'right' && styles.right, className)} {...props}>
         {children}
     </div>
 );
@@ -145,7 +145,7 @@ const InputControl: FC<InputControlProps> = ({
         const skeletonClass = styles[`inputSkeleton_${contextSize}`];
 
         return (
-            <div className={clsx(styles.input, styles.inputSkeleton, skeletonClass, className)}>
+            <div className={cn(styles.input, styles.inputSkeleton, skeletonClass, className)}>
                 <Skeleton width={75} height="70%" />
             </div>
         );
@@ -158,7 +158,7 @@ const InputControl: FC<InputControlProps> = ({
                     {/* Measures actual text width at max (contextSize) font — source of truth for scaling */}
                     <span
                         ref={measureMaxRef}
-                        className={clsx(styles.inputMeasure, styles[`input_${contextSize}`])}
+                        className={cn(styles.inputMeasure, styles[`input_${contextSize}`])}
                         aria-hidden
                     >
                         {text}
@@ -166,13 +166,13 @@ const InputControl: FC<InputControlProps> = ({
                     {/* Empty span — only used to read minFontSize from CSS variable via computed style */}
                     <span
                         ref={measureMinRef}
-                        className={clsx(styles.inputMeasure, styles.input_s)}
+                        className={cn(styles.inputMeasure, styles.input_s)}
                         aria-hidden
                     />
                 </>
             )}
             <input
-                className={clsx(styles.input, styles[`input_${contextSize}`], className)}
+                className={cn(styles.input, styles[`input_${contextSize}`], className)}
                 style={resizeStyle}
                 disabled={disabled}
                 {...props}
@@ -186,7 +186,7 @@ const InputControl: FC<InputControlProps> = ({
 const Caption: FC<ComponentProps<'span'>> = ({ className, children, ...props }) => {
     const { error } = useInputContext();
     return (
-        <span className={clsx(styles.caption, error && styles.errorText, className)} {...props}>
+        <span className={cn(styles.caption, error && styles.errorText, className)} {...props}>
             {children}
         </span>
     );

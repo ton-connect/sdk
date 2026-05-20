@@ -6,16 +6,8 @@ import {
     useTonWallet
 } from '@tonconnect/ui-react';
 
+import { fail, ok, type OperationResult } from '../../../../../core/components/ui/result-block';
 import { TonProofDemoApi } from '../../../../../core/lib/ton-proof-demo-api';
-
-/**
- * A completed (or failed) send/sign attempt — what ResultBlock renders.
- * `response` is the pre-stringified payload shown in the JsonView.
- */
-export interface OperationResult {
-    status: 'success' | 'error';
-    response: string;
-}
 
 /**
  * When `enableEmbeddedRequest: true` returns `hasResponse: false`, the connect
@@ -34,20 +26,6 @@ interface SendOptions {
     /** After send, poll on-chain for the resulting transaction before reporting success. */
     waitForTx: boolean;
 }
-
-const ok = (response: unknown): OperationResult => ({
-    status: 'success',
-    response: JSON.stringify(response, null, 2)
-});
-
-const fail = (error: unknown): OperationResult => ({
-    status: 'error',
-    response: JSON.stringify(
-        { error: error instanceof Error ? error.message : 'Operation failed' },
-        null,
-        2
-    )
-});
 
 /**
  * Owns send/sign orchestration: invokes `tonConnectUi.sendTransaction` /

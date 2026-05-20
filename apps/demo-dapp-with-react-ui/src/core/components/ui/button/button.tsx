@@ -8,7 +8,7 @@
 
 import { forwardRef } from 'react';
 import type { ComponentProps, ReactNode } from 'react';
-import clsx from 'clsx';
+import { cn } from '../../../lib/utils';
 
 import styles from './button.module.css';
 
@@ -74,7 +74,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             <button
                 ref={ref}
                 disabled={disabled || loading}
-                className={clsx(
+                className={cn(
                     styles.button,
                     size !== 'unset' && styles[size],
                     radius && styles[RADIUS_CLASS[radius]],

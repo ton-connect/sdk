@@ -9,7 +9,7 @@
 import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { ComponentPropsWithoutRef, ComponentRef, FC, ReactNode } from 'react';
-import clsx from 'clsx';
+import { cn } from '../../../lib/utils';
 
 import { Button } from '../button';
 import type { ButtonProps } from '../button';
@@ -213,7 +213,7 @@ const SelectContent: FC<SelectContentProps> = ({
             role="listbox"
             data-state="open"
             data-align={align}
-            className={clsx(styles.content, className)}
+            className={cn(styles.content, className)}
             style={{
                 position: 'fixed',
                 top: position.top,
@@ -249,7 +249,7 @@ const SelectItem = forwardRef<ComponentRef<'div'>, SelectItemProps>(
                 data-state={isSelected ? 'checked' : 'unchecked'}
                 data-disabled={disabled || undefined}
                 tabIndex={disabled ? -1 : 0}
-                className={clsx(styles.item, className)}
+                className={cn(styles.item, className)}
                 onClick={event => {
                     onClick?.(event);
                     if (event.defaultPrevented || disabled) return;

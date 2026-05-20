@@ -8,7 +8,7 @@
 
 import { forwardRef } from 'react';
 import type { ComponentProps } from 'react';
-import clsx from 'clsx';
+import { cn } from '../../../lib/utils';
 
 import styles from './skeleton.module.css';
 
@@ -22,7 +22,7 @@ export const Skeleton = forwardRef<HTMLDivElement, SkeletonProps>(
         return (
             <div
                 ref={ref}
-                className={clsx(styles.skeleton, className)}
+                className={cn(styles.skeleton, className)}
                 style={{ width, height, ...style }}
                 {...props}
             />
