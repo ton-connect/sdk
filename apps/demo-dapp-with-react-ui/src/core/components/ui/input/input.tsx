@@ -1,19 +1,10 @@
-/**
- * Copyright (c) TonTech.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- */
-
 import { createContext, useContext, useMemo } from 'react';
 import type { FC, ReactNode, ComponentProps, ChangeEvent } from 'react';
-import { cn } from '../../../lib/utils';
 
+import { cn } from '../../../lib/utils';
 import { Skeleton } from '../skeleton';
 import { useInputResize } from './use-input-resize';
 import type { InputSize } from './use-input-resize';
-import styles from './input.module.css';
 
 type InputVariant = 'default' | 'unstyled';
 
@@ -35,6 +26,18 @@ const useInputContext = () => {
         throw new Error('Input components must be used within an Input.Container');
     }
     return context;
+};
+
+const INPUT_SIZE_CLASS: Record<InputSize, string> = {
+    s: 'text-base font-normal leading-6',
+    m: 'text-2xl font-semibold leading-[30px]',
+    l: 'text-[32px] font-bold leading-10'
+};
+
+const INPUT_SKELETON_HEIGHT: Record<InputSize, string> = {
+    s: 'h-6',
+    m: 'h-[30px]',
+    l: 'h-10'
 };
 
 export interface InputContainerProps extends ComponentProps<'div'> {
@@ -70,12 +73,8 @@ const Container: FC<InputContainerProps> = ({
         <InputContext.Provider value={contextValue}>
             <div
                 className={cn(
-                    styles.container,
-                    styles[`variant-${variant}`],
-                    disabled && styles.disabled,
-                    readOnly && styles.readOnly,
-                    error && styles.error,
-                    loading && styles.loading,
+                    'flex w-full flex-col gap-1',
+                    disabled && 'pointer-events-none opacity-50',
                     className
                 )}
                 {...props}
@@ -91,13 +90,16 @@ export interface InputHeaderProps extends ComponentProps<'div'> {
 }
 
 const Header: FC<InputHeaderProps> = ({ className, children, ...props }) => (
-    <div className={cn(styles.header, className)} {...props}>
+    <div className={cn('flex items-center justify-between px-1', className)} {...props}>
         {children}
     </div>
 );
 
 const Title: FC<ComponentProps<'span'>> = ({ className, children, ...props }) => (
-    <span className={cn(styles.title, className)} {...props}>
+    <span
+        className={cn('text-sm font-normal leading-[18px] text-secondary-foreground', className)}
+        {...props}
+    >
         {children}
     </span>
 );
@@ -106,18 +108,35 @@ export interface InputFieldProps extends ComponentProps<'div'> {
     children: ReactNode;
 }
 
-const Field: FC<InputFieldProps> = ({ className, children, ...props }) => (
-    <div className={cn(styles.field, className)} {...props}>
-        {children}
-    </div>
-);
+const Field: FC<InputFieldProps> = ({ className, children, ...props }) => {
+    const { variant, readOnly, error } = useInputContext();
+    const unstyled = variant === 'unstyled';
+
+    return (
+        <div
+            className={cn(
+                unstyled
+                    ? 'flex items-center gap-2'
+                    : cn(
+                          'relative flex items-center gap-2 overflow-hidden rounded-xl border-2 border-transparent bg-secondary p-[14px] transition-colors focus-within:border-primary',
+                          readOnly && 'bg-tertiary focus-within:border-transparent',
+                          error && 'border-error focus-within:border-error'
+                      ),
+                className
+            )}
+            {...props}
+        >
+            {children}
+        </div>
+    );
+};
 
 export interface InputSlotProps extends ComponentProps<'div'> {
     side?: 'left' | 'right';
 }
 
-const Slot: FC<InputSlotProps> = ({ side, className, children, ...props }) => (
-    <div className={cn(styles.slot, side === 'right' && styles.right, className)} {...props}>
+const Slot: FC<InputSlotProps> = ({ className, children, ...props }) => (
+    <div className={cn('flex shrink-0 items-center justify-center', className)} {...props}>
         {children}
     </div>
 );
@@ -154,11 +173,19 @@ const InputControl: FC<InputControlProps> = ({
 
     const text = String(props.value ?? props.defaultValue ?? '');
 
-    if (loading) {
-        const skeletonClass = styles[`inputSkeleton_${contextSize}`];
+    const inputBaseClass =
+        'w-full min-w-0 flex-1 border-0 bg-transparent p-0 text-foreground outline-none placeholder:text-secondary-foreground placeholder:opacity-60';
 
+    if (loading) {
         return (
-            <div className={cn(styles.input, styles.inputSkeleton, skeletonClass, className)}>
+            <div
+                className={cn(
+                    inputBaseClass,
+                    'pointer-events-none flex items-center',
+                    INPUT_SKELETON_HEIGHT[contextSize],
+                    className
+                )}
+            >
                 <Skeleton width={75} height="70%" />
             </div>
         );
@@ -171,7 +198,10 @@ const InputControl: FC<InputControlProps> = ({
                     {/* Measures actual text width at max (contextSize) font — source of truth for scaling */}
                     <span
                         ref={measureMaxRef}
-                        className={cn(styles.inputMeasure, styles[`input_${contextSize}`])}
+                        className={cn(
+                            'pointer-events-none invisible absolute whitespace-pre',
+                            INPUT_SIZE_CLASS[contextSize]
+                        )}
                         aria-hidden
                     >
                         {text}
@@ -179,16 +209,19 @@ const InputControl: FC<InputControlProps> = ({
                     {/* Empty span — only used to read minFontSize from CSS variable via computed style */}
                     <span
                         ref={measureMinRef}
-                        className={cn(styles.inputMeasure, styles.input_s)}
+                        className={cn(
+                            'pointer-events-none invisible absolute whitespace-pre',
+                            INPUT_SIZE_CLASS.s
+                        )}
                         aria-hidden
                     />
                 </>
             )}
             <input
                 className={cn(
-                    styles.input,
-                    styles[`input_${contextSize}`],
-                    readOnly && styles.inputReadOnly,
+                    inputBaseClass,
+                    INPUT_SIZE_CLASS[contextSize],
+                    readOnly && 'cursor-default select-text',
                     className
                 )}
                 style={resizeStyle}
@@ -205,7 +238,14 @@ const InputControl: FC<InputControlProps> = ({
 const Caption: FC<ComponentProps<'span'>> = ({ className, children, ...props }) => {
     const { error } = useInputContext();
     return (
-        <span className={cn(styles.caption, error && styles.errorText, className)} {...props}>
+        <span
+            className={cn(
+                'px-1 text-xs font-normal leading-4',
+                error ? 'text-error' : 'text-secondary-foreground',
+                className
+            )}
+            {...props}
+        >
             {children}
         </span>
     );

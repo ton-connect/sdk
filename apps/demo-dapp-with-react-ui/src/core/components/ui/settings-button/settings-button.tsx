@@ -1,10 +1,8 @@
 import type { ComponentProps, FC } from 'react';
-import { cn } from '../../../lib/utils';
 import { SlidersHorizontal } from 'lucide-react';
 
+import { cn } from '../../../lib/utils';
 import { Button } from '../button';
-
-import styles from './settings-button.module.css';
 
 export interface SettingsButtonProps extends ComponentProps<typeof Button> {
     onClick?: () => void;
@@ -13,7 +11,7 @@ export interface SettingsButtonProps extends ComponentProps<typeof Button> {
 export const SettingsButton: FC<SettingsButtonProps> = ({ onClick, className, ...props }) => {
     return (
         <Button
-            className={cn(styles.settingsButton, className)}
+            className={cn('aspect-square size-[50px] shrink-0 [&_svg]:size-6', className)}
             variant="gray"
             size="l"
             borderRadius="l"

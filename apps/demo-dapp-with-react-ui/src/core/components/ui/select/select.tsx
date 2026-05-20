@@ -1,19 +1,10 @@
-/**
- * Copyright (c) TonTech.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- */
-
 import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { ComponentPropsWithoutRef, ComponentRef, FC, ReactNode } from 'react';
-import { cn } from '../../../lib/utils';
 
+import { cn } from '../../../lib/utils';
 import { Button } from '../button';
 import type { ButtonProps } from '../button';
-import styles from './select.module.css';
 import { SelectContext, useSelectContext } from './use-select-context';
 
 export interface SelectRootProps {
@@ -213,7 +204,10 @@ const SelectContent: FC<SelectContentProps> = ({
             role="listbox"
             data-state="open"
             data-align={align}
-            className={cn(styles.content, className)}
+            className={cn(
+                'z-[1100] flex flex-col rounded-xl bg-secondary p-1 shadow-[0_8px_24px_rgba(0,0,0,0.16)]',
+                className
+            )}
             style={{
                 position: 'fixed',
                 top: position.top,
@@ -249,7 +243,10 @@ const SelectItem = forwardRef<ComponentRef<'div'>, SelectItemProps>(
                 data-state={isSelected ? 'checked' : 'unchecked'}
                 data-disabled={disabled || undefined}
                 tabIndex={disabled ? -1 : 0}
-                className={cn(styles.item, className)}
+                className={cn(
+                    'flex cursor-pointer select-none items-center whitespace-nowrap rounded-lg px-3 py-2 text-base font-medium leading-5 text-foreground outline-none hover:bg-tertiary focus-visible:bg-tertiary data-[state=checked]:text-primary data-[disabled]:cursor-default data-[disabled]:opacity-40',
+                    className
+                )}
                 onClick={event => {
                     onClick?.(event);
                     if (event.defaultPrevented || disabled) return;

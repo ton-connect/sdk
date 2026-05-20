@@ -1,16 +1,7 @@
-/**
- * Copyright (c) TonTech.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- */
-
 import { forwardRef } from 'react';
 import type { ComponentProps } from 'react';
-import { cn } from '../../../lib/utils';
 
-import styles from './skeleton.module.css';
+import { cn } from '../../../lib/utils';
 
 export interface SkeletonProps extends ComponentProps<'div'> {
     width?: string | number;
@@ -22,7 +13,11 @@ export const Skeleton = forwardRef<HTMLDivElement, SkeletonProps>(
         return (
             <div
                 ref={ref}
-                className={cn(styles.skeleton, className)}
+                className={cn(
+                    'relative inline-block overflow-hidden rounded-xl bg-tertiary',
+                    "after:absolute after:inset-0 after:-translate-x-full after:content-[''] after:[background:var(--skeleton-shimmer)] after:animate-skeleton-shimmer",
+                    className
+                )}
                 style={{ width, height, ...style }}
                 {...props}
             />

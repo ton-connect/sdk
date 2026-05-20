@@ -1,10 +1,12 @@
 import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import type { ComponentProps, FC } from 'react';
+
 import { cn } from '../../../lib/utils';
 
-import styles from './centered-amount-input.module.css';
-
 const MIN_FONT_SCALE = 0.5;
+
+const INPUT_XL = 'text-[60px] font-bold leading-[68px]';
+const INPUT_XL_SYMBOL = 'text-[40px] font-bold leading-none';
 
 export interface CenteredAmountInputProps extends ComponentProps<'div'> {
     value: string;
@@ -70,25 +72,59 @@ export const CenteredAmountInput: FC<CenteredAmountInputProps> = ({
     return (
         <div
             ref={wrapperRef}
-            className={cn(styles.wrapper, className)}
+            className={cn(
+                'relative flex w-full cursor-text flex-col items-center overflow-hidden',
+                className
+            )}
             onClick={() => inputRef.current?.focus()}
             {...props}
         >
-            <div ref={measureRowRef} className={styles.measureRow} aria-hidden="true">
-                {symbol && <span className={styles.symbol}>{symbol}</span>}
-                <span className={styles.measureText}>{value || placeholder}</span>
-                {ticker && <span className={styles.ticker}>{ticker}</span>}
+            <div
+                ref={measureRowRef}
+                className="pointer-events-none invisible absolute flex items-baseline whitespace-nowrap"
+                aria-hidden="true"
+            >
+                {symbol && (
+                    <span
+                        className={cn(
+                            INPUT_XL,
+                            'select-none whitespace-nowrap text-tertiary-foreground'
+                        )}
+                    >
+                        {symbol}
+                    </span>
+                )}
+                <span className={INPUT_XL}>{value || placeholder}</span>
+                {ticker && (
+                    <span
+                        className={cn(
+                            INPUT_XL_SYMBOL,
+                            'ml-[0.2em] select-none whitespace-nowrap text-secondary-foreground'
+                        )}
+                    >
+                        {ticker}
+                    </span>
+                )}
             </div>
 
-            <div className={styles.row}>
+            <div className="flex max-w-full items-baseline">
                 {symbol && (
-                    <span className={styles.symbol} style={{ fontSize: scaledInputFontSize }}>
+                    <span
+                        className={cn(
+                            INPUT_XL,
+                            'select-none whitespace-nowrap text-tertiary-foreground'
+                        )}
+                        style={{ fontSize: scaledInputFontSize }}
+                    >
                         {symbol}
                     </span>
                 )}
                 <input
                     ref={inputRef}
-                    className={styles.input}
+                    className={cn(
+                        INPUT_XL,
+                        'box-content min-w-6 max-w-full border-none bg-transparent p-0 text-right text-foreground outline-none placeholder:text-secondary-foreground placeholder:opacity-100'
+                    )}
                     type="text"
                     inputMode="decimal"
                     placeholder={placeholder}
@@ -101,13 +137,23 @@ export const CenteredAmountInput: FC<CenteredAmountInputProps> = ({
                     }}
                 />
                 {ticker && (
-                    <span className={styles.ticker} style={{ fontSize: scaledTickerFontSize }}>
+                    <span
+                        className={cn(
+                            INPUT_XL_SYMBOL,
+                            'ml-[0.2em] select-none whitespace-nowrap text-secondary-foreground'
+                        )}
+                        style={{ fontSize: scaledTickerFontSize }}
+                    >
                         {ticker}
                     </span>
                 )}
             </div>
 
-            <span ref={mirrorRef} className={styles.mirror} aria-hidden="true">
+            <span
+                ref={mirrorRef}
+                className={cn(INPUT_XL, 'pointer-events-none invisible absolute whitespace-nowrap')}
+                aria-hidden="true"
+            >
                 {value || placeholder}
             </span>
         </div>

@@ -1,16 +1,7 @@
-/**
- * Copyright (c) TonTech.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- */
-
 import { forwardRef } from 'react';
 import type { ComponentProps, ReactNode } from 'react';
-import { cn } from '../../../lib/utils';
 
-import styles from './button.module.css';
+import { cn } from '../../../lib/utils';
 
 export type ButtonSize = 'xs' | 's' | 'm' | 'l' | 'icon' | 'unset';
 export type ButtonBorderRadius = 's' | 'm' | 'l' | 'xl' | '2xl' | 'full';
@@ -43,13 +34,29 @@ const SIZE_DEFAULT_RADIUS: Record<Exclude<ButtonSize, 'unset'>, ButtonBorderRadi
     icon: 'full'
 };
 
+const SIZE_CLASS: Record<Exclude<ButtonSize, 'unset'>, string> = {
+    xs: 'text-xs font-semibold leading-4 px-2 py-1',
+    s: 'text-sm font-semibold leading-[18px] px-3 py-[9px]',
+    m: 'text-sm font-semibold leading-[18px] px-4 py-3',
+    l: 'text-base font-semibold leading-6 px-4 py-3',
+    icon: 'text-sm font-semibold leading-[18px] aspect-square p-1.5'
+};
+
 const RADIUS_CLASS: Record<ButtonBorderRadius, string> = {
-    s: 'radiusS',
-    m: 'radiusM',
-    l: 'radiusL',
-    xl: 'radiusXl',
-    '2xl': 'radius2xl',
-    full: 'radiusFull'
+    s: 'rounded-[4px]',
+    m: 'rounded-lg',
+    l: 'rounded-xl',
+    xl: 'rounded-2xl',
+    '2xl': 'rounded-[20px]',
+    full: 'rounded-full'
+};
+
+const VARIANT_CLASS: Record<Exclude<ButtonVariant, 'unstyled'>, string> = {
+    fill: 'bg-primary text-primary-foreground',
+    secondary: 'bg-secondary text-foreground',
+    bezeled: 'bg-background-bezeled text-primary',
+    gray: 'bg-tertiary text-foreground',
+    ghost: 'bg-transparent text-foreground hover:bg-tertiary'
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -75,21 +82,26 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
                 ref={ref}
                 disabled={disabled || loading}
                 className={cn(
-                    styles.button,
-                    size !== 'unset' && styles[size],
-                    radius && styles[RADIUS_CLASS[radius]],
-                    variant !== 'unstyled' && styles[variant],
-                    fullWidth && styles.fullWidth,
-                    loading && styles.loading,
+                    'inline-flex w-fit cursor-pointer items-center justify-center gap-2 border-0 outline-none transition-opacity duration-150 ease-in-out',
+                    'hover:opacity-85 active:opacity-65 disabled:cursor-not-allowed disabled:opacity-35',
+                    size !== 'unset' && SIZE_CLASS[size],
+                    radius && RADIUS_CLASS[radius],
+                    variant !== 'unstyled' && VARIANT_CLASS[variant],
+                    fullWidth && 'w-full',
+                    loading && 'cursor-wait',
                     className
                 )}
                 {...props}
             >
                 {loading ? (
-                    <span className={styles.spinner} />
+                    <span className="block size-[18px] animate-button-spin rounded-full border-[2.5px] border-current border-t-transparent" />
                 ) : (
                     <>
-                        {icon && <span className={styles.innerIcon}>{icon}</span>}
+                        {icon && (
+                            <span className="inline-flex shrink-0 items-center justify-center">
+                                {icon}
+                            </span>
+                        )}
                         {children}
                     </>
                 )}

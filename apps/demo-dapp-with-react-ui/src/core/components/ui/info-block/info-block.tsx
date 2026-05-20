@@ -1,25 +1,38 @@
 import type { ComponentProps, FC } from 'react';
-import { cn } from '../../../lib/utils';
 
+import { cn } from '../../../lib/utils';
 import { Skeleton } from '../skeleton';
 import type { SkeletonProps } from '../skeleton';
 
-import styles from './info-block.module.css';
-
 const Container: FC<ComponentProps<'div'>> = ({ className, ...props }) => (
-    <div className={cn(styles.container, className)} {...props} />
+    <div className={cn('flex w-full flex-col gap-4 rounded-xl py-4', className)} {...props} />
 );
 
 const Row: FC<ComponentProps<'div'>> = ({ className, ...props }) => (
-    <div className={cn(styles.row, className)} {...props} />
+    <div
+        className={cn(
+            'flex items-center justify-between text-base font-medium leading-5',
+            className
+        )}
+        {...props}
+    />
 );
 
 const Label: FC<ComponentProps<'span'>> = ({ className, ...props }) => (
-    <span className={cn(styles.label, className)} {...props} />
+    <span
+        className={cn(
+            'flex items-center gap-1 text-base font-medium leading-5 text-secondary-foreground',
+            className
+        )}
+        {...props}
+    />
 );
 
 const Value: FC<ComponentProps<'span'>> = ({ className, ...props }) => (
-    <span className={cn(styles.value, className)} {...props} />
+    <span
+        className={cn('text-right text-base font-medium leading-5 text-foreground', className)}
+        {...props}
+    />
 );
 
 const LabelSkeleton: FC<SkeletonProps> = ({ width = 64, height = '1lh', ...props }) => (
