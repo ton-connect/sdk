@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 
-import { Button } from '@/core/components/ui/button';
-import { Skeleton } from '@/core/components/ui/skeleton';
+import { Button } from '../../../../../core/components/ui/button';
+import { Skeleton } from '../../../../../core/components/ui/skeleton';
 
 import { USDT_TICKER } from '../lib/constants';
 import { UsdtIcon } from './usdt-icon';

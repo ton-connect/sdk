@@ -8,7 +8,7 @@
 
 import type { ComponentProps, FC } from 'react';
 
-import { cn } from '@/core/lib/utils';
+import { cn } from '../../../lib/utils';
 
 export const AppLogo: FC<ComponentProps<'img'>> = ({ className, alt = 'TON', ...props }) => {
     return (

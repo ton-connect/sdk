@@ -1,4 +1,4 @@
-import { Tabs } from '@/core/components/ui/tabs';
+import { Tabs } from '../../../../../core/components/ui/tabs';
 
 import type { RequestMode } from '../hooks';
 

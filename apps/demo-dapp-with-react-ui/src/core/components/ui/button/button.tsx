@@ -8,7 +8,7 @@
 
 import { forwardRef } from 'react';
 import type { ComponentProps, ReactNode } from 'react';
-import { cn } from '@/core/lib/utils';
+import { cn } from '../../../lib/utils';
 
 import styles from './button.module.css';
 

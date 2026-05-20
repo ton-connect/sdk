@@ -11,13 +11,13 @@
 import * as React from 'react';
 import { Menu } from 'lucide-react';
 import { Slot } from 'radix-ui';
-import { Button } from '@/core/components/ui/button';
+import { Button } from '../ui/button/index';
 
 import { Separator } from '../separator';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '../sheet';
 
-import { useIsMobile } from '@/core/hooks/use-mobile';
-import { cn } from '@/core/lib/utils';
+import { useIsMobile } from '../../hooks/use-mobile';
+import { cn } from '../../lib/utils';
 
 const SIDEBAR_WIDTH = '18rem';
 

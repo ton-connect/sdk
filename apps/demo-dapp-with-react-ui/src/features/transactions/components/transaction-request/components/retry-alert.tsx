@@ -1,6 +1,6 @@
 import { AlertTriangle, Info } from 'lucide-react';
 
-import { Button } from '@/core/components/ui/button';
+import { Button } from '../../../../../core/components/ui/button';
 
 import type { RetryPrompt } from '../hooks';
 

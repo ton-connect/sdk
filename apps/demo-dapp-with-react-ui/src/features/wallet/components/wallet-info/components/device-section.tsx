@@ -1,6 +1,6 @@
 import type { FC } from 'react';
 
-import { InfoBlock } from '@/core/components/ui/info-block';
+import { InfoBlock } from '../../../../../core/components/ui/info-block';
 
 import { Section } from './section';
 

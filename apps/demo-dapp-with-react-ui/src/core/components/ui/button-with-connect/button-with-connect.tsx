@@ -1,8 +1,8 @@
 import type { FC } from 'react';
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 
-import { Button } from '@/core/components/ui/button';
-import type { ButtonProps } from '@/core/components/ui/button';
+import { Button } from '../button';
+import type { ButtonProps } from '../button';
 
 export interface ButtonWithConnectProps extends ButtonProps {
     /**

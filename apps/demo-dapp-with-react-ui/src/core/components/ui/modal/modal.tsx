@@ -7,7 +7,7 @@
  */
 
 import type { FC, ReactNode } from 'react';
-import { cn } from '@/core/lib/utils';
+import { cn } from '../../../lib/utils';
 
 import { Dialog } from '../dialog';
 import { CloseIcon } from '../icons';

@@ -3,7 +3,7 @@ import { highlight, languages } from 'prismjs/components/prism-core';
 import type { ComponentProps, FC } from 'react';
 import 'prismjs/components/prism-json';
 
-import { cn } from '@/core/lib/utils';
+import { cn } from '../../../lib/utils';
 
 export interface JsonEditorProps extends Omit<ComponentProps<'div'>, 'onChange'> {
     value: string;

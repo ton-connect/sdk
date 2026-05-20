@@ -1,8 +1,8 @@
 import type { ComponentProps, FC } from 'react';
-import { cn } from '@/core/lib/utils';
+import { cn } from '../../../lib/utils';
 import { Check, Copy } from 'lucide-react';
 
-import { useCopy } from '@/core/hooks/use-copy';
+import { useCopy } from '../../../hooks/use-copy';
 
 export interface CopyButtonProps
     extends Omit<ComponentProps<'button'>, 'value' | 'children' | 'onClick'> {

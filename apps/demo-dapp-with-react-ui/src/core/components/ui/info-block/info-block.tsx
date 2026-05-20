@@ -1,8 +1,8 @@
 import type { ComponentProps, FC } from 'react';
-import { cn } from '@/core/lib/utils';
+import { cn } from '../../../lib/utils';
 
-import { Skeleton } from '@/core/components/ui/skeleton';
-import type { SkeletonProps } from '@/core/components/ui/skeleton';
+import { Skeleton } from '../skeleton';
+import type { SkeletonProps } from '../skeleton';
 
 import styles from './info-block.module.css';
 

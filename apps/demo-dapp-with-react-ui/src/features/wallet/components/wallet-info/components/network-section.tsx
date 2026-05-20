@@ -2,7 +2,7 @@ import type { FC } from 'react';
 import { CHAIN } from '@tonconnect/ui-react';
 import { fromNano } from '@ton/core';
 
-import { InfoBlock } from '@/core/components/ui/info-block';
+import { InfoBlock } from '../../../../../core/components/ui/info-block';
 
 import { Section } from './section';
 

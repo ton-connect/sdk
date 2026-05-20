@@ -3,7 +3,7 @@ import { CHAIN, useTonWallet } from '@tonconnect/ui-react';
 import { Address } from '@ton/core';
 import { TonClient } from '@ton/ton';
 
-import { endpointByChain, isSupportedChain } from '@/core/lib/ton-endpoints';
+import { endpointByChain, isSupportedChain } from '../lib/ton-endpoints';
 
 /**
  * Reads the native TON balance of `address` (nanoton) via the active wallet's

@@ -9,7 +9,7 @@
 import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { ComponentPropsWithoutRef, ComponentRef, FC, ReactNode } from 'react';
-import { cn } from '@/core/lib/utils';
+import { cn } from '../../../lib/utils';
 
 import { Button } from '../button';
 import type { ButtonProps } from '../button';

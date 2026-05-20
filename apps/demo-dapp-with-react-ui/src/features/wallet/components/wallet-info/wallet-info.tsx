@@ -2,9 +2,9 @@ import { useMemo } from 'react';
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { IdCard } from 'lucide-react';
 
-import { Button } from '@/core/components/ui/button';
-import { EmptyState } from '@/core/components/empty-state';
-import { useTonBalance } from '@/core/hooks/use-ton-balance';
+import { Button } from '../../../../core/components/ui/button';
+import { EmptyState } from '../../../../core/components/empty-state';
+import { useTonBalance } from '../../../../core/hooks/use-ton-balance';
 
 import { AddressesSection } from './components/addresses-section';
 import { DeviceSection } from './components/device-section';

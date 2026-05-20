@@ -1,6 +1,6 @@
 import type { FC } from 'react';
 
-import { CopyButton } from '@/core/components/ui/copy-button';
+import { CopyButton } from '../../../../../core/components/ui/copy-button';
 
 import type { AddressFormat } from '../lib/address-formats';
 import { Section } from './section';

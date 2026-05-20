@@ -1,5 +1,5 @@
-import { Layout } from '@/core/components';
-import { TransferUsdt } from '@/features/transactions';
+import { Layout } from '../core/components/index';
+import { TransferUsdt } from '../features/transactions/index';
 
 export const TransferUsdtPage = () => (
     <Layout title="Transfer USDT">

@@ -3,12 +3,12 @@ import { Address, fromNano } from '@ton/core';
 import { useTonWallet } from '@tonconnect/ui-react';
 import { ExternalLink } from 'lucide-react';
 
-import { CopyButton } from '@/core/components/ui/copy-button';
-import { Modal } from '@/core/components/ui/modal';
-import { Skeleton } from '@/core/components/ui/skeleton';
-import { useTonBalance } from '@/core/hooks/use-ton-balance';
-import { isSupportedChain, tonviewerBaseByChain } from '@/core/lib/ton-endpoints';
-import { truncateAddress } from '@/core/lib/truncate-address';
+import { CopyButton } from '../../../../core/components/ui/copy-button';
+import { Modal } from '../../../../core/components/ui/modal';
+import { Skeleton } from '../../../../core/components/ui/skeleton';
+import { useTonBalance } from '../../../../core/hooks/use-ton-balance';
+import { isSupportedChain, tonviewerBaseByChain } from '../../../../core/lib/ton-endpoints';
+import { truncateAddress } from '../../../../core/lib/truncate-address';
 
 import { WalletInfo } from '../wallet-info';
 
