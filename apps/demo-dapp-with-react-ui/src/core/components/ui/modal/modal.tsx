@@ -7,7 +7,7 @@
  */
 
 import type { FC, ReactNode } from 'react';
-import clsx from 'clsx';
+import { cn } from '@/core/lib/utils';
 
 import { Dialog } from '../dialog';
 import { CloseIcon } from '../icons';
@@ -53,7 +53,7 @@ export const Modal: FC<ModalProps> = ({
             <Dialog.Portal>
                 <Dialog.Overlay className={styles.overlay} onClick={() => onOpenChange?.(false)}>
                     <Dialog.Content
-                        className={clsx(styles.content, className)}
+                        className={cn(styles.content, className)}
                         onClick={e => e.stopPropagation()}
                     >
                         <div className={styles.header}>
@@ -62,7 +62,7 @@ export const Modal: FC<ModalProps> = ({
                                 <CloseIcon size={12} />
                             </Dialog.Close>
                         </div>
-                        <div className={clsx(styles.body, bodyClassName)}>{children}</div>
+                        <div className={cn(styles.body, bodyClassName)}>{children}</div>
                     </Dialog.Content>
                 </Dialog.Overlay>
             </Dialog.Portal>

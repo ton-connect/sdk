@@ -1,0 +1,30 @@
+.container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    box-sizing: border-box;
+    padding: 16px 0;
+    border-radius: var(--ta-border-radius-l);
+}
+
+.row {
+    composes: bodyMedium from "../../../styles/typography.module.css";
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.label {
+    composes: bodyMedium from "../../../styles/typography.module.css";
+    color: var(--ta-color-text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.value {
+    composes: bodyMedium from "../../../styles/typography.module.css";
+    color: var(--ta-color-text);
+    text-align: right;
+}
