@@ -1,95 +1,80 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { JsonView } from '../../../core/components/ui/json-view';
-import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
+import { useEffect, useRef } from 'react';
 import { ShieldCheck } from 'lucide-react';
 
 import { Button } from '../../../core/components/ui/button/index';
+import { ButtonWithConnect } from '../../../core/components/ui/button-with-connect/index';
+import { ResultBlock } from '../../../core/components/ui/result-block/index';
 import { EmptyState } from '../../../core/components/empty-state/index';
-import { ResultPanel } from '../../../core/components/result-panel/index';
-import { TonProofDemoApi } from '../../../core/lib/ton-proof-demo-api';
-import useInterval from '../../../core/hooks/use-interval';
+
+import { useAccountInfo, useTonProofAuth } from '../hooks';
+import { TonProofAuthInfo } from './ton-proof-auth-info';
 
 export const TonProofDemo = () => {
-    const firstProofLoading = useRef<boolean>(true);
+    const { authorized, wallet, openConnectModal, reconnectForProof } = useTonProofAuth();
+    const { loading, result, fetchAccountInfo, clearResult } = useAccountInfo();
 
-    const [data, setData] = useState({});
-    const wallet = useTonWallet();
-    const [authorized, setAuthorized] = useState(false);
-    const [tonConnectUI] = useTonConnectUI();
-
-    const recreateProofPayload = useCallback(async () => {
-        if (firstProofLoading.current) {
-            tonConnectUI.setConnectRequestParameters({ state: 'loading' });
-            firstProofLoading.current = false;
+    const resultRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        if (!result || !resultRef.current) return;
+        const rect = resultRef.current.getBoundingClientRect();
+        if (rect.top < 0 || rect.bottom > window.innerHeight) {
+            resultRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-
-        const payload = await TonProofDemoApi.generatePayload();
-
-        if (payload) {
-            tonConnectUI.setConnectRequestParameters({ state: 'ready', value: payload });
-        } else {
-            tonConnectUI.setConnectRequestParameters(null);
-        }
-    }, [tonConnectUI, firstProofLoading]);
-
-    if (firstProofLoading.current) {
-        recreateProofPayload();
-    }
-
-    useInterval(recreateProofPayload, TonProofDemoApi.refreshIntervalMs);
-
-    useEffect(
-        () =>
-            tonConnectUI.onStatusChange(async w => {
-                if (!w) {
-                    TonProofDemoApi.reset();
-                    setAuthorized(false);
-                    return;
-                }
-
-                if (w.connectItems?.tonProof && 'proof' in w.connectItems.tonProof) {
-                    await TonProofDemoApi.checkProof(w.connectItems.tonProof.proof, w.account);
-                }
-
-                if (!TonProofDemoApi.accessToken) {
-                    tonConnectUI.disconnect();
-                    setAuthorized(false);
-                    return;
-                }
-
-                setAuthorized(true);
-            }),
-        [tonConnectUI]
-    );
-
-    const handleClick = useCallback(async () => {
-        if (!wallet) {
-            return;
-        }
-        const response = await TonProofDemoApi.getAccountInfo(wallet.account);
-
-        setData(response);
-    }, [wallet]);
+    }, [result]);
 
     if (!authorized) {
+        const needsReconnect = !!wallet;
+
         return (
             <EmptyState
                 icon={ShieldCheck}
-                title="Authenticate to continue"
-                description="Connect your wallet and approve the ton_proof challenge to call the demo backend."
-                action={<Button onClick={() => tonConnectUI.openModal()}>Connect wallet</Button>}
+                title={needsReconnect ? 'Ton proof required' : 'Authenticate to continue'}
+                description={
+                    needsReconnect
+                        ? 'Your wallet is connected to the dapp, but this demo still needs a ton_proof signature for the backend session. Reconnect and approve the challenge in the wallet.'
+                        : 'Connect your wallet and approve the ton_proof challenge. The demo backend verifies the signature before you can call protected APIs.'
+                }
+                action={
+                    <Button
+                        onClick={needsReconnect ? () => void reconnectForProof() : openConnectModal}
+                        data-testid={
+                            needsReconnect
+                                ? 'ton-proof-reconnect-button'
+                                : 'ton-proof-connect-button'
+                        }
+                    >
+                        {needsReconnect ? 'Reconnect wallet' : 'Connect wallet'}
+                    </Button>
+                }
+                data-testid="ton-proof-unauthenticated"
             />
         );
     }
 
     return (
-        <>
-            <Button onClick={handleClick}>Call backend getAccountInfo()</Button>
-            {data && Object.keys(data).length > 0 && (
-                <ResultPanel title="Response">
-                    <JsonView src={data} />
-                </ResultPanel>
+        <div className="flex w-full flex-col gap-4" data-testid="ton-proof-demo">
+            {wallet && <TonProofAuthInfo account={wallet.account} />}
+
+            <div className="flex flex-wrap justify-center gap-3">
+                <ButtonWithConnect
+                    onClick={() => void fetchAccountInfo()}
+                    loading={loading}
+                    disabled={loading}
+                    data-testid="ton-proof-fetch-account-info-button"
+                >
+                    Get account info
+                </ButtonWithConnect>
+            </div>
+
+            {result && (
+                <ResultBlock
+                    ref={resultRef}
+                    title="Account info"
+                    result={result}
+                    onDismiss={clearResult}
+                    testIdPrefix="ton-proof-account-info"
+                />
             )}
-        </>
+        </div>
     );
 };
