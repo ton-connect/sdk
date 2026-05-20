@@ -1,6 +1,4 @@
-import { AlertTriangle, Info } from 'lucide-react';
-
-import { Button } from '../../../../../core/components/ui/button';
+import { RetryAlert as CoreRetryAlert } from '../../../../../core/components/ui/retry-alert';
 
 import type { RetryPrompt } from '../hooks';
 
@@ -13,28 +11,14 @@ interface RetryAlertProps {
 export const RetryAlert = ({ prompt, onRetry, onDismiss }: RetryAlertProps) => {
     const dangerous = prompt.dispatched;
     const subject = prompt.kind === 'sendTx' ? 'transaction' : 'message';
+    const retryLabel = prompt.kind === 'sendTx' ? 'Retry transaction' : 'Retry message signing';
 
     return (
-        <div
-            className={`flex flex-col gap-3 rounded-md border p-3 text-sm ${
-                dangerous
-                    ? 'border-error/40 bg-error/10 text-error'
-                    : 'border-primary/30 bg-primary/10 text-foreground'
-            }`}
-            data-testid="tx-request-retry-alert"
-            data-dispatched={dangerous ? 'true' : 'false'}
-            data-kind={prompt.kind}
-        >
-            <div className="flex items-center gap-2 font-semibold">
-                {dangerous ? (
-                    <AlertTriangle className="size-4 shrink-0" />
-                ) : (
-                    <Info className="size-4 shrink-0" />
-                )}
-                {dangerous ? 'Possible duplicate' : 'Request not delivered'}
-            </div>
-            <p className="leading-relaxed">
-                {dangerous ? (
+        <CoreRetryAlert
+            dispatched={dangerous}
+            title={dangerous ? 'Possible duplicate' : 'Request not delivered'}
+            description={
+                dangerous ? (
                     <>
                         The {subject} was delivered to the wallet inside the connect URL, but no
                         response came back. The wallet may have already processed it. Check your
@@ -46,21 +30,12 @@ export const RetryAlert = ({ prompt, onRetry, onDismiss }: RetryAlertProps) => {
                         The wallet connected but did not receive the request. It is safe to send it
                         again over the bridge.
                     </>
-                )}
-            </p>
-            <div className="flex flex-wrap gap-2">
-                <Button size="s" onClick={onRetry} data-testid="tx-request-retry-button">
-                    Retry {prompt.kind === 'sendTx' ? 'transaction' : 'message signing'}
-                </Button>
-                <Button
-                    size="s"
-                    variant="ghost"
-                    onClick={onDismiss}
-                    data-testid="tx-request-retry-dismiss-button"
-                >
-                    Dismiss
-                </Button>
-            </div>
-        </div>
+                )
+            }
+            retryLabel={retryLabel}
+            onRetry={onRetry}
+            onDismiss={onDismiss}
+            testIdPrefix="tx-request-retry-alert"
+        />
     );
 };

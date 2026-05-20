@@ -1,13 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
-import { Wallet } from 'lucide-react';
+import { useTonWallet } from '@tonconnect/ui-react';
 
 import { ButtonWithConnect } from '../../../../core/components/ui/button-with-connect';
 import { ResultBlock } from '../../../../core/components/ui/result-block';
-import { Button } from '../../../../core/components/ui/button';
 import { JsonEditor } from '../../../../core/components/ui/json-editor';
 import { SettingsButton } from '../../../../core/components/ui/settings-button';
-import { EmptyState } from '../../../../core/components/empty-state';
 
 import {
     buildDefaultTx,
@@ -32,9 +29,7 @@ import {
 } from './hooks';
 
 export const TransactionRequest = () => {
-    const [tonConnectUI] = useTonConnectUI();
     const wallet = useTonWallet();
-    const isConnected = !!wallet;
 
     const form = useTransactionForm();
     const ops = useSendTransaction();
@@ -79,33 +74,12 @@ export const TransactionRequest = () => {
               })
             : ops.signMessage(form.tx, { withConnect: form.withConnect, waitForTx: false });
 
-    // With `withConnect` the user can prepare and dispatch a request before
-    // connecting — the connect modal opens with the request embedded in the URL.
-    const canDispatch = isConnected || form.withConnect;
     const disableAction =
         form.isInvalid || ops.sendingTx || ops.waitingTx || ops.signing || !!ops.retryPrompt;
     const actionLoading = form.mode === 'send' ? ops.sendingTx || ops.waitingTx : ops.signing;
     const actionLabel = form.mode === 'send' ? 'Send transaction' : 'Sign message';
     const resultTitle = form.mode === 'send' ? 'Transaction' : 'Sign message result';
     const dismissActiveResult = form.mode === 'send' ? ops.clearTxResult : ops.clearSignResult;
-
-    if (!canDispatch) {
-        return (
-            <EmptyState
-                icon={Wallet}
-                title="Connect a wallet"
-                description="A connected wallet is required to build and send a transaction request. You can also enable “Embed request in connect” to dispatch before connecting."
-                action={
-                    <Button
-                        onClick={() => tonConnectUI.openModal()}
-                        data-testid="tx-request-connect-wallet-button"
-                    >
-                        Connect wallet
-                    </Button>
-                }
-            />
-        );
-    }
 
     return (
         <div className="flex w-full flex-col gap-2" data-testid="tx-request">

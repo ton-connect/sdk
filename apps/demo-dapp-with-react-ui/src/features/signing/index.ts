@@ -1,2 +1,2 @@
-export { SignDataTester } from './components/sign-data-tester';
+export { SignData } from './components/sign-data';
 export { TonProofDemo } from './components/ton-proof-demo';
