@@ -1,7 +1,14 @@
+/**
+ * Two baseline TON network IDs.
+ */
 export enum CHAIN {
     MAINNET = '-239',
     TESTNET = '-3'
 }
 
-// Extended chain ID type: enum values or any custom string
+/**
+ * TON network identifier. Maybe extended with custom `global_id`'s.
+ *
+ * @see [`NETWORK_ID` (Connect spec)](https://github.com/ton-blockchain/ton-connect/blob/main/spec/connect.md#network_id)
+ */
 export type ChainId = CHAIN | string;
