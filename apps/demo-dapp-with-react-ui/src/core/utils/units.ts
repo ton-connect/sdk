@@ -74,10 +74,3 @@ export function formatUnits(value: bigint | string, decimals: number) {
     fraction = fraction.replace(/(0+)$/, '');
     return `${negative ? '-' : ''}${integer || '0'}${fraction ? `.${fraction}` : ''}`;
 }
-
-export function parseTon(value: string) {
-    return parseUnits(value, 9);
-}
-export function formatTon(value: bigint | string) {
-    return formatUnits(value, 9);
-}

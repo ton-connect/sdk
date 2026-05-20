@@ -1,10 +1,1 @@
-export {
-    Sheet,
-    SheetTrigger,
-    SheetClose,
-    SheetContent,
-    SheetHeader,
-    SheetFooter,
-    SheetTitle,
-    SheetDescription
-} from './sheet';
+export { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from './sheet';
