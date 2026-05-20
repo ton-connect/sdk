@@ -3,10 +3,7 @@ import { useCallback, useState } from 'react';
 import { fail, ok, type OperationResult } from '../../../core/components/ui/result-block/index';
 
 import { DEFAULT_EXTERNAL_MESSAGE_BOC } from '../lib/default-external-message-boc';
-import {
-    findTransactionByExternalMessage,
-    type FindTxNetwork
-} from '../lib/find-transaction-api';
+import { findTransactionByExternalMessage, type FindTxNetwork } from '../lib/find-transaction-api';
 
 export type { FindTxNetwork };
 

@@ -32,10 +32,10 @@ export const FindTransactionDemo = () => {
     }, [result]);
 
     return (
-        <div className="flex w-full flex-col gap-4" data-testid="find-transaction">
-            <Input size="s" data-testid="find-transaction-boc-field">
+        <div className="flex w-full flex-col gap-4" data-testid="find-tx">
+            <Input size="s" data-testid="find-tx-boc-field">
                 <Input.Header>
-                    <Input.Title data-testid="find-transaction-boc-title">
+                    <Input.Title data-testid="find-tx-boc-title">
                         External-in message BOC
                     </Input.Title>
                 </Input.Header>
@@ -45,38 +45,36 @@ export const FindTransactionDemo = () => {
                     rows={4}
                     placeholder="Paste base64 BOC"
                     className="font-mono text-xs break-all"
-                    data-testid="find-transaction-boc-input"
+                    data-testid="find-tx-boc-input"
                 />
             </Input>
 
-            <div
-                className="flex w-full flex-col gap-1"
-                data-testid="find-transaction-network-field"
-            >
+            <div className="flex w-full flex-col gap-1" data-testid="find-tx-network-field">
                 <span
                     className="text-[15px] font-medium tracking-[0.01em] text-secondary-foreground"
-                    data-testid="find-transaction-network-label"
+                    data-testid="find-tx-network-label"
                 >
                     Network
                 </span>
-                <Select.Root
-                    value={network}
-                    onValueChange={v => setNetwork(v as typeof network)}
-                >
+                <Select.Root value={network} onValueChange={v => setNetwork(v as typeof network)}>
                     <Select.Trigger
                         variant="gray"
                         size="l"
                         borderRadius="l"
                         fullWidth
                         className="!justify-between"
-                        data-testid="find-transaction-network-trigger"
+                        data-testid="find-tx-network-trigger"
                     >
                         <span className="truncate text-left capitalize">{network}</span>
                         <ChevronDownIcon size={20} className="shrink-0" />
                     </Select.Trigger>
                     <Select.Content>
-                        <Select.Item value="mainnet">Mainnet</Select.Item>
-                        <Select.Item value="testnet">Testnet</Select.Item>
+                        <Select.Item value="mainnet" data-testid="find-tx-network-item-mainnet">
+                            Mainnet
+                        </Select.Item>
+                        <Select.Item value="testnet" data-testid="find-tx-network-item-testnet">
+                            Testnet
+                        </Select.Item>
                     </Select.Content>
                 </Select.Root>
             </div>
@@ -87,7 +85,7 @@ export const FindTransactionDemo = () => {
                 onClick={() => void findTransaction()}
                 loading={loading}
                 disabled={!canSearch}
-                data-testid="find-transaction-search-button"
+                data-testid="find-tx-search-button"
             >
                 Find transaction
             </Button>
@@ -98,7 +96,7 @@ export const FindTransactionDemo = () => {
                     title="Transaction"
                     result={result}
                     onDismiss={clearResult}
-                    testIdPrefix="find-transaction-result"
+                    testIdPrefix="find-tx-result"
                 />
             )}
         </div>

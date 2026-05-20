@@ -1,6 +1,5 @@
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { useState } from 'react';
-import { JsonView } from '../../../core/components/ui/json-view';
 import { Wallet } from 'lucide-react';
 
 import { Button } from '../../../core/components/ui/button/index';
@@ -49,11 +48,7 @@ export const CreateJettonDemo = () => {
     return (
         <>
             <Button onClick={handleClick}>Send create jetton</Button>
-            {data && Object.keys(data).length > 0 && (
-                <ResultPanel title="Response">
-                    <JsonView src={data} />
-                </ResultPanel>
-            )}
+            {data && Object.keys(data).length > 0 && <ResultPanel title="Response" src={data} />}
         </>
     );
 };

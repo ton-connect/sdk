@@ -1,7 +1,6 @@
 import { forwardRef } from 'react';
 
 import { Button } from '../button';
-import { JsonView } from '../json-view';
 import { ResultPanel } from '../../result-panel';
 import { cn } from '../../../lib/utils';
 
@@ -36,7 +35,7 @@ interface ResultBlockProps {
     /**
      * Stable prefix for `data-testid` attributes. The root carries the prefix
      * directly; sub-elements get `${prefix}-status`, `${prefix}-dismiss-button`,
-     * `${prefix}-json`.
+     * `${prefix}-copy-button`, `${prefix}-json`.
      */
     testIdPrefix: string;
 }
@@ -73,9 +72,7 @@ export const ResultBlock = forwardRef<HTMLDivElement, ResultBlockProps>(
                     Dismiss
                 </Button>
             </div>
-            <ResultPanel title="Response">
-                <JsonView src={result.response} data-testid={`${testIdPrefix}-json`} />
-            </ResultPanel>
+            <ResultPanel title="Response" src={result.response} testIdPrefix={testIdPrefix} />
         </div>
     )
 );
