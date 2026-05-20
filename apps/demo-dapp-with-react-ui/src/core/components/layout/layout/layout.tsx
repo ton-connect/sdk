@@ -43,6 +43,8 @@ interface LayoutProps {
     children: ReactNode;
     title?: string | ReactNode;
     subtitle?: ReactNode;
+    /** Stable test id applied to the `<main>` content element. */
+    'data-testid'?: string;
 }
 
 type NavLinkSpec = { to: string; label: string; icon: ComponentType<{ className?: string }> };
@@ -168,7 +170,7 @@ const AppSidebar: FC = () => {
     );
 };
 
-export const Layout: FC<LayoutProps> = ({ children, title, subtitle }) => {
+export const Layout: FC<LayoutProps> = ({ children, title, subtitle, 'data-testid': testId }) => {
     return (
         <SidebarProvider>
             <AppSidebar />
@@ -192,7 +194,7 @@ export const Layout: FC<LayoutProps> = ({ children, title, subtitle }) => {
                     </div>
                 </header>
 
-                <main className="mx-auto w-full max-w-4xl flex-1 p-4">
+                <main className="mx-auto w-full max-w-4xl flex-1 p-4" data-testid={testId}>
                     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 py-2 md:py-6">
                         <div className="flex w-full items-center justify-start md:hidden">
                             {typeof title === 'string' ? (
