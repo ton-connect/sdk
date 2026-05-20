@@ -1,9 +1,6 @@
 import { useMemo } from 'react';
-import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
-import { IdCard } from 'lucide-react';
+import { useTonWallet } from '@tonconnect/ui-react';
 
-import { Button } from '../../../../core/components/ui/button';
-import { EmptyState } from '../../../../core/components/shared/empty-state';
 import { useTonBalance } from '../../../../core/hooks/use-ton-balance';
 
 import { AddressesSection } from './components/addresses-section';
@@ -15,7 +12,6 @@ import { normalizeFeatures } from './utils/feature-labels';
 
 export const WalletInfo = () => {
     const wallet = useTonWallet();
-    const [tonConnectUI] = useTonConnectUI();
     const tonBalanceQuery = useTonBalance(wallet?.account.address);
 
     const addressFormats = useMemo(
@@ -27,23 +23,7 @@ export const WalletInfo = () => {
         [wallet]
     );
 
-    if (!wallet) {
-        return (
-            <EmptyState
-                icon={IdCard}
-                title="Connect a wallet"
-                description="Connect a wallet to inspect its addresses, balance, and advertised features."
-                action={
-                    <Button
-                        onClick={() => tonConnectUI.openModal()}
-                        data-testid="wallet-info-connect-wallet-button"
-                    >
-                        Connect wallet
-                    </Button>
-                }
-            />
-        );
-    }
+    if (!wallet) return null;
 
     return (
         <div className="flex flex-col gap-6" data-testid="wallet-info">

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShieldCheck, Wallet } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 
 import { Button } from '../../../../core/components/ui/button/index';
 import { ButtonWithConnect } from '../../../../core/components/ui/button-with-connect/index';
@@ -13,7 +13,7 @@ import { MerkleContractInfo } from './components/merkle-contract-info';
 
 export const Merkle = () => {
     const navigate = useNavigate();
-    const { wallet, mode, setMode, sending, result, send, clearResult, canSend, needsTonProof } =
+    const { mode, setMode, sending, result, send, clearResult, canSend, needsTonProof } =
         useMerkleDemo();
 
     const resultRef = useRef<HTMLDivElement>(null);
@@ -24,22 +24,6 @@ export const Merkle = () => {
             resultRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     }, [result]);
-
-    if (!wallet) {
-        return (
-            <EmptyState
-                icon={Wallet}
-                title="Connect a wallet"
-                description="Connect a wallet to send a merkle proof deploy transaction or a merkle update to the example contract."
-                action={
-                    <ButtonWithConnect data-testid="merkle-connect-button">
-                        Connect wallet
-                    </ButtonWithConnect>
-                }
-                data-testid="merkle-unconnected"
-            />
-        );
-    }
 
     if (needsTonProof) {
         return (

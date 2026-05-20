@@ -1,8 +1,4 @@
-import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
-import { Wallet } from 'lucide-react';
-
-import { Button } from '../../../../core/components/ui/button';
-import { EmptyState } from '../../../../core/components/shared/empty-state';
+import { ButtonWithConnect } from '../../../../core/components/ui/button-with-connect';
 import { JsonEditor } from '../../../../core/components/ui/json-editor';
 import { ResultBlock } from '../../../../core/components/shared/result-block';
 
@@ -12,8 +8,6 @@ import { ModeField } from './components/mode-field';
 import { useBatchTester } from './hooks';
 
 export const WalletBatchLimits = () => {
-    const wallet = useTonWallet();
-    const [tonConnectUI] = useTonConnectUI();
     const {
         mode,
         setMode,
@@ -28,24 +22,6 @@ export const WalletBatchLimits = () => {
         clearResult,
         reset
     } = useBatchTester();
-
-    if (!wallet) {
-        return (
-            <EmptyState
-                icon={Wallet}
-                title="Connect a wallet"
-                description="A connected wallet is required to probe batch message limits."
-                action={
-                    <Button
-                        onClick={() => tonConnectUI.openModal()}
-                        data-testid="batch-limits-connect-wallet-button"
-                    >
-                        Connect wallet
-                    </Button>
-                }
-            />
-        );
-    }
 
     const actionLabel = mode === 'sendTransaction' ? 'Send transaction' : 'Sign message';
 
@@ -64,7 +40,7 @@ export const WalletBatchLimits = () => {
                 data-testid="batch-limits-request-editor"
             />
 
-            <Button
+            <ButtonWithConnect
                 size="l"
                 fullWidth
                 loading={sending}
@@ -73,7 +49,7 @@ export const WalletBatchLimits = () => {
                 data-testid="batch-limits-action-button"
             >
                 {actionLabel}
-            </Button>
+            </ButtonWithConnect>
 
             {result && (
                 <ResultBlock
