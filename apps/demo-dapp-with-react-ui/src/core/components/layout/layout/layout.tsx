@@ -52,9 +52,9 @@ const NAV_GROUPS: readonly { label?: string; links: readonly NavLinkSpec[] }[] =
         label: 'Transactions',
         links: [
             { to: '/tx-form', label: 'Send transaction', icon: Send },
-            { to: '/gasless', label: 'Gasless USDT', icon: Zap },
             { to: '/batch-limits', label: 'Batch limits', icon: Sparkles },
-            { to: '/transfer-usdt', label: 'Transfer USDT', icon: CircleDollarSign }
+            { to: '/transfer-usdt', label: 'Transfer USDT', icon: CircleDollarSign },
+            { to: '/gasless', label: 'Gasless USDT', icon: Zap }
         ]
     },
     {

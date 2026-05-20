@@ -9,6 +9,8 @@ export { Skeleton } from './skeleton';
 export { Checkbox } from './checkbox';
 export type { CheckboxProps } from './checkbox';
 export { RadioGroup } from './radio-group';
+export { RadioCards } from './radio-cards';
+export type { RadioCardsRootProps, RadioCardsItemProps } from './radio-cards';
 export { Collapsible } from './collapsible';
 export { Tabs } from './tabs';
 export { Textarea } from './textarea';

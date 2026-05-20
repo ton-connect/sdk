@@ -7,7 +7,8 @@ import { CopyButton } from '../../../../core/components/ui/copy-button';
 import { Modal } from '../../../../core/components/ui/modal';
 import { Skeleton } from '../../../../core/components/ui/skeleton';
 import { useTonBalance } from '../../../../core/hooks/use-ton-balance';
-import { isSupportedChain, tonviewerBaseByChain } from '../../../../core/lib/ton-endpoints';
+import { useWalletNetwork } from '../../../../core/hooks/use-wallet-network';
+import { tonviewerBaseByChain } from '../../../../core/lib/ton-endpoints';
 import { truncateAddress } from '../../../../core/lib/truncate-address';
 
 import { WalletInfo } from '../wallet-info';
@@ -21,6 +22,7 @@ const formatBalance = (nano: bigint): string => Number(fromNano(nano)).toFixed(4
  */
 export const BalanceCard = () => {
     const wallet = useTonWallet();
+    const network = useWalletNetwork();
     const balanceQuery = useTonBalance(wallet?.account.address);
     const [detailsOpen, setDetailsOpen] = useState(false);
 
@@ -30,9 +32,8 @@ export const BalanceCard = () => {
         urlSafe: true,
         bounceable: false
     });
-    const chain = wallet.account.chain;
-    const tonviewerHref = isSupportedChain(chain)
-        ? `${tonviewerBaseByChain[chain]}/${friendlyAddress}`
+    const tonviewerHref = network.chainId
+        ? `${tonviewerBaseByChain[network.chainId]}/${friendlyAddress}`
         : null;
 
     return (
