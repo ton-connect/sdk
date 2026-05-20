@@ -1,25 +1,20 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 import { ButtonWithConnect } from '../../../../core/components/ui/button-with-connect';
-import { CenteredAmountInput } from '../../../../core/components/ui/centered-amount-input';
-import { Input } from '../../../../core/components/ui/input';
+import { JsonEditor } from '../../../../core/components/ui/json-editor';
 import { ResultBlock } from '../../../../core/components/ui/result-block';
 
 import { useCreateJetton } from '../../hooks/use-create-jetton';
-import { formatPresetSupply } from './lib/format-preset-supply';
-import { JETTON_TICKER } from './lib/constants';
+import { ConfigureHeader } from './components/configure-header';
 import { CreateJettonInfo } from './components/create-jetton-info';
-import { SupplyBlock } from './components/supply-block';
+import { JettonPreview } from './components/jetton-preview';
+import { useCreateJettonForm } from './hooks/use-create-jetton-form';
 import { useCreateJettonWallet } from './hooks/use-create-jetton-wallet';
 
 export const CreateJettonDemo = () => {
     const { senderAddress, network, tonBalance, isTonBalanceLoading } = useCreateJettonWallet();
-    const { preset, mint, sending, result, clearResult, canMint, needsTonProof } = useCreateJetton();
-
-    const supplyDisplay = useMemo(
-        () => formatPresetSupply(preset.amount, preset.decimals),
-        [preset.amount, preset.decimals]
-    );
+    const { mint, sending, result, clearResult, canMint, needsTonProof } = useCreateJetton();
+    const form = useCreateJettonForm();
 
     const resultRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
@@ -31,56 +26,50 @@ export const CreateJettonDemo = () => {
     }, [result]);
 
     const sessionError = needsTonProof ? 'Ton proof required' : null;
-
-    const canSend = !!senderAddress && canMint;
+    const canSend = !!senderAddress && canMint && !form.isInvalid;
+    const disableAction = !canSend || sending || form.isInvalid;
 
     const handleMint = async () => {
-        if (!senderAddress || needsTonProof) return;
-        await mint();
+        if (!senderAddress || needsTonProof || form.isInvalid) return;
+        await mint(form.jetton);
     };
 
     return (
-        <div className="flex flex-col gap-4" data-testid="create-jetton">
-            <div
-                className="flex flex-col items-center gap-1 py-7"
-                data-testid="create-jetton-amount-section"
+        <div className="flex w-full flex-col gap-2" data-testid="create-jetton">
+            <ConfigureHeader onReset={form.reset} />
+
+            <JsonEditor
+                className="mb-2"
+                value={form.draft}
+                onChange={form.onDraftChange}
+                invalid={form.isInvalid}
+                data-testid="create-jetton-json-editor"
+            />
+
+            <h3
+                className="pl-1 text-lg font-semibold text-foreground"
+                data-testid="create-jetton-preview-title"
             >
-                <CenteredAmountInput
-                    value={supplyDisplay}
-                    onValueChange={() => {}}
-                    ticker={JETTON_TICKER}
-                    disabled
-                    data-testid="create-jetton-amount-input"
-                />
-            </div>
+                Preview
+            </h3>
 
-            <SupplyBlock supply={supplyDisplay} testIdPrefix="create-jetton-supply" />
-
-            <Input size="s" readOnly data-testid="create-jetton-name-field">
-                <Input.Header>
-                    <Input.Title data-testid="create-jetton-name-title">Jetton name</Input.Title>
-                </Input.Header>
-                <Input.Field>
-                    <Input.Input value={preset.name} data-testid="create-jetton-name-input" />
-                </Input.Field>
-            </Input>
+            <JettonPreview jetton={form.jetton} testIdPrefix="create-jetton-preview" />
 
             <ButtonWithConnect
                 size="l"
                 fullWidth
                 onClick={handleMint}
                 loading={sending}
-                disabled={!canSend}
+                disabled={disableAction}
                 data-testid="create-jetton-mint-button"
             >
-                {sessionError ?? 'Mint demo jetton'}
+                {sessionError ?? 'Mint jetton'}
             </ButtonWithConnect>
 
             <CreateJettonInfo
                 network={network}
                 tonBalance={tonBalance}
                 isTonBalanceLoading={isTonBalanceLoading}
-                decimals={preset.decimals}
                 testIdPrefix="create-jetton-info"
             />
 

@@ -9,7 +9,6 @@ interface CreateJettonInfoProps {
     network: WalletNetwork;
     tonBalance: string | null;
     isTonBalanceLoading: boolean;
-    decimals: number;
     testIdPrefix: string;
 }
 
@@ -22,7 +21,6 @@ export const CreateJettonInfo: FC<CreateJettonInfoProps> = ({
     network,
     tonBalance,
     isTonBalanceLoading,
-    decimals,
     testIdPrefix
 }) => (
     <InfoBlock.Container data-testid={testIdPrefix}>
@@ -42,11 +40,6 @@ export const CreateJettonInfo: FC<CreateJettonInfoProps> = ({
                     {tonBalance ?? '0'} {TON_TICKER}
                 </InfoBlock.Value>
             )}
-        </InfoBlock.Row>
-
-        <InfoBlock.Row data-testid={`${testIdPrefix}-decimals-row`}>
-            <InfoBlock.Label data-testid={`${testIdPrefix}-decimals-label`}>Decimals</InfoBlock.Label>
-            <InfoBlock.Value data-testid={`${testIdPrefix}-decimals-value`}>{decimals}</InfoBlock.Value>
         </InfoBlock.Row>
     </InfoBlock.Container>
 );

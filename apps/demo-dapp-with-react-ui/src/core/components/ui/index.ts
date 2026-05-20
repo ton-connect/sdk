@@ -31,4 +31,6 @@ export { RetryAlert } from './retry-alert';
 export type { RetryAlertProps } from './retry-alert';
 export { CenteredAmountInput } from './centered-amount-input';
 export type { CenteredAmountInputProps } from './centered-amount-input';
+export { Logo } from './logo';
+export type { LogoProps } from './logo';
 export * from './icons';

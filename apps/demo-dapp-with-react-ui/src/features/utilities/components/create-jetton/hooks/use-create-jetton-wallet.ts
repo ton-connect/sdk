@@ -18,8 +18,7 @@ export function useCreateJettonWallet() {
         senderAddress,
         network,
         isWalletConnected: network.isConnected,
-        tonBalance:
-            tonBalanceQuery.data !== undefined ? fromNano(tonBalanceQuery.data) : null,
+        tonBalance: tonBalanceQuery.data !== undefined ? fromNano(tonBalanceQuery.data) : null,
         isTonBalanceLoading: tonBalanceQuery.isLoading
     };
 }

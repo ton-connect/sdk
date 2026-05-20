@@ -2,14 +2,16 @@ import { useCallback, useState } from 'react';
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 
 import { fail, ok, type OperationResult } from '../../../core/components/ui/result-block/index';
+import type { CreateJettonRequestDto } from '../../../server/dto/create-jetton-request-dto';
 
 import { fetchCreateJettonTransaction } from '../lib/create-jetton-api';
 import { hasDemoSession } from '../lib/demo-session';
-import { DEFAULT_JETTON_PRESET } from '../lib/default-jetton-preset';
 
 /**
  * Fetches the deploy+mint transaction from the demo backend, then dispatches it
- * via TonConnect — same orchestration shape as {@link useTransferUsdt}.
+ * via TonConnect — same orchestration shape as {@link useTransferUsdt}. The
+ * jetton metadata is supplied by the caller (see {@link useCreateJettonForm}),
+ * so the page can edit any field before minting.
  */
 export function useCreateJetton() {
     const wallet = useTonWallet();
@@ -21,36 +23,40 @@ export function useCreateJetton() {
     const needsTonProof = !!wallet && !hasSession;
     const canMint = !!wallet && hasSession && !sending;
 
-    const mint = useCallback(async () => {
-        if (!wallet || !hasSession) {
-            return;
-        }
-
-        setResult(null);
-        setSending(true);
-
-        try {
-            const { transaction, error } = await fetchCreateJettonTransaction(DEFAULT_JETTON_PRESET);
-            if (error || !transaction) {
-                setResult(fail({ error: error ?? 'Failed to build create jetton transaction' }));
+    const mint = useCallback(
+        async (jetton: CreateJettonRequestDto) => {
+            if (!wallet || !hasSession) {
                 return;
             }
 
-            const response = await tonConnectUi.sendTransaction(transaction);
-            setResult(ok(response));
-        } catch (error) {
-            console.error('createJetton failed', error);
-            setResult(fail(error));
-        } finally {
-            setSending(false);
-        }
-    }, [tonConnectUi, wallet, hasSession]);
+            setResult(null);
+            setSending(true);
+
+            try {
+                const { transaction, error } = await fetchCreateJettonTransaction(jetton);
+                if (error || !transaction) {
+                    setResult(
+                        fail({ error: error ?? 'Failed to build create jetton transaction' })
+                    );
+                    return;
+                }
+
+                const response = await tonConnectUi.sendTransaction(transaction);
+                setResult(ok({ jetton: transaction, transaction: response }));
+            } catch (error) {
+                console.error('createJetton failed', error);
+                setResult(fail(error));
+            } finally {
+                setSending(false);
+            }
+        },
+        [tonConnectUi, wallet, hasSession]
+    );
 
     const clearResult = useCallback(() => setResult(null), []);
 
     return {
         wallet,
-        preset: DEFAULT_JETTON_PRESET,
         mint,
         sending,
         result,
