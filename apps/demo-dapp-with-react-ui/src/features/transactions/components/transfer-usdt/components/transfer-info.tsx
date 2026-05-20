@@ -1,5 +1,4 @@
 import type { FC } from 'react';
-import { CHAIN } from '@tonconnect/ui-react';
 import { ExternalLink } from 'lucide-react';
 
 import { CopyButton } from '../../../../../core/components/ui/copy-button';
@@ -34,10 +33,8 @@ const iconButtonClass =
     'flex h-5 w-5 items-center justify-center rounded-sm text-secondary-foreground transition-colors hover:bg-tertiary hover:text-foreground';
 
 const explorerHref = (chainId: WalletNetwork['chainId'], jettonWallet: string): string | null => {
-    if (chainId === CHAIN.MAINNET || chainId === CHAIN.TESTNET) {
-        return `${tonviewerBaseByChain[chainId]}/${jettonWallet}`;
-    }
-    return null;
+    if (chainId === undefined) return null;
+    return `${tonviewerBaseByChain[chainId]}/${jettonWallet}`;
 };
 
 export const TransferInfo: FC<TransferInfoProps> = ({
