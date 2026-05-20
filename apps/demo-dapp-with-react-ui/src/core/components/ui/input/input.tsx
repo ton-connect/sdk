@@ -21,6 +21,7 @@ interface InputContextProps {
     size: InputSize;
     variant: InputVariant;
     disabled?: boolean;
+    readOnly?: boolean;
     error?: boolean;
     loading?: boolean;
     resizable?: boolean;
@@ -40,6 +41,8 @@ export interface InputContainerProps extends ComponentProps<'div'> {
     size?: InputSize;
     variant?: InputVariant;
     disabled?: boolean;
+    /** Muted, non-editable field — no focus ring; use with `readOnly` on {@link InputControl}. */
+    readOnly?: boolean;
     error?: boolean;
     loading?: boolean;
     resizable?: boolean;
@@ -50,6 +53,7 @@ const Container: FC<InputContainerProps> = ({
     size = 'm',
     variant = 'default',
     disabled,
+    readOnly,
     error,
     loading,
     resizable,
@@ -58,8 +62,8 @@ const Container: FC<InputContainerProps> = ({
     ...props
 }) => {
     const contextValue = useMemo(
-        () => ({ size, variant, disabled, error, loading, resizable }),
-        [size, variant, disabled, error, loading, resizable]
+        () => ({ size, variant, disabled, readOnly, error, loading, resizable }),
+        [size, variant, disabled, readOnly, error, loading, resizable]
     );
 
     return (
@@ -69,6 +73,7 @@ const Container: FC<InputContainerProps> = ({
                     styles.container,
                     styles[`variant-${variant}`],
                     disabled && styles.disabled,
+                    readOnly && styles.readOnly,
                     error && styles.error,
                     loading && styles.loading,
                     className
@@ -122,11 +127,19 @@ export type InputControlProps = ComponentProps<'input'>;
 const InputControl: FC<InputControlProps> = ({
     className,
     disabled: propsDisabled,
+    readOnly: propsReadOnly,
     onChange,
     ...props
 }) => {
-    const { size: contextSize, disabled: contextDisabled, loading, resizable } = useInputContext();
+    const {
+        size: contextSize,
+        disabled: contextDisabled,
+        readOnly: contextReadOnly,
+        loading,
+        resizable
+    } = useInputContext();
     const disabled = propsDisabled || contextDisabled;
+    const readOnly = propsReadOnly ?? contextReadOnly;
 
     const { inputRef, measureMaxRef, measureMinRef, resizeStyle, adjustSize } = useInputResize({
         resizable,
@@ -172,12 +185,18 @@ const InputControl: FC<InputControlProps> = ({
                 </>
             )}
             <input
-                className={cn(styles.input, styles[`input_${contextSize}`], className)}
+                className={cn(
+                    styles.input,
+                    styles[`input_${contextSize}`],
+                    readOnly && styles.inputReadOnly,
+                    className
+                )}
                 style={resizeStyle}
                 disabled={disabled}
+                readOnly={readOnly}
                 {...props}
                 ref={inputRef}
-                onChange={handleChange}
+                onChange={readOnly ? undefined : handleChange}
             />
         </>
     );

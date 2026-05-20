@@ -4,7 +4,8 @@ import { CreateJettonDemo } from '../features/utilities/index';
 export const CreateJettonPage = () => (
     <Layout
         title="Create jetton"
-        subtitle="Mint a new jetton via the demo backend with metadata and initial supply, then sign the deployment transaction."
+        subtitle="Deploy a jetton and mint the initial supply via the protected backend, then sign the transaction in your wallet."
+        data-testid="create-jetton-page"
     >
         <CreateJettonDemo />
     </Layout>

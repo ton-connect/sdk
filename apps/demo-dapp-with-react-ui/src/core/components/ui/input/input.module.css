@@ -58,6 +58,15 @@
   pointer-events: none;
 }
 
+.readOnly .field {
+  background: var(--ta-color-background-tertiary);
+  cursor: default;
+}
+
+.readOnly .field:focus-within {
+  border-color: transparent;
+}
+
 .error .field {
   border-color: var(--ta-color-error);
 }
@@ -120,6 +129,11 @@
 .input::placeholder {
   color: var(--ta-color-text-secondary);
   opacity: 0.6;
+}
+
+.inputReadOnly {
+  cursor: default;
+  user-select: text;
 }
 
 .inputSkeleton {
