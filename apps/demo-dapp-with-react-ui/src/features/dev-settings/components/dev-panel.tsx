@@ -8,6 +8,7 @@ import { Input } from '../../../core/components/ui/input/index';
 import { Select } from '../../../core/components/ui/select/index';
 import { ChevronDownIcon } from '../../../core/components/ui/icons/index';
 import { NetworkPicker } from '../../network/index';
+import { useIsMobile } from '../../../core/hooks/use-mobile';
 import type { ActionTrigger, SkipRedirect } from '../lib/settings-url';
 import {
     WALLET_FEATURES_PRESETS,
@@ -95,6 +96,7 @@ const SettingsField = ({ label, children }: { label: string; children: ReactNode
 );
 
 export const DevPanel = () => {
+    const isMobile = useIsMobile();
     const { settings, setSettings, resetSettings } = useTonConnectSettings();
     const returnStrategySelectValue = getReturnStrategySelectValue(settings.returnStrategy);
     const isCustomReturnStrategy = returnStrategySelectValue === RETURN_STRATEGY_CUSTOM;
@@ -141,6 +143,26 @@ export const DevPanel = () => {
 
     return (
         <div className="mx-auto flex w-full max-w-3xl flex-col gap-5">
+            <div className="flex w-full flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                <h3 className="mb-3 pl-1 text-lg font-semibold text-foreground md:mb-0">
+                    Configure TonConnect
+                </h3>
+                <div className="flex w-full flex-col-reverse gap-2 md:w-auto md:flex-row md:items-center">
+                    <Button
+                        type="button"
+                        variant={isMobile ? 'bezeled' : 'ghost'}
+                        size="s"
+                        borderRadius={isMobile ? 'l' : undefined}
+                        onClick={resetSettings}
+                        fullWidth={isMobile}
+                        data-testid="settings-reset-button"
+                    >
+                        <RotateCcw className="size-3.5" />
+                        Reset settings
+                    </Button>
+                </div>
+            </div>
+
             <SettingsCard
                 title="Appearance"
                 description="Language, theme, and border radius passed to TonConnect UI."
@@ -451,11 +473,6 @@ export const DevPanel = () => {
                     onColorsSetChange={colorsSet => setSettings({ colorsSet })}
                 />
             </SettingsCard>
-
-            <Button type="button" variant="ghost" className="self-start" onClick={resetSettings}>
-                <RotateCcw size={16} />
-                Reset to defaults
-            </Button>
         </div>
     );
 };
