@@ -5,6 +5,7 @@ import { Button } from '../../../core/components/ui/button/index';
 import { ButtonWithConnect } from '../../../core/components/ui/button-with-connect/index';
 import { ResultBlock } from '../../../core/components/ui/result-block/index';
 import { EmptyState } from '../../../core/components/empty-state/index';
+import { useWalletNetwork } from '../../../core/hooks/use-wallet-network';
 
 import { useAccountInfo, useTonProofAuth } from '../hooks';
 import { TonProofAuthInfo } from './ton-proof-auth-info';
@@ -12,6 +13,7 @@ import { TonProofAuthInfo } from './ton-proof-auth-info';
 export const TonProofDemo = () => {
     const { authorized, wallet, openConnectModal, reconnectForProof } = useTonProofAuth();
     const { loading, result, fetchAccountInfo, clearResult } = useAccountInfo();
+    const network = useWalletNetwork();
 
     const resultRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
@@ -53,18 +55,18 @@ export const TonProofDemo = () => {
 
     return (
         <div className="flex w-full flex-col gap-4" data-testid="ton-proof-demo">
-            {wallet && <TonProofAuthInfo account={wallet.account} />}
+            {wallet && <TonProofAuthInfo account={wallet.account} network={network} />}
 
-            <div className="flex flex-wrap justify-center gap-3">
-                <ButtonWithConnect
-                    onClick={() => void fetchAccountInfo()}
-                    loading={loading}
-                    disabled={loading}
-                    data-testid="ton-proof-fetch-account-info-button"
-                >
-                    Get account info
-                </ButtonWithConnect>
-            </div>
+            <ButtonWithConnect
+                size="l"
+                fullWidth
+                onClick={() => void fetchAccountInfo()}
+                loading={loading}
+                disabled={loading}
+                data-testid="ton-proof-action-button"
+            >
+                Get account info
+            </ButtonWithConnect>
 
             {result && (
                 <ResultBlock

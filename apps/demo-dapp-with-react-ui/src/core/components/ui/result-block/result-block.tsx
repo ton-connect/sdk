@@ -1,6 +1,7 @@
 import { forwardRef } from 'react';
 
 import { Button } from '../button';
+import { CopyButton } from '../copy-button';
 import { JsonView } from '../json-view';
 import { ResultPanel } from '../../result-panel';
 import { cn } from '../../../lib/utils';
@@ -73,7 +74,16 @@ export const ResultBlock = forwardRef<HTMLDivElement, ResultBlockProps>(
                     Dismiss
                 </Button>
             </div>
-            <ResultPanel title="Response">
+            <ResultPanel
+                title="Response"
+                action={
+                    <CopyButton
+                        value={result.response}
+                        aria-label="Copy response"
+                        data-testid={`${testIdPrefix}-copy-button`}
+                    />
+                }
+            >
                 <JsonView src={result.response} data-testid={`${testIdPrefix}-json`} />
             </ResultPanel>
         </div>

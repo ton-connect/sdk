@@ -93,5 +93,9 @@ export function useTonProofAuth() {
         tonConnectUI.openModal();
     }, [tonConnectUI, wallet]);
 
-    return { authorized, wallet, openConnectModal, reconnectForProof };
+    const signOut = useCallback(async () => {
+        await tonConnectUI.disconnect();
+    }, [tonConnectUI]);
+
+    return { authorized, wallet, openConnectModal, reconnectForProof, signOut };
 }
