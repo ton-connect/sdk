@@ -1,5 +1,5 @@
-import { Layout } from '@/core/components';
-import { TransactionRequest } from '@/features/transactions';
+import { Layout } from '../core/components/index';
+import { TransactionRequest } from '../features/transactions';
 
 export const TxFormPage = () => (
     <Layout

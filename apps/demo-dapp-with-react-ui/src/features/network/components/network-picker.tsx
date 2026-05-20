@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
 import { useTonConnectUI, useTonWallet, CHAIN } from '@tonconnect/ui-react';
 
-import { Select } from '@/core/components/ui/select';
-import { ChevronDownIcon } from '@/core/components/ui/icons';
-import { CHAIN_TETRA } from '@/core/utils/network';
-import { useQueryState } from '@/core/hooks/use-query-state';
+import { Select } from '../../../core/components/ui/select/index';
+import { ChevronDownIcon } from '../../../core/components/ui/icons/index';
+import { CHAIN_TETRA } from '../../../core/utils/network';
+import { useQueryState } from '../../../core/hooks/use-query-state';
 
 const NETWORK_LABELS: Record<string, string> = {
     '': 'Any Network',

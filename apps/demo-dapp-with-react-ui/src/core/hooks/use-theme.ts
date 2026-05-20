@@ -1,7 +1,7 @@
 import { useContext, useEffect } from 'react';
 import { THEME, useTonConnectUI } from '@tonconnect/ui-react';
 
-import { ThemeProviderContext } from '@/core/components/layout/theme-provider';
+import { ThemeProviderContext } from '../components/layout/theme-provider/index';
 
 export const useTheme = () => {
     const context = useContext(ThemeProviderContext);

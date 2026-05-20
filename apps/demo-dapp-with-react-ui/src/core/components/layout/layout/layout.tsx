@@ -17,7 +17,7 @@ import {
 import { Link, NavLink } from 'react-router-dom';
 import type { ComponentType, FC, ReactNode } from 'react';
 
-import { usePreserveSearch } from '@/core/hooks/use-preserve-search';
+import { usePreserveSearch } from '../../../hooks/use-preserve-search';
 
 import {
     Sidebar,
@@ -34,9 +34,9 @@ import {
     SidebarSeparator,
     SidebarTrigger,
     useSidebar
-} from '@/core/components/sidebar';
+} from '../../sidebar/index';
 import { AppLogo } from '../app-logo';
-import { ThemeSwitcher } from '@/core/components/layout/theme-switcher';
+import { ThemeSwitcher } from '../theme-switcher/index';
 
 interface LayoutProps {
     children: ReactNode;

@@ -1,14 +1,14 @@
-import '@/patch-local-storage-for-github-pages';
-import '@/polyfills';
-import '@/core/styles/index.css';
+import './patch-local-storage-for-github-pages';
+import './polyfills';
+import './core/styles/index.css';
 
 import eruda from 'eruda';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { App } from '@/App';
-import { initQaModeFromUrl } from '@/core/utils/qa-mode-from-url';
-import { runSingleInstance } from '@/core/utils/run-single-instance';
-import { getTonconnectVersion } from '@/core/utils/get-tonconnect-version';
+import { App } from './App';
+import { initQaModeFromUrl } from './core/utils/qa-mode-from-url';
+import { runSingleInstance } from './core/utils/run-single-instance';
+import { getTonconnectVersion } from './core/utils/get-tonconnect-version';
 
 initQaModeFromUrl();
 
@@ -20,7 +20,7 @@ async function enableMocking() {
     const host = document.baseURI.replace(/\/$/, '');
 
     return new Promise(async resolve => {
-        const { worker } = await import('@/server/worker');
+        const { worker } = await import('./server/worker');
 
         const startMockWorker = () =>
             worker.start({

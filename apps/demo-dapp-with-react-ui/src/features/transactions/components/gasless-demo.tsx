@@ -3,9 +3,9 @@ import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { JsonView } from '@/core/components/ui/json-view';
 import { Address } from '@ton/core';
 
-import { Button } from '@/core/components/ui/button';
-import { Input } from '@/core/components/ui/input';
-import { ResultPanel } from '@/core/components/result-panel';
+import { Button } from '../../../core/components/ui/button/index';
+import { Input } from '../../../core/components/ui/input/index';
+import { ResultPanel } from '../../../core/components/result-panel/index';
 import { sendItems } from '../lib/gasless-items';
 import { sendMessages } from '../lib/gasless-messages';
 

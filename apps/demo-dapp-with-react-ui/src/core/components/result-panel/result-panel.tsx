@@ -1,6 +1,6 @@
 import type { FC, ReactNode } from 'react';
 
-import { cn } from '@/core/lib/utils';
+import { cn } from '../../lib/utils';
 
 interface ResultPanelProps {
     title: string;

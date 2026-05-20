@@ -1,5 +1,5 @@
-import { Layout } from '@/core/components';
-import { SignDataTester } from '@/features/signing';
+import { Layout } from '../core/components/index';
+import { SignDataTester } from '../features/signing/index';
 
 export const SignDataPage = () => (
     <Layout

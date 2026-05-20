@@ -1,5 +1,5 @@
-import { Layout } from '@/core/components';
-import { TonProofDemo } from '@/features/signing';
+import { Layout } from '../core/components/index';
+import { TonProofDemo } from '../features/signing/index';
 
 export const TonProofPage = () => (
     <Layout

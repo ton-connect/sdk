@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { JsonView } from '@/core/components/ui/json-view';
 
-import { Button } from '@/core/components/ui/button';
-import { Input } from '@/core/components/ui/input';
-import { Select } from '@/core/components/ui/select';
-import { ChevronDownIcon } from '@/core/components/ui/icons';
-import { ResultPanel } from '@/core/components/result-panel';
-import { TonProofDemoApi } from '@/core/lib/ton-proof-demo-api';
+import { Button } from '../../../core/components/ui/button/index';
+import { Input } from '../../../core/components/ui/input/index';
+import { Select } from '../../../core/components/ui/select/index';
+import { ChevronDownIcon } from '../../../core/components/ui/icons/index';
+import { ResultPanel } from '../../../core/components/result-panel/index';
+import { TonProofDemoApi } from '../../../core/lib/ton-proof-demo-api';
 
 export const FindTransactionDemo = () => {
     const [boc, setBoc] = useState(

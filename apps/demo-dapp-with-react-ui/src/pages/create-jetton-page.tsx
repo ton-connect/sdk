@@ -1,5 +1,5 @@
-import { Layout } from '@/core/components';
-import { CreateJettonDemo } from '@/features/utilities';
+import { Layout } from '../core/components/index';
+import { CreateJettonDemo } from '../features/utilities/index';
 
 export const CreateJettonPage = () => (
     <Layout
