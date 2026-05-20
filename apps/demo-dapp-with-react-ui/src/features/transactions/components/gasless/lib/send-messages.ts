@@ -12,7 +12,7 @@ import {
 
 import { TonApiClient } from '@ton-api/client';
 import { TonConnectUI } from '@tonconnect/ui-react';
-import { retry } from '../../../core/utils/retry';
+import { retry } from '../../../../../core/utils/retry';
 
 const ta = new TonApiClient({
     baseUrl: 'https://tonapi.io'
@@ -48,7 +48,6 @@ export async function sendMessages(
     console.debug('jettonWalletAddressResult', jettonWalletAddressResult);
     const jettonWallet = Address.parse(jettonWalletAddressResult.decoded.jetton_wallet_address);
 
-    console.debug('re');
     const relayerAddress = await printConfigAndReturnRelayAddress();
     console.debug('relayerAddress', relayerAddress);
     const tetherTransferPayload = beginCell()
@@ -112,7 +111,7 @@ export async function sendMessages(
         )
         .endCell();
 
-    return await retry(
+    const relayResponse = await retry(
         () =>
             ta.gasless.gaslessSend({
                 walletPublicKey: publicKey,
@@ -120,6 +119,15 @@ export async function sendMessages(
             }),
         { delay: 2000, retries: 5 }
     );
+
+    return {
+        mode: 'messages' as const,
+        internalBoc,
+        relayResponse: relayResponse ?? null,
+        destination: destination.toString(),
+        amount: jettonAmount.toString(),
+        submittedAt: new Date().toISOString()
+    };
 }
 
 async function printConfigAndReturnRelayAddress(): Promise<Address> {
