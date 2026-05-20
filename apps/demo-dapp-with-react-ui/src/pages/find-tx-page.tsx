@@ -1,5 +1,5 @@
-import { Layout } from '@/core/components';
-import { FindTransactionDemo } from '@/features/utilities';
+import { Layout } from '../core/components/index';
+import { FindTransactionDemo } from '../features/utilities/index';
 
 export const FindTxPage = () => (
     <Layout

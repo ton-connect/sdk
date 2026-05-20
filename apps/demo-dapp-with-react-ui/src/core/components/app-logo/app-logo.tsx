@@ -1,7 +1,7 @@
 import type { ComponentProps, FC } from 'react';
 
-import { TonIconCircle } from '@/core/components/ui/icons';
-import { cn } from '@/core/lib/utils';
+import { TonIconCircle } from '../ui/icons/index';
+import { cn } from '../../lib/utils';
 
 export const AppLogo: FC<Omit<ComponentProps<'svg'>, 'width' | 'height'>> = ({
     className,

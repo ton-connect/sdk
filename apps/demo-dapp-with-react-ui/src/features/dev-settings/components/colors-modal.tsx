@@ -3,15 +3,20 @@ import { THEME, useTonConnectUI } from '@tonconnect/ui-react';
 import { Palette, RotateCcw } from 'lucide-react';
 import { useState } from 'react';
 
-import { Button } from '@/core/components/ui/button';
-import { Modal } from '@/core/components/ui/modal';
-import { cn } from '@/core/lib/utils';
+import { Button } from '../../../core/components/ui/button/index';
+import { Modal } from '../../../core/components/ui/modal/index';
+import { cn } from '../../../core/lib/utils';
 import { getDefaultColorsForTheme } from '../lib/default-colors';
 import { ColorsSelect } from './colors-select';
 
 interface ColorsModalProps {
     colorsSet?: Partial<Record<Theme, ColorsSet>>;
     onColorsSetChange: (colorsSet: Partial<Record<Theme, ColorsSet>>) => void;
+    /** Controlled open state — use with `onOpenChange` for external triggers. */
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
+    /** Hide the built-in opener when using external buttons (toolbar + card). */
+    hideDefaultTrigger?: boolean;
 }
 
 const THEME_TABS: { id: Theme; label: string }[] = [
@@ -19,9 +24,18 @@ const THEME_TABS: { id: Theme; label: string }[] = [
     { id: THEME.LIGHT, label: 'Light' }
 ];
 
-export const ColorsModal = ({ colorsSet, onColorsSetChange }: ColorsModalProps) => {
+export const ColorsModal = ({
+    colorsSet,
+    onColorsSetChange,
+    open: controlledOpen,
+    onOpenChange: controlledOnOpenChange,
+    hideDefaultTrigger = false
+}: ColorsModalProps) => {
     const [, setOptions] = useTonConnectUI();
-    const [opened, setOpened] = useState(false);
+    const [internalOpen, setInternalOpen] = useState(false);
+    const isControlled = controlledOpen !== undefined && controlledOnOpenChange !== undefined;
+    const opened = isControlled ? controlledOpen : internalOpen;
+    const setOpened = isControlled ? controlledOnOpenChange : setInternalOpen;
     const [activeTheme, setActiveTheme] = useState<Theme>(THEME.DARK);
 
     const resetThemeColors = () => {
@@ -41,10 +55,12 @@ export const ColorsModal = ({ colorsSet, onColorsSetChange }: ColorsModalProps) 
 
     return (
         <>
-            <Button type="button" variant="secondary" onClick={() => setOpened(true)}>
-                <Palette size={16} />
-                Customize colors
-            </Button>
+            {!hideDefaultTrigger ? (
+                <Button type="button" variant="secondary" onClick={() => setOpened(true)}>
+                    <Palette size={16} />
+                    Customize colors
+                </Button>
+            ) : null}
 
             <Modal
                 open={opened}

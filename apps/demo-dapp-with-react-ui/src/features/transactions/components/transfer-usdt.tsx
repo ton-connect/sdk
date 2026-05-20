@@ -4,11 +4,11 @@ import { TonClient, JettonWallet } from '@ton/ton';
 import { Address, beginCell, fromNano, toNano } from '@ton/core';
 import { JettonMinter, storeJettonTransferMessage } from '@ton-community/assets-sdk';
 
-import { Button } from '@/core/components/ui/button';
-import { Input } from '@/core/components/ui/input';
-import { Skeleton } from '@/core/components/ui/skeleton';
-import { retry } from '@/server/utils/transactions-utils';
-import { formatUnits, parseUnits } from '@/core/utils/units';
+import { Button } from '../../../core/components/ui/button/index';
+import { Input } from '../../../core/components/ui/input/index';
+import { Skeleton } from '../../../core/components/ui/skeleton/index';
+import { retry } from '../../../server/utils/transactions-utils';
+import { formatUnits, parseUnits } from '../../../core/utils/units';
 
 const USDT_MASTER = Address.parse('EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs');
 const USDT_DECIMALS = 6;

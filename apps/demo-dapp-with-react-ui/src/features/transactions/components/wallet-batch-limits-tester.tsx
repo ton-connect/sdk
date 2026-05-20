@@ -9,9 +9,9 @@ import { Address } from '@ton/ton';
 import { useState } from 'react';
 import { Wallet } from 'lucide-react';
 
-import { Button } from '@/core/components/ui/button';
-import { RadioGroup } from '@/core/components/ui/radio-group';
-import { EmptyState } from '@/core/components/empty-state';
+import { Button } from '../../../core/components/ui/button/index';
+import { RadioGroup } from '../../../core/components/ui/radio-group/index';
+import { EmptyState } from '../../../core/components/empty-state/index';
 
 type Mode = 'sendTransaction' | 'signMessage';
 

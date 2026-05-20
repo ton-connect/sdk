@@ -1,5 +1,5 @@
-import { Layout } from '@/core/components';
-import { GaslessDemo } from '@/features/transactions';
+import { Layout } from '../core/components/index';
+import { GaslessDemo } from '../features/transactions/index';
 
 export const GaslessPage = () => (
     <Layout
