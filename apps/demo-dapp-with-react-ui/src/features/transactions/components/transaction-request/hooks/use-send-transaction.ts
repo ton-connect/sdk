@@ -6,7 +6,7 @@ import {
     useTonWallet
 } from '@tonconnect/ui-react';
 
-import { TonProofDemoApi } from '@/core/lib/ton-proof-demo-api';
+import { TonProofDemoApi } from '../../../../../core/lib/ton-proof-demo-api';
 
 /**
  * A completed (or failed) send/sign attempt — what ResultBlock renders.

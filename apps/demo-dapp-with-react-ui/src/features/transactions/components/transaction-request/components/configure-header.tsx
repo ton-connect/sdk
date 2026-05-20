@@ -1,7 +1,7 @@
 import { RotateCcw } from 'lucide-react';
 
-import { Button } from '@/core/components/ui/button';
-import { useIsMobile } from '@/core/hooks/use-mobile';
+import { Button } from '../../../../../core/components/ui/button';
+import { useIsMobile } from '../../../../../core/hooks/use-mobile';
 
 import type { PresetKey } from '../../../lib/transaction-presets';
 

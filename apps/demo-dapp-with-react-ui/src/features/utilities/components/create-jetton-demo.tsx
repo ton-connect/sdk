@@ -1,6 +1,6 @@
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { useState } from 'react';
-import { JsonView } from '@/core/components/ui/json-view';
+import { JsonView } from '../../../core/components/ui/json-view';
 import { Wallet } from 'lucide-react';
 
 import { Button } from '../../../core/components/ui/button/index';

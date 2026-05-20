@@ -51,7 +51,6 @@ export default [
         },
         typescript: {
           alwaysTryTypes: true,
-          project: ['tsconfig.base.json', 'apps/*/tsconfig.json', 'packages/*/tsconfig.json'],
         },
       },
     },

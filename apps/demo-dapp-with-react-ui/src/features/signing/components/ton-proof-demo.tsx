@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { JsonView } from '@/core/components/ui/json-view';
+import { JsonView } from '../../../core/components/ui/json-view';
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { ShieldCheck } from 'lucide-react';
 

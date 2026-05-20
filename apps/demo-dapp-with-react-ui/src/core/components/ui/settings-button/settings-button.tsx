@@ -2,7 +2,7 @@ import type { ComponentProps, FC } from 'react';
 import clsx from 'clsx';
 import { SlidersHorizontal } from 'lucide-react';
 
-import { Button } from '@/core/components/ui/button';
+import { Button } from '../button';
 
 import styles from './settings-button.module.css';
 

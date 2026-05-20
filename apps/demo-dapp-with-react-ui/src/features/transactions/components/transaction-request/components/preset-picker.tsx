@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { FileText } from 'lucide-react';
 
-import { Button } from '@/core/components/ui/button';
-import { Modal } from '@/core/components/ui/modal';
-import { useIsMobile } from '@/core/hooks/use-mobile';
-import { cn } from '@/core/lib/utils';
+import { Button } from '../../../../../core/components/ui/button';
+import { Modal } from '../../../../../core/components/ui/modal';
+import { useIsMobile } from '../../../../../core/hooks/use-mobile';
+import { cn } from '../../../../../core/lib/utils';
 
 import { PRESETS, type PresetKey } from '../../../lib/transaction-presets';
 

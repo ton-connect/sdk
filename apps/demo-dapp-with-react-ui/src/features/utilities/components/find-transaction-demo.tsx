@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { JsonView } from '@/core/components/ui/json-view';
+import { JsonView } from '../../../core/components/ui/json-view';
 
 import { Button } from '../../../core/components/ui/button/index';
 import { Input } from '../../../core/components/ui/input/index';

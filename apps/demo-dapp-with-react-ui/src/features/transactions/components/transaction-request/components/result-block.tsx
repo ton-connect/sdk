@@ -1,8 +1,8 @@
 import { forwardRef } from 'react';
 
-import { Button } from '@/core/components/ui/button';
-import { JsonView } from '@/core/components/ui/json-view';
-import { ResultPanel } from '@/core/components/result-panel';
+import { Button } from '../../../../../core/components/ui/button';
+import { JsonView } from '../../../../../core/components/ui/json-view';
+import { ResultPanel } from '../../../../../core/components/result-panel';
 
 import type { OperationResult } from '../hooks';
 

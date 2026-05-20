@@ -7,7 +7,7 @@ import {
 } from '@tonconnect/ui-react';
 import { beginCell } from '@ton/ton';
 import { useState } from 'react';
-import { JsonView } from '@/core/components/ui/json-view';
+import { JsonView } from '../../../core/components/ui/json-view';
 
 import { Button } from '../../../core/components/ui/button/index';
 import { Checkbox } from '../../../core/components/ui/checkbox/index';

@@ -1,5 +1,5 @@
-import { Checkbox } from '@/core/components/ui/checkbox';
-import { Modal } from '@/core/components/ui/modal';
+import { Checkbox } from '../../../../../core/components/ui/checkbox';
+import { Modal } from '../../../../../core/components/ui/modal';
 
 interface SettingsModalProps {
     open: boolean;
