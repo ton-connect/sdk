@@ -13,7 +13,7 @@
 }
 
 .title {
-  composes: bodyMedium from "../../../styles/typography.module.css";
+  composes: labelRegular from "../../../styles/typography.module.css";
   color: var(--ta-color-text-secondary);
 }
 

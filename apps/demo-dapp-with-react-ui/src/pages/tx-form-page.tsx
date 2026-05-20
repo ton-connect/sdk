@@ -1,11 +1,11 @@
 import { Layout } from '../core/components/index';
-import { TxForm } from '../features/transactions/index';
+import { TransactionRequest } from '../features/transactions';
 
 export const TxFormPage = () => (
     <Layout
         title="Send transaction"
-        subtitle="Configure a TON transaction payload and send it via TonConnect, optionally embedding the request inside the connect URL."
+        subtitle="Build a transaction request — pick a preset, set valid-until, edit the JSON, and send or sign it via TonConnect."
     >
-        <TxForm />
+        <TransactionRequest />
     </Layout>
 );

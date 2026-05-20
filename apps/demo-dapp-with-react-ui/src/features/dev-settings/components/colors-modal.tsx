@@ -3,9 +3,9 @@ import { THEME, useTonConnectUI } from '@tonconnect/ui-react';
 import { Palette, RotateCcw } from 'lucide-react';
 import { useState } from 'react';
 
-import { Button } from '../../../core/components/ui/button/index';
-import { Modal } from '../../../core/components/ui/modal/index';
-import { cn } from '../../../core/lib/utils';
+import { Button } from '../../../core/components/ui/button';
+import { Modal } from '../../../core/components/ui/modal';
+import { Tabs } from '../../../core/components/ui/tabs';
 import { getDefaultColorsForTheme } from '../lib/default-colors';
 import { ColorsSelect } from './colors-select';
 
@@ -75,29 +75,23 @@ export const ColorsModal = ({
                 </p>
 
                 <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div
-                        className="inline-flex rounded-xl bg-secondary p-1"
-                        role="tablist"
+                    <Tabs
+                        value={activeTheme}
+                        onValueChange={v => setActiveTheme(v as Theme)}
                         aria-label="Theme"
                     >
-                        {THEME_TABS.map(({ id, label }) => (
-                            <button
-                                key={id}
-                                type="button"
-                                role="tab"
-                                aria-selected={activeTheme === id}
-                                onClick={() => setActiveTheme(id)}
-                                className={cn(
-                                    'min-w-[5.5rem] rounded-lg px-4 py-2 text-sm font-medium transition-all',
-                                    activeTheme === id
-                                        ? 'bg-background text-foreground shadow-sm'
-                                        : 'text-secondary-foreground hover:text-foreground'
-                                )}
-                            >
-                                {label}
-                            </button>
-                        ))}
-                    </div>
+                        <Tabs.List className="rounded-xl">
+                            {THEME_TABS.map(({ id, label }) => (
+                                <Tabs.Trigger
+                                    key={id}
+                                    value={id}
+                                    className="min-w-[5.5rem] rounded-lg px-4 py-2"
+                                >
+                                    {label}
+                                </Tabs.Trigger>
+                            ))}
+                        </Tabs.List>
+                    </Tabs>
 
                     <Button type="button" variant="ghost" size="s" onClick={resetThemeColors}>
                         <RotateCcw size={14} />

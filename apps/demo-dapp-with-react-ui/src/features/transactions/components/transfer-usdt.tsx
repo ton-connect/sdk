@@ -144,6 +144,7 @@ export function TransferUsdt() {
                     {tonBalance ?? balanceSkeleton}
                 </div>
             </div>
+
             <div className="flex flex-col gap-3">
                 <Input size="s">
                     <Input.Header>

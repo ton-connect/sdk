@@ -46,6 +46,13 @@
   padding: 9px 12px;
 }
 
+.xs {
+  font-size: var(--ta-footnote-size);
+  font-weight: var(--ta-footnote-caps-weight);
+  line-height: var(--ta-footnote-line-height);
+  padding: 4px 8px;
+}
+
 .icon {
   composes: labelSemibold from "../../../styles/typography.module.css";
   aspect-ratio: 1;
