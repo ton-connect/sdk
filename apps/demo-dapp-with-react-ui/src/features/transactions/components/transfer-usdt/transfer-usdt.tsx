@@ -19,9 +19,8 @@ const toUserFacingAddress = (raw: string): string =>
 export const TransferUsdt = () => {
     const {
         senderAddress,
+        network,
         chain,
-        rawChain,
-        isWalletConnected,
         tonBalance,
         isTonBalanceLoading,
         usdtBalance,
@@ -50,7 +49,7 @@ export const TransferUsdt = () => {
 
     // Wallet connected, but on a chain we don't have a TonCenter endpoint or
     // USDT master for. Surface as an in-button error so the user can't dispatch.
-    const networkError = isWalletConnected && !chain ? 'Unsupported network' : null;
+    const networkError = network.isConnected && !chain ? 'Unsupported network' : null;
 
     const canSend =
         !!senderAddress && !!jettonWallet && !!destination && !!amount && !sending && !networkError;
@@ -114,8 +113,7 @@ export const TransferUsdt = () => {
             </ButtonWithConnect>
 
             <TransferInfo
-                chain={chain}
-                rawChain={rawChain}
+                network={network}
                 jettonWallet={jettonWallet}
                 isJettonWalletLoading={isJettonWalletLoading}
                 tonBalance={tonBalance}

@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { Address } from '@ton/core';
-import { CHAIN } from '@tonconnect/ui-react';
 
 import { ButtonWithConnect } from '../../../../core/components/ui/button-with-connect';
 import { CenteredAmountInput } from '../../../../core/components/ui/centered-amount-input';
@@ -23,9 +22,7 @@ const toUserFacingAddress = (raw: string): string =>
 export const Gasless = () => {
     const {
         senderAddress,
-        chain,
-        rawChain,
-        isWalletConnected,
+        network,
         tonBalance,
         isTonBalanceLoading,
         usdtBalance,
@@ -55,12 +52,7 @@ export const Gasless = () => {
 
     // The gasless lib pins the USDT master to mainnet, so testnet (or any
     // other chain) is not supported.
-    const networkError =
-        isWalletConnected && chain !== CHAIN.MAINNET
-            ? chain === undefined
-                ? 'Unsupported network'
-                : 'Mainnet only'
-            : null;
+    const networkError = network.isConnected && !network.isMainnet ? 'Unsupported network' : null;
 
     const canSend = !!senderAddress && !!destination && !!amount && !sending && !networkError;
 
@@ -132,8 +124,7 @@ export const Gasless = () => {
             </ButtonWithConnect>
 
             <TransferInfo
-                chain={chain}
-                rawChain={rawChain}
+                network={network}
                 jettonWallet={jettonWallet}
                 isJettonWalletLoading={isJettonWalletLoading}
                 tonBalance={tonBalance}
