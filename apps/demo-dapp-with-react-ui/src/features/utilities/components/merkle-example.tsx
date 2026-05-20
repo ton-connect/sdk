@@ -1,62 +1,103 @@
-import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
-import { toNano } from '@ton/core';
-import { Wallet } from 'lucide-react';
+import { useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ShieldCheck, Wallet } from 'lucide-react';
 
-import {
-    // buildSuccessMerkleProof,
-    buildSuccessMerkleUpdate,
-    // buildVerifyMerkleProof,
-    buildVerifyMerkleUpdate
-} from '../../../server/utils/exotic';
 import { Button } from '../../../core/components/ui/button/index';
+import { ButtonWithConnect } from '../../../core/components/ui/button-with-connect/index';
+import { RadioCards } from '../../../core/components/ui/radio-cards';
+import { ResultBlock } from '../../../core/components/ui/result-block/index';
 import { EmptyState } from '../../../core/components/empty-state/index';
-import { TonProofDemoApi } from '../../../core/lib/ton-proof-demo-api';
 
-const merkleExampleAddress = 'EQD_5KMZVIqzYY91-t5CdRD_V71wRrVzxDXu9n2XEwz2wwdv';
-const merkleUpdateBody = buildVerifyMerkleUpdate(buildSuccessMerkleUpdate());
+import { useMerkleDemo } from '../hooks';
+import { MerkleContractInfo } from './merkle-contract-info';
 
 export const MerkleExample = () => {
-    const [tonConnectUI] = useTonConnectUI();
-    const wallet = useTonWallet();
+    const navigate = useNavigate();
+    const { wallet, mode, setMode, sending, result, send, clearResult, canSend, needsTonProof } =
+        useMerkleDemo();
 
-    const handleMerkleProofClick = async () => {
-        const response = await TonProofDemoApi.merkleProof();
-
-        if (!('error' in response)) {
-            await tonConnectUI.sendTransaction(response);
+    const resultRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        if (!result || !resultRef.current) return;
+        const rect = resultRef.current.getBoundingClientRect();
+        if (rect.top < 0 || rect.bottom > window.innerHeight) {
+            resultRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-    };
-
-    const handleMerkleUpdateClick = async () => {
-        const myTransaction = {
-            validUntil: Math.floor(Date.now() / 1000) + 360,
-            messages: [
-                {
-                    address: merkleExampleAddress,
-                    amount: toNano('0.05').toString(),
-                    payload: merkleUpdateBody.toBoc().toString('base64')
-                }
-            ]
-        };
-
-        await tonConnectUI.sendTransaction(myTransaction);
-    };
+    }, [result]);
 
     if (!wallet) {
         return (
             <EmptyState
                 icon={Wallet}
                 title="Connect a wallet"
-                description="A connected wallet is required to send a merkle proof or update transaction."
-                action={<Button onClick={() => tonConnectUI.openModal()}>Connect wallet</Button>}
+                description="Connect a wallet to send a merkle proof deploy transaction or a merkle update to the example contract."
+                action={
+                    <ButtonWithConnect data-testid="merkle-connect-button">
+                        Connect wallet
+                    </ButtonWithConnect>
+                }
+                data-testid="merkle-unconnected"
             />
         );
     }
 
+    if (needsTonProof) {
+        return (
+            <EmptyState
+                icon={ShieldCheck}
+                title="Ton proof required"
+                description="Merkle proof is built by the protected demo backend. Complete ton_proof authentication on the Ton proof page, then return here."
+                action={
+                    <Button
+                        onClick={() => navigate('/ton-proof')}
+                        data-testid="merkle-go-ton-proof-button"
+                    >
+                        Go to Ton proof
+                    </Button>
+                }
+                data-testid="merkle-needs-ton-proof"
+            />
+        );
+    }
+
+    const actionLabel = mode === 'proof' ? 'Send merkle proof' : 'Send merkle update';
+    const resultTitle = mode === 'proof' ? 'Merkle proof' : 'Merkle update';
+
     return (
-        <div className="flex flex-wrap justify-center gap-3">
-            <Button onClick={handleMerkleProofClick}>Send merkle proof</Button>
-            <Button onClick={handleMerkleUpdateClick}>Send merkle update</Button>
+        <div className="flex w-full flex-col gap-4" data-testid="merkle-demo">
+            <RadioCards value={mode} onChange={setMode} data-testid="merkle-mode">
+                <RadioCards.Item value="proof" data-testid="merkle-mode-proof">
+                    Merkle proof
+                    <RadioCards.Tag>Deploy + proof</RadioCards.Tag>
+                </RadioCards.Item>
+                <RadioCards.Item value="update" data-testid="merkle-mode-update">
+                    Merkle update
+                    <RadioCards.Tag>Example contract</RadioCards.Tag>
+                </RadioCards.Item>
+            </RadioCards>
+
+            {mode === 'update' && <MerkleContractInfo />}
+
+            <ButtonWithConnect
+                size="l"
+                fullWidth
+                onClick={() => void send()}
+                loading={sending}
+                disabled={!canSend}
+                data-testid="merkle-send-button"
+            >
+                {actionLabel}
+            </ButtonWithConnect>
+
+            {result && (
+                <ResultBlock
+                    ref={resultRef}
+                    title={resultTitle}
+                    result={result}
+                    onDismiss={clearResult}
+                    testIdPrefix="merkle-result"
+                />
+            )}
         </div>
     );
 };
