@@ -40,7 +40,7 @@ export const BalanceCard = () => {
         <>
             <div className="mb-2 px-1" data-testid="balance-card">
                 <p className="text-base font-semibold text-foreground">Balance</p>
-                <p className="mt-1 flex items-baseline gap-1.5">
+                <div className="mt-1 flex items-baseline gap-1.5">
                     {balanceQuery.isLoading ? (
                         <Skeleton
                             className="h-8 w-28"
@@ -57,7 +57,7 @@ export const BalanceCard = () => {
                         </span>
                     )}
                     <span className="text-base font-medium text-tertiary-foreground">TON</span>
-                </p>
+                </div>
 
                 <div className="mt-3 flex items-center gap-1.5">
                     <span

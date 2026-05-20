@@ -56,7 +56,7 @@ export const waitForTransactionResolver: HttpResponseResolver = async ({ request
         const network = body.network;
         const inMessageBoc = body.inMessageBoc;
         const client = new TonClient({
-            endpoint: `https://${network === 'testnet' ? 'tesnet.' : ''}toncenter.com/api/v2/jsonRPC`
+            endpoint: `https://${network === 'testnet' ? 'testnet.' : ''}toncenter.com/api/v2/jsonRPC`
         });
         const transaction = await waitForTransaction(inMessageBoc, client);
         if (!transaction) {

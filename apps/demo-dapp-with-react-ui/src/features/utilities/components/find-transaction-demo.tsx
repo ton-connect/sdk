@@ -1,85 +1,106 @@
-import { useState } from 'react';
-import { JsonView } from '../../../core/components/ui/json-view';
+import { useEffect, useRef } from 'react';
 
 import { Button } from '../../../core/components/ui/button/index';
 import { Input } from '../../../core/components/ui/input/index';
+import { Textarea } from '../../../core/components/ui/textarea/index';
 import { Select } from '../../../core/components/ui/select/index';
 import { ChevronDownIcon } from '../../../core/components/ui/icons/index';
-import { ResultPanel } from '../../../core/components/result-panel/index';
-import { TonProofDemoApi } from '../../../core/lib/ton-proof-demo-api';
+import { ResultBlock } from '../../../core/components/ui/result-block/index';
+
+import { useFindTransaction } from '../hooks';
 
 export const FindTransactionDemo = () => {
-    const [boc, setBoc] = useState(
-        'te6cckEBBQEA6wAB4YgB76ksIXpmobiUHDUtWosNdLgI+loKYwC+3DgXeRr2DJ4F4G+ja0rbyhi5yzD+xbfXI1owr5X3/uucREXZXZP4dqxPXukwqPGVrKzUL0g80tYaTgh95b0myTcmVFMS8cTIOU1NGLtDx7h4AAAQ8AAcAQJ7YgBFLU49uGmU3zOG8nNmcylqMjsoilVMAcYzYexnV5aM2BpiWgAAAAAAAAAAAAAAAAACMAAAAAEhlbGxvIYCBAEU/wD0pBP0vPLICwMASNMB0NMDAXGwkVvg+kAwcIAQyMsFWM8WIfoCy2oBzxbJgED7AAAAGE8sBQ=='
-    );
-    const [network, setNetwork] = useState<'mainnet' | 'testnet'>('mainnet');
-    const [txLoading, setTxLoading] = useState(false);
-    const [txError, setTxError] = useState<string | null>(null);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [txResult, setTxResult] = useState<any>(null);
+    const {
+        boc,
+        setBoc,
+        network,
+        setNetwork,
+        loading,
+        result,
+        findTransaction,
+        clearResult,
+        canSearch
+    } = useFindTransaction();
 
-    const handleFindTx = async () => {
-        setTxLoading(true);
-        setTxError(null);
-        setTxResult(null);
-        try {
-            const transaction = await TonProofDemoApi.findTransactionByExternalMessage(
-                boc,
-                network
-            );
-            if (!transaction) {
-                setTxError('Transaction not found');
-            } else {
-                setTxResult(transaction);
-            }
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (err: any) {
-            setTxError(err?.message || 'Unknown error');
-        } finally {
-            setTxLoading(false);
+    const resultRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        if (!result || !resultRef.current) return;
+        const rect = resultRef.current.getBoundingClientRect();
+        if (rect.top < 0 || rect.bottom > window.innerHeight) {
+            resultRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-    };
+    }, [result]);
 
     return (
-        <>
-            <Input size="s">
+        <div className="flex w-full flex-col gap-4" data-testid="find-transaction">
+            <Input size="s" data-testid="find-transaction-boc-field">
                 <Input.Header>
-                    <Input.Title>External-in message BOC</Input.Title>
+                    <Input.Title data-testid="find-transaction-boc-title">
+                        External-in message BOC
+                    </Input.Title>
                 </Input.Header>
-                <Input.Field>
-                    <Input.Input
-                        type="text"
-                        placeholder="Paste base64 BOC"
-                        value={boc}
-                        onChange={e => setBoc(e.target.value)}
-                    />
-                </Input.Field>
+                <Textarea
+                    value={boc}
+                    onChange={e => setBoc(e.target.value)}
+                    rows={4}
+                    placeholder="Paste base64 BOC"
+                    className="font-mono text-xs break-all"
+                    data-testid="find-transaction-boc-input"
+                />
             </Input>
-            <div className="flex items-center gap-3">
-                <span className="text-sm font-medium text-secondary-foreground">Network:</span>
+
+            <div
+                className="flex w-full flex-col gap-1"
+                data-testid="find-transaction-network-field"
+            >
+                <span
+                    className="text-[15px] font-medium tracking-[0.01em] text-secondary-foreground"
+                    data-testid="find-transaction-network-label"
+                >
+                    Network
+                </span>
                 <Select.Root
                     value={network}
-                    onValueChange={v => setNetwork(v as 'mainnet' | 'testnet')}
+                    onValueChange={v => setNetwork(v as typeof network)}
                 >
-                    <Select.Trigger variant="gray" size="s" borderRadius="l">
-                        {network}
-                        <ChevronDownIcon size={16} />
+                    <Select.Trigger
+                        variant="gray"
+                        size="l"
+                        borderRadius="l"
+                        fullWidth
+                        className="!justify-between"
+                        data-testid="find-transaction-network-trigger"
+                    >
+                        <span className="truncate text-left capitalize">{network}</span>
+                        <ChevronDownIcon size={20} className="shrink-0" />
                     </Select.Trigger>
                     <Select.Content>
-                        <Select.Item value="mainnet">mainnet</Select.Item>
-                        <Select.Item value="testnet">testnet</Select.Item>
+                        <Select.Item value="mainnet">Mainnet</Select.Item>
+                        <Select.Item value="testnet">Testnet</Select.Item>
                     </Select.Content>
                 </Select.Root>
             </div>
-            <Button onClick={handleFindTx} disabled={txLoading || !boc}>
-                {txLoading ? 'Searching...' : 'Find Transaction'}
+
+            <Button
+                size="l"
+                fullWidth
+                onClick={() => void findTransaction()}
+                loading={loading}
+                disabled={!canSearch}
+                data-testid="find-transaction-search-button"
+            >
+                Find transaction
             </Button>
-            {txError && <div className="text-sm text-error">{txError}</div>}
-            {txResult !== null && (
-                <ResultPanel title="Transaction">
-                    <JsonView src={txResult} />
-                </ResultPanel>
+
+            {result && (
+                <ResultBlock
+                    ref={resultRef}
+                    title="Transaction"
+                    result={result}
+                    onDismiss={clearResult}
+                    testIdPrefix="find-transaction-result"
+                />
             )}
-        </>
+        </div>
     );
 };
