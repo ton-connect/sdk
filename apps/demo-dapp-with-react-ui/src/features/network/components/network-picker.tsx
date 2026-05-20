@@ -5,13 +5,7 @@ import { Select } from '../../../core/components/ui/select/index';
 import { ChevronDownIcon } from '../../../core/components/ui/icons/index';
 import { CHAIN_TETRA } from '../../../core/utils/network';
 import { useQueryState } from '../../../core/hooks/use-query-state';
-
-const NETWORK_LABELS: Record<string, string> = {
-    '': 'Any Network',
-    [CHAIN.MAINNET]: 'Mainnet',
-    [CHAIN.TESTNET]: 'Testnet',
-    [CHAIN_TETRA]: 'Tetra'
-};
+import { getNetworkName } from '../../../core/hooks/use-wallet-network';
 
 interface NetworkPickerProps {
     triggerClassName?: string;
@@ -33,7 +27,7 @@ export function NetworkPicker({ triggerClassName }: NetworkPickerProps = {}) {
     }, [desired, tonConnectUI]);
 
     const value = desired || '';
-    const label = NETWORK_LABELS[value] ?? value;
+    const label = value === '' ? 'Any Network' : (getNetworkName(value) ?? value);
 
     return (
         <Select.Root value={value} onValueChange={setDesired} disabled={!!wallet}>
@@ -50,9 +44,9 @@ export function NetworkPicker({ triggerClassName }: NetworkPickerProps = {}) {
             </Select.Trigger>
             <Select.Content>
                 <Select.Item value="">Any Network</Select.Item>
-                <Select.Item value={CHAIN.MAINNET}>Mainnet</Select.Item>
-                <Select.Item value={CHAIN.TESTNET}>Testnet</Select.Item>
-                <Select.Item value={CHAIN_TETRA}>Tetra</Select.Item>
+                <Select.Item value={CHAIN.MAINNET}>{getNetworkName(CHAIN.MAINNET)}</Select.Item>
+                <Select.Item value={CHAIN.TESTNET}>{getNetworkName(CHAIN.TESTNET)}</Select.Item>
+                <Select.Item value={CHAIN_TETRA}>{getNetworkName(CHAIN_TETRA)}</Select.Item>
             </Select.Content>
         </Select.Root>
     );

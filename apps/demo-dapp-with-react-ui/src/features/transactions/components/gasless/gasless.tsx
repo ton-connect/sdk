@@ -4,23 +4,25 @@ import { Address } from '@ton/core';
 import { ButtonWithConnect } from '../../../../core/components/ui/button-with-connect';
 import { CenteredAmountInput } from '../../../../core/components/ui/centered-amount-input';
 import { Input } from '../../../../core/components/ui/input';
+import { RadioCards } from '../../../../core/components/ui/radio-cards';
 import { ResultBlock } from '../../../../core/components/ui/result-block';
 
-import { BalanceBlock } from './components/balance-block';
-import { TransferInfo } from './components/transfer-info';
-import { USDT_TICKER } from './lib/constants';
-import { useTransferUsdt, useUsdtWallet } from './hooks';
+import { BalanceBlock } from '../transfer-usdt/components/balance-block';
+import { TransferInfo } from '../transfer-usdt/components/transfer-info';
+import { useUsdtWallet } from '../transfer-usdt/hooks';
+import { USDT_TICKER } from '../transfer-usdt/lib/constants';
 
-const DEFAULT_AMOUNT = '0.01';
+import { useGasless, type GaslessMode } from './hooks';
+
+const DEFAULT_AMOUNT = '0.05';
 
 const toUserFacingAddress = (raw: string): string =>
     Address.parse(raw).toString({ urlSafe: true, bounceable: false });
 
-export const TransferUsdt = () => {
+export const Gasless = () => {
     const {
         senderAddress,
         network,
-        chain,
         tonBalance,
         isTonBalanceLoading,
         usdtBalance,
@@ -28,10 +30,11 @@ export const TransferUsdt = () => {
         jettonWallet,
         isJettonWalletLoading
     } = useUsdtWallet();
-    const { send, sending, result, clearResult } = useTransferUsdt();
+    const { send, sending, result, clearResult } = useGasless();
 
     const [amount, setAmount] = useState<string>(DEFAULT_AMOUNT);
     const [destination, setDestination] = useState<string>('');
+    const [mode, setMode] = useState<GaslessMode>('messages');
 
     useEffect(() => {
         setDestination(senderAddress ? toUserFacingAddress(senderAddress) : '');
@@ -47,16 +50,15 @@ export const TransferUsdt = () => {
         }
     }, [result]);
 
-    // Wallet connected, but on a chain we don't have a TonCenter endpoint or
-    // USDT master for. Surface as an in-button error so the user can't dispatch.
-    const networkError = network.isConnected && !chain ? 'Unsupported network' : null;
+    // The gasless lib pins the USDT master to mainnet, so testnet (or any
+    // other chain) is not supported.
+    const networkError = network.isConnected && !network.isMainnet ? 'Unsupported network' : null;
 
-    const canSend =
-        !!senderAddress && !!jettonWallet && !!destination && !!amount && !sending && !networkError;
+    const canSend = !!senderAddress && !!destination && !!amount && !sending && !networkError;
 
     const handleSend = async () => {
-        if (!senderAddress || !jettonWallet || !destination || networkError) return;
-        await send({ senderAddress, destination, jettonWallet, amount });
+        if (!senderAddress || !destination || networkError) return;
+        await send({ mode, destination, amount });
     };
 
     const handleMax = () => {
@@ -64,16 +66,16 @@ export const TransferUsdt = () => {
     };
 
     return (
-        <div className="flex flex-col gap-4" data-testid="transfer-usdt">
+        <div className="flex flex-col gap-4" data-testid="gasless">
             <div
                 className="flex flex-col items-center gap-1 py-7"
-                data-testid="transfer-usdt-amount-section"
+                data-testid="gasless-amount-section"
             >
                 <CenteredAmountInput
                     value={amount}
                     onValueChange={setAmount}
                     ticker={USDT_TICKER}
-                    data-testid="transfer-usdt-amount-input"
+                    data-testid="gasless-amount-input"
                 />
             </div>
 
@@ -82,24 +84,33 @@ export const TransferUsdt = () => {
                 loading={isUsdtBalanceLoading}
                 onMaxClick={handleMax}
                 maxDisabled={isUsdtBalanceLoading || !usdtBalance}
-                testIdPrefix="transfer-usdt-balance"
+                testIdPrefix="gasless-balance"
             />
 
-            <Input size="s" data-testid="transfer-usdt-destination-field">
+            <Input size="s" data-testid="gasless-destination-field">
                 <Input.Header>
-                    <Input.Title data-testid="transfer-usdt-destination-title">
-                        Destination
-                    </Input.Title>
+                    <Input.Title data-testid="gasless-destination-title">Destination</Input.Title>
                 </Input.Header>
                 <Input.Field>
                     <Input.Input
                         value={destination}
                         onChange={e => setDestination(e.target.value)}
                         placeholder="EQAB…"
-                        data-testid="transfer-usdt-destination-input"
+                        data-testid="gasless-destination-input"
                     />
                 </Input.Field>
             </Input>
+
+            <RadioCards value={mode} onChange={setMode} data-testid="gasless-mode">
+                <RadioCards.Item value="messages" data-testid="gasless-mode-messages">
+                    Messages
+                    <RadioCards.Tag>Default</RadioCards.Tag>
+                </RadioCards.Item>
+                <RadioCards.Item value="items" data-testid="gasless-mode-items">
+                    Items
+                    <RadioCards.Tag>Structured</RadioCards.Tag>
+                </RadioCards.Item>
+            </RadioCards>
 
             <ButtonWithConnect
                 size="l"
@@ -107,9 +118,9 @@ export const TransferUsdt = () => {
                 onClick={handleSend}
                 loading={sending}
                 disabled={!canSend}
-                data-testid="transfer-usdt-send-button"
+                data-testid="gasless-send-button"
             >
-                {networkError ?? 'Send USDT'}
+                {networkError ?? 'Send gasless'}
             </ButtonWithConnect>
 
             <TransferInfo
@@ -118,16 +129,16 @@ export const TransferUsdt = () => {
                 isJettonWalletLoading={isJettonWalletLoading}
                 tonBalance={tonBalance}
                 isTonBalanceLoading={isTonBalanceLoading}
-                testIdPrefix="transfer-usdt-info"
+                testIdPrefix="gasless-info"
             />
 
             {result && (
                 <ResultBlock
                     ref={resultRef}
-                    title="Transfer USDT"
+                    title="Gasless USDT"
                     result={result}
                     onDismiss={clearResult}
-                    testIdPrefix="transfer-usdt-result"
+                    testIdPrefix="gasless-result"
                 />
             )}
         </div>

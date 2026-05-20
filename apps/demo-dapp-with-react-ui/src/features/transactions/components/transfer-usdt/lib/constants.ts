@@ -10,11 +10,6 @@ export const USDT_MASTER_BY_CHAIN: Record<CHAIN, Address> = {
     [CHAIN.TESTNET]: Address.parse('kQD0GKBM8ZbryVk2aESmzfU6b9b_8era_IkvBSELujFZPsyy')
 };
 
-export const NETWORK_LABEL_BY_CHAIN: Record<CHAIN, string> = {
-    [CHAIN.MAINNET]: 'Mainnet',
-    [CHAIN.TESTNET]: 'Testnet'
-};
-
 export const USDT_DECIMALS = 6;
 export const USDT_TICKER = 'USDT';
 
