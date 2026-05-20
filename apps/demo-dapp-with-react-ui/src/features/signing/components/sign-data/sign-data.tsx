@@ -1,10 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
-import { FileSignature } from 'lucide-react';
 
-import { Button } from '../../../../core/components/ui/button';
 import { ButtonWithConnect } from '../../../../core/components/ui/button-with-connect';
-import { EmptyState } from '../../../../core/components/empty-state';
 import { JsonEditor } from '../../../../core/components/ui/json-editor';
 import { ResultBlock } from '../../../../core/components/ui/result-block';
 import { SettingsButton } from '../../../../core/components/ui/settings-button';
@@ -13,10 +9,6 @@ import { ConfigureHeader, ModeField, RetryAlert, SettingsModal } from './compone
 import { useSignData, useSignDataForm } from './hooks';
 
 export const SignData = () => {
-    const [tonConnectUI] = useTonConnectUI();
-    const wallet = useTonWallet();
-    const isConnected = !!wallet;
-
     const form = useSignDataForm();
     const ops = useSignData();
     const [settingsOpen, setSettingsOpen] = useState(false);
@@ -36,28 +28,7 @@ export const SignData = () => {
         ops.send(form.payload, { withConnect: form.withConnect });
     };
 
-    // With `withConnect` the user can prepare and dispatch a request before
-    // connecting — the connect modal opens with the request embedded in the URL.
-    const canDispatch = isConnected || form.withConnect;
     const disableAction = form.isInvalid || ops.sending || !!ops.retryPrompt;
-
-    if (!canDispatch) {
-        return (
-            <EmptyState
-                icon={FileSignature}
-                title="Connect a wallet"
-                description="A connected wallet is required to sign a payload. You can also enable “Embed request in connect” to dispatch before connecting."
-                action={
-                    <Button
-                        onClick={() => tonConnectUI.openModal()}
-                        data-testid="sign-data-connect-wallet-button"
-                    >
-                        Connect wallet
-                    </Button>
-                }
-            />
-        );
-    }
 
     return (
         <div className="flex w-full flex-col gap-2" data-testid="sign-data">

@@ -27,6 +27,8 @@ export { CopyButton } from './copy-button';
 export type { CopyButtonProps } from './copy-button';
 export { ResultBlock, ok, fail } from './result-block';
 export type { OperationResult } from './result-block';
+export { RetryAlert } from './retry-alert';
+export type { RetryAlertProps } from './retry-alert';
 export { CenteredAmountInput } from './centered-amount-input';
 export type { CenteredAmountInputProps } from './centered-amount-input';
 export * from './icons';
