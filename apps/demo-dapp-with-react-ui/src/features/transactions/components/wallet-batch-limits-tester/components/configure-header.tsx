@@ -11,8 +11,14 @@ export const ConfigureHeader = ({ onReset }: ConfigureHeaderProps) => {
     const isMobile = useIsMobile();
 
     return (
-        <div className="flex w-full flex-col gap-2 md:flex-row md:items-center md:justify-between">
-            <h3 className="mb-3 pl-1 text-lg font-semibold text-foreground md:mb-0">
+        <div
+            className="flex w-full flex-col gap-2 md:flex-row md:items-center md:justify-between"
+            data-testid="batch-limits-configure-header"
+        >
+            <h3
+                className="mb-3 pl-1 text-lg font-semibold text-foreground md:mb-0"
+                data-testid="batch-limits-configure-title"
+            >
                 Configure request
             </h3>
             <Button

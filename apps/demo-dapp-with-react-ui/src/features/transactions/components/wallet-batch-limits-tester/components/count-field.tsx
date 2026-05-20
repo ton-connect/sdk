@@ -11,9 +11,9 @@ interface CountFieldProps {
 const PRESETS = [1, 4, 5, 255, 256];
 
 export const CountField: FC<CountFieldProps> = ({ count, onChange }) => (
-    <Input size="s">
+    <Input size="s" data-testid="batch-limits-count-field">
         <Input.Header>
-            <Input.Title>Message count</Input.Title>
+            <Input.Title data-testid="batch-limits-count-title">Message count</Input.Title>
         </Input.Header>
         <Input.Field>
             <Input.Input

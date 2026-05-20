@@ -6,6 +6,8 @@ export const BatchLimitsPage = () => (
         title="Batch limits"
         subtitle="Probe how many messages a wallet accepts in a single sendTransaction or signMessage request."
     >
-        <WalletBatchLimitsTester />
+        <div data-testid="batch-limits-page">
+            <WalletBatchLimitsTester />
+        </div>
     </Layout>
 );
