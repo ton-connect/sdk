@@ -1,7 +1,7 @@
 import { forwardRef } from 'react';
 import type { ComponentPropsWithoutRef, ComponentRef } from 'react';
 
-import { cn } from '../../../lib/utils';
+import { cn } from '../../../utils/cn';
 
 export type TextareaSize = 's' | 'm' | 'l';
 

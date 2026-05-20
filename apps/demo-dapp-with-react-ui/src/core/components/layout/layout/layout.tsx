@@ -35,7 +35,7 @@ import {
     SidebarSeparator,
     SidebarTrigger,
     useSidebar
-} from '../../sidebar/index';
+} from '../../shared/sidebar/index';
 import { AppLogo } from '../app-logo';
 import { ThemeSwitcher } from '../theme-switcher/index';
 

@@ -1,7 +1,7 @@
 import { forwardRef } from 'react';
 import type { ComponentProps, ReactNode } from 'react';
 
-import { cn } from '../../../lib/utils';
+import { cn } from '../../../utils/cn';
 
 export type ButtonSize = 'xs' | 's' | 'm' | 'l' | 'icon' | 'unset';
 export type ButtonBorderRadius = 's' | 'm' | 'l' | 'xl' | '2xl' | 'full';

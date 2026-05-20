@@ -1,7 +1,7 @@
 import { CHAIN, useTonWallet } from '@tonconnect/ui-react';
 
 import { CHAIN_TETRA } from '../utils/network';
-import type { SupportedChainId } from '../lib/ton-endpoints';
+import type { SupportedChainId } from '../utils/ton-endpoints';
 
 export type { SupportedChainId };
 

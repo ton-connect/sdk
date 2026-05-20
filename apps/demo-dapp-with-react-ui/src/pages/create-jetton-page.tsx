@@ -1,5 +1,5 @@
 import { Layout } from '../core/components/index';
-import { CreateJettonDemo } from '../features/utilities/index';
+import { CreateJetton } from '../features/utilities/index';
 
 export const CreateJettonPage = () => (
     <Layout
@@ -7,6 +7,6 @@ export const CreateJettonPage = () => (
         subtitle="Deploy a jetton and mint the initial supply via the protected backend, then sign the transaction in your wallet."
         data-testid="create-jetton-page"
     >
-        <CreateJettonDemo />
+        <CreateJetton />
     </Layout>
 );

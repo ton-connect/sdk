@@ -8,9 +8,9 @@ import { formatUnits } from '../../../../../core/utils/units';
 import { useJettonBalance } from '../../../../../core/hooks/use-jetton-balance';
 import { useTonBalance } from '../../../../../core/hooks/use-ton-balance';
 import { useWalletNetwork } from '../../../../../core/hooks/use-wallet-network';
-import { endpointByChain } from '../../../../../core/lib/ton-endpoints';
+import { endpointByChain } from '../../../../../core/utils/ton-endpoints';
 
-import { USDT_DECIMALS, USDT_MASTER_BY_CHAIN } from '../lib/constants';
+import { USDT_DECIMALS, USDT_MASTER_BY_CHAIN } from '../utils/constants';
 
 /**
  * Composes wallet-derived state for the USDT transfer form. Delegates raw

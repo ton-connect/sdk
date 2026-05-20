@@ -1,7 +1,7 @@
 import { createContext, forwardRef, useContext, useEffect, useLayoutEffect, useState } from 'react';
 import type { ComponentPropsWithoutRef, ComponentRef } from 'react';
 
-import { cn } from '../../../lib/utils';
+import { cn } from '../../../utils/cn';
 import { useImageLoadingStatus } from './use-image-loading-status';
 import type { ImageLoadingStatus } from './use-image-loading-status';
 

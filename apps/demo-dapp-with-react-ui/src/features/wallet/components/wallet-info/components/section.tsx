@@ -1,6 +1,6 @@
 import type { FC, ReactNode } from 'react';
 
-import { InfoBlock } from '../../../../../core/components/ui/info-block';
+import { InfoBlock } from '../../../../../core/components/shared/info-block';
 
 interface SectionProps {
     title: string;

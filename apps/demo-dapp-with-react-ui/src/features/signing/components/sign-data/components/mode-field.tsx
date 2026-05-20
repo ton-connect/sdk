@@ -1,6 +1,6 @@
 import { Tabs } from '../../../../../core/components/ui/tabs';
 
-import { isSignDataMode, type SignDataMode } from '../lib/payloads';
+import { isSignDataMode, type SignDataMode } from '../utils/payloads';
 
 interface ModeFieldProps {
     mode: SignDataMode;

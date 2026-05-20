@@ -2,7 +2,7 @@ import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'r
 import { createPortal } from 'react-dom';
 import type { ComponentPropsWithoutRef, ComponentRef, FC, ReactNode } from 'react';
 
-import { cn } from '../../../lib/utils';
+import { cn } from '../../../utils/cn';
 import { Button } from '../button';
 import type { ButtonProps } from '../button';
 import { SelectContext, useSelectContext } from './use-select-context';

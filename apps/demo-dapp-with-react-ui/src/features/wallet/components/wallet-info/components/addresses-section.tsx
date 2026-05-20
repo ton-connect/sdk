@@ -2,7 +2,7 @@ import type { FC } from 'react';
 
 import { CopyButton } from '../../../../../core/components/ui/copy-button';
 
-import type { AddressFormat } from '../lib/address-formats';
+import type { AddressFormat } from '../utils/address-formats';
 import { Section } from './section';
 
 interface AddressesSectionProps {

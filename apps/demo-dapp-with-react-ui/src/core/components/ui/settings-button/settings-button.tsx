@@ -1,7 +1,7 @@
 import type { ComponentProps, FC } from 'react';
 import { SlidersHorizontal } from 'lucide-react';
 
-import { cn } from '../../../lib/utils';
+import { cn } from '../../../utils/cn';
 import { Button } from '../button';
 
 export interface SettingsButtonProps extends ComponentProps<typeof Button> {

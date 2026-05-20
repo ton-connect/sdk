@@ -1,5 +1,5 @@
 import type { ComponentProps, FC } from 'react';
-import { cn } from '../../../lib/utils';
+import { cn } from '../../../utils/cn';
 import { Check, Copy } from 'lucide-react';
 
 import { useCopy } from '../../../hooks/use-copy';

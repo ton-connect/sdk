@@ -8,8 +8,8 @@ import { Modal } from '../../../../core/components/ui/modal';
 import { Skeleton } from '../../../../core/components/ui/skeleton';
 import { useTonBalance } from '../../../../core/hooks/use-ton-balance';
 import { useWalletNetwork } from '../../../../core/hooks/use-wallet-network';
-import { tonviewerBaseByChain } from '../../../../core/lib/ton-endpoints';
-import { truncateAddress } from '../../../../core/lib/truncate-address';
+import { tonviewerBaseByChain } from '../../../../core/utils/ton-endpoints';
+import { truncateAddress } from '../../../../core/utils/truncate-address';
 
 import { WalletInfo } from '../wallet-info';
 

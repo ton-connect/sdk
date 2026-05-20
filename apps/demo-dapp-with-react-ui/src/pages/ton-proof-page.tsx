@@ -1,5 +1,5 @@
 import { Layout } from '../core/components/index';
-import { TonProofDemo } from '../features/signing/index';
+import { TonProof } from '../features/signing/index';
 
 export const TonProofPage = () => (
     <Layout title="Ton proof" data-testid="ton-proof-page">
@@ -11,7 +11,7 @@ export const TonProofPage = () => (
                 Authenticate the connected wallet against the demo backend using ton_proof signature
                 verification.
             </p>
-            <TonProofDemo />
+            <TonProof />
         </div>
     </Layout>
 );

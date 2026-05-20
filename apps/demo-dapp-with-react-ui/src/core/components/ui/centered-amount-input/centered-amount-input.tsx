@@ -1,7 +1,7 @@
 import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import type { ComponentProps, FC } from 'react';
 
-import { cn } from '../../../lib/utils';
+import { cn } from '../../../utils/cn';
 
 const MIN_FONT_SCALE = 0.5;
 

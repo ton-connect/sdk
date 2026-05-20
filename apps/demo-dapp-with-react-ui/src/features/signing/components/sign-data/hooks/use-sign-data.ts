@@ -6,8 +6,8 @@ import {
     useTonWallet
 } from '@tonconnect/ui-react';
 
-import { fail, ok, type OperationResult } from '../../../../../core/components/ui/result-block';
-import { TonProofDemoApi } from '../../../../../core/lib/ton-proof-demo-api';
+import { fail, ok, type OperationResult } from '../../../../../core/components/shared/result-block';
+import { TonProofApi } from '../../../../../core/utils/ton-proof-demo-api';
 
 /**
  * Embedded-request retry signal: connect happened, but no signature came back.
@@ -56,7 +56,7 @@ export const useSignData = () => {
                 }
 
                 const verification = wallet
-                    ? await TonProofDemoApi.checkSignData(response, wallet.account)
+                    ? await TonProofApi.checkSignData(response, wallet.account)
                     : null;
 
                 setResult(ok({ response, verification }));

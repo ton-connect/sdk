@@ -1,7 +1,7 @@
 import { forwardRef } from 'react';
 import type { ComponentProps } from 'react';
 
-import { cn } from '../../../lib/utils';
+import { cn } from '../../../utils/cn';
 
 export interface SkeletonProps extends ComponentProps<'div'> {
     width?: string | number;

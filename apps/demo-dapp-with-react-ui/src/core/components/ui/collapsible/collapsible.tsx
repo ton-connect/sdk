@@ -2,7 +2,7 @@ import { forwardRef } from 'react';
 import type { ComponentPropsWithoutRef, ComponentRef } from 'react';
 import { Collapsible as CollapsiblePrimitive } from 'radix-ui';
 
-import { cn } from '../../../lib/utils';
+import { cn } from '../../../utils/cn';
 
 const CollapsibleRoot = CollapsiblePrimitive.Root;
 

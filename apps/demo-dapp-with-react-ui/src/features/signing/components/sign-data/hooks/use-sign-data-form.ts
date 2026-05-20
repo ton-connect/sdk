@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import type { SignDataPayload } from '@tonconnect/ui-react';
 
-import { defaultPayloadFor, isSignDataMode, type SignDataMode } from '../lib/payloads';
+import { defaultPayloadFor, isSignDataMode, type SignDataMode } from '../utils/payloads';
 
 const stringify = (value: SignDataPayload): string => JSON.stringify(value, null, 2);
 

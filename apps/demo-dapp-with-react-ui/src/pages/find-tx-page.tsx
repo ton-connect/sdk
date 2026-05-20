@@ -1,5 +1,5 @@
 import { Layout } from '../core/components/index';
-import { FindTransactionDemo } from '../features/utilities/index';
+import { FindTx } from '../features/utilities/index';
 
 export const FindTxPage = () => (
     <Layout title="Find transaction" data-testid="find-tx-page">
@@ -10,7 +10,7 @@ export const FindTxPage = () => (
             >
                 Look up the on-chain transaction that corresponds to an external-in message BOC.
             </p>
-            <FindTransactionDemo />
+            <FindTx />
         </div>
     </Layout>
 );

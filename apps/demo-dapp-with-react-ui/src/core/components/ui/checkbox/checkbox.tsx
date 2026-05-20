@@ -3,7 +3,7 @@ import type { ComponentPropsWithoutRef, ComponentRef } from 'react';
 import { Checkbox as CheckboxPrimitive } from 'radix-ui';
 import { Check, Minus } from 'lucide-react';
 
-import { cn } from '../../../lib/utils';
+import { cn } from '../../../utils/cn';
 
 export type CheckboxProps = ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>;
 

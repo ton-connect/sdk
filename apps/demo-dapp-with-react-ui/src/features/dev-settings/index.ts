@@ -1,1 +1,1 @@
-export { DevPanel } from './components/dev-panel';
+export { DevPanel } from './components/dev-panel/dev-panel';

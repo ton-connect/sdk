@@ -1,1 +1,1 @@
-export { CreateJettonDemo } from './create-jetton';
+export { CreateJetton } from './create-jetton';

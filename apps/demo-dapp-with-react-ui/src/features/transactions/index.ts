@@ -1,4 +1,4 @@
-export { TransactionRequest } from './components/transaction-request';
+export { SendTransaction } from './components/send-transaction';
 export { Gasless } from './components/gasless';
-export { WalletBatchLimitsTester } from './components/wallet-batch-limits-tester';
+export { WalletBatchLimits } from './components/wallet-batch-limits';
 export { TransferUsdt } from './components/transfer-usdt';

@@ -1,9 +1,9 @@
 import type { FC } from 'react';
 
-import { InfoBlock } from '../../../../../core/components/ui/info-block';
+import { InfoBlock } from '../../../../../core/components/shared/info-block';
 import type { WalletNetwork } from '../../../../../core/hooks/use-wallet-network';
 
-import { TON_TICKER } from '../lib/constants';
+import { TON_TICKER } from '../utils/constants';
 
 interface CreateJettonInfoProps {
     network: WalletNetwork;

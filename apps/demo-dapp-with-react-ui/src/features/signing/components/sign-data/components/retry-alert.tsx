@@ -1,4 +1,4 @@
-import { RetryAlert as CoreRetryAlert } from '../../../../../core/components/ui/retry-alert';
+import { RetryAlert as CoreRetryAlert } from '../../../../../core/components/shared/retry-alert';
 
 import type { RetryPrompt } from '../hooks';
 

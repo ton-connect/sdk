@@ -1,3 +1,3 @@
-export { FindTransactionDemo } from './components/find-transaction-demo';
-export { MerkleExample } from './components/merkle-example';
-export { CreateJettonDemo } from './components/create-jetton';
+export { FindTx } from './components/find-tx/find-tx';
+export { Merkle } from './components/merkle/merkle';
+export { CreateJetton } from './components/create-jetton';

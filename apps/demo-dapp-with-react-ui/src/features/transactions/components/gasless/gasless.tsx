@@ -5,12 +5,12 @@ import { ButtonWithConnect } from '../../../../core/components/ui/button-with-co
 import { CenteredAmountInput } from '../../../../core/components/ui/centered-amount-input';
 import { Input } from '../../../../core/components/ui/input';
 import { RadioCards } from '../../../../core/components/ui/radio-cards';
-import { ResultBlock } from '../../../../core/components/ui/result-block';
+import { ResultBlock } from '../../../../core/components/shared/result-block';
 
 import { BalanceBlock } from '../transfer-usdt/components/balance-block';
 import { TransferInfo } from '../transfer-usdt/components/transfer-info';
 import { useUsdtWallet } from '../transfer-usdt/hooks';
-import { USDT_TICKER } from '../transfer-usdt/lib/constants';
+import { USDT_TICKER } from '../transfer-usdt/utils/constants';
 
 import { useGasless, type GaslessMode } from './hooks';
 

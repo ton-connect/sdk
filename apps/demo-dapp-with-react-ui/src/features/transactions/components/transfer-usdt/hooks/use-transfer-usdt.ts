@@ -3,7 +3,7 @@ import { useTonConnectUI } from '@tonconnect/ui-react';
 import { Address, beginCell, toNano } from '@ton/core';
 import { storeJettonTransferMessage } from '@ton-community/assets-sdk';
 
-import { fail, ok, type OperationResult } from '../../../../../core/components/ui/result-block';
+import { fail, ok, type OperationResult } from '../../../../../core/components/shared/result-block';
 import { parseUnits } from '../../../../../core/utils/units';
 
 import {
@@ -11,7 +11,7 @@ import {
     FORWARD_AMOUNT_TON,
     USDT_DECIMALS,
     VALID_UNTIL_SECONDS
-} from '../lib/constants';
+} from '../utils/constants';
 
 interface SendArgs {
     senderAddress: string;

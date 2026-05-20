@@ -1,5 +1,5 @@
 import { Layout } from '../core/components/index';
-import { WalletBatchLimitsTester } from '../features/transactions/index';
+import { WalletBatchLimits } from '../features/transactions/index';
 
 export const BatchLimitsPage = () => (
     <Layout
@@ -7,6 +7,6 @@ export const BatchLimitsPage = () => (
         subtitle="Probe how many messages a wallet accepts in a single sendTransaction or signMessage request."
         data-testid="batch-limits-page"
     >
-        <WalletBatchLimitsTester />
+        <WalletBatchLimits />
     </Layout>
 );

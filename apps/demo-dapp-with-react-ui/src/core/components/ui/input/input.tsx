@@ -1,7 +1,7 @@
 import { createContext, useContext, useMemo } from 'react';
 import type { FC, ReactNode, ComponentProps, ChangeEvent } from 'react';
 
-import { cn } from '../../../lib/utils';
+import { cn } from '../../../utils/cn';
 import { Skeleton } from '../skeleton';
 import { useInputResize } from './use-input-resize';
 import type { InputSize } from './use-input-resize';

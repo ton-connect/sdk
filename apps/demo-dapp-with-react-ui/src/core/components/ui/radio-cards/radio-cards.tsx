@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react';
 import type { ComponentProps, FC, ReactNode } from 'react';
 
-import { cn } from '../../../lib/utils';
+import { cn } from '../../../utils/cn';
 
 interface RadioCardsContextValue {
     value: string;

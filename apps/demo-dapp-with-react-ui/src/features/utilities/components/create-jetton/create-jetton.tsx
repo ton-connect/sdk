@@ -2,16 +2,16 @@ import { useEffect, useRef } from 'react';
 
 import { ButtonWithConnect } from '../../../../core/components/ui/button-with-connect';
 import { JsonEditor } from '../../../../core/components/ui/json-editor';
-import { ResultBlock } from '../../../../core/components/ui/result-block';
+import { ResultBlock } from '../../../../core/components/shared/result-block';
 
-import { useCreateJetton } from '../../hooks/use-create-jetton';
+import { useCreateJetton } from './hooks/use-create-jetton';
 import { ConfigureHeader } from './components/configure-header';
 import { CreateJettonInfo } from './components/create-jetton-info';
 import { JettonPreview } from './components/jetton-preview';
 import { useCreateJettonForm } from './hooks/use-create-jetton-form';
 import { useCreateJettonWallet } from './hooks/use-create-jetton-wallet';
 
-export const CreateJettonDemo = () => {
+export const CreateJetton = () => {
     const { senderAddress, network, tonBalance, isTonBalanceLoading } = useCreateJettonWallet();
     const { mint, sending, result, clearResult, canMint, needsTonProof } = useCreateJetton();
     const form = useCreateJettonForm();

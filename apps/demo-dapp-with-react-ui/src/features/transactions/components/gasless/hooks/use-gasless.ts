@@ -2,13 +2,13 @@ import { useCallback, useState } from 'react';
 import { useTonConnectUI } from '@tonconnect/ui-react';
 import { Address } from '@ton/core';
 
-import { fail, ok, type OperationResult } from '../../../../../core/components/ui/result-block';
+import { fail, ok, type OperationResult } from '../../../../../core/components/shared/result-block';
 import { parseUnits } from '../../../../../core/utils/units';
 
-import { USDT_DECIMALS } from '../../transfer-usdt/lib/constants';
+import { USDT_DECIMALS } from '../../transfer-usdt/utils/constants';
 
-import { sendItems } from '../lib/send-items';
-import { sendMessages } from '../lib/send-messages';
+import { sendItems } from '../utils/send-items';
+import { sendMessages } from '../utils/send-messages';
 
 export type GaslessMode = 'messages' | 'items';
 

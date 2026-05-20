@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 
 import { Section } from './section';
-import type { NormalizedFeature } from '../lib/feature-labels';
+import type { NormalizedFeature } from '../utils/feature-labels';
 
 interface FeaturesSectionProps {
     features: NormalizedFeature[];

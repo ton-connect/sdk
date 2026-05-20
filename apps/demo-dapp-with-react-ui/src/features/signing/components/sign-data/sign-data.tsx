@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { ButtonWithConnect } from '../../../../core/components/ui/button-with-connect';
 import { JsonEditor } from '../../../../core/components/ui/json-editor';
-import { ResultBlock } from '../../../../core/components/ui/result-block';
+import { ResultBlock } from '../../../../core/components/shared/result-block';
 import { SettingsButton } from '../../../../core/components/ui/settings-button';
 
 import { ConfigureHeader, ModeField, RetryAlert, SettingsModal } from './components';

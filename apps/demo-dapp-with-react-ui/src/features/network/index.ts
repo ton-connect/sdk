@@ -1,1 +1,1 @@
-export { NetworkPicker } from './components/network-picker';
+export { NetworkPicker } from './components/network-picker/network-picker';

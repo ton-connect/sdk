@@ -1,5 +1,5 @@
 import { Layout } from '../core/components/index';
-import { MerkleExample } from '../features/utilities/index';
+import { Merkle } from '../features/utilities/index';
 
 export const MerklePage = () => (
     <Layout title="Merkle proof" data-testid="merkle-page">
@@ -11,7 +11,7 @@ export const MerklePage = () => (
                 Send a transaction containing a merkle proof or merkle update exotic cell to the
                 example contract.
             </p>
-            <MerkleExample />
+            <Merkle />
         </div>
     </Layout>
 );

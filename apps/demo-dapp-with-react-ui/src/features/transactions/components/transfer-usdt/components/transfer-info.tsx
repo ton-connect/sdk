@@ -2,11 +2,11 @@ import type { FC } from 'react';
 import { ExternalLink } from 'lucide-react';
 
 import { CopyButton } from '../../../../../core/components/ui/copy-button';
-import { InfoBlock } from '../../../../../core/components/ui/info-block';
+import { InfoBlock } from '../../../../../core/components/shared/info-block';
 import type { WalletNetwork } from '../../../../../core/hooks/use-wallet-network';
-import { tonviewerBaseByChain } from '../../../../../core/lib/ton-endpoints';
+import { tonviewerBaseByChain } from '../../../../../core/utils/ton-endpoints';
 
-import { TON_TICKER } from '../lib/constants';
+import { TON_TICKER } from '../utils/constants';
 
 interface TransferInfoProps {
     network: WalletNetwork;

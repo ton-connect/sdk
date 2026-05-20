@@ -3,15 +3,15 @@ import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { IdCard } from 'lucide-react';
 
 import { Button } from '../../../../core/components/ui/button';
-import { EmptyState } from '../../../../core/components/empty-state';
+import { EmptyState } from '../../../../core/components/shared/empty-state';
 import { useTonBalance } from '../../../../core/hooks/use-ton-balance';
 
 import { AddressesSection } from './components/addresses-section';
 import { DeviceSection } from './components/device-section';
 import { FeaturesSection } from './components/features-section';
 import { NetworkSection } from './components/network-section';
-import { buildAddressFormats } from './lib/address-formats';
-import { normalizeFeatures } from './lib/feature-labels';
+import { buildAddressFormats } from './utils/address-formats';
+import { normalizeFeatures } from './utils/feature-labels';
 
 export const WalletInfo = () => {
     const wallet = useTonWallet();

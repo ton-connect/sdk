@@ -1,7 +1,7 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
-import { PreserveSearchNavigate } from '../../router/preserve-search-navigate';
-import { TonConnectSettingsSync } from '../../../../features/dev-settings/components/ton-connect-settings-sync';
+import { PreserveSearchNavigate } from './preserve-search-navigate';
+import { TonConnectSettingsSync } from '../../../../features/dev-settings/components/ton-connect-settings-sync/ton-connect-settings-sync';
 
 import {
     BatchLimitsPage,

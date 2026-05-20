@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 
 import type { CreateJettonRequestDto } from '../../../../../server/dto/create-jetton-request-dto';
-import { DEFAULT_JETTON_PRESET } from '../../../lib/default-jetton-preset';
+import { DEFAULT_JETTON_PRESET } from '../utils/default-jetton-preset';
 
 const stringify = (value: CreateJettonRequestDto): string => JSON.stringify(value, null, 2);
 
