@@ -1,4 +1,4 @@
-import { TonConnectButton } from '@tonconnect/ui-react';
+import { TonConnectButton, useTonWallet } from '@tonconnect/ui-react';
 import {
     BookOpen,
     CircleDollarSign,
@@ -17,6 +17,7 @@ import {
 import { Link, NavLink } from 'react-router-dom';
 import type { ComponentType, FC, ReactNode } from 'react';
 
+import { BalanceCard } from '../../../../features/wallet';
 import { usePreserveSearch } from '../../../hooks/use-preserve-search';
 
 import {
@@ -85,6 +86,7 @@ const EXTERNAL_LINKS: readonly {
 const AppSidebar: FC = () => {
     const { setOpenMobile, isMobile } = useSidebar();
     const withSearch = usePreserveSearch();
+    const wallet = useTonWallet();
 
     const closeOnMobile = () => {
         if (isMobile) setOpenMobile(false);
@@ -104,6 +106,16 @@ const AppSidebar: FC = () => {
             </SidebarHeader>
 
             <SidebarContent>
+                {wallet && (
+                    <>
+                        <SidebarGroup>
+                            <BalanceCard />
+                        </SidebarGroup>
+
+                        <SidebarSeparator />
+                    </>
+                )}
+
                 {NAV_GROUPS.map((group, i) => (
                     <SidebarGroup key={group.label ?? `group-${i}`}>
                         {group.label && <SidebarGroupLabel>{group.label}</SidebarGroupLabel>}
