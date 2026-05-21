@@ -11,6 +11,8 @@ interface TransferSettingsModalProps {
     onGaslessChange: (next: boolean) => void;
     gaslessMode: GaslessMode;
     onGaslessModeChange: (next: GaslessMode) => void;
+    withConnect: boolean;
+    onWithConnectChange: (next: boolean) => void;
 }
 
 export const TransferSettingsModal = ({
@@ -19,10 +21,28 @@ export const TransferSettingsModal = ({
     gasless,
     onGaslessChange,
     gaslessMode,
-    onGaslessModeChange
+    onGaslessModeChange,
+    withConnect,
+    onWithConnectChange
 }: TransferSettingsModalProps) => (
     <Modal open={open} onOpenChange={onOpenChange} title="Settings">
         <div className="flex flex-col gap-4" data-testid="transfer-usdt-settings-modal">
+            <label className="flex cursor-pointer flex-col gap-1">
+                <span className="flex items-center gap-2 text-sm text-foreground">
+                    <Checkbox
+                        checked={withConnect}
+                        onCheckedChange={v => onWithConnectChange(v === true)}
+                        data-testid="transfer-usdt-settings-embed-checkbox"
+                    />
+                    Embed request in connect
+                </span>
+                <span className="pl-6 text-xs text-secondary-foreground">
+                    Bundle the transfer into the connect URL (connect + send in one screen). Works
+                    for standard transfers; gasless uses{' '}
+                    <code className="text-foreground">signMessage</code> separately.
+                </span>
+            </label>
+
             <label className="flex cursor-pointer flex-col gap-1">
                 <span className="flex items-center gap-2 text-sm text-foreground">
                     <Checkbox

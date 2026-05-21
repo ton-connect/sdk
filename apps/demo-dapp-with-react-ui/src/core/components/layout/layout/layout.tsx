@@ -1,24 +1,14 @@
 import { TonConnectButton, useTonWallet } from '@tonconnect/ui-react';
-import {
-    BookOpen,
-    CircleDollarSign,
-    ExternalLink,
-    FileSignature,
-    Github,
-    Search,
-    MessageSquare,
-    Send,
-    Settings,
-    ShieldCheck,
-    Sparkles,
-    TreePine,
-    Wallet
-} from 'lucide-react';
+import { BookOpen, ExternalLink, Github, Settings } from 'lucide-react';
 import { Link, NavLink } from 'react-router-dom';
 import type { ComponentType, FC, ReactNode } from 'react';
 
+import { DEMO_NAV_GROUPS, TON_CONNECT_DOCS } from '../../../config/demo-nav';
 import { BalanceCard } from '../../../../features/wallet';
 import { usePreserveSearch } from '../../../hooks/use-preserve-search';
+
+import { PageHeading } from './page-heading';
+import { SidebarNavItem } from './sidebar-nav-item';
 
 import {
     Sidebar,
@@ -42,39 +32,12 @@ import { ThemeSwitcher } from '../theme-switcher/index';
 interface LayoutProps {
     children: ReactNode;
     title?: string | ReactNode;
+    /** How-to doc opened from the page title (desktop header + mobile title row). */
+    docHref?: string;
     subtitle?: ReactNode;
     /** Stable test id applied to the `<main>` content element. */
     'data-testid'?: string;
 }
-
-type NavLinkSpec = { to: string; label: string; icon: ComponentType<{ className?: string }> };
-
-const NAV_GROUPS: readonly { label?: string; links: readonly NavLinkSpec[] }[] = [
-    {
-        label: 'Transactions',
-        links: [
-            { to: '/tx-form', label: 'Send transaction', icon: Send },
-            { to: '/sign-message', label: 'Sign message', icon: MessageSquare },
-            { to: '/batch-limits', label: 'Batch limits', icon: Sparkles },
-            { to: '/transfer-usdt', label: 'Transfer USDT', icon: CircleDollarSign }
-        ]
-    },
-    {
-        label: 'Signing',
-        links: [
-            { to: '/sign-data', label: 'Sign data', icon: FileSignature },
-            { to: '/ton-proof', label: 'Ton proof', icon: ShieldCheck }
-        ]
-    },
-    {
-        label: 'Utilities',
-        links: [
-            { to: '/find-tx', label: 'Find transaction', icon: Search },
-            { to: '/merkle', label: 'Merkle proof', icon: TreePine },
-            { to: '/create-jetton', label: 'Create jetton', icon: Wallet }
-        ]
-    }
-];
 
 const EXTERNAL_LINKS: readonly {
     href: string;
@@ -82,7 +45,7 @@ const EXTERNAL_LINKS: readonly {
     icon: ComponentType<{ className?: string }>;
 }[] = [
     {
-        href: 'https://docs.ton.org/applications/ton-connect/overview',
+        href: TON_CONNECT_DOCS.overview,
         label: 'Docs',
         icon: BookOpen
     },
@@ -122,21 +85,17 @@ const AppSidebar: FC = () => {
                     </>
                 )}
 
-                {NAV_GROUPS.map((group, i) => (
-                    <SidebarGroup key={group.label ?? `group-${i}`}>
-                        {group.label && <SidebarGroupLabel>{group.label}</SidebarGroupLabel>}
+                {DEMO_NAV_GROUPS.map(group => (
+                    <SidebarGroup key={group.label}>
+                        <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
                         <SidebarMenu>
-                            {group.links.map(({ to, label, icon: Icon }) => (
-                                <SidebarMenuItem key={to}>
-                                    <NavLink to={withSearch(to)} end onClick={closeOnMobile}>
-                                        {({ isActive }) => (
-                                            <SidebarMenuButton isActive={isActive}>
-                                                <Icon />
-                                                <span>{label}</span>
-                                            </SidebarMenuButton>
-                                        )}
-                                    </NavLink>
-                                </SidebarMenuItem>
+                            {group.links.map(link => (
+                                <SidebarNavItem
+                                    key={link.to}
+                                    link={link}
+                                    to={withSearch(link.to)}
+                                    onNavigate={closeOnMobile}
+                                />
                             ))}
                         </SidebarMenu>
                     </SidebarGroup>
@@ -174,7 +133,13 @@ const AppSidebar: FC = () => {
     );
 };
 
-export const Layout: FC<LayoutProps> = ({ children, title, subtitle, 'data-testid': testId }) => {
+export const Layout: FC<LayoutProps> = ({
+    children,
+    title,
+    docHref,
+    subtitle,
+    'data-testid': testId
+}) => {
     return (
         <SidebarProvider>
             <AppSidebar />
@@ -185,9 +150,11 @@ export const Layout: FC<LayoutProps> = ({ children, title, subtitle, 'data-testi
                     className="sticky top-0 z-10 flex h-14 items-center gap-3 border-b border-tertiary bg-background/80 px-4 backdrop-blur"
                 >
                     <AppLogo className="size-8 md:hidden" />
-                    <div className="hidden text-lg font-semibold md:flex md:items-center md:justify-center">
-                        {typeof title === 'string' ? <h1>{title}</h1> : title}
-                    </div>
+                    {title != null && (
+                        <div className="hidden min-w-0 md:flex md:items-center">
+                            <PageHeading title={title} docHref={docHref} />
+                        </div>
+                    )}
 
                     <div className="ml-auto">
                         <TonConnectButton />
@@ -200,13 +167,15 @@ export const Layout: FC<LayoutProps> = ({ children, title, subtitle, 'data-testi
 
                 <main className="mx-auto w-full max-w-4xl flex-1 p-4" data-testid={testId}>
                     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 py-2 md:py-6">
-                        <div className="flex w-full items-center justify-start md:hidden">
-                            {typeof title === 'string' ? (
-                                <h1 className="text-lg font-semibold">{title}</h1>
-                            ) : (
-                                title
-                            )}
-                        </div>
+                        {title != null && (
+                            <div className="flex w-full items-baseline justify-start md:hidden">
+                                <PageHeading
+                                    title={title}
+                                    docHref={docHref}
+                                    className="flex w-full min-w-0 items-baseline gap-1.5"
+                                />
+                            </div>
+                        )}
                         {subtitle && (
                             <p className="text-[15px] leading-relaxed text-secondary-foreground">
                                 {subtitle}

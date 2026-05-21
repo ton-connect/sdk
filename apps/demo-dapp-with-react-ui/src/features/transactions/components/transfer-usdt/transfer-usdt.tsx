@@ -75,7 +75,8 @@ export const TransferUsdt = () => {
             jettonWallet: jettonWallet ?? '',
             amount,
             gasless: form.gasless,
-            gaslessMode: form.gaslessMode
+            gaslessMode: form.gaslessMode,
+            withConnect: form.withConnect
         });
     };
 
@@ -135,6 +136,7 @@ export const TransferUsdt = () => {
                     onClick={handleSend}
                     loading={sending}
                     disabled={!canSend}
+                    skipConnectPrompt={form.withConnect}
                     data-testid="transfer-usdt-send-button"
                 >
                     {buttonLabel}
@@ -152,6 +154,8 @@ export const TransferUsdt = () => {
                 onGaslessChange={form.setGasless}
                 gaslessMode={form.gaslessMode}
                 onGaslessModeChange={form.setGaslessMode}
+                withConnect={form.withConnect}
+                onWithConnectChange={form.setWithConnect}
             />
 
             <TransferInfo

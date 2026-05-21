@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import type { SendTransactionRequest } from '@tonconnect/ui-react';
 import { useTonConnectUI } from '@tonconnect/ui-react';
 import { Address, beginCell, toNano } from '@ton/core';
 import { storeJettonTransferMessage } from '@ton-community/assets-sdk';
@@ -23,6 +24,26 @@ interface SendArgs {
     amount: string;
     gasless: boolean;
     gaslessMode: GaslessMode;
+    withConnect: boolean;
+}
+
+async function dispatchTransfer(
+    tonConnectUi: ReturnType<typeof useTonConnectUI>[0],
+    tx: SendTransactionRequest,
+    withConnect: boolean
+) {
+    if (withConnect) {
+        const embedded = await tonConnectUi.sendTransaction(tx, {
+            enableEmbeddedRequest: true
+        });
+        if (!embedded.hasResponse) {
+            return { ok: false as const, dispatched: embedded.connectResult.dispatched };
+        }
+        return { ok: true as const, response: embedded.response };
+    }
+
+    const response = await tonConnectUi.sendTransaction(tx);
+    return { ok: true as const, response };
 }
 
 export const useTransferUsdt = () => {
@@ -37,7 +58,8 @@ export const useTransferUsdt = () => {
             jettonWallet,
             amount,
             gasless,
-            gaslessMode
+            gaslessMode,
+            withConnect
         }: SendArgs) => {
             const amountUsdt = parseUnits(amount, USDT_DECIMALS);
             if (!(amountUsdt > 0)) return;
@@ -95,7 +117,7 @@ export const useTransferUsdt = () => {
                     .toBoc()
                     .toString('base64');
 
-                const response = await tonConnectUi.sendTransaction({
+                const tx: SendTransactionRequest = {
                     validUntil: Math.floor(Date.now() / 1000) + VALID_UNTIL_SECONDS,
                     messages: [
                         {
@@ -104,8 +126,21 @@ export const useTransferUsdt = () => {
                             payload: body
                         }
                     ]
-                });
-                setResult(ok(response));
+                };
+
+                const outcome = await dispatchTransfer(tonConnectUi, tx, withConnect);
+                if (!outcome.ok) {
+                    setResult(
+                        fail({
+                            error:
+                                outcome.dispatched === true
+                                    ? 'Connect succeeded but no transaction response. Check your wallet before retrying.'
+                                    : 'Wallet connected but the transfer was not delivered. Safe to retry.'
+                        })
+                    );
+                    return;
+                }
+                setResult(ok(outcome.response));
             } catch (error) {
                 console.error('transferUsdt failed', error);
                 setResult(fail(error));

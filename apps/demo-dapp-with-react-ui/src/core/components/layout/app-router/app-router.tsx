@@ -30,6 +30,10 @@ export const AppRouter = () => {
                     path="/gasless"
                     element={<PreserveSearchNavigate to="/transfer-usdt" replace />}
                 />
+                <Route
+                    path="/pay"
+                    element={<PreserveSearchNavigate to="/transfer-usdt" replace />}
+                />
                 <Route path="/batch-limits" element={<BatchLimitsPage />} />
                 <Route path="/transfer-usdt" element={<TransferUsdtPage />} />
                 <Route path="/sign-data" element={<SignDataPage />} />
