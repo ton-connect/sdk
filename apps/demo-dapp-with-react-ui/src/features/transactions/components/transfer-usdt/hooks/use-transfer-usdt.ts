@@ -12,51 +12,89 @@ import {
     USDT_DECIMALS,
     VALID_UNTIL_SECONDS
 } from '../utils/constants';
+import { sendGaslessItems } from '../utils/send-gasless-items';
+import { sendGaslessMessages } from '../utils/send-gasless-messages';
+import type { GaslessMode } from './use-transfer-form';
 
 interface SendArgs {
     senderAddress: string;
     destination: string;
     jettonWallet: string;
     amount: string;
+    gasless: boolean;
+    gaslessMode: GaslessMode;
 }
 
-/**
- * Builds and dispatches a jetton-transfer message via TonConnect; captures the
- * BOC response (or error) into `result` for the page to render. Pure
- * orchestration — caller owns the form state, validation, and loading UX.
- */
 export const useTransferUsdt = () => {
     const [tonConnectUi] = useTonConnectUI();
     const [sending, setSending] = useState(false);
     const [result, setResult] = useState<OperationResult | null>(null);
 
     const send = useCallback(
-        async ({ senderAddress, destination, jettonWallet, amount }: SendArgs) => {
+        async ({
+            senderAddress,
+            destination,
+            jettonWallet,
+            amount,
+            gasless,
+            gaslessMode
+        }: SendArgs) => {
             const amountUsdt = parseUnits(amount, USDT_DECIMALS);
             if (!(amountUsdt > 0)) return;
-
-            const body = beginCell()
-                .store(
-                    storeJettonTransferMessage({
-                        queryId: 0n,
-                        amount: amountUsdt,
-                        destination: Address.parse(destination),
-                        responseDestination: Address.parse(senderAddress),
-                        customPayload: null,
-                        forwardAmount: toNano(FORWARD_AMOUNT_TON),
-                        forwardPayload: beginCell()
-                            .storeUint(0, 32)
-                            .storeStringTail('hello!')
-                            .endCell()
-                    })
-                )
-                .endCell()
-                .toBoc()
-                .toString('base64');
 
             setResult(null);
             setSending(true);
             try {
+                if (gasless) {
+                    const dest = Address.parse(destination);
+                    const data =
+                        gaslessMode === 'items'
+                            ? await sendGaslessItems(
+                                  tonConnectUi,
+                                  amountUsdt,
+                                  dest,
+                                  senderAddress || undefined
+                              )
+                            : await sendGaslessMessages(
+                                  tonConnectUi,
+                                  amountUsdt,
+                                  dest,
+                                  senderAddress || undefined
+                              );
+                    setResult(ok(data));
+                    return;
+                }
+
+                if (!jettonWallet) {
+                    setResult(
+                        fail(
+                            new Error(
+                                'Connect wallet to resolve your USDT jetton wallet before sending.'
+                            )
+                        )
+                    );
+                    return;
+                }
+
+                const body = beginCell()
+                    .store(
+                        storeJettonTransferMessage({
+                            queryId: 0n,
+                            amount: amountUsdt,
+                            destination: Address.parse(destination),
+                            responseDestination: Address.parse(senderAddress),
+                            customPayload: null,
+                            forwardAmount: toNano(FORWARD_AMOUNT_TON),
+                            forwardPayload: beginCell()
+                                .storeUint(0, 32)
+                                .storeStringTail('hello!')
+                                .endCell()
+                        })
+                    )
+                    .endCell()
+                    .toBoc()
+                    .toString('base64');
+
                 const response = await tonConnectUi.sendTransaction({
                     validUntil: Math.floor(Date.now() / 1000) + VALID_UNTIL_SECONDS,
                     messages: [

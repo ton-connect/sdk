@@ -11,8 +11,7 @@ import {
     ShieldCheck,
     Sparkles,
     TreePine,
-    Wallet,
-    Zap
+    Wallet
 } from 'lucide-react';
 import { Link, NavLink } from 'react-router-dom';
 import type { ComponentType, FC, ReactNode } from 'react';
@@ -55,8 +54,7 @@ const NAV_GROUPS: readonly { label?: string; links: readonly NavLinkSpec[] }[] =
         links: [
             { to: '/tx-form', label: 'Send transaction', icon: Send },
             { to: '/batch-limits', label: 'Batch limits', icon: Sparkles },
-            { to: '/transfer-usdt', label: 'Transfer USDT', icon: CircleDollarSign },
-            { to: '/gasless', label: 'Gasless USDT', icon: Zap }
+            { to: '/transfer-usdt', label: 'Transfer USDT', icon: CircleDollarSign }
         ]
     },
     {

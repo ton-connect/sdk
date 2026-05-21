@@ -7,7 +7,6 @@ import {
     BatchLimitsPage,
     CreateJettonPage,
     FindTxPage,
-    GaslessPage,
     IframeIframePage,
     IframePage,
     MerklePage,
@@ -25,7 +24,10 @@ export const AppRouter = () => {
             <Routes>
                 <Route path="/" element={<PreserveSearchNavigate to="/tx-form" replace />} />
                 <Route path="/tx-form" element={<TxFormPage />} />
-                <Route path="/gasless" element={<GaslessPage />} />
+                <Route
+                    path="/gasless"
+                    element={<PreserveSearchNavigate to="/transfer-usdt" replace />}
+                />
                 <Route path="/batch-limits" element={<BatchLimitsPage />} />
                 <Route path="/transfer-usdt" element={<TransferUsdtPage />} />
                 <Route path="/sign-data" element={<SignDataPage />} />

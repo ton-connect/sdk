@@ -11,8 +11,10 @@ import {
 } from '@ton/core';
 
 import { TonApiClient } from '@ton-api/client';
-import { TonConnectUI } from '@tonconnect/ui-react';
+import { JettonItem, TonConnectUI } from '@tonconnect/ui-react';
 import { retry } from '../../../../../core/utils/retry';
+
+import { resolveGaslessWallet } from './gasless-wallet';
 
 const ta = new TonApiClient({
     baseUrl: 'https://tonapi.io'
@@ -23,33 +25,33 @@ const OP_CODES = {
     JETTON_TRANSFER: 0xf8a7ea5
 };
 const BASE_JETTON_SEND_AMOUNT = toNano(0.05);
-const usdtMaster = Address.parse('EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs'); // USDt jetton master.
+const usdtMaster = Address.parse('EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs');
 
-export async function sendMessages(
+export type GaslessItemsResult = {
+    mode: 'items';
+    internalBoc: string;
+    relayResponse: unknown;
+    destination: string;
+    amount: string;
+    submittedAt: string;
+};
+
+export async function sendGaslessItems(
     tonConnectUi: TonConnectUI,
     jettonAmount: number | bigint,
-    destination: Address
-) {
-    if (!tonConnectUi.wallet?.account?.address || !tonConnectUi.wallet?.account?.publicKey) {
-        console.error('No connected wallet found.');
-        throw new Error('No wallet found.');
-    }
-    const walletAddress = Address.parse(tonConnectUi.wallet.account.address);
-    const publicKey = tonConnectUi.wallet.account.publicKey;
+    destination: Address,
+    senderAddress?: string
+): Promise<GaslessItemsResult> {
+    const { walletAddress, publicKey } = await resolveGaslessWallet(tonConnectUi, senderAddress);
 
-    console.debug({ walletAddress, publicKey });
     const jettonWalletAddressResult = await ta.blockchain.execGetMethodForBlockchainAccount(
         usdtMaster,
         'get_wallet_address',
-        {
-            args: [walletAddress.toString()]
-        }
+        { args: [walletAddress.toString()] }
     );
-    console.debug('jettonWalletAddressResult', jettonWalletAddressResult);
     const jettonWallet = Address.parse(jettonWalletAddressResult.decoded.jetton_wallet_address);
 
     const relayerAddress = await printConfigAndReturnRelayAddress();
-    console.debug('relayerAddress', relayerAddress);
     const tetherTransferPayload = beginCell()
         .storeUint(OP_CODES.JETTON_TRANSFER, 32)
         .storeUint(0, 64)
@@ -80,18 +82,29 @@ export async function sendMessages(
         messages: [{ boc: messageToEstimate }]
     });
 
-    console.debug('Estimated transfer:', params);
+    function payloadToStructuredItem(p: Cell): JettonItem {
+        const c = p.beginParse();
+        c.skip(32);
+        c.loadUintBig(64);
+        const amount = c.loadCoins();
+        const dest = c.loadAddress();
+        const responseDestination = c.loadMaybeAddress();
+        c.skip(1);
+        const forwardAmount = c.loadCoins();
+        return {
+            type: 'jetton',
+            master: usdtMaster.toString(),
+            amount: amount.toString(),
+            destination: dest.toString(),
+            responseDestination: responseDestination?.toString(),
+            forwardAmount: forwardAmount.toString()
+        };
+    }
 
     const { internalBoc } = await tonConnectUi.signMessage({
         validUntil: Math.ceil(Date.now() / 1000) + 5 * 60,
-        messages: params.messages.map(message => ({
-            address: message.address.toString(),
-            payload: message.payload?.toBoc()?.toString('base64'),
-            amount: message.amount,
-            stateInit: message.stateInit?.toBoc()?.toString('base64')
-        }))
+        items: params.messages.map(message => payloadToStructuredItem(message.payload!))
     });
-    console.debug('internalBoc', internalBoc);
 
     const {
         info: { dest },
@@ -111,17 +124,18 @@ export async function sendMessages(
         )
         .endCell();
 
+    const relayPublicKey = tonConnectUi.wallet?.account?.publicKey ?? publicKey;
     const relayResponse = await retry(
         () =>
             ta.gasless.gaslessSend({
-                walletPublicKey: publicKey,
+                walletPublicKey: relayPublicKey,
                 boc: extMessage
             }),
         { delay: 2000, retries: 5 }
     );
 
     return {
-        mode: 'messages' as const,
+        mode: 'items',
         internalBoc,
         relayResponse: relayResponse ?? null,
         destination: destination.toString(),
@@ -132,10 +146,5 @@ export async function sendMessages(
 
 async function printConfigAndReturnRelayAddress(): Promise<Address> {
     const cfg = await ta.gasless.gaslessConfig();
-
-    console.debug('Available jettons for gasless transfer');
-    console.debug(cfg.gasJettons.map(gasJetton => gasJetton.masterId));
-
-    console.debug(`Relay address to send fees to: ${cfg.relayAddress}`);
     return cfg.relayAddress;
 }

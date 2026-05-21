@@ -1,5 +1,4 @@
 export { TxFormPage } from './tx-form-page';
-export { GaslessPage } from './gasless-page';
 export { BatchLimitsPage } from './batch-limits-page';
 export { TransferUsdtPage } from './transfer-usdt-page';
 export { SignDataPage } from './sign-data-page';
