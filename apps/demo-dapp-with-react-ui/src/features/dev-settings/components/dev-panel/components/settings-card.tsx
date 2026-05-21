@@ -21,12 +21,12 @@ export const SettingsCard: FC<SettingsCardProps> = ({
             className
         )}
     >
-        <header className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1">
             <h2 className="text-base font-semibold tracking-tight text-foreground">{title}</h2>
             {description ? (
                 <p className="text-sm leading-relaxed text-secondary-foreground">{description}</p>
             ) : null}
-        </header>
+        </div>
         {children}
     </section>
 );
