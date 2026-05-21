@@ -11,9 +11,10 @@ import { PresetPicker } from './preset-picker';
 interface ConfigureHeaderProps {
     onReset: () => void;
     onPresetSelect: (key: PresetKey) => void;
+    testIdPrefix: string;
 }
 
-export const ConfigureHeader = ({ onReset, onPresetSelect }: ConfigureHeaderProps) => {
+export const ConfigureHeader = ({ onReset, onPresetSelect, testIdPrefix }: ConfigureHeaderProps) => {
     const isMobile = useIsMobile();
     const network = useWalletNetwork();
 
@@ -24,7 +25,7 @@ export const ConfigureHeader = ({ onReset, onPresetSelect }: ConfigureHeaderProp
                 {network.isConnected && (
                     <span
                         className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground"
-                        data-testid="tx-request-network-badge"
+                        data-testid={`${testIdPrefix}-network-badge`}
                         data-network={network.chainId ?? 'unsupported'}
                     >
                         {network.name}
@@ -38,12 +39,12 @@ export const ConfigureHeader = ({ onReset, onPresetSelect }: ConfigureHeaderProp
                     borderRadius={isMobile ? 'l' : undefined}
                     onClick={onReset}
                     fullWidth={isMobile}
-                    data-testid="tx-request-reset-button"
+                    data-testid={`${testIdPrefix}-reset-button`}
                 >
                     <RotateCcw className="size-3.5" />
                     Reset
                 </Button>
-                <PresetPicker onSelect={onPresetSelect} />
+                <PresetPicker onSelect={onPresetSelect} testIdPrefix={testIdPrefix} />
             </div>
         </div>
     );

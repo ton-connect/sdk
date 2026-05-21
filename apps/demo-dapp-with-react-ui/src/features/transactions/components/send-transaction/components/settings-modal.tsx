@@ -8,6 +8,8 @@ interface SettingsModalProps {
     onWithConnectChange: (next: boolean) => void;
     waitForTx: boolean;
     onWaitForTxChange: (next: boolean) => void;
+    showWaitForTx: boolean;
+    testIdPrefix: string;
 }
 
 export const SettingsModal = ({
@@ -16,16 +18,18 @@ export const SettingsModal = ({
     withConnect,
     onWithConnectChange,
     waitForTx,
-    onWaitForTxChange
+    onWaitForTxChange,
+    showWaitForTx,
+    testIdPrefix
 }: SettingsModalProps) => (
     <Modal open={open} onOpenChange={onOpenChange} title="Settings">
-        <div className="flex flex-col gap-4" data-testid="tx-request-settings-modal">
+        <div className="flex flex-col gap-4" data-testid={`${testIdPrefix}-settings-modal`}>
             <label className="flex cursor-pointer flex-col gap-1">
                 <span className="flex items-center gap-2 text-sm text-foreground">
                     <Checkbox
                         checked={withConnect}
                         onCheckedChange={v => onWithConnectChange(v === true)}
-                        data-testid="tx-request-settings-embed-checkbox"
+                        data-testid={`${testIdPrefix}-settings-embed-checkbox`}
                     />
                     Embed request in connect
                 </span>
@@ -35,19 +39,21 @@ export const SettingsModal = ({
                 </span>
             </label>
 
-            <label className="flex cursor-pointer flex-col gap-1">
-                <span className="flex items-center gap-2 text-sm text-foreground">
-                    <Checkbox
-                        checked={waitForTx}
-                        onCheckedChange={v => onWaitForTxChange(v === true)}
-                        data-testid="tx-request-settings-wait-checkbox"
-                    />
-                    Wait for transaction confirmation
-                </span>
-                <span className="pl-6 text-xs text-secondary-foreground">
-                    After send, poll on-chain for the resulting transaction and show it below.
-                </span>
-            </label>
+            {showWaitForTx && (
+                <label className="flex cursor-pointer flex-col gap-1">
+                    <span className="flex items-center gap-2 text-sm text-foreground">
+                        <Checkbox
+                            checked={waitForTx}
+                            onCheckedChange={v => onWaitForTxChange(v === true)}
+                            data-testid={`${testIdPrefix}-settings-wait-checkbox`}
+                        />
+                        Wait for transaction confirmation
+                    </span>
+                    <span className="pl-6 text-xs text-secondary-foreground">
+                        After send, poll on-chain for the resulting transaction and show it below.
+                    </span>
+                </label>
+            )}
         </div>
     </Modal>
 );

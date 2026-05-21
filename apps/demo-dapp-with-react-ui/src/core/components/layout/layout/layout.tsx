@@ -6,6 +6,7 @@ import {
     FileSignature,
     Github,
     Search,
+    MessageSquare,
     Send,
     Settings,
     ShieldCheck,
@@ -53,6 +54,7 @@ const NAV_GROUPS: readonly { label?: string; links: readonly NavLinkSpec[] }[] =
         label: 'Transactions',
         links: [
             { to: '/tx-form', label: 'Send transaction', icon: Send },
+            { to: '/sign-message', label: 'Sign message', icon: MessageSquare },
             { to: '/batch-limits', label: 'Batch limits', icon: Sparkles },
             { to: '/transfer-usdt', label: 'Transfer USDT', icon: CircleDollarSign }
         ]

@@ -10,9 +10,10 @@ import { PRESETS, type PresetKey } from '../utils/transaction-presets';
 
 interface PresetPickerProps {
     onSelect: (key: PresetKey) => void;
+    testIdPrefix: string;
 }
 
-export const PresetPicker = ({ onSelect }: PresetPickerProps) => {
+export const PresetPicker = ({ onSelect, testIdPrefix }: PresetPickerProps) => {
     const [open, setOpen] = useState(false);
     const isMobile = useIsMobile();
 
@@ -29,7 +30,7 @@ export const PresetPicker = ({ onSelect }: PresetPickerProps) => {
                 borderRadius={isMobile ? 'l' : undefined}
                 onClick={() => setOpen(true)}
                 fullWidth={isMobile}
-                data-testid="tx-request-presets-button"
+                data-testid={`${testIdPrefix}-presets-button`}
             >
                 <FileText className="size-3.5" />
                 Presets
@@ -39,7 +40,7 @@ export const PresetPicker = ({ onSelect }: PresetPickerProps) => {
                 <p className="mb-4 text-sm leading-relaxed text-secondary-foreground">
                     Replace the current request with a ready-made example.
                 </p>
-                <div className="flex flex-col gap-2" data-testid="tx-request-presets-list">
+                <div className="flex flex-col gap-2" data-testid={`${testIdPrefix}-presets-list`}>
                     {PRESETS.map(opt => (
                         <button
                             key={opt.id}
@@ -49,7 +50,7 @@ export const PresetPicker = ({ onSelect }: PresetPickerProps) => {
                                 'flex flex-col gap-1 rounded-lg border p-3 text-left transition-colors',
                                 'border-tertiary bg-secondary/40 hover:border-primary/40 hover:bg-secondary'
                             )}
-                            data-testid={`tx-request-presets-card-${opt.id}`}
+                            data-testid={`${testIdPrefix}-presets-card-${opt.id}`}
                         >
                             <span className="text-sm font-semibold text-foreground">
                                 {opt.name}

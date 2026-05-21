@@ -6,9 +6,10 @@ interface RetryAlertProps {
     prompt: RetryPrompt;
     onRetry: () => void;
     onDismiss: () => void;
+    testIdPrefix: string;
 }
 
-export const RetryAlert = ({ prompt, onRetry, onDismiss }: RetryAlertProps) => {
+export const RetryAlert = ({ prompt, onRetry, onDismiss, testIdPrefix }: RetryAlertProps) => {
     const dangerous = prompt.dispatched;
     const subject = prompt.kind === 'sendTx' ? 'transaction' : 'message';
     const retryLabel = prompt.kind === 'sendTx' ? 'Retry transaction' : 'Retry message signing';
@@ -35,7 +36,7 @@ export const RetryAlert = ({ prompt, onRetry, onDismiss }: RetryAlertProps) => {
             retryLabel={retryLabel}
             onRetry={onRetry}
             onDismiss={onDismiss}
-            testIdPrefix="tx-request-retry-alert"
+            testIdPrefix={`${testIdPrefix}-retry-alert`}
         />
     );
 };

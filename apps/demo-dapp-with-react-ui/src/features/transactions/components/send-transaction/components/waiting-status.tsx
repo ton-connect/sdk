@@ -1,5 +1,6 @@
 interface WaitingStatusProps {
     waiting: boolean;
+    testIdPrefix: string;
 }
 
 /**
@@ -7,10 +8,10 @@ interface WaitingStatusProps {
  * is going to poll on-chain after the wallet returns, and reflects the
  * in-flight state once the poll is happening.
  */
-export const WaitingStatus = ({ waiting }: WaitingStatusProps) => (
+export const WaitingStatus = ({ waiting, testIdPrefix }: WaitingStatusProps) => (
     <div
         className="text-xs text-center text-secondary-foreground"
-        data-testid="tx-request-waiting-status"
+        data-testid={`${testIdPrefix}-waiting-status`}
     >
         {waiting
             ? 'Waiting for transaction confirmation…'

@@ -13,6 +13,7 @@ import {
     SettingsPage,
     SignDataPage,
     TonProofPage,
+    SignMessagePage,
     TransferUsdtPage,
     TxFormPage
 } from '../../../../pages/index';
@@ -24,6 +25,7 @@ export const AppRouter = () => {
             <Routes>
                 <Route path="/" element={<PreserveSearchNavigate to="/tx-form" replace />} />
                 <Route path="/tx-form" element={<TxFormPage />} />
+                <Route path="/sign-message" element={<SignMessagePage />} />
                 <Route
                     path="/gasless"
                     element={<PreserveSearchNavigate to="/transfer-usdt" replace />}

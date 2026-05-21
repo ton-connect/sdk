@@ -8,6 +8,7 @@ interface ValidUntilFieldProps {
     onChange: (next: number) => void;
     onSetFromNow: (seconds: number) => void;
     timer: TimerState;
+    testIdPrefix: string;
 }
 
 const STATUS_DOT: Record<TimerStatus, string> = {
@@ -20,7 +21,8 @@ export const ValidUntilField = ({
     validUntil,
     onChange,
     onSetFromNow,
-    timer
+    timer,
+    testIdPrefix
 }: ValidUntilFieldProps) => (
     <Input size="s">
         <Input.Header>
@@ -29,7 +31,7 @@ export const ValidUntilField = ({
                 className={`inline-flex items-center gap-1.5 font-mono text-xs ${
                     timer.status === 'expired' ? 'text-error' : 'text-secondary-foreground'
                 }`}
-                data-testid="tx-request-valid-until-timer"
+                data-testid={`${testIdPrefix}-valid-until-timer`}
                 data-status={timer.status}
             >
                 <span
@@ -44,7 +46,7 @@ export const ValidUntilField = ({
                 type="number"
                 value={validUntil}
                 onChange={e => onChange(parseInt(e.target.value) || 0)}
-                data-testid="tx-request-valid-until-input"
+                data-testid={`${testIdPrefix}-valid-until-input`}
             />
         </Input.Field>
 
@@ -53,7 +55,7 @@ export const ValidUntilField = ({
                 variant="bezeled"
                 size="xs"
                 onClick={() => onSetFromNow(-600)}
-                data-testid="tx-request-valid-until-preset-minus-10m"
+                data-testid={`${testIdPrefix}-valid-until-preset-minus-10m`}
             >
                 −10m
             </Button>
@@ -61,7 +63,7 @@ export const ValidUntilField = ({
                 variant="bezeled"
                 size="xs"
                 onClick={() => onSetFromNow(-300)}
-                data-testid="tx-request-valid-until-preset-minus-5m"
+                data-testid={`${testIdPrefix}-valid-until-preset-minus-5m`}
             >
                 −5m
             </Button>
@@ -69,7 +71,7 @@ export const ValidUntilField = ({
                 variant="bezeled"
                 size="xs"
                 onClick={() => onSetFromNow(60)}
-                data-testid="tx-request-valid-until-preset-plus-1m"
+                data-testid={`${testIdPrefix}-valid-until-preset-plus-1m`}
             >
                 1m
             </Button>
@@ -77,7 +79,7 @@ export const ValidUntilField = ({
                 variant="bezeled"
                 size="xs"
                 onClick={() => onSetFromNow(300)}
-                data-testid="tx-request-valid-until-preset-plus-5m"
+                data-testid={`${testIdPrefix}-valid-until-preset-plus-5m`}
             >
                 5m
             </Button>
@@ -85,7 +87,7 @@ export const ValidUntilField = ({
                 variant="bezeled"
                 size="xs"
                 onClick={() => onSetFromNow(43_200)}
-                data-testid="tx-request-valid-until-preset-plus-12h"
+                data-testid={`${testIdPrefix}-valid-until-preset-plus-12h`}
             >
                 12h
             </Button>

@@ -21,7 +21,6 @@ export const useTransactionForm = () => {
     const [draft, setDraft] = useState<string>(() => stringify(tx));
     const [isInvalid, setIsInvalid] = useState(false);
 
-    const [mode, setMode] = useState<RequestMode>('send');
     const [withConnect, setWithConnect] = useState(false);
     const [waitForTx, setWaitForTx] = useState(false);
 
@@ -66,7 +65,6 @@ export const useTransactionForm = () => {
     const reset = useCallback(() => {
         const fresh = buildDefaultTx();
         replaceTx(fresh);
-        setMode('send');
         setWithConnect(false);
         setWaitForTx(false);
     }, [replaceTx]);
@@ -80,8 +78,6 @@ export const useTransactionForm = () => {
         setValidUntil,
         setValidUntilFromNow,
         reset,
-        mode,
-        setMode,
         withConnect,
         setWithConnect,
         waitForTx,

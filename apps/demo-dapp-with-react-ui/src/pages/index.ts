@@ -1,4 +1,5 @@
 export { TxFormPage } from './tx-form-page';
+export { SignMessagePage } from './sign-message-page';
 export { BatchLimitsPage } from './batch-limits-page';
 export { TransferUsdtPage } from './transfer-usdt-page';
 export { SignDataPage } from './sign-data-page';
