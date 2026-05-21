@@ -13,7 +13,11 @@ import { truncateAddress } from '../../../../core/utils/truncate-address';
 
 import { WalletInfo } from '../wallet-info';
 
-const formatBalance = (nano: bigint): string => Number(fromNano(nano)).toFixed(4);
+const formatBalance = (nano: bigint): string => {
+    const [whole, frac = ''] = fromNano(nano).split('.');
+    const truncated = frac.slice(0, 4).replace(/0+$/, '');
+    return truncated ? `${whole}.${truncated}` : whole;
+};
 
 /**
  * Sidebar tile shown when a wallet is connected: TON balance, truncated

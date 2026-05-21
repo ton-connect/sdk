@@ -10,15 +10,13 @@ export const TransferUsdtPage = () => (
         sourceHref={DEMO_SOURCE_LINKS.transferUsdt}
         data-testid="transfer-usdt-page"
     >
-        <div className="mx-auto flex w-full max-w-[434px] flex-col">
-            <p
-                className="text-[15px] leading-relaxed text-secondary-foreground"
-                data-testid="transfer-usdt-page-subtitle"
-            >
-                Pay USDT from your wallet via TonConnect. Toggle gasless relay in settings, or embed
-                the transfer in connect for a one-tap flow.
-            </p>
-            <TransferUsdt />
-        </div>
+        <p
+            className="text-[15px] leading-relaxed text-secondary-foreground"
+            data-testid="transfer-usdt-page-subtitle"
+        >
+            Pay USDT from your wallet via TonConnect. Toggle gasless relay in settings, or embed
+            the transfer in connect for a one-tap flow.
+        </p>
+        <TransferUsdt />
     </Layout>
 );
