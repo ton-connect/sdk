@@ -9,13 +9,10 @@ import {
 import type { CreateJettonRequestDto } from '../../../../../server/dto/create-jetton-request-dto';
 
 import { fetchCreateJettonTransaction } from '../utils/create-jetton-api';
-import { hasDemoSession } from '../../../utils/demo-session';
 
 /**
  * Fetches the deploy+mint transaction from the demo backend, then dispatches it
- * via TonConnect — same orchestration shape as {@link useTransferUsdt}. The
- * jetton metadata is supplied by the caller (see {@link useCreateJettonForm}),
- * so the page can edit any field before minting.
+ * via TonConnect — same orchestration shape as {@link useMerkleDemo}.
  */
 export function useCreateJetton() {
     const wallet = useTonWallet();
@@ -23,13 +20,11 @@ export function useCreateJetton() {
     const [sending, setSending] = useState(false);
     const [result, setResult] = useState<OperationResult | null>(null);
 
-    const hasSession = wallet ? hasDemoSession(wallet.account) : false;
-    const needsTonProof = !!wallet && !hasSession;
-    const canMint = !!wallet && hasSession && !sending;
+    const canMint = !!wallet && !sending;
 
     const mint = useCallback(
         async (jetton: CreateJettonRequestDto) => {
-            if (!wallet || !hasSession) {
+            if (!wallet?.account || sending) {
                 return;
             }
 
@@ -37,7 +32,10 @@ export function useCreateJetton() {
             setSending(true);
 
             try {
-                const { transaction, error } = await fetchCreateJettonTransaction(jetton);
+                const { transaction, error } = await fetchCreateJettonTransaction(
+                    wallet.account,
+                    jetton
+                );
                 if (error || !transaction) {
                     setResult(
                         fail({ error: error ?? 'Failed to build create jetton transaction' })
@@ -54,7 +52,7 @@ export function useCreateJetton() {
                 setSending(false);
             }
         },
-        [tonConnectUi, wallet, hasSession]
+        [tonConnectUi, wallet, sending]
     );
 
     const clearResult = useCallback(() => setResult(null), []);
@@ -65,7 +63,6 @@ export function useCreateJetton() {
         sending,
         result,
         clearResult,
-        canMint,
-        needsTonProof
+        canMint
     };
 }

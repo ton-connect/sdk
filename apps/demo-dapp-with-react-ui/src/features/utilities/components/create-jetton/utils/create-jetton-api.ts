@@ -1,29 +1,26 @@
-import type { SendTransactionRequest } from '@tonconnect/ui-react';
+import type { Account, SendTransactionRequest } from '@tonconnect/ui-react';
 
 import '../../../../../patch-local-storage-for-github-pages';
 
 import type { CreateJettonRequestDto } from '../../../../../server/dto/create-jetton-request-dto';
 
-import { getDemoAccessToken } from '../../../utils/demo-session';
-
 const apiHost = document.baseURI.replace(/\/$/, '');
 
 export async function fetchCreateJettonTransaction(
+    account: Account,
     jetton: CreateJettonRequestDto
 ): Promise<{ transaction?: SendTransactionRequest; error?: string }> {
-    const token = getDemoAccessToken();
-    if (!token) {
-        return { error: 'Authenticate on the Ton proof page first' };
-    }
-
     try {
         const response = await fetch(`${apiHost}/api/create_jetton`, {
             method: 'POST',
             headers: {
-                Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(jetton)
+            body: JSON.stringify({
+                address: account.address,
+                network: account.chain,
+                ...jetton
+            })
         });
         const data = await response.json();
 

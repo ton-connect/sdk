@@ -165,12 +165,18 @@ class TonProofApiService {
         return response as {};
     }
 
-    async createJetton(jetton: CreateJettonRequestDto): Promise<SendTransactionRequest> {
+    async createJetton(
+        account: Account,
+        jetton: CreateJettonRequestDto
+    ): Promise<SendTransactionRequest> {
         return await (
             await fetch(`${this.host}/api/create_jetton`, {
-                body: JSON.stringify(jetton),
+                body: JSON.stringify({
+                    address: account.address,
+                    network: account.chain,
+                    ...jetton
+                }),
                 headers: {
-                    Authorization: `Bearer ${this.accessToken}`,
                     'Content-Type': 'application/json'
                 },
                 method: 'POST'

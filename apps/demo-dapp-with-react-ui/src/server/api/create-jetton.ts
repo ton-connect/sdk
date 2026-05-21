@@ -5,47 +5,38 @@ import { Address } from '@ton/ton';
 import { CHAIN } from '@tonconnect/sdk';
 import { HttpResponseResolver } from 'msw';
 import { CreateJettonRequest } from '../dto/create-jetton-request-dto';
-import { badRequest, ok, unauthorized } from '../utils/http-utils';
-import { decodeAuthToken, verifyToken } from '../utils/jwt';
+import { badRequest, ok } from '../utils/http-utils';
 
 const VALID_UNTIL = 1000 * 60 * 5; // 5 minutes
 
 /**
- * Checks the proof and returns an access token.
+ * Builds a jetton deploy + mint transaction for the connected wallet.
  *
  * POST /api/create_jetton
+ * Body: { address, network?, ...jetton metadata }
  */
 export const createJetton: HttpResponseResolver = async ({ request }) => {
     try {
-        const token = request.headers.get('Authorization')?.replace('Bearer ', '');
+        const raw = (await request.json().catch(() => null)) as Record<string, unknown> | null;
 
-        if (!token || !(await verifyToken(token))) {
-            return unauthorized({ error: 'Unauthorized' });
+        if (!raw?.address || typeof raw.address !== 'string') {
+            return badRequest({ error: 'address is required' });
         }
 
-        const payload = decodeAuthToken(token);
-        if (!payload?.address || !payload?.network) {
-            return unauthorized({ error: 'Invalid token' });
-        }
+        const network =
+            typeof raw.network === 'string' ? raw.network : CHAIN.MAINNET;
 
-        const body = CreateJettonRequest.parse(await request.json());
+        const { address: _address, network: _network, ...jettonFields } = raw;
+        const body = CreateJettonRequest.parse(jettonFields);
 
-        // specify the time until the message is valid
         const validUntil = Math.round((Date.now() + VALID_UNTIL) / 1000);
-
-        // amount of TON to send with the message
         const amount = toNano('0.06').toString();
-        // forward value for the message to the wallet
         const walletForwardValue = toNano('0.05');
 
-        // who send the jetton create message
-        const senderAddress = Address.parse(payload.address);
-        // who will be the owner of the jetton
-        const ownerAddress = Address.parse(payload.address);
-        // who will receive the jetton
-        const receiverAddress = Address.parse(payload.address);
+        const senderAddress = Address.parse(raw.address);
+        const ownerAddress = Address.parse(raw.address);
+        const receiverAddress = Address.parse(raw.address);
 
-        // create a jetton master
         const jettonMaster = JettonMinter.createFromConfig({
             admin: ownerAddress,
             content: internalOnchainContentToCell({
@@ -60,21 +51,18 @@ export const createJetton: HttpResponseResolver = async ({ request }) => {
             return badRequest({ error: 'Invalid jetton master' });
         }
 
-        // prepare jetton master address
         const jettonMasterAddress = jettonMaster.address.toString({
             urlSafe: true,
             bounceable: true,
-            testOnly: payload.network === CHAIN.TESTNET
+            testOnly: network === CHAIN.TESTNET
         });
 
-        // prepare stateInit for the jetton deploy message
         const stateInitBase64 = beginCell()
             .store(storeStateInit(jettonMaster.init))
             .endCell()
             .toBoc()
             .toString('base64');
 
-        // prepare payload for the jetton mint message
         const payloadBase64 = beginCell()
             .store(
                 storeJettonMintMessage({

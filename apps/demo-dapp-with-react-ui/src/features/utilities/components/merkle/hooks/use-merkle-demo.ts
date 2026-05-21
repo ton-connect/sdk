@@ -8,7 +8,7 @@ import {
 } from '../../../../../core/components/shared/result-block/index';
 
 import { buildMerkleUpdateTransaction } from '../utils/build-merkle-update-tx';
-import { fetchMerkleProofTransaction, hasMerkleProofSession } from '../utils/merkle-api';
+import { fetchMerkleProofTransaction } from '../utils/merkle-api';
 
 export type MerkleMode = 'proof' | 'update';
 
@@ -19,12 +19,10 @@ export function useMerkleDemo() {
     const [sending, setSending] = useState(false);
     const [result, setResult] = useState<OperationResult | null>(null);
 
-    const hasSession = wallet ? hasMerkleProofSession(wallet.account) : false;
-    const needsTonProof = mode === 'proof' && wallet !== null && !hasSession;
-    const canSend = !!wallet && !sending && (mode === 'update' || hasSession);
+    const canSend = !!wallet && !sending;
 
     const send = useCallback(async () => {
-        if (!wallet || !canSend) {
+        if (!wallet?.account || sending) {
             return;
         }
 
@@ -33,7 +31,9 @@ export function useMerkleDemo() {
 
         try {
             if (mode === 'proof') {
-                const { transaction, error } = await fetchMerkleProofTransaction();
+                const { transaction, error } = await fetchMerkleProofTransaction(
+                    wallet.account
+                );
                 if (error || !transaction) {
                     setResult(fail({ error: error ?? 'Failed to build merkle proof transaction' }));
                     return;
@@ -41,7 +41,9 @@ export function useMerkleDemo() {
                 const response = await tonConnectUI.sendTransaction(transaction);
                 setResult(ok(response));
             } else {
-                const response = await tonConnectUI.sendTransaction(buildMerkleUpdateTransaction());
+                const response = await tonConnectUI.sendTransaction(
+                    buildMerkleUpdateTransaction()
+                );
                 setResult(ok(response));
             }
         } catch (error) {
@@ -50,7 +52,7 @@ export function useMerkleDemo() {
         } finally {
             setSending(false);
         }
-    }, [wallet, canSend, mode, tonConnectUI]);
+    }, [wallet, sending, mode, tonConnectUI]);
 
     const clearResult = useCallback(() => setResult(null), []);
 
@@ -62,8 +64,6 @@ export function useMerkleDemo() {
         result,
         send,
         clearResult,
-        canSend,
-        needsTonProof,
-        hasSession
+        canSend
     };
 }

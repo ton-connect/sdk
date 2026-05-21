@@ -13,7 +13,7 @@ import { useCreateJettonWallet } from './hooks/use-create-jetton-wallet';
 
 export const CreateJetton = () => {
     const { senderAddress, network, tonBalance, isTonBalanceLoading } = useCreateJettonWallet();
-    const { mint, sending, result, clearResult, canMint, needsTonProof } = useCreateJetton();
+    const { mint, sending, result, clearResult, canMint } = useCreateJetton();
     const form = useCreateJettonForm();
 
     const resultRef = useRef<HTMLDivElement>(null);
@@ -25,12 +25,10 @@ export const CreateJetton = () => {
         }
     }, [result]);
 
-    const sessionError = needsTonProof ? 'Ton proof required' : null;
-    const canSend = !!senderAddress && canMint && !form.isInvalid;
-    const disableAction = !canSend || sending || form.isInvalid;
+    const disableAction = !senderAddress || !canMint || form.isInvalid || sending;
 
     const handleMint = async () => {
-        if (!senderAddress || needsTonProof || form.isInvalid) return;
+        if (!senderAddress || form.isInvalid) return;
         await mint(form.jetton);
     };
 
@@ -63,7 +61,7 @@ export const CreateJetton = () => {
                 disabled={disableAction}
                 data-testid="create-jetton-mint-button"
             >
-                {sessionError ?? 'Mint jetton'}
+                Mint jetton
             </ButtonWithConnect>
 
             <CreateJettonInfo

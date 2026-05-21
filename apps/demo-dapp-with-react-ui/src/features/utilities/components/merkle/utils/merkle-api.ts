@@ -1,43 +1,25 @@
 import type { Account, SendTransactionRequest } from '@tonconnect/ui-react';
-import { decodeJwt } from 'jose';
 
 import '../../../../../patch-local-storage-for-github-pages';
 
-import { DEMO_ACCESS_TOKEN_KEY } from './merkle-demo-constants';
-
 const apiHost = document.baseURI.replace(/\/$/, '');
 
-export function hasMerkleProofSession(account: Account): boolean {
-    const token = localStorage.getItem(DEMO_ACCESS_TOKEN_KEY);
-    if (!token) {
-        return false;
-    }
-
-    try {
-        const payload = decodeJwt(token) as { address?: string; network?: string };
-        return payload.address === account.address && payload.network === account.chain;
-    } catch {
-        return false;
-    }
-}
-
-export async function fetchMerkleProofTransaction(): Promise<{
+export async function fetchMerkleProofTransaction(
+    account: Account
+): Promise<{
     transaction?: SendTransactionRequest;
     error?: string;
 }> {
-    const token = localStorage.getItem(DEMO_ACCESS_TOKEN_KEY);
-    if (!token) {
-        return { error: 'Authenticate on the Ton proof page first' };
-    }
-
     try {
         const response = await fetch(`${apiHost}/api/merkle_proof`, {
             method: 'POST',
             headers: {
-                Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
-            body: ''
+            body: JSON.stringify({
+                address: account.address,
+                network: account.chain
+            })
         });
         const data = await response.json();
 

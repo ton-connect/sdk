@@ -1,20 +1,14 @@
 import { useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ShieldCheck } from 'lucide-react';
 
-import { Button } from '../../../../core/components/ui/button/index';
 import { ButtonWithConnect } from '../../../../core/components/ui/button-with-connect/index';
 import { RadioCards } from '../../../../core/components/ui/radio-cards';
 import { ResultBlock } from '../../../../core/components/shared/result-block/index';
-import { EmptyState } from '../../../../core/components/shared/empty-state/index';
 
 import { useMerkleDemo } from './hooks/use-merkle-demo';
 import { MerkleContractInfo } from './components/merkle-contract-info';
 
 export const Merkle = () => {
-    const navigate = useNavigate();
-    const { mode, setMode, sending, result, send, clearResult, canSend, needsTonProof } =
-        useMerkleDemo();
+    const { mode, setMode, sending, result, send, clearResult, canSend } = useMerkleDemo();
 
     const resultRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
@@ -24,25 +18,6 @@ export const Merkle = () => {
             resultRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     }, [result]);
-
-    if (needsTonProof) {
-        return (
-            <EmptyState
-                icon={ShieldCheck}
-                title="Ton proof required"
-                description="Merkle proof is built by the protected demo backend. Complete ton_proof authentication on the Ton proof page, then return here."
-                action={
-                    <Button
-                        onClick={() => navigate('/ton-proof')}
-                        data-testid="merkle-go-ton-proof-button"
-                    >
-                        Go to Ton proof
-                    </Button>
-                }
-                data-testid="merkle-needs-ton-proof"
-            />
-        );
-    }
 
     const actionLabel = mode === 'proof' ? 'Send merkle proof' : 'Send merkle update';
     const resultTitle = mode === 'proof' ? 'Merkle proof' : 'Merkle update';
