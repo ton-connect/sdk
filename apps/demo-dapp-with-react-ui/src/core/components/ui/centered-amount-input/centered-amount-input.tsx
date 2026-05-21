@@ -15,6 +15,7 @@ export interface CenteredAmountInputProps extends ComponentProps<'div'> {
     symbol?: string;
     placeholder?: string;
     disabled?: boolean;
+    align?: 'start' | 'center';
 }
 
 export const CenteredAmountInput: FC<CenteredAmountInputProps> = ({
@@ -24,6 +25,7 @@ export const CenteredAmountInput: FC<CenteredAmountInputProps> = ({
     symbol,
     placeholder = '0',
     disabled,
+    align = 'center',
     className,
     ...props
 }) => {
@@ -73,7 +75,8 @@ export const CenteredAmountInput: FC<CenteredAmountInputProps> = ({
         <div
             ref={wrapperRef}
             className={cn(
-                'relative flex w-full cursor-text flex-col items-center overflow-hidden',
+                'relative flex w-full cursor-text flex-col overflow-hidden',
+                align === 'center' ? 'items-center' : 'items-start',
                 className
             )}
             onClick={() => inputRef.current?.focus()}
@@ -123,7 +126,8 @@ export const CenteredAmountInput: FC<CenteredAmountInputProps> = ({
                     ref={inputRef}
                     className={cn(
                         INPUT_XL,
-                        'box-content min-w-6 max-w-full border-none bg-transparent p-0 text-right text-foreground outline-none placeholder:text-secondary-foreground placeholder:opacity-100'
+                        'box-content min-w-6 max-w-full border-none bg-transparent p-0 text-foreground outline-none placeholder:text-secondary-foreground placeholder:opacity-100',
+                        align === 'center' ? 'text-right' : 'text-left'
                     )}
                     type="text"
                     inputMode="decimal"

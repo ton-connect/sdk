@@ -14,8 +14,8 @@ export const TransferUsdtPage = () => (
             className="text-[15px] leading-relaxed text-secondary-foreground"
             data-testid="transfer-usdt-page-subtitle"
         >
-            Pay USDT from your wallet via TonConnect. Toggle gasless relay in settings, or embed
-            the transfer in connect for a one-tap flow.
+            Pay USDT from your wallet via TonConnect. Toggle gasless relay in settings, or embed the
+            transfer in connect for a one-tap flow.
         </p>
         <TransferUsdt />
     </Layout>

@@ -1,12 +1,13 @@
-import type { FC } from 'react';
+import type { FC, ComponentProps } from 'react';
 
 import { Button } from '../../../../../core/components/ui/button';
 import { Skeleton } from '../../../../../core/components/ui/skeleton';
+import { cn } from '../../../../../core/utils/cn';
 
 import { USDT_TICKER } from '../utils/constants';
 import { UsdtIcon } from './usdt-icon';
 
-interface BalanceBlockProps {
+interface BalanceBlockProps extends ComponentProps<'div'> {
     balance: string | null;
     loading: boolean;
     onMaxClick: () => void;
@@ -23,9 +24,11 @@ export const BalanceBlock: FC<BalanceBlockProps> = ({
     loading,
     onMaxClick,
     maxDisabled,
-    testIdPrefix
+    testIdPrefix,
+    className,
+    ...props
 }) => (
-    <div className="flex items-center gap-2" data-testid={testIdPrefix}>
+    <div className={cn('flex items-center gap-2', className)} data-testid={testIdPrefix} {...props}>
         <span data-testid={`${testIdPrefix}-icon`}>
             <UsdtIcon size={36} />
         </span>
@@ -49,6 +52,7 @@ export const BalanceBlock: FC<BalanceBlockProps> = ({
                 )}
             </span>
         </div>
+
         <Button
             size="s"
             variant="bezeled"
@@ -56,7 +60,7 @@ export const BalanceBlock: FC<BalanceBlockProps> = ({
             disabled={maxDisabled}
             data-testid={`${testIdPrefix}-max-button`}
         >
-            Max
+            Set Max
         </Button>
     </div>
 );

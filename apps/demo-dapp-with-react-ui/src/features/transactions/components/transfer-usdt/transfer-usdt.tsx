@@ -1,16 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { Address } from '@ton/core';
 
-import { ButtonWithConnect } from '../../../../core/components/ui/button-with-connect';
-import { CenteredAmountInput } from '../../../../core/components/ui/centered-amount-input';
-import { Input } from '../../../../core/components/ui/input';
 import { ResultBlock } from '../../../../core/components/shared/result-block';
-import { SettingsButton } from '../../../../core/components/ui/settings-button';
 
+import { AmountSection } from './components/amount-section';
 import { BalanceBlock } from './components/balance-block';
+import { DestinationInput } from './components/destination-input';
+import { TransferActions } from './components/transfer-actions';
 import { TransferInfo } from './components/transfer-info';
 import { TransferSettingsModal } from './components/transfer-settings-modal';
-import { USDT_TICKER } from './utils/constants';
 import { useTransferForm, useTransferUsdt, useUsdtWallet } from './hooks';
 
 const DEFAULT_AMOUNT = '0.01';
@@ -89,17 +87,7 @@ export const TransferUsdt = () => {
 
     return (
         <div className="flex flex-col gap-4" data-testid="transfer-usdt">
-            <div
-                className="flex flex-col items-center gap-1 py-7"
-                data-testid="transfer-usdt-amount-section"
-            >
-                <CenteredAmountInput
-                    value={amount}
-                    onValueChange={setAmount}
-                    ticker={USDT_TICKER}
-                    data-testid="transfer-usdt-amount-input"
-                />
-            </div>
+            <AmountSection value={amount} onChange={setAmount} />
 
             <BalanceBlock
                 balance={usdtBalance}
@@ -109,39 +97,25 @@ export const TransferUsdt = () => {
                 testIdPrefix="transfer-usdt-balance"
             />
 
-            <Input size="s" data-testid="transfer-usdt-destination-field">
-                <Input.Header>
-                    <Input.Title data-testid="transfer-usdt-destination-title">
-                        Destination
-                    </Input.Title>
-                </Input.Header>
-                <Input.Field>
-                    <Input.Input
-                        value={destination}
-                        onChange={e => setDestination(e.target.value)}
-                        placeholder="EQAB…"
-                        data-testid="transfer-usdt-destination-input"
-                    />
-                </Input.Field>
-            </Input>
+            <DestinationInput value={destination} onChange={setDestination} />
 
-            <div className="flex items-stretch gap-2">
-                <ButtonWithConnect
-                    size="l"
-                    fullWidth
-                    onClick={handleSend}
-                    loading={sending}
-                    disabled={!canSend}
-                    skipConnectPrompt={form.withConnect}
-                    data-testid="transfer-usdt-send-button"
-                >
-                    {buttonLabel}
-                </ButtonWithConnect>
-                <SettingsButton
-                    onClick={() => setSettingsOpen(true)}
-                    data-testid="transfer-usdt-settings-button"
-                />
-            </div>
+            <TransferActions
+                label={buttonLabel}
+                onSend={handleSend}
+                onSettingsClick={() => setSettingsOpen(true)}
+                sending={sending}
+                disabled={!canSend}
+                skipConnectPrompt={form.withConnect}
+            />
+
+            <TransferInfo
+                network={network}
+                jettonWallet={jettonWallet}
+                isJettonWalletLoading={isJettonWalletLoading}
+                tonBalance={tonBalance}
+                isTonBalanceLoading={isTonBalanceLoading}
+                testIdPrefix="transfer-usdt-info"
+            />
 
             <TransferSettingsModal
                 open={settingsOpen}
@@ -152,15 +126,6 @@ export const TransferUsdt = () => {
                 onGaslessModeChange={form.setGaslessMode}
                 withConnect={form.withConnect}
                 onWithConnectChange={form.setWithConnect}
-            />
-
-            <TransferInfo
-                network={network}
-                jettonWallet={jettonWallet}
-                isJettonWalletLoading={isJettonWalletLoading}
-                tonBalance={tonBalance}
-                isTonBalanceLoading={isTonBalanceLoading}
-                testIdPrefix="transfer-usdt-info"
             />
 
             {result && (

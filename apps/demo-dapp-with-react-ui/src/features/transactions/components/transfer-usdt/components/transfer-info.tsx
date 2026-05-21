@@ -1,14 +1,15 @@
-import type { FC } from 'react';
+import type { ComponentProps, FC } from 'react';
 import { ExternalLink } from 'lucide-react';
 
 import { CopyButton } from '../../../../../core/components/ui/copy-button';
 import { InfoBlock } from '../../../../../core/components/shared/info-block';
 import type { WalletNetwork } from '../../../../../core/hooks/use-wallet-network';
+import { cn } from '../../../../../core/utils/cn';
 import { tonviewerBaseByChain } from '../../../../../core/utils/ton-endpoints';
 
 import { TON_TICKER } from '../utils/constants';
 
-interface TransferInfoProps {
+interface TransferInfoProps extends ComponentProps<'div'> {
     network: WalletNetwork;
     jettonWallet: string | null;
     isJettonWalletLoading: boolean;
@@ -20,11 +21,6 @@ interface TransferInfoProps {
      */
     testIdPrefix: string;
 }
-
-const renderNetwork = (network: WalletNetwork): string => {
-    if (!network.isConnected) return '—';
-    return network.name;
-};
 
 const shortenAddress = (address: string): string =>
     address.length <= 15 ? address : `${address.slice(0, 6)}…${address.slice(-6)}`;
@@ -43,25 +39,23 @@ export const TransferInfo: FC<TransferInfoProps> = ({
     isJettonWalletLoading,
     tonBalance,
     isTonBalanceLoading,
-    testIdPrefix
+    testIdPrefix,
+    className,
+    ...props
 }) => {
     const tonviewerHref = jettonWallet ? explorerHref(network.chainId, jettonWallet) : null;
 
     return (
-        <InfoBlock.Container data-testid={testIdPrefix}>
+        <InfoBlock.Container className={cn(className)} data-testid={testIdPrefix} {...props}>
             <InfoBlock.Row data-testid={`${testIdPrefix}-network-row`}>
-                <InfoBlock.Label data-testid={`${testIdPrefix}-network-label`}>
-                    Network
-                </InfoBlock.Label>
+                <InfoBlock.Label>Network</InfoBlock.Label>
                 <InfoBlock.Value data-testid={`${testIdPrefix}-network-value`}>
-                    {renderNetwork(network)}
+                    {network.isConnected ? network.name : '—'}
                 </InfoBlock.Value>
             </InfoBlock.Row>
 
             <InfoBlock.Row data-testid={`${testIdPrefix}-ton-row`}>
-                <InfoBlock.Label data-testid={`${testIdPrefix}-ton-label`}>
-                    TON Balance
-                </InfoBlock.Label>
+                <InfoBlock.Label>TON balance</InfoBlock.Label>
                 {isTonBalanceLoading ? (
                     <InfoBlock.ValueSkeleton data-testid={`${testIdPrefix}-ton-balance-skeleton`} />
                 ) : (
@@ -72,9 +66,7 @@ export const TransferInfo: FC<TransferInfoProps> = ({
             </InfoBlock.Row>
 
             <InfoBlock.Row data-testid={`${testIdPrefix}-jetton-wallet-row`}>
-                <InfoBlock.Label data-testid={`${testIdPrefix}-jetton-wallet-label`}>
-                    Jetton Wallet
-                </InfoBlock.Label>
+                <InfoBlock.Label>Jetton wallet</InfoBlock.Label>
                 {isJettonWalletLoading ? (
                     <InfoBlock.ValueSkeleton
                         width={120}
