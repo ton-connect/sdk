@@ -1,9 +1,16 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { SignDataPayload } from '@tonconnect/ui-react';
 
 import { ButtonWithConnect } from '../../../../core/components/ui/button-with-connect';
 import { JsonEditor } from '../../../../core/components/ui/json-editor';
 import { ResultBlock } from '../../../../core/components/shared/result-block';
+import { RequestContextQuickFill } from '../../../../core/components/shared/request-context-quick-fill';
 import { SettingsButton } from '../../../../core/components/ui/settings-button';
+import {
+    mergeRequestContext,
+    type RequestContextPatch
+} from '../../../../core/utils/merge-request-context';
+import { isSignDataMode } from './utils/payloads';
 
 import { ConfigureHeader, ModeField, RetryAlert, SettingsModal } from './components';
 import { useSignData, useSignDataForm } from './hooks';
@@ -30,11 +37,33 @@ export const SignData = () => {
 
     const disableAction = form.isInvalid || ops.sending || !!ops.retryPrompt;
 
+    const applyRequestContext = useCallback(
+        (patch: RequestContextPatch) => {
+            try {
+                const parsed = JSON.parse(form.draft);
+                if (!parsed || typeof parsed !== 'object' || !isSignDataMode(parsed.type)) {
+                    return;
+                }
+                form.replacePayload(
+                    mergeRequestContext(parsed as SignDataPayload, patch)
+                );
+            } catch {
+                // Ignore while JSON is invalid.
+            }
+        },
+        [form]
+    );
+
     return (
         <div className="flex w-full flex-col gap-2" data-testid="sign-data">
             <ConfigureHeader onReset={form.reset} />
 
             <ModeField mode={form.mode} onChange={form.setMode} />
+
+            <RequestContextQuickFill
+                onPatch={applyRequestContext}
+                testIdPrefix="sign-data"
+            />
 
             <JsonEditor
                 className="mb-4"

@@ -1,10 +1,16 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { SendTransactionRequest } from '@tonconnect/ui-react';
 import { useTonWallet } from '@tonconnect/ui-react';
 
 import { ButtonWithConnect } from '../../../../core/components/ui/button-with-connect';
 import { ResultBlock } from '../../../../core/components/shared/result-block';
+import { RequestContextQuickFill } from '../../../../core/components/shared/request-context-quick-fill';
 import { JsonEditor } from '../../../../core/components/ui/json-editor';
 import { SettingsButton } from '../../../../core/components/ui/settings-button';
+import {
+    mergeRequestContext,
+    type RequestContextPatch
+} from '../../../../core/utils/merge-request-context';
 
 import {
     buildDefaultTx,
@@ -73,6 +79,21 @@ export const TransactionRequest = ({ mode, testIdPrefix }: TransactionRequestPro
             ? ops.retryPrompt
             : null;
 
+    const applyRequestContext = useCallback(
+        (patch: RequestContextPatch) => {
+            try {
+                const parsed = JSON.parse(form.draft);
+                if (!parsed || typeof parsed !== 'object') return;
+                form.replaceTx(
+                    mergeRequestContext(parsed as SendTransactionRequest, patch)
+                );
+            } catch {
+                // Ignore while JSON is invalid — editor shows invalid state.
+            }
+        },
+        [form]
+    );
+
     return (
         <div className="flex w-full flex-col gap-2" data-testid={testIdPrefix}>
             <ConfigureHeader
@@ -86,6 +107,11 @@ export const TransactionRequest = ({ mode, testIdPrefix }: TransactionRequestPro
                 onChange={form.setValidUntil}
                 onSetFromNow={form.setValidUntilFromNow}
                 timer={timer}
+                testIdPrefix={testIdPrefix}
+            />
+
+            <RequestContextQuickFill
+                onPatch={applyRequestContext}
                 testIdPrefix={testIdPrefix}
             />
 

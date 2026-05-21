@@ -8,6 +8,10 @@ import {
 import { Address } from '@ton/ton';
 
 import { fail, ok, type OperationResult } from '../../../../../core/components/shared/result-block';
+import {
+    mergeRequestContext,
+    type RequestContextPatch
+} from '../../../../../core/utils/merge-request-context';
 
 export type BatchMode = 'sendTransaction' | 'signMessage';
 
@@ -91,6 +95,15 @@ export const useBatchTester = () => {
 
     const onDraftChange = useCallback((next: string) => setDraft(next), []);
 
+    const applyRequestContext = useCallback(
+        (patch: RequestContextPatch) => {
+            const base =
+                parseDraft(draft) ?? buildRequest(count > 0 ? count : DEFAULT_COUNT, recipient);
+            setDraft(serializeRequest(mergeRequestContext(base, patch)));
+        },
+        [draft, recipient, count]
+    );
+
     const reset = useCallback(() => {
         setMode('sendTransaction');
         setDraft(serializeRequest(buildRequest(DEFAULT_COUNT, recipient)));
@@ -125,6 +138,7 @@ export const useBatchTester = () => {
         setCount,
         draft,
         onDraftChange,
+        applyRequestContext,
         isInvalid,
         send,
         sending,

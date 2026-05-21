@@ -1,6 +1,7 @@
 import { ButtonWithConnect } from '../../../../core/components/ui/button-with-connect';
 import { JsonEditor } from '../../../../core/components/ui/json-editor';
 import { ResultBlock } from '../../../../core/components/shared/result-block';
+import { RequestContextQuickFill } from '../../../../core/components/shared/request-context-quick-fill';
 
 import { ConfigureHeader } from './components/configure-header';
 import { CountField } from './components/count-field';
@@ -15,6 +16,7 @@ export const WalletBatchLimits = () => {
         setCount,
         draft,
         onDraftChange,
+        applyRequestContext,
         isInvalid,
         send,
         sending,
@@ -32,6 +34,11 @@ export const WalletBatchLimits = () => {
             <ModeField mode={mode} onChange={setMode} />
 
             <CountField count={count} onChange={setCount} />
+
+            <RequestContextQuickFill
+                onPatch={applyRequestContext}
+                testIdPrefix="batch-limits"
+            />
 
             <JsonEditor
                 value={draft}

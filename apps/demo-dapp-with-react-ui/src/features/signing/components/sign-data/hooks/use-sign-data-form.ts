@@ -42,6 +42,12 @@ export const useSignDataForm = () => {
         }
     }, []);
 
+    const replacePayload = useCallback((next: SignDataPayload) => {
+        setPayload(next);
+        setDraft(stringify(next));
+        setIsInvalid(false);
+    }, []);
+
     const reset = useCallback(() => {
         setMode('text');
         setWithConnect(false);
@@ -52,6 +58,7 @@ export const useSignDataForm = () => {
         setMode,
         draft,
         onDraftChange,
+        replacePayload,
         isInvalid,
         payload,
         withConnect,

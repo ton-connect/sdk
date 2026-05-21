@@ -81,7 +81,11 @@ const EXTERNAL_LINKS: readonly {
     label: string;
     icon: ComponentType<{ className?: string }>;
 }[] = [
-    { href: 'https://docs.ton.org/develop/dapps/ton-connect', label: 'Docs', icon: BookOpen },
+    {
+        href: 'https://docs.ton.org/applications/ton-connect/overview',
+        label: 'Docs',
+        icon: BookOpen
+    },
     { href: 'https://github.com/ton-connect/sdk', label: 'GitHub', icon: Github }
 ];
 
