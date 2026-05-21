@@ -1,11 +1,13 @@
 import { Layout } from '../core/components/index';
 import { TON_CONNECT_DOCS } from '../core/config/demo-nav';
+import { DEMO_SOURCE_LINKS } from '../core/config/demo-source-links';
 import { TransferUsdt } from '../features/transactions/index';
 
 export const TransferUsdtPage = () => (
     <Layout
         title="Transfer USDT"
         docHref={TON_CONNECT_DOCS.gasless}
+        sourceHref={DEMO_SOURCE_LINKS.transferUsdt}
         data-testid="transfer-usdt-page"
     >
         <div className="mx-auto flex w-full max-w-[434px] flex-col">

@@ -1,13 +1,22 @@
-import { BookOpen } from 'lucide-react';
+import { BookOpen, Github } from 'lucide-react';
 import type { FC, ReactNode } from 'react';
+
+const linkClassName =
+    'relative top-[0.2em] inline-flex size-7 shrink-0 items-center justify-center rounded-md text-primary hover:bg-tertiary';
 
 interface PageHeadingProps {
     title: string | ReactNode;
     docHref?: string;
+    sourceHref?: string;
     className?: string;
 }
 
-export const PageHeading: FC<PageHeadingProps> = ({ title, docHref, className }) => {
+export const PageHeading: FC<PageHeadingProps> = ({
+    title,
+    docHref,
+    sourceHref,
+    className
+}) => {
     if (title == null) {
         return null;
     }
@@ -26,10 +35,23 @@ export const PageHeading: FC<PageHeadingProps> = ({ title, docHref, className })
                     rel="noreferrer"
                     title="Documentation"
                     aria-label="Documentation"
-                    className="relative top-[0.2em] inline-flex size-7 shrink-0 items-center justify-center rounded-md text-primary hover:bg-tertiary"
+                    className={linkClassName}
                     data-testid="page-doc-link"
                 >
                     <BookOpen className="size-4" />
+                </a>
+            )}
+            {sourceHref && (
+                <a
+                    href={sourceHref}
+                    target="_blank"
+                    rel="noreferrer"
+                    title="View demo source on GitHub"
+                    aria-label="View demo source on GitHub"
+                    className={linkClassName}
+                    data-testid="page-source-link"
+                >
+                    <Github className="size-4" />
                 </a>
             )}
         </div>

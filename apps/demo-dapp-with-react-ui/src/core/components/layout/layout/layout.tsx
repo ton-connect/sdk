@@ -34,6 +34,8 @@ interface LayoutProps {
     title?: string | ReactNode;
     /** How-to doc opened from the page title (desktop header + mobile title row). */
     docHref?: string;
+    /** Demo feature source on GitHub (ton-connect/sdk monorepo). */
+    sourceHref?: string;
     subtitle?: ReactNode;
     /** Stable test id applied to the `<main>` content element. */
     'data-testid'?: string;
@@ -137,6 +139,7 @@ export const Layout: FC<LayoutProps> = ({
     children,
     title,
     docHref,
+    sourceHref,
     subtitle,
     'data-testid': testId
 }) => {
@@ -152,7 +155,7 @@ export const Layout: FC<LayoutProps> = ({
                     <AppLogo className="size-8 md:hidden" />
                     {title != null && (
                         <div className="hidden min-w-0 md:flex md:items-center">
-                            <PageHeading title={title} docHref={docHref} />
+                            <PageHeading title={title} docHref={docHref} sourceHref={sourceHref} />
                         </div>
                     )}
 
@@ -172,6 +175,7 @@ export const Layout: FC<LayoutProps> = ({
                                 <PageHeading
                                     title={title}
                                     docHref={docHref}
+                                    sourceHref={sourceHref}
                                     className="flex w-full min-w-0 items-baseline gap-1.5"
                                 />
                             </div>
