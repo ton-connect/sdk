@@ -70,14 +70,17 @@ const RADIUS_VALUES: BorderRadius[] = ['m', 's', 'none'];
 const SKIP_VALUES: SkipRedirect[] = ['ios', 'never', 'always'];
 
 function parseActionList(value: string | null, fallback: ActionTrigger[]): ActionTrigger[] {
-    if (!value) {
+    // Missing param → defaults; explicit empty (`notifications=`) → none selected.
+    if (value === null) {
         return fallback;
     }
-    const items = value
+    if (value === '') {
+        return [];
+    }
+    return value
         .split(',')
         .map(item => item.trim())
         .filter((item): item is ActionTrigger => ACTION_TRIGGERS.includes(item as ActionTrigger));
-    return items;
 }
 
 function serializeActionList(items: ActionTrigger[]): string {
