@@ -12,6 +12,7 @@ import {
     mergeRequestContext,
     type RequestContextPatch
 } from '../../../../../core/utils/merge-request-context';
+import { DEMO_ECHO_ADDRESS } from '../../send-transaction/utils/transaction-presets';
 
 export type BatchMode = 'sendTransaction' | 'signMessage';
 
@@ -66,7 +67,9 @@ export const useBatchTester = () => {
     const wallet = useTonWallet();
     const [tonConnectUI] = useTonConnectUI();
 
-    const recipient = wallet?.account.address ? toFriendlyAddress(wallet.account.address) : '';
+    const recipient = wallet?.account.address
+        ? toFriendlyAddress(wallet.account.address)
+        : DEMO_ECHO_ADDRESS;
 
     const [mode, setMode] = useState<BatchMode>('sendTransaction');
     const [draft, setDraft] = useState(() =>
