@@ -14,7 +14,11 @@ interface ConfigureHeaderProps {
     testIdPrefix: string;
 }
 
-export const ConfigureHeader = ({ onReset, onPresetSelect, testIdPrefix }: ConfigureHeaderProps) => {
+export const ConfigureHeader = ({
+    onReset,
+    onPresetSelect,
+    testIdPrefix
+}: ConfigureHeaderProps) => {
     const isMobile = useIsMobile();
     const network = useWalletNetwork();
 

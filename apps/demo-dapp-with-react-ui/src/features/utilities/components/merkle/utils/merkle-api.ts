@@ -4,9 +4,7 @@ import '../../../../../patch-local-storage-for-github-pages';
 
 const apiHost = document.baseURI.replace(/\/$/, '');
 
-export async function fetchMerkleProofTransaction(
-    account: Account
-): Promise<{
+export async function fetchMerkleProofTransaction(account: Account): Promise<{
     transaction?: SendTransactionRequest;
     error?: string;
 }> {

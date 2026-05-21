@@ -26,7 +26,12 @@ import {
     ValidUntilField,
     WaitingStatus
 } from './components';
-import { type RequestMode, useSendTransaction, useTransactionForm, useValidUntilTimer } from './hooks';
+import {
+    type RequestMode,
+    useSendTransaction,
+    useTransactionForm,
+    useValidUntilTimer
+} from './hooks';
 
 interface TransactionRequestProps {
     mode: RequestMode;
@@ -84,9 +89,7 @@ export const TransactionRequest = ({ mode, testIdPrefix }: TransactionRequestPro
             try {
                 const parsed = JSON.parse(form.draft);
                 if (!parsed || typeof parsed !== 'object') return;
-                form.replaceTx(
-                    mergeRequestContext(parsed as SendTransactionRequest, patch)
-                );
+                form.replaceTx(mergeRequestContext(parsed as SendTransactionRequest, patch));
             } catch {
                 // Ignore while JSON is invalid — editor shows invalid state.
             }
@@ -110,10 +113,7 @@ export const TransactionRequest = ({ mode, testIdPrefix }: TransactionRequestPro
                 testIdPrefix={testIdPrefix}
             />
 
-            <RequestContextQuickFill
-                onPatch={applyRequestContext}
-                testIdPrefix={testIdPrefix}
-            />
+            <RequestContextQuickFill onPatch={applyRequestContext} testIdPrefix={testIdPrefix} />
 
             <JsonEditor
                 className="mb-4"

@@ -35,10 +35,7 @@ export const WalletBatchLimits = () => {
 
             <CountField count={count} onChange={setCount} />
 
-            <RequestContextQuickFill
-                onPatch={applyRequestContext}
-                testIdPrefix="batch-limits"
-            />
+            <RequestContextQuickFill onPatch={applyRequestContext} testIdPrefix="batch-limits" />
 
             <JsonEditor
                 value={draft}

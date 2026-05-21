@@ -84,11 +84,7 @@ export const TransferUsdt = () => {
         if (usdtBalance) setAmount(usdtBalance);
     };
 
-    const buttonLabel = networkError
-        ? networkError
-        : form.gasless
-          ? 'Send gasless'
-          : 'Send USDT';
+    const buttonLabel = networkError ? networkError : form.gasless ? 'Send gasless' : 'Send USDT';
     const resultTitle = form.gasless ? 'Gasless USDT' : 'Transfer USDT';
 
     return (

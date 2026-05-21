@@ -44,9 +44,7 @@ export const SignData = () => {
                 if (!parsed || typeof parsed !== 'object' || !isSignDataMode(parsed.type)) {
                     return;
                 }
-                form.replacePayload(
-                    mergeRequestContext(parsed as SignDataPayload, patch)
-                );
+                form.replacePayload(mergeRequestContext(parsed as SignDataPayload, patch));
             } catch {
                 // Ignore while JSON is invalid.
             }
@@ -60,10 +58,7 @@ export const SignData = () => {
 
             <ModeField mode={form.mode} onChange={form.setMode} />
 
-            <RequestContextQuickFill
-                onPatch={applyRequestContext}
-                testIdPrefix="sign-data"
-            />
+            <RequestContextQuickFill onPatch={applyRequestContext} testIdPrefix="sign-data" />
 
             <JsonEditor
                 className="mb-4"

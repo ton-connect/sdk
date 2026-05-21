@@ -31,9 +31,7 @@ export function useMerkleDemo() {
 
         try {
             if (mode === 'proof') {
-                const { transaction, error } = await fetchMerkleProofTransaction(
-                    wallet.account
-                );
+                const { transaction, error } = await fetchMerkleProofTransaction(wallet.account);
                 if (error || !transaction) {
                     setResult(fail({ error: error ?? 'Failed to build merkle proof transaction' }));
                     return;
@@ -41,9 +39,7 @@ export function useMerkleDemo() {
                 const response = await tonConnectUI.sendTransaction(transaction);
                 setResult(ok(response));
             } else {
-                const response = await tonConnectUI.sendTransaction(
-                    buildMerkleUpdateTransaction()
-                );
+                const response = await tonConnectUI.sendTransaction(buildMerkleUpdateTransaction());
                 setResult(ok(response));
             }
         } catch (error) {

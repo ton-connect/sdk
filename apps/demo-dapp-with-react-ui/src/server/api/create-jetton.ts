@@ -23,11 +23,9 @@ export const createJetton: HttpResponseResolver = async ({ request }) => {
             return badRequest({ error: 'address is required' });
         }
 
-        const network =
-            typeof raw.network === 'string' ? raw.network : CHAIN.MAINNET;
+        const network = typeof raw.network === 'string' ? raw.network : CHAIN.MAINNET;
 
-        const { address: _address, network: _network, ...jettonFields } = raw;
-        const body = CreateJettonRequest.parse(jettonFields);
+        const body = CreateJettonRequest.parse(raw);
 
         const validUntil = Math.round((Date.now() + VALID_UNTIL) / 1000);
         const amount = toNano('0.06').toString();
