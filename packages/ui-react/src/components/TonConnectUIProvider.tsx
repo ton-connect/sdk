@@ -9,9 +9,17 @@ import {
 import type { ITonConnect, RequiredFeatures, AnalyticsSettings } from '@tonconnect/ui';
 import { isClientSide } from '../utils/web';
 
+/**
+ * @internal
+ */
 export const TonConnectUIContext = createContext<TonConnectUI | null>(null);
 
 export type TonConnectUIProviderProps = {
+    /**
+     * Children of the provider. The TonConnect UI context is available to
+     * every descendant — place hooks (`useTonConnectUI`, `useTonAddress`,
+     * etc.) and `<TonConnectButton>` anywhere inside this subtree.
+     */
     children: ReactNode;
 } & (
     | Partial<
@@ -23,8 +31,8 @@ export type TonConnectUIProviderProps = {
 
 export interface TonConnectUIProviderPropsWithManifest {
     /**
-     * Url to the [manifest]{@link https://github.com/ton-connect/docs/blob/main/requests-responses.md#app-manifest} with the Dapp metadata that will be displayed in the user's wallet.
-     * If not passed, manifest from `${window.location.origin}/tonconnect-manifest.json` will be taken.
+     * URL to the [manifest]{@link https://github.com/ton-connect/docs/blob/main/requests-responses.md#app-manifest} with the dApp metadata that is displayed in the user's wallet.
+     * If not passed, the manifest is loaded from `${window.location.origin}/tonconnect-manifest.json`.
      */
     manifestUrl: string;
 }
@@ -41,8 +49,8 @@ export interface TonConnectUIProviderPropsWithInstance {
      * TonConnectUI instance. Can be helpful if TonConnectUI instance is used outside of React context.
      *
      * Note: TonConnect UI works as a singleton.
-     * If you pass a custom instance, it will be stored in the global singleton
-     * and reused by the library.
+     * A custom instance is stored in the global singleton on first render
+     * and reused by the library on subsequent renders.
      */
     instance: TonConnectUI;
 }
@@ -50,7 +58,7 @@ export interface TonConnectUIProviderPropsWithInstance {
 export interface TonConnectUIProviderPropsBase {
     /**
      * Try to restore existing session and reconnect to the corresponding wallet.
-     * @default true.
+     * @default true
      */
     restoreConnection: boolean;
 
@@ -61,8 +69,8 @@ export interface TonConnectUIProviderPropsBase {
     language: Locales;
 
     /**
-     * HTML element id to attach the modal window element. If not passed, `div#tc-widget-root` in the end of the <body> will be added and used.
-     * @default `div#tc-widget-root`.
+     * HTML element id to attach the modal window element. If not passed, the library appends `div#tc-widget-root` to the end of `<body>` and uses it.
+     * @default `div#tc-widget-root`
      */
     widgetRootId: string;
 
@@ -105,14 +113,7 @@ export interface TonConnectUIProviderPropsBase {
 
 let tonConnectUI: TonConnectUI | null = null;
 
-/**
- * Add TonConnectUIProvider to the root of the app. You can specify UI options using props.
- * All TonConnect UI hooks calls and `<TonConnectButton />` component must be placed inside `<TonConnectUIProvider>`.
- * @param children JSX to insert.
- * @param [options] additional options.
- * @constructor
- */
-const TonConnectUIProvider: FunctionComponent<TonConnectUIProviderProps> = ({
+const TonConnectUIProviderComponent: FunctionComponent<TonConnectUIProviderProps> = ({
     children,
     ...options
 }) => {
@@ -139,4 +140,12 @@ const TonConnectUIProvider: FunctionComponent<TonConnectUIProviderProps> = ({
     );
 };
 
-export default memo(TonConnectUIProvider);
+/**
+ * Add `TonConnectUIProvider` at the root of your app. Specify UI options
+ * through its props. Every TonConnect UI hook call and `<TonConnectButton />`
+ * must live somewhere inside this provider. Props on
+ * {@link TonConnectUIProviderProps}.
+ */
+const TonConnectUIProvider = memo(TonConnectUIProviderComponent);
+
+export default TonConnectUIProvider;

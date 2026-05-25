@@ -211,13 +211,13 @@ export function sendOpenTelegramLink(link: string, fallback?: () => void): void 
         if (fallback) {
             return fallback();
         }
-        throw new TonConnectUIError(`Url protocol is not supported: ${url}`);
+        throw new TonConnectUIError(`URL protocol is not supported: ${url}`);
     }
     if (url.hostname !== 't.me') {
         if (fallback) {
             return fallback();
         }
-        throw new TonConnectUIError(`Url host is not supported: ${url}`);
+        throw new TonConnectUIError(`URL host is not supported: ${url}`);
     }
 
     const pathFull = url.pathname + url.search;

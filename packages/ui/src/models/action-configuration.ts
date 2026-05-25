@@ -21,12 +21,12 @@ export interface ActionConfiguration {
 
     /**
      * Specifies return url for TWA-TWA connections.
-     * This will be applied as a return strategy if dApp is opened as a TWA and user selects TWA wallet (overrides `returnStrategy` if).
+     * This is applied as a return strategy if dApp is opened as a TWA and user selects TWA wallet (overrides `returnStrategy` if set).
      */
     twaReturnUrl?: `${string}://${string}`;
 
     /**
-     * @deprecated Shouldn't be used anymore, SDK will automatically detect return strategy for TWA-TWA connections.
+     * @deprecated Shouldn't be used anymore, the SDK automatically detects the return strategy for TWA-TWA connections.
      * Specifies whether the method should redirect user to the connected wallet
      * @default 'ios'
      */

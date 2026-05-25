@@ -1,20 +1,23 @@
 export interface DappMetadata {
     /**
-     * Dapp name. Might be simple, will not be used as identifier.
-     * @default `document.title` if exists, 'Unknown dapp' overwise
+     * dApp name. Might be simple; not used as identifier.
+     * Defaults to `document.title`, or to `'Unknown dApp'` when no document title is present.
      */
     name: string;
 
     /**
-     * URL to the dapp icon. Must be PNG, ICO, ... . SVG icons are not supported.
-     * @default best quality favicon declared via <link> in the document or '' if there are no any icons in the document.
+     * URL to the dApp icon. Must be PNG, ICO, ... . SVG icons are not supported.
+     * Defaults to the best-quality favicon declared via a `<link>` element in the document,
+     * or to an empty string when no favicon is declared.
      */
     icon: string;
 
     /**
-     * Dapp URL. Will be used as the dapp identifier. Will be used to open the dapp after click to its icon in the wallet.
-     * It is recommended to pass url without closing slash, e.g. 'https://mydapp.com' instead of 'https://mydapp.com/'.
-     * @default `window.location.origin` if exists, otherwise (if not explicitly specified) an error will be thrown.
+     * dApp URL. Identifies the dApp; the wallet opens this URL when the user taps the dApp icon.
+     * Pass the URL without a trailing slash, e.g. 'https://mydapp.com' rather than 'https://mydapp.com/'.
+     * Defaults to `window.location.origin`; the TonConnect constructor throws
+     * `DappMetadataError` when neither `url` nor `window.location.origin` is available
+     * (e.g., in a Node.js environment without an explicit manifest URL).
      */
     url: string;
 }

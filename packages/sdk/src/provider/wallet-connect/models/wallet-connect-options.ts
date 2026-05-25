@@ -1,5 +1,5 @@
 /**
- * Metadata information about your application that will be displayed to users during WalletConnect pairing.
+ * Metadata information about your application that is shown to users during WalletConnect pairing.
  */
 export type WalletConnectMetadata = {
     /**
@@ -38,7 +38,7 @@ export type WalletConnectOptions = {
     projectId: string;
 
     /**
-     * Metadata about your application that will be displayed to users.
+     * Metadata about your application shown to users.
      */
     metadata: WalletConnectMetadata;
 };

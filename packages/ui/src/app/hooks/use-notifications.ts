@@ -15,7 +15,7 @@ export type UseOpenedNotifications = Accessor<Notification[]>;
  */
 export type UseOpenedNotificationsConfig = {
     /**
-     * Timeout in milliseconds after which the notification will be removed, default is 4500.
+     * Timeout in milliseconds after which the notification is removed, default is 4500.
      */
     timeout?: number;
 };

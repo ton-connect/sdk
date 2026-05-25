@@ -14,7 +14,7 @@ export interface WalletsModal {
 
     /**
      * Close the modal.
-     * @default 'action-cancelled'
+     * @param reason close reason. Defaults to `'action-cancelled'`.
      */
     close: (reason?: WalletsModalCloseReason) => void;
 

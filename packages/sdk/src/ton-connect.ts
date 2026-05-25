@@ -212,7 +212,7 @@ export class TonConnect implements ITonConnect {
 
         if (!this.dappSettings.manifestUrl) {
             throw new DappMetadataError(
-                'Dapp tonconnect-manifest.json must be specified if window.location.origin is undefined. See more https://github.com/ton-connect/docs/blob/main/requests-responses.md#app-manifest'
+                'dApp tonconnect-manifest.json must be specified if window.location.origin is undefined. See more https://github.com/ton-connect/docs/blob/main/requests-responses.md#app-manifest'
             );
         }
 
@@ -227,7 +227,9 @@ export class TonConnect implements ITonConnect {
     }
 
     /**
-     * Returns available wallets list.
+     * Returns the available wallets list. The internal wallets-list manager
+     * falls back to a bundled list if the configured `walletsListSource` is
+     * unreachable, so this method does not throw `FetchWalletsError`.
      */
     public getWallets(): Promise<WalletInfo[]> {
         return this.walletsList.getWallets();
@@ -235,8 +237,8 @@ export class TonConnect implements ITonConnect {
 
     /**
      * Allows to subscribe to connection status changes and handle connection errors.
-     * @param callback will be called after connections status changes with actual wallet or null.
-     * @param errorsHandler (optional) will be called with some instance of TonConnectError when connect error is received.
+     * @param callback fires after the connection status changes, receiving the active wallet or null.
+     * @param errorsHandler fires with a TonConnectError instance when a connect error is received.
      * @returns unsubscribe callback.
      */
     public onStatusChange(
@@ -263,9 +265,10 @@ export class TonConnect implements ITonConnect {
     /**
      * Generates universal link for an external wallet and subscribes to the wallet's bridge, or sends connect request to the injected wallet.
      * @param wallet wallet's bridge url and universal link for an external wallet or jsBridge key for the injected wallet.
-     * @param request (optional) additional request to pass to the wallet while connect (currently only ton_proof is available).
-     * @param options (optional) openingDeadlineMS for the connection opening deadline and signal for the connection abort.
+     * @param options openingDeadlineMS sets the connection opening deadline; signal aborts the connection. Pass `ton_proof` and other connect-additional-request fields via `options.request`.
      * @returns universal link if external wallet was passed or void for the injected wallet.
+     * @throws {@link WalletAlreadyConnectedError} a wallet is already connected — disconnect first.
+     * @throws {@link TonConnectError} the connect-additional-request or embedded request failed validation, or the connection was aborted via `options.signal`.
      */
 
     public connect<
@@ -547,9 +550,15 @@ export class TonConnect implements ITonConnect {
     /**
      * Asks connected wallet to sign and send the transaction.
      * @param transaction transaction to send.
-     * @param options (optional) onRequestSent will be called after the request was sent to the wallet and signal for the transaction abort.
+     * @param options onRequestSent fires after the request is sent to the wallet; signal aborts the transaction.
      * @returns signed transaction boc that allows you to find the transaction in the blockchain.
-     * If user rejects transaction, method will throw the corresponding error.
+     * @throws {@link WalletNotConnectedError} no wallet is currently connected.
+     * @throws {@link WalletNotSupportFeatureError} the connected wallet does not advertise support for the requested transaction shape (messages, items, or extra currencies).
+     * @throws {@link WalletWrongNetworkError} the wallet's `account.chain` differs from the network on `transaction`.
+     * @throws {@link UserRejectsError} the user rejected the transaction in the wallet UI.
+     * @throws {@link BadRequestError} the wallet rejected the request as malformed.
+     * @throws {@link UnknownAppError} the wallet does not recognise this dApp session.
+     * @throws {@link TonConnectError} `transaction` failed validation or the request was aborted via `options.signal`.
      */
     public sendTransaction(
         transaction: SendTransactionRequest,
@@ -693,6 +702,29 @@ export class TonConnect implements ITonConnect {
         return { requiredMessagesNumber, requireExtraCurrencies, requiredItemTypes };
     }
 
+    /**
+     * Asks the connected wallet to sign an arbitrary payload (text, binary, or
+     * structured cell) and return the user's signature. The payload is not
+     * broadcast to the blockchain — only signed.
+     * @param data payload to sign. The `type` discriminator selects the
+     *   payload form (`'text'`, `'binary'`, or `'cell'`).
+     * @param options `onRequestSent` fires once the request has been
+     *   dispatched to the wallet; `signal` aborts the in-flight signing
+     *   request.
+     * @returns the signed payload together with the signer address, the
+     *   domain the dApp was opened under, and the wallet-stamped timestamp.
+     * @throws {@link WalletNotConnectedError} no wallet is currently connected.
+     * @throws {@link WalletNotSupportFeatureError} the connected wallet does not
+     *   advertise support for the requested payload type via its `signData`
+     *   feature.
+     * @throws {@link WalletWrongNetworkError} the wallet's `account.chain` differs
+     *   from the network on `data`.
+     * @throws {@link UserRejectsError} the user rejected the request in the wallet UI.
+     * @throws {@link BadRequestError} the wallet rejected the payload as malformed.
+     * @throws {@link UnknownAppError} the wallet does not recognise this dApp session.
+     * @throws {@link TonConnectError} `data` failed validation or the request was
+     *   aborted via `options.signal`.
+     */
     public async signData(
         data: SignDataPayload,
         options?: OptionalTraceable<{
@@ -771,6 +803,28 @@ export class TonConnect implements ITonConnect {
         return { ...result, traceId };
     }
 
+    /**
+     * Asks the connected wallet to sign an internal-message body (BoC) without
+     * sending it to the blockchain. Use this when the dApp needs a signed
+     * message it will relay itself.
+     * @param message message to sign. Carries the same `messages` / `items`
+     *   shape as a transaction request.
+     * @param options `onRequestSent` fires once the request has been
+     *   dispatched to the wallet; `signal` aborts the in-flight signing
+     *   request.
+     * @returns the signed internal-message BoC.
+     * @throws {@link WalletNotConnectedError} no wallet is currently connected.
+     * @throws {@link WalletNotSupportFeatureError} the connected wallet does not
+     *   advertise support for the requested message shape via its
+     *   `signMessage` feature.
+     * @throws {@link WalletWrongNetworkError} the wallet's `account.chain` differs
+     *   from the network on `message`.
+     * @throws {@link UserRejectsError} the user rejected the request in the wallet UI.
+     * @throws {@link BadRequestError} the wallet rejected the message as malformed.
+     * @throws {@link UnknownAppError} the wallet does not recognise this dApp session.
+     * @throws {@link TonConnectError} `message` failed validation or the request was
+     *   aborted via `options.signal`.
+     */
     public async signMessage(
         message: SignMessageRequest,
         options?: OptionalTraceable<{
@@ -851,8 +905,9 @@ export class TonConnect implements ITonConnect {
 
     /**
      * Set desired network for the connection. Can only be set before connecting.
-     * If wallet connects with a different chain, the SDK will throw an error and abort connection.
+     * If the wallet connects with a different chain, the SDK throws an error and aborts the connection.
      * @param network desired network id (e.g., '-239', '-3', or custom). Pass undefined to allow any network.
+     * @throws {@link TonConnectError} a wallet is already connected — disconnect before changing the desired network.
      */
     public setConnectionNetwork(network?: ChainId): void {
         if (this.connected) {
@@ -862,7 +917,9 @@ export class TonConnect implements ITonConnect {
     }
 
     /**
-     * Disconnect form thw connected wallet and drop current session.
+     * Disconnect from the connected wallet and drop the current session.
+     * @throws {@link WalletNotConnectedError} no wallet is currently connected.
+     * @throws {@link TonConnectError} the request was aborted via `options.signal`.
      */
     public async disconnect(options?: OptionalTraceable<{ signal?: AbortSignal }>): Promise<void> {
         if (!this.connected) {
@@ -972,7 +1029,7 @@ export class TonConnect implements ITonConnect {
 
     /**
      * Pause bridge HTTP connection. Might be helpful, if you want to pause connections while browser tab is unfocused,
-     * or if you use SDK with NodeJS and want to save server resources.
+     * or if you use SDK with Node.js and want to save server resources.
      */
     public pauseConnection(): void {
         if (this.provider?.type !== 'http') {

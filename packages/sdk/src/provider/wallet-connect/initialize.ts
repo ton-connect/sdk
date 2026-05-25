@@ -10,7 +10,7 @@ const state: {
  * Initializes the WalletConnect integration.
  *
  * This function must be called once before using WalletConnect features.
- * A second call will throw an error to prevent accidental re-initialization.
+ * A second call throws an error to prevent accidental re-initialization.
  *
  * @param UniversalConnectorCls - A UniversalConnector class imported from '@reown/appkit-universal-connector'
  * @param {WalletConnectOptions} walletConnectOptions - Configuration options used for initializing WalletConnect.

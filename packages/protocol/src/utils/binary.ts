@@ -1,3 +1,7 @@
+/**
+ * Concatenate two byte buffers into a fresh `Uint8Array`. Inputs are not
+ * modified.
+ */
 export function concatUint8Arrays(buffer1: Uint8Array, buffer2: Uint8Array): Uint8Array {
     const mergedArray = new Uint8Array(buffer1.length + buffer2.length);
     mergedArray.set(buffer1);
@@ -5,6 +9,13 @@ export function concatUint8Arrays(buffer1: Uint8Array, buffer2: Uint8Array): Uin
     return mergedArray;
 }
 
+/**
+ * Split a byte buffer at `index` into a `[prefix, suffix]` pair. The prefix
+ * is `array[0..index)` and the suffix is `array[index..end)`. Used by
+ * {@link SessionCrypto.decrypt} to peel the nonce off a received ciphertext.
+ *
+ * @throws {@link Error} when `index` is at or past the end of `array`.
+ */
 export function splitToUint8Arrays(array: Uint8Array, index: number): [Uint8Array, Uint8Array] {
     if (index >= array.length) {
         throw new Error('Index is out of buffer');
@@ -15,6 +26,10 @@ export function splitToUint8Arrays(array: Uint8Array, index: number): [Uint8Arra
     return [subArray1, subArray2];
 }
 
+/**
+ * Encode a byte buffer as a lowercase, zero-padded hex string (two characters
+ * per byte). Inverse of {@link hexToByteArray}.
+ */
 export function toHexString(byteArray: Uint8Array): string {
     let hexString = '';
     byteArray.forEach(byte => {
@@ -22,6 +37,11 @@ export function toHexString(byteArray: Uint8Array): string {
     });
     return hexString;
 }
+/**
+ * Decode a hex string into a byte buffer. Inverse of {@link toHexString}.
+ *
+ * @throws {@link Error} when the input has an odd length.
+ */
 export function hexToByteArray(hexString: string): Uint8Array {
     if (hexString.length % 2 !== 0) {
         throw new Error(`Cannot convert ${hexString} to bytesArray`);

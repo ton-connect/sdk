@@ -3,7 +3,22 @@ import { ConnectedWallet, Wallet, WalletInfoWithOpenMethod } from '@tonconnect/u
 import { useTonConnectUI } from './useTonConnectUI';
 
 /**
- * Use it to get user's current ton wallet. If wallet is not connected hook will return null.
+ * Use it to get the user's current TON wallet. Returns `null` when no wallet is connected.
+ *
+ * Subscribes to `tonConnectUI.onStatusChange` internally, so the component
+ * re-renders whenever the user connects, disconnects, or switches accounts.
+ *
+ * @throws {@link TonConnectProviderNotSetError} when called on the client side without a `<TonConnectUIProvider>` ancestor.
+ * @example
+ * function WalletStatus() {
+ *     const wallet = useTonWallet();
+ *
+ *     if (!wallet) {
+ *         return <p>No wallet connected</p>;
+ *     }
+ *
+ *     return <p>Connected: {wallet.account.address}</p>;
+ * }
  */
 export function useTonWallet(): Wallet | (Wallet & WalletInfoWithOpenMethod) | null {
     const [tonConnectUI] = useTonConnectUI();
