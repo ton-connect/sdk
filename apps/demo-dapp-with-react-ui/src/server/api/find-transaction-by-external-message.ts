@@ -5,6 +5,13 @@ import { Cell, loadMessage, Transaction } from '@ton/core';
 import { badRequest, notFound, ok } from '../utils/http-utils';
 import { getNormalizedExtMessageHash, retry } from '../utils/transactions-utils';
 
+/** Cap TonCenter pagination so the demo cannot scan an entire busy account forever. */
+const MAX_SCAN_PAGES = 25;
+const TX_PAGE_SIZE = 10;
+
+const toncenterEndpoint = (network: 'mainnet' | 'testnet') =>
+    `https://${network === 'testnet' ? 'testnet.' : ''}toncenter.com/api/v2/jsonRPC`;
+
 async function getTransactionByInMessage(
     inMessageBoc: string,
     client: TonClient
@@ -24,25 +31,23 @@ async function getTransactionByInMessage(
     let lt: string | undefined = undefined;
     let hash: string | undefined = undefined;
 
-    // Step 4. Paginate through transaction history of account
-    while (true) {
+    // Step 4. Paginate through transaction history (bounded — unbounded scan never returns on busy accounts)
+    for (let page = 0; page < MAX_SCAN_PAGES; page++) {
         const transactions = await retry(
             () =>
                 client.getTransactions(account, {
                     hash,
                     lt,
-                    limit: 10,
+                    limit: TX_PAGE_SIZE,
                     archival: true
                 }),
             { delay: 1000, retries: 3 }
         );
 
         if (transactions.length === 0) {
-            // No more transactions found - message may not be processed yet
             return undefined;
         }
 
-        // Step 5. Search for a transaction whose input message matches the normalized hash
         for (const transaction of transactions) {
             if (transaction.inMessage?.info.type !== 'external-in') {
                 continue;
@@ -58,6 +63,8 @@ async function getTransactionByInMessage(
         lt = last.lt.toString();
         hash = last.hash().toString('base64');
     }
+
+    return undefined;
 }
 
 /**
@@ -76,12 +83,14 @@ export const findTransactionByExternalMessage: HttpResponseResolver = async ({ r
         }
 
         const client = new TonClient({
-            endpoint: `https://${network === 'testnet' ? 'tesnet.' : ''}toncenter.com/api/v2/jsonRPC`
+            endpoint: toncenterEndpoint(network)
         });
 
         const transaction = await getTransactionByInMessage(boc, client);
         if (!transaction) {
-            return notFound({ error: 'Transaction not found' });
+            return notFound({
+                error: `Transaction not found in the last ${MAX_SCAN_PAGES * TX_PAGE_SIZE} account transactions`
+            });
         }
 
         return ok({ transaction: { ...transaction, hash: transaction.hash().toString('base64') } });

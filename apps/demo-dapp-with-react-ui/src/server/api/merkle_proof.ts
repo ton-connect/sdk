@@ -2,8 +2,7 @@ import { beginCell, Cell, storeStateInit, toNano } from '@ton/core';
 import { Address } from '@ton/ton';
 import { CHAIN } from '@tonconnect/sdk';
 import { HttpResponseResolver } from 'msw';
-import { badRequest, ok, unauthorized } from '../utils/http-utils';
-import { decodeAuthToken, verifyToken } from '../utils/jwt';
+import { badRequest, ok } from '../utils/http-utils';
 import { buildSuccessMerkleProof, buildVerifyMerkleProof, Exotic } from '../utils/exotic';
 import { Buffer } from 'buffer';
 
@@ -16,34 +15,29 @@ const EXOTIC_CODE = Cell.fromBoc(
 )[0]!;
 
 /**
- * Checks the proof and returns an access token.
+ * Builds a merkle proof deploy transaction for the connected wallet.
  *
  * POST /api/merkle_proof
+ * Body: { address: string, network?: string }
  */
 export const merkleProof: HttpResponseResolver = async ({ request }) => {
     try {
-        const token = request.headers.get('Authorization')?.replace('Bearer ', '');
+        const body = (await request.json().catch(() => null)) as {
+            address?: string;
+            network?: string;
+        } | null;
 
-        if (!token || !(await verifyToken(token))) {
-            return unauthorized({ error: `Unauthorized unverified token ${token}` });
+        if (!body?.address) {
+            return badRequest({ error: 'address is required' });
         }
 
-        const payload = decodeAuthToken(token);
-        if (!payload?.address) {
-            return unauthorized({ error: 'Invalid token' });
-        }
+        const network = body.network ?? CHAIN.MAINNET;
 
-        // specify the time until the message is valid
         const validUntil = Math.round((Date.now() + VALID_UNTIL) / 1000);
-
-        // amount of TON to send with the message
         const amount = toNano('0.06').toString();
-        // forward value for the message to the wallet
-        // const walletForwardValue = toNano('0.05');
 
-        const senderAddress = Address.parse(payload.address);
-        const ownerAddress = Address.parse(payload.address);
-        // const receiverAddress = Address.parse(payload.address);
+        const senderAddress = Address.parse(body.address);
+        const ownerAddress = Address.parse(body.address);
 
         const exotic = Exotic.createFromConfig(
             {
@@ -56,21 +50,18 @@ export const merkleProof: HttpResponseResolver = async ({ request }) => {
             return badRequest({ error: 'Invalid exotic' });
         }
 
-        // prepare jetton master address
         const exoticAdress = exotic.address.toString({
             urlSafe: true,
             bounceable: true,
-            testOnly: payload.network === CHAIN.TESTNET
+            testOnly: network === CHAIN.TESTNET
         });
 
-        // prepare stateInit for the merkle proof deploy message
         const stateInitBase64 = beginCell()
             .store(storeStateInit(exotic.init))
             .endCell()
             .toBoc()
             .toString('base64');
 
-        // prepare payload for the jetton mint message
         const merkleProofBody = buildVerifyMerkleProof(buildSuccessMerkleProof());
 
         return ok({

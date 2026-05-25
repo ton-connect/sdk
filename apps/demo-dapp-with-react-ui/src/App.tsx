@@ -1,74 +1,33 @@
-import './App.scss';
-import { THEME, TonConnectUIProvider, initializeWalletConnect } from '@tonconnect/ui-react';
-import { Routes, Route } from 'react-router-dom';
-import { Header } from './components/Header/Header';
-import { TxForm } from './components/TxForm/TxForm';
-import { Footer } from './components/Footer/Footer';
-import { TonProofDemo } from './components/TonProofDemo/TonProofDemo';
-import { CreateJettonDemo } from './components/CreateJettonDemo/CreateJettonDemo';
-import { WalletBatchLimitsTester } from './components/WalletBatchLimitsTester/WalletBatchLimitsTester';
-import { SignDataTester } from './components/SignDataTester/SignDataTester';
-import { MerkleExample } from './components/MerkleExample/MerkleExample';
-import { FindTransactionDemo } from './components/FindTransactionDemo/FindTransactionDemo';
-import { TransferUsdt } from './components/TransferUsdt/TransferUsdt';
-import { UniversalConnector } from '@reown/appkit-universal-connector';
-import { GaslessDemo } from './components/GaslessDemo/GaslessDemo';
-import { OneClickPay } from './pages/OneClickPay/OneClickPay';
+import { TonConnectUIProvider } from '@tonconnect/ui-react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-initializeWalletConnect(UniversalConnector, {
-    projectId: '9cb446f4a1b697039a23332618d942b0',
-    metadata: {
-        name: 'Demo DApp',
-        icons: [
-            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS0uc4aSvQASroq4VfMx30RkZzIX8wiefg3rQ&s'
-        ],
-        url: window.location.origin,
-        description: 'Demo DApp'
+import { AppRouter, ThemeProvider } from './core/components/index';
+import { tonConnectManifestUrl, tonConnectUiPreferences } from './core/configs/app-kit';
+import { getProviderAnalyticsSettingsFromLocation } from './features/dev-settings/utils/settings-url';
+
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            staleTime: 30_000,
+            retry: 10,
+            retryDelay: 1500,
+            refetchOnWindowFocus: false
+        }
     }
 });
 
-function HomePage() {
+export const App = () => {
     return (
-        <div className="app">
-            <Header />
-            <TxForm />
-            <GaslessDemo />
-            <WalletBatchLimitsTester />
-            <SignDataTester />
-            <TransferUsdt />
-            <CreateJettonDemo />
-            <TonProofDemo />
-            <FindTransactionDemo />
-            <MerkleExample />
-            <Footer />
-        </div>
+        <ThemeProvider defaultTheme="dark" storageKey="demo-dapp-theme">
+            <QueryClientProvider client={queryClient}>
+                <TonConnectUIProvider
+                    manifestUrl={tonConnectManifestUrl}
+                    uiPreferences={tonConnectUiPreferences}
+                    analytics={getProviderAnalyticsSettingsFromLocation()}
+                >
+                    <AppRouter />
+                </TonConnectUIProvider>
+            </QueryClientProvider>
+        </ThemeProvider>
     );
-}
-
-function IframePage() {
-    return <iframe src="/" style={{ width: '100%', height: '100vh', border: 'none' }} />;
-}
-
-function IframeIframePage() {
-    return <iframe src="/iframe" style={{ width: '100%', height: '100vh', border: 'none' }} />;
-}
-
-function App() {
-    return (
-        <TonConnectUIProvider
-            manifestUrl="https://tonconnect-sdk-demo-dapp.vercel.app/tonconnect-manifest.json"
-            uiPreferences={{ theme: THEME.DARK }}
-        >
-            <div>
-                <Routes>
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="/pay" element={<OneClickPay />} />
-                    <Route path="/iframe" element={<IframePage />} />
-                    <Route path="/iframe/iframe" element={<IframeIframePage />} />
-                </Routes>
-            </div>
-        </TonConnectUIProvider>
-    );
-}
-
-export default App;
+};

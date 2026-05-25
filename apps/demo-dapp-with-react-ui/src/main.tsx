@@ -1,19 +1,16 @@
 import './patch-local-storage-for-github-pages';
 import './polyfills';
+import './core/styles/index.css';
+
 import eruda from 'eruda';
-
-import React, { StrictMode } from 'react';
+import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
-import App from './App';
-import './index.scss';
-import { runSingleInstance } from './utils/run-single-instance';
-import { enableQaMode } from '@tonconnect/ui-react';
-import { getTonconnectVersion } from './utils/get-tonconnect-version';
+import { App } from './App';
+import { initQaModeFromUrl } from './core/utils/qa-mode-from-url';
+import { runSingleInstance } from './core/utils/run-single-instance';
+import { getTonconnectVersion } from './core/utils/get-tonconnect-version';
 
-if (import.meta.env.VITE_QA_MODE === 'enable') {
-    enableQaMode();
-}
+initQaModeFromUrl();
 
 getTonconnectVersion();
 
@@ -73,9 +70,7 @@ enableMocking().then(() => {
     const root = createRoot(container);
     root.render(
         <StrictMode>
-            <BrowserRouter>
-                <App />
-            </BrowserRouter>
+            <App />
         </StrictMode>
     );
 });
