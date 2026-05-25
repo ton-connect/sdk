@@ -1,4 +1,6 @@
-import { BookOpen, Github } from 'lucide-react';
+import { BookOpen } from 'lucide-react';
+
+import { GitHubIcon } from '../../ui/icons';
 import type { FC, ReactNode } from 'react';
 
 const linkClassName =
@@ -51,7 +53,7 @@ export const PageHeading: FC<PageHeadingProps> = ({
                     className={linkClassName}
                     data-testid="page-source-link"
                 >
-                    <Github className="size-4" />
+                    <GitHubIcon className="size-4" />
                 </a>
             )}
         </div>

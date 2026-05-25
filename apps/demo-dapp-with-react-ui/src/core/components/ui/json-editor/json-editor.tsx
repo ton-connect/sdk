@@ -1,9 +1,11 @@
-import Editor from 'react-simple-code-editor';
+import EditorImport from 'react-simple-code-editor';
 import { highlight, languages } from 'prismjs/components/prism-core';
 import type { ComponentProps, FC } from 'react';
 import 'prismjs/components/prism-json';
 
 import { cn } from '../../../utils/cn';
+
+const Editor = (EditorImport as { default?: typeof EditorImport }).default ?? EditorImport;
 
 export interface JsonEditorProps extends Omit<ComponentProps<'div'>, 'onChange'> {
     value: string;

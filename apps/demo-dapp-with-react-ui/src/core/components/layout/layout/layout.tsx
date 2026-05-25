@@ -1,5 +1,5 @@
 import { TonConnectButton, useTonWallet } from '@tonconnect/ui-react';
-import { BookOpen, ExternalLink, Github, Settings } from 'lucide-react';
+import { BookOpen, ExternalLink, Settings } from 'lucide-react';
 import { Link, NavLink } from 'react-router-dom';
 import type { ComponentType, FC, ReactNode } from 'react';
 
@@ -26,6 +26,7 @@ import {
     SidebarTrigger,
     useSidebar
 } from '../../shared/sidebar/index';
+import { GitHubIcon } from '../../ui/icons';
 import { AppLogo } from '../app-logo';
 import { ThemeSwitcher } from '../theme-switcher/index';
 
@@ -51,7 +52,7 @@ const EXTERNAL_LINKS: readonly {
         label: 'Docs',
         icon: BookOpen
     },
-    { href: 'https://github.com/ton-connect/sdk', label: 'GitHub', icon: Github }
+    { href: 'https://github.com/ton-connect/sdk', label: 'GitHub', icon: GitHubIcon }
 ];
 
 const AppSidebar: FC = () => {
