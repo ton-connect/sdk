@@ -1,7 +1,8 @@
 import { TonConnectError } from 'src/errors/ton-connect.error';
 
 /**
- * Thrown when `Storage` was not specified in the `DappMetadata` and default `localStorage` was not detected in the Node.js environment.
+ * Thrown when `Storage` was not specified in the `DappMetadata` and default
+ * `localStorage` was not detected in the Node.js environment.
  */
 export class LocalstorageNotFoundError extends TonConnectError {
     protected get info(): string {
