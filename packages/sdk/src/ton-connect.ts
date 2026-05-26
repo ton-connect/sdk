@@ -100,26 +100,47 @@ import { WalletConnectProvider } from 'src/provider/wallet-connect/wallet-connec
 import { wireRequestParser } from 'src/parsers/wire-request-parser';
 import { Consumable, ConsumableLike } from 'src/utils/consumable';
 
+/**
+ * Headless TON Connect connector — implements the {@link ITonConnect} contract.
+ * Wraps the protocol handshake, the HTTP / JS bridge transports.
+ *
+ * @example
+ * ```ts
+ * import TonConnect from '@tonconnect/sdk';
+ *
+ * const connector = new TonConnect({
+ *     manifestUrl: 'https://example.com/tonconnect-manifest.json',
+ * });
+ * ```
+ */
 export class TonConnect implements ITonConnect {
     private desiredChainId: string | undefined;
     private static readonly walletsList = new WalletsListManager();
 
     /**
-     * Check if specified wallet is injected and available to use with the app.
-     * @param walletJSKey target wallet's js bridge key.
+     * `true` when a wallet identified by `walletJSKey` exposes a JS bridge on
+     * the current page. The fastest way to detect a browser extension before
+     * deciding which connect source to build.
+     *
+     * @param walletJSKey — value of the wallet's `jsBridgeKey` in the wallets list.
      */
     public static isWalletInjected = (walletJSKey: string): boolean =>
         InjectedProvider.isWalletInjected(walletJSKey);
 
     /**
-     * Check if the app is opened inside specified wallet's browser.
-     * @param walletJSKey target wallet's js bridge key.
+     * `true` when the dApp is running inside the named wallet's in-app
+     * browser. Use it to pick the JS-bridge transport automatically and skip
+     * the QR-code modal.
+     *
+     * @param walletJSKey — value of the wallet's `jsBridgeKey` in the wallets list.
      */
     public static isInsideWalletBrowser = (walletJSKey: string): boolean =>
         InjectedProvider.isInsideWalletBrowser(walletJSKey);
 
     /**
-     * Returns available wallets list.
+     * Fetch the wallets-list registry without instantiating a connector.
+     * Equivalent to {@link ITonConnect.getWallets} but usable before
+     * constructing a `TonConnect`.
      */
     public static getWallets(): Promise<WalletInfo[]> {
         return this.walletsList.getWallets();
@@ -181,6 +202,14 @@ export class TonConnect implements ITonConnect {
         this.statusChangeSubscriptions.forEach(callback => callback(this._wallet));
     }
 
+    /**
+     * Create a new connector. See {@link TonConnectOptions} for every option;
+     * the most common shape is `{ manifestUrl }` in the browser, and
+     * `{ manifestUrl, storage }` in Node.js / non-browser hosts.
+     *
+     * @throws `DappMetadataError` when `manifestUrl` is omitted and
+     *         `window.location.origin` is not available.
+     */
     constructor(options?: TonConnectOptions) {
         const manifestUrl = options?.manifestUrl || getWebPageManifest();
         this.dappSettings = {

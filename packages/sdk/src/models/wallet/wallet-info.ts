@@ -1,42 +1,36 @@
 import { Feature } from '@tonconnect/protocol';
 
 /**
- * Common information for injectable and http-compatible wallets.
+ * Common fields shared by every wallet returned from the wallets list.
+ *
+ * @see [Wallets list (spec)](https://github.com/ton-blockchain/ton-connect/blob/main/spec/wallets-list.md)
  */
 export interface WalletInfoBase {
-    /**
-     * Human-readable name of the wallet.
-     */
+    /** Human-readable display name shown in the wallet picker. */
     name: string;
 
     /**
-     * ID of the wallet, equals to the `appName` property into {@link Wallet.device}.
+     * Wallet identifier — equals {@link Wallet.device.appName} at runtime.
      */
     appName: string;
 
     /**
-     * Url to the icon of the wallet. Resolution 288×288px. On non-transparent background, without rounded corners. PNG format.
+     * HTTPS URL of the wallet icon. 288×288 PNG on a non-transparent
+     * background, no rounded corners.
      */
     imageUrl: string;
 
-    /**
-     * Will be used in the protocol later.
-     */
     tondns?: string;
 
-    /**
-     * Info or landing page of your wallet. May be useful for TON newcomers.
-     */
+    /** Info or landing page for the wallet — shown to new users. */
     aboutUrl: string;
 
     /**
-     * List of features supported by the wallet.
+     * Wallet capabilities advertised in the registry.
      */
     features?: Feature[];
 
-    /**
-     * OS and browsers where the wallet could be installed
-     */
+    /** Operating systems / browsers the wallet supports. */
     platforms: (
         | 'ios'
         | 'android'
@@ -50,54 +44,57 @@ export interface WalletInfoBase {
 }
 
 /**
- * Http-compatible wallet information.
+ * Wallet reached over the HTTP (SSE) bridge.
  */
 export interface WalletInfoRemote extends WalletInfoBase {
     /**
-     * Base part of the wallet universal url. The link should support [Ton Connect parameters]{@link https://github.com/ton-connect/docs/blob/main/bridge.md#universal-link}.
+     * HTTPS base of the wallet's universal link. The SDK appends the connect
+     * parameters (`v`, `id`, `r`, optional `ret`, `trace_id`, `e`).
      */
     universalLink: string;
 
     /**
-     * Native wallet app deepLink. The link should support [Ton Connect parameters]{@link https://github.com/ton-connect/docs/blob/main/bridge.md#universal-link}.
+     * Optional custom-scheme deep link (e.g. `tonkeeper-tc://`). Same protocol
+     * parameters as the universal link.
      */
     deepLink?: string;
 
-    /**
-     * Url of the wallet's implementation of the [HTTP bridge]{@link https://github.com/ton-connect/docs/blob/main/bridge.md#http-bridge}.
-     */
+    /** URL of the wallet's HTTP (SSE) bridge endpoint. */
     bridgeUrl: string;
 }
 
 /**
- * JS-injectable wallet information.
+ * Wallet exposed through a JS bridge — typically a browser extension, or the
+ * dApp running inside the wallet's webview.
  */
 export interface WalletInfoInjectable extends WalletInfoBase {
     /**
-     * If the wallet handles JS Bridge connection, specifies the binding for the bridge object accessible through window. Example: the key "tonkeeper" means the bridge can be accessed as window.tonkeeper.
+     * `window` property name where the wallet exposes its `TonConnectBridge`
+     * object. `key: 'tonkeeper'` → `window.tonkeeper.tonconnect`.
      */
     jsBridgeKey: string;
 
-    /**
-     * Indicates if the wallet currently is injected to the webpage.
-     */
+    /** `true` when the wallet is injected into the current page. */
     injected: boolean;
 
-    /**
-     * Indicates if the dapp is opened inside this wallet's browser.
-     */
+    /** `true` when the dApp is running inside this wallet's in-app browser. */
     embedded: boolean;
 }
 
 /**
- * Information about the JS-injectable wallet that is injected to the current webpage.
+ * {@link WalletInfoInjectable} narrowed to wallets actually injected on the
+ * current page. Filter the wallets list with {@link isWalletInfoCurrentlyInjected}.
  */
 export interface WalletInfoCurrentlyInjected extends WalletInfoInjectable {
     injected: true;
 }
 
 /**
- * Information about the JS-injectable wallet in the browser of which the dApp is opened.
+ * {@link WalletInfoCurrentlyInjected} narrowed to the case where the dApp is
+ * running inside the wallet's webview. Detect with {@link isWalletInfoCurrentlyEmbedded}.
+ *
+ * When the dApp boots inside a wallet, prefer connecting via this entry rather
+ * than showing a QR-code modal.
  */
 export interface WalletInfoCurrentlyEmbedded extends WalletInfoCurrentlyInjected {
     injected: true;

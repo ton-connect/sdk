@@ -210,6 +210,15 @@ export function checkSignMessageSupport(
     );
 }
 
+/**
+ * Test whether a wallet's advertised `features` satisfy a
+ * {@link RequiredFeatures} filter.
+ *
+ * @returns `true` when every constraint in `walletsRequiredFeatures` matches,
+ *          `false` otherwise.
+ *
+ * @see [Filter wallets by required features (docs)](https://docs.ton.org/applications/ton-connect/how-to/filter-wallets)
+ */
 export function checkRequiredWalletFeatures(
     features: Feature[],
     walletsRequiredFeatures?: RequiredFeatures

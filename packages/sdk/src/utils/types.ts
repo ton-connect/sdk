@@ -29,5 +29,16 @@ export type Dynamic<TObject extends Record<string, unknown>> = {
     [Key in keyof TObject]: TObject[Key] | (() => TObject[Key]);
 };
 
+/**
+ * Wraps a value with a required `traceId` — a UUID
+ * used to correlate logs and analytics across the dApp, bridge and wallet for
+ * one user-visible operation.
+ *
+ * @see [`trace_id` (Bridge spec)](https://github.com/ton-blockchain/ton-connect/blob/main/spec/bridge.md#trace_id--analytics-correlation)
+ */
 export type Traceable<T extends {} = {}> = { traceId: string } & T;
+
+/**
+ * Wraps a value with an optional `traceId`.
+ */
 export type OptionalTraceable<T extends {} = {}> = { traceId?: string } & T;

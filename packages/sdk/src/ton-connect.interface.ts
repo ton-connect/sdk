@@ -22,32 +22,40 @@ import { SignDataPayload } from '@tonconnect/protocol';
 import { OptionalTraceable } from 'src/utils/types';
 import { ConsumableLike } from 'src/utils/consumable';
 
+/**
+ * Public contract of the TON Connect connector.
+ *
+ * @see [TON Connect overview (docs)](https://docs.ton.org/applications/ton-connect/overview)
+ */
 export interface ITonConnect {
     /**
-     * Shows if the wallet is connected right now.
+     * `true` while a wallet session is active. Equivalent to `wallet !== null`.
+     *
      */
     connected: boolean;
 
-    /**
-     * Current connected account or null if no account is connected.
-     */
+    /** Currently connected {@link Account}, or `null` when no wallet is connected. */
     account: Account | null;
 
-    /**
-     * Current connected wallet or null if no account is connected.
-     */
+    /** Currently connected {@link Wallet}, or `null` when no wallet is connected. */
     wallet: Wallet | null;
 
     /**
-     * Returns available wallets list.
+     * Fetch the wallets-list registry, merged with any JS-injectable wallets
+     * detected on the page.
+     *
+     * @see [`wallets-list.md`](https://github.com/ton-blockchain/ton-connect/blob/main/spec/wallets-list.md)
      */
     getWallets(): Promise<WalletInfo[]>;
 
     /**
-     * Allows to subscribe to connection status changes and handle connection errors.
-     * @param callback will be called after connections status changes with actual wallet or null.
-     * @param errorsHandler (optional) will be called with some instance of TonConnectError when connect error is received.
-     * @returns unsubscribe callback.
+     * Subscribe to connection state changes. The callback fires after every
+     * connect, disconnect, restore. `errorsHandler`, when
+     * provided, is called with a {@link TonConnectError} subclass when the
+     * connector observes a connect failure (manifest fetch error, user
+     * rejection, wrong network, missing features).
+     *
+     * @returns Unsubscribe function. Call it to stop receiving updates.
      */
     onStatusChange(
         callback: (walletInfo: Wallet | null) => void,
@@ -55,18 +63,35 @@ export interface ITonConnect {
     ): () => void;
 
     /**
-     * Generates universal link for an external wallet and subscribes to the wallet's bridge, or sends connect request to the injected wallet.
-     * @param wallet wallet's bridge url and universal link for an external wallet or jsBridge key for the injected wallet, or list of bridges urls for creating an universal connection request for the corresponding wallets.
-     * @param request (optional) additional request to pass to the wallet while connect (currently only ton_proof is available).
-     * @param options (optional) options
-     * @returns universal link if external wallet was passed or void for the injected wallet.
+     * Begin a wallet-connect flow.
+     *
+     * - For an {@link WalletConnectionSourceHTTP} (or an array of bridge URLs):
+     *   returns the universal link to show as a QR code or open in a new tab.
+     *   The wallet's reply lands on {@link ITonConnect.onStatusChange}.
+     * - For a {@link WalletConnectionSourceJS}: returns `void`; the call sends
+     *   the connect request to the injected wallet, which replies via
+     *   `onStatusChange`.
+     *
+     * @param wallet — connection source for a single wallet, or an array of
+     *   `{ bridgeUrl }` entries for a multi-wallet connection.
+     * @param request — additional `ConnectItem`s to attach.
+     * @param options — `openingDeadlineMS` deadline, `signal` for cancellation,
+     *   `embeddedRequest` to fold an action into the connect URL, and the
+     *   common `traceId` analytics id.
      */
     connect<T extends WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[]>(
         wallet: T,
         request?: ConnectAdditionalRequest,
         options?: OptionalTraceable<{
+            /** Reject the connect attempt with `TonConnectError` after this many ms. */
             openingDeadlineMS?: number;
+            /** Abort the connect flow externally. */
             signal?: AbortSignal;
+            /**
+             * Fold an action ({@link EmbeddedRequest}) into the connect URL.
+             *
+             * @see [Connect-and-act in one tap (docs)](https://docs.ton.org/applications/ton-connect/how-to/embedded-request)
+             */
             embeddedRequest?: ConsumableLike<EmbeddedRequest>;
         }>
     ): T extends WalletConnectionSourceJS
@@ -76,7 +101,12 @@ export interface ITonConnect {
           : string;
 
     /**
-     * Try to restore existing session and reconnect to the corresponding wallet. Call it immediately when your app is loaded.
+     * Try to restore the previous session from storage. Call this once on
+     * dApp startup, before deciding whether to show the connect modal.
+     *
+     * Resolves when the restore attempt has settled — either with a successful
+     * `onStatusChange` emission (session restored) or with the connector
+     * remaining disconnected (no session, or the wallet ended it).
      */
     restoreConnection(
         options?: OptionalTraceable<{
@@ -86,49 +116,85 @@ export interface ITonConnect {
     ): Promise<void>;
 
     /**
-     * Pause bridge HTTP connection. Might be helpful, if you want to pause connections while browser tab is unfocused,
-     * or if you use SDK with NodeJS and want to save server resources.
+     * Pause the SSE bridge connection.
+     *
+     * @see {@link ITonConnect.unPauseConnection}
      */
     pauseConnection(): void;
 
-    /**
-     * Unpause bridge HTTP connection if it is paused.
-     */
+    /** Resume a connection paused with {@link ITonConnect.pauseConnection}. */
     unPauseConnection(): Promise<void>;
 
     /**
-     * Set desired network for the connection. Can only be set before connecting.
-     * If wallet connects with a different chain, the SDK will throw an error and abort connection.
-     * @param network desired network id (e.g., '-239', '-3', or custom). Pass undefined to allow any network.
+     * Constrain the network the connector will accept. Must be set **before**
+     * calling {@link ITonConnect.connect} — attempting to change it while a
+     * wallet is connected throws.
+     *
+     * If the wallet replies with a different chain id, the SDK aborts the
+     * connection and surfaces `WalletWrongNetworkError` to
+     * {@link ITonConnect.onStatusChange}'s error handler.
+     *
+     * Pass `undefined` to clear the restriction and accept any network.
+     *
+     * @param network — desired network
      */
     setConnectionNetwork(network?: ChainId): void;
 
     /**
-     * Disconnect form thw connected wallet and drop current session.
+     * End the session. Clears the local session state, fires the disconnected
+     * `onStatusChange` event immediately, and sends a `disconnect` RPC to the
+     * wallet so it can clean up its side too.
+     *
+     * @throws `WalletNotConnectedError` when no wallet is connected.
      */
     disconnect(options?: OptionalTraceable<{ signal?: AbortSignal }>): Promise<void>;
 
     /**
-     * Asks connected wallet to sign and send the transaction.
-     * @param transaction transaction to send.
-     * @param options (optional) onRequestSent callback will be called after the transaction is sent and signal to abort the request.
-     * @returns signed transaction boc that allows you to find the transaction in the blockchain.
-     * If user rejects transaction, method will throw the corresponding error.
+     * Ask the connected wallet to sign **and broadcast** a transaction.
+     *
+     * @throws `WalletNotConnectedError` — no wallet is connected.
+     * @throws `WalletNotSupportFeatureError` — wallet does not advertise the
+     *         required `SendTransaction` capabilities.
+     * @throws `UserRejectsError` — user declined in the wallet.
+     * @throws `WalletWrongNetworkError` — wallet network differs from the request.
+     * @throws `TonConnectError` — bridge / validation error.
+     *
+     * @returns The signed BoC plus, when available, the `traceId` the SDK
+     *          propagated through the bridge.
+     *
+     * @see [Send a transaction (docs)](https://docs.ton.org/applications/ton-connect/how-to/send-transaction)
      */
     sendTransaction(
         transaction: SendTransactionRequest,
         options?: OptionalTraceable<{
+            /** Called the moment the encrypted request is posted to the bridge. */
             onRequestSent?: () => void;
             signal?: AbortSignal;
         }>
     ): Promise<OptionalTraceable<SendTransactionResponse>>;
 
-    /** @deprecated use sendTransaction(transaction, options) instead */
+    /**
+     * @deprecated Use `sendTransaction(transaction, options)` instead.
+     *             Provided so existing dApps keep compiling.
+     */
     sendTransaction(
         transaction: SendTransactionRequest,
         onRequestSent?: () => void
     ): Promise<OptionalTraceable<SendTransactionResponse>>;
 
+    /**
+     * Ask the connected wallet to sign opaque data ({@link SignDataPayload}).
+     * The signature is bound to the user's wallet address, the dApp's domain,
+     * a timestamp, and the payload — verify on the backend or on-chain.
+     *
+     * @throws `WalletNotConnectedError` — no wallet is connected.
+     * @throws `WalletNotSupportFeatureError` — wallet does not advertise the
+     *         requested `SignData.types`.
+     * @throws `UserRejectsError` — user declined.
+     * @throws `TonConnectError` — bridge / validation error.
+     *
+     * @see [Sign data (docs)](https://docs.ton.org/applications/ton-connect/how-to/sign-data)
+     */
     signData(
         data: SignDataPayload,
         options?: OptionalTraceable<{
@@ -138,11 +204,23 @@ export interface ITonConnect {
     ): Promise<OptionalTraceable<SignDataResponse>>;
 
     /**
-     * Asks connected wallet to sign the message without sending it to the blockchain.
-     * @param message message to sign (same structure as transaction).
-     * @param options (optional) onRequestSent callback and abort signal.
-     * @returns signed internal message boc.
-     * If user rejects signing, method will throw the corresponding error.
+     * Ask the connected wallet to sign an internal message **without
+     * broadcasting it**.
+     *
+     * Same payload shape as `sendTransaction`; supported by wallets that
+     * advertise the `SignMessage` feature (typically Wallet V5).
+     *
+     * @throws `WalletNotConnectedError` — no wallet is connected.
+     * @throws `WalletNotSupportFeatureError` — wallet does not advertise `SignMessage`.
+     * @throws `UserRejectsError` — user declined.
+     * @throws `WalletWrongNetworkError` — wallet network differs from the request.
+     * @throws `TonConnectError` — bridge / validation error.
+     *
+     * @returns a signed BoC the dApp can wrap in an external
+     * message and submit through a relayer (e.g. for a gasless jetton
+     * transfer).
+     *
+     * @see [Sign and relay a message (gasless) (docs)](https://docs.ton.org/applications/ton-connect/how-to/sign-message-gasless)
      */
     signMessage(
         message: SignMessageRequest,
@@ -153,8 +231,7 @@ export interface ITonConnect {
     ): Promise<OptionalTraceable<SignMessageResponse>>;
 
     /**
-     * Gets the current session ID if available.
-     * @returns session ID string or null if not available.
+     * Current bridge session ID, or `null` if no session is open.
      */
     getSessionId(): Promise<string | null>;
 }

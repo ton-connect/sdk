@@ -5,58 +5,92 @@ import { RequiredFeatures } from './wallet';
 import { IEnvironment } from 'src/environment/models/environment.interface';
 import { AnalyticsMode } from 'src/analytics/analytics-manager';
 
+/**
+ * Analytics configuration forwarded to the SDK's internal tracker.
+ *
+ * Analytics is opt-out. The default mode is `'telemetry'` —
+ * minimal, anonymous signals used for technical research and issue debugging.
+ * Set `mode: 'off'` to disable, or `mode: 'full'` to opt into the full event
+ * stream.
+ */
 export interface AnalyticsSettings {
     /**
+     * - `'off'` — no events are collected or sent.
+     * - `'telemetry'` — technical analytics only (default).
+     * - `'full'` — full user-action event stream.
+     *
      * @default 'telemetry'
      */
     mode?: AnalyticsMode;
 }
 
 /**
- * TonConnect constructor options
+ * Constructor options for the `TonConnect` connector.
+ *
+ * For most browser dApps `{ manifestUrl }` is enough; the SDK fills in
+ * `localStorage`, fetches the canonical wallets list, and runs analytics in
+ * the default `'telemetry'` mode.
  */
 export interface TonConnectOptions {
     /**
-     * Url to the [manifest]{@link https://github.com/ton-connect/docs/blob/main/requests-responses.md#app-manifest} with the Dapp metadata that will be displayed in the user's wallet.
-     * If not passed, manifest from `${window.location.origin}/tonconnect-manifest.json` will be taken.
+     * HTTPS URL of the dApp's `tonconnect-manifest.json`. The wallet fetches
+     * this file before showing the connect prompt to extract the dApp's name,
+     * icon and policy URLs. If omitted, the SDK falls back to
+     * `${window.location.origin}/tonconnect-manifest.json`.
+     *
+     * @see [App manifest spec](https://github.com/ton-blockchain/ton-connect/blob/main/spec/manifest.md)
      */
     manifestUrl?: string;
 
     /**
-     * Storage to save protocol data. For browser default is `localStorage`. If you use SDK with nodeJS, you have to specify this field.
+     * Storage backend for protocol state (session keys, last connected
+     * wallet). Defaults to `window.localStorage` in the browser. Required
+     * when running the SDK in Node.js.
      */
     storage?: IStorage;
 
     /**
-     * Event dispatcher to track user actions. By default, it uses `window.dispatchEvent` for browser environment.
+     * Custom event dispatcher for user-action events. Defaults to
+     * `window.dispatchEvent` in the browser, emitting `CustomEvent`s prefixed
+     * with `ton-connect-`.
      */
     eventDispatcher?: EventDispatcher<SdkActionEvent>;
 
     /**
-     * Redefine wallets list source URL. Must be a link to a json file with [following structure]{@link https://github.com/ton-connect/wallets-list}
-     * @default https://config.ton.org/wallets-v2.json
-     * @
+     * Override the wallets-list JSON source. Must point to a file matching the
+     * [wallets-v2 schema](https://github.com/ton-connect/wallets-list).
+     *
+     * @default 'https://config.ton.org/wallets-v2.json'
      */
     walletsListSource?: string;
 
     /**
-     * Wallets list cache time to live
+     * In-memory cache TTL for the fetched wallets list, in milliseconds.
+     * `Infinity` (default) caches forever for the lifetime of the page.
+     *
      * @default Infinity
      */
     walletsListCacheTTLMs?: number;
 
     /**
-     * Required features for wallets. If wallet doesn't support required features, it will be disabled.
+     * Required wallet capabilities. Wallets that do not advertise every
+     * requested feature are hidden from the picker (and rejected at connect
+     * time if the user selects one through a custom flow).
+     *
+     * @see [Filter wallets by required features (docs)](https://docs.ton.org/applications/ton-connect/how-to/filter-wallets)
      */
     walletsRequiredFeatures?: RequiredFeatures;
 
     /**
-     * Allows to disable auto pause/unpause SSE connection on 'document.visibilitychange' event. It is not recommended to change default behaviour.
+     * Disable the automatic pause / unpause of the SSE bridge connection
+     * driven by `document.visibilitychange`.
      */
     disableAutoPauseConnection?: boolean;
 
     /**
-     * Represents the client environment in which the application is running.
+     * Override the runtime environment (platform, user-agent, Telegram user
+     * context). The SDK auto-detects in browsers; pass an {@link IEnvironment}
+     * implementation when embedding the SDK in a non-standard host.
      */
     environment?: IEnvironment;
 
