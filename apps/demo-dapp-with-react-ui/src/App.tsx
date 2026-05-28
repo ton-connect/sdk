@@ -14,6 +14,7 @@ import { TransferUsdt } from './components/TransferUsdt/TransferUsdt';
 import { UniversalConnector } from '@reown/appkit-universal-connector';
 import { GaslessDemo } from './components/GaslessDemo/GaslessDemo';
 import { OneClickPay } from './pages/OneClickPay/OneClickPay';
+import { FrogDemo } from './pages/FrogDemo/FrogDemo';
 
 initializeWalletConnect(UniversalConnector, {
     projectId: '9cb446f4a1b697039a23332618d942b0',
@@ -58,11 +59,48 @@ function App() {
         <TonConnectUIProvider
             manifestUrl="https://tonconnect-sdk-demo-dapp.vercel.app/tonconnect-manifest.json"
             uiPreferences={{ theme: THEME.DARK }}
+            actionsConfiguration={{ returnStrategy: 'http://localhost:5173/frog' }}
+            walletsListConfiguration={{
+                includeWallets: [
+                    {
+                        name: 'WalletKit',
+                        appName: 'wallet_kit',
+                        aboutUrl: 'https://walletkit-demo-wallet.vercel.app',
+                        bridgeUrl: 'https://connect.ton.org/bridge',
+                        imageUrl: 'https://walletkit-demo-wallet.vercel.app/ton.svg',
+                        universalLink: 'https://walletkit-demo-wallet.vercel.app/ton-connect',
+                        jsBridgeKey: 'walletKitDemoWallet',
+                        platforms: ['chrome', 'safari', 'firefox', 'ios', 'android'],
+                        features: [
+                            {
+                                name: 'SendTransaction',
+                                maxMessages: 255,
+                                extraCurrencySupported: true,
+                                itemTypes: ['ton', 'jetton', 'nft']
+                            },
+                            {
+                                name: 'SignData',
+                                types: ['text', 'binary', 'cell']
+                            },
+                            {
+                                name: 'SignMessage',
+                                maxMessages: 4,
+                                extraCurrencySupported: true,
+                                itemTypes: ['ton', 'jetton', 'nft']
+                            },
+                            {
+                                name: 'EmbeddedRequest'
+                            }
+                        ]
+                    }
+                ]
+            }}
         >
             <div>
                 <Routes>
                     <Route path="/" element={<HomePage />} />
                     <Route path="/pay" element={<OneClickPay />} />
+                    <Route path="/frog" element={<FrogDemo />} />
                     <Route path="/iframe" element={<IframePage />} />
                     <Route path="/iframe/iframe" element={<IframeIframePage />} />
                 </Routes>
