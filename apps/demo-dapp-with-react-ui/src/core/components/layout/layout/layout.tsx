@@ -29,6 +29,7 @@ import {
 import { GitHubIcon } from '../../ui/icons';
 import { AppLogo } from '../app-logo';
 import { ThemeSwitcher } from '../theme-switcher/index';
+import { cn } from '../../../utils/cn';
 
 interface LayoutProps {
     children: ReactNode;
@@ -38,6 +39,8 @@ interface LayoutProps {
     /** Demo feature source on GitHub (ton-connect/sdk monorepo). */
     sourceHref?: string;
     subtitle?: ReactNode;
+    wide?: boolean;
+    hideFooter?: boolean;
     /** Stable test id applied to the `<main>` content element. */
     'data-testid'?: string;
 }
@@ -142,6 +145,8 @@ export const Layout: FC<LayoutProps> = ({
     docHref,
     sourceHref,
     subtitle,
+    wide = false,
+    hideFooter = false,
     'data-testid': testId
 }) => {
     return (
@@ -169,8 +174,16 @@ export const Layout: FC<LayoutProps> = ({
                     </div>
                 </header>
 
-                <main className="mx-auto w-full max-w-4xl flex-1 p-4" data-testid={testId}>
-                    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 py-2 md:py-6">
+                <main
+                    className={cn('mx-auto w-full flex-1 p-4', wide ? 'max-w-7xl' : 'max-w-4xl')}
+                    data-testid={testId}
+                >
+                    <div
+                        className={cn(
+                            'mx-auto flex w-full flex-col gap-6 py-2 md:py-6',
+                            wide ? 'max-w-none' : 'max-w-2xl'
+                        )}
+                    >
                         {title != null && (
                             <div className="flex w-full items-baseline justify-start md:hidden">
                                 <PageHeading
@@ -190,9 +203,11 @@ export const Layout: FC<LayoutProps> = ({
                     </div>
                 </main>
 
-                <footer className="pb-4 pt-2 text-center text-xs text-tertiary-foreground">
-                    <p>Powered by TON Connect</p>
-                </footer>
+                {!hideFooter ? (
+                    <footer className="pb-4 pt-2 text-center text-xs text-tertiary-foreground">
+                        <p>Powered by TON Connect</p>
+                    </footer>
+                ) : null}
             </SidebarInset>
         </SidebarProvider>
     );
