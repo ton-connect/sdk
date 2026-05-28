@@ -120,10 +120,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
     };
 
     createEffect(() => {
-        if (
-            untrack(mode) !== 'extension' &&
-            (supportsMobile(props.wallet) || supportsDesktop(props.wallet))
-        ) {
+        if (untrack(mode) !== 'extension' && supportsMobile(props.wallet)) {
             generateUniversalLink();
         }
     });
@@ -143,7 +140,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
 
     const onClickDesktop = (): void => {
         setConnectionErrored(null);
-        if (mode() === 'extension') {
+        if (mode() === 'extension' || !universalLink()) {
             generateUniversalLink();
         }
 
