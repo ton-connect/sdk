@@ -193,7 +193,9 @@ function ToggleField({
             <div className="flex min-w-0 flex-col gap-1">
                 <span className="text-sm font-semibold text-foreground">{label}</span>
                 {description ? (
-                    <span className="text-xs leading-4 text-secondary-foreground">{description}</span>
+                    <span className="text-xs leading-4 text-secondary-foreground">
+                        {description}
+                    </span>
                 ) : null}
             </div>
         </div>
@@ -212,7 +214,9 @@ function BuilderSection({
     return (
         <section className="flex flex-col gap-4 border-t border-tertiary/70 pt-4 first:border-t-0 first:pt-0">
             <div className="flex flex-col gap-1">
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-foreground">{title}</h2>
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-foreground">
+                    {title}
+                </h2>
                 {description ? (
                     <p className="text-xs leading-5 text-secondary-foreground">{description}</p>
                 ) : null}
@@ -280,7 +284,10 @@ function ThemePanel({
 
     return (
         <div className="flex flex-col gap-5">
-            <BuilderSection title="Theme" description="These tokens are exported as TonConnect UI `colorsSet` and applied to the modal preview.">
+            <BuilderSection
+                title="Theme"
+                description="These tokens are exported as TonConnect UI `colorsSet` and applied to the modal preview."
+            >
                 <div className="grid grid-cols-2 gap-3">
                     <Field label="Theme">
                         <SelectField
@@ -418,8 +425,14 @@ function ThemePanel({
                 </div>
             </BuilderSection>
 
-            <BuilderSection title="Button" description="CSS overrides are exported separately and kept optional.">
-                <Field label="Launcher label" description="Used by the custom launcher export. The built-in TonConnect button keeps its trusted default states.">
+            <BuilderSection
+                title="Button"
+                description="CSS overrides are exported separately and kept optional."
+            >
+                <Field
+                    label="Launcher label"
+                    description="Used by the custom launcher export. The built-in TonConnect button keeps its trusted default states."
+                >
                     <TextField
                         value={builderSettings.buttonLabel}
                         onChange={buttonLabel => setBuilderSettings({ buttonLabel })}
@@ -430,14 +443,18 @@ function ThemePanel({
                         <TextField
                             value={builderSettings.buttonWidth}
                             type="number"
-                            onChange={buttonWidth => setBuilderSettings({ buttonWidth: Number(buttonWidth) })}
+                            onChange={buttonWidth =>
+                                setBuilderSettings({ buttonWidth: Number(buttonWidth) })
+                            }
                         />
                     </Field>
                     <Field label="Height">
                         <TextField
                             value={builderSettings.buttonHeight}
                             type="number"
-                            onChange={buttonHeight => setBuilderSettings({ buttonHeight: Number(buttonHeight) })}
+                            onChange={buttonHeight =>
+                                setBuilderSettings({ buttonHeight: Number(buttonHeight) })
+                            }
                         />
                     </Field>
                 </div>
@@ -451,7 +468,9 @@ function ThemePanel({
                     label="Export CSS overrides"
                     description="Disable it to keep only official TonConnect UI options."
                     checked={builderSettings.cssOverridesEnabled}
-                    onCheckedChange={cssOverridesEnabled => setBuilderSettings({ cssOverridesEnabled })}
+                    onCheckedChange={cssOverridesEnabled =>
+                        setBuilderSettings({ cssOverridesEnabled })
+                    }
                 />
             </BuilderSection>
         </div>
@@ -475,7 +494,10 @@ function GeneralPanel({
                 title="Integration"
                 description="These values are embedded into generated CDN and React snippets."
             >
-                <Field label="Manifest URL" description="Must be hosted on the same domain before production launch.">
+                <Field
+                    label="Manifest URL"
+                    description="Must be hosted on the same domain before production launch."
+                >
                     <TextField
                         value={builderSettings.manifestUrl}
                         placeholder="https://example.com/tonconnect-manifest.json"
@@ -520,7 +542,8 @@ function GeneralPanel({
                         options={SKIP_OPTIONS}
                         onChange={skipRedirect =>
                             setTonSettings({
-                                skipRedirect: skipRedirect as TonConnectSettingsState['skipRedirect']
+                                skipRedirect:
+                                    skipRedirect as TonConnectSettingsState['skipRedirect']
                             })
                         }
                     />
@@ -681,7 +704,9 @@ function ExportPanel({
                     variant="secondary"
                     size="s"
                     fullWidth
-                    onClick={() => downloadSnippet('ton-connect-widget.css', snippets.css, 'text/css')}
+                    onClick={() =>
+                        downloadSnippet('ton-connect-widget.css', snippets.css, 'text/css')
+                    }
                 >
                     Save CSS
                 </Button>
@@ -728,7 +753,8 @@ function PreviewPanel({
                     <div>
                         <h2 className="text-lg font-semibold">TON Connect widget</h2>
                         <p className="mt-1 text-sm text-secondary-foreground">
-                            Preview uses the same settings that will be exported in the generated code.
+                            Preview uses the same settings that will be exported in the generated
+                            code.
                         </p>
                     </div>
                     <Settings2 size={18} className="mt-1 text-secondary-foreground" />
@@ -798,10 +824,20 @@ export function WidgetBuilder() {
             <aside className="flex min-h-0 flex-col border-b border-tertiary bg-background lg:border-b-0 lg:border-r">
                 <div className="flex items-center justify-between gap-3 border-b border-tertiary p-4">
                     <div className="min-w-0">
-                        <h1 className="truncate text-lg font-bold text-foreground">Widget builder</h1>
-                        <p className="mt-1 text-xs text-secondary-foreground">TON Connect visual editor</p>
+                        <h1 className="truncate text-lg font-bold text-foreground">
+                            Widget builder
+                        </h1>
+                        <p className="mt-1 text-xs text-secondary-foreground">
+                            TON Connect visual editor
+                        </p>
                     </div>
-                    <Button type="button" variant="ghost" size="icon" onClick={resetAll} aria-label="Reset all changes">
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={resetAll}
+                        aria-label="Reset all changes"
+                    >
                         <RotateCcw size={16} />
                     </Button>
                 </div>
@@ -856,7 +892,12 @@ export function WidgetBuilder() {
                     <div className="text-xs leading-5 text-secondary-foreground">
                         Export includes CDN, CSS, JS, React/NPM, and custom launcher variants.
                     </div>
-                    <Button type="button" variant="secondary" size="s" onClick={() => setActiveTab('export')}>
+                    <Button
+                        type="button"
+                        variant="secondary"
+                        size="s"
+                        onClick={() => setActiveTab('export')}
+                    >
                         <Download size={14} />
                         Open export
                     </Button>

@@ -8,8 +8,8 @@ export const MerklePage = () => (
             className="text-[15px] leading-relaxed text-secondary-foreground"
             data-testid="merkle-page-subtitle"
         >
-            Send a transaction containing a merkle proof or merkle update exotic cell to the
-            example contract.
+            Send a transaction containing a merkle proof or merkle update exotic cell to the example
+            contract.
         </p>
         <Merkle />
     </Layout>

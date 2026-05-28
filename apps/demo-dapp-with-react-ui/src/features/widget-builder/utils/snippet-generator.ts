@@ -106,7 +106,8 @@ export function generateReactSnippet(
 ): string {
     const options = stringifyConfig(getWidgetOptions(tonConnectSettings));
     const css = generateCssSnippet(builderSettings);
-    const theme = tonConnectSettings.theme === 'SYSTEM' ? THEME.DARK : (tonConnectSettings.theme as Theme);
+    const theme =
+        tonConnectSettings.theme === 'SYSTEM' ? THEME.DARK : (tonConnectSettings.theme as Theme);
 
     return `import { TonConnectButton, TonConnectUIProvider } from '@tonconnect/ui-react';
 

@@ -34,7 +34,9 @@ const PARAM_KEYS = {
 const WIDGET_BUILDER_PARAM_KEYS = Object.values(PARAM_KEYS);
 
 function sanitizeId(value: string): string {
-    return value.trim().replace(/[^a-zA-Z0-9_-]/g, '') || DEFAULT_WIDGET_BUILDER_SETTINGS.containerId;
+    return (
+        value.trim().replace(/[^a-zA-Z0-9_-]/g, '') || DEFAULT_WIDGET_BUILDER_SETTINGS.containerId
+    );
 }
 
 function parseNumber(value: string | null, fallback: number, min: number, max: number): number {
@@ -110,7 +112,8 @@ export function useWidgetBuilderSettings() {
             setSearchParams(
                 prev => {
                     const current = parseWidgetBuilderSettings(prev);
-                    const next = typeof patch === 'function' ? patch(current) : { ...current, ...patch };
+                    const next =
+                        typeof patch === 'function' ? patch(current) : { ...current, ...patch };
                     return writeWidgetBuilderSettingsToSearchParams(prev, next);
                 },
                 { replace: true }

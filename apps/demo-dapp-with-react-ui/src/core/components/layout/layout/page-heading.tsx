@@ -13,12 +13,7 @@ interface PageHeadingProps {
     className?: string;
 }
 
-export const PageHeading: FC<PageHeadingProps> = ({
-    title,
-    docHref,
-    sourceHref,
-    className
-}) => {
+export const PageHeading: FC<PageHeadingProps> = ({ title, docHref, sourceHref, className }) => {
     if (title == null) {
         return null;
     }
