@@ -16,6 +16,12 @@ import { FALLBACK_WALLETS_LIST } from 'src/resources/fallback-wallets-list';
 import { isQaModeEnabled } from './utils/qa-mode';
 import { TonConnectError } from 'src/errors';
 
+/**
+ * Fetches and caches the wallets-list registry (`wallets-v2.json`) and merges
+ * it with any JS-injectable wallets the SDK detects on the page.
+ *
+ * @see [Wallets list (spec)](https://github.com/ton-blockchain/ton-connect/blob/main/spec/wallets-list.md)
+ */
 export class WalletsListManager {
     private walletsListDTOCache: Promise<WalletInfoDTO[]> | null = null;
 
