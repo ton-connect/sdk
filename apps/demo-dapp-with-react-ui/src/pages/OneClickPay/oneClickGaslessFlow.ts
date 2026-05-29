@@ -151,7 +151,7 @@ export async function oneClickGaslessPay(
             {
                 type: 'jetton' as const,
                 master: params.master.toString(),
-                amount: params.amount.toString(),
+                amount: (params.amount - BigInt(providerAmount)).toString(),
                 destination: params.destination.toString(),
                 responseDestination: relayAddress.toString(),
                 attachAmount: BASE_JETTON_SEND_AMOUNT.toString(),
