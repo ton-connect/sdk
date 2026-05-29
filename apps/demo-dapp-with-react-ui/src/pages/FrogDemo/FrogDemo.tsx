@@ -11,9 +11,9 @@ import {
 import { KISSED_FROG_6425, pickPreview } from './nftData';
 import { NftLottie } from './NftLottie';
 
-const PRICE_USDT_UNITS = 5_000_000n;
-const PRICE_LABEL = '5';
-const PRICE_USD = '$5';
+const PRICE_USDT_UNITS = 1_000_000n;
+const PRICE_LABEL = '100';
+const PRICE_USD = '$100';
 const USDT_ICON =
     'https://i.getgems.io/B72rsV0ak6jDfESUi_x1Lniw7uP39c0Bw-qGguyuu6Q/rs:fill:150:150:1/g:ce/czM6Ly9nZXRnZW1zLXMzL2ltYWdlcy9qZXR0b24vVVNEVC80M2FhYzI2OGUzMjVmZjg2LnBuZw.webp';
 

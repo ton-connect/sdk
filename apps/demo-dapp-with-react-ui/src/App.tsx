@@ -65,11 +65,10 @@ function App() {
                     {
                         name: 'WalletKit',
                         appName: 'wallet_kit',
-                        aboutUrl: 'https://walletkit-demo-wallet.vercel.app',
+                        aboutUrl: 'localhost:5555',
                         bridgeUrl: 'https://connect.ton.org/bridge',
                         imageUrl: 'https://walletkit-demo-wallet.vercel.app/ton.svg',
-                        universalLink: 'https://walletkit-demo-wallet.vercel.app/ton-connect',
-                        jsBridgeKey: 'walletKitDemoWallet',
+                        universalLink: 'http://localhost:5555/ton-connect',
                         platforms: ['chrome', 'safari', 'firefox', 'ios', 'android'],
                         features: [
                             {
