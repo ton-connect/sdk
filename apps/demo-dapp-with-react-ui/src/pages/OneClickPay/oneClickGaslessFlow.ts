@@ -145,13 +145,15 @@ export async function oneClickGaslessPay(
     params.onStage({ name: 'signing' });
     const signedAtSec = Math.floor(Date.now() / 1000);
 
+    const finalAmount = params.amount - BigInt(providerAmount);
+
     const signPayload = {
         validUntil: Math.ceil(Date.now() / 1000) + 5 * 60,
         items: [
             {
                 type: 'jetton' as const,
                 master: params.master.toString(),
-                amount: (params.amount - BigInt(providerAmount)).toString(),
+                amount: finalAmount.toString(),
                 destination: params.destination.toString(),
                 responseDestination: relayAddress.toString(),
                 attachAmount: BASE_JETTON_SEND_AMOUNT.toString(),
@@ -219,7 +221,7 @@ export async function oneClickGaslessPay(
         {
             destination: params.destination,
             master: params.master,
-            amount: params.amount
+            amount: finalAmount
         },
         {
             intervalMs: 2000,
