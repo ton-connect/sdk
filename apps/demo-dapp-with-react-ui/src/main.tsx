@@ -1,6 +1,5 @@
 import './patch-local-storage-for-github-pages';
 import './polyfills';
-import eruda from 'eruda';
 
 import React, { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -8,16 +7,9 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import './index.scss';
 import { runSingleInstance } from './utils/run-single-instance';
-import { enableQaMode } from '@tonconnect/ui-react';
 import { getTonconnectVersion } from './utils/get-tonconnect-version';
 
-if (import.meta.env.VITE_QA_MODE === 'enable') {
-    enableQaMode();
-}
-
 getTonconnectVersion();
-
-eruda.init();
 
 async function enableMocking() {
     const host = document.baseURI.replace(/\/$/, '');
