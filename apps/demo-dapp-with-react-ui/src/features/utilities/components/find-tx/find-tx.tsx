@@ -17,6 +17,7 @@ export const FindTx = () => {
         setNetwork,
         loading,
         result,
+        bocError,
         findTransaction,
         clearResult,
         canSearch
@@ -33,7 +34,7 @@ export const FindTx = () => {
 
     return (
         <div className="flex w-full flex-col gap-4" data-testid="find-tx">
-            <Input size="s" data-testid="find-tx-boc-field">
+            <Input size="s" error={Boolean(bocError)} data-testid="find-tx-boc-field">
                 <Input.Header>
                     <Input.Title data-testid="find-tx-boc-title">
                         External-in message BOC
@@ -41,12 +42,19 @@ export const FindTx = () => {
                 </Input.Header>
                 <Textarea
                     value={boc}
-                    onChange={e => setBoc(e.target.value)}
+                    onChange={e => {
+                        setBoc(e.target.value);
+                        clearResult();
+                    }}
                     rows={4}
                     placeholder="Paste base64 BOC"
+                    error={Boolean(bocError)}
                     className="font-mono text-sm break-all"
                     data-testid="find-tx-boc-input"
                 />
+                {bocError ? (
+                    <Input.Caption data-testid="find-tx-boc-error">{bocError}</Input.Caption>
+                ) : null}
             </Input>
 
             <div className="flex w-full flex-col gap-1" data-testid="find-tx-network-field">

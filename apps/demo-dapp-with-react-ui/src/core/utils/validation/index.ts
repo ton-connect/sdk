@@ -5,3 +5,4 @@ export {
     sanitizeDecimalAmountInput,
     validatePositiveDecimalAmount
 } from './validate-positive-decimal-amount';
+export { validateExternalMessageBoc } from './validate-external-message-boc';

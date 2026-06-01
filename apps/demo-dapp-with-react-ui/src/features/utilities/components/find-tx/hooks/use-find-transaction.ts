@@ -1,10 +1,11 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import {
     fail,
     ok,
     type OperationResult
 } from '../../../../../core/components/shared/result-block/index';
+import { validateExternalMessageBoc } from '../../../../../core/utils/validation';
 
 import { DEFAULT_EXTERNAL_MESSAGE_BOC } from '../utils/default-external-message-boc';
 import {
@@ -20,14 +21,16 @@ export function useFindTransaction() {
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<OperationResult | null>(null);
 
-    const canSearch = boc.trim().length > 0 && !loading;
+    const bocError = useMemo(() => validateExternalMessageBoc(boc), [boc]);
 
     const findTransaction = useCallback(async () => {
-        const trimmedBoc = boc.trim();
-        if (!trimmedBoc) {
+        const validationError = validateExternalMessageBoc(boc);
+        if (validationError) {
+            setResult(null);
             return;
         }
 
+        const trimmedBoc = boc.trim();
         setLoading(true);
         setResult(null);
 
@@ -58,8 +61,9 @@ export function useFindTransaction() {
         setNetwork,
         loading,
         result,
+        bocError,
         findTransaction,
         clearResult,
-        canSearch
+        canSearch: !loading
     };
 }
