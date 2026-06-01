@@ -13,6 +13,8 @@ export interface JsonEditorProps extends Omit<ComponentProps<'div'>, 'onChange'>
     onChange?: (value: string) => void;
     /** Renders an error border + helper text. Ignored when `readOnly`. */
     invalid?: boolean;
+    /** Validation or syntax messages shown below the editor when `invalid` is true. */
+    messages?: string[];
     readOnly?: boolean;
     /** Override the default min-height (240px in edit mode, no min-height in readOnly). */
     minHeight?: number;
@@ -28,6 +30,7 @@ export const JsonEditor: FC<JsonEditorProps> = ({
     value,
     onChange,
     invalid = false,
+    messages,
     readOnly = false,
     minHeight,
     className,
@@ -60,8 +63,18 @@ export const JsonEditor: FC<JsonEditorProps> = ({
                 />
             </div>
             {showError && (
-                <div className="rounded-md border border-error/40 bg-error/15 px-3 py-2 text-sm text-error">
-                    Invalid JSON syntax. Fix the request before sending.
+                <div
+                    className="rounded-md border border-error/40 bg-error/15 px-3 py-2 text-sm text-error"
+                    role="alert"
+                >
+                    <ul className="list-disc space-y-1 pl-4">
+                        {(messages?.length
+                            ? messages
+                            : ['Invalid JSON syntax. Fix the request before sending.']
+                        ).map((message, index) => (
+                            <li key={`${index}-${message}`}>{message}</li>
+                        ))}
+                    </ul>
                 </div>
             )}
         </div>

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
     type SendTransactionRequest,
     type SignMessageRequest,
@@ -7,11 +7,13 @@ import {
 } from '@tonconnect/ui-react';
 import { Address } from '@ton/ton';
 
+import { useJsonDraftValidation } from '../../../../../core/hooks/use-json-draft-validation';
 import { fail, ok, type OperationResult } from '../../../../../core/components/shared/result-block';
 import {
     mergeRequestContext,
     type RequestContextPatch
 } from '../../../../../core/utils/merge-request-context';
+import { validateTransactionRequest } from '../../../../../core/utils/validation';
 import { DEMO_ECHO_ADDRESS } from '../../send-transaction/utils/transaction-presets';
 
 export type BatchMode = 'sendTransaction' | 'signMessage';
@@ -38,25 +40,6 @@ const buildRequest = (count: number, recipient: string): BatchRequest => ({
     }))
 });
 
-const serializeRequest = (request: BatchRequest): string => JSON.stringify(request, null, 2);
-
-const parseDraft = (draft: string): BatchRequest | null => {
-    try {
-        const parsed = JSON.parse(draft);
-        if (
-            parsed &&
-            typeof parsed === 'object' &&
-            Array.isArray(parsed.messages) &&
-            typeof parsed.validUntil === 'number'
-        ) {
-            return parsed as BatchRequest;
-        }
-        return null;
-    } catch {
-        return null;
-    }
-};
-
 /**
  * Owns the batch-limits probe state. The JsonEditor `draft` is the source of
  * truth at send time — mode/count act as presets that regenerate the draft.
@@ -72,48 +55,52 @@ export const useBatchTester = () => {
         : DEMO_ECHO_ADDRESS;
 
     const [mode, setMode] = useState<BatchMode>('sendTransaction');
-    const [draft, setDraft] = useState(() =>
-        serializeRequest(buildRequest(DEFAULT_COUNT, recipient))
-    );
     const [sending, setSending] = useState(false);
     const [result, setResult] = useState<OperationResult | null>(null);
 
-    // Regenerate the draft when the wallet address changes so the preset always
-    // matches the active account. Wipes manual edits — acceptable since
-    // switching accounts mid-edit is rare.
-    useEffect(() => {
-        setDraft(serializeRequest(buildRequest(DEFAULT_COUNT, recipient)));
-    }, [recipient]);
+    const {
+        value: requestValue,
+        draft,
+        onDraftChange,
+        replaceValue,
+        isInvalid,
+        editorMessages,
+        isSyntaxInvalid
+    } = useJsonDraftValidation({
+        initialValue: buildRequest(DEFAULT_COUNT, recipient),
+        validate: (parsed, { nowSec }) => validateTransactionRequest(parsed, nowSec),
+        watchTime: true
+    });
 
-    const parsed = useMemo(() => parseDraft(draft), [draft]);
-    const isInvalid = parsed === null;
+    useEffect(() => {
+        replaceValue(buildRequest(DEFAULT_COUNT, recipient));
+    }, [recipient, replaceValue]);
+
+    const parsed = isSyntaxInvalid ? null : requestValue;
     const count = parsed?.messages?.length ?? 0;
 
     const setCount = useCallback(
         (next: number) => {
-            setDraft(serializeRequest(buildRequest(next, recipient)));
+            replaceValue(buildRequest(next, recipient));
         },
-        [recipient]
+        [replaceValue, recipient]
     );
-
-    const onDraftChange = useCallback((next: string) => setDraft(next), []);
 
     const applyRequestContext = useCallback(
         (patch: RequestContextPatch) => {
-            const base =
-                parseDraft(draft) ?? buildRequest(count > 0 ? count : DEFAULT_COUNT, recipient);
-            setDraft(serializeRequest(mergeRequestContext(base, patch)));
+            const base = parsed ?? buildRequest(count > 0 ? count : DEFAULT_COUNT, recipient);
+            replaceValue(mergeRequestContext(base, patch));
         },
-        [draft, recipient, count]
+        [parsed, recipient, count, replaceValue]
     );
 
     const reset = useCallback(() => {
         setMode('sendTransaction');
-        setDraft(serializeRequest(buildRequest(DEFAULT_COUNT, recipient)));
-    }, [recipient]);
+        replaceValue(buildRequest(DEFAULT_COUNT, recipient));
+    }, [replaceValue, recipient]);
 
     const send = useCallback(async () => {
-        if (!wallet?.account || !parsed) return;
+        if (!wallet?.account || !parsed || isInvalid) return;
 
         setResult(null);
         setSending(true);
@@ -130,7 +117,7 @@ export const useBatchTester = () => {
         } finally {
             setSending(false);
         }
-    }, [tonConnectUI, wallet, mode, parsed, count]);
+    }, [tonConnectUI, wallet, mode, parsed, count, isInvalid]);
 
     const clearResult = useCallback(() => setResult(null), []);
 
@@ -143,6 +130,7 @@ export const useBatchTester = () => {
         onDraftChange,
         applyRequestContext,
         isInvalid,
+        editorMessages,
         send,
         sending,
         result,

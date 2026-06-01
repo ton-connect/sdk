@@ -1,11 +1,10 @@
 import { useCallback, useState } from 'react';
-import type { SendTransactionRequest } from '@tonconnect/ui-react';
 
+import { useJsonDraftValidation } from '../../../../../core/hooks/use-json-draft-validation';
+import { validateTransactionRequest } from '../../../../../core/utils/validation';
 import { buildDefaultTx } from '../utils/transaction-presets';
 
 export type RequestMode = 'send' | 'sign';
-
-const stringify = (value: SendTransactionRequest): string => JSON.stringify(value, null, 2);
 
 /**
  * Holds the transaction-request as a parsed object (single source of truth) plus
@@ -17,45 +16,31 @@ const stringify = (value: SendTransactionRequest): string => JSON.stringify(valu
  * request in the connect URL) and `waitForTx` (poll on-chain after send).
  */
 export const useTransactionForm = () => {
-    const [tx, setTx] = useState<SendTransactionRequest>(buildDefaultTx);
-    const [draft, setDraft] = useState<string>(() => stringify(tx));
-    const [isInvalid, setIsInvalid] = useState(false);
+    const {
+        value: tx,
+        draft,
+        onDraftChange,
+        replaceValue: replaceTx,
+        isInvalid,
+        editorMessages,
+        validationIssues
+    } = useJsonDraftValidation({
+        initialValue: buildDefaultTx(),
+        validate: (parsed, { nowSec }) => validateTransactionRequest(parsed, nowSec),
+        watchTime: true
+    });
 
     const [withConnect, setWithConnect] = useState(false);
     const [waitForTx, setWaitForTx] = useState(false);
 
-    /** Replace the whole tx (preset load, reset). Buffer follows. */
-    const replaceTx = useCallback((next: SendTransactionRequest) => {
-        setTx(next);
-        setDraft(stringify(next));
-        setIsInvalid(false);
-    }, []);
+    const validUntilError = validationIssues.find(message => message.startsWith('validUntil'));
 
-    /** Editor change: update buffer, re-parse, swap `tx` if the JSON is valid. */
-    const onDraftChange = useCallback((next: string) => {
-        setDraft(next);
-        try {
-            const parsed = JSON.parse(next);
-            if (parsed && typeof parsed === 'object') {
-                setTx(parsed as SendTransactionRequest);
-                setIsInvalid(false);
-            } else {
-                setIsInvalid(true);
-            }
-        } catch {
-            setIsInvalid(true);
-        }
-    }, []);
-
-    /** Form-side mutator for `validUntil`. Rewrites both the object and the buffer. */
-    const setValidUntil = useCallback((nextValidUntil: number) => {
-        setTx(prev => {
-            const next = { ...prev, validUntil: nextValidUntil };
-            setDraft(stringify(next));
-            setIsInvalid(false);
-            return next;
-        });
-    }, []);
+    const setValidUntil = useCallback(
+        (nextValidUntil: number) => {
+            replaceTx({ ...tx, validUntil: nextValidUntil });
+        },
+        [replaceTx, tx]
+    );
 
     const setValidUntilFromNow = useCallback(
         (seconds: number) => setValidUntil(Math.floor(Date.now() / 1000) + seconds),
@@ -63,8 +48,7 @@ export const useTransactionForm = () => {
     );
 
     const reset = useCallback(() => {
-        const fresh = buildDefaultTx();
-        replaceTx(fresh);
+        replaceTx(buildDefaultTx());
         setWithConnect(false);
         setWaitForTx(false);
     }, [replaceTx]);
@@ -73,6 +57,8 @@ export const useTransactionForm = () => {
         tx,
         draft,
         isInvalid,
+        editorMessages,
+        validUntilError,
         onDraftChange,
         replaceTx,
         setValidUntil,
@@ -82,7 +68,6 @@ export const useTransactionForm = () => {
         setWithConnect,
         waitForTx,
         setWaitForTx,
-        // derived
         validUntil: tx.validUntil
     };
 };

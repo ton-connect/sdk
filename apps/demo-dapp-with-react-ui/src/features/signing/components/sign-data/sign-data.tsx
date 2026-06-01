@@ -65,6 +65,7 @@ export const SignData = () => {
                 value={form.draft}
                 onChange={form.onDraftChange}
                 invalid={form.isInvalid}
+                messages={form.editorMessages}
                 data-testid="sign-data-json-editor"
             />
 

@@ -8,6 +8,8 @@ interface ValidUntilFieldProps {
     onChange: (next: number) => void;
     onSetFromNow: (seconds: number) => void;
     timer: TimerState;
+    /** Shown under the input when `validUntil` fails semantic validation. */
+    errorMessage?: string;
     testIdPrefix: string;
 }
 
@@ -22,9 +24,10 @@ export const ValidUntilField = ({
     onChange,
     onSetFromNow,
     timer,
+    errorMessage,
     testIdPrefix
 }: ValidUntilFieldProps) => (
-    <Input size="s">
+    <Input size="s" error={Boolean(errorMessage) || timer.status === 'expired'}>
         <Input.Header>
             <Input.Title>Valid Until</Input.Title>
             <span
@@ -92,5 +95,11 @@ export const ValidUntilField = ({
                 12h
             </Button>
         </div>
+
+        {errorMessage ? (
+            <p className="text-sm text-error" data-testid={`${testIdPrefix}-valid-until-error`}>
+                {errorMessage}
+            </p>
+        ) : null}
     </Input>
 );
