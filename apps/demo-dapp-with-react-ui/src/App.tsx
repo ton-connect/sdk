@@ -15,6 +15,7 @@ import { UniversalConnector } from '@reown/appkit-universal-connector';
 import { GaslessDemo } from './components/GaslessDemo/GaslessDemo';
 import { OneClickPay } from './pages/OneClickPay/OneClickPay';
 import { FrogDemo } from './pages/FrogDemo/FrogDemo';
+import { CatDemo } from './pages/CatDemo/CatDemo';
 
 initializeWalletConnect(UniversalConnector, {
     projectId: '9cb446f4a1b697039a23332618d942b0',
@@ -100,6 +101,7 @@ function App() {
                     <Route path="/" element={<HomePage />} />
                     <Route path="/pay" element={<OneClickPay />} />
                     <Route path="/frog" element={<FrogDemo />} />
+                    <Route path="/cat" element={<CatDemo />} />
                     <Route path="/iframe" element={<IframePage />} />
                     <Route path="/iframe/iframe" element={<IframeIframePage />} />
                 </Routes>

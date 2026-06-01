@@ -1,0 +1,567 @@
+// Mobile-first checkout demo focused on TON payment via embedded requests.
+// The story: you never have to press "Connect" — Buy opens the wallet and does
+// connect + pay in one tap. Scoped under `.cat`.
+
+$blue: #0098ea;
+$blue-hover: #0086d1;
+$blue-active: #0076b8;
+$ink: #0a0a0a;
+$ink-2: #1f2937;
+$muted: #6b7a8a;
+$muted-soft: #a4adb6;
+$surface: #ffffff;
+$surface-soft: #f1f3f5;
+$hairline: #e7eaee;
+$green: #2ebd59;
+
+@mixin font {
+    font-family:
+        'Inter',
+        -apple-system,
+        BlinkMacSystemFont,
+        'Segoe UI',
+        Roboto,
+        sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.cat {
+    @include font;
+    min-height: 100vh;
+    width: 100%;
+    max-width: 440px;
+    margin: 0 auto;
+    padding: 12px 16px 32px;
+    color: $ink;
+    background: $surface;
+    box-sizing: border-box;
+
+    // ── Top bar ─────────────────────────────────────────────────────────
+    &__topbar {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        column-gap: 12px;
+        min-height: 56px;
+        margin-bottom: 14px;
+        border-bottom: 1px solid $hairline;
+    }
+
+    &__brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+    }
+
+    &__logo {
+        width: 32px;
+        height: 32px;
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: $surface-soft;
+        border-radius: 10px;
+
+        svg {
+            width: 22px;
+            height: 22px;
+        }
+    }
+
+    &__brand-text {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.1;
+        min-width: 0;
+        overflow: hidden;
+    }
+
+    &__brand-name {
+        font-size: 15px;
+        font-weight: 700;
+        color: $ink;
+        letter-spacing: -0.01em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &__brand-sub {
+        font-size: 12px;
+        color: $muted;
+        margin-top: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    // ── Connect (optional) button ───────────────────────────────────────
+    &__connect {
+        @include font;
+        justify-self: end;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 8px 11px;
+        font-size: 13px;
+        font-weight: 600;
+        white-space: nowrap;
+        color: $ink-2;
+        background: $surface-soft;
+        border: 1px solid $hairline;
+        border-radius: 999px;
+        cursor: pointer;
+        transition:
+            background 140ms ease,
+            border-color 140ms ease;
+
+        &:hover {
+            background: darken($surface-soft, 3%);
+        }
+
+        &--connected {
+            color: $blue-active;
+            border-color: rgba(0, 152, 234, 0.25);
+            font-family:
+                'JetBrains Mono',
+                'SF Mono',
+                ui-monospace,
+                monospace;
+            font-size: 13px;
+        }
+    }
+
+    &__connect-opt {
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: $muted-soft;
+        background: $surface;
+        border: 1px solid $hairline;
+        border-radius: 6px;
+        padding: 1px 5px;
+    }
+
+    &__connect-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: $green;
+        box-shadow: 0 0 0 3px rgba(46, 189, 89, 0.18);
+    }
+
+    // ── Hero badge: the “no connect” message ────────────────────────────
+    &__hero-badge {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 14px;
+        margin-bottom: 16px;
+        font-size: 13px;
+        font-weight: 600;
+        color: $blue-active;
+        background: linear-gradient(90deg, #e6f4fe 0%, #f1f9ff 100%);
+        border: 1px solid rgba(0, 152, 234, 0.18);
+        border-radius: 12px;
+        line-height: 1.35;
+    }
+
+    &__bolt {
+        font-size: 15px;
+        flex-shrink: 0;
+    }
+
+    // ── Image card ──────────────────────────────────────────────────────
+    &__image-card {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        border-radius: 20px;
+        overflow: hidden;
+        background: radial-gradient(120% 120% at 50% 50%, #2a2a2a 0%, #0e0e0e 80%);
+    }
+
+    .nft-image-container {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .nft-image-container__lottie,
+    .nft-image-container__image {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        image-rendering: -webkit-optimize-contrast;
+    }
+
+    // ── Title ───────────────────────────────────────────────────────────
+    &__title-row {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin: 22px 0 10px;
+    }
+
+    &__title {
+        font-size: 28px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        margin: 0;
+        line-height: 1.15;
+        color: $ink;
+    }
+
+    &__badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        background: #e6f4fe;
+        color: $blue;
+        font-size: 13px;
+        font-weight: 600;
+        border-radius: 999px;
+    }
+
+    &__collection {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 24px;
+    }
+
+    &__collection-icon {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        object-fit: cover;
+        background: #1a1a1a;
+    }
+
+    &__collection-name {
+        font-size: 15px;
+        font-weight: 500;
+        color: $ink-2;
+    }
+
+    &__verified {
+        width: 16px;
+        height: 16px;
+    }
+
+    // ── Price ───────────────────────────────────────────────────────────
+    &__price-block {
+        margin-bottom: 20px;
+    }
+
+    &__price-icon {
+        width: 28px;
+        height: 28px;
+        flex-shrink: 0;
+    }
+
+    &__price-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: $muted;
+        margin-bottom: 8px;
+        letter-spacing: 0.04em;
+    }
+
+    &__price-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    &__price-value {
+        font-size: 32px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: $ink;
+    }
+
+    &__price-ticker {
+        font-size: 16px;
+        color: $muted;
+        font-weight: 600;
+        margin-left: 2px;
+    }
+
+    // ── Messages ────────────────────────────────────────────────────────
+    &__error,
+    &__warn {
+        border-radius: 12px;
+        padding: 12px 14px;
+        font-size: 13px;
+        line-height: 1.45;
+        margin-bottom: 12px;
+        word-break: break-word;
+    }
+
+    &__error {
+        background: #fff3f3;
+        color: #b02029;
+        border: 1px solid #ffd4d4;
+    }
+
+    &__warn {
+        background: #fff8ec;
+        color: #8a5a00;
+        border: 1px solid #ffe2ac;
+    }
+
+    // ── Actions ─────────────────────────────────────────────────────────
+    &__actions {
+        margin-bottom: 4px;
+    }
+
+    &__btn {
+        @include font;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        padding: 16px 18px;
+        border-radius: 14px;
+        font-size: 16px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        line-height: 1;
+        transition:
+            background 140ms ease,
+            color 140ms ease,
+            transform 100ms ease;
+
+        &--primary {
+            background: $blue;
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(0, 152, 234, 0.28);
+
+            &:hover:not(:disabled) {
+                background: $blue-hover;
+            }
+
+            &:active:not(:disabled) {
+                transform: translateY(1px);
+            }
+
+            &:disabled {
+                background: #a8c7df;
+                box-shadow: none;
+                cursor: not-allowed;
+            }
+        }
+
+        &--secondary {
+            background: $surface-soft;
+            color: $ink;
+            margin-top: 8px;
+
+            &:hover:not(:disabled) {
+                background: darken($surface-soft, 3%);
+            }
+        }
+    }
+
+    &__btn-diamond {
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+    }
+
+    &__cta-hint {
+        margin: 10px 2px 0;
+        font-size: 12px;
+        line-height: 1.45;
+        color: $muted;
+        text-align: center;
+    }
+
+    // ── Description + attributes ────────────────────────────────────────
+    &__description {
+        margin: 24px 0 0;
+        font-size: 14px;
+        line-height: 1.55;
+        color: $ink-2;
+    }
+
+    &__section-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: $muted;
+        letter-spacing: 0.04em;
+        margin: 0 0 12px;
+        text-transform: uppercase;
+    }
+
+    &__attrs {
+        margin-top: 24px;
+    }
+
+    &__attrs-grid {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    &__attr {
+        padding: 12px 14px;
+        background: $surface-soft;
+        border-radius: 12px;
+    }
+
+    &__attr-key {
+        font-size: 11px;
+        font-weight: 600;
+        color: $muted;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-bottom: 4px;
+    }
+
+    &__attr-value {
+        font-size: 14px;
+        font-weight: 600;
+        color: $ink;
+    }
+
+    &__foot {
+        margin-top: 26px;
+        font-size: 12px;
+        line-height: 1.55;
+        color: $muted;
+        text-align: center;
+    }
+
+    // ── Success view ────────────────────────────────────────────────────
+    &__success {
+        padding: 32px 6px 16px;
+        text-align: center;
+    }
+
+    &__success-icon {
+        width: 96px;
+        height: 96px;
+        margin: 0 auto 22px;
+        border-radius: 22px;
+        background: radial-gradient(120% 120% at 50% 50%, #2a2a2a 0%, #0e0e0e 80%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        img {
+            width: 72%;
+            height: 72%;
+            object-fit: contain;
+        }
+    }
+
+    &__success-title {
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        margin: 0 0 8px;
+    }
+
+    &__success-sub {
+        font-size: 15px;
+        color: $muted;
+        margin: 0 0 4px;
+    }
+
+    &__success-ok {
+        color: $green;
+        font-weight: 600;
+    }
+
+    &__success-note {
+        font-size: 13px;
+        color: $muted;
+        margin: 12px auto 24px;
+        max-width: 320px;
+        line-height: 1.45;
+    }
+
+    &__success-row {
+        display: grid;
+        grid-template-columns: auto auto 1fr auto;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 4px;
+        text-align: left;
+        margin-bottom: 20px;
+    }
+
+    &__success-row-check {
+        width: 22px;
+        height: 22px;
+    }
+
+    &__success-row-img {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        object-fit: cover;
+        background: radial-gradient(120% 120% at 50% 50%, #2a2a2a 0%, #0e0e0e 80%);
+        padding: 4px;
+    }
+
+    &__success-row-name {
+        font-size: 15px;
+        font-weight: 600;
+        color: $ink;
+    }
+
+    &__success-row-collection {
+        font-size: 13px;
+        color: $muted;
+        margin-top: 2px;
+    }
+
+    &__success-row-price {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 15px;
+        font-weight: 600;
+
+        .cat__price-icon {
+            width: 20px;
+            height: 20px;
+        }
+    }
+
+    &__explorer {
+        display: inline-block;
+        margin-bottom: 16px;
+        font-size: 13px;
+        font-weight: 600;
+        color: $blue;
+        text-decoration: none;
+        word-break: break-all;
+
+        &:hover {
+            color: $blue-hover;
+            text-decoration: underline;
+        }
+    }
+}
+
+@media (min-width: 480px) {
+    .cat {
+        padding: 20px 24px 40px;
+    }
+}
