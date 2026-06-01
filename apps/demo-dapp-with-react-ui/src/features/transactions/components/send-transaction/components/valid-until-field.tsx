@@ -56,7 +56,7 @@ export const ValidUntilField = ({
                 value={validUntil ?? ''}
                 placeholder="Not set"
                 onChange={e => {
-                    const next = Number.parseInt(e.target.value, 10);
+                    const next = e.target.valueAsNumber;
                     if (Number.isFinite(next)) {
                         onChange(next);
                     }
