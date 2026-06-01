@@ -1,7 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Address } from '@ton/core';
 
 import { ResultBlock } from '../../../../core/components/shared/result-block';
+import {
+    sanitizeDecimalAmountInput,
+    validatePositiveDecimalAmount
+} from '../../../../core/utils/validation';
 
 import { AmountSection } from './components/amount-section';
 import { BalanceBlock } from './components/balance-block';
@@ -10,6 +14,7 @@ import { TransferActions } from './components/transfer-actions';
 import { TransferInfo } from './components/transfer-info';
 import { TransferSettingsModal } from './components/transfer-settings-modal';
 import { useTransferForm, useTransferUsdt, useUsdtWallet } from './hooks';
+import { USDT_DECIMALS } from './utils/constants';
 
 const DEFAULT_AMOUNT = '0.01';
 
@@ -34,6 +39,15 @@ export const TransferUsdt = () => {
     const [amount, setAmount] = useState<string>(DEFAULT_AMOUNT);
     const [destination, setDestination] = useState<string>('');
     const [settingsOpen, setSettingsOpen] = useState(false);
+
+    const amountError = useMemo(
+        () => validatePositiveDecimalAmount(amount, { maxDecimals: USDT_DECIMALS }),
+        [amount]
+    );
+
+    const handleAmountChange = useCallback((next: string) => {
+        setAmount(sanitizeDecimalAmountInput(next, USDT_DECIMALS));
+    }, []);
 
     useEffect(() => {
         setDestination(senderAddress ? toUserFacingAddress(senderAddress) : '');
@@ -60,12 +74,13 @@ export const TransferUsdt = () => {
         !!senderAddress &&
         !!destination &&
         !!amount &&
+        !amountError &&
         !sending &&
         !networkError &&
         (form.gasless || !!jettonWallet);
 
     const handleSend = async () => {
-        if (!senderAddress || !destination || networkError) return;
+        if (!senderAddress || !destination || amountError || networkError) return;
         if (!form.gasless && !jettonWallet) return;
         await send({
             senderAddress,
@@ -87,7 +102,11 @@ export const TransferUsdt = () => {
 
     return (
         <div className="flex flex-col gap-4" data-testid="transfer-usdt">
-            <AmountSection value={amount} onChange={setAmount} />
+            <AmountSection
+                value={amount}
+                onChange={handleAmountChange}
+                errorMessage={amountError}
+            />
 
             <BalanceBlock
                 balance={usdtBalance}
