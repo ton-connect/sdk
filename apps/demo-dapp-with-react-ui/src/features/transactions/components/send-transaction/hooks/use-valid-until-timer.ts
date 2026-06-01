@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react';
 
-export type TimerStatus = 'ok' | 'warning' | 'expired' | 'missing';
+import {
+    TRANSACTION_VALID_UNTIL_MAX_HOURS,
+    TRANSACTION_VALID_UNTIL_MAX_SECONDS
+} from '../../../../../core/utils/validation';
+
+export type TimerStatus = 'ok' | 'warning' | 'expired' | 'missing' | 'tooFar';
 
 export interface TimerState {
     display: string;
@@ -25,8 +30,9 @@ const formatCountdown = (diff: number): string => {
 /**
  * Drives a 1s-tick countdown towards `validUntil` (a unix timestamp in seconds).
  * Owns the interval lifecycle and the status policy:
- *  - `> 5m` left → ok (green)
+ *  - `> 5m` left and within max window → ok (green)
  *  - `0 < diff <= 5m` left → warning (yellow)
+ *  - more than max window ahead → tooFar (yellow, display `> 48h`)
  *  - past `validUntil` → expired (red, display shows negative countdown).
  */
 export const useValidUntilTimer = (validUntil: number | undefined): TimerState => {
@@ -47,6 +53,11 @@ export const useValidUntilTimer = (validUntil: number | undefined): TimerState =
             const diff = validUntil - Math.floor(Date.now() / 1000);
             if (diff <= 0) {
                 setState({ display: `−${formatCountdown(-diff)}`, status: 'expired' });
+            } else if (diff > TRANSACTION_VALID_UNTIL_MAX_SECONDS) {
+                setState({
+                    display: `> ${TRANSACTION_VALID_UNTIL_MAX_HOURS}h`,
+                    status: 'tooFar'
+                });
             } else {
                 const status: TimerStatus = diff <= WARNING_THRESHOLD_SEC ? 'warning' : 'ok';
                 setState({ display: formatCountdown(diff), status });

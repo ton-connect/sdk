@@ -1,12 +1,19 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { JSON_SYNTAX_ERROR_MESSAGE, parseJsonObjectDraft } from '../utils/json-draft';
+import {
+    normalizeJsonValidation,
+    type JsonValidationResult
+} from '../utils/validation/validation-result';
 
 export interface JsonDraftValidationContext {
     nowSec: number;
 }
 
-export type JsonDraftValidator = (parsed: unknown, context: JsonDraftValidationContext) => string[];
+export type JsonDraftValidator = (
+    parsed: unknown,
+    context: JsonDraftValidationContext
+) => string[] | JsonValidationResult;
 
 export interface UseJsonDraftValidationOptions<T> {
     initialValue: T;
@@ -49,17 +56,21 @@ export function useJsonDraftValidation<T>({
         }
     }, [draftParse]);
 
-    const validationIssues = useMemo(() => {
+    const { validationErrors, validationWarnings } = useMemo(() => {
         if (draftParse.syntaxInvalid || !validate) {
-            return [];
+            return { validationErrors: [], validationWarnings: [] };
         }
 
-        return validate(draftParse.parsed, { nowSec });
+        const { errors, warnings } = normalizeJsonValidation(
+            validate(draftParse.parsed, { nowSec })
+        );
+        return { validationErrors: errors, validationWarnings: warnings };
     }, [draftParse, validate, nowSec]);
 
     const isSyntaxInvalid = draftParse.syntaxInvalid;
-    const isInvalid = isSyntaxInvalid || validationIssues.length > 0;
-    const editorMessages = isSyntaxInvalid ? [JSON_SYNTAX_ERROR_MESSAGE] : validationIssues;
+    const isInvalid = isSyntaxInvalid || validationErrors.length > 0;
+    const editorMessages = isSyntaxInvalid ? [JSON_SYNTAX_ERROR_MESSAGE] : validationErrors;
+    const editorWarnings = isSyntaxInvalid ? [] : validationWarnings;
 
     const replaceValue = useCallback(
         (next: T) => {
@@ -80,7 +91,11 @@ export function useJsonDraftValidation<T>({
         replaceValue,
         isInvalid,
         editorMessages,
-        validationIssues,
+        editorWarnings,
+        validationErrors,
+        validationWarnings,
+        /** @deprecated Use `validationErrors`. */
+        validationIssues: validationErrors,
         isSyntaxInvalid
     };
 }

@@ -65,6 +65,7 @@ export const useBatchTester = () => {
         replaceValue,
         isInvalid,
         editorMessages,
+        editorWarnings,
         isSyntaxInvalid
     } = useJsonDraftValidation({
         initialValue: buildRequest(DEFAULT_COUNT, recipient),
@@ -131,6 +132,7 @@ export const useBatchTester = () => {
         applyRequestContext,
         isInvalid,
         editorMessages,
+        editorWarnings,
         send,
         sending,
         result,

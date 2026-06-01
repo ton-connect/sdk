@@ -26,7 +26,9 @@ export const useTransactionForm = (
         replaceValue: replaceTx,
         isInvalid,
         editorMessages,
-        validationIssues
+        editorWarnings,
+        validationErrors,
+        validationWarnings
     } = useJsonDraftValidation({
         initialValue: buildInitial(),
         validate: (parsed, { nowSec }) => validateTransactionRequest(parsed, nowSec),
@@ -36,7 +38,8 @@ export const useTransactionForm = (
     const [withConnect, setWithConnect] = useState(false);
     const [waitForTx, setWaitForTx] = useState(false);
 
-    const validUntilError = validationIssues.find(message => message.startsWith('validUntil'));
+    const validUntilError = validationErrors.find(message => message.startsWith('validUntil'));
+    const validUntilWarning = validationWarnings.find(message => message.startsWith('validUntil'));
 
     const setValidUntil = useCallback(
         (nextValidUntil: number) => {
@@ -61,7 +64,9 @@ export const useTransactionForm = (
         draft,
         isInvalid,
         editorMessages,
+        editorWarnings,
         validUntilError,
+        validUntilWarning,
         onDraftChange,
         replaceTx,
         setValidUntil,

@@ -132,6 +132,7 @@ export const TransactionRequest = ({ mode, testIdPrefix }: TransactionRequestPro
                 onSetFromNow={form.setValidUntilFromNow}
                 timer={timer}
                 errorMessage={form.validUntilError}
+                warningMessage={form.validUntilWarning}
                 testIdPrefix={testIdPrefix}
             />
 
@@ -143,6 +144,7 @@ export const TransactionRequest = ({ mode, testIdPrefix }: TransactionRequestPro
                 onChange={form.onDraftChange}
                 invalid={form.isInvalid}
                 messages={form.editorMessages}
+                warnings={form.editorWarnings}
                 data-testid={`${testIdPrefix}-json-editor`}
             />
 

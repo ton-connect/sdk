@@ -19,6 +19,7 @@ export const WalletBatchLimits = () => {
         applyRequestContext,
         isInvalid,
         editorMessages,
+        editorWarnings,
         send,
         sending,
         result,
@@ -43,6 +44,7 @@ export const WalletBatchLimits = () => {
                 onChange={onDraftChange}
                 invalid={isInvalid}
                 messages={editorMessages}
+                warnings={editorWarnings}
                 data-testid="batch-limits-request-editor"
             />
 

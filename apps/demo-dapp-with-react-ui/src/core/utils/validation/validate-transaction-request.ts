@@ -1,24 +1,42 @@
 import { Address } from '@ton/ton';
 
 import { jsonPath } from './json-path';
+import {
+    TRANSACTION_VALID_UNTIL_MAX_HOURS,
+    TRANSACTION_VALID_UNTIL_MAX_SECONDS
+} from './valid-until-limits';
+import type { JsonValidationResult } from './validation-result';
 
 const POSITIVE_AMOUNT_PATTERN = /^\d+$/;
 
-function validateValidUntil(value: unknown, issues: string[], nowSec: number): void {
+function validateValidUntil(
+    value: unknown,
+    errors: string[],
+    warnings: string[],
+    nowSec: number
+): void {
     const field = jsonPath('validUntil');
 
     if (value === undefined) {
-        issues.push(`${field}: required`);
+        errors.push(`${field}: required`);
         return;
     }
 
     if (typeof value !== 'number' || !Number.isFinite(value) || !Number.isInteger(value)) {
-        issues.push(`${field}: must be a unix timestamp in seconds (integer number)`);
+        errors.push(`${field}: must be a unix timestamp in seconds (integer number)`);
         return;
     }
 
     if (value <= nowSec) {
-        issues.push(`${field}: must be in the future (deadline has already expired)`);
+        errors.push(`${field}: must be in the future (deadline has already expired)`);
+        return;
+    }
+
+    const maxAllowed = nowSec + TRANSACTION_VALID_UNTIL_MAX_SECONDS;
+    if (value > maxAllowed) {
+        warnings.push(
+            `${field}: more than ${TRANSACTION_VALID_UNTIL_MAX_HOURS} hours from now — unusually long for transactions`
+        );
     }
 }
 
@@ -132,52 +150,53 @@ function validateItem(item: unknown, index: number, issues: string[]): void {
 
 /**
  * Semantic validation for send/sign transaction JSON (beyond JSON syntax).
- * Returns human-readable issues shown in the editor; empty when valid.
+ * `errors` block submit; `warnings` are advisory only.
  */
 export function validateTransactionRequest(
     value: unknown,
     nowSec: number = Math.floor(Date.now() / 1000)
-): string[] {
-    const issues: string[] = [];
+): JsonValidationResult {
+    const errors: string[] = [];
+    const warnings: string[] = [];
 
     if (!value || typeof value !== 'object' || Array.isArray(value)) {
-        issues.push('Request must be a JSON object');
-        return issues;
+        errors.push('Request must be a JSON object');
+        return { errors, warnings };
     }
 
     const request = value as Record<string, unknown>;
-    validateValidUntil(request.validUntil, issues, nowSec);
+    validateValidUntil(request.validUntil, errors, warnings, nowSec);
 
     const hasMessages = Array.isArray(request.messages);
     const hasItems = Array.isArray(request.items);
 
     if (hasMessages && hasItems) {
-        issues.push("Request must contain either 'messages' or 'items', not both");
-        return issues;
+        errors.push("Request must contain either 'messages' or 'items', not both");
+        return { errors, warnings };
     }
 
     if (!hasMessages && !hasItems) {
-        issues.push("Request must contain a non-empty 'messages' or 'items' array");
-        return issues;
+        errors.push("Request must contain a non-empty 'messages' or 'items' array");
+        return { errors, warnings };
     }
 
     if (hasMessages) {
         const messages = request.messages as unknown[];
         if (messages.length === 0) {
-            issues.push('messages: must contain at least one entry');
+            errors.push('messages: must contain at least one entry');
         } else {
-            messages.forEach((message, index) => validateMessage(message, index, issues));
+            messages.forEach((message, index) => validateMessage(message, index, errors));
         }
     }
 
     if (hasItems) {
         const items = request.items as unknown[];
         if (items.length === 0) {
-            issues.push('items: must contain at least one entry');
+            errors.push('items: must contain at least one entry');
         } else {
-            items.forEach((item, index) => validateItem(item, index, issues));
+            items.forEach((item, index) => validateItem(item, index, errors));
         }
     }
 
-    return issues;
+    return { errors, warnings };
 }

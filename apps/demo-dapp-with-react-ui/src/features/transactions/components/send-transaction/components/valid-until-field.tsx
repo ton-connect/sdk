@@ -10,14 +10,30 @@ interface ValidUntilFieldProps {
     timer: TimerState;
     /** Shown under the input when `validUntil` fails semantic validation. */
     errorMessage?: string;
+    /** Advisory when `validUntil` is unusually far in the future. */
+    warningMessage?: string;
     testIdPrefix: string;
 }
 
 const STATUS_DOT: Record<TimerStatus, string> = {
     ok: 'bg-success',
     warning: 'bg-[#f5a73b]',
+    tooFar: 'bg-[#f5a73b]',
     expired: 'bg-error',
     missing: 'bg-tertiary-foreground'
+};
+
+const isFieldError = (status: TimerStatus, errorMessage?: string) =>
+    Boolean(errorMessage) || status === 'expired' || status === 'missing';
+
+const timerTextClass = (status: TimerStatus) => {
+    if (status === 'expired' || status === 'missing') {
+        return 'text-error';
+    }
+    if (status === 'warning' || status === 'tooFar') {
+        return 'text-[#f5a73b]';
+    }
+    return 'text-secondary-foreground';
 };
 
 export const ValidUntilField = ({
@@ -26,20 +42,17 @@ export const ValidUntilField = ({
     onSetFromNow,
     timer,
     errorMessage,
+    warningMessage,
     testIdPrefix
 }: ValidUntilFieldProps) => (
     <Input
         size="s"
-        error={Boolean(errorMessage) || timer.status === 'expired' || timer.status === 'missing'}
+        error={isFieldError(timer.status, errorMessage)}
     >
         <Input.Header>
             <Input.Title>Valid Until</Input.Title>
             <span
-                className={`inline-flex items-center gap-1.5 font-mono text-xs ${
-                    timer.status === 'expired' || timer.status === 'missing'
-                        ? 'text-error'
-                        : 'text-secondary-foreground'
-                }`}
+                className={`inline-flex items-center gap-1.5 font-mono text-xs ${timerTextClass(timer.status)}`}
                 data-testid={`${testIdPrefix}-valid-until-timer`}
                 data-status={timer.status}
             >
@@ -111,6 +124,13 @@ export const ValidUntilField = ({
         {errorMessage ? (
             <p className="text-sm text-error" data-testid={`${testIdPrefix}-valid-until-error`}>
                 {errorMessage}
+            </p>
+        ) : warningMessage ? (
+            <p
+                className="text-sm text-[#f5a73b]"
+                data-testid={`${testIdPrefix}-valid-until-warning`}
+            >
+                {warningMessage}
             </p>
         ) : null}
     </Input>

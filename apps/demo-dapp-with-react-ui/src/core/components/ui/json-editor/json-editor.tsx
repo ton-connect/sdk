@@ -15,6 +15,8 @@ export interface JsonEditorProps extends Omit<ComponentProps<'div'>, 'onChange'>
     invalid?: boolean;
     /** Validation or syntax messages shown below the editor when `invalid` is true. */
     messages?: string[];
+    /** Advisory messages shown below the editor (does not set `invalid`). */
+    warnings?: string[];
     readOnly?: boolean;
     /** Override the default min-height (240px in edit mode, no min-height in readOnly). */
     minHeight?: number;
@@ -31,12 +33,14 @@ export const JsonEditor: FC<JsonEditorProps> = ({
     onChange,
     invalid = false,
     messages,
+    warnings,
     readOnly = false,
     minHeight,
     className,
     ...props
 }) => {
     const showError = invalid && !readOnly;
+    const showWarnings = !readOnly && !showError && (warnings?.length ?? 0) > 0;
     const effectiveMinHeight = minHeight ?? (readOnly ? undefined : 240);
     const borderClass = readOnly
         ? ''
@@ -72,7 +76,19 @@ export const JsonEditor: FC<JsonEditorProps> = ({
                             ? messages
                             : ['Invalid JSON syntax. Fix the request before sending.']
                         ).map((message, index) => (
-                            <li key={`${index}-${message}`}>{message}</li>
+                            <li key={`err-${index}-${message}`}>{message}</li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+            {showWarnings && (
+                <div
+                    className="rounded-md border border-[#f5a73b]/40 bg-[#f5a73b]/15 px-3 py-2 text-sm text-[#f5a73b]"
+                    role="status"
+                >
+                    <ul className="list-disc space-y-1 pl-4">
+                        {warnings!.map((message, index) => (
+                            <li key={`warn-${index}-${message}`}>{message}</li>
                         ))}
                     </ul>
                 </div>
