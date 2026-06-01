@@ -1,9 +1,10 @@
 import './style.scss';
 import { useState } from 'react';
-import { TonConnectButton, useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
+import { useTonConnectUI } from '@tonconnect/ui-react';
 import { SCARED_CAT_742 } from './catData';
 import { pickPreview } from '../FrogDemo/nftData';
 import { NftLottie } from '../FrogDemo/NftLottie';
+import { MarketHeader } from '../../components/MarketHeader/MarketHeader';
 import { embeddedTonPay, PayStage, PRICE_TON, PRICE_TON_NANO } from './embeddedTonPay';
 
 const nft = SCARED_CAT_742;
@@ -11,10 +12,6 @@ const NFT_IMAGE_LARGE = pickPreview(nft, 1500);
 const NFT_IMAGE_THUMB = pickPreview(nft, 100);
 
 const TON_ICON = 'https://getgems.io/_next/static/media/ton.2d9f8065.png';
-
-function shortAddr(a: string): string {
-    return a.length > 12 ? `${a.slice(0, 4)}…${a.slice(-4)}` : a;
-}
 
 function TonIcon({ className }: { className?: string }) {
     return <img className={className} src={TON_ICON} alt="TON" />;
@@ -41,7 +38,6 @@ function VerifiedTick() {
 
 export function CatDemo() {
     const [tonConnectUi] = useTonConnectUI();
-    const wallet = useTonWallet();
     const [stage, setStage] = useState<PayStage>({ name: 'idle' });
 
     const busy = stage.name === 'awaiting';
@@ -118,26 +114,7 @@ export function CatDemo() {
 
     return (
         <div className="cat">
-            <header className="cat__topbar">
-                <div className="cat__brand">
-                    <div className="cat__logo" aria-hidden>
-                        <svg viewBox="0 0 116 100" fill="currentColor">
-                            <path d="M28.8674 0L49.487 0L59.7968 17.8571L49.487 35.7142H28.8674L18.5576 17.8571L28.8674 0Z" />
-                            <path d="M86.6023 0L96.912 17.8571L86.6023 35.7142H65.9827L55.6729 17.8571L65.9827 0L86.6023 0Z" />
-                            <path d="M115.47 49.9998L105.16 67.8569H84.5403L74.2305 49.9998L84.5403 32.1427L105.16 32.1428L115.47 49.9998Z" />
-                            <path d="M86.6023 99.9997L65.9827 99.9997L55.6729 82.1426L65.9827 64.2855H86.6023L96.912 82.1426L86.6023 99.9997Z" />
-                            <path d="M28.8674 99.9997L18.5576 82.1426L28.8674 64.2855H49.487L59.7968 82.1426L49.487 99.9997H28.8674Z" />
-                            <path d="M0 49.9998L10.3098 32.1428H30.9294L41.2392 49.9998L30.9294 67.8569H10.3098L0 49.9998Z" />
-                        </svg>
-                    </div>
-                    <div className="cat__brand-text">
-                        <div className="cat__brand-name">NFT Marketplace</div>
-                        <div className="cat__brand-sub">on TON</div>
-                    </div>
-                </div>
-
-                <TonConnectButton />
-            </header>
+            <MarketHeader />
 
             <div className="cat__image-card nft-image-wrap">
                 <div className="nft-image-container">
@@ -173,7 +150,7 @@ export function CatDemo() {
                 <div className="cat__price-row">
                     <TonIcon className="cat__price-icon" />
                     <span className="cat__price-value">{PRICE_TON}</span>
-                    <span className="cat__price-ticker">TON</span>
+                    <span className="cat__price-ticker">≈ $195.32</span>
                 </div>
             </div>
 
@@ -189,7 +166,6 @@ export function CatDemo() {
 
             <div className="cat__actions">
                 <button className="cat__btn cat__btn--primary" onClick={handlePay} disabled={busy}>
-                    <TonIcon className="cat__btn-diamond" />
                     {busy ? 'Confirm in your wallet…' : `Buy for ${PRICE_TON} TON`}
                 </button>
             </div>

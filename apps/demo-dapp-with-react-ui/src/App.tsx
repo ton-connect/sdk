@@ -64,7 +64,7 @@ function App() {
             walletsListConfiguration={{
                 includeWallets: [
                     {
-                        name: 'WalletKit',
+                        name: 'Wallet',
                         appName: 'wallet_kit',
                         aboutUrl: 'localhost:5555',
                         bridgeUrl: 'https://connect.ton.org/bridge',

@@ -10,6 +10,7 @@ import {
 } from '../OneClickPay/oneClickGaslessFlow';
 import { KISSED_FROG_6425, pickPreview } from './nftData';
 import { NftLottie } from './NftLottie';
+import { MarketHeader } from '../../components/MarketHeader/MarketHeader';
 
 const PRICE_USDT_UNITS = 1_000_000n;
 const PRICE_LABEL = '100';
@@ -40,10 +41,6 @@ function stageHint(stage: PayStage): string {
     }
 }
 
-function shortAddr(a: string): string {
-    return a.length > 12 ? `${a.slice(0, 4)}…${a.slice(-4)}` : a;
-}
-
 function VerifiedTick() {
     return (
         <svg viewBox="0 0 16 16" className="frog__verified" aria-hidden>
@@ -67,7 +64,6 @@ export function FrogDemo() {
     const [tonConnectUi] = useTonConnectUI();
     const wallet = useTonWallet();
     const [stage, setStage] = useState<PayStage>({ name: 'idle' });
-    const [menuOpen, setMenuOpen] = useState(false);
 
     const busy = isBusy(stage);
     const success = stage.name === 'confirmed';
@@ -162,92 +158,7 @@ export function FrogDemo() {
 
     return (
         <div className="frog">
-            <header className="frog__topbar">
-                <div className="frog__brand">
-                    <div className="frog__logo" aria-hidden>
-                        <svg viewBox="0 0 116 100" fill="currentColor">
-                            <path d="M28.8674 0L49.487 0L59.7968 17.8571L49.487 35.7142H28.8674L18.5576 17.8571L28.8674 0Z" />
-                            <path d="M86.6023 0L96.912 17.8571L86.6023 35.7142H65.9827L55.6729 17.8571L65.9827 0L86.6023 0Z" />
-                            <path d="M115.47 49.9998L105.16 67.8569H84.5403L74.2305 49.9998L84.5403 32.1427L105.16 32.1428L115.47 49.9998Z" />
-                            <path d="M86.6023 99.9997L65.9827 99.9997L55.6729 82.1426L65.9827 64.2855H86.6023L96.912 82.1426L86.6023 99.9997Z" />
-                            <path d="M28.8674 99.9997L18.5576 82.1426L28.8674 64.2855H49.487L59.7968 82.1426L49.487 99.9997H28.8674Z" />
-                            <path d="M0 49.9998L10.3098 32.1428H30.9294L41.2392 49.9998L30.9294 67.8569H10.3098L0 49.9998Z" />
-                        </svg>
-                    </div>
-                    <div className="frog__brand-text">
-                        <div className="frog__brand-name">NFT Marketplace</div>
-                        <div className="frog__brand-sub">on TON</div>
-                    </div>
-                </div>
-                <button
-                    className="frog__menu-btn"
-                    type="button"
-                    aria-label="Open menu"
-                    aria-expanded={menuOpen}
-                    onClick={() => setMenuOpen(true)}
-                >
-                    <span />
-                    <span />
-                    <span />
-                </button>
-            </header>
-
-            {menuOpen && (
-                <>
-                    <div
-                        className="frog__menu-backdrop"
-                        onClick={() => setMenuOpen(false)}
-                        aria-hidden
-                    />
-                    <aside className="frog__menu" role="dialog" aria-label="Menu">
-                        <div className="frog__menu-head">
-                            <span className="frog__menu-title">Menu</span>
-                            <button
-                                type="button"
-                                className="frog__menu-close"
-                                aria-label="Close menu"
-                                onClick={() => setMenuOpen(false)}
-                            >
-                                ×
-                            </button>
-                        </div>
-
-                        {wallet ? (
-                            <div className="frog__menu-wallet">
-                                <div className="frog__menu-wallet-label">Connected</div>
-                                <code className="frog__menu-wallet-addr">
-                                    {shortAddr(
-                                        Address.parse(wallet.account.address).toString({
-                                            bounceable: false
-                                        })
-                                    )}
-                                </code>
-                                <button
-                                    className="frog__btn frog__btn--secondary frog__menu-action"
-                                    type="button"
-                                    onClick={() => {
-                                        tonConnectUi.disconnect();
-                                        setMenuOpen(false);
-                                    }}
-                                >
-                                    Disconnect
-                                </button>
-                            </div>
-                        ) : (
-                            <button
-                                className="frog__btn frog__btn--primary frog__menu-action"
-                                type="button"
-                                onClick={() => {
-                                    setMenuOpen(false);
-                                    handleBuy();
-                                }}
-                            >
-                                Connect Wallet
-                            </button>
-                        )}
-                    </aside>
-                </>
-            )}
+            <MarketHeader />
 
             <div className="frog__image-card nft-image-wrap">
                 <div className="nft-image-container">
@@ -295,10 +206,7 @@ export function FrogDemo() {
                     onClick={handleBuy}
                     disabled={busy}
                 >
-                    <span className="frog__btn-plus" aria-hidden>
-                        +
-                    </span>
-                    {busy ? stageHint(stage) : 'Buy Now'}
+                    {busy ? stageHint(stage) : `Buy for ${PRICE_LABEL} USD₮`}
                 </button>
             </div>
         </div>

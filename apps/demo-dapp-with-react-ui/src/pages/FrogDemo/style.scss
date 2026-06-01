@@ -15,617 +15,609 @@ $hairline: #e7eaee;
 $green: #2ebd59;
 
 @mixin font {
-    font-family:
-        'Inter',
-        -apple-system,
-        BlinkMacSystemFont,
-        'Segoe UI',
-        Roboto,
-        sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+  font-family: 'Inter',
+  -apple-system,
+  BlinkMacSystemFont,
+  'Segoe UI',
+  Roboto,
+  sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .frog {
-    @include font;
-    min-height: 100vh;
-    width: 100%;
-    max-width: 440px;
-    margin: 0 auto;
-    padding: 12px 16px 32px;
+  @include font;
+  min-height: 100vh;
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 12px 16px 32px;
+  color: $ink;
+  background: $surface;
+  box-sizing: border-box;
+
+  // ── Top bar ─────────────────────────────────────────────────────────
+  &__topbar {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    column-gap: 12px;
+    min-height: 56px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid $hairline;
+  }
+
+  &__brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    justify-self: start;
+  }
+
+  &__logo {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: $surface-soft;
+    border-radius: 10px;
+
+    svg {
+      width: 22px;
+      height: 22px;
+    }
+  }
+
+  &__brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+    min-width: 0;
+  }
+
+  &__brand-name {
+    font-size: 15px;
+    font-weight: 700;
     color: $ink;
+    letter-spacing: -0.01em;
+  }
+
+  &__brand-sub {
+    font-size: 12px;
+    color: $muted;
+    margin-top: 2px;
+  }
+
+  &__menu-btn {
+    @include font;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    justify-self: end;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 0;
+    background: $surface-soft;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 140ms ease;
+
+    span {
+      display: block;
+      width: 16px;
+      height: 2px;
+      background: $ink;
+      border-radius: 2px;
+    }
+
+    &:hover {
+      background: darken($surface-soft, 4%);
+    }
+  }
+
+  // ── Menu drawer ────────────────────────────────────────────────────
+  &__menu-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    background: rgba(10, 10, 10, 0.45);
+    animation: frog-fade-in 160ms ease both;
+  }
+
+  &__menu {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 50;
+    width: min(320px, 86vw);
+    padding: 18px 18px 24px;
     background: $surface;
-    box-sizing: border-box;
+    box-shadow: -12px 0 32px rgba(15, 23, 38, 0.18);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    animation: frog-slide-in 220ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
 
-    // ── Top bar ─────────────────────────────────────────────────────────
-    &__topbar {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        align-items: center;
-        column-gap: 12px;
-        min-height: 56px;
-        margin-bottom: 14px;
-        border-bottom: 1px solid $hairline;
+  &__menu-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 12px;
+    border-bottom: 1px solid $hairline;
+  }
+
+  &__menu-title {
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  &__menu-close {
+    @include font;
+    width: 32px;
+    height: 32px;
+    font-size: 22px;
+    line-height: 1;
+    color: $muted;
+    background: $surface-soft;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: color 140ms ease,
+    background 140ms ease;
+
+    &:hover {
+      color: $ink;
+      background: darken($surface-soft, 4%);
+    }
+  }
+
+  &__menu-action {
+    width: 100%;
+  }
+
+  &__menu-wallet {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px;
+    background: $surface-soft;
+    border-radius: 14px;
+  }
+
+  &__menu-wallet-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: $muted;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  &__menu-wallet-addr {
+    font-family: 'JetBrains Mono',
+    'SF Mono',
+    ui-monospace,
+    monospace;
+    font-size: 13px;
+    color: $ink;
+  }
+
+  // ── Image card ──────────────────────────────────────────────────────
+  &__image-card {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 20px;
+    overflow: hidden;
+    background: radial-gradient(120% 120% at 50% 50%, #2a2a2a 0%, #0e0e0e 80%);
+  }
+
+  .nft-image-container {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nft-image-container__lottie,
+  .nft-image-container__image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    image-rendering: -webkit-optimize-contrast;
+  }
+
+  // ── Title row ───────────────────────────────────────────────────────
+  &__title-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 22px 0 10px;
+  }
+
+  &__title {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 0;
+    line-height: 1.15;
+    color: $ink;
+  }
+
+  &__badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    background: #e6f4fe;
+    color: $blue;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 999px;
+  }
+
+  // ── Collection ──────────────────────────────────────────────────────
+  &__collection {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+
+  &__collection-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #d4f6c5;
+  }
+
+  &__collection-name {
+    font-size: 15px;
+    font-weight: 500;
+    color: $ink-2;
+  }
+
+  &__verified {
+    width: 16px;
+    height: 16px;
+  }
+
+  // ── Price block ─────────────────────────────────────────────────────
+  &__price-block {
+    margin-bottom: 24px;
+  }
+
+  &__price-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  &__price-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: $muted;
+    margin-bottom: 8px;
+    letter-spacing: 0.04em;
+  }
+
+  &__price-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  &__price-value {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: $ink;
+  }
+
+  &__price-usd {
+    font-size: 16px;
+    color: $muted;
+    font-weight: 500;
+    margin-left: 6px;
+  }
+
+  // ── Actions ─────────────────────────────────────────────────────────
+  &__error {
+    background: #fff3f3;
+    color: #b02029;
+    border: 1px solid #ffd4d4;
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 13px;
+    line-height: 1.45;
+    margin-bottom: 12px;
+    word-break: break-word;
+  }
+
+  &__actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  &__btn {
+    @include font;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 16px 18px;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    line-height: 1;
+    transition: transform 180ms ease-out;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+
+    &:hover:not(:disabled) {
+      transform: scale(1.02);
     }
 
-    &__brand {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        min-width: 0;
-        justify-self: start;
+    &:active:not(:disabled) {
+      transform: scale(0.98);
+      transition: transform 80ms ease-out;
     }
 
-    &__logo {
-        width: 32px;
-        height: 32px;
-        flex-shrink: 0;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        background: $surface-soft;
-        border-radius: 10px;
+    &--primary {
+      background: $blue;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(0, 152, 234, 0.24);
 
-        svg {
-            width: 22px;
-            height: 22px;
-        }
+      &:disabled {
+        background: #a8c7df;
+        box-shadow: none;
+        cursor: not-allowed;
+      }
     }
 
-    &__brand-text {
-        display: flex;
-        flex-direction: column;
-        line-height: 1.1;
-        min-width: 0;
-    }
+    &--secondary {
+      background: $surface-soft;
+      color: $ink;
 
-    &__brand-name {
-        font-size: 15px;
-        font-weight: 700;
-        color: $ink;
-        letter-spacing: -0.01em;
-    }
-
-    &__brand-sub {
-        font-size: 12px;
+      &:disabled {
         color: $muted;
-        margin-top: 2px;
+        cursor: not-allowed;
+      }
     }
+  }
 
-    &__menu-btn {
-        @include font;
-        width: 40px;
-        height: 40px;
-        flex-shrink: 0;
-        justify-self: end;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 4px;
-        padding: 0;
-        background: $surface-soft;
-        border: none;
-        border-radius: 50%;
-        cursor: pointer;
-        transition: background 140ms ease;
+  &__btn-plus {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.25);
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1;
+  }
 
-        span {
-            display: block;
-            width: 16px;
-            height: 2px;
-            background: $ink;
-            border-radius: 2px;
-        }
+  &__btn-tag {
+    font-size: 14px;
+    opacity: 0.75;
+  }
 
-        &:hover {
-            background: darken($surface-soft, 4%);
-        }
+  // ── Description + attributes ────────────────────────────────────────
+  &__description {
+    margin: 24px 0 0;
+    font-size: 14px;
+    line-height: 1.55;
+    color: $ink-2;
+  }
+
+  &__section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: $muted;
+    letter-spacing: 0.04em;
+    margin: 0 0 12px;
+    text-transform: uppercase;
+  }
+
+  &__attrs {
+    margin-top: 24px;
+  }
+
+  &__attrs-grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  &__attr {
+    padding: 12px 14px;
+    background: $surface-soft;
+    border-radius: 12px;
+  }
+
+  &__attr-key {
+    font-size: 11px;
+    font-weight: 600;
+    color: $muted;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 4px;
+  }
+
+  &__attr-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: $ink;
+  }
+
+  // ── Success view ────────────────────────────────────────────────────
+  &__success {
+    padding: 32px 6px 16px;
+    text-align: center;
+  }
+
+  &__success-icon {
+    width: 96px;
+    height: 96px;
+    margin: 0 auto 22px;
+    border-radius: 22px;
+    background: radial-gradient(120% 120% at 50% 50%, #2a2a2a 0%, #0e0e0e 80%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    img {
+      width: 64%;
+      height: 64%;
+      object-fit: contain;
     }
+  }
 
-    // ── Menu drawer ────────────────────────────────────────────────────
-    &__menu-backdrop {
-        position: fixed;
-        inset: 0;
-        z-index: 40;
-        background: rgba(10, 10, 10, 0.45);
-        animation: frog-fade-in 160ms ease both;
+  &__success-title {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0 0 8px;
+  }
+
+  &__success-sub {
+    font-size: 15px;
+    color: $muted;
+    margin: 0 0 4px;
+  }
+
+  &__success-ok {
+    color: $green;
+    font-weight: 600;
+  }
+
+  &__success-note {
+    font-size: 13px;
+    color: $muted;
+    margin: 12px auto 24px;
+    max-width: 320px;
+    line-height: 1.45;
+  }
+
+  &__success-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 12px;
+    text-align: left;
+  }
+
+  &__success-section-label {
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  &__success-section-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 7px;
+    border-radius: 999px;
+    background: $surface-soft;
+    color: $muted;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  &__success-row {
+    display: grid;
+    grid-template-columns: auto auto 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 4px;
+    text-align: left;
+    margin-bottom: 28px;
+  }
+
+  &__success-row-check {
+    width: 22px;
+    height: 22px;
+  }
+
+  &__success-row-img {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    object-fit: cover;
+    background: radial-gradient(120% 120% at 50% 50%, #2a2a2a 0%, #0e0e0e 80%);
+    padding: 4px;
+  }
+
+  &__success-row-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: $ink;
+  }
+
+  &__success-row-collection {
+    font-size: 13px;
+    color: $muted;
+    margin-top: 2px;
+  }
+
+  &__success-row-price {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 15px;
+    font-weight: 600;
+
+    .frog__price-icon {
+      width: 20px;
+      height: 20px;
     }
-
-    &__menu {
-        position: fixed;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 50;
-        width: min(320px, 86vw);
-        padding: 18px 18px 24px;
-        background: $surface;
-        box-shadow: -12px 0 32px rgba(15, 23, 38, 0.18);
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-        animation: frog-slide-in 220ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
-    }
-
-    &__menu-head {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding-bottom: 12px;
-        border-bottom: 1px solid $hairline;
-    }
-
-    &__menu-title {
-        font-size: 16px;
-        font-weight: 700;
-    }
-
-    &__menu-close {
-        @include font;
-        width: 32px;
-        height: 32px;
-        font-size: 22px;
-        line-height: 1;
-        color: $muted;
-        background: $surface-soft;
-        border: none;
-        border-radius: 50%;
-        cursor: pointer;
-        transition:
-            color 140ms ease,
-            background 140ms ease;
-
-        &:hover {
-            color: $ink;
-            background: darken($surface-soft, 4%);
-        }
-    }
-
-    &__menu-action {
-        width: 100%;
-    }
-
-    &__menu-wallet {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        padding: 14px;
-        background: $surface-soft;
-        border-radius: 14px;
-    }
-
-    &__menu-wallet-label {
-        font-size: 11px;
-        font-weight: 600;
-        color: $muted;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-    }
-
-    &__menu-wallet-addr {
-        font-family:
-            'JetBrains Mono',
-            'SF Mono',
-            ui-monospace,
-            monospace;
-        font-size: 13px;
-        color: $ink;
-    }
-
-    // ── Image card ──────────────────────────────────────────────────────
-    &__image-card {
-        position: relative;
-        width: 100%;
-        aspect-ratio: 1 / 1;
-        border-radius: 20px;
-        overflow: hidden;
-        background:
-            radial-gradient(120% 120% at 50% 50%, #2a2a2a 0%, #0e0e0e 80%);
-    }
-
-    .nft-image-container {
-        position: absolute;
-        inset: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .nft-image-container__lottie,
-    .nft-image-container__image {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-        image-rendering: -webkit-optimize-contrast;
-    }
-
-    // ── Title row ───────────────────────────────────────────────────────
-    &__title-row {
-        display: flex;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin: 22px 0 10px;
-    }
-
-    &__title {
-        font-size: 28px;
-        font-weight: 700;
-        letter-spacing: -0.02em;
-        margin: 0;
-        line-height: 1.15;
-        color: $ink;
-    }
-
-    &__badge {
-        display: inline-flex;
-        align-items: center;
-        padding: 4px 10px;
-        background: #e6f4fe;
-        color: $blue;
-        font-size: 13px;
-        font-weight: 600;
-        border-radius: 999px;
-    }
-
-    // ── Collection ──────────────────────────────────────────────────────
-    &__collection {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 24px;
-    }
-
-    &__collection-icon {
-        width: 22px;
-        height: 22px;
-        border-radius: 50%;
-        object-fit: cover;
-        background: #d4f6c5;
-    }
-
-    &__collection-name {
-        font-size: 15px;
-        font-weight: 500;
-        color: $ink-2;
-    }
-
-    &__verified {
-        width: 16px;
-        height: 16px;
-    }
-
-    // ── Price block ─────────────────────────────────────────────────────
-    &__price-block {
-        margin-bottom: 24px;
-    }
-
-    &__price-icon {
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        object-fit: cover;
-        flex-shrink: 0;
-    }
-
-    &__price-label {
-        font-size: 13px;
-        font-weight: 600;
-        color: $muted;
-        margin-bottom: 8px;
-        letter-spacing: 0.04em;
-    }
-
-    &__price-row {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    &__price-value {
-        font-size: 32px;
-        font-weight: 700;
-        letter-spacing: -0.02em;
-        color: $ink;
-    }
-
-    &__price-usd {
-        font-size: 16px;
-        color: $muted;
-        font-weight: 500;
-        margin-left: 6px;
-    }
-
-    // ── Actions ─────────────────────────────────────────────────────────
-    &__error {
-        background: #fff3f3;
-        color: #b02029;
-        border: 1px solid #ffd4d4;
-        border-radius: 12px;
-        padding: 12px 14px;
-        font-size: 13px;
-        line-height: 1.45;
-        margin-bottom: 12px;
-        word-break: break-word;
-    }
-
-    &__actions {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 10px;
-    }
-
-    &__btn {
-        @include font;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        padding: 16px 18px;
-        border-radius: 14px;
-        font-size: 15px;
-        font-weight: 600;
-        border: none;
-        cursor: pointer;
-        line-height: 1;
-        transition:
-            background 140ms ease,
-            color 140ms ease,
-            transform 100ms ease;
-
-        &--primary {
-            background: $blue;
-            color: #fff;
-            box-shadow: 0 4px 12px rgba(0, 152, 234, 0.24);
-
-            &:hover:not(:disabled) {
-                background: $blue-hover;
-            }
-
-            &:active:not(:disabled) {
-                transform: translateY(1px);
-            }
-
-            &:disabled {
-                background: #a8c7df;
-                box-shadow: none;
-                cursor: not-allowed;
-            }
-        }
-
-        &--secondary {
-            background: $surface-soft;
-            color: $ink;
-
-            &:hover:not(:disabled) {
-                background: darken($surface-soft, 3%);
-            }
-
-            &:disabled {
-                color: $muted;
-                cursor: not-allowed;
-            }
-        }
-    }
-
-    &__btn-plus {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 18px;
-        height: 18px;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.25);
-        font-size: 16px;
-        font-weight: 700;
-        line-height: 1;
-    }
-
-    &__btn-tag {
-        font-size: 14px;
-        opacity: 0.75;
-    }
-
-    // ── Description + attributes ────────────────────────────────────────
-    &__description {
-        margin: 24px 0 0;
-        font-size: 14px;
-        line-height: 1.55;
-        color: $ink-2;
-    }
-
-    &__section-title {
-        font-size: 13px;
-        font-weight: 600;
-        color: $muted;
-        letter-spacing: 0.04em;
-        margin: 0 0 12px;
-        text-transform: uppercase;
-    }
-
-    &__attrs {
-        margin-top: 24px;
-    }
-
-    &__attrs-grid {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-    }
-
-    &__attr {
-        padding: 12px 14px;
-        background: $surface-soft;
-        border-radius: 12px;
-    }
-
-    &__attr-key {
-        font-size: 11px;
-        font-weight: 600;
-        color: $muted;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        margin-bottom: 4px;
-    }
-
-    &__attr-value {
-        font-size: 14px;
-        font-weight: 600;
-        color: $ink;
-    }
-
-    // ── Success view ────────────────────────────────────────────────────
-    &__success {
-        padding: 32px 6px 16px;
-        text-align: center;
-    }
-
-    &__success-icon {
-        width: 96px;
-        height: 96px;
-        margin: 0 auto 22px;
-        border-radius: 22px;
-        background:
-            radial-gradient(120% 120% at 50% 50%, #2a2a2a 0%, #0e0e0e 80%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        img {
-            width: 64%;
-            height: 64%;
-            object-fit: contain;
-        }
-    }
-
-    &__success-title {
-        font-size: 22px;
-        font-weight: 700;
-        letter-spacing: -0.01em;
-        margin: 0 0 8px;
-    }
-
-    &__success-sub {
-        font-size: 15px;
-        color: $muted;
-        margin: 0 0 4px;
-    }
-
-    &__success-ok {
-        color: $green;
-        font-weight: 600;
-    }
-
-    &__success-note {
-        font-size: 13px;
-        color: $muted;
-        margin: 12px auto 24px;
-        max-width: 320px;
-        line-height: 1.45;
-    }
-
-    &__success-section {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin: 0 0 12px;
-        text-align: left;
-    }
-
-    &__success-section-label {
-        font-size: 16px;
-        font-weight: 600;
-    }
-
-    &__success-section-count {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 22px;
-        height: 22px;
-        padding: 0 7px;
-        border-radius: 999px;
-        background: $surface-soft;
-        color: $muted;
-        font-size: 12px;
-        font-weight: 600;
-    }
-
-    &__success-row {
-        display: grid;
-        grid-template-columns: auto auto 1fr auto;
-        align-items: center;
-        gap: 12px;
-        padding: 12px 4px;
-        text-align: left;
-        margin-bottom: 28px;
-    }
-
-    &__success-row-check {
-        width: 22px;
-        height: 22px;
-    }
-
-    &__success-row-img {
-        width: 44px;
-        height: 44px;
-        border-radius: 10px;
-        object-fit: cover;
-        background:
-            radial-gradient(120% 120% at 50% 50%, #2a2a2a 0%, #0e0e0e 80%);
-        padding: 4px;
-    }
-
-    &__success-row-name {
-        font-size: 15px;
-        font-weight: 600;
-        color: $ink;
-    }
-
-    &__success-row-collection {
-        font-size: 13px;
-        color: $muted;
-        margin-top: 2px;
-    }
-
-    &__success-row-price {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 15px;
-        font-weight: 600;
-
-        .frog__price-icon {
-            width: 20px;
-            height: 20px;
-        }
-    }
+  }
 }
 
 @keyframes frog-fade-in {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes frog-slide-in {
-    from {
-        transform: translateX(100%);
-    }
-    to {
-        transform: translateX(0);
-    }
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 @media (min-width: 480px) {
-    .frog {
-        padding: 20px 24px 40px;
-    }
+  .frog {
+    padding: 20px 24px 40px;
+  }
 }
