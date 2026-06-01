@@ -255,7 +255,7 @@ $green: #2ebd59;
 
   // ── Price ───────────────────────────────────────────────────────────
   &__price-block {
-    margin-bottom: 20px;
+    margin-bottom: 24px;
   }
 
   &__price-icon {
@@ -288,8 +288,8 @@ $green: #2ebd59;
   &__price-ticker {
     font-size: 16px;
     color: $muted;
-    font-weight: 600;
-    margin-left: 2px;
+    font-weight: 500;
+    margin-left: 6px;
   }
 
   // ── Messages ────────────────────────────────────────────────────────

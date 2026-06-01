@@ -347,9 +347,7 @@ $green: #2ebd59;
   }
 
   &__actions {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 10px;
+    margin-bottom: 4px;
   }
 
   &__btn {
