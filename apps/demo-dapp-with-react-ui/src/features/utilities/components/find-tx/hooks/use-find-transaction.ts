@@ -41,7 +41,7 @@ export function useFindTransaction() {
             );
 
             if (error || !transaction) {
-                setResult(fail({ error: error ?? 'Transaction not found' }));
+                setResult(fail(error ?? 'Transaction not found'));
             } else {
                 setResult(ok(transaction));
             }

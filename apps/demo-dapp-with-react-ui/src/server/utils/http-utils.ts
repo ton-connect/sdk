@@ -1,5 +1,8 @@
 import { HttpResponse, JsonBodyType, StrictResponse } from 'msw';
-import { Address, Cell } from '@ton/core';
+
+import { jsonReplacer } from '../../core/utils/json-replacer';
+
+export { jsonReplacer } from '../../core/utils/json-replacer';
 
 /**
  * Receives a body and returns an HTTP response with the given body and status code 200.
@@ -39,26 +42,3 @@ export function notFound<T extends object>(body: T): StrictResponse<JsonBodyType
     });
 }
 
-export function jsonReplacer(_key: string, value: unknown): unknown {
-    if (typeof value === 'bigint') {
-        return value.toString();
-    } else if (value instanceof Address) {
-        return value.toString();
-    } else if (value instanceof Cell) {
-        return value.toBoc().toString('base64');
-    } else if (value instanceof Buffer) {
-        return value.toString('base64');
-    } else if (
-        value &&
-        typeof value === 'object' &&
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (value as any).type === 'Buffer' &&
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        Array.isArray((value as any).data)
-    ) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return Buffer.from((value as any).data).toString('base64');
-    }
-
-    return value;
-}

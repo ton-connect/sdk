@@ -1,71 +1,11 @@
 import { HttpResponseResolver } from 'msw';
-import { TonClient } from '@ton/ton';
-import { Cell, loadMessage, Transaction } from '@ton/core';
 
+import {
+    findTransactionByExternalMessageService,
+    FindTransactionError,
+    type FindTxNetwork
+} from '../services/find-transaction-by-external-message-service';
 import { badRequest, notFound, ok } from '../utils/http-utils';
-import { getNormalizedExtMessageHash, retry } from '../utils/transactions-utils';
-
-/** Cap TonCenter pagination so the demo cannot scan an entire busy account forever. */
-const MAX_SCAN_PAGES = 25;
-const TX_PAGE_SIZE = 10;
-
-const toncenterEndpoint = (network: 'mainnet' | 'testnet') =>
-    `https://${network === 'testnet' ? 'testnet.' : ''}toncenter.com/api/v2/jsonRPC`;
-
-async function getTransactionByInMessage(
-    inMessageBoc: string,
-    client: TonClient
-): Promise<Transaction | undefined> {
-    // Step 1. Convert Base64 boc to Message if input is a string
-    const inMessage = loadMessage(Cell.fromBase64(inMessageBoc).beginParse());
-
-    // Step 2. Ensure the message is an external-in message
-    if (inMessage.info.type !== 'external-in') {
-        throw new Error(`Message must be "external-in", got ${inMessage.info.type}`);
-    }
-    const account = inMessage.info.dest;
-
-    // Step 3. Compute the normalized hash of the input message
-    const targetInMessageHash = getNormalizedExtMessageHash(inMessage);
-
-    let lt: string | undefined = undefined;
-    let hash: string | undefined = undefined;
-
-    // Step 4. Paginate through transaction history (bounded — unbounded scan never returns on busy accounts)
-    for (let page = 0; page < MAX_SCAN_PAGES; page++) {
-        const transactions = await retry(
-            () =>
-                client.getTransactions(account, {
-                    hash,
-                    lt,
-                    limit: TX_PAGE_SIZE,
-                    archival: true
-                }),
-            { delay: 1000, retries: 3 }
-        );
-
-        if (transactions.length === 0) {
-            return undefined;
-        }
-
-        for (const transaction of transactions) {
-            if (transaction.inMessage?.info.type !== 'external-in') {
-                continue;
-            }
-
-            const inMessageHash = getNormalizedExtMessageHash(transaction.inMessage);
-            if (inMessageHash.equals(targetInMessageHash)) {
-                return transaction;
-            }
-        }
-
-        const last = transactions.at(-1)!;
-        lt = last.lt.toString();
-        hash = last.hash().toString('base64');
-    }
-
-    return undefined;
-}
 
 /**
  * POST /api/find_transaction_by_external_message
@@ -74,27 +14,29 @@ async function getTransactionByInMessage(
  */
 export const findTransactionByExternalMessage: HttpResponseResolver = async ({ request }) => {
     try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const body = (await request.json()) as any;
+        const body = (await request.json()) as { boc?: unknown; network?: unknown };
         const boc = body.boc;
         const network = body.network;
         if (typeof boc !== 'string' || (network !== 'mainnet' && network !== 'testnet')) {
             return badRequest({ error: 'Invalid request body' });
         }
 
-        const client = new TonClient({
-            endpoint: toncenterEndpoint(network)
-        });
-
-        const transaction = await getTransactionByInMessage(boc, client);
-        if (!transaction) {
-            return notFound({
-                error: `Transaction not found in the last ${MAX_SCAN_PAGES * TX_PAGE_SIZE} account transactions`
-            });
+        const { transaction } = await findTransactionByExternalMessageService(
+            boc,
+            network as FindTxNetwork
+        );
+        return ok({ transaction });
+    } catch (e) {
+        if (e instanceof FindTransactionError) {
+            if (e.statusCode === 404) {
+                return notFound({ error: e.message });
+            }
+            return badRequest({ error: e.message });
         }
 
-        return ok({ transaction: { ...transaction, hash: transaction.hash().toString('base64') } });
-    } catch (e) {
-        return badRequest({ error: 'Invalid request', trace: e instanceof Error ? e.message : e });
+        return badRequest({
+            error: 'Invalid request',
+            trace: e instanceof Error ? e.message : e
+        });
     }
 };

@@ -1,45 +1,29 @@
-import '../../../../../patch-local-storage-for-github-pages';
+import {
+    findTransactionByExternalMessageService,
+    FindTransactionError,
+    type FindTxNetwork
+} from '../../../../../server/services/find-transaction-by-external-message-service';
 
-export type FindTxNetwork = 'mainnet' | 'testnet';
+export type { FindTxNetwork };
 
-const apiHost = document.baseURI.replace(/\/$/, '');
-const REQUEST_TIMEOUT_MS = 45_000;
-
+/**
+ * Resolves a transaction by external-in BOC via TonAPI in the browser (CORS-safe).
+ * MSW / Vercel handlers call the same service with TonCenter on the server side.
+ */
 export async function findTransactionByExternalMessage(
     boc: string,
     network: FindTxNetwork
 ): Promise<{ transaction?: unknown; error?: string }> {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-
     try {
-        const response = await fetch(`${apiHost}/api/find_transaction_by_external_message`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ boc, network }),
-            signal: controller.signal
-        });
-        const data = await response.json();
-
-        if (!response.ok) {
-            return {
-                error: typeof data?.error === 'string' ? data.error : 'Request failed'
-            };
-        }
-
-        if (!data.transaction) {
-            return { error: 'Transaction not found' };
-        }
-
-        return { transaction: data.transaction };
+        const { transaction } = await findTransactionByExternalMessageService(boc, network);
+        return { transaction };
     } catch (e) {
-        if (e instanceof Error && e.name === 'AbortError') {
-            return { error: 'Request timed out' };
+        if (e instanceof FindTransactionError) {
+            return { error: e.message };
         }
+
         return {
             error: e instanceof Error ? e.message : 'Unknown error'
         };
-    } finally {
-        clearTimeout(timeoutId);
     }
 }
