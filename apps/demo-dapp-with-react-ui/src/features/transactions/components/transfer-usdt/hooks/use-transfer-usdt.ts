@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import type { SendTransactionRequest } from '@tonconnect/ui-react';
-import { useTonConnectUI } from '@tonconnect/ui-react';
+import { CHAIN, useTonConnectUI } from '@tonconnect/ui-react';
 import { Address, beginCell, toNano } from '@ton/core';
 import { storeJettonTransferMessage } from '@ton-community/assets-sdk';
 
@@ -13,9 +13,21 @@ import {
     USDT_DECIMALS,
     VALID_UNTIL_SECONDS
 } from '../utils/constants';
+import { waitForWalletConnection } from '../utils/gasless-wallet';
+import { resolveUsdtJettonWallet } from '../utils/resolve-usdt-jetton-wallet';
 import { sendGaslessItems } from '../utils/send-gasless-items';
 import { sendGaslessMessages } from '../utils/send-gasless-messages';
 import type { GaslessMode } from './use-transfer-form';
+
+const chainFromConnectedWallet = (
+    tonConnectUi: ReturnType<typeof useTonConnectUI>[0]
+): CHAIN | undefined => {
+    const chain = tonConnectUi.wallet?.account.chain;
+    if (chain === CHAIN.MAINNET || chain === CHAIN.TESTNET) {
+        return chain;
+    }
+    return undefined;
+};
 
 interface SendArgs {
     senderAddress: string;
@@ -25,6 +37,7 @@ interface SendArgs {
     gasless: boolean;
     gaslessMode: GaslessMode;
     withConnect: boolean;
+    chain: CHAIN | undefined;
 }
 
 async function dispatchTransfer(
@@ -59,7 +72,8 @@ export const useTransferUsdt = () => {
             amount,
             gasless,
             gaslessMode,
-            withConnect
+            withConnect,
+            chain
         }: SendArgs) => {
             const amountUsdt = parseUnits(amount, USDT_DECIMALS);
             if (!(amountUsdt > 0)) return;
@@ -75,19 +89,37 @@ export const useTransferUsdt = () => {
                                   tonConnectUi,
                                   amountUsdt,
                                   dest,
-                                  senderAddress || undefined
+                                  senderAddress || undefined,
+                                  withConnect
                               )
                             : await sendGaslessMessages(
                                   tonConnectUi,
                                   amountUsdt,
                                   dest,
-                                  senderAddress || undefined
+                                  senderAddress || undefined,
+                                  withConnect
                               );
                     setResult(ok(data));
                     return;
                 }
 
-                if (!jettonWallet) {
+                let resolvedSender = senderAddress || tonConnectUi.wallet?.account?.address;
+                let resolvedJettonWallet = jettonWallet;
+
+                if (withConnect && !resolvedSender) {
+                    await waitForWalletConnection(tonConnectUi);
+                    resolvedSender = tonConnectUi.wallet?.account?.address;
+                }
+
+                const resolvedChain = chain ?? chainFromConnectedWallet(tonConnectUi);
+                if (!resolvedJettonWallet && resolvedSender && resolvedChain) {
+                    resolvedJettonWallet = await resolveUsdtJettonWallet(
+                        resolvedSender,
+                        resolvedChain
+                    );
+                }
+
+                if (!resolvedSender || !resolvedJettonWallet) {
                     setResult(
                         fail(
                             new Error(
@@ -104,7 +136,7 @@ export const useTransferUsdt = () => {
                             queryId: 0n,
                             amount: amountUsdt,
                             destination: Address.parse(destination),
-                            responseDestination: Address.parse(senderAddress),
+                            responseDestination: Address.parse(resolvedSender),
                             customPayload: null,
                             forwardAmount: toNano(FORWARD_AMOUNT_TON),
                             forwardPayload: beginCell()
@@ -121,7 +153,7 @@ export const useTransferUsdt = () => {
                     validUntil: Math.floor(Date.now() / 1000) + VALID_UNTIL_SECONDS,
                     messages: [
                         {
-                            address: jettonWallet,
+                            address: resolvedJettonWallet,
                             amount: toNano(ATTACHED_AMOUNT_TON).toString(),
                             payload: body
                         }

@@ -15,6 +15,7 @@ import { JettonItem, TonConnectUI } from '@tonconnect/ui-react';
 import { retry } from '../../../../../core/utils/retry';
 
 import { resolveGaslessWallet } from './gasless-wallet';
+import { signGaslessRequest } from './gasless-sign';
 
 const ta = new TonApiClient({
     baseUrl: 'https://tonapi.io'
@@ -40,9 +41,12 @@ export async function sendGaslessItems(
     tonConnectUi: TonConnectUI,
     jettonAmount: number | bigint,
     destination: Address,
-    senderAddress?: string
+    senderAddress?: string,
+    withConnect = false
 ): Promise<GaslessItemsResult> {
-    const { walletAddress, publicKey } = await resolveGaslessWallet(tonConnectUi, senderAddress);
+    const { walletAddress, publicKey } = await resolveGaslessWallet(tonConnectUi, senderAddress, {
+        withConnect
+    });
 
     const jettonWalletAddressResult = await ta.blockchain.execGetMethodForBlockchainAccount(
         usdtMaster,
@@ -101,10 +105,14 @@ export async function sendGaslessItems(
         };
     }
 
-    const { internalBoc } = await tonConnectUi.signMessage({
-        validUntil: Math.ceil(Date.now() / 1000) + 5 * 60,
-        items: params.messages.map(message => payloadToStructuredItem(message.payload!))
-    });
+    const { internalBoc } = await signGaslessRequest(
+        tonConnectUi,
+        {
+            validUntil: Math.ceil(Date.now() / 1000) + 5 * 60,
+            items: params.messages.map(message => payloadToStructuredItem(message.payload!))
+        },
+        withConnect
+    );
 
     const {
         info: { dest },

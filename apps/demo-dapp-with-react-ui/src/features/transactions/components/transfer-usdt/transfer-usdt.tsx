@@ -71,25 +71,26 @@ export const TransferUsdt = () => {
           : null;
 
     const canSend =
-        !!senderAddress &&
         !!destination &&
         !!amount &&
         !amountError &&
         !sending &&
         !networkError &&
-        (form.gasless || !!jettonWallet);
+        (form.withConnect || (!!senderAddress && (form.gasless || !!jettonWallet)));
 
     const handleSend = async () => {
-        if (!senderAddress || !destination || amountError || networkError) return;
-        if (!form.gasless && !jettonWallet) return;
+        if (!destination || amountError || networkError) return;
+        if (!form.withConnect && !senderAddress) return;
+        if (!form.gasless && !form.withConnect && !jettonWallet) return;
         await send({
-            senderAddress,
+            senderAddress: senderAddress ?? '',
             destination,
             jettonWallet: jettonWallet ?? '',
             amount,
             gasless: form.gasless,
             gaslessMode: form.gaslessMode,
-            withConnect: form.withConnect
+            withConnect: form.withConnect,
+            chain
         });
     };
 
