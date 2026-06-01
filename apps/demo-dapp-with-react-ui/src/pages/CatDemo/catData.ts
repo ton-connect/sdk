@@ -7,7 +7,7 @@ const IMAGE = 'https://nft.fragment.com/gift/scaredcat-742.webp';
 
 export const SCARED_CAT_742: NftData = {
     address: 'EQAscaredcat742demoaddressxxxxxxxxxxxxxxxxxxxxxxx',
-    name: 'Scared Cat #742',
+    name: 'Scared Cat #0000',
     description:
         'An exclusive Scared Cat with the appearance Meowdas on a Black background with Spider Web icons.',
     collection: {

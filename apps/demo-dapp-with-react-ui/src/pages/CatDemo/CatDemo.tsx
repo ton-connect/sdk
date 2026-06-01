@@ -1,7 +1,6 @@
 import './style.scss';
 import { useState } from 'react';
-import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
-import { Address } from '@ton/core';
+import { TonConnectButton, useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { SCARED_CAT_742 } from './catData';
 import { pickPreview } from '../FrogDemo/nftData';
 import { NftLottie } from '../FrogDemo/NftLottie';
@@ -137,27 +136,7 @@ export function CatDemo() {
                     </div>
                 </div>
 
-                {wallet ? (
-                    <button
-                        className="cat__connect cat__connect--connected"
-                        type="button"
-                        onClick={() => tonConnectUi.disconnect()}
-                        title={wallet.account.address}
-                    >
-                        <span className="cat__connect-dot" />
-                        {shortAddr(
-                            Address.parse(wallet.account.address).toString({ bounceable: false })
-                        )}
-                    </button>
-                ) : (
-                    <button
-                        className="cat__connect"
-                        type="button"
-                        onClick={() => tonConnectUi.openModal()}
-                    >
-                        Connect
-                    </button>
-                )}
+                <TonConnectButton />
             </header>
 
             <div className="cat__image-card nft-image-wrap">
