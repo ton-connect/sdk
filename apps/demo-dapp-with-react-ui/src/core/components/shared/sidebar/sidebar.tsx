@@ -22,6 +22,8 @@ import { cn } from '../../../utils/cn';
 const SIDEBAR_WIDTH = '18rem';
 
 type SidebarContextProps = {
+    open: boolean;
+    setOpen: (open: boolean) => void;
     openMobile: boolean;
     setOpenMobile: (open: boolean) => void;
     isMobile: boolean;
@@ -40,13 +42,20 @@ const useSidebar = () => {
 
 const SidebarProvider = ({ className, style, children, ...props }: React.ComponentProps<'div'>) => {
     const isMobile = useIsMobile();
+    const [open, setOpen] = React.useState(true);
     const [openMobile, setOpenMobile] = React.useState(false);
 
-    const toggleSidebar = React.useCallback(() => setOpenMobile(open => !open), []);
+    const toggleSidebar = React.useCallback(() => {
+        if (isMobile) {
+            setOpenMobile(mobileOpen => !mobileOpen);
+        } else {
+            setOpen(desktopOpen => !desktopOpen);
+        }
+    }, [isMobile]);
 
     const value = React.useMemo<SidebarContextProps>(
-        () => ({ openMobile, setOpenMobile, isMobile, toggleSidebar }),
-        [openMobile, isMobile, toggleSidebar]
+        () => ({ open, setOpen, openMobile, setOpenMobile, isMobile, toggleSidebar }),
+        [open, openMobile, isMobile, toggleSidebar]
     );
 
     return (
@@ -64,7 +73,7 @@ const SidebarProvider = ({ className, style, children, ...props }: React.Compone
 };
 
 const Sidebar = ({ className, children }: React.ComponentProps<'div'>) => {
-    const { isMobile, openMobile, setOpenMobile } = useSidebar();
+    const { isMobile, open, openMobile, setOpenMobile } = useSidebar();
 
     if (isMobile) {
         return (
@@ -89,8 +98,10 @@ const Sidebar = ({ className, children }: React.ComponentProps<'div'>) => {
     return (
         <aside
             data-slot="sidebar"
+            data-state={open ? 'expanded' : 'collapsed'}
             className={cn(
-                'sticky top-0 hidden h-svh w-(--sidebar-width) shrink-0 flex-col border-r border-tertiary bg-background text-foreground md:flex',
+                'sticky top-0 h-svh w-(--sidebar-width) shrink-0 flex-col border-r border-tertiary bg-background text-foreground',
+                open ? 'flex' : 'hidden',
                 className
             )}
         >
