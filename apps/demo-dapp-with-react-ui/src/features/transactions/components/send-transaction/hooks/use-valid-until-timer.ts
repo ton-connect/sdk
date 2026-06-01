@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-export type TimerStatus = 'ok' | 'warning' | 'expired';
+export type TimerStatus = 'ok' | 'warning' | 'expired' | 'missing';
 
 export interface TimerState {
     display: string;
@@ -10,6 +10,10 @@ export interface TimerState {
 const WARNING_THRESHOLD_SEC = 300;
 
 const formatCountdown = (diff: number): string => {
+    if (!Number.isFinite(diff)) {
+        return '—';
+    }
+
     const h = Math.floor(diff / 3600);
     const m = Math.floor((diff % 3600) / 60);
     const s = diff % 60;
@@ -25,14 +29,21 @@ const formatCountdown = (diff: number): string => {
  *  - `0 < diff <= 5m` left → warning (yellow)
  *  - past `validUntil` → expired (red, display shows negative countdown).
  */
-export const useValidUntilTimer = (validUntil: number): TimerState => {
-    const [state, setState] = useState<TimerState>({ display: '', status: 'ok' });
+export const useValidUntilTimer = (validUntil: number | undefined): TimerState => {
+    const [state, setState] = useState<TimerState>({ display: '—', status: 'missing' });
 
     useEffect(() => {
         let timeoutId: ReturnType<typeof setTimeout> | undefined;
         let cancelled = false;
 
         const tick = () => {
+            if (validUntil === undefined || !Number.isFinite(validUntil)) {
+                setState({ display: '—', status: 'missing' });
+                if (cancelled) return;
+                timeoutId = setTimeout(tick, 1000);
+                return;
+            }
+
             const diff = validUntil - Math.floor(Date.now() / 1000);
             if (diff <= 0) {
                 setState({ display: `−${formatCountdown(-diff)}`, status: 'expired' });

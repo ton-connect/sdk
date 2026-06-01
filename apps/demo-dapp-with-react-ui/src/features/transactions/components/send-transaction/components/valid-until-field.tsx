@@ -4,7 +4,7 @@ import { Input } from '../../../../../core/components/ui/input';
 import type { TimerState, TimerStatus } from '../hooks';
 
 interface ValidUntilFieldProps {
-    validUntil: number;
+    validUntil: number | undefined;
     onChange: (next: number) => void;
     onSetFromNow: (seconds: number) => void;
     timer: TimerState;
@@ -16,7 +16,8 @@ interface ValidUntilFieldProps {
 const STATUS_DOT: Record<TimerStatus, string> = {
     ok: 'bg-success',
     warning: 'bg-[#f5a73b]',
-    expired: 'bg-error'
+    expired: 'bg-error',
+    missing: 'bg-tertiary-foreground'
 };
 
 export const ValidUntilField = ({
@@ -27,12 +28,17 @@ export const ValidUntilField = ({
     errorMessage,
     testIdPrefix
 }: ValidUntilFieldProps) => (
-    <Input size="s" error={Boolean(errorMessage) || timer.status === 'expired'}>
+    <Input
+        size="s"
+        error={Boolean(errorMessage) || timer.status === 'expired' || timer.status === 'missing'}
+    >
         <Input.Header>
             <Input.Title>Valid Until</Input.Title>
             <span
                 className={`inline-flex items-center gap-1.5 font-mono text-xs ${
-                    timer.status === 'expired' ? 'text-error' : 'text-secondary-foreground'
+                    timer.status === 'expired' || timer.status === 'missing'
+                        ? 'text-error'
+                        : 'text-secondary-foreground'
                 }`}
                 data-testid={`${testIdPrefix}-valid-until-timer`}
                 data-status={timer.status}
@@ -47,8 +53,14 @@ export const ValidUntilField = ({
         <Input.Field>
             <Input.Input
                 type="number"
-                value={validUntil}
-                onChange={e => onChange(parseInt(e.target.value) || 0)}
+                value={validUntil ?? ''}
+                placeholder="Not set"
+                onChange={e => {
+                    const next = Number.parseInt(e.target.value, 10);
+                    if (Number.isFinite(next)) {
+                        onChange(next);
+                    }
+                }}
                 data-testid={`${testIdPrefix}-valid-until-input`}
             />
         </Input.Field>
