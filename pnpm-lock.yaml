@@ -116,9 +116,6 @@ importers:
       crc-32:
         specifier: ^1.2.2
         version: 1.2.2
-      eruda:
-        specifier: ^3.4.3
-        version: 3.4.3
       jose:
         specifier: ^6.2.3
         version: 6.2.3
@@ -177,6 +174,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: ^6.0.2
         version: 6.0.2(vite@8.0.14(@types/node@24.2.0)(jiti@2.7.0)(sass@1.90.0)(terser@5.43.1)(yaml@2.8.0))
+      eruda:
+        specifier: ^3.4.3
+        version: 3.4.3
       typescript:
         specifier: ^5.9.2
         version: 5.9.2

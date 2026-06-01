@@ -2,7 +2,6 @@ import './patch-local-storage-for-github-pages';
 import './polyfills';
 import './core/styles/index.css';
 
-import eruda from 'eruda';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App';
@@ -14,7 +13,9 @@ initQaModeFromUrl();
 
 getTonconnectVersion();
 
-eruda.init();
+if (import.meta.env.DEV) {
+    void import('eruda').then(({ default: eruda }) => eruda.init());
+}
 
 async function enableMocking() {
     const host = document.baseURI.replace(/\/$/, '');
