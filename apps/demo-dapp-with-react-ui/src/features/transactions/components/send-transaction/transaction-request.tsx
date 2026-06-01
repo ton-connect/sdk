@@ -13,9 +13,16 @@ import {
 } from '../../../../core/utils/merge-request-context';
 
 import {
+    buildDefaultSignMessage,
+    buildSignMessagePreset,
+    SIGN_MESSAGE_PRESETS,
+    type SignMessagePresetKey
+} from '../sign-message/utils/sign-message-presets';
+import {
     buildDefaultTx,
     buildItemsTx,
     buildNftItemsTx,
+    PRESETS as SEND_TRANSACTION_PRESETS,
     type PresetKey
 } from './utils/transaction-presets';
 
@@ -42,7 +49,7 @@ export const TransactionRequest = ({ mode, testIdPrefix }: TransactionRequestPro
     const wallet = useTonWallet();
     const isSend = mode === 'send';
 
-    const form = useTransactionForm();
+    const form = useTransactionForm(isSend ? buildDefaultTx : buildDefaultSignMessage);
     const ops = useSendTransaction();
     const timer = useValidUntilTimer(form.validUntil);
     const [settingsOpen, setSettingsOpen] = useState(false);
@@ -57,10 +64,18 @@ export const TransactionRequest = ({ mode, testIdPrefix }: TransactionRequestPro
         }
     }, [activeResult]);
 
-    const loadPreset = (key: PresetKey) => {
-        if (key === 'default-tx') form.replaceTx(buildDefaultTx());
-        else if (key === 'items-tx') form.replaceTx(buildItemsTx());
-        else if (key === 'nft-items-tx') form.replaceTx(buildNftItemsTx(wallet?.account?.address));
+    const loadPreset = (key: string) => {
+        if (isSend) {
+            const sendKey = key as PresetKey;
+            if (sendKey === 'default-tx') form.replaceTx(buildDefaultTx());
+            else if (sendKey === 'items-tx') form.replaceTx(buildItemsTx());
+            else if (sendKey === 'nft-items-tx') {
+                form.replaceTx(buildNftItemsTx(wallet?.account?.address));
+            }
+            return;
+        }
+
+        form.replaceTx(buildSignMessagePreset(key as SignMessagePresetKey));
     };
 
     const handleAction = () =>
@@ -102,6 +117,12 @@ export const TransactionRequest = ({ mode, testIdPrefix }: TransactionRequestPro
             <ConfigureHeader
                 onReset={form.reset}
                 onPresetSelect={loadPreset}
+                presets={isSend ? SEND_TRANSACTION_PRESETS : SIGN_MESSAGE_PRESETS}
+                presetsDescription={
+                    isSend
+                        ? 'Replace the current request with a ready-made sendTransaction example.'
+                        : 'Replace the current request with a ready-made signMessage example.'
+                }
                 testIdPrefix={testIdPrefix}
             />
 

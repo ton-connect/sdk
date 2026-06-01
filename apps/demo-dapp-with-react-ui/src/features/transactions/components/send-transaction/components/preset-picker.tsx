@@ -6,18 +6,29 @@ import { Modal } from '../../../../../core/components/ui/modal';
 import { useIsMobile } from '../../../../../core/hooks/use-mobile';
 import { cn } from '../../../../../core/utils/cn';
 
-import { PRESETS, type PresetKey } from '../utils/transaction-presets';
-
-interface PresetPickerProps {
-    onSelect: (key: PresetKey) => void;
-    testIdPrefix: string;
+export interface PresetOption {
+    id: string;
+    name: string;
+    description: string;
 }
 
-export const PresetPicker = ({ onSelect, testIdPrefix }: PresetPickerProps) => {
+interface PresetPickerProps {
+    presets: readonly PresetOption[];
+    onSelect: (key: string) => void;
+    testIdPrefix: string;
+    description?: string;
+}
+
+export const PresetPicker = ({
+    presets,
+    onSelect,
+    testIdPrefix,
+    description = 'Replace the current request with a ready-made example.'
+}: PresetPickerProps) => {
     const [open, setOpen] = useState(false);
     const isMobile = useIsMobile();
 
-    const choose = (key: PresetKey) => {
+    const choose = (key: string) => {
         onSelect(key);
         setOpen(false);
     };
@@ -37,11 +48,9 @@ export const PresetPicker = ({ onSelect, testIdPrefix }: PresetPickerProps) => {
             </Button>
 
             <Modal open={open} onOpenChange={setOpen} title="Load a preset">
-                <p className="mb-4 text-sm leading-relaxed text-secondary-foreground">
-                    Replace the current request with a ready-made example.
-                </p>
+                <p className="mb-4 text-sm leading-relaxed text-secondary-foreground">{description}</p>
                 <div className="flex flex-col gap-2" data-testid={`${testIdPrefix}-presets-list`}>
-                    {PRESETS.map(opt => (
+                    {presets.map(opt => (
                         <button
                             key={opt.id}
                             type="button"

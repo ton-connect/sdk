@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import type { SendTransactionRequest } from '@tonconnect/ui-react';
 
 import { useJsonDraftValidation } from '../../../../../core/hooks/use-json-draft-validation';
 import { validateTransactionRequest } from '../../../../../core/utils/validation';
@@ -15,7 +16,9 @@ export type RequestMode = 'send' | 'sign';
  * Also owns the two flags that wrap the wallet call: `withConnect` (embed the
  * request in the connect URL) and `waitForTx` (poll on-chain after send).
  */
-export const useTransactionForm = () => {
+export const useTransactionForm = (
+    buildInitial: () => SendTransactionRequest = buildDefaultTx
+) => {
     const {
         value: tx,
         draft,
@@ -25,7 +28,7 @@ export const useTransactionForm = () => {
         editorMessages,
         validationIssues
     } = useJsonDraftValidation({
-        initialValue: buildDefaultTx(),
+        initialValue: buildInitial(),
         validate: (parsed, { nowSec }) => validateTransactionRequest(parsed, nowSec),
         watchTime: true
     });
@@ -48,10 +51,10 @@ export const useTransactionForm = () => {
     );
 
     const reset = useCallback(() => {
-        replaceTx(buildDefaultTx());
+        replaceTx(buildInitial());
         setWithConnect(false);
         setWaitForTx(false);
-    }, [replaceTx]);
+    }, [buildInitial, replaceTx]);
 
     return {
         tx,

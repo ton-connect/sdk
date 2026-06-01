@@ -4,19 +4,23 @@ import { Button } from '../../../../../core/components/ui/button';
 import { useIsMobile } from '../../../../../core/hooks/use-mobile';
 import { useWalletNetwork } from '../../../../../core/hooks/use-wallet-network';
 
-import type { PresetKey } from '../utils/transaction-presets';
+import type { PresetOption } from './preset-picker';
 
 import { PresetPicker } from './preset-picker';
 
 interface ConfigureHeaderProps {
     onReset: () => void;
-    onPresetSelect: (key: PresetKey) => void;
+    onPresetSelect: (key: string) => void;
+    presets: readonly PresetOption[];
+    presetsDescription?: string;
     testIdPrefix: string;
 }
 
 export const ConfigureHeader = ({
     onReset,
     onPresetSelect,
+    presets,
+    presetsDescription,
     testIdPrefix
 }: ConfigureHeaderProps) => {
     const isMobile = useIsMobile();
@@ -48,7 +52,12 @@ export const ConfigureHeader = ({
                     <RotateCcw className="size-3.5" />
                     Reset
                 </Button>
-                <PresetPicker onSelect={onPresetSelect} testIdPrefix={testIdPrefix} />
+                <PresetPicker
+                    presets={presets}
+                    onSelect={onPresetSelect}
+                    description={presetsDescription}
+                    testIdPrefix={testIdPrefix}
+                />
             </div>
         </div>
     );
