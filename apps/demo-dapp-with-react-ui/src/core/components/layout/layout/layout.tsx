@@ -169,7 +169,9 @@ export const Layout: FC<LayoutProps> = ({
                         <TonConnectButton />
                     </div>
                     <ThemeSwitcher />
-                    <SidebarTrigger />
+                    <div className="md:hidden">
+                        <SidebarTrigger />
+                    </div>
                 </header>
 
                 <main
