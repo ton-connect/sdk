@@ -6,6 +6,7 @@ import { pickPreview } from '../FrogDemo/nftData';
 import { NftLottie } from '../FrogDemo/NftLottie';
 import { MarketHeader } from '../../components/MarketHeader/MarketHeader';
 import { embeddedTonPay, PRICE_TON, PRICE_TON_NANO } from './embeddedTonPay';
+import { PurchaseSuccess } from '../FrogDemo/PurchaseSuccess';
 
 const nft = SCARED_CAT_742;
 const NFT_IMAGE_LARGE = pickPreview(nft, 1500);
@@ -86,54 +87,27 @@ export function CatDemo() {
     if (success && stage.name === 'confirmed') {
         return (
             <div className="cat">
-                <div className="cat__success">
-                    <div className="cat__success-icon">
-                        <img src={NFT_IMAGE_THUMB} alt="" />
-                    </div>
-                    <h1 className="cat__success-title">Payment sent</h1>
-                    <p className="cat__success-sub">
-                        <span className="cat__success-ok">1 success</span> · 0 errors
-                    </p>
-                    <p className="cat__success-note">
-                        Paid with TON in one tap — no wallet connection was needed beforehand.
-                    </p>
-
-                    <div className="cat__success-row">
-                        <div className="cat__success-row-check">
-                            <svg viewBox="0 0 24 24" fill="none" aria-hidden>
-                                <circle cx="12" cy="12" r="12" fill="#2EBD59" />
-                                <path
-                                    d="M7 12.5l3 3 7-7"
-                                    stroke="#fff"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                />
-                            </svg>
-                        </div>
-                        <img className="cat__success-row-img" src={NFT_IMAGE_THUMB} alt="" />
-                        <div className="cat__success-row-text">
-                            <div className="cat__success-row-name">{nft.name}</div>
-                            <div className="cat__success-row-collection">{nft.collection.name}</div>
-                        </div>
-                        <div className="cat__success-row-price">
-                            <TonIcon className="cat__price-icon" />
-                            <span>{PRICE_TON}</span>
-                        </div>
-                    </div>
-
-                    <a
-                        className="cat__explorer"
+                <PurchaseSuccess>
+                    <PurchaseSuccess.Header
+                        thumbUrl={NFT_IMAGE_THUMB}
+                        title="Payment sent"
+                        note="Paid with TON in one tap — no wallet connection was needed beforehand."
+                        iconImageScale={72}
+                    />
+                    <PurchaseSuccess.Row
+                        thumbUrl={NFT_IMAGE_THUMB}
+                        name={nft.name}
+                        collection={nft.collection.name}
+                        priceIcon={<TonIcon />}
+                        priceLabel={PRICE_TON}
+                    />
+                    <PurchaseSuccess.ExplorerLink
                         href={`https://tonviewer.com/transaction/${stage.boc}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
                     >
                         View transaction →
-                    </a>
-                    <button className="cat__btn cat__btn--secondary" onClick={reset}>
-                        Done
-                    </button>
-                </div>
+                    </PurchaseSuccess.ExplorerLink>
+                    <PurchaseSuccess.Cta onClick={reset}>Done</PurchaseSuccess.Cta>
+                </PurchaseSuccess>
             </div>
         );
     }

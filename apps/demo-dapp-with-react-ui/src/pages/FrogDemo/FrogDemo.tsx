@@ -6,6 +6,7 @@ import { KISSED_FROG_6425, pickPreview } from './nftData';
 import { NftLottie } from './NftLottie';
 import { MarketHeader } from '../../components/MarketHeader/MarketHeader';
 import { sendMessages } from '../../components/GaslessDemo/gaslessMessages';
+import { PurchaseSuccess } from './PurchaseSuccess';
 
 const PRICE_USDT_UNITS = 1_000_000n;
 const PRICE_LABEL = '100';
@@ -100,53 +101,22 @@ export function FrogDemo() {
     if (success) {
         return (
             <div className="frog">
-                <div className="frog__success">
-                    <div className="frog__success-icon">
-                        <img src={NFT_IMAGE_THUMB} alt="" />
-                    </div>
-                    <h1 className="frog__success-title">1 / 1 actions completed</h1>
-                    <p className="frog__success-sub">
-                        <span className="frog__success-ok">1 success</span> · 0 errors
-                    </p>
-                    <p className="frog__success-note">
-                        Closing this window will not undo any changes to the blockchain
-                    </p>
-
-                    <div className="frog__success-section">
-                        <span className="frog__success-section-label">Buy</span>
-                        <span className="frog__success-section-count">1</span>
-                    </div>
-
-                    <div className="frog__success-row">
-                        <div className="frog__success-row-check">
-                            <svg viewBox="0 0 24 24" fill="none" aria-hidden>
-                                <circle cx="12" cy="12" r="12" fill="#2EBD59" />
-                                <path
-                                    d="M7 12.5l3 3 7-7"
-                                    stroke="#fff"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                />
-                            </svg>
-                        </div>
-                        <img className="frog__success-row-img" src={NFT_IMAGE_THUMB} alt="" />
-                        <div className="frog__success-row-text">
-                            <div className="frog__success-row-name">{nft.name}</div>
-                            <div className="frog__success-row-collection">
-                                {nft.collection.name}
-                            </div>
-                        </div>
-                        <div className="frog__success-row-price">
-                            <img className="frog__price-icon" src={USDT_ICON} alt="USDT" />
-                            <span>{PRICE_LABEL}</span>
-                        </div>
-                    </div>
-
-                    <button className="frog__btn frog__btn--secondary" onClick={reset}>
-                        Close
-                    </button>
-                </div>
+                <PurchaseSuccess>
+                    <PurchaseSuccess.Header
+                        thumbUrl={NFT_IMAGE_THUMB}
+                        title="1 / 1 actions completed"
+                        note="Closing this window will not undo any changes to the blockchain"
+                    />
+                    <PurchaseSuccess.Section label="Buy" count={1} />
+                    <PurchaseSuccess.Row
+                        thumbUrl={NFT_IMAGE_THUMB}
+                        name={nft.name}
+                        collection={nft.collection.name}
+                        priceIcon={<img src={USDT_ICON} alt="USDT" />}
+                        priceLabel={PRICE_LABEL}
+                    />
+                    <PurchaseSuccess.Cta onClick={reset}>Close</PurchaseSuccess.Cta>
+                </PurchaseSuccess>
             </div>
         );
     }
