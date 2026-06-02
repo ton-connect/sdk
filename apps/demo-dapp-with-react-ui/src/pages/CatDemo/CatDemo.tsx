@@ -89,24 +89,44 @@ export function CatDemo() {
             <div className="cat">
                 <PurchaseSuccess>
                     <PurchaseSuccess.Header
-                        thumbUrl={NFT_IMAGE_THUMB}
-                        title="Payment sent"
-                        note="Paid with TON in one tap — no wallet connection was needed beforehand."
-                        iconImageScale={72}
+                        thumbUrl={NFT_IMAGE_LARGE}
+                        title={nft.name}
+                        subtitle="Joined your collection"
                     />
-                    <PurchaseSuccess.Row
-                        thumbUrl={NFT_IMAGE_THUMB}
-                        name={nft.name}
-                        collection={nft.collection.name}
-                        priceIcon={<TonIcon />}
-                        priceLabel={PRICE_TON}
-                    />
+                    <PurchaseSuccess.Block label="Purchased">
+                        <PurchaseSuccess.Item
+                            thumbUrl={NFT_IMAGE_THUMB}
+                            name={nft.name}
+                            collection={nft.collection.name}
+                        />
+                    </PurchaseSuccess.Block>
+                    <PurchaseSuccess.Block label="Spent">
+                        <PurchaseSuccess.Line
+                            label="Price"
+                            amountIcon={<TonIcon />}
+                            amount={`${PRICE_TON} TON`}
+                            sub="≈ $194.32"
+                        />
+                        <PurchaseSuccess.Line
+                            label="Fee"
+                            amountIcon={<TonIcon />}
+                            amount="0.1 TON"
+                            sub="≈ $0.19"
+                        />
+                    </PurchaseSuccess.Block>
                     <PurchaseSuccess.ExplorerLink
                         href={`https://tonviewer.com/transaction/${stage.boc}`}
                     >
                         View transaction →
                     </PurchaseSuccess.ExplorerLink>
-                    <PurchaseSuccess.Cta onClick={reset}>Done</PurchaseSuccess.Cta>
+                    <PurchaseSuccess.Footer>
+                        <PurchaseSuccess.Cta variant="primary" onClick={reset}>
+                            Continue shopping
+                        </PurchaseSuccess.Cta>
+                        <PurchaseSuccess.Cta variant="secondary" onClick={reset}>
+                            Close
+                        </PurchaseSuccess.Cta>
+                    </PurchaseSuccess.Footer>
                 </PurchaseSuccess>
             </div>
         );

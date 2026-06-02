@@ -476,125 +476,128 @@ $green: #2ebd59;
 .purchase-success {
   padding: 32px 6px 16px;
   text-align: center;
+  // Parent (.frog / .cat) has min-height: 100vh and padding 12px / 32px top/bottom.
+  // Subtract the parent's vertical padding so the success view fills the remaining space.
+  min-height: calc(100vh - 44px);
+  display: flex;
+  flex-direction: column;
 
   &__icon {
-    width: 96px;
-    height: 96px;
+    width: 180px;
+    height: 180px;
     margin: 0 auto 22px;
-    border-radius: 22px;
+    border-radius: 28px;
     background: radial-gradient(120% 120% at 50% 50%, #2a2a2a 0%, #0e0e0e 80%);
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
 
     img {
-      width: 64%;
-      height: 64%;
+      width: 88%;
+      height: 88%;
       object-fit: contain;
     }
   }
 
   &__title {
-    font-size: 22px;
+    font-size: 24px;
     font-weight: 700;
     letter-spacing: -0.01em;
-    margin: 0 0 8px;
+    margin: 0 0 6px;
   }
 
-  &__sub {
-    font-size: 15px;
+  &__subtitle {
+    font-size: 14px;
     color: $muted;
-    margin: 0 0 4px;
+    margin: 0 0 28px;
+    line-height: 1.4;
   }
 
-  &__ok {
-    color: $green;
-    font-weight: 600;
-  }
-
-  &__note {
-    font-size: 13px;
-    color: $muted;
-    margin: 12px auto 24px;
-    max-width: 320px;
-    line-height: 1.45;
-  }
-
-  &__section {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 0 0 12px;
+  &__block {
     text-align: left;
+    margin-bottom: 16px;
   }
 
-  &__section-label {
-    font-size: 16px;
+  &__block-label {
+    display: block;
+    font-size: 11px;
     font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: $muted;
+    padding: 0 4px 8px;
   }
 
-  &__section-count {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 22px;
-    height: 22px;
-    padding: 0 7px;
-    border-radius: 999px;
+  &__card {
     background: $surface-soft;
-    color: $muted;
-    font-size: 12px;
-    font-weight: 600;
+    border-radius: 14px;
+    padding: 20px 16px;
   }
 
-  &__row {
+  &__item {
     display: grid;
-    grid-template-columns: auto auto 1fr auto;
+    grid-template-columns: auto 1fr;
     align-items: center;
-    gap: 12px;
-    padding: 12px 4px;
-    text-align: left;
-    margin-bottom: 28px;
+    gap: 14px;
   }
 
-  &__row-check {
-    width: 22px;
-    height: 22px;
-  }
-
-  &__row-img {
-    width: 44px;
-    height: 44px;
-    border-radius: 10px;
+  &__item-thumb {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
     object-fit: cover;
     background: radial-gradient(120% 120% at 50% 50%, #2a2a2a 0%, #0e0e0e 80%);
     padding: 4px;
   }
 
-  &__row-name {
+  &__item-name {
     font-size: 15px;
     font-weight: 600;
     color: $ink;
   }
 
-  &__row-collection {
+  &__item-collection {
     font-size: 13px;
     color: $muted;
     margin-top: 2px;
   }
 
-  &__row-price {
+  &__line {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+
+    & + & {
+      border-top: 1px solid $hairline;
+      margin-top: 10px;
+      padding-top: 14px;
+    }
+  }
+
+  &__line-label {
+    font-size: 14px;
+    color: $muted;
+  }
+
+  &__line-value {
+    text-align: right;
+  }
+
+  &__line-amount {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     font-size: 15px;
     font-weight: 600;
+    color: $ink;
   }
 
-  &__row-price-icon {
+  &__line-amount-icon {
     display: inline-flex;
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
 
     img,
     svg {
@@ -604,7 +607,14 @@ $green: #2ebd59;
     }
   }
 
+  &__line-sub {
+    display: block;
+    font-size: 12px;
+    color: $muted;
+  }
+
   &__explorer {
+    align-self: center;
     display: inline-block;
     margin-bottom: 16px;
     font-size: 13px;
@@ -617,6 +627,13 @@ $green: #2ebd59;
       color: $blue-hover;
       text-decoration: underline;
     }
+  }
+
+  &__footer {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
 
   &__cta {
@@ -637,8 +654,6 @@ $green: #2ebd59;
     touch-action: manipulation;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
-    background: $surface-soft;
-    color: $ink;
 
     &:hover:not(:disabled) {
       transform: scale(1.02);
@@ -649,9 +664,24 @@ $green: #2ebd59;
       transition: transform 80ms ease-out;
     }
 
-    &:disabled {
-      color: $muted;
-      cursor: not-allowed;
+    &--primary {
+      background: $blue;
+      color: #fff;
+
+      &:disabled {
+        background: #a8c7df;
+        cursor: not-allowed;
+      }
+    }
+
+    &--secondary {
+      background: $surface-soft;
+      color: $ink;
+
+      &:disabled {
+        color: $muted;
+        cursor: not-allowed;
+      }
     }
   }
 }

@@ -13,6 +13,7 @@ const PRICE_LABEL = '100';
 const PRICE_USD = '$100';
 const USDT_ICON =
     'https://i.getgems.io/B72rsV0ak6jDfESUi_x1Lniw7uP39c0Bw-qGguyuu6Q/rs:fill:150:150:1/g:ce/czM6Ly9nZXRnZW1zLXMzL2ltYWdlcy9qZXR0b24vVVNEVC80M2FhYzI2OGUzMjVmZjg2LnBuZw.webp';
+const TON_ICON = 'https://getgems.io/_next/static/media/ton.2d9f8065.png';
 
 const nft = KISSED_FROG_6425;
 const NFT_IMAGE_LARGE = pickPreview(nft, 1500);
@@ -103,19 +104,44 @@ export function FrogDemo() {
             <div className="frog">
                 <PurchaseSuccess>
                     <PurchaseSuccess.Header
-                        thumbUrl={NFT_IMAGE_THUMB}
-                        title="1 / 1 actions completed"
-                        note="Closing this window will not undo any changes to the blockchain"
+                        thumbUrl={NFT_IMAGE_LARGE}
+                        title={nft.name}
+                        subtitle="Joined your collection"
                     />
-                    <PurchaseSuccess.Section label="Buy" count={1} />
-                    <PurchaseSuccess.Row
-                        thumbUrl={NFT_IMAGE_THUMB}
-                        name={nft.name}
-                        collection={nft.collection.name}
-                        priceIcon={<img src={USDT_ICON} alt="USDT" />}
-                        priceLabel={PRICE_LABEL}
-                    />
-                    <PurchaseSuccess.Cta onClick={reset}>Close</PurchaseSuccess.Cta>
+                    <PurchaseSuccess.Block label="Purchased">
+                        <PurchaseSuccess.Item
+                            thumbUrl={NFT_IMAGE_THUMB}
+                            name={nft.name}
+                            collection={nft.collection.name}
+                        />
+                    </PurchaseSuccess.Block>
+                    <PurchaseSuccess.Block label="Spent">
+                        <PurchaseSuccess.Line
+                            label="Price"
+                            amountIcon={<img src={USDT_ICON} alt="USDT" />}
+                            amount={`${PRICE_LABEL} USD₮`}
+                            sub={`≈ ${PRICE_USD}`}
+                        />
+                        <PurchaseSuccess.Line
+                            label="Fee"
+                            amountIcon={<img src={TON_ICON} alt="TON" />}
+                            amount="0 TON"
+                            sub="paid by marketplace"
+                        />
+                    </PurchaseSuccess.Block>
+                    <PurchaseSuccess.ExplorerLink
+                        href={`https://tonviewer.com/transaction/${stage.name}`}
+                    >
+                        View transaction →
+                    </PurchaseSuccess.ExplorerLink>
+                    <PurchaseSuccess.Footer>
+                        <PurchaseSuccess.Cta variant="primary" onClick={reset}>
+                            Continue shopping
+                        </PurchaseSuccess.Cta>
+                        <PurchaseSuccess.Cta variant="secondary" onClick={reset}>
+                            Close
+                        </PurchaseSuccess.Cta>
+                    </PurchaseSuccess.Footer>
                 </PurchaseSuccess>
             </div>
         );

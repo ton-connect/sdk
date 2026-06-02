@@ -11,84 +11,70 @@ function Root({ children }: RootProps) {
 interface HeaderProps {
     thumbUrl: string;
     title: string;
-    note: string;
-    summary?: { success: number; errors: number };
-    /** Tweaks the image scale inside the icon container (Cat used 72%, Frog 64%). */
-    iconImageScale?: number;
+    subtitle?: string;
 }
 
-function Header({
-    thumbUrl,
-    title,
-    note,
-    summary = { success: 1, errors: 0 },
-    iconImageScale
-}: HeaderProps) {
-    const imgStyle = iconImageScale
-        ? { width: `${iconImageScale}%`, height: `${iconImageScale}%` }
-        : undefined;
+function Header({ thumbUrl, title, subtitle }: HeaderProps) {
     return (
         <>
             <div className="purchase-success__icon">
-                <img src={thumbUrl} alt="" style={imgStyle} />
+                <img src={thumbUrl} alt="" />
             </div>
             <h1 className="purchase-success__title">{title}</h1>
-            <p className="purchase-success__sub">
-                <span className="purchase-success__ok">
-                    {summary.success} success
-                </span>{' '}
-                · {summary.errors} errors
-            </p>
-            <p className="purchase-success__note">{note}</p>
+            {subtitle ? <p className="purchase-success__subtitle">{subtitle}</p> : null}
         </>
     );
 }
 
-interface SectionProps {
+interface BlockProps {
     label: string;
-    count: number;
+    children: ReactNode;
 }
 
-function Section({ label, count }: SectionProps) {
+function Block({ label, children }: BlockProps) {
     return (
-        <div className="purchase-success__section">
-            <span className="purchase-success__section-label">{label}</span>
-            <span className="purchase-success__section-count">{count}</span>
+        <div className="purchase-success__block">
+            <span className="purchase-success__block-label">{label}</span>
+            <div className="purchase-success__card">{children}</div>
         </div>
     );
 }
 
-interface RowProps {
+interface ItemProps {
     thumbUrl: string;
     name: string;
     collection: string;
-    priceIcon: ReactNode;
-    priceLabel: string;
 }
 
-function Row({ thumbUrl, name, collection, priceIcon, priceLabel }: RowProps) {
+function Item({ thumbUrl, name, collection }: ItemProps) {
     return (
-        <div className="purchase-success__row">
-            <div className="purchase-success__row-check">
-                <svg viewBox="0 0 24 24" fill="none" aria-hidden>
-                    <circle cx="12" cy="12" r="12" fill="#2EBD59" />
-                    <path
-                        d="M7 12.5l3 3 7-7"
-                        stroke="#fff"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                    />
-                </svg>
+        <div className="purchase-success__item">
+            <img className="purchase-success__item-thumb" src={thumbUrl} alt="" />
+            <div>
+                <div className="purchase-success__item-name">{name}</div>
+                <div className="purchase-success__item-collection">{collection}</div>
             </div>
-            <img className="purchase-success__row-img" src={thumbUrl} alt="" />
-            <div className="purchase-success__row-text">
-                <div className="purchase-success__row-name">{name}</div>
-                <div className="purchase-success__row-collection">{collection}</div>
-            </div>
-            <div className="purchase-success__row-price">
-                <span className="purchase-success__row-price-icon">{priceIcon}</span>
-                <span>{priceLabel}</span>
+        </div>
+    );
+}
+
+interface LineProps {
+    label: string;
+    amountIcon: ReactNode;
+    amount: string;
+    sub?: string;
+}
+
+function Line({ label, amountIcon, amount, sub }: LineProps) {
+    return (
+        <div className="purchase-success__line">
+            <span className="purchase-success__line-label">{label}</span>
+            <div className="purchase-success__line-value">
+                <span className="purchase-success__line-amount">
+                    <span className="purchase-success__line-amount-icon">{amountIcon}</span>
+                    {amount}
+                </span>
+                {sub ? <span className="purchase-success__line-sub">{sub}</span> : null}
             </div>
         </div>
     );
@@ -112,16 +98,25 @@ function ExplorerLink({ href, children }: ExplorerLinkProps) {
     );
 }
 
-interface CtaProps {
-    onClick: () => void;
+interface FooterProps {
     children: ReactNode;
 }
 
-function Cta({ onClick, children }: CtaProps) {
+function Footer({ children }: FooterProps) {
+    return <div className="purchase-success__footer">{children}</div>;
+}
+
+interface CtaProps {
+    onClick: () => void;
+    children: ReactNode;
+    variant?: 'primary' | 'secondary';
+}
+
+function Cta({ onClick, children, variant = 'primary' }: CtaProps) {
     return (
         <button
             type="button"
-            className="purchase-success__cta"
+            className={`purchase-success__cta purchase-success__cta--${variant}`}
             onClick={onClick}
         >
             {children}
@@ -131,8 +126,10 @@ function Cta({ onClick, children }: CtaProps) {
 
 export const PurchaseSuccess = Object.assign(Root, {
     Header,
-    Section,
-    Row,
+    Block,
+    Item,
+    Line,
     ExplorerLink,
+    Footer,
     Cta
 });
