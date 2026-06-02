@@ -4,6 +4,7 @@ import { Address } from '@ton/core';
 import { ResultBlock } from '../../../../core/components/shared/result-block';
 import {
     sanitizeDecimalAmountInput,
+    validateAmountWithinBalance,
     validatePositiveDecimalAmount
 } from '../../../../core/utils/validation';
 
@@ -40,10 +41,19 @@ export const TransferUsdt = () => {
     const [destination, setDestination] = useState<string>('');
     const [settingsOpen, setSettingsOpen] = useState(false);
 
-    const amountError = useMemo(
+    const formatError = useMemo(
         () => validatePositiveDecimalAmount(amount, { maxDecimals: USDT_DECIMALS }),
         [amount]
     );
+
+    const balanceError = useMemo(() => {
+        if (formatError || isUsdtBalanceLoading || !senderAddress || !usdtBalance) {
+            return null;
+        }
+        return validateAmountWithinBalance(amount, usdtBalance, USDT_DECIMALS);
+    }, [amount, formatError, isUsdtBalanceLoading, senderAddress, usdtBalance]);
+
+    const amountError = formatError ?? balanceError;
 
     const handleAmountChange = useCallback((next: string) => {
         setAmount(sanitizeDecimalAmountInput(next, USDT_DECIMALS));

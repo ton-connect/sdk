@@ -8,6 +8,7 @@ export { validateSignDataPayload } from './validate-sign-data-payload';
 export { validateCreateJettonRequest } from './validate-create-jetton-request';
 export {
     sanitizeDecimalAmountInput,
+    validateAmountWithinBalance,
     validatePositiveDecimalAmount
 } from './validate-positive-decimal-amount';
 export { validateExternalMessageBoc } from './validate-external-message-boc';

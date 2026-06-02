@@ -1,3 +1,5 @@
+import { parseUnits } from '../units';
+
 export interface PositiveDecimalAmountOptions {
     /** Maximum digits after the decimal point (e.g. 6 for USDT). */
     maxDecimals?: number;
@@ -30,6 +32,37 @@ export function validatePositiveDecimalAmount(
     const fraction = trimmed.split('.')[1];
     if (maxDecimals !== undefined && fraction !== undefined && fraction.length > maxDecimals) {
         return `Use at most ${maxDecimals} decimal places`;
+    }
+
+    return null;
+}
+
+/**
+ * Ensures `amount` does not exceed a known wallet balance (compared in smallest units).
+ * Returns `null` when balance is unknown or amount is within balance.
+ */
+export function validateAmountWithinBalance(
+    amount: string,
+    balance: string | null | undefined,
+    decimals: number
+): string | null {
+    if (balance == null || balance === '') {
+        return null;
+    }
+
+    const trimmed = amount.trim();
+    if (!trimmed || !/^\d+(\.\d+)?$/.test(trimmed)) {
+        return null;
+    }
+
+    try {
+        const amountUnits = parseUnits(trimmed, decimals);
+        const balanceUnits = parseUnits(balance, decimals);
+        if (amountUnits > balanceUnits) {
+            return 'Insufficient funds';
+        }
+    } catch {
+        return null;
     }
 
     return null;
