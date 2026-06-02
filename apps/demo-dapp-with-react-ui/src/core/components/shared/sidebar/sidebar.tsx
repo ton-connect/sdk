@@ -9,7 +9,7 @@
 'use client';
 
 import * as React from 'react';
-import { Menu } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { Slot } from 'radix-ui';
 import { Button } from '../../ui/button/index';
 
@@ -81,7 +81,7 @@ const Sidebar = ({ className, children }: React.ComponentProps<'div'>) => {
                 <SheetContent
                     side="right"
                     data-slot="sidebar"
-                    className="max-w-[85vw] bg-background p-0 text-foreground [&>button]:hidden"
+                    className="max-w-[85vw] bg-background p-0 text-foreground"
                 >
                     <SheetHeader className="sr-only">
                         <SheetTitle>Sidebar</SheetTitle>
@@ -111,7 +111,8 @@ const Sidebar = ({ className, children }: React.ComponentProps<'div'>) => {
 };
 
 const SidebarTrigger = ({ className, onClick, ...props }: React.ComponentProps<typeof Button>) => {
-    const { toggleSidebar } = useSidebar();
+    const { toggleSidebar, isMobile, open, openMobile } = useSidebar();
+    const isOpen = isMobile ? openMobile : open;
     return (
         <Button
             data-slot="sidebar-trigger"
@@ -124,7 +125,7 @@ const SidebarTrigger = ({ className, onClick, ...props }: React.ComponentProps<t
             }}
             {...props}
         >
-            <Menu className="size-5" />
+            {isOpen ? <X className="size-5" /> : <Menu className="size-5" />}
             <span className="sr-only">Toggle Sidebar</span>
         </Button>
     );
