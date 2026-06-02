@@ -102,11 +102,12 @@ export function FrogDemo() {
     if (success) {
         return (
             <div className="frog">
+                <MarketHeader />
+
                 <PurchaseSuccess>
                     <PurchaseSuccess.Header
-                        thumbUrl={NFT_IMAGE_LARGE}
-                        title={nft.name}
-                        subtitle="Joined your collection"
+                        title="Success"
+                        subtitle="New NFT joined your collection"
                     />
                     <PurchaseSuccess.Block label="Purchased">
                         <PurchaseSuccess.Item

@@ -478,25 +478,45 @@ $green: #2ebd59;
   text-align: center;
   // Parent (.frog / .cat) has min-height: 100vh and padding 12px / 32px top/bottom.
   // Subtract the parent's vertical padding so the success view fills the remaining space.
-  min-height: calc(100vh - 44px);
+  min-height: calc(100vh - 110px);
   display: flex;
   flex-direction: column;
 
   &__icon {
-    width: 180px;
-    height: 180px;
+    width: 56px;
+    height: 56px;
     margin: 0 auto 22px;
-    border-radius: 28px;
-    background: radial-gradient(120% 120% at 50% 50%, #2a2a2a 0%, #0e0e0e 80%);
+    border-radius: 50%;
+    background: $green;
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
+    animation: purchase-success-pop 420ms cubic-bezier(0.18, 1.25, 0.4, 1) both;
+  }
 
-    img {
-      width: 88%;
-      height: 88%;
-      object-fit: contain;
+  &__check {
+    width: 50%;
+    height: 50%;
+
+    path {
+      stroke-dasharray: 26;
+      stroke-dashoffset: 26;
+      animation: purchase-success-check 360ms ease-out 200ms forwards;
+    }
+  }
+
+  @keyframes purchase-success-pop {
+    0% {
+      transform: scale(0);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  @keyframes purchase-success-check {
+    to {
+      stroke-dashoffset: 0;
     }
   }
 

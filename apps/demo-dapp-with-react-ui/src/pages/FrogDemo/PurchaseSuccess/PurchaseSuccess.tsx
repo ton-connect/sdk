@@ -9,16 +9,25 @@ function Root({ children }: RootProps) {
 }
 
 interface HeaderProps {
-    thumbUrl: string;
     title: string;
     subtitle?: string;
 }
 
-function Header({ thumbUrl, title, subtitle }: HeaderProps) {
+function Header({ title, subtitle }: HeaderProps) {
     return (
         <>
-            <div className="purchase-success__icon">
-                <img src={thumbUrl} alt="" />
+            <div className="purchase-success__icon" aria-hidden>
+                <svg
+                    className="purchase-success__check"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="white"
+                    strokeWidth={3}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                >
+                    <path d="M5 12 L10 17 L19 7" />
+                </svg>
             </div>
             <h1 className="purchase-success__title">{title}</h1>
             {subtitle ? <p className="purchase-success__subtitle">{subtitle}</p> : null}

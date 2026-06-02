@@ -14,8 +14,6 @@ const NFT_IMAGE_THUMB = pickPreview(nft, 100);
 
 const TON_ICON = 'https://getgems.io/_next/static/media/ton.2d9f8065.png';
 
-const sleep = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
-
 // Cosmetic stages for the purchase loader — each separated by a 400ms pause.
 // No on-chain polling, no elapsed-seconds counter.
 type Stage =
@@ -87,11 +85,12 @@ export function CatDemo() {
     if (success && stage.name === 'confirmed') {
         return (
             <div className="cat">
+                <MarketHeader />
+
                 <PurchaseSuccess>
                     <PurchaseSuccess.Header
-                        thumbUrl={NFT_IMAGE_LARGE}
-                        title={nft.name}
-                        subtitle="Joined your collection"
+                        title="Success"
+                        subtitle="New NFT joined your collection"
                     />
                     <PurchaseSuccess.Block label="Purchased">
                         <PurchaseSuccess.Item
