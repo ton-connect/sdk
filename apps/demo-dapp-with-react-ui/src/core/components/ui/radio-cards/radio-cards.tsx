@@ -64,7 +64,7 @@ const Item: FC<RadioCardsItemProps> = ({ value, children, className, onClick, ..
                 if (!event.defaultPrevented) ctx.onValueChange(value);
             }}
             className={cn(
-                'flex cursor-pointer items-center gap-2 rounded-lg border border-tertiary bg-secondary p-4 text-left text-foreground transition-colors hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30',
+                'flex cursor-pointer items-center gap-2 rounded-lg border border-tertiary bg-secondary p-4 text-left text-foreground transition-colors hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
                 className
             )}
             data-active={isActive ? 'true' : 'false'}
