@@ -24,16 +24,11 @@ const ECHO_STATE_INIT =
 export const PRICE_TON = '100';
 export const PRICE_TON_NANO = toNano('1').toString();
 
-export type PayStage =
-    | { name: 'idle' }
-    | { name: 'awaiting' }
-    | { name: 'confirmed'; boc: string }
-    | { name: 'dispatched' }
-    | { name: 'error'; error: string };
-
-export interface PayParams {
-    amountNano: string;
-    onStage: (stage: PayStage) => void;
+export interface PayResult {
+    /** Signed BoC, or null when the wallet connected but returned no signature. */
+    boc: string | null;
+    /** True when the request rode along inside the connect link but no signature came back. */
+    dispatched: boolean;
 }
 
 /**
@@ -41,26 +36,18 @@ export interface PayParams {
  *
  * `sendTransaction(tx, { enableEmbeddedRequest: true })` folds the whole transfer
  * into the connect URL when the wallet is not connected, so a compliant wallet
- * handles connect + sign + send in a single round-trip. The point of this demo:
- * the user never has to press "Connect" first.
- *
- *  - `{ hasResponse: true, response }` — the wallet signed and submitted the tx.
- *  - `{ hasResponse: false, connectResult: { dispatched } }` — connected but no
- *    signed BoC came back. We never retry silently:
- *      - `dispatched: false` → request never reached the wallet; safe to retry.
- *      - `dispatched: true`  → the request rode along inside the connect URL and
- *        may already be signed; the UI must ask the user before retrying.
+ * handles connect + sign + send in a single round-trip. Returns the signed BoC
+ * (or `dispatched: true` when the wallet connected but returned nothing) — the
+ * page drives its own loader stages.
  */
-export async function embeddedTonPay(ui: TonConnectUI, params: PayParams): Promise<void> {
-    params.onStage({ name: 'awaiting' });
-
+export async function embeddedTonPay(ui: TonConnectUI, amountNano: string): Promise<PayResult> {
     const embedded = await ui.sendTransaction(
         {
             validUntil: Math.floor(Date.now() / 1000) + 6 * 60,
             messages: [
                 {
                     address: ECHO_CONTRACT,
-                    amount: params.amountNano,
+                    amount: amountNano,
                     payload: COMMENT_BODY,
                     stateInit: ECHO_STATE_INIT
                 }
@@ -71,11 +58,10 @@ export async function embeddedTonPay(ui: TonConnectUI, params: PayParams): Promi
 
     if (!embedded.hasResponse) {
         if (embedded.connectResult.dispatched) {
-            params.onStage({ name: 'dispatched' });
-            return;
+            return { boc: null, dispatched: true };
         }
         throw new Error('The request never reached the wallet — you can safely try again.');
     }
 
-    params.onStage({ name: 'confirmed', boc: embedded.response.boc });
+    return { boc: embedded.response.boc, dispatched: false };
 }

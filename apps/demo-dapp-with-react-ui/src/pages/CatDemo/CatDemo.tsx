@@ -5,13 +5,32 @@ import { SCARED_CAT_742 } from './catData';
 import { pickPreview } from '../FrogDemo/nftData';
 import { NftLottie } from '../FrogDemo/NftLottie';
 import { MarketHeader } from '../../components/MarketHeader/MarketHeader';
-import { embeddedTonPay, PayStage, PRICE_TON, PRICE_TON_NANO } from './embeddedTonPay';
+import { embeddedTonPay, PRICE_TON, PRICE_TON_NANO } from './embeddedTonPay';
 
 const nft = SCARED_CAT_742;
 const NFT_IMAGE_LARGE = pickPreview(nft, 1500);
 const NFT_IMAGE_THUMB = pickPreview(nft, 100);
 
 const TON_ICON = 'https://getgems.io/_next/static/media/ton.2d9f8065.png';
+
+const sleep = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
+
+// Cosmetic stages for the purchase loader — each separated by a 400ms pause.
+// No on-chain polling, no elapsed-seconds counter.
+type Stage =
+    | { name: 'idle' }
+    | { name: 'estimating' }
+    | { name: 'signing' }
+    | { name: 'submitting' }
+    | { name: 'confirmed'; boc: string | null }
+    | { name: 'dispatched' }
+    | { name: 'error'; error: string };
+
+const STAGE_LABEL: Partial<Record<Stage['name'], string>> = {
+    estimating: 'Estimating fee…',
+    signing: 'Sign in your wallet…',
+    submitting: 'Submitting…'
+};
 
 function TonIcon({ className }: { className?: string }) {
     return <img className={className} src={TON_ICON} alt="TON" />;
@@ -38,18 +57,25 @@ function VerifiedTick() {
 
 export function CatDemo() {
     const [tonConnectUi] = useTonConnectUI();
-    const [stage, setStage] = useState<PayStage>({ name: 'idle' });
+    const [stage, setStage] = useState<Stage>({ name: 'idle' });
 
-    const busy = stage.name === 'awaiting';
+    const busy =
+        stage.name === 'estimating' || stage.name === 'signing' || stage.name === 'submitting';
     const success = stage.name === 'confirmed';
 
     const handlePay = async () => {
         setStage({ name: 'idle' });
         try {
-            await embeddedTonPay(tonConnectUi, {
-                amountNano: PRICE_TON_NANO,
-                onStage: setStage
-            });
+            // One-tap embedded request: connect + sign + send in a single round-trip.
+            setStage({ name: 'signing' });
+            const res = await embeddedTonPay(tonConnectUi, PRICE_TON_NANO);
+
+            if (res.dispatched) {
+                setStage({ name: 'dispatched' });
+                return;
+            }
+
+            setStage({ name: 'confirmed', boc: res.boc });
         } catch (e) {
             setStage({ name: 'error', error: e instanceof Error ? e.message : String(e) });
         }
@@ -166,7 +192,7 @@ export function CatDemo() {
 
             <div className="cat__actions">
                 <button className="cat__btn cat__btn--primary" onClick={handlePay} disabled={busy}>
-                    {busy ? 'Confirm in your wallet…' : `Buy for ${PRICE_TON} TON`}
+                    {busy ? (STAGE_LABEL[stage.name] ?? 'Processing…') : `Buy for ${PRICE_TON} TON`}
                 </button>
             </div>
         </div>

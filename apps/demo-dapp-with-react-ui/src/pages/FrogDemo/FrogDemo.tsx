@@ -2,15 +2,10 @@ import './style.scss';
 import { useState } from 'react';
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { Address } from '@ton/core';
-import {
-    EmbeddedSignNoResponseError,
-    oneClickGaslessPay,
-    PayStage,
-    USDT_MASTER
-} from '../OneClickPay/oneClickGaslessFlow';
 import { KISSED_FROG_6425, pickPreview } from './nftData';
 import { NftLottie } from './NftLottie';
 import { MarketHeader } from '../../components/MarketHeader/MarketHeader';
+import { sendMessages } from '../../components/GaslessDemo/gaslessMessages';
 
 const PRICE_USDT_UNITS = 1_000_000n;
 const PRICE_LABEL = '100';
@@ -22,24 +17,23 @@ const nft = KISSED_FROG_6425;
 const NFT_IMAGE_LARGE = pickPreview(nft, 1500);
 const NFT_IMAGE_THUMB = pickPreview(nft, 100);
 
-function isBusy(stage: PayStage): boolean {
-    return stage.name !== 'idle' && stage.name !== 'confirmed' && stage.name !== 'error';
-}
+const sleep = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
 
-function stageHint(stage: PayStage): string {
-    switch (stage.name) {
-        case 'estimating':
-            return 'Estimating fee…';
-        case 'signing':
-            return 'Approve in wallet…';
-        case 'submitting':
-            return 'Submitting…';
-        case 'waiting-onchain':
-            return `On-chain · ${Math.round(stage.pollsElapsedMs / 1000)}s`;
-        default:
-            return '';
-    }
-}
+// Cosmetic stages for the purchase loader — each separated by a 500ms pause.
+// No on-chain polling, no elapsed-seconds counter.
+type Stage =
+    | { name: 'idle' }
+    | { name: 'estimating' }
+    | { name: 'signing' }
+    | { name: 'submitting' }
+    | { name: 'confirmed' }
+    | { name: 'error'; error: string };
+
+const STAGE_LABEL: Partial<Record<Stage['name'], string>> = {
+    estimating: 'Estimating fee…',
+    signing: 'Sign in your wallet…',
+    submitting: 'Submitting…'
+};
 
 function VerifiedTick() {
     return (
@@ -63,9 +57,10 @@ function VerifiedTick() {
 export function FrogDemo() {
     const [tonConnectUi] = useTonConnectUI();
     const wallet = useTonWallet();
-    const [stage, setStage] = useState<PayStage>({ name: 'idle' });
+    const [stage, setStage] = useState<Stage>({ name: 'idle' });
 
-    const busy = isBusy(stage);
+    const busy =
+        stage.name === 'estimating' || stage.name === 'signing' || stage.name === 'submitting';
     const success = stage.name === 'confirmed';
 
     const handleBuy = async () => {
@@ -82,20 +77,20 @@ export function FrogDemo() {
 
         try {
             const self = Address.parse(wallet.account.address);
-            await oneClickGaslessPay(tonConnectUi, {
-                master: USDT_MASTER,
-                amount: PRICE_USDT_UNITS,
-                destination: self,
-                onStage: setStage
-            });
+
+            setStage({ name: 'estimating' });
+            await sleep(400);
+
+            // Reuse the shared gasless transfer helper (same one the GaslessDemo uses):
+            // estimate the relay fee, sign, and submit through the gasless relayer.
+            setStage({ name: 'signing' });
+            await sendMessages(tonConnectUi, PRICE_USDT_UNITS, self);
+
+            setStage({ name: 'submitting' });
+            await sleep(400);
+
+            setStage({ name: 'confirmed' });
         } catch (e) {
-            if (e instanceof EmbeddedSignNoResponseError) {
-                setStage({
-                    name: 'error',
-                    error: 'Wallet did not return a signed message. Check wallet history before retrying.'
-                });
-                return;
-            }
             setStage({ name: 'error', error: e instanceof Error ? e.message : String(e) });
         }
     };
@@ -206,7 +201,9 @@ export function FrogDemo() {
                     onClick={handleBuy}
                     disabled={busy}
                 >
-                    {busy ? stageHint(stage) : `Buy for ${PRICE_LABEL} USD₮`}
+                    {busy
+                        ? (STAGE_LABEL[stage.name] ?? 'Processing…')
+                        : `Buy for ${PRICE_LABEL} USD₮`}
                 </button>
             </div>
         </div>
