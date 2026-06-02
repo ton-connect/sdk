@@ -62,7 +62,7 @@ async function enableMocking() {
             }
         });
 
-        setInterval(verifyAndRestartWorker, 1_000);
+        setInterval(verifyAndRestartWorker, 10_000);
     });
 }
 

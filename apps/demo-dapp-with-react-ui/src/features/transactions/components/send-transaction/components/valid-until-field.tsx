@@ -45,10 +45,7 @@ export const ValidUntilField = ({
     warningMessage,
     testIdPrefix
 }: ValidUntilFieldProps) => (
-    <Input
-        size="s"
-        error={isFieldError(timer.status, errorMessage)}
-    >
+    <Input size="s" error={isFieldError(timer.status, errorMessage)}>
         <Input.Header>
             <Input.Title>Valid Until</Input.Title>
             <span

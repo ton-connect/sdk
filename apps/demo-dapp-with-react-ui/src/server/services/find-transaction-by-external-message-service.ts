@@ -1,7 +1,8 @@
 import { Cell, loadMessage, loadTransaction, type Transaction } from '@ton/core';
-import { TonClient } from '@ton/ton';
+import type { TonClient } from '@ton/ton';
 import { TonApiClient } from '@ton-api/client';
 
+import { createTonClientForNetwork } from '../../core/utils/create-ton-client';
 import { getNormalizedExtMessageHash, retry } from '../utils/transactions-utils';
 
 /** Cap pagination so the demo cannot scan an entire busy account forever. */
@@ -9,9 +10,6 @@ const MAX_SCAN_PAGES = 25;
 const TX_PAGE_SIZE = 10;
 
 export type FindTxNetwork = 'mainnet' | 'testnet';
-
-const toncenterEndpoint = (network: FindTxNetwork) =>
-    `https://${network === 'testnet' ? 'testnet.' : ''}toncenter.com/api/v2/jsonRPC`;
 
 const tonApiBaseUrl = (network: FindTxNetwork) =>
     network === 'testnet' ? 'https://testnet.tonapi.io' : 'https://tonapi.io';
@@ -33,9 +31,7 @@ function parseExternalInMessage(boc: string) {
     const inMessage = loadMessage(Cell.fromBase64(boc).beginParse());
 
     if (inMessage.info.type !== 'external-in') {
-        throw new FindTransactionError(
-            `Message must be "external-in", got ${inMessage.info.type}`
-        );
+        throw new FindTransactionError(`Message must be "external-in", got ${inMessage.info.type}`);
     }
 
     return {
@@ -146,10 +142,7 @@ export async function findTransactionByExternalMessageService(
 ): Promise<{ transaction: Record<string, unknown> }> {
     const transaction = isBrowserMainThread
         ? await getTransactionByInMessageTonApi(boc, network)
-        : await getTransactionByInMessageTonCenter(
-              boc,
-              new TonClient({ endpoint: toncenterEndpoint(network) })
-          );
+        : await getTransactionByInMessageTonCenter(boc, createTonClientForNetwork(network));
 
     if (!transaction) {
         throw new FindTransactionError(

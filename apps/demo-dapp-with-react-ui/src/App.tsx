@@ -8,9 +8,9 @@ import { getProviderAnalyticsSettingsFromLocation } from './features/dev-setting
 const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
-            staleTime: 30_000,
-            retry: 10,
-            retryDelay: 1500,
+            staleTime: 60_000,
+            retry: 2,
+            retryDelay: attemptIndex => Math.min(10_000, 2_000 * 2 ** attemptIndex),
             refetchOnWindowFocus: false
         }
     }

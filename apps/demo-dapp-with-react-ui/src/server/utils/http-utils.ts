@@ -41,4 +41,3 @@ export function notFound<T extends object>(body: T): StrictResponse<JsonBodyType
         statusText: 'Not Found'
     });
 }
-

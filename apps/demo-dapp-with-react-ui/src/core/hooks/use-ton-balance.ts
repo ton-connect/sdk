@@ -1,9 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { CHAIN, useTonWallet } from '@tonconnect/ui-react';
 import { Address } from '@ton/core';
-import { TonClient } from '@ton/ton';
-
-import { endpointByChain, isSupportedChain } from '../utils/ton-endpoints';
+import { createTonClient } from '../utils/create-ton-client';
+import { isSupportedChain } from '../utils/ton-endpoints';
 
 /**
  * Reads the native TON balance of `address` (nanoton) via the active wallet's
@@ -17,8 +16,9 @@ export const useTonBalance = (address: string | undefined) => {
     return useQuery({
         queryKey: ['ton-balance', chain, address],
         enabled,
+        staleTime: 60_000,
         queryFn: async (): Promise<bigint> => {
-            const client = new TonClient({ endpoint: endpointByChain[chain as CHAIN] });
+            const client = createTonClient(chain as CHAIN);
             return client.getBalance(Address.parse(address!));
         }
     });

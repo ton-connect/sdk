@@ -1,14 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { CHAIN, useTonWallet } from '@tonconnect/ui-react';
 import { Address, fromNano } from '@ton/core';
-import { TonClient } from '@ton/ton';
 import { JettonMinter } from '@ton-community/assets-sdk';
 
 import { formatUnits } from '../../../../../core/utils/units';
 import { useJettonBalance } from '../../../../../core/hooks/use-jetton-balance';
 import { useTonBalance } from '../../../../../core/hooks/use-ton-balance';
 import { useWalletNetwork } from '../../../../../core/hooks/use-wallet-network';
-import { endpointByChain } from '../../../../../core/utils/ton-endpoints';
+import { createTonClient } from '../../../../../core/utils/create-ton-client';
 
 import { USDT_DECIMALS, USDT_MASTER_BY_CHAIN } from '../utils/constants';
 
@@ -37,8 +36,9 @@ export const useUsdtWallet = () => {
     const jettonWalletQuery = useQuery({
         queryKey: ['usdt-jetton-wallet', chain, senderAddress],
         enabled: !!senderAddress && !!chain,
+        staleTime: 60_000,
         queryFn: async () => {
-            const client = new TonClient({ endpoint: endpointByChain[chain!] });
+            const client = createTonClient(chain!);
             const master = client.open(
                 JettonMinter.createFromAddress(USDT_MASTER_BY_CHAIN[chain!])
             );

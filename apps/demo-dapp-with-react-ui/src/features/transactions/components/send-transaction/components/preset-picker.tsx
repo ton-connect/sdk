@@ -48,7 +48,9 @@ export const PresetPicker = ({
             </Button>
 
             <Modal open={open} onOpenChange={setOpen} title="Load a preset">
-                <p className="mb-4 text-sm leading-relaxed text-secondary-foreground">{description}</p>
+                <p className="mb-4 text-sm leading-relaxed text-secondary-foreground">
+                    {description}
+                </p>
                 <div className="flex flex-col gap-2" data-testid={`${testIdPrefix}-presets-list`}>
                     {presets.map(opt => (
                         <button

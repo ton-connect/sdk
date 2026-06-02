@@ -16,9 +16,7 @@ export type RequestMode = 'send' | 'sign';
  * Also owns the two flags that wrap the wallet call: `withConnect` (embed the
  * request in the connect URL) and `waitForTx` (poll on-chain after send).
  */
-export const useTransactionForm = (
-    buildInitial: () => SendTransactionRequest = buildDefaultTx
-) => {
+export const useTransactionForm = (buildInitial: () => SendTransactionRequest = buildDefaultTx) => {
     const {
         value: tx,
         draft,

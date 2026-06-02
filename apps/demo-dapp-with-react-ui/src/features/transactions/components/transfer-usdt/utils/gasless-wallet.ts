@@ -37,11 +37,7 @@ export async function resolveGaslessWallet(
     senderAddress?: string,
     options?: { withConnect?: boolean }
 ): Promise<{ walletAddress: Address; publicKey: string }> {
-    if (
-        !tonConnectUi.wallet?.account?.address &&
-        !senderAddress &&
-        options?.withConnect
-    ) {
+    if (!tonConnectUi.wallet?.account?.address && !senderAddress && options?.withConnect) {
         await waitForWalletConnection(tonConnectUi);
     }
 
