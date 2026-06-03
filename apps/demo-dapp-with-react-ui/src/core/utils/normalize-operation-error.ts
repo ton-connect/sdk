@@ -71,7 +71,8 @@ function buildWalletResponse(
     }
 
     const error: Record<string, unknown> = { message: walletMessage };
-    const code = errorClass && isKnownErrorClass(errorClass) ? ERROR_CLASS_TO_CODE[errorClass] : undefined;
+    const code =
+        errorClass && isKnownErrorClass(errorClass) ? ERROR_CLASS_TO_CODE[errorClass] : undefined;
     if (code !== undefined) {
         error.code = code;
     }

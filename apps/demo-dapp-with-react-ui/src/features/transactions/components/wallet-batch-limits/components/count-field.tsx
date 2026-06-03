@@ -12,13 +12,17 @@ interface CountFieldProps {
 const PRESETS = [1, 4, 5, 255, 256];
 
 export const CountField: FC<CountFieldProps> = ({ count, onChange }) => {
-    const input = useIntegerInputDraft(count, next => {
-        if (next !== undefined) {
-            onChange(next);
+    const input = useIntegerInputDraft(
+        count,
+        next => {
+            if (next !== undefined) {
+                onChange(next);
+            }
+        },
+        {
+            shouldCommit: value => value >= 1
         }
-    }, {
-        shouldCommit: value => value >= 1
-    });
+    );
 
     return (
         <Input size="s" data-testid="batch-limits-count-field">

@@ -26,8 +26,14 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     }
 
     try {
-        const boc = req.body?.boc;
-        const network = req.body?.network;
+        const body =
+            req.body && typeof req.body === 'object'
+                ? req.body
+                : typeof req.body === 'string'
+                  ? (JSON.parse(req.body) as ApiRequest['body'])
+                  : null;
+        const boc = body?.boc;
+        const network = body?.network;
         if (typeof boc !== 'string' || (network !== 'mainnet' && network !== 'testnet')) {
             res.status(400).json({ error: 'Invalid request body' });
             return;

@@ -35,32 +35,32 @@ const captureFromConsoleArgs = (args: unknown[]): void => {
 
 type ConsoleMethod = (...args: unknown[]) => void;
 
-const patchConsoleMethod = (
-    method: 'debug' | 'log' | 'info'
-): (() => void) => {
-    const original = console[method].bind(console) as ConsoleMethod;
-
-    const patched: ConsoleMethod = (...args: unknown[]) => {
+const wrapConsoleMethod = (original: ConsoleMethod): ConsoleMethod => {
+    return (...args: unknown[]) => {
         captureFromConsoleArgs(args);
         return original(...args);
     };
+};
 
-    if (method === 'debug') {
-        console.debug = patched as typeof console.debug;
-    } else if (method === 'log') {
-        console.log = patched as typeof console.log;
-    } else {
-        console.info = patched as typeof console.info;
-    }
+const patchConsoleDebug = (): (() => void) => {
+    const original = console.debug.bind(console);
+    console.debug = wrapConsoleMethod(original) as typeof console.debug;
+    return () => {
+        console.debug = original;
+    };
+};
+
+/** SDK also logs wallet RPC lines via `console.log`. */
+const patchConsoleLog = (): (() => void) => {
+    /* eslint-disable no-console -- intercept SDK wallet message lines for demo Result */
+    const original = console.log.bind(console);
+    console.log = wrapConsoleMethod(original) as typeof console.log;
+    /* eslint-enable no-console */
 
     return () => {
-        if (method === 'debug') {
-            console.debug = original as typeof console.debug;
-        } else if (method === 'log') {
-            console.log = original as typeof console.log;
-        } else {
-            console.info = original as typeof console.info;
-        }
+        /* eslint-disable no-console -- restore patched console.log */
+        console.log = original;
+        /* eslint-enable no-console */
     };
 };
 
@@ -75,8 +75,8 @@ export function installWalletConsoleCapture(): void {
         return;
     }
 
-    const restoreDebug = patchConsoleMethod('debug');
-    const restoreLog = patchConsoleMethod('log');
+    const restoreDebug = patchConsoleDebug();
+    const restoreLog = patchConsoleLog();
     restoreConsole = () => {
         restoreDebug();
         restoreLog();

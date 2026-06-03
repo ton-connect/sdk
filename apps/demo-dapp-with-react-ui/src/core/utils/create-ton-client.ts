@@ -9,7 +9,13 @@ const TONCENTER_ENDPOINT_BY_CHAIN: Record<TonChain, string> = {
 };
 
 const readEnv = (key: string): string | undefined => {
-    const value = import.meta.env[key];
+    const fromVite =
+        typeof import.meta !== 'undefined' && import.meta.env
+            ? (import.meta.env as Record<string, string | undefined>)[key]
+            : undefined;
+    const fromProcess =
+        typeof process !== 'undefined' && process.env ? process.env[key] : undefined;
+    const value = fromVite ?? fromProcess;
     return typeof value === 'string' && value.length > 0 ? value : undefined;
 };
 
