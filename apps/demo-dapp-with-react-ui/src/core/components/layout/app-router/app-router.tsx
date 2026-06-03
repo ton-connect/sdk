@@ -15,9 +15,7 @@ import {
     TonProofPage,
     SignMessagePage,
     TransferUsdtPage,
-    TxFormPage,
-    WidgetBuilderPage,
-    WidgetSandboxPage
+    TxFormPage
 } from '../../../../pages/index';
 
 export const AppRouter = () => {
@@ -43,8 +41,6 @@ export const AppRouter = () => {
                 <Route path="/find-tx" element={<FindTxPage />} />
                 <Route path="/merkle" element={<MerklePage />} />
                 <Route path="/create-jetton" element={<CreateJettonPage />} />
-                <Route path="/widget-builder" element={<WidgetBuilderPage />} />
-                <Route path="/widget-sandbox" element={<WidgetSandboxPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="/iframe" element={<IframePage />} />
                 <Route path="/iframe/iframe" element={<IframeIframePage />} />
