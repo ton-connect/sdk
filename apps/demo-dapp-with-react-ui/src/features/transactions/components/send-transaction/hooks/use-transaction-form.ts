@@ -23,6 +23,8 @@ export const useTransactionForm = (buildInitial: () => SendTransactionRequest = 
         onDraftChange,
         replaceValue: replaceTx,
         isInvalid,
+        showInvalidUi,
+        showValidationUi,
         editorMessages,
         editorWarnings,
         validationErrors,
@@ -36,12 +38,19 @@ export const useTransactionForm = (buildInitial: () => SendTransactionRequest = 
     const [withConnect, setWithConnect] = useState(false);
     const [waitForTx, setWaitForTx] = useState(false);
 
-    const validUntilError = validationErrors.find(message => message.startsWith('validUntil'));
-    const validUntilWarning = validationWarnings.find(message => message.startsWith('validUntil'));
+    const validUntilError = showValidationUi
+        ? validationErrors.find(message => message.startsWith('validUntil'))
+        : undefined;
+    const validUntilWarning = showValidationUi
+        ? validationWarnings.find(message => message.startsWith('validUntil'))
+        : undefined;
 
     const setValidUntil = useCallback(
-        (nextValidUntil: number) => {
-            replaceTx({ ...tx, validUntil: nextValidUntil });
+        (nextValidUntil: number | undefined) => {
+            replaceTx({
+                ...tx,
+                validUntil: nextValidUntil
+            } as SendTransactionRequest);
         },
         [replaceTx, tx]
     );
@@ -61,6 +70,7 @@ export const useTransactionForm = (buildInitial: () => SendTransactionRequest = 
         tx,
         draft,
         isInvalid,
+        showInvalidUi,
         editorMessages,
         editorWarnings,
         validUntilError,

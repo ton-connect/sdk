@@ -16,6 +16,7 @@ export function useCreateJettonForm() {
         onDraftChange,
         replaceValue,
         isInvalid,
+        showInvalidUi,
         editorMessages
     } = useJsonDraftValidation({
         initialValue: DEFAULT_JETTON_PRESET,
@@ -30,6 +31,7 @@ export function useCreateJettonForm() {
         jetton,
         draft,
         isInvalid,
+        showInvalidUi,
         editorMessages,
         onDraftChange,
         reset

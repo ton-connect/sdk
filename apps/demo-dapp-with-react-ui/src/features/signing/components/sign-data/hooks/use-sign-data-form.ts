@@ -21,6 +21,7 @@ export const useSignDataForm = () => {
         onDraftChange,
         replaceValue: replacePayload,
         isInvalid,
+        showInvalidUi,
         editorMessages
     } = useJsonDraftValidation({
         initialValue: defaultPayloadFor('text'),
@@ -47,6 +48,7 @@ export const useSignDataForm = () => {
         onDraftChange,
         replacePayload,
         isInvalid,
+        showInvalidUi,
         editorMessages,
         payload,
         withConnect,

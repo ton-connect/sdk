@@ -27,6 +27,29 @@ const formatCountdown = (diff: number): string => {
     return `${s}s`;
 };
 
+export const computeValidUntilTimerState = (
+    validUntil: number | undefined,
+    nowSec = Math.floor(Date.now() / 1000)
+): TimerState => {
+    if (validUntil === undefined || !Number.isFinite(validUntil)) {
+        return { display: '—', status: 'missing' };
+    }
+
+    const diff = validUntil - nowSec;
+    if (diff <= 0) {
+        return { display: `−${formatCountdown(-diff)}`, status: 'expired' };
+    }
+    if (diff > TRANSACTION_VALID_UNTIL_MAX_SECONDS) {
+        return {
+            display: `> ${TRANSACTION_VALID_UNTIL_MAX_HOURS}h`,
+            status: 'tooFar'
+        };
+    }
+
+    const status: TimerStatus = diff <= WARNING_THRESHOLD_SEC ? 'warning' : 'ok';
+    return { display: formatCountdown(diff), status };
+};
+
 /**
  * Drives a 1s-tick countdown towards `validUntil` (a unix timestamp in seconds).
  * Owns the interval lifecycle and the status policy:
@@ -36,32 +59,14 @@ const formatCountdown = (diff: number): string => {
  *  - past `validUntil` → expired (red, display shows negative countdown).
  */
 export const useValidUntilTimer = (validUntil: number | undefined): TimerState => {
-    const [state, setState] = useState<TimerState>({ display: '—', status: 'missing' });
+    const [state, setState] = useState(() => computeValidUntilTimerState(validUntil));
 
     useEffect(() => {
         let timeoutId: ReturnType<typeof setTimeout> | undefined;
         let cancelled = false;
 
         const tick = () => {
-            if (validUntil === undefined || !Number.isFinite(validUntil)) {
-                setState({ display: '—', status: 'missing' });
-                if (cancelled) return;
-                timeoutId = setTimeout(tick, 1000);
-                return;
-            }
-
-            const diff = validUntil - Math.floor(Date.now() / 1000);
-            if (diff <= 0) {
-                setState({ display: `−${formatCountdown(-diff)}`, status: 'expired' });
-            } else if (diff > TRANSACTION_VALID_UNTIL_MAX_SECONDS) {
-                setState({
-                    display: `> ${TRANSACTION_VALID_UNTIL_MAX_HOURS}h`,
-                    status: 'tooFar'
-                });
-            } else {
-                const status: TimerStatus = diff <= WARNING_THRESHOLD_SEC ? 'warning' : 'ok';
-                setState({ display: formatCountdown(diff), status });
-            }
+            setState(computeValidUntilTimerState(validUntil));
             if (cancelled) return;
             timeoutId = setTimeout(tick, 1000);
         };

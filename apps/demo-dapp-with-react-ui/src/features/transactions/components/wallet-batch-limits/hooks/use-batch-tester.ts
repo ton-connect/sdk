@@ -32,8 +32,14 @@ const toFriendlyAddress = (raw: string): string => {
 
 type BatchRequest = SendTransactionRequest & SignMessageRequest;
 
-const buildRequest = (count: number, recipient: string): BatchRequest => ({
-    validUntil: Math.floor(Date.now() / 1000) + VALID_UNTIL_SECONDS,
+const defaultValidUntil = () => Math.floor(Date.now() / 1000) + VALID_UNTIL_SECONDS;
+
+const buildRequest = (
+    count: number,
+    recipient: string,
+    validUntil: number = defaultValidUntil()
+): BatchRequest => ({
+    validUntil,
     messages: Array.from({ length: count }, () => ({
         address: recipient,
         amount: PER_MESSAGE_AMOUNT_NANO
@@ -64,8 +70,12 @@ export const useBatchTester = () => {
         onDraftChange,
         replaceValue,
         isInvalid,
+        showInvalidUi,
+        showValidationUi,
         editorMessages,
         editorWarnings,
+        validationErrors,
+        validationWarnings,
         isSyntaxInvalid
     } = useJsonDraftValidation({
         initialValue: buildRequest(DEFAULT_COUNT, recipient),
@@ -79,12 +89,36 @@ export const useBatchTester = () => {
 
     const parsed = isSyntaxInvalid ? null : requestValue;
     const count = parsed?.messages?.length ?? 0;
+    const validUntil = parsed?.validUntil;
+
+    const validUntilError = showValidationUi
+        ? validationErrors.find(message => message.startsWith('validUntil'))
+        : undefined;
+    const validUntilWarning = showValidationUi
+        ? validationWarnings.find(message => message.startsWith('validUntil'))
+        : undefined;
 
     const setCount = useCallback(
         (next: number) => {
-            replaceValue(buildRequest(next, recipient));
+            replaceValue(buildRequest(next, recipient, parsed?.validUntil ?? defaultValidUntil()));
         },
-        [replaceValue, recipient]
+        [replaceValue, recipient, parsed?.validUntil]
+    );
+
+    const setValidUntil = useCallback(
+        (nextValidUntil: number | undefined) => {
+            const base = parsed ?? buildRequest(count > 0 ? count : DEFAULT_COUNT, recipient);
+            replaceValue({
+                ...base,
+                validUntil: nextValidUntil
+            } as BatchRequest);
+        },
+        [parsed, count, recipient, replaceValue]
+    );
+
+    const setValidUntilFromNow = useCallback(
+        (seconds: number) => setValidUntil(Math.floor(Date.now() / 1000) + seconds),
+        [setValidUntil]
     );
 
     const applyRequestContext = useCallback(
@@ -127,10 +161,16 @@ export const useBatchTester = () => {
         setMode,
         count,
         setCount,
+        validUntil,
+        setValidUntil,
+        setValidUntilFromNow,
+        validUntilError,
+        validUntilWarning,
         draft,
         onDraftChange,
         applyRequestContext,
         isInvalid,
+        showInvalidUi,
         editorMessages,
         editorWarnings,
         send,

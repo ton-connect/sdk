@@ -38,6 +38,11 @@ export function useJsonDraftValidation<T>({
     const [value, setValue] = useState<T>(initialValue);
     const [draft, setDraft] = useState(() => stringify(initialValue));
     const [nowSec, setNowSec] = useState(() => Math.floor(Date.now() / 1000));
+    const [showValidationUi, setShowValidationUi] = useState(false);
+
+    useEffect(() => {
+        setShowValidationUi(true);
+    }, []);
 
     useEffect(() => {
         if (!watchTime) {
@@ -69,6 +74,7 @@ export function useJsonDraftValidation<T>({
 
     const isSyntaxInvalid = draftParse.syntaxInvalid;
     const isInvalid = isSyntaxInvalid || validationErrors.length > 0;
+    const showInvalidUi = showValidationUi && isInvalid;
     const editorMessages = isSyntaxInvalid ? [JSON_SYNTAX_ERROR_MESSAGE] : validationErrors;
     const editorWarnings = isSyntaxInvalid ? [] : validationWarnings;
 
@@ -90,6 +96,8 @@ export function useJsonDraftValidation<T>({
         onDraftChange,
         replaceValue,
         isInvalid,
+        showInvalidUi,
+        showValidationUi,
         editorMessages,
         editorWarnings,
         validationErrors,

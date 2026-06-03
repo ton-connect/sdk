@@ -40,7 +40,7 @@ export const CreateJetton = () => {
                 className="mb-2"
                 value={form.draft}
                 onChange={form.onDraftChange}
-                invalid={form.isInvalid}
+                invalid={form.showInvalidUi}
                 messages={form.editorMessages}
                 data-testid="create-jetton-json-editor"
             />

@@ -3,6 +3,9 @@ import { JsonEditor } from '../../../../core/components/ui/json-editor';
 import { ResultBlock } from '../../../../core/components/shared/result-block';
 import { RequestContextQuickFill } from '../../../../core/components/shared/request-context-quick-fill';
 
+import { ValidUntilField } from '../send-transaction/components/valid-until-field';
+import { useValidUntilTimer } from '../send-transaction/hooks';
+
 import { ConfigureHeader } from './components/configure-header';
 import { CountField } from './components/count-field';
 import { ModeField } from './components/mode-field';
@@ -18,15 +21,22 @@ export const WalletBatchLimits = () => {
         onDraftChange,
         applyRequestContext,
         isInvalid,
+        showInvalidUi,
         editorMessages,
         editorWarnings,
         send,
         sending,
         result,
         clearResult,
-        reset
+        reset,
+        validUntil,
+        setValidUntil,
+        setValidUntilFromNow,
+        validUntilError,
+        validUntilWarning
     } = useBatchTester();
 
+    const timer = useValidUntilTimer(validUntil);
     const actionLabel = mode === 'sendTransaction' ? 'Send transaction' : 'Sign message';
 
     return (
@@ -37,12 +47,22 @@ export const WalletBatchLimits = () => {
 
             <CountField count={count} onChange={setCount} />
 
+            <ValidUntilField
+                validUntil={validUntil}
+                onChange={setValidUntil}
+                onSetFromNow={setValidUntilFromNow}
+                timer={timer}
+                errorMessage={validUntilError}
+                warningMessage={validUntilWarning}
+                testIdPrefix="batch-limits"
+            />
+
             <RequestContextQuickFill onPatch={applyRequestContext} testIdPrefix="batch-limits" />
 
             <JsonEditor
                 value={draft}
                 onChange={onDraftChange}
-                invalid={isInvalid}
+                invalid={showInvalidUi}
                 messages={editorMessages}
                 warnings={editorWarnings}
                 data-testid="batch-limits-request-editor"
