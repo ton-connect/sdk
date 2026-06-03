@@ -11,9 +11,10 @@ import { Wallet, WalletInfoBase, WalletInfoInjectable, WalletInfoRemote } from '
 export type WalletOpenMethod = 'qrcode' | 'universal-link' | 'custom-deeplink';
 
 /**
- * Connected-wallet entry as exposed by `tonConnectUI.wallet` — combines the
- * runtime `Wallet` from `@tonconnect/sdk` with the wallets-list entry plus,
- * for remote wallets, the {@link WalletOpenMethod} the user picked.
+ * Wallets-list info for the connected wallet — the registry (or custom) entry
+ * plus, for remote wallets, the {@link WalletOpenMethod} the user picked. It is
+ * merged with the runtime `Wallet` from `@tonconnect/sdk` to form
+ * {@link ConnectedWallet}, the shape `tonConnectUI.wallet` resolves to.
  *
  * Used by UI components that want to render wallet branding next to the
  * connected account.

@@ -27,7 +27,7 @@ export interface TonConnectUiOptions {
     /**
      * Language for the strings shown inside SDK-rendered UI.
      *
-     * @default system locale
+     * @default 'en'
      */
     language?: Locales;
 

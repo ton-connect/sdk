@@ -171,7 +171,7 @@ export function isWalletInfoCurrentlyEmbedded(
 }
 
 /**
- * Checks if `WalletInfo` is `WalletInfoInjected`, but doesn't check if it is injected to the page or not.
+ * Checks if `WalletInfo` is `WalletInfoInjectable`, but doesn't check if it is injected to the page or not.
  * @param value WalletInfo to check.
  */
 export function isWalletInfoInjectable(value: WalletInfo): value is WalletInfoInjectable {

@@ -5,7 +5,7 @@ export type BaseEvent = {
      */
     trace_id?: string;
     /**
-     * The subsystem used to collect the event (possible values: dapp, dapp-sdk, bridge, wallet).
+     * The subsystem used to collect the event (possible values: dapp, dapp-sdk, bridge, wallet, wallet-sdk).
      */
     subsystem?: 'dapp' | 'dapp-sdk' | 'bridge' | 'wallet' | 'wallet-sdk';
     /**

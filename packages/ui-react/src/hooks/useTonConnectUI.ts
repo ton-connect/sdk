@@ -7,7 +7,7 @@ import { isServerSide } from '../utils/web';
 /**
  * Returns a tuple of:
  *
- * - the singleton `TonConnectUI` instance — call every method (`connect`,
+ * - the singleton `TonConnectUI` instance — call every method (`connectWallet`,
  *   `sendTransaction`, `signData`, `signMessage`, modal helpers) on it;
  * - a `setOptions(options)` callback that merges the partial
  *   `TonConnectUiOptions` into the live instance via its `uiOptions`

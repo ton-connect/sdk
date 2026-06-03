@@ -1,7 +1,7 @@
 import { Feature } from './feature';
 
 /**
- * Wallet self-description returned inside the {@link ConnectEventSuccess.payload.device}.
+ * Wallet self-description returned inside {@link ConnectEventSuccess}'s `payload.device`.
  *
  * @see [`DeviceInfo` (Connect spec)](https://github.com/ton-blockchain/ton-connect/blob/main/spec/connect.md#deviceinfo)
  */

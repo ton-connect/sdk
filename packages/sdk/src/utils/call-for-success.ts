@@ -12,7 +12,7 @@ export type CallForSuccessOptions = {
     signal?: AbortSignal;
 
     /**
-     * The number of attempts to make before giving up. Default is 20.
+     * The number of attempts to make before giving up. Default is 10.
      */
     attempts?: number;
 

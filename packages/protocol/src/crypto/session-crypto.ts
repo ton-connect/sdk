@@ -6,8 +6,10 @@ import nacl, { BoxKeyPair } from 'tweetnacl';
  * Implements the TON Connect session-encryption protocol on top of NaCl's
  * `crypto_box`.
  *
- * Use `SessionCrypto` on the wallet side to encrypt outgoing
- * {@link WalletMessage} and decrypt incoming {@link AppMessage} on the bridge.
+ * The protocol is symmetric: each side encrypts the messages it sends and
+ * decrypts the messages it receives. On the dApp side that means encrypting
+ * outgoing {@link AppMessage} and decrypting incoming {@link WalletMessage};
+ * the wallet does the reverse.
  *
  * @example
  * ```ts
@@ -15,15 +17,15 @@ import nacl, { BoxKeyPair } from 'tweetnacl';
  *
  * // Generate a fresh session
  * const session = new SessionCrypto();
- * const myClientId = session.sessionId;  // hex public key (sent to the dApp)
+ * const myClientId = session.sessionId;  // hex public key (sent to the peer)
  *
- * // Encrypt an outgoing message for the dApp
+ * // Encrypt an outgoing message for the peer
  * const ciphertext = session.encrypt(
- *     JSON.stringify(walletResponse),
- *     hexToByteArray(dAppClientId)
+ *     JSON.stringify(message),
+ *     hexToByteArray(peerClientId)
  * );
  *
- * // Decrypt an incoming message from the dApp
+ * // Decrypt an incoming message from the peer
  * const plaintext = session.decrypt(
  *     Base64.decode(bridgeMessage.message).toUint8Array(),
  *     hexToByteArray(bridgeMessage.from)
@@ -70,8 +72,8 @@ export class SessionCrypto {
 
     /**
      * Encrypt `message` for `receiverPublicKey` using a fresh 24-byte random
-     * nonce. Returns `nonce || ciphertext` — the format the bridge
-     * `POST /message` body expects.
+     * nonce. Returns `nonce || ciphertext` as raw bytes; base64-encode this
+     * value before placing it in the bridge `POST /message` body.
      */
     public encrypt(message: string, receiverPublicKey: Uint8Array): Uint8Array {
         const encodedMessage = new TextEncoder().encode(message);

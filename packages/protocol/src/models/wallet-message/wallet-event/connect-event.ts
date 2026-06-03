@@ -78,8 +78,8 @@ export enum CONNECT_EVENT_ERROR_CODES {
 
 /**
  * Per-item reply inside {@link ConnectEventSuccess}`.payload.items`. Wallets
- * either fulfil the item or return a {@link ConnectItemReplyError} with code
- * `400`.
+ * either fulfil the item or return a {@link ConnectItemReplyError} carrying a
+ * {@link CONNECT_ITEM_ERROR_CODES} code (`400` when the item is unsupported).
  */
 export type ConnectItemReply = TonAddressItemReply | TonProofItemReply;
 

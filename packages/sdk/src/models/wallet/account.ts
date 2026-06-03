@@ -12,8 +12,8 @@ export interface Account {
     /**
      * User's address in raw hex form `<workchain>:<hex>`.
      *
-     * Use {@link toUserFriendlyAddress} to render the bounceable / non-bounceable
-     * base64url form used in user-facing UI.
+     * Use {@link toUserFriendlyAddress} to render the non-bounceable base64url
+     * form (`UQ…` on mainnet, `0Q…` on testnet) used in user-facing UI.
      */
     address: string;
 

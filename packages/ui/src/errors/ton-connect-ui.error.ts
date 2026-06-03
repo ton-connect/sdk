@@ -2,8 +2,8 @@ import { TonConnectError } from '@tonconnect/sdk';
 
 /**
  * UI-layer precondition failure thrown by `TonConnectUI` — e.g. calling
- * `sendTransaction()` while no wallet is connected, or invoking a method
- * with mutually-exclusive options.
+ * `sendTransaction()` while no wallet is connected, or when the configured
+ * `buttonRootId` element is not present in the document.
  *
  * Extends `TonConnectError` so a single `catch (e instanceof TonConnectError)`
  * branch covers both SDK-level and UI-level failures:

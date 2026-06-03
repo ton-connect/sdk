@@ -43,8 +43,7 @@ export interface TonConnectUIProviderPropsWithManifest {
     /**
      * HTTPS URL of the dApp's
      * [`tonconnect-manifest.json`](https://github.com/ton-blockchain/ton-connect/blob/main/spec/manifest.md).
-     * When omitted, the SDK falls back to
-     * `${window.location.origin}/tonconnect-manifest.json`.
+     * The provider builds the `TonConnectUI` connector from it.
      */
     manifestUrl: string;
 }
@@ -86,7 +85,7 @@ export interface TonConnectUIProviderPropsBase {
     /**
      * Language for SDK-rendered strings.
      *
-     * @default system locale
+     * @default 'en'
      */
     language: Locales;
 

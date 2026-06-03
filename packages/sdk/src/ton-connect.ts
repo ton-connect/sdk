@@ -102,7 +102,7 @@ import { Consumable, ConsumableLike } from 'src/utils/consumable';
 
 /**
  * Headless TON Connect connector — implements the {@link ITonConnect} contract.
- * Wraps the protocol handshake, the HTTP / JS bridge transports.
+ * Wraps the protocol handshake and the HTTP / JS bridge / WalletConnect transports.
  *
  * @example
  * ```ts
@@ -891,7 +891,7 @@ export class TonConnect implements ITonConnect {
     }
 
     /**
-     * Disconnect form thw connected wallet and drop current session.
+     * Disconnect from the connected wallet and drop current session.
      */
     public async disconnect(options?: OptionalTraceable<{ signal?: AbortSignal }>): Promise<void> {
         if (!this.connected) {

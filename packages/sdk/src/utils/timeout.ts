@@ -21,7 +21,7 @@ export type DeferOptions = {
  *
  * @template T The type of the value returned by the deferrable action.
  * @param {DeferOptions} [options] The options to configure the deferrable action.
- * @returns {Promise<T>} A promise that resolves with the result of the deferrable action.
+ * @returns {Promise<void>} A promise that settles when the deferrable action has finished; the result value is delivered via the `resolve` callback.
  */
 export type Deferrable<T> = (
     resolve: (value: T) => void,

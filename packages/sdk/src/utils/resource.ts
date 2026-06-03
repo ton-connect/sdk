@@ -35,7 +35,7 @@ export type Resource<T, Args extends any[]> = {
  * @template Args - The type of the arguments for creating the resource.
  *
  * @param {(...args: Args) => Promise<T>} createFn - A function that creates the resource.
- * @param {(resource: T) => Promise<void>} [disposeFn] - An optional function that disposes the resource.
+ * @param {(resource: T) => Promise<void>} disposeFn - A function that disposes the resource.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createResource<T extends EventSource, Args extends any[]>(

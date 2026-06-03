@@ -384,7 +384,7 @@ export class TonConnectUI {
 
     /**
      * Use it to customize ConnectRequest and add `tonProof` payload.
-     * You can call it multiply times to set updated tonProof payload if previous one is outdated.
+     * You can call it multiple times to set an updated tonProof payload if the previous one is outdated.
      * If `connectRequestParameters.state === 'loading'` loader will appear instead of the qr code in the wallets modal.
      * If `connectRequestParameters.state` was changed to 'ready' or it's value has been changed, QR will be re-rendered.
      */

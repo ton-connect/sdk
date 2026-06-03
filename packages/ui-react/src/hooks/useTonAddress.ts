@@ -6,8 +6,8 @@ import { useMemo } from 'react';
  * Reactive accessor for the connected account's TON address. Returns an
  * empty string while disconnected.
  *
- * @param userFriendly — `true` (default) returns the bounceable /
- *   non-bounceable base64url form (`UQ…` on mainnet, `0Q…` on testnet).
+ * @param userFriendly — `true` (default) returns the non-bounceable base64url
+ *   user-friendly form (`UQ…` on mainnet, `0Q…` on testnet).
  *   Pass `false` to get the raw `<workchain>:<hex>` form.
  *
  * @example

@@ -18,8 +18,9 @@ export interface TonAddressItem {
     name: 'ton_addr';
 
     /**
-     * Desired TON network global_id. If provided, the wallet MUST connect
-     * the dApp on this network or refuse the connect with an alert.
+     * Desired TON network global_id the dApp wants to connect on. A hint only;
+     * the network-mismatch alert is enforced at request time
+     * (`sendTransaction` / `signData`), not at connect.
      *
      * @see {@link ChainId}
      */

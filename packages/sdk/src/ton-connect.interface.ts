@@ -190,6 +190,7 @@ export interface ITonConnect {
      * @throws {@link WalletNotSupportFeatureError} — wallet does not advertise the
      *         requested `SignData.types`.
      * @throws {@link UserRejectsError} — user declined.
+     * @throws {@link WalletWrongNetworkError} — wallet network differs from the request.
      * @throws {@link TonConnectError} — bridge / validation error.
      *
      * @returns The {@link SignDataResponse} plus, when available, the `traceId`

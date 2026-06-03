@@ -7,7 +7,7 @@ export enum CHAIN {
 }
 
 /**
- * TON network identifier. Maybe extended with custom `global_id`'s.
+ * TON network identifier. May be extended with custom `global_id`s.
  *
  * @see [`NETWORK_ID` (Connect spec)](https://github.com/ton-blockchain/ton-connect/blob/main/spec/connect.md#network_id)
  */

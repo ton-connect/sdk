@@ -24,8 +24,8 @@ export interface TonConnectUiOptionsWithManifest extends TonConnectUiCreateOptio
     /**
      * HTTPS URL of the dApp's
      * [`tonconnect-manifest.json`](https://github.com/ton-blockchain/ton-connect/blob/main/spec/manifest.md).
-     * When omitted, the SDK falls back to
-     * `${window.location.origin}/tonconnect-manifest.json`.
+     * Required unless a `connector` is supplied instead; omitting both throws a
+     * `TonConnectUIError`.
      */
     manifestUrl?: string;
 }
