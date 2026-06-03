@@ -347,7 +347,7 @@ const result = await tonConnectUI.sendTransaction(transaction, {
 console.log(result.traceId); // use this ID to correlate with analytics events
 ```
 
-`sendTransaction` will automatically render informational modals and notifications. You can change its behaviour:
+`sendTransaction` will automatically render informational modals and notifications. You can change its behavior:
 
 ```ts
 const result = await tonConnectUI.sendTransaction(defaultTx, {
@@ -358,13 +358,13 @@ const result = await tonConnectUI.sendTransaction(defaultTx, {
 
 Default configuration is: 
 ```ts
-const defaultBehaviour = {
+const defaultBehavior = {
     modals: ['before'],
     notifications: ['before', 'success', 'error']
 }
 ```
 
-You can also modify this behaviour for all actions calls using `uiOptions` setter:
+You can also modify this behavior for all actions calls using `uiOptions` setter:
 ```ts
 tonConnectUI.uiOptions = {
         actionsConfiguration: {
@@ -644,7 +644,7 @@ const tonConnectUI = new TonConnectUI({
 
 Treat `hasResponse: false` as a UI state, not an exception: store `dispatched` somewhere the UI can read it, render an explicit **Retry** button, and let the user click it. The retry calls the same method with the flag still set — the wallet is connected by then, so the SDK takes the bridge path and returns `{ hasResponse: true, response }`.
 
-See the [embedded request how-to](https://docs.ton.org/applications/ton-connect/how-to/embedded-request) for the full behaviour matrix and retry patterns.
+See the [embedded request how-to](https://docs.ton.org/applications/ton-connect/how-to/embedded-request) for the full behavior matrix and retry patterns.
 
 ## Universal links redirecting issues (IOS)
 Some operating systems, and especially iOS, have restrictions related to universal link usage. 

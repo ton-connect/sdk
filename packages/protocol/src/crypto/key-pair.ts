@@ -1,5 +1,5 @@
 /**
- * Serialised form of a session keypair, used to persist a session across
+ * Serialized form of a session keypair, used to persist a session across
  * page reloads. Both fields are hex-encoded (no `0x` prefix). Pass an
  * existing keypair into {@link SessionCrypto} to resume a session; omit it
  * to generate a fresh one.

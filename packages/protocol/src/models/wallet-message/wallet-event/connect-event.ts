@@ -32,7 +32,7 @@ export interface ConnectEventSuccess {
     };
 
     /**
-     * Result of an embedded request that travelled in the connect URL's
+     * Result of an embedded request that traveled in the connect URL's
      * `e` parameter. Present only when the wallet supports the
      * `EmbeddedRequest` feature and chose to process the folded request.
      *

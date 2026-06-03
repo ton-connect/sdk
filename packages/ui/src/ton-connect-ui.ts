@@ -566,7 +566,7 @@ export class TonConnectUI {
      * `SendTransactionResponse` otherwise.
      *
      * @param tx transaction to send.
-     * @param options modal and notifications behaviour settings; set `enableEmbeddedRequest: true`
+     * @param options modal and notifications behavior settings; set `enableEmbeddedRequest: true`
      * to opt into the connect-and-send flow described above.
      */
     public async sendTransaction(
@@ -649,7 +649,7 @@ export class TonConnectUI {
      * `SignDataResponse` otherwise.
      *
      * @param data data to sign.
-     * @param options modal and notifications behaviour settings; set `enableEmbeddedRequest: true`
+     * @param options modal and notifications behavior settings; set `enableEmbeddedRequest: true`
      * to opt into the connect-and-sign flow described above.
      */
     public async signData(
@@ -726,7 +726,7 @@ export class TonConnectUI {
      * `SignMessageResponse` otherwise.
      *
      * @param message transaction-like request describing the internal message to sign.
-     * @param options modal and notifications behaviour settings; set `enableEmbeddedRequest: true`
+     * @param options modal and notifications behavior settings; set `enableEmbeddedRequest: true`
      * to opt into the connect-and-sign flow described above.
      */
     public async signMessage(

@@ -55,7 +55,7 @@ export interface TonConnectUiOptions {
     walletsPreferredFeatures?: RequiredFeatures;
 
     /**
-     * Modal / notification behaviour and the return strategy for action
+     * Modal / notification behavior and the return strategy for action
      * deep links (`sendTransaction`, `signData`, `signMessage`).
      * See {@link ActionConfiguration}.
      */

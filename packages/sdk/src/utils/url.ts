@@ -39,7 +39,7 @@ export function isConnectUrl(link: string | undefined): link is string {
 
 /**
  * Encode query parameters for transport inside a Telegram universal link.
- * Telegram normalises ASCII punctuation in URLs, which breaks the encoded
+ * Telegram normalizes ASCII punctuation in URLs, which breaks the encoded
  * connect payload; this helper substitutes the affected characters with
  * pass-through markers that {@link decodeTelegramUrlParameters} reverses.
  */

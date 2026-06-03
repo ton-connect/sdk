@@ -1,7 +1,7 @@
 import { ReturnStrategy } from 'src/models/return-strategy';
 
 /**
- * Modal / notification behaviour for action calls
+ * Modal / notification behavior for action calls
  * (`sendTransaction`, `signData`, `signMessage`) and the return strategy
  * applied to outgoing deep links.
  *
@@ -47,7 +47,7 @@ export interface ActionConfiguration {
     twaReturnUrl?: `${string}://${string}`;
 
     /**
-     * @deprecated The SDK now detects the right behaviour automatically for
+     * @deprecated The SDK now detects the right behavior automatically for
      *             TWA-TWA connections; setting this has no effect.
      */
     skipRedirectToWallet?: 'ios' | 'always' | 'never';
