@@ -3,7 +3,25 @@ import { useTonConnectUI } from './useTonConnectUI';
 import { useEffect, useState } from 'react';
 
 /**
- * Use it to get access to the open/close modal functions.
+ * Reactive wrapper around `tonConnectUI.modal`. Returns `{ state, open,
+ * close }` — `state` mirrors `WalletsModalState` and re-renders on every
+ * modal lifecycle event; `open` / `close` are convenience bindings.
+ *
+ * Must be called inside a `<TonConnectUIProvider>`. Use this hook when the
+ * dApp wants its own "Connect" UI separate from `<TonConnectButton />`.
+ *
+ * @example
+ * ```tsx
+ * const { state, open, close } = useTonConnectModal();
+ *
+ * return (
+ *     <>
+ *         <div>Modal status: {state?.status}</div>
+ *         <button onClick={open}>Open modal</button>
+ *         <button onClick={close}>Close modal</button>
+ *     </>
+ * );
+ * ```
  */
 export function useTonConnectModal(): Omit<WalletsModal, 'onStateChange'> {
     const [tonConnectUI] = useTonConnectUI();

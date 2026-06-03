@@ -5,7 +5,26 @@ import { checkProvider } from '../utils/errors';
 import { isServerSide } from '../utils/web';
 
 /**
- * Use it to get access to the `TonConnectUI` instance and UI options updating function.
+ * Returns a tuple of:
+ *
+ * - the singleton `TonConnectUI` instance — call every method (`connect`,
+ *   `sendTransaction`, `signData`, `signMessage`, modal helpers) on it;
+ * - a `setOptions(options)` callback that merges the partial
+ *   `TonConnectUiOptions` into the live instance via its `uiOptions`
+ *   setter, triggering an immediate re-render.
+ *
+ * Must be called inside a `<TonConnectUIProvider>`. On the server side,
+ * the hook returns a no-op pair — call sites can render shells
+ * without crashing, but the real wiring only kicks in once the component
+ * hydrates in the browser.
+ *
+ * @example
+ * ```tsx
+ * const [tonConnectUI, setOptions] = useTonConnectUI();
+ *
+ * await tonConnectUI.sendTransaction(tx, { traceId });
+ * setOptions({ language: 'ru' });
+ * ```
  */
 export function useTonConnectUI(): [TonConnectUI, (options: TonConnectUiOptions) => void] {
     const tonConnectUI = useContext(TonConnectUIContext);
