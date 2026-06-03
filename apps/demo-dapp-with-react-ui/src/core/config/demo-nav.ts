@@ -3,6 +3,7 @@ import {
     CircleDollarSign,
     FileSignature,
     FlaskConical,
+    ListOrdered,
     MessageSquare,
     Paintbrush,
     Search,
@@ -62,6 +63,7 @@ export const DEMO_NAV_GROUPS: readonly DemoNavGroup[] = [
             { to: '/widget-builder', label: 'Widget builder', icon: Paintbrush },
             { to: '/widget-sandbox', label: 'Export sandbox', icon: FlaskConical },
             { to: '/ton-proof', label: 'Ton proof', icon: ShieldCheck },
+            { to: '/batch-limits', label: 'Batch limits', icon: ListOrdered },
             { to: '/find-tx', label: 'Find transaction', icon: Search }
         ]
     }

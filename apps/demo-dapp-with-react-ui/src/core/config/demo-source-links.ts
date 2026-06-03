@@ -14,5 +14,6 @@ export const DEMO_SOURCE_LINKS = {
     merkle: demoSource('src/features/utilities/components/merkle'),
     createJetton: demoSource('src/features/utilities/components/create-jetton'),
     tonProof: demoSource('src/features/signing/components/ton-proof'),
-    findTx: demoSource('src/features/utilities/components/find-tx')
+    findTx: demoSource('src/features/utilities/components/find-tx'),
+    batchLimits: demoSource('src/features/transactions/components/wallet-batch-limits')
 } as const;

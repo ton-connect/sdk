@@ -128,7 +128,7 @@ const AppSidebar: FC = () => {
                             {({ isActive }) => (
                                 <SidebarMenuButton isActive={isActive}>
                                     <Settings />
-                                    <span>Settings</span>
+                                    <span>Ton Connect settings</span>
                                 </SidebarMenuButton>
                             )}
                         </NavLink>
