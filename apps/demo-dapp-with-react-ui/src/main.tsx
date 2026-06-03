@@ -6,10 +6,12 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App';
 import { initQaModeFromUrl } from './core/utils/qa-mode-from-url';
+import { installWalletConsoleCapture } from './core/utils/wallet-console-capture';
 import { runSingleInstance } from './core/utils/run-single-instance';
 import { getTonconnectVersion } from './core/utils/get-tonconnect-version';
 
 initQaModeFromUrl();
+installWalletConsoleCapture();
 
 getTonconnectVersion();
 

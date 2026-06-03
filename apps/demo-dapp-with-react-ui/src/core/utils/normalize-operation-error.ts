@@ -1,5 +1,7 @@
 import { TonConnectError } from '@tonconnect/sdk';
 
+import { consumeLastWalletConsoleError } from './wallet-console-capture';
+
 const SDK_ERROR_PREFIX = '[TON_CONNECT_SDK_ERROR]';
 
 /** Known TonConnect error classes mapped to wallet RPC error codes (protocol). */
@@ -20,13 +22,27 @@ export type NormalizedOperationError = {
     sdkError?: boolean;
 };
 
+function isKnownErrorClass(name: string | undefined): name is keyof typeof ERROR_CLASS_TO_CODE {
+    return !!name && name in ERROR_CLASS_TO_CODE;
+}
+
+function resolveErrorClass(parsed?: string): string | undefined {
+    if (parsed && isKnownErrorClass(parsed)) {
+        return parsed;
+    }
+    if (parsed && parsed.length > 2 && parsed !== 'Error') {
+        return parsed;
+    }
+    return undefined;
+}
+
 function parseSdkErrorString(text: string): Omit<NormalizedOperationError, 'walletResponse'> {
     const match = text.match(/^\[TON_CONNECT_SDK_ERROR\]\s*([^:]+):\s*([\s\S]*)$/);
     if (!match) {
         return { message: text, sdkError: text.includes(SDK_ERROR_PREFIX) };
     }
 
-    const errorClass = match[1].trim();
+    const errorClass = resolveErrorClass(match[1].trim());
     const body = match[2];
     const newlineIndex = body.indexOf('\n');
 
@@ -54,8 +70,8 @@ function buildWalletResponse(
         return undefined;
     }
 
-    const code = errorClass ? ERROR_CLASS_TO_CODE[errorClass] : undefined;
     const error: Record<string, unknown> = { message: walletMessage };
+    const code = errorClass && isKnownErrorClass(errorClass) ? ERROR_CLASS_TO_CODE[errorClass] : undefined;
     if (code !== undefined) {
         error.code = code;
     }
@@ -85,11 +101,18 @@ function extractWalletMessage(value: unknown): string {
     return 'Operation failed';
 }
 
-function finalizeNormalized(
-    partial: Omit<NormalizedOperationError, 'walletResponse'> & { walletResponse?: unknown }
-): NormalizedOperationError {
+function applyConsoleCapture(partial: NormalizedOperationError): NormalizedOperationError {
+    const fromConsole = consumeLastWalletConsoleError();
+    if (fromConsole) {
+        return {
+            ...partial,
+            message: extractWalletMessage(fromConsole),
+            walletResponse: fromConsole
+        };
+    }
+
     if (partial.walletResponse !== undefined) {
-        return partial as NormalizedOperationError;
+        return partial;
     }
 
     const walletResponse = buildWalletResponse(partial.errorClass, partial.walletMessage);
@@ -100,10 +123,21 @@ function finalizeNormalized(
     return { ...partial, walletResponse };
 }
 
+function normalizeFromErrorInstance(error: Error): NormalizedOperationError {
+    if (error.message.includes(SDK_ERROR_PREFIX)) {
+        const parsed = parseSdkErrorString(error.message);
+        return applyConsoleCapture({
+            ...parsed,
+            errorClass: resolveErrorClass(parsed.errorClass)
+        });
+    }
+
+    return applyConsoleCapture({ message: error.message });
+}
+
 /**
  * Turns wallet/SDK failures into a stable shape for {@link ResultBlock}.
- * Preserves raw wallet payloads when present; otherwise reconstructs `walletResponse`
- * from the TonConnect SDK error string (code + wallet message).
+ * Enriches SDK errors with the last `Wallet message received:` object from console (demo-only).
  */
 export function normalizeOperationError(error: unknown): NormalizedOperationError | null {
     if (error == null || error === undefined) {
@@ -111,26 +145,11 @@ export function normalizeOperationError(error: unknown): NormalizedOperationErro
     }
 
     if (typeof error === 'string') {
-        return finalizeNormalized(parseSdkErrorString(error));
+        return applyConsoleCapture(parseSdkErrorString(error));
     }
 
-    if (error instanceof TonConnectError) {
-        const parsed = parseSdkErrorString(error.message);
-        return finalizeNormalized({
-            ...parsed,
-            errorClass: parsed.errorClass ?? error.constructor.name
-        });
-    }
-
-    if (error instanceof Error) {
-        if (error.message.includes(SDK_ERROR_PREFIX)) {
-            const parsed = parseSdkErrorString(error.message);
-            return finalizeNormalized({
-                ...parsed,
-                errorClass: parsed.errorClass ?? error.name
-            });
-        }
-        return { message: error.message, errorClass: error.name };
+    if (error instanceof TonConnectError || error instanceof Error) {
+        return normalizeFromErrorInstance(error);
     }
 
     if (typeof error === 'object') {
@@ -141,14 +160,14 @@ export function normalizeOperationError(error: unknown): NormalizedOperationErro
         }
 
         if ('jetton' in record || 'transaction' in record) {
-            return finalizeNormalized({
+            return applyConsoleCapture({
                 message: 'Wallet rejected the action',
                 walletResponse: error
             });
         }
 
         if ('error' in record || 'id' in record) {
-            return finalizeNormalized({
+            return applyConsoleCapture({
                 message: extractWalletMessage(record),
                 walletResponse: error
             });
@@ -165,7 +184,7 @@ export function formatOperationErrorForDisplay(error: unknown): string {
             return JSON.stringify({ message: error }, null, 2);
         }
         if (error instanceof Error) {
-            return JSON.stringify({ message: error.message, errorClass: error.name }, null, 2);
+            return JSON.stringify({ message: error.message }, null, 2);
         }
         return JSON.stringify({ message: 'Operation failed' }, null, 2);
     }
