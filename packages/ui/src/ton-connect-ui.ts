@@ -85,7 +85,40 @@ import {
 import { IMG } from 'src/app/env/IMG';
 import { PickRequired } from 'src/utils/pick-required';
 
+/**
+ * UI-aware TON Connect connector. Wraps a `TonConnect` instance from
+ * `@tonconnect/sdk` and adds the wallet-selection modal, the
+ * "connect-wallet" button, notification toasts, and a `uiOptions` setter
+ * for runtime theming.
+ *
+ * In a React app prefer `<TonConnectUIProvider>` from
+ * `@tonconnect/ui-react`, which manages a singleton `TonConnectUI` for you.
+ *
+ * @example
+ * ```ts
+ * import { TonConnectUI, THEME } from '@tonconnect/ui';
+ *
+ * const tonConnectUI = new TonConnectUI({
+ *     manifestUrl: 'https://example.com/tonconnect-manifest.json',
+ *     buttonRootId: 'ton-connect-button',
+ *     uiPreferences: { theme: THEME.DARK },
+ * });
+ *
+ * if (tonConnectUI.connected) {
+ *     await tonConnectUI.sendTransaction(tx);
+ * } else {
+ *     await tonConnectUI.openModal();
+ * }
+ * ```
+ *
+ * @see [Connect a wallet (docs)](https://docs.ton.org/applications/ton-connect/how-to/connect)
+ */
 export class TonConnectUI {
+    /**
+     * Fetch the wallets-list registry without instantiating a `TonConnectUI`.
+     * Equivalent to the instance method but usable in code that runs before
+     * the connector exists.
+     */
     public static getWallets(): Promise<WalletInfo[]> {
         return TonConnect.getWallets();
     }
@@ -1341,15 +1374,30 @@ export class TonConnectUI {
     }
 }
 
+/**
+ * Per-call options accepted by `TonConnectUI.sendTransaction` /
+ * `signData` / `signMessage`. Extends {@link ActionConfiguration} with the
+ * common `traceId` and an `onRequestSent` hook that fires the moment the
+ * encrypted request is handed to the bridge.
+ */
 type ActionOptions = ActionConfiguration &
     OptionalTraceable<{
         onRequestSent?: (redirectToWallet: () => void) => void;
     }>;
 
+/**
+ * Flag that opts an action call into the embedded-request flow. When set,
+ * the method returns the {@link EmbeddedTResponse} envelope instead of the
+ * raw method result.
+ */
 type EnableEmbeddedRequest = {
     enableEmbeddedRequest: true;
 };
 
+/**
+ * Action options with `enableEmbeddedRequest: true` selected. Used as the
+ * second argument to the overload that returns the embedded envelope.
+ */
 type EmbeddedActionOptions = ActionOptions & EnableEmbeddedRequest;
 
 function isEmbeddedActionOptions(
