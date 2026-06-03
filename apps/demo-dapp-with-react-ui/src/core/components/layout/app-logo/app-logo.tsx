@@ -10,31 +10,31 @@ import type { ComponentProps, FC } from 'react';
 
 import { cn } from '../../../utils/cn';
 
-const LOGO_PATHS = [
-    'M54.1725 37.8602L32.4301 0L75.9148 3.80156e-06L54.1725 37.8602Z',
-    'M64.6858 43.9301L86.6025 6.17057L108.345 43.8294L64.6858 43.9301Z',
-    'M64.6858 56.0699L108.345 56.1706L86.6025 93.8294L64.6858 56.0699Z',
-    'M54.1725 62.1398L75.9148 100L32.4301 100L54.1725 62.1398Z',
-    'M43.6591 56.0699L21.7424 93.8294L3.10592e-06 56.1706L43.6591 56.0699Z',
-    'M43.6591 43.9301L0 43.8294L21.7424 6.17057L43.6591 43.9301Z'
-] as const;
+/** `public/app-logo.svg` — favicon and in-app logo share the same asset. */
+const appLogoUrl = `${import.meta.env.BASE_URL}app-logo.svg`;
 
-export const AppLogo: FC<ComponentProps<'svg'>> = ({
+const logoMaskStyle = {
+    WebkitMaskImage: `url(${appLogoUrl})`,
+    maskImage: `url(${appLogoUrl})`,
+    WebkitMaskRepeat: 'no-repeat',
+    maskRepeat: 'no-repeat',
+    WebkitMaskPosition: 'center',
+    maskPosition: 'center',
+    WebkitMaskSize: 'contain',
+    maskSize: 'contain'
+} as const;
+
+export const AppLogo: FC<ComponentProps<'span'>> = ({
     className,
     'aria-label': ariaLabel = 'TON Connect Demo',
+    style,
     ...props
 }) => (
-    <svg
-        viewBox="0 0 109 100"
-        fill="currentColor"
-        xmlns="http://www.w3.org/2000/svg"
+    <span
         role="img"
         aria-label={ariaLabel}
-        className={cn('aspect-[109/100] shrink-0 text-foreground', className)}
+        className={cn('inline-block aspect-[109/100] shrink-0 bg-current text-foreground', className)}
+        style={{ ...logoMaskStyle, ...style }}
         {...props}
-    >
-        {LOGO_PATHS.map(d => (
-            <path key={d} d={d} />
-        ))}
-    </svg>
+    />
 );
