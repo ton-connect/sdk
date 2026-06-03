@@ -2,7 +2,7 @@
 
 ℹ️ If you want to integrate TonConnect to your dApp, you should use [@tonconnect/sdk](https://www.npmjs.com/package/@tonconnect/sdk)
 
-[Latest API documentation](https://ton-connect.github.io/sdk/modules/_tonconnect_protocol.html)
+[Latest API documentation](https://docs.ton.org/applications/ton-connect/api-reference/protocol)
 
 ## Summary
 Package contains protocol requests, responses and event models and encoding, decoding functions.

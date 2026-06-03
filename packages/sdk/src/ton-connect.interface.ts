@@ -30,7 +30,6 @@ import { ConsumableLike } from 'src/utils/consumable';
 export interface ITonConnect {
     /**
      * `true` while a wallet session is active. Equivalent to `wallet !== null`.
-     *
      */
     connected: boolean;
 
@@ -136,7 +135,7 @@ export interface ITonConnect {
      *
      * Pass `undefined` to clear the restriction and accept any network.
      *
-     * @param network — desired network
+     * @param network — desired network. See {@link ChainId}.
      */
     setConnectionNetwork(network?: ChainId): void;
 
@@ -145,19 +144,19 @@ export interface ITonConnect {
      * `onStatusChange` event immediately, and sends a `disconnect` RPC to the
      * wallet so it can clean up its side too.
      *
-     * @throws `WalletNotConnectedError` when no wallet is connected.
+     * @throws {@link WalletNotConnectedError} when no wallet is connected.
      */
     disconnect(options?: OptionalTraceable<{ signal?: AbortSignal }>): Promise<void>;
 
     /**
      * Ask the connected wallet to sign **and broadcast** a transaction.
      *
-     * @throws `WalletNotConnectedError` — no wallet is connected.
-     * @throws `WalletNotSupportFeatureError` — wallet does not advertise the
+     * @throws {@link WalletNotConnectedError} — no wallet is connected.
+     * @throws {@link WalletNotSupportFeatureError} — wallet does not advertise the
      *         required `SendTransaction` capabilities.
-     * @throws `UserRejectsError` — user declined in the wallet.
-     * @throws `WalletWrongNetworkError` — wallet network differs from the request.
-     * @throws `TonConnectError` — bridge / validation error.
+     * @throws {@link UserRejectsError} — user declined in the wallet.
+     * @throws {@link WalletWrongNetworkError} — wallet network differs from the request.
+     * @throws {@link TonConnectError} — bridge / validation error.
      *
      * @returns The signed BoC plus, when available, the `traceId` the SDK
      *          propagated through the bridge.
@@ -187,11 +186,14 @@ export interface ITonConnect {
      * The signature is bound to the user's wallet address, the dApp's domain,
      * a timestamp, and the payload — verify on the backend or on-chain.
      *
-     * @throws `WalletNotConnectedError` — no wallet is connected.
-     * @throws `WalletNotSupportFeatureError` — wallet does not advertise the
+     * @throws {@link WalletNotConnectedError} — no wallet is connected.
+     * @throws {@link WalletNotSupportFeatureError} — wallet does not advertise the
      *         requested `SignData.types`.
-     * @throws `UserRejectsError` — user declined.
-     * @throws `TonConnectError` — bridge / validation error.
+     * @throws {@link UserRejectsError} — user declined.
+     * @throws {@link TonConnectError} — bridge / validation error.
+     *
+     * @returns The {@link SignDataResponse} plus, when available, the `traceId`
+     *          the SDK propagated through the bridge.
      *
      * @see [Sign data (docs)](https://docs.ton.org/applications/ton-connect/how-to/sign-data)
      */
@@ -210,11 +212,11 @@ export interface ITonConnect {
      * Same payload shape as `sendTransaction`; supported by wallets that
      * advertise the `SignMessage` feature (typically Wallet V5).
      *
-     * @throws `WalletNotConnectedError` — no wallet is connected.
-     * @throws `WalletNotSupportFeatureError` — wallet does not advertise `SignMessage`.
-     * @throws `UserRejectsError` — user declined.
-     * @throws `WalletWrongNetworkError` — wallet network differs from the request.
-     * @throws `TonConnectError` — bridge / validation error.
+     * @throws {@link WalletNotConnectedError} — no wallet is connected.
+     * @throws {@link WalletNotSupportFeatureError} — wallet does not advertise `SignMessage`.
+     * @throws {@link UserRejectsError} — user declined.
+     * @throws {@link WalletWrongNetworkError} — wallet network differs from the request.
+     * @throws {@link TonConnectError} — bridge / validation error.
      *
      * @returns a signed BoC the dApp can wrap in an external
      * message and submit through a relayer (e.g. for a gasless jetton

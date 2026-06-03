@@ -143,12 +143,23 @@ export class TonConnectUI {
 
     private _walletsRequiredFeatures?: RequiredFeatures;
 
+    /**
+     * Wallet features the dApp requires. Wallets that do not advertise them are
+     * hidden from the picker and rejected at connect time. Set via the
+     * constructor or the `uiOptions` setter. See {@link RequiredFeatures}.
+     */
     public get walletsRequiredFeatures(): RequiredFeatures | undefined {
         return this._walletsRequiredFeatures;
     }
 
     private _walletsPreferredFeatures?: RequiredFeatures;
 
+    /**
+     * Wallet features the dApp prefers. Non-matching wallets stay selectable
+     * but are sorted to the bottom of the picker; unlike
+     * {@link TonConnectUI.walletsRequiredFeatures}, the match is not enforced
+     * at connect time. See {@link RequiredFeatures}.
+     */
     public get walletsPreferredFeatures(): RequiredFeatures | undefined {
         return this._walletsPreferredFeatures;
     }
@@ -182,9 +193,9 @@ export class TonConnectUI {
     private readonly transactionModal: TransactionModalManager;
 
     /**
-     * Promise that resolves after end of th connection restoring process (promise will fire after `onStatusChange`,
-     * so you can get actual information about wallet and session after when promise resolved).
-     * Resolved value `true`/`false` indicates if the session was restored successfully.
+     * Promise that resolves after the connection restoring process ends (it fires after `onStatusChange`,
+     * so you can read actual wallet and session information once it resolves).
+     * The resolved value `true`/`false` indicates whether the session was restored successfully.
      */
     public readonly connectionRestored = Promise.resolve(false);
 
@@ -203,7 +214,7 @@ export class TonConnectUI {
     }
 
     /**
-     * Curren connected wallet app and its info or null.
+     * Current connected wallet app and its info, or `null` when not connected.
      */
     public get wallet(): Wallet | (Wallet & WalletInfoWithOpenMethod) | null {
         if (!this.connector.wallet) {
@@ -389,7 +400,7 @@ export class TonConnectUI {
     /**
      * Set desired network for the connection. Can only be set before connecting.
      * If wallet connects with a different chain, the SDK will throw an error and abort connection.
-     * @param network desired network id (e.g., '-239', '-3', or custom). Pass undefined to allow any network.
+     * @param network desired network id (e.g., '-239', '-3', or custom). Pass undefined to allow any network. See {@link ChainId}.
      */
     public setConnectionNetwork(network?: ChainId): void {
         this.connector.setConnectionNetwork(network);
@@ -397,6 +408,7 @@ export class TonConnectUI {
 
     /**
      * Returns available wallets list.
+     * @returns array of {@link WalletInfo}, merged from the registry and any injected wallets.
      */
     public async getWallets(): Promise<WalletInfo[]> {
         return this.connector.getWallets();
@@ -404,7 +416,7 @@ export class TonConnectUI {
 
     /**
      * Subscribe to connection status change.
-     * @return function which has to be called to unsubscribe.
+     * @returns function which has to be called to unsubscribe.
      */
     public onStatusChange(
         callback: (wallet: ConnectedWallet | null) => void,
@@ -443,13 +455,16 @@ export class TonConnectUI {
 
     /**
      * Closes the modal window.
+     * @param reason optional {@link WalletsModalCloseReason} forwarded to state subscribers.
      */
     public closeModal(reason?: WalletsModalCloseReason): void {
         this.modal.close(reason);
     }
 
     /**
-     * Subscribe to the modal window state changes, returns a function which has to be called to unsubscribe.
+     * Subscribe to the modal window state changes.
+     * @param onChange callback invoked with the new {@link WalletsModalState} on every change.
+     * @returns function which has to be called to unsubscribe.
      */
     public onModalStateChange(onChange: (state: WalletsModalState) => void): () => void {
         return this.modal.onStateChange(onChange);
@@ -499,8 +514,8 @@ export class TonConnectUI {
     /**
      * @deprecated Use `tonConnectUI.openModal()` instead. Will be removed in the next major version.
      * Opens the modal window and handles a wallet connection.
-     * @return Connected wallet.
-     * @throws TonConnectUIError if connection was aborted.
+     * @returns Connected wallet.
+     * @throws {@link TonConnectUIError} if connection was aborted.
      */
     public async connectWallet(options?: OptionalTraceable): Promise<ConnectedWallet> {
         const traceId = options?.traceId ?? UUIDv7();

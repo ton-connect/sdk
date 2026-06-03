@@ -13,7 +13,7 @@ import { ReturnStrategy } from 'src/models/return-strategy';
 export interface ActionConfiguration {
     /**
      * Which lifecycle stages render a modal. `'all'` is shorthand for
-     * `['before', 'success', 'error']`. The "before" modal shows whe the
+     * `['before', 'success', 'error']`. The "before" modal shows when the
      * user is sent to the wallet; "success" / "error" render after the wallet replies.
      *
      * @default ['before']

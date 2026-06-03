@@ -3,7 +3,7 @@
  * transfer a jetton, transfer an NFT) and let the wallet build the BoC.
  *
  * Wallets advertise structured-item support through the
- * {@link SendTransactionFeature.itemTypes} and {@link SignMessage.itemTypes} features.
+ * {@link SendTransactionFeature.itemTypes} and {@link SignMessageFeature.itemTypes} features.
  *
  * @see [Send a transaction § Structured items (docs)](https://docs.ton.org/applications/ton-connect/how-to/send-transaction#structured-items)
  * @see [Structured items wallet guide](https://github.com/ton-blockchain/ton-connect/blob/main/guides/structured-items.md)

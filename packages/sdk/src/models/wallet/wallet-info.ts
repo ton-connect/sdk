@@ -10,7 +10,8 @@ export interface WalletInfoBase {
     name: string;
 
     /**
-     * Wallet identifier — equals {@link Wallet.device.appName} at runtime.
+     * Wallet identifier — equals the {@link DeviceInfo.appName} reported by the
+     * connected {@link Wallet} at runtime.
      */
     appName: string;
 

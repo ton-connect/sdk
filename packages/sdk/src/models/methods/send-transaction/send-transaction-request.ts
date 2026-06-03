@@ -57,6 +57,9 @@ export interface SendTransactionRequestWithMessages extends SendTransactionReque
         /** Optional one-cell BoC body, base64-encoded. */
         payload?: string;
 
+        /**
+         * Extra currencies to attach.
+         */
         extraCurrency?: { [k: number]: string };
     }[];
 
@@ -65,7 +68,7 @@ export interface SendTransactionRequestWithMessages extends SendTransactionReque
 
 /**
  * Send a transaction using structured items. Use only when you
- * know the wallet advertises the needed {@link SendTransactionFeature.itemTypes}`.
+ * know the wallet advertises the needed {@link SendTransactionFeature.itemTypes}.
  *
  * @see {@link StructuredItem}
  * @see [Send a transaction § Structured items (docs)](https://docs.ton.org/applications/ton-connect/how-to/send-transaction#structured-items)

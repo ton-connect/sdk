@@ -18,7 +18,7 @@ export interface Account {
     address: string;
 
     /**
-     * TON network identifier.
+     * TON network identifier. See {@link ChainId}.
      */
     chain: ChainId;
 
