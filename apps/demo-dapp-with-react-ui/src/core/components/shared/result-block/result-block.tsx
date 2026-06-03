@@ -1,6 +1,7 @@
 import { forwardRef } from 'react';
 
 import { Button } from '../../ui/button';
+import { formatOperationErrorForDisplay } from '../../../utils/normalize-operation-error';
 import { stringifyForDisplay } from '../../../utils/json-replacer';
 import { ResultPanel } from '../result-panel';
 import { cn } from '../../../utils/cn';
@@ -20,27 +21,9 @@ export const ok = (response: unknown): OperationResult => ({
     response: stringifyForDisplay(response)
 });
 
-const failMessage = (error: unknown): string => {
-    if (typeof error === 'string') {
-        return error;
-    }
-    if (error instanceof Error) {
-        return error.message;
-    }
-    if (
-        error &&
-        typeof error === 'object' &&
-        'error' in error &&
-        typeof (error as { error: unknown }).error === 'string'
-    ) {
-        return (error as { error: string }).error;
-    }
-    return 'Operation failed';
-};
-
 export const fail = (error: unknown): OperationResult => ({
     status: 'error',
-    response: JSON.stringify({ error: failMessage(error) }, null, 2)
+    response: formatOperationErrorForDisplay(error)
 });
 
 interface ResultBlockProps {
