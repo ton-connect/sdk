@@ -4,6 +4,9 @@ export const QA_MODE_URL_PARAM = 'qa';
 
 const DEMO_QA_COMPENSATION_STYLE_ID = 'demo-qa-compensation-styles';
 
+/** Matches `@tonconnect/sdk` QA banner offset (`body.qa-mode-active { padding-top: 48px }`). */
+const QA_BANNER_HEIGHT_PX = 48;
+
 const QA_MODE_ENABLED_VALUES = new Set(['1', 'true', 'enable']);
 
 export function isQaModeEnabledViaUrl(search?: string): boolean {
@@ -36,8 +39,26 @@ function scheduleDemoQaCompensationStyles(): void {
         style.id = DEMO_QA_COMPENSATION_STYLE_ID;
         // SDK already adds body padding-top for the fixed banner; drop duplicate margin on app bar.
         style.textContent = `
+            body.qa-mode-active {
+                --demo-qa-banner-height: ${QA_BANNER_HEIGHT_PX}px;
+            }
+
             body.qa-mode-active header[data-app-chrome-header] {
                 margin-top: 0 !important;
+            }
+
+            body.qa-mode-active [data-slot="sidebar-wrapper"] {
+                min-height: calc(100svh - var(--demo-qa-banner-height)) !important;
+            }
+
+            body.qa-mode-active [data-slot="sidebar"] {
+                top: var(--demo-qa-banner-height) !important;
+                height: calc(100svh - var(--demo-qa-banner-height)) !important;
+                max-height: calc(100svh - var(--demo-qa-banner-height)) !important;
+            }
+
+            body.qa-mode-active [data-slot="sidebar-content"] {
+                overflow-y: hidden !important;
             }
         `;
         const sdkStyles = document.getElementById('ton-connect-qa-mode-styles');

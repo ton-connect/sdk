@@ -4,7 +4,7 @@ import { GitHubIcon } from '../../ui/icons';
 import type { FC, ReactNode } from 'react';
 
 const linkClassName =
-    'relative top-[0.2em] inline-flex size-7 shrink-0 items-center justify-center rounded-md text-primary hover:bg-tertiary';
+    'inline-flex size-7 shrink-0 items-center justify-center rounded-md text-primary hover:bg-tertiary';
 
 interface PageHeadingProps {
     title: string | ReactNode;
@@ -23,8 +23,8 @@ export const PageHeading: FC<PageHeadingProps> = ({ title, docHref, sourceHref, 
     }
 
     return (
-        <div className={className ?? 'flex min-w-0 items-baseline gap-1.5'}>
-            <h1 className="truncate text-lg font-semibold leading-none md:text-lg">{title}</h1>
+        <div className={className ?? 'flex min-w-0 items-center gap-1.5'}>
+            <h1 className="truncate text-lg font-semibold leading-snug">{title}</h1>
             {docHref && (
                 <a
                     href={docHref}

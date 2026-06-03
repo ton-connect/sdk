@@ -185,12 +185,12 @@ export const Layout: FC<LayoutProps> = ({
                         )}
                     >
                         {title != null && (
-                            <div className="flex w-full items-baseline justify-start md:hidden">
+                            <div className="flex w-full items-center justify-start md:hidden">
                                 <PageHeading
                                     title={title}
                                     docHref={docHref}
                                     sourceHref={sourceHref}
-                                    className="flex w-full min-w-0 items-baseline gap-1.5"
+                                    className="flex w-full min-w-0 items-center gap-1.5"
                                 />
                             </div>
                         )}
