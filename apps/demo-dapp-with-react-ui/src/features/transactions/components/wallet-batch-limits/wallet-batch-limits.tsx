@@ -33,7 +33,10 @@ export const WalletBatchLimits = () => {
         setValidUntil,
         setValidUntilFromNow,
         validUntilError,
-        validUntilWarning
+        validUntilWarning,
+        countError,
+        countWarning,
+        isCountBlocked
     } = useBatchTester();
 
     const timer = useValidUntilTimer(validUntil);
@@ -45,7 +48,12 @@ export const WalletBatchLimits = () => {
 
             <ModeField mode={mode} onChange={setMode} />
 
-            <CountField count={count} onChange={setCount} />
+            <CountField
+                count={count}
+                onChange={setCount}
+                errorMessage={countError}
+                warningMessage={countWarning}
+            />
 
             <ValidUntilField
                 validUntil={validUntil}
@@ -72,7 +80,7 @@ export const WalletBatchLimits = () => {
                 size="l"
                 fullWidth
                 loading={sending}
-                disabled={sending || isInvalid || count <= 0}
+                disabled={sending || isInvalid || isCountBlocked}
                 onClick={send}
                 data-testid="batch-limits-action-button"
             >

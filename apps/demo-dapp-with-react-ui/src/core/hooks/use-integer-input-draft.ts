@@ -12,6 +12,8 @@ export type UseIntegerInputDraftOptions = {
     commitUndefinedWhenEmpty?: boolean;
     /** Return false to keep typing locally without calling `onCommit` yet. */
     shouldCommit?: (value: number) => boolean;
+    /** When false, only blur commits (avoids regenerating dependents on every keystroke). Default true. */
+    commitOnChange?: boolean;
 };
 
 /**
@@ -23,7 +25,11 @@ export function useIntegerInputDraft(
     onCommit: (next: number | undefined) => void,
     options: UseIntegerInputDraftOptions = {}
 ) {
-    const { commitUndefinedWhenEmpty = false, shouldCommit = () => true } = options;
+    const {
+        commitUndefinedWhenEmpty = false,
+        shouldCommit = () => true,
+        commitOnChange = true
+    } = options;
     const [draft, setDraft] = useState(() => formatDraft(value));
 
     useEffect(() => {
@@ -45,11 +51,11 @@ export function useIntegerInputDraft(
             }
             setDraft(raw);
             const parsed = Number(raw);
-            if (shouldCommit(parsed)) {
+            if (commitOnChange && shouldCommit(parsed)) {
                 onCommit(parsed);
             }
         },
-        [commitUndefinedWhenEmpty, onCommit, shouldCommit]
+        [commitOnChange, commitUndefinedWhenEmpty, onCommit, shouldCommit]
     );
 
     const onBlur = useCallback(() => {

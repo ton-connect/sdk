@@ -13,8 +13,17 @@ import {
     mergeRequestContext,
     type RequestContextPatch
 } from '../../../../../core/utils/merge-request-context';
+import {
+    normalizeJsonValidation,
+    type JsonValidationResult
+} from '../../../../../core/utils/validation/validation-result';
 import { validateTransactionRequest } from '../../../../../core/utils/validation';
 import { DEMO_ECHO_ADDRESS } from '../../send-transaction/utils/transaction-presets';
+import {
+    BATCH_MESSAGE_COUNT_MAX,
+    BATCH_MESSAGE_COUNT_WALLET_HINT,
+    isBatchMessageCountCommittable
+} from '../constants';
 
 export type BatchMode = 'sendTransaction' | 'signMessage';
 
@@ -34,17 +43,51 @@ type BatchRequest = SendTransactionRequest & SignMessageRequest;
 
 const defaultValidUntil = () => Math.floor(Date.now() / 1000) + VALID_UNTIL_SECONDS;
 
+const clampMessageCount = (count: number): number =>
+    Math.min(BATCH_MESSAGE_COUNT_MAX, Math.max(1, Math.floor(count)));
+
 const buildRequest = (
     count: number,
     recipient: string,
     validUntil: number = defaultValidUntil()
-): BatchRequest => ({
-    validUntil,
-    messages: Array.from({ length: count }, () => ({
-        address: recipient,
-        amount: PER_MESSAGE_AMOUNT_NANO
-    }))
-});
+): BatchRequest => {
+    const safeCount = clampMessageCount(count);
+    return {
+        validUntil,
+        messages: Array.from({ length: safeCount }, () => ({
+            address: recipient,
+            amount: PER_MESSAGE_AMOUNT_NANO
+        }))
+    };
+};
+
+const validateBatchRequest = (parsed: unknown, nowSec: number): JsonValidationResult => {
+    const base = normalizeJsonValidation(validateTransactionRequest(parsed, nowSec));
+    const messages = (parsed as BatchRequest | null)?.messages;
+    const length = Array.isArray(messages) ? messages.length : 0;
+
+    if (length > BATCH_MESSAGE_COUNT_MAX) {
+        return {
+            errors: [
+                ...base.errors,
+                `messages: count must be at most ${BATCH_MESSAGE_COUNT_MAX} (got ${length})`
+            ],
+            warnings: base.warnings
+        };
+    }
+
+    if (length > BATCH_MESSAGE_COUNT_WALLET_HINT) {
+        return {
+            errors: base.errors,
+            warnings: [
+                ...base.warnings,
+                `messages: ${length} exceeds maxMessages (${BATCH_MESSAGE_COUNT_WALLET_HINT}) on all known TON Connect wallets`
+            ]
+        };
+    }
+
+    return base;
+};
 
 /**
  * Owns the batch-limits probe state. The JsonEditor `draft` is the source of
@@ -79,7 +122,7 @@ export const useBatchTester = () => {
         isSyntaxInvalid
     } = useJsonDraftValidation({
         initialValue: buildRequest(DEFAULT_COUNT, recipient),
-        validate: (parsed, { nowSec }) => validateTransactionRequest(parsed, nowSec),
+        validate: (parsed, { nowSec }) => validateBatchRequest(parsed, nowSec),
         watchTime: true
     });
 
@@ -98,8 +141,23 @@ export const useBatchTester = () => {
         ? validationWarnings.find(message => message.startsWith('validUntil'))
         : undefined;
 
+    const countError =
+        count > BATCH_MESSAGE_COUNT_MAX
+            ? `Must be at most ${BATCH_MESSAGE_COUNT_MAX}`
+            : count < 1 && showValidationUi
+              ? 'Must be at least 1'
+              : undefined;
+    const countWarning =
+        count > BATCH_MESSAGE_COUNT_WALLET_HINT && count <= BATCH_MESSAGE_COUNT_MAX
+            ? `Exceeds maxMessages (${BATCH_MESSAGE_COUNT_WALLET_HINT}) on all known TON Connect wallets`
+            : undefined;
+    const isCountBlocked = !isBatchMessageCountCommittable(count);
+
     const setCount = useCallback(
         (next: number) => {
+            if (!isBatchMessageCountCommittable(next)) {
+                return;
+            }
             replaceValue(buildRequest(next, recipient, parsed?.validUntil ?? defaultValidUntil()));
         },
         [replaceValue, recipient, parsed?.validUntil]
@@ -161,6 +219,9 @@ export const useBatchTester = () => {
         setMode,
         count,
         setCount,
+        countError,
+        countWarning,
+        isCountBlocked,
         validUntil,
         setValidUntil,
         setValidUntilFromNow,
