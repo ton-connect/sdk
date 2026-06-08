@@ -1,4 +1,7 @@
-const separator = window.location.pathname.replace(/\/+$/, '') + ':';
+// Scope keys to the app base path (GH Pages subpath), not the current SPA route.
+// Using pathname would break TonConnect session restore after navigating + refresh.
+const basePath = import.meta.env.BASE_URL.replace(/\/+$/, '');
+const separator = basePath ? `${basePath}:` : '';
 
 const setItem = localStorage.setItem;
 localStorage.constructor.prototype.setItem = (key: unknown, value: string) =>

@@ -1,23 +1,23 @@
 import './patch-local-storage-for-github-pages';
 import './polyfills';
-import eruda from 'eruda';
+import './core/styles/index.css';
 
-import React, { StrictMode } from 'react';
+import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
-import App from './App';
-import './index.scss';
-import { runSingleInstance } from './utils/run-single-instance';
-import { enableQaMode } from '@tonconnect/ui-react';
-import { getTonconnectVersion } from './utils/get-tonconnect-version';
+import { App } from './App';
+import { initQaModeFromUrl } from './core/utils/qa-mode-from-url';
+import { installWalletConsoleCapture } from './core/utils/wallet-console-capture';
+import { runSingleInstance } from './core/utils/run-single-instance';
+import { getTonconnectVersion } from './core/utils/get-tonconnect-version';
 
-if (import.meta.env.VITE_QA_MODE === 'enable') {
-    enableQaMode();
-}
+initQaModeFromUrl();
+installWalletConsoleCapture();
 
 getTonconnectVersion();
 
-eruda.init();
+if (import.meta.env.DEV) {
+    void import('eruda').then(({ default: eruda }) => eruda.init());
+}
 
 async function enableMocking() {
     const host = document.baseURI.replace(/\/$/, '');
@@ -64,7 +64,7 @@ async function enableMocking() {
             }
         });
 
-        setInterval(verifyAndRestartWorker, 1_000);
+        setInterval(verifyAndRestartWorker, 10_000);
     });
 }
 
@@ -73,9 +73,7 @@ enableMocking().then(() => {
     const root = createRoot(container);
     root.render(
         <StrictMode>
-            <BrowserRouter>
-                <App />
-            </BrowserRouter>
+            <App />
         </StrictMode>
     );
 });

@@ -1,6 +1,8 @@
-import { Cell, loadMessage, TonClient, Transaction } from '@ton/ton';
-import { getNormalizedExtMessageHash, retry } from '../utils/transactions-utils';
+import { Cell, loadMessage, type TonClient, Transaction } from '@ton/ton';
 import { HttpResponseResolver } from 'msw';
+
+import { createTonClientForNetwork } from '../../core/utils/create-ton-client';
+import { getNormalizedExtMessageHash, retry } from '../utils/transactions-utils';
 import { badRequest, notFound, ok } from '../utils/http-utils';
 
 async function waitForTransaction(
@@ -55,9 +57,7 @@ export const waitForTransactionResolver: HttpResponseResolver = async ({ request
         const body = (await request.json()) as any;
         const network = body.network;
         const inMessageBoc = body.inMessageBoc;
-        const client = new TonClient({
-            endpoint: `https://${network === 'testnet' ? 'tesnet.' : ''}toncenter.com/api/v2/jsonRPC`
-        });
+        const client = createTonClientForNetwork(network === 'testnet' ? 'testnet' : 'mainnet');
         const transaction = await waitForTransaction(inMessageBoc, client);
         if (!transaction) {
             return notFound({ error: 'Transaction not found' });
