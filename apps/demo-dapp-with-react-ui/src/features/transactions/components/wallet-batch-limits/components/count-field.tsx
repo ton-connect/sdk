@@ -46,8 +46,7 @@ export const CountField: FC<CountFieldProps> = ({
     );
 
     const draftCount = parseDraftCount(input.value);
-    const draftExceedsMax =
-        draftCount !== undefined && draftCount > BATCH_MESSAGE_COUNT_MAX;
+    const draftExceedsMax = draftCount !== undefined && draftCount > BATCH_MESSAGE_COUNT_MAX;
     const draftBelowMin = draftCount !== undefined && draftCount < 1;
     const showDraftError = draftExceedsMax || draftBelowMin;
 

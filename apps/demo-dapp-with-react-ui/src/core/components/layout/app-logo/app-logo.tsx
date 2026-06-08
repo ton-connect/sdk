@@ -33,7 +33,10 @@ export const AppLogo: FC<ComponentProps<'span'>> = ({
     <span
         role="img"
         aria-label={ariaLabel}
-        className={cn('inline-block aspect-[109/100] shrink-0 bg-current text-foreground', className)}
+        className={cn(
+            'inline-block aspect-[109/100] shrink-0 bg-current text-foreground',
+            className
+        )}
         style={{ ...logoMaskStyle, ...style }}
         {...props}
     />
