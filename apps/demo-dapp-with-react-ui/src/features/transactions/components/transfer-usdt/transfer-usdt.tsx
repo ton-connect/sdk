@@ -23,6 +23,7 @@ const DEFAULT_AMOUNT = '0.01';
 const toUserFacingAddress = (raw: string): string =>
     Address.parse(raw).toString({ urlSafe: true, bounceable: false });
 
+// eslint-disable-next-line complexity
 export const TransferUsdt = () => {
     const qaMode = useQaMode();
     const {
@@ -90,18 +91,12 @@ export const TransferUsdt = () => {
         !sending &&
         !networkError &&
         (form.withConnect ||
-            (!!senderAddress &&
-                (form.gasless || form.gaslessMode === 'items' || !!jettonWallet)));
+            (!!senderAddress && (form.gasless || form.gaslessMode === 'items' || !!jettonWallet)));
 
     const handleSend = async () => {
         if (!destination || amountSendBlocked || networkError) return;
         if (!form.withConnect && !senderAddress) return;
-        if (
-            !form.gasless &&
-            !form.withConnect &&
-            !jettonWallet &&
-            form.gaslessMode !== 'items'
-        ) {
+        if (!form.gasless && !form.withConnect && !jettonWallet && form.gaslessMode !== 'items') {
             return;
         }
         await send({
