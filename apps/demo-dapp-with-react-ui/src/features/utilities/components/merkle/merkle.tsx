@@ -27,11 +27,9 @@ export const Merkle = () => {
             <RadioCards value={mode} onChange={setMode} data-testid="merkle-mode">
                 <RadioCards.Item value="proof" data-testid="merkle-mode-proof">
                     Merkle proof
-                    <RadioCards.Tag>Deploy + proof</RadioCards.Tag>
                 </RadioCards.Item>
                 <RadioCards.Item value="update" data-testid="merkle-mode-update">
                     Merkle update
-                    <RadioCards.Tag>Example contract</RadioCards.Tag>
                 </RadioCards.Item>
             </RadioCards>
 
