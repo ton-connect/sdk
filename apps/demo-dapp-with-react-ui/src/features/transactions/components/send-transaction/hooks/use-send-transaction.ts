@@ -1,10 +1,5 @@
 import { useCallback, useState } from 'react';
-import {
-    CHAIN,
-    type SendTransactionRequest,
-    useTonConnectUI,
-    useTonWallet
-} from '@tonconnect/ui-react';
+import { CHAIN, type SendTransactionRequest, useTonConnectUI } from '@tonconnect/ui-react';
 
 import { fail, ok, type OperationResult } from '../../../../../core/components/shared/result-block';
 import { TonProofApi } from '../../../../../core/utils/ton-proof-demo-api';
@@ -35,7 +30,6 @@ interface SendOptions {
  */
 export const useSendTransaction = () => {
     const [tonConnectUI] = useTonConnectUI();
-    const wallet = useTonWallet();
 
     const [sendingTx, setSendingTx] = useState(false);
     const [waitingTx, setWaitingTx] = useState(false);
@@ -69,9 +63,10 @@ export const useSendTransaction = () => {
                     response = await tonConnectUI.sendTransaction(tx);
                 }
 
-                if (opts.waitForTx && wallet?.account) {
+                if (opts.waitForTx && tonConnectUI?.account) {
                     setWaitingTx(true);
-                    const network = wallet.account.chain === CHAIN.TESTNET ? 'testnet' : 'mainnet';
+                    const network =
+                        tonConnectUI.account.chain === CHAIN.TESTNET ? 'testnet' : 'mainnet';
                     const confirmed = await TonProofApi.waitForTransaction(response.boc, network);
                     setTxResult(ok(confirmed));
                 } else {
@@ -85,7 +80,7 @@ export const useSendTransaction = () => {
                 setWaitingTx(false);
             }
         },
-        [tonConnectUI, wallet]
+        [tonConnectUI]
     );
 
     const signMessage = useCallback(
