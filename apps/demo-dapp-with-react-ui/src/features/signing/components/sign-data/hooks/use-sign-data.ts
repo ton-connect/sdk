@@ -1,10 +1,5 @@
 import { useCallback, useState } from 'react';
-import {
-    type SignDataPayload,
-    type SignDataResponse,
-    useTonConnectUI,
-    useTonWallet
-} from '@tonconnect/ui-react';
+import { type SignDataPayload, type SignDataResponse, useTonConnectUI } from '@tonconnect/ui-react';
 
 import { fail, ok, type OperationResult } from '../../../../../core/components/shared/result-block';
 import { TonProofApi } from '../../../../../core/utils/ton-proof-demo-api';
@@ -28,7 +23,6 @@ interface SendOptions {
  */
 export const useSignData = () => {
     const [tonConnectUi] = useTonConnectUI();
-    const wallet = useTonWallet();
 
     const [sending, setSending] = useState(false);
     const [result, setResult] = useState<OperationResult | null>(null);
@@ -55,8 +49,9 @@ export const useSignData = () => {
                     response = await tonConnectUi.signData(payload);
                 }
 
-                const verification = wallet
-                    ? await TonProofApi.checkSignData(response, wallet.account)
+                const account = tonConnectUi.account;
+                const verification = account
+                    ? await TonProofApi.checkSignData(response, account)
                     : null;
 
                 setResult(ok({ response, verification }));
@@ -67,7 +62,7 @@ export const useSignData = () => {
                 setSending(false);
             }
         },
-        [tonConnectUi, wallet]
+        [tonConnectUi]
     );
 
     const dismissRetryPrompt = useCallback(() => setRetryPrompt(null), []);
