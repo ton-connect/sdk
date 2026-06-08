@@ -57,7 +57,7 @@ export function addReturnStrategy(
  *
  * @param universalLink A string representing the universal link to redirect to within Telegram.
  * @param options An object containing specific properties to customize the redirect behavior:
- *   - returnStrategy: An enum `ReturnStrategy` dictating the method for returning to the app after the action is completed.
+ *   - returnStrategy: A `ReturnStrategy` value dictating the method for returning to the app after the action is completed.
  *   - twaReturnUrl: A URL template string for TMA return, or `undefined` if not applicable.
  *   - forceRedirect: A boolean flag to force redirection, bypassing deep link fallback mechanisms.
  *
@@ -263,7 +263,7 @@ export function redirectToTelegram(
  * @param universalLink A string representing the universal link to redirect to within the wallet.
  * @param deepLink A string representing the deep link to redirect to within the wallet, or `undefined` if not applicable.
  * @param options An object containing specific properties to customize the redirect behavior:
- *  - returnStrategy: An enum `ReturnStrategy` dictating the method for returning to the app after the action is completed.
+ *  - returnStrategy: A `ReturnStrategy` value dictating the method for returning to the app after the action is completed.
  *  - forceRedirect: A boolean flag to force redirection, bypassing deep link fallback mechanisms.
  * @param setOpenMethod A function to set the method of opening the wallet.
  *

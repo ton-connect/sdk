@@ -1,7 +1,7 @@
 import { TonConnectError } from 'src/errors/ton-connect.error';
 
 /**
- * Thrown when wallet connection called but wallet already connected. To avoid the error, disconnect the wallet before doing a new connection.
+ * Thrown when wallet connection called but wallet already connected.
  */
 export class WalletAlreadyConnectedError extends TonConnectError {
     protected get info(): string {

@@ -1,3 +1,4 @@
+/** Concatenate two byte arrays into a new `Uint8Array`. */
 export function concatUint8Arrays(buffer1: Uint8Array, buffer2: Uint8Array): Uint8Array {
     const mergedArray = new Uint8Array(buffer1.length + buffer2.length);
     mergedArray.set(buffer1);
@@ -5,6 +6,10 @@ export function concatUint8Arrays(buffer1: Uint8Array, buffer2: Uint8Array): Uin
     return mergedArray;
 }
 
+/**
+ * Split `array` at `index` and return the two halves as fresh
+ * `Uint8Array`s.
+ */
 export function splitToUint8Arrays(array: Uint8Array, index: number): [Uint8Array, Uint8Array] {
     if (index >= array.length) {
         throw new Error('Index is out of buffer');
@@ -15,6 +20,7 @@ export function splitToUint8Arrays(array: Uint8Array, index: number): [Uint8Arra
     return [subArray1, subArray2];
 }
 
+/** Hex-encode a byte array, lowercase, no `0x` prefix. */
 export function toHexString(byteArray: Uint8Array): string {
     let hexString = '';
     byteArray.forEach(byte => {
@@ -22,6 +28,10 @@ export function toHexString(byteArray: Uint8Array): string {
     });
     return hexString;
 }
+
+/**
+ * Inverse of {@link toHexString}. Throws when `hexString` has an odd length.
+ */
 export function hexToByteArray(hexString: string): Uint8Array {
     if (hexString.length % 2 !== 0) {
         throw new Error(`Cannot convert ${hexString} to bytesArray`);

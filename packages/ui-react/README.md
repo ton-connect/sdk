@@ -12,7 +12,7 @@ You can find more details and the protocol specification in the [docs](https://d
 
 # Getting started
 
-[Latest API documentation](https://ton-connect.github.io/sdk/modules/_tonconnect_ui_react.html)
+[Latest API documentation](https://docs.ton.org/applications/ton-connect/api-reference/ui-react)
 
 # Getting started
 
@@ -23,7 +23,7 @@ You can find more details and the protocol specification in the [docs](https://d
 
 ## Add TonConnectUIProvider
 Add TonConnectUIProvider to the root of the app. You can specify UI options using props.
-[See all available options](https://ton-connect.github.io/sdk/types/_tonconnect_ui_react.TonConnectUIProviderProps.html)
+[See all available options](https://docs.ton.org/applications/ton-connect/api-reference/ui-react)
 
 All TonConnect UI hooks calls and `<TonConnectButton />` component must be placed inside `<TonConnectUIProvider>`.
 
@@ -186,8 +186,8 @@ Use it to get user's current ton wallet. If wallet is not connected hook will re
 
 See all wallet's properties
 
-[Wallet interface](https://ton-connect.github.io/sdk/interfaces/_tonconnect_sdk.Wallet.html)
-[WalletInfo interface](https://ton-connect.github.io/sdk/types/_tonconnect_sdk.WalletInfo.html)
+[Wallet interface](https://docs.ton.org/applications/ton-connect/api-reference/sdk)
+[WalletInfo interface](https://docs.ton.org/applications/ton-connect/api-reference/sdk)
 
 ```tsx
 import { useTonWallet } from '@tonconnect/ui-react';

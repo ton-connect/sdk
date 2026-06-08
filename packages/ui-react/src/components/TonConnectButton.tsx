@@ -3,18 +3,31 @@ import { useTonConnectUI } from '../hooks/useTonConnectUI';
 
 const buttonRootId = 'ton-connect-button';
 
+/** Props for {@link TonConnectButton}. */
 export interface TonConnectButtonProps {
+    /** Extra class name applied to the button container. */
     className?: string;
 
+    /** Inline styles merged with the button container's `width: fit-content` default. */
     style?: CSSProperties;
 }
 
 /**
- * TonConnect Button is universal UI component for initializing connection. After wallet is connected it transforms to a wallet menu.
- * It is recommended to place it in the top right corner of your app.
- * @param [className] css class to add to the button container.
- * @param [style] style to add to the button container.
- * @constructor
+ * Universal "Connect Wallet" button.
+ *
+ * When connected, the button transforms into a wallet-account dropdown
+ * (address, copy, disconnect). Style via `className` / `style` or via the
+ * data-attribute selectors documented in `@tonconnect/ui`'s README.
+ *
+ * Must be rendered inside a <{@link TonConnectUIProvider}>.
+ *
+ * @example
+ * ```tsx
+ * <header>
+ *     <span>My App</span>
+ *     <TonConnectButton className="my-class" style={{ float: 'right' }} />
+ * </header>
+ * ```
  */
 const TonConnectButton: FunctionComponent<TonConnectButtonProps> = ({ className, style }) => {
     const [_, setOptions] = useTonConnectUI();

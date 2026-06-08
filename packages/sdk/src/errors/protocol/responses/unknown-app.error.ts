@@ -1,7 +1,7 @@
 import { TonConnectError } from 'src/errors/ton-connect.error';
 
 /**
- * Thrown when app tries to send rpc request to the injected wallet while not connected.
+ * Thrown when the wallet returns `UNKNOWN_APP` (code 100): the session or app is unknown to the wallet.
  */
 export class UnknownAppError extends TonConnectError {
     protected get info(): string {

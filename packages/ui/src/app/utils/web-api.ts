@@ -18,7 +18,7 @@ import { removeEmbeddedRequestFromUniversalLink } from 'src/app/utils/url-strate
 export const MAX_LINK_LENGTH = 1024;
 
 /**
- * Opens a link in a new tab.
+ * Opens a link in the given target window (defaults to the current tab).
  * @param href
  * @param target
  */
@@ -42,7 +42,7 @@ export function openLinkBlank(href: string): void {
 
 /**
  * Open a deeplink in the same tab and fallback to a direct link after 200 ms.
- * In Safari, the fallback will not work.
+ * The fallback will not work on Safari, on Windows, or on Firefox for Android.
  * @param href
  * @param fallback
  */

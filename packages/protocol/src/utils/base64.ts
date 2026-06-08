@@ -60,6 +60,20 @@ function decode(
     };
 }
 
+/**
+ * UTF-8 base64 codec used by `@tonconnect/protocol`. Wraps the NaCl
+ * helpers with optional URL-safe encoding and a typed decoder that can
+ * yield a string, an object (JSON-parsed), or the raw byte array.
+ *
+ * @example
+ * ```ts
+ * import { Base64 } from '@tonconnect/protocol';
+ *
+ * const encoded = Base64.encode({ hello: 'world' });
+ * const obj = Base64.decode(encoded).toObject<{ hello: string }>();
+ * const bin = Base64.decode(Base64.encode('Hello')).toUint8Array();
+ * ```
+ */
 export const Base64 = {
     encode,
     decode

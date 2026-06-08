@@ -13,7 +13,7 @@ export type DelayFnOptions = {
 /**
  * Delays the execution of code for a specified number of milliseconds.
  * @param {number} timeout - The number of milliseconds to delay the execution.
- * @param {DelayOptions} [options] - Optional configuration options for the delay.
+ * @param {DelayFnOptions} [options] - Optional configuration options for the delay.
  * @return {Promise<void>} - A promise that resolves after the specified delay, or rejects if the delay is aborted.
  */
 export async function delay(timeout: number, options?: DelayFnOptions): Promise<void> {

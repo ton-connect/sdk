@@ -3,8 +3,18 @@ import { useTonWallet } from './useTonWallet';
 import { useMemo } from 'react';
 
 /**
- * Use it to get user's current ton wallet address. If wallet is not connected hook will return empty string.
- * @param [userFriendly=true] allows to choose format of the address.
+ * Reactive accessor for the connected account's TON address. Returns an
+ * empty string while disconnected.
+ *
+ * @param userFriendly — `true` (default) returns the non-bounceable base64url
+ *   user-friendly form (`UQ…` on mainnet, `0Q…` on testnet).
+ *   Pass `false` to get the raw `<workchain>:<hex>` form.
+ *
+ * @example
+ * ```tsx
+ * const address = useTonAddress();      // user-friendly
+ * const rawAddress = useTonAddress(false);
+ * ```
  */
 export function useTonAddress(userFriendly = true): string {
     const wallet = useTonWallet();

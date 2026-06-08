@@ -1,23 +1,43 @@
 /**
- * Imitation of the localStorage.
+ * Async key-value store used by the SDK to persist protocol state (session
+ * keys, last connected wallet info, restoration markers).
+ *
+ * In the browser the SDK uses `window.localStorage` by default. In Node.js,
+ * React Native or any other environment without a `localStorage` global the
+ * dApp MUST pass a custom implementation on `TonConnectOptions.storage`.
+ *
+ * @example
+ * ```ts
+ * import type { IStorage } from '@tonconnect/sdk';
+ *
+ * const memoryStorage = {
+ *     state: new Map<string, string>(),
+ *     setItem(k, v) { this.state.set(k, v); return Promise.resolve(); },
+ *     getItem(k)    { return Promise.resolve(this.state.get(k) ?? null); },
+ *     removeItem(k) { this.state.delete(k); return Promise.resolve(); },
+ * } satisfies IStorage & { state: Map<string, string> };
+ * ```
  */
 export interface IStorage {
     /**
-     * Saves the `value` to the storage. Value can be accessed later by the `key`. Implementation may use backend as a storage due to the fact that the function returns a promise.
-     * @param key key to access to the value later.
-     * @param value value to save.
+     * Persist `value` under `key`. Overwrites any existing value.
+     *
+     * @param key — string identifier, scoped per dApp.
+     * @param value — value to save.
      */
     setItem(key: string, value: string): Promise<void>;
 
     /**
-     * Reads the `value` from the storage. Implementation may use backend as a storage due to the fact that the function returns a promise.
-     * @param key key to access the value.
+     * Read the value previously stored under `key`, or `null` if absent.
+     *
+     * @param key — string identifier set on a previous {@link IStorage.setItem} call.
      */
     getItem(key: string): Promise<string | null>;
 
     /**
-     * Removes the `value` from the storage. Implementation may use backend as a storage due to the fact that the function returns a promise.
-     * @param key key to access the value.
+     * Delete the value stored under `key`. A no-op if the key does not exist.
+     *
+     * @param key — string identifier to remove.
      */
     removeItem(key: string): Promise<void>;
 }

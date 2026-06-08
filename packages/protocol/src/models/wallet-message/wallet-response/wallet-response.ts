@@ -13,6 +13,11 @@ import {
     DisconnectRpcResponseSuccess
 } from './disconnect-rpc-response';
 
+/**
+ * Map from RPC method name to its success / error response envelope.
+ *
+ * Used to derive {@link WalletResponse}.
+ */
 export type RpcResponses = {
     sendTransaction: {
         error: SendTransactionRpcResponseError;
@@ -39,4 +44,9 @@ export type WalletResponseSuccess<T extends RpcMethod> = RpcResponses[T]['succes
 
 export type WalletResponseError<T extends RpcMethod> = RpcResponses[T]['error'];
 
+/**
+ * Wallet reply to an {@link AppRequest}.
+ *
+ * @see [`WalletResponse` (RPC spec)](https://github.com/ton-blockchain/ton-connect/blob/main/spec/rpc.md#walletresponse)
+ */
 export type WalletResponse<T extends RpcMethod> = WalletResponseSuccess<T> | WalletResponseError<T>;

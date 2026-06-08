@@ -4,7 +4,7 @@ Use it to connect your app to TON wallets via TonConnect protocol.
 You can find more details and the protocol specification in the [docs](https://docs.ton.org/develop/dapps/ton-connect/overview).
 See the example of sdk usage [here](https://github.com/ton-connect/demo-dapp).
 
-[Latest API documentation](https://ton-connect.github.io/sdk/modules/_tonconnect_sdk.html)
+[Latest API documentation](https://docs.ton.org/applications/ton-connect/api-reference/sdk)
 
 # Getting started
 ## Installation with cdn
@@ -276,6 +276,76 @@ const result = await connector.sendTransaction(transaction, {
 console.log(result.traceId); // use this ID to correlate with analytics events
 ```
 
+### Structured items
+
+As an alternative to raw `messages`, you can describe **what** to do — transfer TON, jetton, or NFT — and let the wallet build the BoC. See [`StructuredItem`](src/models/methods/send-transaction/structured-item.ts) for the full type. Use this path only when you know the wallet advertises support; see [Filter wallets by required features](#filter-wallets-by-required-features).
+
+```ts
+import { comment } from '@ton/ton';
+
+await connector.sendTransaction({
+    validUntil: Math.floor(Date.now() / 1000) + 600,
+    network: '-239',
+    items: [
+        // Native TON transfer
+        { type: 'ton', address: 'EQD4oN...wz7A', amount: '5000000', payload: comment('Hello, world!') },
+        // Jetton transfer — wallet resolves the user's jetton-wallet address and builds TEP-74 body
+        { type: 'jetton', master: 'EQCxE6...Id_sDs', amount: '1000000', destination: 'EQD4oN...wz7A' },
+        // NFT transfer — wallet builds the TEP-62 transfer body
+        { type: 'nft', nftAddress: 'EQAcoW...qD8qM3T', newOwner: 'EQD4oN...wz7A' }
+    ]
+});
+```
+
+`messages` and `items` are mutually exclusive in a single request. The wallet's `SendTransaction.itemTypes` feature declares which item kinds it accepts.
+
+## Sign and relay a message (gasless)
+
+`signMessage` asks the wallet to sign an internal message **without broadcasting it**. The dApp receives a signed BoC and submits it through a relayer — typically to pay gas in a jetton instead of TON. The payload has the same shape as `sendTransaction`. Supported by wallets that advertise the `SignMessage` feature (typically Wallet V5).
+
+```ts
+const { internalBoc, traceId } = await connector.signMessage({
+    validUntil: Math.floor(Date.now() / 1000) + 300,
+    network: '-239',
+    messages: [
+        {
+            address: 'Ef8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAU',
+            amount: '5000000',
+            payload: bodyBoc,    // optional, base64
+            stateInit: initBoc   // optional, base64
+        }
+    ]
+});
+
+// Wrap internalBoc in an external message and submit via your relayer
+// (e.g. TonAPI gasless: https://docs.tonconsole.com/tonapi/rest-api/gasless).
+```
+
+`signMessage` accepts both raw `messages[]` and structured `items[]`, exactly like `sendTransaction`. The full gasless cookbook lives in the [Sign and relay a message (gasless)](https://docs.ton.org/applications/ton-connect/how-to/sign-message-gasless) docs.
+
+## Filter wallets by required features
+
+Pass `walletsRequiredFeatures` to the constructor to hide wallets that don't advertise the capabilities your dApp needs. See [`RequiredFeatures`](src/models/wallet/require-feature.ts) for every supported filter.
+
+```ts
+const connector = new TonConnect({
+    manifestUrl: 'https://myApp.com/tonconnect-manifest.json',
+    walletsRequiredFeatures: {
+        sendTransaction: {
+            minMessages: 1,
+            itemTypes: ['ton', 'jetton']   // require structured items for these kinds
+        },
+        signData: { types: ['text', 'cell'] },
+        signMessage: { minMessages: 1 },
+        embeddedRequest: {}                 // require one-tap connect-and-act support
+    }
+});
+```
+
+The filter is enforced both before the picker (non-matching wallets are excluded) and at connect time — a wallet whose runtime `DeviceInfo.features` no longer satisfies the filter is rejected with [`WalletMissingRequiredFeaturesError`](src/errors/wallet/wallet-missing-required-features.error.ts).
+
+Use [`checkRequiredWalletFeatures`](src/utils/feature-support.ts) to run the same check yourself against an arbitrary `Feature[]`.
+
 ## Sign data
 
 Sign arbitrary data with the user's wallet. The wallet will display the data to the user for confirmation before signing.
@@ -539,7 +609,7 @@ export interface IStorage {
 }
 ```
 
-[See details about IStorage in the API documentation](https://ton-connect.github.io/sdk/interfaces/_tonconnect_sdk.IStorage.html).
+[See details about IStorage in the API documentation](https://docs.ton.org/applications/ton-connect/api-reference/sdk).
 
 Other steps are the same as for browser apps.
 

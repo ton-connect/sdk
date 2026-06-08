@@ -6,9 +6,14 @@ const noBounceableTag = 0x51;
 const testOnlyTag = 0x80;
 
 /**
- * Converts raw TON address to no-bounceable user-friendly format. [See details]{@link https://ton.org/docs/learn/overviews/addresses#user-friendly-address}
- * @param hexAddress raw TON address formatted as "0:<hex string without 0x>".
- * @param [testOnly=false] convert address to test-only form. [See details]{@link https://ton.org/docs/learn/overviews/addresses#user-friendly-address}
+ * Convert a raw `<workchain>:<hex>` TON address into the URL-safe,
+ * non-bounceable user-friendly form (`UQ…` on mainnet, `0Q…` on testnet).
+ *
+ * @param hexAddress — raw address, e.g. `'0:348bcf...0415f'`.
+ * @param testOnly — set the test-only flag; Defaults to `false`.
+ * @returns Base64url-encoded user-friendly address.
+ *
+ * @see [User-friendly address format](https://docs.ton.org/blockchain-basics/primitives/addresses/formats#user-friendly-format)
  */
 export function toUserFriendlyAddress(hexAddress: string, testOnly = false): string {
     const { wc, hex } = parseHexAddress(hexAddress);

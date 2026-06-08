@@ -1,5 +1,17 @@
 /**
- * Base class for TonConnect errors. You can check if the error was triggered by the @tonconnect/sdk using `err instanceof TonConnectError`.
+ * Base class for every error thrown by `@tonconnect/sdk`. Catch it to handle
+ * TON Connect failures uniformly.
+ *
+ * @example
+ * ```ts
+ * try {
+ *     await connector.sendTransaction(tx);
+ * } catch (e) {
+ *     if (e instanceof TonConnectError) {
+ *         // wallet error, validation error, user rejection — all subclass this.
+ *     }
+ * }
+ * ```
  */
 export class TonConnectError<T = unknown> extends Error {
     private static prefix = '[TON_CONNECT_SDK_ERROR]';

@@ -85,7 +85,40 @@ import {
 import { IMG } from 'src/app/env/IMG';
 import { PickRequired } from 'src/utils/pick-required';
 
+/**
+ * UI-aware TON Connect connector. Wraps a `TonConnect` instance from
+ * `@tonconnect/sdk` and adds the wallet-selection modal, the
+ * "connect-wallet" button, notification toasts, and a `uiOptions` setter
+ * for runtime theming.
+ *
+ * In a React app prefer `<TonConnectUIProvider>` from
+ * `@tonconnect/ui-react`, which manages a singleton `TonConnectUI` for you.
+ *
+ * @example
+ * ```ts
+ * import { TonConnectUI, THEME } from '@tonconnect/ui';
+ *
+ * const tonConnectUI = new TonConnectUI({
+ *     manifestUrl: 'https://example.com/tonconnect-manifest.json',
+ *     buttonRootId: 'ton-connect-button',
+ *     uiPreferences: { theme: THEME.DARK },
+ * });
+ *
+ * if (tonConnectUI.connected) {
+ *     await tonConnectUI.sendTransaction(tx);
+ * } else {
+ *     await tonConnectUI.openModal();
+ * }
+ * ```
+ *
+ * @see [Connect a wallet (docs)](https://docs.ton.org/applications/ton-connect/how-to/connect)
+ */
 export class TonConnectUI {
+    /**
+     * Fetch the wallets-list registry without instantiating a `TonConnectUI`.
+     * Equivalent to the instance method but usable in code that runs before
+     * the connector exists.
+     */
     public static getWallets(): Promise<WalletInfo[]> {
         return TonConnect.getWallets();
     }
@@ -110,12 +143,23 @@ export class TonConnectUI {
 
     private _walletsRequiredFeatures?: RequiredFeatures;
 
+    /**
+     * Wallet features the dApp requires. Wallets that do not advertise them are
+     * hidden from the picker and rejected at connect time. Set via the
+     * constructor or the `uiOptions` setter. See {@link RequiredFeatures}.
+     */
     public get walletsRequiredFeatures(): RequiredFeatures | undefined {
         return this._walletsRequiredFeatures;
     }
 
     private _walletsPreferredFeatures?: RequiredFeatures;
 
+    /**
+     * Wallet features the dApp prefers. Non-matching wallets stay selectable
+     * but are sorted to the bottom of the picker; unlike
+     * {@link TonConnectUI.walletsRequiredFeatures}, the match is not enforced
+     * at connect time. See {@link RequiredFeatures}.
+     */
     public get walletsPreferredFeatures(): RequiredFeatures | undefined {
         return this._walletsPreferredFeatures;
     }
@@ -149,9 +193,9 @@ export class TonConnectUI {
     private readonly transactionModal: TransactionModalManager;
 
     /**
-     * Promise that resolves after end of th connection restoring process (promise will fire after `onStatusChange`,
-     * so you can get actual information about wallet and session after when promise resolved).
-     * Resolved value `true`/`false` indicates if the session was restored successfully.
+     * Promise that resolves after the connection restoring process ends (it fires after `onStatusChange`,
+     * so you can read actual wallet and session information once it resolves).
+     * The resolved value `true`/`false` indicates whether the session was restored successfully.
      */
     public readonly connectionRestored = Promise.resolve(false);
 
@@ -170,7 +214,7 @@ export class TonConnectUI {
     }
 
     /**
-     * Curren connected wallet app and its info or null.
+     * Current connected wallet app and its info, or `null` when not connected.
      */
     public get wallet(): Wallet | (Wallet & WalletInfoWithOpenMethod) | null {
         if (!this.connector.wallet) {
@@ -340,7 +384,7 @@ export class TonConnectUI {
 
     /**
      * Use it to customize ConnectRequest and add `tonProof` payload.
-     * You can call it multiply times to set updated tonProof payload if previous one is outdated.
+     * You can call it multiple times to set an updated tonProof payload if the previous one is outdated.
      * If `connectRequestParameters.state === 'loading'` loader will appear instead of the qr code in the wallets modal.
      * If `connectRequestParameters.state` was changed to 'ready' or it's value has been changed, QR will be re-rendered.
      */
@@ -356,7 +400,7 @@ export class TonConnectUI {
     /**
      * Set desired network for the connection. Can only be set before connecting.
      * If wallet connects with a different chain, the SDK will throw an error and abort connection.
-     * @param network desired network id (e.g., '-239', '-3', or custom). Pass undefined to allow any network.
+     * @param network desired network id (e.g., '-239', '-3', or custom). Pass undefined to allow any network. See {@link ChainId}.
      */
     public setConnectionNetwork(network?: ChainId): void {
         this.connector.setConnectionNetwork(network);
@@ -364,6 +408,7 @@ export class TonConnectUI {
 
     /**
      * Returns available wallets list.
+     * @returns array of {@link WalletInfo}, merged from the registry and any injected wallets.
      */
     public async getWallets(): Promise<WalletInfo[]> {
         return this.connector.getWallets();
@@ -371,7 +416,7 @@ export class TonConnectUI {
 
     /**
      * Subscribe to connection status change.
-     * @return function which has to be called to unsubscribe.
+     * @returns function which has to be called to unsubscribe.
      */
     public onStatusChange(
         callback: (wallet: ConnectedWallet | null) => void,
@@ -410,13 +455,16 @@ export class TonConnectUI {
 
     /**
      * Closes the modal window.
+     * @param reason optional {@link WalletsModalCloseReason} forwarded to state subscribers.
      */
     public closeModal(reason?: WalletsModalCloseReason): void {
         this.modal.close(reason);
     }
 
     /**
-     * Subscribe to the modal window state changes, returns a function which has to be called to unsubscribe.
+     * Subscribe to the modal window state changes.
+     * @param onChange callback invoked with the new {@link WalletsModalState} on every change.
+     * @returns function which has to be called to unsubscribe.
      */
     public onModalStateChange(onChange: (state: WalletsModalState) => void): () => void {
         return this.modal.onStateChange(onChange);
@@ -466,8 +514,8 @@ export class TonConnectUI {
     /**
      * @deprecated Use `tonConnectUI.openModal()` instead. Will be removed in the next major version.
      * Opens the modal window and handles a wallet connection.
-     * @return Connected wallet.
-     * @throws TonConnectUIError if connection was aborted.
+     * @returns Connected wallet.
+     * @throws {@link TonConnectUIError} if connection was aborted.
      */
     public async connectWallet(options?: OptionalTraceable): Promise<ConnectedWallet> {
         const traceId = options?.traceId ?? UUIDv7();
@@ -518,7 +566,7 @@ export class TonConnectUI {
      * `SendTransactionResponse` otherwise.
      *
      * @param tx transaction to send.
-     * @param options modal and notifications behaviour settings; set `enableEmbeddedRequest: true`
+     * @param options modal and notifications behavior settings; set `enableEmbeddedRequest: true`
      * to opt into the connect-and-send flow described above.
      */
     public async sendTransaction(
@@ -601,7 +649,7 @@ export class TonConnectUI {
      * `SignDataResponse` otherwise.
      *
      * @param data data to sign.
-     * @param options modal and notifications behaviour settings; set `enableEmbeddedRequest: true`
+     * @param options modal and notifications behavior settings; set `enableEmbeddedRequest: true`
      * to opt into the connect-and-sign flow described above.
      */
     public async signData(
@@ -678,7 +726,7 @@ export class TonConnectUI {
      * `SignMessageResponse` otherwise.
      *
      * @param message transaction-like request describing the internal message to sign.
-     * @param options modal and notifications behaviour settings; set `enableEmbeddedRequest: true`
+     * @param options modal and notifications behavior settings; set `enableEmbeddedRequest: true`
      * to opt into the connect-and-sign flow described above.
      */
     public async signMessage(
@@ -1341,15 +1389,30 @@ export class TonConnectUI {
     }
 }
 
+/**
+ * Per-call options accepted by `TonConnectUI.sendTransaction` /
+ * `signData` / `signMessage`. Extends {@link ActionConfiguration} with the
+ * common `traceId` and an `onRequestSent` hook that fires the moment the
+ * encrypted request is handed to the bridge.
+ */
 type ActionOptions = ActionConfiguration &
     OptionalTraceable<{
         onRequestSent?: (redirectToWallet: () => void) => void;
     }>;
 
+/**
+ * Flag that opts an action call into the embedded-request flow. When set,
+ * the method returns the {@link EmbeddedTResponse} envelope instead of the
+ * raw method result.
+ */
 type EnableEmbeddedRequest = {
     enableEmbeddedRequest: true;
 };
 
+/**
+ * Action options with `enableEmbeddedRequest: true` selected. Used as the
+ * second argument to the overload that returns the embedded envelope.
+ */
 type EmbeddedActionOptions = ActionOptions & EnableEmbeddedRequest;
 
 function isEmbeddedActionOptions(

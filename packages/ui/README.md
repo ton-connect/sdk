@@ -10,7 +10,7 @@ You can find more details and the protocol specification in the [docs](https://d
 
 ---
 
-[Latest API documentation](https://ton-connect.github.io/sdk/modules/_tonconnect_ui.html)
+[Latest API documentation](https://docs.ton.org/applications/ton-connect/api-reference/ui)
 
 # Getting started
 
@@ -110,9 +110,9 @@ const tonConnectUI = new TonConnectUI({
 
 See all available options:
 
-[TonConnectUiOptionsWithManifest](https://ton-connect.github.io/sdk/interfaces/_tonconnect_ui.TonConnectUiOptionsWithManifest.html)
+[TonConnectUiOptionsWithManifest](https://docs.ton.org/applications/ton-connect/api-reference/ui)
 
-[TonConnectUiOptionsWithConnector](https://ton-connect.github.io/sdk/interfaces/_tonconnect_ui.TonConnectUiOptionsWithConnector.html)
+[TonConnectUiOptionsWithConnector](https://docs.ton.org/applications/ton-connect/api-reference/ui)
 
 ## Change options if needed 
 ```ts
@@ -132,7 +132,7 @@ DON'T do this:
 /* WRONG, WILL NOT WORK */ tonConnectUI.uiOptions.language = 'ru'; 
 ```
 
-[See all available options](https://ton-connect.github.io/sdk/interfaces/_tonconnect_ui.TonConnectUiOptions.html)
+[See all available options](https://docs.ton.org/applications/ton-connect/api-reference/ui)
 
 ## Fetch wallets list
 ```ts
@@ -347,7 +347,7 @@ const result = await tonConnectUI.sendTransaction(transaction, {
 console.log(result.traceId); // use this ID to correlate with analytics events
 ```
 
-`sendTransaction` will automatically render informational modals and notifications. You can change its behaviour:
+`sendTransaction` will automatically render informational modals and notifications. You can change its behavior:
 
 ```ts
 const result = await tonConnectUI.sendTransaction(defaultTx, {
@@ -358,13 +358,13 @@ const result = await tonConnectUI.sendTransaction(defaultTx, {
 
 Default configuration is: 
 ```ts
-const defaultBehaviour = {
+const defaultBehavior = {
     modals: ['before'],
     notifications: ['before', 'success', 'error']
 }
 ```
 
-You can also modify this behaviour for all actions calls using `uiOptions` setter:
+You can also modify this behavior for all actions calls using `uiOptions` setter:
 ```ts
 tonConnectUI.uiOptions = {
         actionsConfiguration: {
@@ -373,6 +373,55 @@ tonConnectUI.uiOptions = {
         }
     };
 ```
+
+### Structured items
+
+Instead of raw `messages`, you can describe **what** to do — transfer TON, a jetton, or an NFT — and let the wallet build the message body (BoC) for you. Pass `items` instead of `messages`; the two are mutually exclusive in a single request.
+
+```ts
+import { comment } from '@ton/ton';
+
+await tonConnectUI.sendTransaction({
+    validUntil: Math.floor(Date.now() / 1000) + 600,
+    network: '-239', // CHAIN.MAINNET; '-3' for testnet
+    items: [
+        // Native TON transfer
+        {
+            type: 'ton',
+            address: 'EQD4oN...wz7A',
+            amount: '5000000',
+            payload: comment('Hello, world!') // optional, base64 BoC
+        },
+        // Jetton (TEP-74) transfer — the wallet resolves the user's jetton wallet
+        // and builds the transfer body
+        {
+            type: 'jetton',
+            master: 'EQCxE6...Id_sDs',  // jetton master address
+            amount: '1000000',          // amount in jetton elementary units
+            destination: 'EQD4oN...wz7A'
+        },
+        // NFT (TEP-62) transfer
+        {
+            type: 'nft',
+            nftAddress: 'EQAcoW...qD8qM3T',
+            newOwner: 'EQD4oN...wz7A'
+        }
+    ]
+});
+```
+
+Structured items work only with wallets that advertise the matching `SendTransaction.itemTypes`. Restrict the wallet picker with `walletsRequiredFeatures` so only supporting wallets are shown:
+
+```ts
+const tonConnectUI = new TonConnectUI({
+    manifestUrl: 'https://<YOUR_APP_URL>/tonconnect-manifest.json',
+    walletsRequiredFeatures: {
+        sendTransaction: { itemTypes: ['ton', 'jetton', 'nft'] }
+    }
+});
+```
+
+`items` are also accepted by [`signMessage`](#sign-and-relay-a-message-gasless). See [`StructuredItem`](https://docs.ton.org/applications/ton-connect/api-reference/sdk) for the full field reference.
 
 ## Sign data
 
@@ -499,6 +548,103 @@ After receiving the signed data, you need to verify the signature to ensure it's
 **For smart contract verification:** See [FunC verification example](https://github.com/p0lunin/sign-data-contract-verify-example/blob/master/contracts/sign_data_example.fc) showing how to verify signatures in TON smart contracts.
 
 **For complete technical details:** See the [Sign Data specification](https://github.com/ton-blockchain/ton-connect/blob/main/requests-responses.md#sign-data) for full signature verification requirements.
+
+## Sign and relay a message (gasless)
+
+`signMessage` asks the wallet to sign an internal message **without broadcasting it**. You get back a signed BoC that your dApp (or a relayer) submits to the network — typically to pay gas in a jetton instead of TON. Currently supported by Wallet V5 and other wallets that advertise the `SignMessage` feature.
+
+The request payload has the same shape as `sendTransaction` — both raw `messages` and structured [`items`](#structured-items) are accepted. Wallet must be connected when you call `signMessage`, otherwise an error will be thrown.
+
+```ts
+const result = await tonConnectUI.signMessage({
+    validUntil: Math.floor(Date.now() / 1000) + 300,
+    network: '-239', // mainnet; '-3' for testnet
+    messages: [
+        {
+            address: 'Ef8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAU',
+            amount: '5000000',   // nanoTON
+            payload: bodyBoc,    // optional, base64
+            stateInit: initBoc   // optional, base64
+        }
+    ]
+});
+
+const signedBoc = result.internalBoc; // base64 signed internal message
+const traceId = result.traceId;       // request correlation ID for logs/analytics
+```
+
+The response shape:
+
+```ts
+type SignMessageResult = {
+    internalBoc: string; // base64 signed internal message BoC
+    traceId?: string;    // correlates the request across UI events and the bridge
+};
+```
+
+Wrap `internalBoc` in an external message and submit it through a relayer (for example the [TonAPI gasless API](https://docs.tonconsole.com/tonapi/rest-api/gasless)). To restrict the picker to wallets that support `signMessage`, set `walletsRequiredFeatures: { signMessage: { minMessages: 1 } }`.
+
+| | `sendTransaction` | `signMessage` |
+| ------------------ | -------------------------------- | ------------------------------------------- |
+| Wallet broadcasts  | Yes                              | No                                          |
+| Wallet deducts gas | Yes                              | No                                          |
+| Result             | BoC of the broadcast transaction | `{ internalBoc }` — signed internal message |
+| Use case           | Standard transfer                | Gasless / sponsored / custom relayer        |
+
+See the [`signMessage` how-to](https://docs.ton.org/applications/ton-connect/how-to/sign-message-gasless) for the full gasless jetton-transfer recipe.
+
+## Connect and act in one tap (embedded requests)
+
+An *embedded request* packs an action — `sendTransaction`, `signMessage` or `signData` — into the wallet's connect URL, so a compatible wallet shows the connect approval and the action on one screen and returns the signed result together with the connect response. This removes the second round-trip on mobile.
+
+```ts
+const r = await tonConnectUI.sendTransaction(tx, { enableEmbeddedRequest: true });
+
+if (r.hasResponse) {
+    // The wallet signed — `r.response` is the regular SendTransactionResponse.
+    const someTxData = await myAppExplorerService.getTransaction(r.response.boc);
+} else {
+    // The request was folded into the connect URL, but no signed result came back.
+    // The wallet MAY have already processed it — do NOT retry silently.
+    // Render a Retry button and, ideally, verify on-chain before re-submitting.
+}
+```
+
+The envelope type:
+
+```ts
+type EmbeddedTResponse<TResponse> =
+    | { hasResponse: true;  response: TResponse }
+    | { hasResponse: false; connectResult: { dispatched: boolean } };
+```
+
+The same flag works on `signData` and `signMessage`. When the wallet is already connected, the SDK runs the normal bridge flow and still wraps the result in `{ hasResponse: true, response }`, so your code keeps one branch.
+
+### When the SDK embeds vs falls back
+
+The SDK folds the request into the connect URL only when all of the following hold:
+
+1. The wallet is not yet connected.
+2. `enableEmbeddedRequest: true` is set on the call.
+3. The user picks a wallet whose `DeviceInfo.features` lists `EmbeddedRequest`.
+4. The encoded URL fits within the SDK's URL length budget.
+
+If any condition fails the SDK opens the wallet without the embedded request and returns `{ hasResponse: false, connectResult: { dispatched: false } }`. To hide wallets that don't support the feature, require it on the picker:
+
+```ts
+const tonConnectUI = new TonConnectUI({
+    manifestUrl: 'https://<YOUR_APP_URL>/tonconnect-manifest.json',
+    walletsRequiredFeatures: { embeddedRequest: {} }
+});
+```
+
+### Retry rules
+
+> **Do not retry inside the same async flow.** When `dispatched: true`, the wallet may already have processed the request — verify on-chain or in your backend before re-prompting.
+
+Treat `hasResponse: false` as a UI state, not an exception: store `dispatched` somewhere the UI can read it, render an explicit **Retry** button, and let the user click it. The retry calls the same method with the flag still set — the wallet is connected by then, so the SDK takes the bridge path and returns `{ hasResponse: true, response }`.
+
+See the [embedded request how-to](https://docs.ton.org/applications/ton-connect/how-to/embedded-request) for the full behavior matrix and retry patterns.
 
 ## Universal links redirecting issues (IOS)
 Some operating systems, and especially iOS, have restrictions related to universal link usage. 
@@ -661,7 +807,7 @@ However, the app developer can make changes to this interface to keep it consist
 ### Customise UI using tonconnectUI.uiOptions
 All such updates are reactive -- change `tonconnectUI.uiOptions` and changes will be applied immediately.  
 
-[See all available options](https://ton-connect.github.io/sdk/interfaces/_tonconnect_ui.UIPreferences.html)
+[See all available options](https://docs.ton.org/applications/ton-connect/api-reference/ui)
 
 #### Change border radius
 There are three border-radius modes: `'m'`, `'s'` and `'none'`. Default is `'m'`. You can change it via tonconnectUI.uiOptions, or set on tonConnectUI creating:
@@ -793,7 +939,7 @@ const tonConnectUI = new TonConnectUI({
 });
 ```
 
-[See all available options](https://ton-connect.github.io/sdk/interfaces/_tonconnect_ui.PartialColorsSet.html)
+[See all available options](https://docs.ton.org/applications/ton-connect/api-reference/ui)
 
 #### Combine options
 It is possible to change all required options at the same time:

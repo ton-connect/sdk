@@ -1,11 +1,15 @@
 import { UIWallet } from './ui-wallet';
 
 /**
- * Add corrections to the default wallets list in the modal: add custom wallets and change wallets order.
+ * Overrides for the wallets list shown inside the connect modal — add
+ * custom wallets, alter ordering, etc.
  */
 export type WalletsListConfiguration = {
     /**
-     * Allows to include extra wallets to the wallets list in the modal.
+     * Extra wallets to append to the picker. Use this for wallets not yet
+     * in the canonical
+     * [wallets-list registry](https://github.com/ton-connect/wallets-list).
+     * Entries appear after the registry wallets.
      */
     includeWallets?: UIWallet[];
 };
