@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { useQaMode } from './use-qa-mode';
 import { JSON_SYNTAX_ERROR_MESSAGE, parseJsonObjectDraft } from '../utils/json-draft';
+import { blocksWalletSend } from '../utils/qa-mode-from-url';
 import {
     normalizeJsonValidation,
     type JsonValidationResult
@@ -39,6 +41,7 @@ export function useJsonDraftValidation<T>({
     const [draft, setDraft] = useState(() => stringify(initialValue));
     const [nowSec, setNowSec] = useState(() => Math.floor(Date.now() / 1000));
     const [showValidationUi, setShowValidationUi] = useState(false);
+    const qaMode = useQaMode();
 
     useEffect(() => {
         setShowValidationUi(true);
@@ -74,6 +77,7 @@ export function useJsonDraftValidation<T>({
 
     const isSyntaxInvalid = draftParse.syntaxInvalid;
     const isInvalid = isSyntaxInvalid || validationErrors.length > 0;
+    const isSendBlocked = blocksWalletSend(isInvalid, isSyntaxInvalid, qaMode);
     const showInvalidUi = showValidationUi && isInvalid;
     const editorMessages = isSyntaxInvalid ? [JSON_SYNTAX_ERROR_MESSAGE] : validationErrors;
     const editorWarnings = isSyntaxInvalid ? [] : validationWarnings;
@@ -96,6 +100,7 @@ export function useJsonDraftValidation<T>({
         onDraftChange,
         replaceValue,
         isInvalid,
+        isSendBlocked,
         showInvalidUi,
         showValidationUi,
         editorMessages,

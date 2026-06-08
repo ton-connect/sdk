@@ -25,10 +25,10 @@ export const CreateJetton = () => {
         }
     }, [result]);
 
-    const disableAction = !senderAddress || !canMint || form.isInvalid || sending;
+    const disableAction = !senderAddress || !canMint || form.isSendBlocked || sending;
 
     const handleMint = async () => {
-        if (!senderAddress || form.isInvalid) return;
+        if (!senderAddress || form.isSendBlocked) return;
         await mint(form.jetton);
     };
 

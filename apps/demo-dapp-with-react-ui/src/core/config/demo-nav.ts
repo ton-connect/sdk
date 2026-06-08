@@ -52,14 +52,14 @@ export const DEMO_NAV_GROUPS: readonly DemoNavGroup[] = [
         links: [
             { to: '/transfer-usdt', label: 'USDT transfer', icon: CircleDollarSign },
             { to: '/merkle', label: 'Merkle proof', icon: TreePine },
-            { to: '/create-jetton', label: 'Create jetton', icon: Wallet }
+            { to: '/create-jetton', label: 'Create jetton', icon: Wallet },
+            { to: '/batch-limits', label: 'Batch limits', icon: ListOrdered }
         ]
     },
     {
         label: 'Utils',
         links: [
             { to: '/ton-proof', label: 'Ton proof', icon: ShieldCheck },
-            { to: '/batch-limits', label: 'Batch limits', icon: ListOrdered },
             { to: '/find-tx', label: 'Find transaction', icon: Search }
         ]
     }

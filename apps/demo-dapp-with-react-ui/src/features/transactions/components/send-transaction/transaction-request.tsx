@@ -87,7 +87,7 @@ export const TransactionRequest = ({ mode, testIdPrefix }: TransactionRequestPro
             : ops.signMessage(form.tx, { withConnect: form.withConnect, waitForTx: false });
 
     const disableAction =
-        form.isInvalid || ops.sendingTx || ops.waitingTx || ops.signing || !!ops.retryPrompt;
+        form.isSendBlocked || ops.sendingTx || ops.waitingTx || ops.signing || !!ops.retryPrompt;
     const actionLoading = isSend ? ops.sendingTx || ops.waitingTx : ops.signing;
     const actionLabel = isSend ? 'Send transaction' : 'Sign message';
     const resultTitle = isSend ? 'Transaction' : 'Sign message result';

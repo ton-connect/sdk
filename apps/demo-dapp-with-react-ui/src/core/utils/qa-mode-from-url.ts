@@ -15,6 +15,15 @@ export function isQaModeEnabledViaUrl(search?: string): boolean {
     return value !== null && QA_MODE_ENABLED_VALUES.has(value);
 }
 
+/** In QA mode only malformed JSON blocks wallet requests; semantic errors stay visible. */
+export function blocksWalletSend(
+    isInvalid: boolean,
+    isSyntaxInvalid: boolean,
+    qaMode: boolean
+): boolean {
+    return qaMode ? isSyntaxInvalid : isInvalid;
+}
+
 /** Enables SDK QA mode from `?qa=1` and applies demo layout compensation for the fixed banner. */
 export function initQaModeFromUrl(): void {
     if (!isQaModeEnabledViaUrl()) {

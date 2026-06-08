@@ -31,11 +31,11 @@ export const SignData = () => {
     }, [ops.result]);
 
     const handleSign = () => {
-        if (!form.payload || form.isInvalid) return;
+        if (!form.payload || form.isSendBlocked) return;
         ops.send(form.payload, { withConnect: form.withConnect });
     };
 
-    const disableAction = form.isInvalid || ops.sending || !!ops.retryPrompt;
+    const disableAction = form.isSendBlocked || ops.sending || !!ops.retryPrompt;
 
     const applyRequestContext = useCallback(
         (patch: RequestContextPatch) => {

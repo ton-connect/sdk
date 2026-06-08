@@ -20,7 +20,7 @@ export const WalletBatchLimits = () => {
         draft,
         onDraftChange,
         applyRequestContext,
-        isInvalid,
+        isSendBlocked,
         showInvalidUi,
         editorMessages,
         editorWarnings,
@@ -80,7 +80,7 @@ export const WalletBatchLimits = () => {
                 size="l"
                 fullWidth
                 loading={sending}
-                disabled={sending || isInvalid || isCountBlocked}
+                disabled={sending || isSendBlocked || isCountBlocked}
                 onClick={send}
                 data-testid="batch-limits-action-button"
             >

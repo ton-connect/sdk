@@ -8,6 +8,7 @@ import {
 import { Address } from '@ton/ton';
 
 import { useJsonDraftValidation } from '../../../../../core/hooks/use-json-draft-validation';
+import { useQaMode } from '../../../../../core/hooks/use-qa-mode';
 import { fail, ok, type OperationResult } from '../../../../../core/components/shared/result-block';
 import {
     mergeRequestContext,
@@ -98,6 +99,7 @@ const validateBatchRequest = (parsed: unknown, nowSec: number): JsonValidationRe
 export const useBatchTester = () => {
     const wallet = useTonWallet();
     const [tonConnectUI] = useTonConnectUI();
+    const qaMode = useQaMode();
 
     const recipient = wallet?.account.address
         ? toFriendlyAddress(wallet.account.address)
@@ -113,6 +115,7 @@ export const useBatchTester = () => {
         onDraftChange,
         replaceValue,
         isInvalid,
+        isSendBlocked,
         showInvalidUi,
         showValidationUi,
         editorMessages,
@@ -151,16 +154,16 @@ export const useBatchTester = () => {
         count > BATCH_MESSAGE_COUNT_WALLET_HINT && count <= BATCH_MESSAGE_COUNT_MAX
             ? `Exceeds maxMessages (${BATCH_MESSAGE_COUNT_WALLET_HINT}) on all known TON Connect wallets`
             : undefined;
-    const isCountBlocked = !isBatchMessageCountCommittable(count);
+    const isCountBlocked = !qaMode && !isBatchMessageCountCommittable(count);
 
     const setCount = useCallback(
         (next: number) => {
-            if (!isBatchMessageCountCommittable(next)) {
+            if (!qaMode && !isBatchMessageCountCommittable(next)) {
                 return;
             }
             replaceValue(buildRequest(next, recipient, parsed?.validUntil ?? defaultValidUntil()));
         },
-        [replaceValue, recipient, parsed?.validUntil]
+        [qaMode, replaceValue, recipient, parsed?.validUntil]
     );
 
     const setValidUntil = useCallback(
@@ -193,7 +196,7 @@ export const useBatchTester = () => {
     }, [replaceValue, recipient]);
 
     const send = useCallback(async () => {
-        if (!wallet?.account || !parsed || isInvalid) return;
+        if (!wallet?.account || !parsed || isSendBlocked) return;
 
         setResult(null);
         setSending(true);
@@ -210,7 +213,7 @@ export const useBatchTester = () => {
         } finally {
             setSending(false);
         }
-    }, [tonConnectUI, wallet, mode, parsed, count, isInvalid]);
+    }, [tonConnectUI, wallet, mode, parsed, count, isSendBlocked]);
 
     const clearResult = useCallback(() => setResult(null), []);
 
@@ -231,6 +234,7 @@ export const useBatchTester = () => {
         onDraftChange,
         applyRequestContext,
         isInvalid,
+        isSendBlocked,
         showInvalidUi,
         editorMessages,
         editorWarnings,

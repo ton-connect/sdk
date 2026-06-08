@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Address } from '@ton/core';
 
 import { ResultBlock } from '../../../../core/components/shared/result-block';
+import { useQaMode } from '../../../../core/hooks/use-qa-mode';
 import {
     sanitizeDecimalAmountInput,
     validateAmountWithinBalance,
@@ -23,6 +24,7 @@ const toUserFacingAddress = (raw: string): string =>
     Address.parse(raw).toString({ urlSafe: true, bounceable: false });
 
 export const TransferUsdt = () => {
+    const qaMode = useQaMode();
     const {
         senderAddress,
         network,
@@ -54,6 +56,7 @@ export const TransferUsdt = () => {
     }, [amount, formatError, isUsdtBalanceLoading, senderAddress, usdtBalance]);
 
     const amountError = formatError ?? balanceError;
+    const amountSendBlocked = qaMode ? null : amountError;
 
     const handleAmountChange = useCallback((next: string) => {
         setAmount(sanitizeDecimalAmountInput(next, USDT_DECIMALS));
@@ -83,13 +86,13 @@ export const TransferUsdt = () => {
     const canSend =
         !!destination &&
         !!amount &&
-        !amountError &&
+        !amountSendBlocked &&
         !sending &&
         !networkError &&
         (form.withConnect || (!!senderAddress && (form.gasless || !!jettonWallet)));
 
     const handleSend = async () => {
-        if (!destination || amountError || networkError) return;
+        if (!destination || amountSendBlocked || networkError) return;
         if (!form.withConnect && !senderAddress) return;
         if (!form.gasless && !form.withConnect && !jettonWallet) return;
         await send({

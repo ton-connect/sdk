@@ -21,6 +21,7 @@ export const useSignDataForm = () => {
         onDraftChange,
         replaceValue: replacePayload,
         isInvalid,
+        isSendBlocked,
         showInvalidUi,
         editorMessages
     } = useJsonDraftValidation({
@@ -48,6 +49,7 @@ export const useSignDataForm = () => {
         onDraftChange,
         replacePayload,
         isInvalid,
+        isSendBlocked,
         showInvalidUi,
         editorMessages,
         payload,
