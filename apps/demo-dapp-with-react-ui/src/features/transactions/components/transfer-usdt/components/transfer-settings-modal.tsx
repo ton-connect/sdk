@@ -61,38 +61,37 @@ export const TransferSettingsModal = ({
                     </span>
                 </label>
 
-                {gasless && (
-                    <div className="flex flex-col gap-2">
-                        <RadioCards
-                            value={gaslessMode}
-                            onChange={onGaslessModeChange}
-                            data-testid="transfer-usdt-settings-gasless-mode"
+                <div className="flex flex-col gap-2">
+                    <span className="text-sm font-medium text-foreground">Request format</span>
+                    <RadioCards
+                        value={gaslessMode}
+                        onChange={onGaslessModeChange}
+                        data-testid="transfer-usdt-settings-request-mode"
+                    >
+                        <RadioCards.Item
+                            value="messages"
+                            disabled={messagesDisabled}
+                            data-testid="transfer-usdt-settings-request-mode-messages"
                         >
-                            <RadioCards.Item
-                                value="messages"
-                                disabled={messagesDisabled}
-                                data-testid="transfer-usdt-settings-gasless-mode-messages"
-                            >
-                                Messages
-                            </RadioCards.Item>
-                            <RadioCards.Item
-                                value="items"
-                                data-testid="transfer-usdt-settings-gasless-mode-items"
-                            >
-                                Items
-                            </RadioCards.Item>
-                        </RadioCards>
-                        {messagesDisabled ? (
-                            <p
-                                className="text-xs text-secondary-foreground"
-                                data-testid="transfer-usdt-settings-gasless-mode-hint"
-                            >
-                                Embedded gasless requires Items — the jetton wallet address is
-                                resolved only after the wallet connects.
-                            </p>
-                        ) : null}
-                    </div>
-                )}
+                            Messages
+                        </RadioCards.Item>
+                        <RadioCards.Item
+                            value="items"
+                            data-testid="transfer-usdt-settings-request-mode-items"
+                        >
+                            Items
+                        </RadioCards.Item>
+                    </RadioCards>
+                    {messagesDisabled ? (
+                        <p
+                            className="text-xs text-secondary-foreground"
+                            data-testid="transfer-usdt-settings-request-mode-hint"
+                        >
+                            Embedded gasless requires Items — the jetton wallet address is resolved
+                            only after the wallet connects.
+                        </p>
+                    ) : null}
+                </div>
             </div>
         </Modal>
     );

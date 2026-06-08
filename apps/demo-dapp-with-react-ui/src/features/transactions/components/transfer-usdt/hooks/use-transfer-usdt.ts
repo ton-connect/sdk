@@ -66,7 +66,8 @@ export const useTransferUsdt = () => {
                     jettonWallet: args.jettonWallet,
                     amountUsdt,
                     withConnect: args.withConnect,
-                    chain: args.chain
+                    chain: args.chain,
+                    requestMode: args.gaslessMode
                 });
 
                 const outcome = await dispatchTransfer(tonConnectUi, tx, args.withConnect);

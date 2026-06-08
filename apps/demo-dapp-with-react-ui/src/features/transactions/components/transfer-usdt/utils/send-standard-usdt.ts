@@ -4,7 +4,12 @@ import { CHAIN } from '@tonconnect/ui-react';
 import { Address, beginCell, toNano } from '@ton/core';
 import { storeJettonTransferMessage } from '@ton-community/assets-sdk';
 
-import { ATTACHED_AMOUNT_TON, FORWARD_AMOUNT_TON, VALID_UNTIL_SECONDS } from './constants';
+import {
+    ATTACHED_AMOUNT_TON,
+    FORWARD_AMOUNT_TON,
+    USDT_MASTER_BY_CHAIN,
+    VALID_UNTIL_SECONDS
+} from './constants';
 import { waitForWalletConnection } from './gasless-wallet';
 import { resolveUsdtJettonWallet } from './resolve-usdt-jetton-wallet';
 
@@ -24,6 +29,7 @@ export interface StandardUsdtTransferParams {
     amountUsdt: bigint;
     withConnect: boolean;
     chain: CHAIN | undefined;
+    requestMode: 'messages' | 'items';
 }
 
 export async function buildStandardUsdtTransaction({
@@ -33,10 +39,10 @@ export async function buildStandardUsdtTransaction({
     jettonWallet,
     amountUsdt,
     withConnect,
-    chain
+    chain,
+    requestMode
 }: StandardUsdtTransferParams): Promise<SendTransactionRequest> {
     let resolvedSender = senderAddress || tonConnectUi.wallet?.account?.address;
-    let resolvedJettonWallet = jettonWallet;
 
     if (withConnect && !resolvedSender) {
         await waitForWalletConnection(tonConnectUi);
@@ -44,11 +50,42 @@ export async function buildStandardUsdtTransaction({
     }
 
     const resolvedChain = chain ?? chainFromConnectedWallet(tonConnectUi);
-    if (!resolvedJettonWallet && resolvedSender && resolvedChain) {
+    if (!resolvedSender || !resolvedChain) {
+        throw new Error('Connect wallet before sending USDT.');
+    }
+
+    const forwardPayload = beginCell().storeUint(0, 32).storeStringTail('hello!').endCell();
+
+    if (requestMode === 'items') {
+        return {
+            validUntil: Math.floor(Date.now() / 1000) + VALID_UNTIL_SECONDS,
+            items: [
+                {
+                    type: 'jetton',
+                    master: USDT_MASTER_BY_CHAIN[resolvedChain].toString(),
+                    amount: amountUsdt.toString(),
+                    destination: Address.parse(destination).toString({
+                        urlSafe: true,
+                        bounceable: false
+                    }),
+                    responseDestination: Address.parse(resolvedSender).toString({
+                        urlSafe: true,
+                        bounceable: false
+                    }),
+                    forwardAmount: toNano(FORWARD_AMOUNT_TON).toString(),
+                    forwardPayload: forwardPayload.toBoc().toString('base64'),
+                    attachAmount: toNano(ATTACHED_AMOUNT_TON).toString()
+                }
+            ]
+        };
+    }
+
+    let resolvedJettonWallet = jettonWallet;
+    if (!resolvedJettonWallet) {
         resolvedJettonWallet = await resolveUsdtJettonWallet(resolvedSender, resolvedChain);
     }
 
-    if (!resolvedSender || !resolvedJettonWallet) {
+    if (!resolvedJettonWallet) {
         throw new Error('Connect wallet to resolve your USDT jetton wallet before sending.');
     }
 
@@ -61,7 +98,7 @@ export async function buildStandardUsdtTransaction({
                 responseDestination: Address.parse(resolvedSender),
                 customPayload: null,
                 forwardAmount: toNano(FORWARD_AMOUNT_TON),
-                forwardPayload: beginCell().storeUint(0, 32).storeStringTail('hello!').endCell()
+                forwardPayload
             })
         )
         .endCell()
