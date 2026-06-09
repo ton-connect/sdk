@@ -39,7 +39,7 @@ export const buildTwoMessageSignMessage = (): SendTransactionRequest => ({
     ]
 });
 
-/** Items-shaped signMessage with a single TON transfer and comment payload. */
+/** Items-shaped signMessage with a single GRAM transfer and comment payload. */
 export const buildTonItemSignMessage = (): SendTransactionRequest => ({
     validUntil: validUntilDefault(),
     items: [
@@ -73,8 +73,8 @@ export const SIGN_MESSAGE_PRESETS: readonly SignMessagePresetDescriptor[] = [
     },
     {
         id: 'ton-item',
-        name: 'Structured TON item',
-        description: 'Items-shaped request with one TON transfer and a comment payload.'
+        name: 'Structured GRAM item',
+        description: 'Items-shaped request with one GRAM transfer and a comment payload.'
     }
 ];
 

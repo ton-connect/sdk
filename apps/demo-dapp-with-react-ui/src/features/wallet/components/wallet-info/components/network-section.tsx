@@ -36,12 +36,12 @@ export const NetworkSection: FC<NetworkSectionProps> = ({
             </InfoBlock.Value>
         </InfoBlock.Row>
         <InfoBlock.Row>
-            <InfoBlock.Label>TON Balance</InfoBlock.Label>
+            <InfoBlock.Label>GRAM Balance</InfoBlock.Label>
             {isTonBalanceLoading ? (
                 <InfoBlock.ValueSkeleton data-testid="wallet-info-network-ton-balance-skeleton" />
             ) : (
                 <InfoBlock.Value data-testid="wallet-info-network-ton-balance">
-                    {tonBalance !== undefined ? fromNano(tonBalance) : '—'} TON
+                    {tonBalance !== undefined ? fromNano(tonBalance) : '—'} GRAM
                 </InfoBlock.Value>
             )}
         </InfoBlock.Row>
