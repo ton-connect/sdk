@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) TonTech.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
 'use client';
 
 import * as React from 'react';
@@ -12,6 +20,8 @@ import { useIsMobile } from '../../../hooks/use-mobile';
 import { cn } from '../../../utils/cn';
 
 const SIDEBAR_WIDTH = '18rem';
+const SIDEBAR_COLLAPSED_WIDTH = '4rem';
+const SIDEBAR_STORAGE_KEY = 'demo-dapp-sidebar-open';
 
 type SidebarContextProps = {
     open: boolean;
@@ -34,27 +44,58 @@ const useSidebar = () => {
 
 const SidebarProvider = ({ className, style, children, ...props }: React.ComponentProps<'div'>) => {
     const isMobile = useIsMobile();
-    const [open, setOpen] = React.useState(true);
+    const [open, setOpen] = React.useState(() => {
+        if (typeof window === 'undefined') {
+            return true;
+        }
+
+        return window.localStorage.getItem(SIDEBAR_STORAGE_KEY) !== '0';
+    });
     const [openMobile, setOpenMobile] = React.useState(false);
+
+    const setDesktopOpen = React.useCallback((nextOpen: boolean | ((open: boolean) => boolean)) => {
+        setOpen(currentOpen => {
+            const resolvedOpen = typeof nextOpen === 'function' ? nextOpen(currentOpen) : nextOpen;
+
+            if (typeof window !== 'undefined') {
+                window.localStorage.setItem(SIDEBAR_STORAGE_KEY, resolvedOpen ? '1' : '0');
+            }
+
+            return resolvedOpen;
+        });
+    }, []);
 
     const toggleSidebar = React.useCallback(() => {
         if (isMobile) {
             setOpenMobile(mobileOpen => !mobileOpen);
         } else {
-            setOpen(desktopOpen => !desktopOpen);
+            setDesktopOpen(desktopOpen => !desktopOpen);
         }
-    }, [isMobile]);
+    }, [isMobile, setDesktopOpen]);
 
     const value = React.useMemo<SidebarContextProps>(
-        () => ({ open, setOpen, openMobile, setOpenMobile, isMobile, toggleSidebar }),
-        [open, openMobile, isMobile, toggleSidebar]
+        () => ({
+            open,
+            setOpen: setDesktopOpen,
+            openMobile,
+            setOpenMobile,
+            isMobile,
+            toggleSidebar
+        }),
+        [open, setDesktopOpen, openMobile, isMobile, toggleSidebar]
     );
 
     return (
         <SidebarContext.Provider value={value}>
             <div
                 data-slot="sidebar-wrapper"
-                style={{ '--sidebar-width': SIDEBAR_WIDTH, ...style } as React.CSSProperties}
+                style={
+                    {
+                        '--sidebar-width': SIDEBAR_WIDTH,
+                        '--sidebar-collapsed-width': SIDEBAR_COLLAPSED_WIDTH,
+                        ...style
+                    } as React.CSSProperties
+                }
                 className={cn('flex min-h-svh w-full', className)}
                 {...props}
             >
@@ -92,8 +133,8 @@ const Sidebar = ({ className, children }: React.ComponentProps<'div'>) => {
             data-slot="sidebar"
             data-state={open ? 'expanded' : 'collapsed'}
             className={cn(
-                'sticky top-0 h-svh w-(--sidebar-width) shrink-0 flex-col border-r border-tertiary bg-background text-foreground',
-                open ? 'flex' : 'hidden',
+                'sticky top-0 z-20 flex h-svh shrink-0 flex-col overflow-visible border-r border-tertiary bg-background text-foreground transition-[width] duration-200 ease-out',
+                open ? 'w-(--sidebar-width)' : 'w-(--sidebar-collapsed-width)',
                 className
             )}
         >
@@ -127,7 +168,7 @@ const SidebarInset = ({ className, ...props }: React.ComponentProps<'main'>) => 
     return (
         <main
             data-slot="sidebar-inset"
-            className={cn('flex min-w-0 flex-1 flex-col', className)}
+            className={cn('flex min-h-0 min-w-0 flex-1 flex-col', className)}
             {...props}
         />
     );
@@ -154,11 +195,15 @@ const SidebarFooter = ({ className, ...props }: React.ComponentProps<'div'>) => 
 };
 
 const SidebarContent = ({ className, ...props }: React.ComponentProps<'div'>) => {
+    const { isMobile, open } = useSidebar();
+    const collapsed = !isMobile && !open;
+
     return (
         <div
             data-slot="sidebar-content"
             className={cn(
-                'flex min-h-0 flex-1 flex-col gap-2 overflow-x-hidden overflow-y-auto',
+                'flex min-h-0 flex-1 flex-col gap-2',
+                collapsed ? 'overflow-visible' : 'overflow-x-hidden overflow-y-auto',
                 className
             )}
             {...props}
@@ -181,7 +226,7 @@ const SidebarGroupLabel = ({ className, ...props }: React.ComponentProps<'div'>)
         <div
             data-slot="sidebar-group-label"
             className={cn(
-                'px-2 pb-1 text-[10px] font-medium uppercase tracking-wide text-tertiary-foreground',
+                'overflow-hidden whitespace-nowrap px-2 pb-1 text-[10px] font-medium uppercase tracking-wide text-tertiary-foreground',
                 className
             )}
             {...props}
@@ -213,8 +258,27 @@ const SidebarMenuItem = ({ className, ...props }: React.ComponentProps<'li'>) =>
     return <li data-slot="sidebar-menu-item" className={cn('relative', className)} {...props} />;
 };
 
+const SidebarTooltip = ({
+    children,
+    className,
+    ...props
+}: React.ComponentProps<'span'> & { children: React.ReactNode }) => {
+    return (
+        <span
+            data-slot="sidebar-tooltip"
+            className={cn(
+                'pointer-events-none absolute left-[calc(100%+0.75rem)] top-1/2 z-50 hidden -translate-y-1/2 whitespace-nowrap rounded-xl border border-tertiary bg-background px-3 py-2 text-sm font-semibold text-foreground shadow-xl group-hover:block group-focus-within:block',
+                className
+            )}
+            {...props}
+        >
+            {children}
+        </span>
+    );
+};
+
 const sidebarMenuButtonClasses =
-    'flex h-8 w-full items-center gap-2 overflow-hidden rounded-md px-2 py-1 text-left text-sm text-foreground outline-hidden transition-colors hover:bg-tertiary focus-visible:ring-2 focus-visible:ring-primary disabled:pointer-events-none disabled:opacity-50 data-[active=true]:bg-tertiary data-[active=true]:font-medium [&_svg]:size-4 [&_svg]:shrink-0 [&>span:last-child]:truncate';
+    'flex h-8 w-full shrink-0 items-center gap-2 overflow-hidden rounded-md px-2 py-1 text-left text-sm text-foreground outline-hidden transition-[background-color,color,width,padding] duration-200 ease-out hover:bg-tertiary focus-visible:ring-2 focus-visible:ring-primary disabled:pointer-events-none disabled:opacity-50 data-[active=true]:bg-tertiary data-[active=true]:font-medium [&_svg]:size-4 [&_svg]:shrink-0 [&>span:last-child]:truncate';
 
 const SidebarMenuButton = ({
     asChild = false,
@@ -247,6 +311,7 @@ export {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
+    SidebarTooltip,
     SidebarProvider,
     SidebarSeparator,
     SidebarTrigger,
