@@ -1,42 +1,223 @@
 import { useTonConnectUI } from '@tonconnect/ui-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
     parseSettingsFromSearchParams,
     toTonConnectOptions,
     toTonConnectResetOptions
 } from '../features/dev-settings/utils/settings-url';
+import {
+    applyPreviewAction,
+    refreshBeforeNotificationPreview
+} from '../features/widget-builder/utils/preview-action';
+import {
+    clearPreviewConnectedWallet,
+    installPreviewMocks,
+    setPreviewConnectedWallet
+} from '../features/widget-builder/utils/preview-mocks';
+import { resetNotificationPreviewDedupe } from '../features/widget-builder/utils/preview-notification-state';
+import { clearAllPreviewNotifications } from '../features/widget-builder/utils/preview-use-notifications';
+import {
+    getActionPreviewReadySelector,
+    PREVIEW_NOTIFICATION_KEEPALIVE_MS,
+    type PreviewKind,
+    type PreviewMethod,
+    type PreviewMode,
+    type PreviewSurface,
+    type PreviewTrigger
+} from '../features/widget-builder/utils/preview-types';
 
-type PreviewMode = 'desktop' | 'mobile';
+const PREVIEW_BUTTON_ROOT_ID = 'widget-preview-button-root';
 
-function getInitialPreviewMode(): PreviewMode {
-    return new URLSearchParams(window.location.search).get('previewMode') === 'mobile'
-        ? 'mobile'
-        : 'desktop';
+function withPreviewSafeOptions(options: ReturnType<typeof toTonConnectOptions>) {
+    return {
+        ...options,
+        actionsConfiguration: {
+            ...options.actionsConfiguration,
+            returnStrategy: 'none' as const,
+            skipRedirectToWallet: 'always' as const
+        }
+    };
+}
+
+function parsePreviewKind(value: string | null): PreviewKind {
+    return value === 'action' ? 'action' : 'connect';
+}
+
+function parsePreviewMode(value: string | null): PreviewMode {
+    return value === 'mobile' ? 'mobile' : 'desktop';
+}
+
+function parsePreviewMethod(value: string | null): PreviewMethod {
+    if (value === 'signData' || value === 'signMessage') {
+        return value;
+    }
+
+    return 'sendTransaction';
+}
+
+function parsePreviewSurface(value: string | null): PreviewSurface {
+    return value === 'notification' ? 'notification' : 'modal';
+}
+
+function parsePreviewTrigger(value: string | null): PreviewTrigger {
+    if (value === 'success' || value === 'error') {
+        return value;
+    }
+
+    return 'before';
+}
+
+type PreviewState = ReturnType<typeof getInitialPreviewState>;
+
+function getInitialPreviewState() {
+    const params = new URLSearchParams(window.location.search);
+
+    return {
+        previewKind: parsePreviewKind(params.get('previewKind')),
+        previewMode: parsePreviewMode(params.get('previewMode')),
+        previewMethod: parsePreviewMethod(params.get('previewMethod')),
+        previewSurface: parsePreviewSurface(params.get('previewSurface')),
+        previewTrigger: parsePreviewTrigger(params.get('previewTrigger'))
+    };
+}
+
+function getPreviewStateSignature(state: PreviewState): string {
+    return [
+        state.previewKind,
+        state.previewMode,
+        state.previewMethod,
+        state.previewSurface,
+        state.previewTrigger
+    ].join('|');
+}
+
+function getActionPreviewSignature(state: PreviewState): string | null {
+    if (state.previewKind !== 'action') {
+        return null;
+    }
+
+    return `${state.previewMethod}|${state.previewSurface}|${state.previewTrigger}`;
+}
+
+function waitForPreviewElement(selector: string, onReady: () => void): () => void {
+    if (document.querySelector(selector)) {
+        onReady();
+        return () => {};
+    }
+
+    const observer = new MutationObserver(() => {
+        if (document.querySelector(selector)) {
+            observer.disconnect();
+            onReady();
+        }
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    const fallbackTimer = window.setTimeout(() => {
+        observer.disconnect();
+        onReady();
+    }, 8000);
+
+    return () => {
+        observer.disconnect();
+        window.clearTimeout(fallbackTimer);
+    };
+}
+
+function getNotificationPreviewLayoutStyles(): string {
+    return `
+        [data-tc-dropdown-container='true'] {
+            position: fixed !important;
+            inset: 0 !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            transform: none !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            z-index: 1 !important;
+            pointer-events: none !important;
+        }
+
+        [data-tc-list-notifications='true'] {
+            position: relative !important;
+            width: auto !important;
+            max-width: none !important;
+            display: flex !important;
+            justify-content: center !important;
+            transform: none !important;
+            padding: 0 !important;
+            overflow: visible !important;
+        }
+
+        [data-tc-notification='true'] {
+            width: 256px !important;
+            max-width: 256px !important;
+        }
+    `;
 }
 
 export const WidgetModalPreviewPage = () => {
     const [tonConnectUI, setTonConnectOptions] = useTonConnectUI();
-    const [previewMode, setPreviewMode] = useState<PreviewMode>(getInitialPreviewMode);
+    const [previewState, setPreviewState] = useState(getInitialPreviewState);
+    const [settingsRevision, setSettingsRevision] = useState(0);
     const lastResetToken = useRef(0);
+    const hasAppliedInitialSettingsRef = useRef(false);
+    const requestMocksCleanupRef = useRef<(() => void) | null>(null);
+
+    const notifyReady = useCallback(() => {
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                window.parent.postMessage(
+                    { type: 'widget-builder-preview-ready' },
+                    window.location.origin
+                );
+            });
+        });
+    }, []);
+
+    useEffect(() => {
+        setTonConnectOptions({
+            buttonRootId: PREVIEW_BUTTON_ROOT_ID,
+            actionsConfiguration: {
+                returnStrategy: 'none',
+                skipRedirectToWallet: 'always'
+            }
+        });
+    }, [setTonConnectOptions]);
+
+    useLayoutEffect(() => {
+        const cleanupMocks = installPreviewMocks(tonConnectUI);
+
+        return () => {
+            cleanupMocks();
+            requestMocksCleanupRef.current?.();
+            requestMocksCleanupRef.current = null;
+        };
+    }, [tonConnectUI]);
+
+    useLayoutEffect(() => {
+        if (previewState.previewKind !== 'action') {
+            return;
+        }
+
+        setPreviewConnectedWallet(tonConnectUI.connector);
+    }, [tonConnectUI, previewState.previewKind]);
 
     useEffect(() => {
         let disposed = false;
         let reopenTimer: number | undefined;
 
-        const notifyReady = () => {
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    if (!disposed) {
-                        window.parent.postMessage(
-                            { type: 'widget-builder-preview-ready' },
-                            window.location.origin
-                        );
-                    }
-                });
-            });
-        };
+        if (previewState.previewKind !== 'connect') {
+            return;
+        }
 
         const openPreviewModal = () => {
+            clearPreviewConnectedWallet(tonConnectUI.connector);
+
             if (disposed || tonConnectUI.modalState.status === 'opened') {
                 notifyReady();
                 return;
@@ -55,6 +236,7 @@ export const WidgetModalPreviewPage = () => {
                 notifyReady();
                 return;
             }
+
             if (state.status === 'closed' && !disposed) {
                 reopenTimer = window.setTimeout(openPreviewModal, 150);
             }
@@ -62,29 +244,194 @@ export const WidgetModalPreviewPage = () => {
 
         return () => {
             disposed = true;
+
             if (reopenTimer !== undefined) {
                 window.clearTimeout(reopenTimer);
             }
+
             unsubscribe();
         };
-    }, [tonConnectUI]);
+    }, [tonConnectUI, previewState.previewKind, notifyReady, settingsRevision]);
+
+    const actionPreviewSignature = useMemo(
+        () => getActionPreviewSignature(previewState),
+        [
+            previewState.previewKind,
+            previewState.previewMethod,
+            previewState.previewSurface,
+            previewState.previewTrigger
+        ]
+    );
 
     useEffect(() => {
-        const applySettings = (query: string, resetToken = 0) => {
-            if (resetToken > lastResetToken.current) {
-                setTonConnectOptions(toTonConnectResetOptions());
-                lastResetToken.current = resetToken;
+        if (!actionPreviewSignature) {
+            return;
+        }
+
+        const [method, surface, trigger] = actionPreviewSignature.split('|') as [
+            PreviewMethod,
+            PreviewSurface,
+            PreviewTrigger
+        ];
+
+        let disposed = false;
+        let readyCleanup: (() => void) | undefined;
+        let refreshTimer: number | undefined;
+        let hasNotifiedReady = false;
+
+        const clearRefreshTimer = () => {
+            if (refreshTimer !== undefined) {
+                window.clearTimeout(refreshTimer);
+                refreshTimer = undefined;
+            }
+        };
+
+        const scheduleNotificationKeepalive = () => {
+            clearRefreshTimer();
+
+            if (disposed || surface !== 'notification') {
+                return;
             }
 
-            setTonConnectOptions(
-                toTonConnectOptions(parseSettingsFromSearchParams(new URLSearchParams(query)))
-            );
+            refreshTimer = window.setTimeout(() => {
+                runPreview({ keepalive: true });
+            }, PREVIEW_NOTIFICATION_KEEPALIVE_MS);
+        };
+
+        const notifyReadyOnce = () => {
+            if (disposed || hasNotifiedReady) {
+                return;
+            }
+
+            hasNotifiedReady = true;
+            notifyReady();
+
+            if (surface === 'notification') {
+                scheduleNotificationKeepalive();
+            }
+        };
+
+        const readySelector = getActionPreviewReadySelector(method, surface, trigger);
+
+        let previewRunSeq = 0;
+        let previewQueue = Promise.resolve();
+
+        const enqueuePreview = (task: () => Promise<void>) => {
+            previewQueue = previewQueue.then(task).catch(() => {});
+        };
+
+        const runPreview = (options?: { keepalive?: boolean }) => {
+            const isKeepalive = options?.keepalive === true;
+            const runId = ++previewRunSeq;
+
+            enqueuePreview(async () => {
+                if (disposed || runId !== previewRunSeq) {
+                    return;
+                }
+
+                requestMocksCleanupRef.current?.();
+                requestMocksCleanupRef.current = null;
+
+                let cleanup: () => void;
+
+                if (isKeepalive && surface === 'notification') {
+                    await resetNotificationPreviewDedupe();
+
+                    if (trigger === 'before') {
+                        setPreviewConnectedWallet(tonConnectUI.connector);
+                        cleanup = await refreshBeforeNotificationPreview(tonConnectUI, {
+                            method,
+                            skipNotificationGuard: true
+                        });
+                    } else {
+                        cleanup = await applyPreviewAction(tonConnectUI, {
+                            method,
+                            surface,
+                            trigger,
+                            resetUi: true,
+                            skipNotificationGuard: true
+                        });
+                    }
+                } else {
+                    cleanup = await applyPreviewAction(tonConnectUI, {
+                        method,
+                        surface,
+                        trigger
+                    });
+                }
+
+                if (disposed || runId !== previewRunSeq) {
+                    cleanup();
+                    return;
+                }
+
+                requestMocksCleanupRef.current = cleanup;
+
+                if (isKeepalive && surface === 'notification') {
+                    scheduleNotificationKeepalive();
+                }
+            });
+        };
+
+        runPreview();
+        readyCleanup = waitForPreviewElement(readySelector, notifyReadyOnce);
+
+        return () => {
+            disposed = true;
+            previewRunSeq += 1;
+            readyCleanup?.();
+            clearRefreshTimer();
+            requestMocksCleanupRef.current?.();
+            requestMocksCleanupRef.current = null;
+            clearAllPreviewNotifications();
+            void tonConnectUI.disconnect().catch(() => {});
+            clearPreviewConnectedWallet(tonConnectUI.connector);
+        };
+    }, [tonConnectUI, actionPreviewSignature, notifyReady, settingsRevision]);
+
+    useEffect(() => {
+        const appliedSettingsQueryRef = { current: '' };
+        const appliedPreviewSignatureRef = {
+            current: getPreviewStateSignature(getInitialPreviewState())
+        };
+
+        const applySettings = (query: string, resetToken = 0) => {
+            const shouldReset = resetToken > lastResetToken.current;
+            const queryChanged = query !== appliedSettingsQueryRef.current;
+
+            if (!shouldReset && !queryChanged) {
+                return;
+            }
+
+            if (shouldReset) {
+                setTonConnectOptions(toTonConnectResetOptions());
+                lastResetToken.current = resetToken;
+                appliedSettingsQueryRef.current = '';
+            }
+
+            if (query !== appliedSettingsQueryRef.current) {
+                appliedSettingsQueryRef.current = query;
+                setTonConnectOptions(
+                    withPreviewSafeOptions(
+                        toTonConnectOptions(
+                            parseSettingsFromSearchParams(new URLSearchParams(query))
+                        )
+                    )
+                );
+            }
+
+            if (hasAppliedInitialSettingsRef.current) {
+                setSettingsRevision(revision => revision + 1);
+            }
+
+            hasAppliedInitialSettingsRef.current = true;
         };
 
         const onMessage = (event: MessageEvent) => {
             if (event.origin !== window.location.origin) {
                 return;
             }
+
             if (
                 typeof event.data === 'object' &&
                 event.data?.type === 'widget-builder-preview-settings' &&
@@ -95,14 +442,55 @@ export const WidgetModalPreviewPage = () => {
                     typeof event.data.resetToken === 'number' ? event.data.resetToken : 0
                 );
 
-                if (event.data.previewMode === 'mobile' || event.data.previewMode === 'desktop') {
-                    setPreviewMode(event.data.previewMode);
-                }
+                setPreviewState(current => {
+                    const nextPreviewState: PreviewState = {
+                        previewKind:
+                            event.data.previewKind === 'action' ||
+                            event.data.previewKind === 'connect'
+                                ? event.data.previewKind
+                                : current.previewKind,
+                        previewMode:
+                            event.data.previewMode === 'mobile' ||
+                            event.data.previewMode === 'desktop'
+                                ? event.data.previewMode
+                                : current.previewMode,
+                        previewMethod:
+                            event.data.previewMethod === 'sendTransaction' ||
+                            event.data.previewMethod === 'signData' ||
+                            event.data.previewMethod === 'signMessage'
+                                ? event.data.previewMethod
+                                : current.previewMethod,
+                        previewSurface:
+                            event.data.previewSurface === 'modal' ||
+                            event.data.previewSurface === 'notification'
+                                ? event.data.previewSurface
+                                : current.previewSurface,
+                        previewTrigger:
+                            event.data.previewTrigger === 'before' ||
+                            event.data.previewTrigger === 'success' ||
+                            event.data.previewTrigger === 'error'
+                                ? event.data.previewTrigger
+                                : current.previewTrigger
+                    };
+                    const nextSignature = getPreviewStateSignature(nextPreviewState);
+
+                    if (nextSignature === getPreviewStateSignature(current)) {
+                        return current;
+                    }
+
+                    appliedPreviewSignatureRef.current = nextSignature;
+
+                    return nextPreviewState;
+                });
             }
         };
 
         if (window.location.search) {
-            applySettings(window.location.search);
+            const initialQuery = window.location.search.startsWith('?')
+                ? window.location.search.slice(1)
+                : window.location.search;
+
+            applySettings(initialQuery);
         }
 
         window.addEventListener('message', onMessage);
@@ -110,46 +498,81 @@ export const WidgetModalPreviewPage = () => {
         return () => window.removeEventListener('message', onMessage);
     }, [setTonConnectOptions]);
 
+    const isNotificationPreview =
+        previewState.previewKind === 'action' && previewState.previewSurface === 'notification';
+
     const previewStyles = useMemo(
         () =>
-            previewMode === 'desktop'
+            previewState.previewMode === 'desktop'
                 ? `
-                    [data-tc-modal='true'] {
+                    ${isNotificationPreview ? getNotificationPreviewLayoutStyles() : ''}
+                    [data-tc-modal='true'],
+                    [data-tc-actions-modal-container='true'] {
                         display: flex !important;
                         align-items: center !important;
                         justify-content: center !important;
                         background: transparent !important;
-                        padding: 4px !important;
+                        padding: 0 !important;
                         overflow: hidden !important;
                         box-sizing: border-box !important;
                     }
 
-                    [data-tc-modal='true'] > div {
+                    [data-tc-modal='true'] > div,
+                    [data-tc-actions-modal-container='true'] > div {
                         width: fit-content !important;
                         height: auto !important;
                         max-height: 100% !important;
                         margin: 0 !important;
                         overflow: hidden !important;
                         flex-shrink: 0;
-                        transform: scale(0.92) !important;
+                        transform: none !important;
                         transform-origin: center center !important;
+                    }
+
+                    [data-tc-wallets-modal-container='true'] {
+                        max-height: 100% !important;
+                        overflow-y: auto !important;
+                    }
+
+                    [data-tc-list-notifications='true'] {
+                        background: transparent !important;
+                        padding: 4px !important;
+                        overflow: hidden !important;
                     }
                 `
                 : `
-                    [data-tc-modal='true'] {
+                    ${isNotificationPreview ? getNotificationPreviewLayoutStyles() : ''}
+                    [data-tc-modal='true'],
+                    [data-tc-actions-modal-container='true'] {
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
                         background: transparent !important;
                         padding: 0 !important;
                         overflow: hidden !important;
                     }
 
-                    [data-tc-modal='true'] > div {
+                    [data-tc-modal='true'] > div,
+                    [data-tc-actions-modal-container='true'] > div {
                         width: 100% !important;
                         max-height: 100% !important;
-                        margin: auto 0 0 0 !important;
+                        margin: 0 !important;
+                        overflow: hidden !important;
+                        transform: none !important;
+                    }
+
+                    [data-tc-wallets-modal-container='true'] {
+                        max-height: 100% !important;
+                        overflow-y: auto !important;
+                    }
+
+                    [data-tc-list-notifications='true'] {
+                        background: transparent !important;
+                        padding: 0 !important;
                         overflow: hidden !important;
                     }
                 `,
-        [previewMode]
+        [isNotificationPreview, previewState.previewMode]
     );
 
     return (
@@ -171,7 +594,8 @@ export const WidgetModalPreviewPage = () => {
                 `}
             </style>
             <main className="min-h-dvh bg-transparent text-foreground">
-                <div className="sr-only">TON Connect modal preview</div>
+                <div id={PREVIEW_BUTTON_ROOT_ID} className="sr-only" />
+                <div className="sr-only">TON Connect widget preview</div>
             </main>
         </>
     );

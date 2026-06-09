@@ -46,6 +46,25 @@ import {
     generateReactSnippet,
     generateSingleHtmlSnippet
 } from '../utils/snippet-generator';
+import {
+    ADD_PREVIEW_BLOCK_GROUPS,
+    decodeAddBlockOption,
+    getConnectPreviewMode,
+    getPreviewFrameSize,
+    getPreviewBlockTitle,
+    getPreviewKind,
+    getPreviewSurface,
+    isActionBlockType,
+    PREVIEW_BLOCK_EXPORT_SLUGS,
+    PREVIEW_BLOCK_LABELS,
+    type ActionPreviewBlockType,
+    type PreviewBlockType,
+    type PreviewKind,
+    type PreviewMethod,
+    type PreviewMode,
+    type PreviewSurface,
+    type PreviewTrigger
+} from '../utils/preview-types';
 
 type BuilderTab = 'theme' | 'general' | 'export';
 type MobileWorkspacePanel = 'edit' | 'preview';
@@ -111,8 +130,6 @@ const ACTION_LABELS = [
     { value: 'error', label: 'Error' }
 ] as const;
 
-type PreviewBlockType = 'launcher' | 'desktopModal' | 'mobileModal';
-
 interface PreviewBlock {
     id: string;
     type: PreviewBlockType;
@@ -120,6 +137,9 @@ interface PreviewBlock {
     y: number;
     width: number;
     height: number;
+    method?: PreviewMethod;
+    trigger?: PreviewTrigger;
+    previewMode?: PreviewMode;
 }
 
 interface PreviewDragState {
@@ -128,6 +148,8 @@ interface PreviewDragState {
     startY: number;
     originX: number;
     originY: number;
+    width: number;
+    height: number;
 }
 
 interface BlockOverrideSettings {
@@ -211,18 +233,6 @@ function mergeBuilderSettings(
     return override ? { ...global, ...override } : global;
 }
 
-const PREVIEW_BLOCK_LABELS: Record<PreviewBlockType, string> = {
-    launcher: 'Button',
-    desktopModal: 'Desktop modal',
-    mobileModal: 'Mobile modal'
-};
-
-const PREVIEW_BLOCK_SHORT_LABELS: Record<PreviewBlockType, string> = {
-    launcher: 'Button',
-    desktopModal: 'Desktop',
-    mobileModal: 'Mobile'
-};
-
 function getCanvasMinSize(blocks: PreviewBlock[]): { minWidth: number; minHeight: number } {
     if (blocks.length === 0) {
         return { minWidth: 360, minHeight: 480 };
@@ -264,14 +274,18 @@ function MobileWorkspaceToggle({
 
 const DEFAULT_PREVIEW_BLOCKS: PreviewBlock[] = [
     { id: 'launcher-1', type: 'launcher', x: 40, y: 300, width: 220, height: 112 },
-    { id: 'desktop-modal-1', type: 'desktopModal', x: 300, y: 40, width: 460, height: 672 }
+    { id: 'desktop-modal-1', type: 'desktopModal', x: 300, y: 40, width: 520, height: 760 }
 ];
 
 function getInitialWidgetBuilderState(): WidgetBuilderPersistedState {
     return loadWidgetBuilderState() ?? getDefaultWidgetBuilderState();
 }
 
-function createPreviewBlock(type: PreviewBlockType, index: number): PreviewBlock {
+function createPreviewBlock(
+    type: PreviewBlockType,
+    index: number,
+    actionOptions?: { method: PreviewMethod; trigger: PreviewTrigger }
+): PreviewBlock {
     const id = `${type}-${Date.now()}-${index}`;
 
     if (type === 'launcher') {
@@ -279,10 +293,72 @@ function createPreviewBlock(type: PreviewBlockType, index: number): PreviewBlock
     }
 
     if (type === 'mobileModal') {
-        return { id, type, x: 480, y: 24, width: 320, height: 560 };
+        const size = getPreviewFrameSize('mobileModal');
+
+        return { id, type, x: 480, y: 24, ...size };
     }
 
-    return { id, type, x: 320, y: 40, width: 460, height: 672 };
+    if (type === 'actionNotification') {
+        const size = getPreviewFrameSize('actionNotification');
+        const method = actionOptions?.method ?? 'sendTransaction';
+        const trigger = actionOptions?.trigger ?? 'before';
+
+        return {
+            id,
+            type,
+            x: 320,
+            y: 480,
+            ...size,
+            method,
+            trigger,
+            previewMode: 'desktop'
+        };
+    }
+
+    if (type === 'actionModal') {
+        const method = actionOptions?.method ?? 'sendTransaction';
+        const trigger = actionOptions?.trigger ?? 'before';
+        const size = getPreviewFrameSize('actionModal', 'desktop', trigger);
+
+        return {
+            id,
+            type,
+            x: 320,
+            y: 40,
+            ...size,
+            method,
+            trigger,
+            previewMode: 'desktop'
+        };
+    }
+
+    const size = getPreviewFrameSize('desktopModal');
+
+    return { id, type, x: 320, y: 40, ...size };
+}
+
+function buildPreviewIframeSrc(
+    previewSettingsQuery: string,
+    params: {
+        previewKind: PreviewKind;
+        previewMode: PreviewMode;
+        previewMethod?: PreviewMethod;
+        previewSurface?: PreviewSurface;
+        previewTrigger?: PreviewTrigger;
+    }
+) {
+    const search = new URLSearchParams(previewSettingsQuery);
+
+    search.set('previewMode', params.previewMode);
+    search.set('previewKind', params.previewKind);
+
+    if (params.previewKind === 'action') {
+        search.set('previewMethod', params.previewMethod ?? 'sendTransaction');
+        search.set('previewSurface', params.previewSurface ?? 'modal');
+        search.set('previewTrigger', params.previewTrigger ?? 'before');
+    }
+
+    return `/widget-preview?${search.toString()}`;
 }
 
 function getCanvasBackgroundStyle(previewBackground: string, isDark: boolean): React.CSSProperties {
@@ -904,12 +980,6 @@ function buildExportSnippets(
     };
 }
 
-const PREVIEW_BLOCK_EXPORT_SLUGS: Record<PreviewBlockType, string> = {
-    launcher: 'launcher',
-    desktopModal: 'desktop-modal',
-    mobileModal: 'mobile-modal'
-};
-
 function ExportPanel({
     tonSettings,
     builderSettings,
@@ -1014,40 +1084,118 @@ function ExportPanel({
     );
 }
 
+function buildPreviewSettingsSignature(params: {
+    previewSettingsQuery: string;
+    resetToken: number;
+    previewKind: PreviewKind;
+    previewMode: PreviewMode;
+    previewMethod?: PreviewMethod;
+    previewSurface?: PreviewSurface;
+    previewTrigger?: PreviewTrigger;
+}): string {
+    return JSON.stringify(params);
+}
+
 function PreviewModalFrame({
     previewSettingsQuery,
     resetToken,
-    isDragging,
     title,
-    previewMode
+    previewKind,
+    previewMode,
+    previewMethod,
+    previewSurface,
+    previewTrigger,
+    isInteractive
 }: {
     previewSettingsQuery: string;
     resetToken: number;
-    isDragging: boolean;
     title: string;
-    previewMode: 'desktop' | 'mobile';
+    previewKind: PreviewKind;
+    previewMode: PreviewMode;
+    previewMethod?: PreviewMethod;
+    previewSurface?: PreviewSurface;
+    previewTrigger?: PreviewTrigger;
+    isInteractive: boolean;
 }) {
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const [previewReady, setPreviewReady] = useState(false);
-    const [iframeSrc] = useState(
-        () => `/widget-preview?${previewSettingsQuery}&previewMode=${previewMode}`
+    const lastPostedSignatureRef = useRef('');
+    const readySignatureRef = useRef<string | null>(null);
+    const previewSignatureRef = useRef('');
+    const [iframeSrc] = useState(() =>
+        buildPreviewIframeSrc(previewSettingsQuery, {
+            previewKind,
+            previewMode,
+            previewMethod,
+            previewSurface,
+            previewTrigger
+        })
+    );
+    const previewSignature = useMemo(
+        () =>
+            buildPreviewSettingsSignature({
+                previewSettingsQuery,
+                resetToken,
+                previewKind,
+                previewMode,
+                previewMethod,
+                previewSurface,
+                previewTrigger
+            }),
+        [
+            previewSettingsQuery,
+            resetToken,
+            previewKind,
+            previewMode,
+            previewMethod,
+            previewSurface,
+            previewTrigger
+        ]
     );
 
+    previewSignatureRef.current = previewSignature;
+
     const postPreviewSettings = useCallback(() => {
+        if (lastPostedSignatureRef.current === previewSignature) {
+            return;
+        }
+
+        lastPostedSignatureRef.current = previewSignature;
+
         iframeRef.current?.contentWindow?.postMessage(
             {
                 type: 'widget-builder-preview-settings',
                 query: previewSettingsQuery,
                 resetToken,
-                previewMode
+                previewKind,
+                previewMode,
+                previewMethod,
+                previewSurface,
+                previewTrigger
             },
             window.location.origin
         );
-    }, [previewSettingsQuery, resetToken, previewMode]);
+    }, [
+        previewSignature,
+        previewSettingsQuery,
+        resetToken,
+        previewKind,
+        previewMode,
+        previewMethod,
+        previewSurface,
+        previewTrigger
+    ]);
 
     useEffect(() => {
+        if (readySignatureRef.current === previewSignature) {
+            setPreviewReady(true);
+            return;
+        }
+
+        readySignatureRef.current = null;
         setPreviewReady(false);
-    }, [previewSettingsQuery, resetToken, previewMode]);
+        lastPostedSignatureRef.current = '';
+    }, [previewSignature]);
 
     useEffect(() => {
         postPreviewSettings();
@@ -1063,6 +1211,7 @@ function PreviewModalFrame({
                 event.data?.type === 'widget-builder-preview-ready' &&
                 event.source === iframeRef.current?.contentWindow
             ) {
+                readySignatureRef.current = previewSignatureRef.current;
                 setPreviewReady(true);
             }
         };
@@ -1072,25 +1221,11 @@ function PreviewModalFrame({
         return () => window.removeEventListener('message', onMessage);
     }, []);
 
-    useEffect(() => {
-        if (previewReady) {
-            return;
-        }
-
-        const checkPreviewReady = window.setInterval(() => {
-            if (iframeRef.current?.contentDocument?.querySelector('[data-tc-modal="true"]')) {
-                setPreviewReady(true);
-            }
-        }, 100);
-
-        return () => window.clearInterval(checkPreviewReady);
-    }, [previewReady, previewSettingsQuery]);
-
     return (
         <div className="relative h-full w-full overflow-hidden">
             <div
                 className={cn(
-                    'absolute inset-0 z-10 flex items-center justify-center rounded-[24px] bg-transparent shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)] transition-opacity duration-200 ease-out',
+                    'absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-background/70 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)] transition-opacity duration-200 ease-out',
                     previewReady && 'pointer-events-none opacity-0'
                 )}
                 aria-hidden={previewReady}
@@ -1102,15 +1237,13 @@ function PreviewModalFrame({
                 title={title}
                 src={iframeSrc}
                 onLoad={() => {
-                    setPreviewReady(false);
+                    lastPostedSignatureRef.current = '';
                     postPreviewSettings();
-                    window.setTimeout(postPreviewSettings, 0);
-                    window.setTimeout(postPreviewSettings, 100);
                 }}
                 className={cn(
                     'absolute inset-0 h-full w-full overflow-hidden border-0 bg-transparent transition-opacity duration-200 ease-out',
-                    previewReady ? 'opacity-100' : 'opacity-0',
-                    isDragging && 'pointer-events-none'
+                    !isInteractive && 'pointer-events-none',
+                    previewReady ? 'opacity-100' : 'opacity-0'
                 )}
             />
         </div>
@@ -1146,69 +1279,212 @@ function ModalPreviewPanel({
     );
     const canvasRef = useRef<HTMLDivElement>(null);
     const canvasSurfaceRef = useRef<HTMLDivElement>(null);
-    const htmlDragRef = useRef<PreviewDragState | null>(null);
-    const [dragging, setDragging] = useState<PreviewDragState | null>(null);
+    const blockNodeRefs = useRef(new Map<string, HTMLDivElement>());
+    const dragLiveRef = useRef<PreviewDragState | null>(null);
+    const dragPointerIdRef = useRef<number | null>(null);
+    const dragCaptureTargetRef = useRef<HTMLElement | null>(null);
+    const lastPointerPositionRef = useRef({ x: 0, y: 0 });
+    const stackOrderRef = useRef(new Map<string, number>());
+    const [stackRevision, setStackRevision] = useState(0);
+    const [draggingId, setDraggingId] = useState<string | null>(null);
     const canvasMinSize = useMemo(() => getCanvasMinSize(blocks), [blocks]);
 
-    const moveDraggedBlock = (dragState: PreviewDragState, clientX: number, clientY: number) => {
+    const bringBlockToFront = useCallback(
+        (id: string) => {
+            const currentMax = blocks.reduce((max, block, index) => {
+                const order = stackOrderRef.current.get(block.id) ?? index;
+
+                return Math.max(max, order);
+            }, -1);
+
+            stackOrderRef.current.set(id, currentMax + 1);
+            setStackRevision(revision => revision + 1);
+        },
+        [blocks]
+    );
+
+    const getBlockZIndex = useCallback(
+        (blockId: string, blockIndex: number) => {
+            void stackRevision;
+
+            return 10 + (stackOrderRef.current.get(blockId) ?? blockIndex);
+        },
+        [stackRevision]
+    );
+
+    const getDraggedPosition = (dragState: PreviewDragState, clientX: number, clientY: number) => {
         const canvasSurface = canvasSurfaceRef.current;
 
         if (!canvasSurface) {
+            return { x: dragState.originX, y: dragState.originY };
+        }
+
+        return {
+            x: clamp(
+                dragState.originX + clientX - dragState.startX,
+                0,
+                Math.max(0, canvasSurface.offsetWidth - dragState.width)
+            ),
+            y: clamp(
+                dragState.originY + clientY - dragState.startY,
+                0,
+                Math.max(0, canvasSurface.offsetHeight - dragState.height)
+            )
+        };
+    };
+
+    const updateDragVisual = (dragState: PreviewDragState, clientX: number, clientY: number) => {
+        const node = blockNodeRefs.current.get(dragState.id);
+
+        if (!node) {
             return;
         }
 
-        setBlocks(currentBlocks =>
-            currentBlocks.map(block => {
-                if (block.id !== dragState.id) {
-                    return block;
-                }
+        const { x, y } = getDraggedPosition(dragState, clientX, clientY);
 
-                return {
-                    ...block,
-                    x: clamp(
-                        dragState.originX + clientX - dragState.startX,
-                        0,
-                        Math.max(0, canvasSurface.offsetWidth - block.width)
-                    ),
-                    y: clamp(
-                        dragState.originY + clientY - dragState.startY,
-                        0,
-                        Math.max(0, canvasSurface.offsetHeight - block.height)
-                    )
-                };
-            })
+        node.style.transform = `translate(${x - dragState.originX}px, ${y - dragState.originY}px)`;
+    };
+
+    const clearDragVisual = (dragState: PreviewDragState) => {
+        const node = blockNodeRefs.current.get(dragState.id);
+
+        if (!node) {
+            return;
+        }
+
+        node.style.transform = '';
+        node.style.zIndex = '';
+    };
+
+    const commitDragPosition = (dragState: PreviewDragState, clientX: number, clientY: number) => {
+        const { x, y } = getDraggedPosition(dragState, clientX, clientY);
+
+        bringBlockToFront(dragState.id);
+        setBlocks(currentBlocks =>
+            currentBlocks.map(block =>
+                block.id === dragState.id
+                    ? {
+                          ...block,
+                          x,
+                          y
+                      }
+                    : block
+            )
         );
     };
 
-    useEffect(() => {
-        if (!dragging) {
+    const releaseDragPointerCapture = () => {
+        const captureTarget = dragCaptureTargetRef.current;
+        const pointerId = dragPointerIdRef.current;
+
+        dragCaptureTargetRef.current = null;
+        dragPointerIdRef.current = null;
+
+        if (captureTarget && pointerId !== null) {
+            try {
+                captureTarget.releasePointerCapture(pointerId);
+            } catch {
+                // Pointer was already released.
+            }
+        }
+    };
+
+    const finishDragging = (clientX: number, clientY: number) => {
+        const dragState = dragLiveRef.current;
+
+        releaseDragPointerCapture();
+
+        if (!dragState) {
+            setDraggingId(null);
             return;
         }
 
-        const onPointerMove = (event: PointerEvent) =>
-            moveDraggedBlock(dragging, event.clientX, event.clientY);
-        const onMouseMove = (event: MouseEvent) =>
-            moveDraggedBlock(dragging, event.clientX, event.clientY);
-        const onPointerUp = () => setDragging(null);
+        clearDragVisual(dragState);
+        commitDragPosition(dragState, clientX, clientY);
+        dragLiveRef.current = null;
+        setDraggingId(null);
+    };
 
-        window.addEventListener('pointermove', onPointerMove);
-        window.addEventListener('mousemove', onMouseMove);
-        window.addEventListener('pointerup', onPointerUp);
-        window.addEventListener('mouseup', onPointerUp);
+    useEffect(() => {
+        if (!draggingId) {
+            return;
+        }
+
+        const isActiveDragPointer = (pointerId: number) =>
+            dragPointerIdRef.current === null || dragPointerIdRef.current === pointerId;
+
+        const onPointerMove = (event: PointerEvent) => {
+            if (!isActiveDragPointer(event.pointerId)) {
+                return;
+            }
+
+            lastPointerPositionRef.current = { x: event.clientX, y: event.clientY };
+
+            const dragState = dragLiveRef.current;
+
+            if (!dragState) {
+                return;
+            }
+
+            updateDragVisual(dragState, event.clientX, event.clientY);
+        };
+
+        const onPointerEnd = (event: PointerEvent) => {
+            if (!isActiveDragPointer(event.pointerId)) {
+                return;
+            }
+
+            finishDragging(event.clientX, event.clientY);
+        };
+
+        const onWindowBlur = () => {
+            const { x, y } = lastPointerPositionRef.current;
+            finishDragging(x, y);
+        };
+
+        document.addEventListener('pointermove', onPointerMove);
+        document.addEventListener('pointerup', onPointerEnd, true);
+        document.addEventListener('pointercancel', onPointerEnd, true);
+        window.addEventListener('blur', onWindowBlur);
 
         return () => {
-            window.removeEventListener('pointermove', onPointerMove);
-            window.removeEventListener('mousemove', onMouseMove);
-            window.removeEventListener('pointerup', onPointerUp);
-            window.removeEventListener('mouseup', onPointerUp);
+            document.removeEventListener('pointermove', onPointerMove);
+            document.removeEventListener('pointerup', onPointerEnd, true);
+            document.removeEventListener('pointercancel', onPointerEnd, true);
+            window.removeEventListener('blur', onWindowBlur);
         };
-    }, [dragging]);
+    }, [draggingId]);
 
     const addBlock = (type: PreviewBlockType) => {
         setBlocks(currentBlocks => [
             ...currentBlocks,
             createPreviewBlock(type, currentBlocks.length)
         ]);
+    };
+
+    const addActionBlock = (
+        type: ActionPreviewBlockType,
+        method: PreviewMethod,
+        trigger: PreviewTrigger
+    ) => {
+        setBlocks(currentBlocks => [
+            ...currentBlocks,
+            createPreviewBlock(type, currentBlocks.length, { method, trigger })
+        ]);
+    };
+
+    const handleAddBlockOption = (value: string) => {
+        const parsed = decodeAddBlockOption(value);
+
+        if (!parsed) {
+            return;
+        }
+
+        if (parsed.method && parsed.trigger && isActionBlockType(parsed.type)) {
+            addActionBlock(parsed.type, parsed.method, parsed.trigger);
+        } else {
+            addBlock(parsed.type);
+        }
     };
 
     const removeBlock = (id: string) => {
@@ -1223,21 +1499,47 @@ function ModalPreviewPanel({
         setBlocks(DEFAULT_PREVIEW_BLOCKS);
     };
 
-    const startDragging = (
-        block: PreviewBlock,
-        event: React.PointerEvent<HTMLButtonElement> | React.MouseEvent<HTMLButtonElement>
-    ) => {
+    const activateBlock = (block: PreviewBlock) => {
+        focusBlock({ id: block.id, type: block.type });
+    };
+
+    const startDragging = (block: PreviewBlock, event: React.PointerEvent<HTMLButtonElement>) => {
+        if (event.button !== 0) {
+            return;
+        }
+
         event.preventDefault();
+        event.stopPropagation();
+        activateBlock(block);
+
         const dragState = {
             id: block.id,
             startX: event.clientX,
             startY: event.clientY,
             originX: block.x,
-            originY: block.y
+            originY: block.y,
+            width: block.width,
+            height: block.height
         };
+        const node = blockNodeRefs.current.get(block.id);
 
-        htmlDragRef.current = dragState;
-        setDragging(dragState);
+        dragLiveRef.current = dragState;
+        dragPointerIdRef.current = event.pointerId;
+        dragCaptureTargetRef.current = event.currentTarget;
+        lastPointerPositionRef.current = { x: event.clientX, y: event.clientY };
+
+        event.currentTarget.setPointerCapture(event.pointerId);
+
+        if (node) {
+            node.style.zIndex = '100';
+        }
+
+        setDraggingId(block.id);
+    };
+
+    const focusBlock = (block: FocusedPreviewBlock) => {
+        bringBlockToFront(block.id);
+        onFocusBlock(block);
     };
 
     return (
@@ -1249,26 +1551,37 @@ function ModalPreviewPanel({
                     </h2>
                 </div>
                 <div className="flex min-w-0 items-center gap-2">
-                    <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto rounded-full bg-secondary p-1 sm:flex-none">
-                        {(Object.keys(PREVIEW_BLOCK_LABELS) as PreviewBlockType[]).map(type => (
-                            <Button
-                                key={type}
-                                type="button"
-                                variant="ghost"
-                                size="xs"
-                                className="shrink-0"
-                                onClick={() => addBlock(type)}
-                            >
-                                <Plus size={13} />
-                                <span className="sm:hidden">
-                                    {PREVIEW_BLOCK_SHORT_LABELS[type]}
-                                </span>
-                                <span className="hidden sm:inline">
-                                    {PREVIEW_BLOCK_LABELS[type]}
-                                </span>
-                            </Button>
-                        ))}
-                    </div>
+                    <Select.Root onValueChange={handleAddBlockOption}>
+                        <Select.Trigger
+                            variant="secondary"
+                            size="xs"
+                            borderRadius="l"
+                            className="shrink-0 gap-1.5"
+                        >
+                            <Plus size={14} />
+                            Add block
+                        </Select.Trigger>
+                        <Select.Content
+                            align="end"
+                            className="min-w-64 max-h-[min(24rem,70vh)] overflow-y-auto"
+                        >
+                            {ADD_PREVIEW_BLOCK_GROUPS.map((group, groupIndex) => (
+                                <div key={group.label}>
+                                    {groupIndex > 0 ? (
+                                        <div className="mx-2 my-1 border-t border-tertiary/60" />
+                                    ) : null}
+                                    <div className="px-3 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wide text-secondary-foreground">
+                                        {group.label}
+                                    </div>
+                                    {group.options.map(option => (
+                                        <Select.Item key={option.value} value={option.value}>
+                                            {option.label}
+                                        </Select.Item>
+                                    ))}
+                                </div>
+                            ))}
+                        </Select.Content>
+                    </Select.Root>
                     <Button
                         type="button"
                         variant="ghost"
@@ -1302,7 +1615,7 @@ function ModalPreviewPanel({
                         })
                     }}
                 >
-                    {blocks.map(block => {
+                    {blocks.map((block, blockIndex) => {
                         const blockTonSettings = getBlockTonSettings(block.id);
                         const blockBuilderSettings = getBlockBuilderSettings(block.id);
                         const blockColors = getPreviewColors(blockTonSettings);
@@ -1325,7 +1638,7 @@ function ModalPreviewPanel({
                             'transition-shadow duration-150',
                             focusedBlockId === block.id
                                 ? 'shadow-lg ring-2 ring-primary'
-                                : dragging?.id === block.id
+                                : draggingId === block.id
                                   ? 'shadow-lg ring-2 ring-primary/35'
                                   : 'hover:shadow-md',
                             hasBlockOverrides &&
@@ -1336,70 +1649,58 @@ function ModalPreviewPanel({
                         return (
                             <div
                                 key={block.id}
-                                className={cn(
-                                    'group absolute',
-                                    focusedBlockId === block.id || dragging?.id === block.id
-                                        ? 'z-20'
-                                        : 'z-10'
-                                )}
+                                ref={node => {
+                                    if (node) {
+                                        blockNodeRefs.current.set(block.id, node);
+                                    } else {
+                                        blockNodeRefs.current.delete(block.id);
+                                    }
+                                }}
+                                className="group absolute"
+                                onClick={() => activateBlock(block)}
+                                onKeyDown={event => {
+                                    if (event.key === 'Enter' || event.key === ' ') {
+                                        event.preventDefault();
+                                        activateBlock(block);
+                                    }
+                                }}
+                                role="button"
+                                tabIndex={0}
+                                aria-label={`Select ${getPreviewBlockTitle(block)}`}
                                 style={{
                                     left: block.x,
                                     top: block.y,
                                     width: block.width,
-                                    height: block.height
+                                    height: block.height,
+                                    zIndex: getBlockZIndex(block.id, blockIndex)
                                 }}
                             >
                                 <div
                                     className={cn(
-                                        'absolute inset-x-2 top-2 z-10 flex items-center justify-between gap-2 transition-opacity',
+                                        'absolute inset-x-2 top-2 z-20 flex items-center justify-between gap-2 transition-opacity',
                                         focusedBlockId === block.id
                                             ? 'opacity-100'
                                             : 'opacity-0 group-hover:opacity-100'
                                     )}
+                                    onClick={event => event.stopPropagation()}
+                                    onKeyDown={event => event.stopPropagation()}
                                 >
                                     <div className="flex items-center gap-1">
                                         <button
                                             type="button"
-                                            draggable
                                             className="grid size-7 cursor-grab place-items-center rounded-full border border-tertiary/70 bg-background/90 text-secondary-foreground shadow-sm active:cursor-grabbing"
                                             aria-label={`Move ${PREVIEW_BLOCK_LABELS[block.type]}`}
                                             onPointerDown={event => startDragging(block, event)}
-                                            onMouseDown={event => startDragging(block, event)}
-                                            onDragStart={event => {
-                                                const dragState = {
-                                                    id: block.id,
-                                                    startX: event.clientX,
-                                                    startY: event.clientY,
-                                                    originX: block.x,
-                                                    originY: block.y
-                                                };
-
-                                                event.dataTransfer.effectAllowed = 'move';
-                                                htmlDragRef.current = dragState;
-                                                setDragging(dragState);
-                                            }}
-                                            onDrag={event => {
-                                                if (!htmlDragRef.current || event.clientX === 0) {
-                                                    return;
-                                                }
-
-                                                moveDraggedBlock(
-                                                    htmlDragRef.current,
-                                                    event.clientX,
-                                                    event.clientY
-                                                );
-                                            }}
-                                            onDragEnd={event => {
-                                                if (htmlDragRef.current && event.clientX !== 0) {
-                                                    moveDraggedBlock(
-                                                        htmlDragRef.current,
-                                                        event.clientX,
-                                                        event.clientY
+                                            onLostPointerCapture={event => {
+                                                if (
+                                                    dragLiveRef.current?.id === block.id &&
+                                                    dragPointerIdRef.current === event.pointerId
+                                                ) {
+                                                    finishDragging(
+                                                        lastPointerPositionRef.current.x,
+                                                        lastPointerPositionRef.current.y
                                                     );
                                                 }
-
-                                                htmlDragRef.current = null;
-                                                setDragging(null);
                                             }}
                                         >
                                             <GripVertical size={14} />
@@ -1428,7 +1729,7 @@ function ModalPreviewPanel({
                                         aria-pressed={focusedBlockId === block.id}
                                         onClick={event => {
                                             event.stopPropagation();
-                                            onFocusBlock({ id: block.id, type: block.type });
+                                            focusBlock({ id: block.id, type: block.type });
                                         }}
                                     >
                                         <Pencil size={12} />
@@ -1439,7 +1740,7 @@ function ModalPreviewPanel({
                                 {block.type === 'launcher' ? (
                                     <div
                                         className={cn(
-                                            'flex h-full items-center justify-center border border-tertiary/60 bg-background/70 p-4 shadow-sm',
+                                            'flex h-full cursor-pointer items-center justify-center border border-tertiary/60 bg-background/70 p-4 shadow-sm',
                                             blockRadiusClass,
                                             blockFocusClassName
                                         )}
@@ -1458,19 +1759,27 @@ function ModalPreviewPanel({
                                 ) : (
                                     <div
                                         className={cn(
-                                            'h-full overflow-hidden rounded-[28px] bg-white/5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]',
-                                            block.type === 'desktopModal' && 'p-2',
+                                            'relative h-full overflow-hidden rounded-2xl bg-white/5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]',
+                                            focusedBlockId !== block.id && 'cursor-pointer',
                                             blockFocusClassName
                                         )}
                                     >
                                         <PreviewModalFrame
                                             previewSettingsQuery={blockPreviewQuery}
                                             resetToken={resetToken}
-                                            isDragging={dragging !== null}
-                                            title={`${PREVIEW_BLOCK_LABELS[block.type]} preview`}
+                                            isInteractive={focusedBlockId === block.id}
+                                            title={`${getPreviewBlockTitle(block)} preview`}
+                                            previewKind={getPreviewKind(block.type)}
                                             previewMode={
-                                                block.type === 'mobileModal' ? 'mobile' : 'desktop'
+                                                isActionBlockType(block.type)
+                                                    ? (block.previewMode ?? 'desktop')
+                                                    : getConnectPreviewMode(block.type)
                                             }
+                                            previewMethod={block.method}
+                                            previewSurface={
+                                                getPreviewSurface(block.type) ?? undefined
+                                            }
+                                            previewTrigger={block.trigger}
                                         />
                                     </div>
                                 )}

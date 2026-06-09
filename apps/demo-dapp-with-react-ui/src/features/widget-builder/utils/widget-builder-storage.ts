@@ -8,15 +8,23 @@ import {
     parseWidgetBuilderSettingsFromSearchParams,
     type WidgetBuilderSettings
 } from './widget-builder-settings';
+import {
+    getPreviewFrameSize,
+    PREVIEW_BLOCK_TYPES,
+    PREVIEW_METHODS,
+    PREVIEW_MODES,
+    PREVIEW_TRIGGERS,
+    type PreviewBlockType,
+    type PreviewMethod,
+    type PreviewMode,
+    type PreviewTrigger
+} from './preview-types';
 
 const STORAGE_KEY = 'widget-builder-state';
 const LEGACY_CANVAS_STORAGE_KEY = 'widget-builder-canvas-state';
-const STORAGE_VERSION = 2;
+const STORAGE_VERSION = 3;
 
-type PreviewBlockType = 'launcher' | 'desktopModal' | 'mobileModal';
 type BuilderTab = 'theme' | 'general' | 'export';
-
-const PREVIEW_BLOCK_TYPES = new Set<PreviewBlockType>(['launcher', 'desktopModal', 'mobileModal']);
 
 const BUILDER_TABS = new Set<BuilderTab>(['theme', 'general', 'export']);
 
@@ -27,6 +35,9 @@ export interface StoredPreviewBlock {
     y: number;
     width: number;
     height: number;
+    method?: PreviewMethod;
+    trigger?: PreviewTrigger;
+    previewMode?: PreviewMode;
 }
 
 export interface StoredBlockOverrideSettings {
@@ -73,13 +84,31 @@ const DEFAULT_PREVIEW_BLOCKS: StoredPreviewBlock[] = [
         type: 'desktopModal',
         x: 300,
         y: 40,
-        width: 460,
-        height: 672
+        width: 520,
+        height: 760
     }
 ];
 
 function isPreviewBlockType(value: unknown): value is PreviewBlockType {
     return typeof value === 'string' && PREVIEW_BLOCK_TYPES.has(value as PreviewBlockType);
+}
+
+function parsePreviewMethod(value: unknown): PreviewMethod | undefined {
+    return typeof value === 'string' && PREVIEW_METHODS.has(value as PreviewMethod)
+        ? (value as PreviewMethod)
+        : undefined;
+}
+
+function parsePreviewTrigger(value: unknown): PreviewTrigger | undefined {
+    return typeof value === 'string' && PREVIEW_TRIGGERS.has(value as PreviewTrigger)
+        ? (value as PreviewTrigger)
+        : undefined;
+}
+
+function parsePreviewMode(value: unknown): PreviewMode | undefined {
+    return typeof value === 'string' && PREVIEW_MODES.has(value as PreviewMode)
+        ? (value as PreviewMode)
+        : undefined;
 }
 
 function parseNumber(value: unknown, fallback: number): number {
@@ -97,14 +126,27 @@ function parsePreviewBlock(value: unknown): StoredPreviewBlock | null {
         return null;
     }
 
-    return {
+    const previewMode = parsePreviewMode(block.previewMode) ?? 'desktop';
+    const method = parsePreviewMethod(block.method);
+    const trigger = parsePreviewTrigger(block.trigger);
+    const defaults = getPreviewFrameSize(block.type, previewMode, trigger ?? 'before');
+
+    const parsed: StoredPreviewBlock = {
         id: block.id,
         type: block.type,
         x: parseNumber(block.x, 0),
         y: parseNumber(block.y, 0),
-        width: parseNumber(block.width, 220),
-        height: parseNumber(block.height, 112)
+        width: parseNumber(block.width, defaults.width),
+        height: parseNumber(block.height, defaults.height)
     };
+
+    if (block.type === 'actionModal' || block.type === 'actionNotification') {
+        parsed.method = method ?? 'sendTransaction';
+        parsed.trigger = trigger ?? 'before';
+        parsed.previewMode = previewMode;
+    }
+
+    return parsed;
 }
 
 function parseFocusedBlock(
@@ -331,7 +373,7 @@ export function loadWidgetBuilderState(): WidgetBuilderPersistedState | null {
         if (raw) {
             const parsed = JSON.parse(raw) as Partial<PersistedPayload>;
 
-            if (parsed.version === STORAGE_VERSION) {
+            if (parsed.version === STORAGE_VERSION || parsed.version === 2) {
                 const state = parsePersistedPayload(parsed);
 
                 if (state) {

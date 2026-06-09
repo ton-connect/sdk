@@ -71,9 +71,9 @@ async function enableMocking() {
 enableMocking().then(() => {
     const container = document.getElementById('root') as HTMLElement;
     const root = createRoot(container);
-    root.render(
-        <StrictMode>
-            <App />
-        </StrictMode>
-    );
+    const app = <App />;
+    const isWidgetPreview = window.location.pathname.endsWith('/widget-preview');
+
+    // StrictMode remounts effects and duplicates widget-builder notification previews.
+    root.render(isWidgetPreview ? app : <StrictMode>{app}</StrictMode>);
 });
