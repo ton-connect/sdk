@@ -2,8 +2,10 @@ import type { ComponentType } from 'react';
 import {
     CircleDollarSign,
     FileSignature,
+    FlaskConical,
     ListOrdered,
     MessageSquare,
+    Paintbrush,
     Search,
     Send,
     ShieldCheck,
@@ -59,6 +61,8 @@ export const DEMO_NAV_GROUPS: readonly DemoNavGroup[] = [
     {
         label: 'Utils',
         links: [
+            { to: '/widget-builder', label: 'Widget builder', icon: Paintbrush },
+            { to: '/widget-sandbox', label: 'Export sandbox', icon: FlaskConical },
             { to: '/ton-proof', label: 'Ton proof', icon: ShieldCheck },
             { to: '/find-tx', label: 'Find transaction', icon: Search }
         ]

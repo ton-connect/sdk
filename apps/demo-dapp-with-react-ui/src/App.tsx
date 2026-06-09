@@ -3,7 +3,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { AppRouter, ThemeProvider } from './core/components/index';
 import { tonConnectManifestUrl, tonConnectUiPreferences } from './core/configs/app-kit';
-import { getProviderAnalyticsSettingsFromLocation } from './features/dev-settings/utils/settings-url';
+import {
+    getProviderAnalyticsSettingsFromLocation,
+    parseSettingsFromSearchParams,
+    toTonConnectOptions
+} from './features/dev-settings/utils/settings-url';
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -17,12 +21,27 @@ const queryClient = new QueryClient({
 });
 
 export const App = () => {
+    const isWidgetPreview =
+        typeof window !== 'undefined' && window.location.pathname.endsWith('/widget-preview');
+    const widgetPreviewOptions =
+        typeof window !== 'undefined' && isWidgetPreview
+            ? toTonConnectOptions(
+                  parseSettingsFromSearchParams(new URLSearchParams(window.location.search))
+              )
+            : undefined;
+
     return (
         <ThemeProvider defaultTheme="dark" storageKey="demo-dapp-theme">
             <QueryClientProvider client={queryClient}>
                 <TonConnectUIProvider
                     manifestUrl={tonConnectManifestUrl}
-                    uiPreferences={tonConnectUiPreferences}
+                    uiPreferences={widgetPreviewOptions?.uiPreferences ?? tonConnectUiPreferences}
+                    language={widgetPreviewOptions?.language}
+                    actionsConfiguration={widgetPreviewOptions?.actionsConfiguration}
+                    walletsRequiredFeatures={widgetPreviewOptions?.walletsRequiredFeatures}
+                    walletsPreferredFeatures={widgetPreviewOptions?.walletsPreferredFeatures}
+                    enableAndroidBackHandler={widgetPreviewOptions?.enableAndroidBackHandler}
+                    restoreConnection={isWidgetPreview ? false : undefined}
                     analytics={getProviderAnalyticsSettingsFromLocation()}
                 >
                     <AppRouter />

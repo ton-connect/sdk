@@ -15,7 +15,7 @@ installWalletConsoleCapture();
 
 getTonconnectVersion();
 
-if (import.meta.env.DEV) {
+if (import.meta.env.DEV && !window.location.pathname.endsWith('/widget-preview')) {
     void import('eruda').then(({ default: eruda }) => eruda.init());
 }
 
