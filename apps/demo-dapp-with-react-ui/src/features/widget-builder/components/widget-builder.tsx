@@ -1104,8 +1104,7 @@ function PreviewModalFrame({
     previewMode,
     previewMethod,
     previewSurface,
-    previewTrigger,
-    isInteractive
+    previewTrigger
 }: {
     previewSettingsQuery: string;
     resetToken: number;
@@ -1115,7 +1114,6 @@ function PreviewModalFrame({
     previewMethod?: PreviewMethod;
     previewSurface?: PreviewSurface;
     previewTrigger?: PreviewTrigger;
-    isInteractive: boolean;
 }) {
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const [previewReady, setPreviewReady] = useState(false);
@@ -1242,7 +1240,6 @@ function PreviewModalFrame({
                 }}
                 className={cn(
                     'absolute inset-0 h-full w-full overflow-hidden border-0 bg-transparent transition-opacity duration-200 ease-out',
-                    !isInteractive && 'pointer-events-none',
                     previewReady ? 'opacity-100' : 'opacity-0'
                 )}
             />
@@ -1760,14 +1757,12 @@ function ModalPreviewPanel({
                                     <div
                                         className={cn(
                                             'relative h-full overflow-hidden rounded-2xl bg-white/5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]',
-                                            focusedBlockId !== block.id && 'cursor-pointer',
                                             blockFocusClassName
                                         )}
                                     >
                                         <PreviewModalFrame
                                             previewSettingsQuery={blockPreviewQuery}
                                             resetToken={resetToken}
-                                            isInteractive={focusedBlockId === block.id}
                                             title={`${getPreviewBlockTitle(block)} preview`}
                                             previewKind={getPreviewKind(block.type)}
                                             previewMode={
