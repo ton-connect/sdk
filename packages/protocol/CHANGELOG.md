@@ -1,5 +1,55 @@
 # Changelog @tonconnect/protocol
 
+## 3.0.0
+
+### Major Changes
+
+- d918578: TON Connect V3 — sign message, embedded requests, structure items.
+
+### Minor Changes
+
+- 73907ad: Add embedded requests
+
+    An RPC request (`sendTransaction`, `signMessage`, or `signData`) can now be embedded directly
+    into the connect URL via an `e` query parameter. On mobile this lets the wallet handle
+    connection and action in a single tap, eliminating the round-trip for "connect and pay" flows.
+
+    In the UI SDK, pass `enableEmbeddedRequest: true` in the request options to opt in. With the
+    flag, the result is always wrapped in an `EmbeddedTResponse` envelope:
+    - `{ hasResponse: true, response }` — the request was completed, either folded into connect by
+      an embedded-request-capable wallet, or via the normal bridge flow when the wallet was already
+      connected.
+    - `{ hasResponse: false, connectResult: { dispatched } }` — the wallet connected but did not
+      return a signed result. Two sub-cases:
+        - `dispatched: false` — the request never reached the wallet;
+        - `dispatched: true` — the request was delivered to the wallet inside the connect URL, but
+          no response came back. **The wallet may have already processed it.** dApps MUST NOT retry
+          silently in this case — surface an explicit retry button to the user and, where
+          applicable, verify on-chain state (e.g. recipient's recent transaction history) before
+          re-submitting to avoid duplicate transactions or signatures.
+
+    Wallets declare support via the `EmbeddedRequest` feature in `DeviceInfo.features`.
+
+- a9021e6: Add `signMessage` method
+
+    Wallets can now be asked to sign an internal message without broadcasting it. The signed BoC is
+    returned to the dApp, which can submit it through a relayer — enabling gasless (sponsored)
+    transaction flows where the user does not need to hold TON for gas.
+
+    The request payload has the same shape as `sendTransaction` (supports both raw `messages` and
+    structured `items`). Wallets declare support via the `SignMessage` feature in
+    `DeviceInfo.features`.
+
+- 609418a: Add structured items to `sendTransaction` and `signMessage`
+
+    A new `items` field is accepted as an alternative to `messages`. Instead of constructing raw BoC
+    payloads, dApps describe transfers at a high level and the wallet handles BoC construction —
+    resolving jetton wallet addresses, building transfer cells, and estimating gas.
+
+    Three item types are supported: `ton`, `jetton`, and `nft`. A request must contain either
+    `messages` or `items`, never both. Wallets declare supported item types via the `itemTypes`
+    field in the `SendTransaction` / `SignMessage` feature entries.
+
 ## 3.0.0-beta.2
 
 ### Major Changes
