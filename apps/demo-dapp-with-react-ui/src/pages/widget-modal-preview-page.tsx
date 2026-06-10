@@ -5,20 +5,17 @@ import {
     toTonConnectOptions,
     toTonConnectResetOptions
 } from '../features/dev-settings/utils/settings-url';
-import {
-    applyPreviewAction,
-    refreshBeforeNotificationPreview
-} from '../features/widget-builder/utils/preview-action';
+import { applyPreviewAction } from '../features/widget-builder/utils/preview-action';
 import {
     clearPreviewConnectedWallet,
     installPreviewMocks,
     setPreviewConnectedWallet
 } from '../features/widget-builder/utils/preview-mocks';
-import { resetNotificationPreviewDedupe } from '../features/widget-builder/utils/preview-notification-state';
+import { parseButtonPreviewCss } from '../features/widget-builder/utils/button-preview-css';
 import { clearAllPreviewNotifications } from '../features/widget-builder/utils/preview-use-notifications';
 import {
     getActionPreviewReadySelector,
-    PREVIEW_NOTIFICATION_KEEPALIVE_MS,
+    PREVIEW_CONNECT_BUTTON_SELECTOR,
     type PreviewKind,
     type PreviewMethod,
     type PreviewMode,
@@ -40,7 +37,11 @@ function withPreviewSafeOptions(options: ReturnType<typeof toTonConnectOptions>)
 }
 
 function parsePreviewKind(value: string | null): PreviewKind {
-    return value === 'action' ? 'action' : 'connect';
+    if (value === 'action' || value === 'button') {
+        return value;
+    }
+
+    return 'connect';
 }
 
 function parsePreviewMode(value: string | null): PreviewMode {
@@ -164,6 +165,9 @@ export const WidgetModalPreviewPage = () => {
     const [tonConnectUI, setTonConnectOptions] = useTonConnectUI();
     const [previewState, setPreviewState] = useState(getInitialPreviewState);
     const [settingsRevision, setSettingsRevision] = useState(0);
+    const [buttonPreviewCss, setButtonPreviewCss] = useState(() =>
+        parseButtonPreviewCss(new URLSearchParams(window.location.search))
+    );
     const lastResetToken = useRef(0);
     const hasAppliedInitialSettingsRef = useRef(false);
     const requestMocksCleanupRef = useRef<(() => void) | null>(null);
@@ -253,6 +257,18 @@ export const WidgetModalPreviewPage = () => {
         };
     }, [tonConnectUI, previewState.previewKind, notifyReady, settingsRevision]);
 
+    useEffect(() => {
+        if (previewState.previewKind !== 'button') {
+            return;
+        }
+
+        // The real TonConnect button is rendered by @tonconnect/ui into `buttonRootId`;
+        // keep the connector disconnected so it shows the "Connect wallet" state.
+        clearPreviewConnectedWallet(tonConnectUI.connector);
+
+        return waitForPreviewElement(PREVIEW_CONNECT_BUTTON_SELECTOR, notifyReady);
+    }, [tonConnectUI, previewState.previewKind, notifyReady, settingsRevision]);
+
     const actionPreviewSignature = useMemo(
         () => getActionPreviewSignature(previewState),
         [
@@ -276,27 +292,7 @@ export const WidgetModalPreviewPage = () => {
 
         let disposed = false;
         let readyCleanup: (() => void) | undefined;
-        let refreshTimer: number | undefined;
         let hasNotifiedReady = false;
-
-        const clearRefreshTimer = () => {
-            if (refreshTimer !== undefined) {
-                window.clearTimeout(refreshTimer);
-                refreshTimer = undefined;
-            }
-        };
-
-        const scheduleNotificationKeepalive = () => {
-            clearRefreshTimer();
-
-            if (disposed || surface !== 'notification') {
-                return;
-            }
-
-            refreshTimer = window.setTimeout(() => {
-                runPreview({ keepalive: true });
-            }, PREVIEW_NOTIFICATION_KEEPALIVE_MS);
-        };
 
         const notifyReadyOnce = () => {
             if (disposed || hasNotifiedReady) {
@@ -305,10 +301,6 @@ export const WidgetModalPreviewPage = () => {
 
             hasNotifiedReady = true;
             notifyReady();
-
-            if (surface === 'notification') {
-                scheduleNotificationKeepalive();
-            }
         };
 
         const readySelector = getActionPreviewReadySelector(method, surface, trigger);
@@ -320,8 +312,9 @@ export const WidgetModalPreviewPage = () => {
             previewQueue = previewQueue.then(task).catch(() => {});
         };
 
-        const runPreview = (options?: { keepalive?: boolean }) => {
-            const isKeepalive = options?.keepalive === true;
+        // Preview toasts never auto-dismiss (see preview-use-notifications.ts), so a single
+        // run keeps both modal and notification previews on screen — no keepalive refresh.
+        const runPreview = () => {
             const runId = ++previewRunSeq;
 
             enqueuePreview(async () => {
@@ -332,33 +325,11 @@ export const WidgetModalPreviewPage = () => {
                 requestMocksCleanupRef.current?.();
                 requestMocksCleanupRef.current = null;
 
-                let cleanup: () => void;
-
-                if (isKeepalive && surface === 'notification') {
-                    await resetNotificationPreviewDedupe();
-
-                    if (trigger === 'before') {
-                        setPreviewConnectedWallet(tonConnectUI.connector);
-                        cleanup = await refreshBeforeNotificationPreview(tonConnectUI, {
-                            method,
-                            skipNotificationGuard: true
-                        });
-                    } else {
-                        cleanup = await applyPreviewAction(tonConnectUI, {
-                            method,
-                            surface,
-                            trigger,
-                            resetUi: true,
-                            skipNotificationGuard: true
-                        });
-                    }
-                } else {
-                    cleanup = await applyPreviewAction(tonConnectUI, {
-                        method,
-                        surface,
-                        trigger
-                    });
-                }
+                const cleanup = await applyPreviewAction(tonConnectUI, {
+                    method,
+                    surface,
+                    trigger
+                });
 
                 if (disposed || runId !== previewRunSeq) {
                     cleanup();
@@ -366,10 +337,6 @@ export const WidgetModalPreviewPage = () => {
                 }
 
                 requestMocksCleanupRef.current = cleanup;
-
-                if (isKeepalive && surface === 'notification') {
-                    scheduleNotificationKeepalive();
-                }
             });
         };
 
@@ -380,7 +347,6 @@ export const WidgetModalPreviewPage = () => {
             disposed = true;
             previewRunSeq += 1;
             readyCleanup?.();
-            clearRefreshTimer();
             requestMocksCleanupRef.current?.();
             requestMocksCleanupRef.current = null;
             clearAllPreviewNotifications();
@@ -411,11 +377,13 @@ export const WidgetModalPreviewPage = () => {
 
             if (query !== appliedSettingsQueryRef.current) {
                 appliedSettingsQueryRef.current = query;
+
+                const queryParams = new URLSearchParams(query);
+
+                setButtonPreviewCss(parseButtonPreviewCss(queryParams));
                 setTonConnectOptions(
                     withPreviewSafeOptions(
-                        toTonConnectOptions(
-                            parseSettingsFromSearchParams(new URLSearchParams(query))
-                        )
+                        toTonConnectOptions(parseSettingsFromSearchParams(queryParams))
                     )
                 );
             }
@@ -446,7 +414,8 @@ export const WidgetModalPreviewPage = () => {
                     const nextPreviewState: PreviewState = {
                         previewKind:
                             event.data.previewKind === 'action' ||
-                            event.data.previewKind === 'connect'
+                            event.data.previewKind === 'connect' ||
+                            event.data.previewKind === 'button'
                                 ? event.data.previewKind
                                 : current.previewKind,
                         previewMode:
@@ -500,11 +469,27 @@ export const WidgetModalPreviewPage = () => {
 
     const isNotificationPreview =
         previewState.previewKind === 'action' && previewState.previewSurface === 'notification';
+    const isButtonPreview = previewState.previewKind === 'button';
 
     const previewStyles = useMemo(
         () =>
-            previewState.previewMode === 'desktop'
+            isButtonPreview
                 ? `
+                    #${PREVIEW_BUTTON_ROOT_ID} {
+                        position: fixed;
+                        inset: 0;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        box-sizing: border-box;
+                        /* The preview is display-only: keep the real button from opening the modal. */
+                        pointer-events: none;
+                    }
+
+                    ${buttonPreviewCss}
+                `
+                : previewState.previewMode === 'desktop'
+                  ? `
                     ${isNotificationPreview ? getNotificationPreviewLayoutStyles() : ''}
                     [data-tc-modal='true'],
                     [data-tc-actions-modal-container='true'] {
@@ -540,7 +525,7 @@ export const WidgetModalPreviewPage = () => {
                         overflow: hidden !important;
                     }
                 `
-                : `
+                  : `
                     ${isNotificationPreview ? getNotificationPreviewLayoutStyles() : ''}
                     [data-tc-modal='true'],
                     [data-tc-actions-modal-container='true'] {
@@ -572,7 +557,7 @@ export const WidgetModalPreviewPage = () => {
                         overflow: hidden !important;
                     }
                 `,
-        [isNotificationPreview, previewState.previewMode]
+        [isButtonPreview, buttonPreviewCss, isNotificationPreview, previewState.previewMode]
     );
 
     return (
@@ -594,7 +579,10 @@ export const WidgetModalPreviewPage = () => {
                 `}
             </style>
             <main className="min-h-dvh bg-transparent text-foreground">
-                <div id={PREVIEW_BUTTON_ROOT_ID} className="sr-only" />
+                <div
+                    id={PREVIEW_BUTTON_ROOT_ID}
+                    className={isButtonPreview ? undefined : 'sr-only'}
+                />
                 <div className="sr-only">TON Connect widget preview</div>
             </main>
         </>

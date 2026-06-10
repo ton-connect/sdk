@@ -28,6 +28,7 @@ import {
     serializeSettingsToParams,
     type TonConnectSettingsState
 } from '../../dev-settings/utils/settings-url';
+import { appendButtonPreviewParams } from '../utils/button-preview-css';
 import {
     DEFAULT_WIDGET_BUILDER_SETTINGS,
     type WidgetBuilderSettings
@@ -522,16 +523,6 @@ function getThemeForPreview(tonSettings: TonConnectSettingsState): Theme {
     return tonSettings.theme === THEME.LIGHT ? THEME.LIGHT : THEME.DARK;
 }
 
-function getRadiusClass(radius: TonConnectSettingsState['borderRadius']): string {
-    if (radius === 'none') {
-        return 'rounded-none';
-    }
-    if (radius === 's') {
-        return 'rounded-lg';
-    }
-    return 'rounded-2xl';
-}
-
 function updateThemeColors(
     settings: TonConnectSettingsState,
     theme: Theme,
@@ -567,7 +558,7 @@ function FocusContextBanner({
 }) {
     if (!focusedBlock) {
         return (
-            <div className="mb-4 rounded-xl bg-tertiary/50 px-3 py-2 text-xs leading-5 text-secondary-foreground">
+            <div className="rounded-xl bg-tertiary/50 px-3 py-2 text-xs leading-5 text-secondary-foreground">
                 Global settings apply to all preview blocks. Use Edit on a block to override it
                 locally.
             </div>
@@ -575,7 +566,7 @@ function FocusContextBanner({
     }
 
     return (
-        <div className="mb-4 flex flex-col gap-2 rounded-xl border border-primary/30 bg-primary/10 px-3 py-2">
+        <div className="flex flex-col gap-2 rounded-xl border border-primary/30 bg-primary/10 px-3 py-2">
             <div className="flex items-start justify-between gap-2">
                 <p className="text-xs leading-5 text-foreground">
                     Editing{' '}
@@ -801,6 +792,7 @@ function ThemePanel({
                 />
                 <ToggleField
                     label="Export CSS overrides"
+                    description="Applies Width and Height to the TON Connect button in the preview and the exported CSS."
                     checked={builderSettings.cssOverridesEnabled}
                     onCheckedChange={cssOverridesEnabled =>
                         setBuilderSettings({ cssOverridesEnabled })
@@ -1615,20 +1607,17 @@ function ModalPreviewPanel({
                     {blocks.map((block, blockIndex) => {
                         const blockTonSettings = getBlockTonSettings(block.id);
                         const blockBuilderSettings = getBlockBuilderSettings(block.id);
-                        const blockColors = getPreviewColors(blockTonSettings);
-                        const blockButtonWidth = blockBuilderSettings.buttonFullWidth
-                            ? '100%'
-                            : blockBuilderSettings.buttonWidth;
-                        const blockRadiusClass = getRadiusClass(blockTonSettings.borderRadius);
-                        const blockButtonStyle = {
-                            width: blockButtonWidth,
-                            height: blockBuilderSettings.buttonHeight,
-                            background: blockColors.connectButton.background,
-                            color: blockColors.connectButton.foreground
-                        };
-                        const blockPreviewQuery = new URLSearchParams(
+                        const blockPreviewParams = new URLSearchParams(
                             serializeSettingsToParams(blockTonSettings)
-                        ).toString();
+                        );
+
+                        if (block.type === 'launcher') {
+                            // The button block renders the real TonConnect button in the
+                            // preview iframe; carry the CSS overrides along with it.
+                            appendButtonPreviewParams(blockPreviewParams, blockBuilderSettings);
+                        }
+
+                        const blockPreviewQuery = blockPreviewParams.toString();
                         const hasBlockOverrides = Boolean(blockOverrides[block.id]);
 
                         const blockFocusClassName = cn(
@@ -1734,50 +1723,27 @@ function ModalPreviewPanel({
                                     </button>
                                 </div>
 
-                                {block.type === 'launcher' ? (
-                                    <div
-                                        className={cn(
-                                            'flex h-full cursor-pointer items-center justify-center border border-tertiary/60 bg-background/70 p-4 shadow-sm',
-                                            blockRadiusClass,
-                                            blockFocusClassName
-                                        )}
-                                    >
-                                        <button
-                                            type="button"
-                                            className={cn(
-                                                'cursor-default border-0 px-4 text-sm font-semibold shadow-sm',
-                                                blockRadiusClass
-                                            )}
-                                            style={blockButtonStyle}
-                                        >
-                                            {blockBuilderSettings.buttonLabel}
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <div
-                                        className={cn(
-                                            'relative h-full overflow-hidden rounded-2xl bg-white/5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]',
-                                            blockFocusClassName
-                                        )}
-                                    >
-                                        <PreviewModalFrame
-                                            previewSettingsQuery={blockPreviewQuery}
-                                            resetToken={resetToken}
-                                            title={`${getPreviewBlockTitle(block)} preview`}
-                                            previewKind={getPreviewKind(block.type)}
-                                            previewMode={
-                                                isActionBlockType(block.type)
-                                                    ? (block.previewMode ?? 'desktop')
-                                                    : getConnectPreviewMode(block.type)
-                                            }
-                                            previewMethod={block.method}
-                                            previewSurface={
-                                                getPreviewSurface(block.type) ?? undefined
-                                            }
-                                            previewTrigger={block.trigger}
-                                        />
-                                    </div>
-                                )}
+                                <div
+                                    className={cn(
+                                        'relative h-full overflow-hidden rounded-2xl bg-white/5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]',
+                                        blockFocusClassName
+                                    )}
+                                >
+                                    <PreviewModalFrame
+                                        previewSettingsQuery={blockPreviewQuery}
+                                        resetToken={resetToken}
+                                        title={`${getPreviewBlockTitle(block)} preview`}
+                                        previewKind={getPreviewKind(block.type)}
+                                        previewMode={
+                                            isActionBlockType(block.type)
+                                                ? (block.previewMode ?? 'desktop')
+                                                : getConnectPreviewMode(block.type)
+                                        }
+                                        previewMethod={block.method}
+                                        previewSurface={getPreviewSurface(block.type) ?? undefined}
+                                        previewTrigger={block.trigger}
+                                    />
+                                </div>
                             </div>
                         );
                     })}
@@ -1990,6 +1956,17 @@ export function WidgetBuilder() {
                     </Button>
                 </div>
 
+                {/* Pinned next to the sidebar header so the edit context stays visible while
+                    the settings below scroll. */}
+                <div className="shrink-0 px-3 pt-3 sm:px-4">
+                    <FocusContextBanner
+                        focusedBlock={focusedBlock}
+                        hasOverrides={focusedBlockHasOverrides}
+                        onClearOverrides={clearFocusedBlockOverrides}
+                        onClearFocus={() => handleFocusBlock(null)}
+                    />
+                </div>
+
                 <Tabs
                     value={activeTab}
                     onValueChange={value => setActiveTab(value as BuilderTab)}
@@ -2008,12 +1985,6 @@ export function WidgetBuilder() {
                     </Tabs.List>
 
                     <div className="min-h-0 flex-1 overflow-y-auto px-3 py-3 sm:px-4 sm:py-4">
-                        <FocusContextBanner
-                            focusedBlock={focusedBlock}
-                            hasOverrides={focusedBlockHasOverrides}
-                            onClearOverrides={clearFocusedBlockOverrides}
-                            onClearFocus={() => handleFocusBlock(null)}
-                        />
                         <Tabs.Content value="theme">
                             <ThemePanel
                                 tonSettings={editingTonSettings}

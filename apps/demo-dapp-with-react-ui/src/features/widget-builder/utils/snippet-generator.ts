@@ -23,18 +23,31 @@ function getWidgetOptions(tonConnectSettings: TonConnectSettingsState) {
     };
 }
 
+/** Shared between the CSS export and the live button preview, so they never diverge. */
+export function buildConnectButtonCss(params: {
+    width: number;
+    height: number;
+    fullWidth: boolean;
+}): string {
+    const width = params.fullWidth ? '100%' : `${params.width}px`;
+
+    return `[data-tc-connect-button="true"] {
+  width: ${width};
+  min-width: ${width};
+  height: ${params.height}px;
+}`;
+}
+
 function getButtonCss(builderSettings: WidgetBuilderSettings): string {
     if (!builderSettings.cssOverridesEnabled) {
         return '';
     }
 
-    const width = builderSettings.buttonFullWidth ? '100%' : `${builderSettings.buttonWidth}px`;
-
-    return `[data-tc-connect-button="true"] {
-  width: ${width};
-  min-width: ${width};
-  height: ${builderSettings.buttonHeight}px;
-}`;
+    return buildConnectButtonCss({
+        width: builderSettings.buttonWidth,
+        height: builderSettings.buttonHeight,
+        fullWidth: builderSettings.buttonFullWidth
+    });
 }
 
 export function generateCssSnippet(builderSettings: WidgetBuilderSettings): string {

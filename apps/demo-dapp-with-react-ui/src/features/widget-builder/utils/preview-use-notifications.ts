@@ -1,10 +1,12 @@
-// @ts-nocheck
 /**
- * Demo-only patch of @tonconnect/ui use-notifications.
+ * Demo-only replacement of the @tonconnect/ui `use-notifications` hook, swapped in by the
+ * `widget-preview-ui-overrides` vite plugin (see vite.config.ts) so the real notifications
+ * view from @tonconnect/ui can be used as-is.
  * Single-slot toasts: at most one notification in the list, replaced atomically on update.
  */
-import { Accessor, createEffect, createSignal, on, onCleanup } from 'solid-js';
-import { Action, action, isConfirmAction } from 'src/app/state/modals-state';
+import type { Accessor } from 'solid-js';
+import { createEffect, createSignal, on, onCleanup } from 'solid-js';
+import { action, isConfirmAction, type Action } from 'src/app/state/modals-state';
 
 type Notification = {
     action: Action;
@@ -16,9 +18,8 @@ export type UseOpenedNotificationsConfig = {
     timeout?: number;
 };
 
-const defaultConfig: UseOpenedNotificationsConfig = {
-    timeout: 9999999999
-};
+/** Preview toasts never auto-dismiss: they live until the preview replaces or clears them. */
+const PREVIEW_NOTIFICATION_NO_TIMEOUT = Number.POSITIVE_INFINITY;
 
 const [latestAction, setLatestAction] = createSignal<Action | null>(null);
 const [openedNotifications, setOpenedNotifications] = createSignal<Notification[]>([]);
@@ -46,6 +47,11 @@ function showSingleNotification(nextAction: Action, timeout: number): void {
     const notification: Notification = { action: nextAction };
     setOpenedNotifications([notification]);
 
+    if (!Number.isFinite(timeout)) {
+        // No auto-dismiss: skip scheduling entirely (large delays overflow setTimeout).
+        return;
+    }
+
     const timeoutId = setTimeout(() => {
         setOpenedNotifications(current => (current[0] === notification ? [] : current));
         setTimeoutIds(ids => ids.filter(id => id !== timeoutId));
@@ -56,7 +62,7 @@ function showSingleNotification(nextAction: Action, timeout: number): void {
 export function useOpenedNotifications(
     config?: UseOpenedNotificationsConfig
 ): UseOpenedNotifications {
-    const { timeout } = { ...defaultConfig, ...config };
+    const timeout = config?.timeout ?? PREVIEW_NOTIFICATION_NO_TIMEOUT;
 
     createEffect(
         on(action, (nextAction: Action | null): void => {

@@ -1,4 +1,4 @@
-export type PreviewKind = 'connect' | 'action';
+export type PreviewKind = 'connect' | 'action' | 'button';
 export type PreviewMode = 'desktop' | 'mobile';
 export type PreviewMethod = 'sendTransaction' | 'signData' | 'signMessage';
 export type PreviewSurface = 'modal' | 'notification';
@@ -31,22 +31,6 @@ const ACTION_RESULT_MODAL_SIZE_DESKTOP: PreviewFrameSize = { width: 500, height:
 const ACTION_CONFIRM_MODAL_SIZE_MOBILE: PreviewFrameSize = { width: 380, height: 400 };
 const ACTION_RESULT_MODAL_SIZE_MOBILE: PreviewFrameSize = { width: 380, height: 280 };
 const NOTIFICATION_SIZE: PreviewFrameSize = { width: 280, height: 140 };
-
-/** Matches `useOpenedNotifications` default timeout in @tonconnect/ui. */
-export const NOTIFICATION_AUTO_DISMISS_MS = 4500;
-
-/** Matches exit transition duration in notifications/index.tsx. */
-export const NOTIFICATION_EXIT_ANIMATION_MS = 200;
-
-/**
- * Refresh the preview toast shortly before SDK auto-dismiss (before exit animation).
- * Buffer covers async preview apply latency so the replacement is visible in time.
- */
-/** Time to apply the next toast before SDK removes the previous one. */
-export const PREVIEW_NOTIFICATION_REFRESH_BUFFER_MS = 300;
-
-export const PREVIEW_NOTIFICATION_KEEPALIVE_MS =
-    NOTIFICATION_AUTO_DISMISS_MS - PREVIEW_NOTIFICATION_REFRESH_BUFFER_MS;
 
 export const PREVIEW_BLOCK_TYPES = new Set<PreviewBlockType>([
     'launcher',
@@ -103,6 +87,10 @@ export function getPreviewFrameSize(
 }
 
 export function getPreviewKind(type: PreviewBlockType): PreviewKind {
+    if (type === 'launcher') {
+        return 'button';
+    }
+
     return isActionBlockType(type) ? 'action' : 'connect';
 }
 
@@ -171,12 +159,19 @@ export function getActionPreviewReadySelector(
     return selectors[method][trigger];
 }
 
+/** The real TonConnect button rendered by @tonconnect/ui into `buttonRootId`. */
+export const PREVIEW_CONNECT_BUTTON_SELECTOR = '[data-tc-connect-button="true"]';
+
 export function getPreviewReadySelector(
     previewKind: PreviewKind,
     previewSurface: PreviewSurface | null,
     method?: PreviewMethod,
     trigger?: PreviewTrigger
 ): string {
+    if (previewKind === 'button') {
+        return PREVIEW_CONNECT_BUTTON_SELECTOR;
+    }
+
     if (previewKind === 'connect') {
         return '[data-tc-modal="true"]';
     }

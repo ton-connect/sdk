@@ -12,10 +12,7 @@ import { defaultPayloadFor } from '../../signing/components/sign-data/utils/payl
 import { buildDefaultSignMessage } from '../../transactions/components/sign-message/utils/sign-message-presets';
 import { buildDefaultTx } from '../../transactions/components/send-transaction/utils/transaction-presets';
 import { resetPreviewActionUi } from './preview-mocks';
-import {
-    prepareBeforeNotificationRefresh,
-    resetNotificationPreviewDedupe
-} from './preview-notification-state';
+import { resetNotificationPreviewDedupe } from './preview-notification-state';
 import type { PreviewMethod, PreviewSurface, PreviewTrigger } from './preview-types';
 
 const MOCK_SEND_TRANSACTION_RESULT: SendTransactionResponse = {
@@ -113,15 +110,11 @@ export async function applyPreviewAction(
         method: PreviewMethod;
         surface: PreviewSurface;
         trigger: PreviewTrigger;
-        resetUi?: boolean;
-        skipNotificationGuard?: boolean;
     }
 ): Promise<() => void> {
-    if (params.resetUi !== false) {
-        await resetPreviewActionUi(tonConnectUI);
-    }
+    await resetPreviewActionUi(tonConnectUI);
 
-    if (params.surface === 'notification' && params.skipNotificationGuard !== true) {
+    if (params.surface === 'notification') {
         await resetNotificationPreviewDedupe();
     }
 
@@ -158,37 +151,6 @@ export async function applyPreviewAction(
             cleanup();
         }
     }
-
-    return cleanup;
-}
-
-/** Re-shows a hanging "before" notification without disconnecting the mock wallet. */
-export async function refreshBeforeNotificationPreview(
-    tonConnectUI: TonConnectUI,
-    params: {
-        method: PreviewMethod;
-        skipNotificationGuard?: boolean;
-    }
-): Promise<() => void> {
-    if (params.skipNotificationGuard !== true) {
-        await prepareBeforeNotificationRefresh(tonConnectUI);
-    }
-
-    const cleanup = installPreviewRequestMocks(tonConnectUI.connector, params.method, 'before');
-
-    const actionOptions = buildActionOptions('notification', 'before');
-
-    const runAction = async () => {
-        if (params.method === 'sendTransaction') {
-            await tonConnectUI.sendTransaction(buildDefaultTx(), actionOptions);
-        } else if (params.method === 'signData') {
-            await tonConnectUI.signData(defaultPayloadFor('text'), actionOptions);
-        } else {
-            await tonConnectUI.signMessage(buildDefaultSignMessage(), actionOptions);
-        }
-    };
-
-    void runAction().catch(() => {});
 
     return cleanup;
 }

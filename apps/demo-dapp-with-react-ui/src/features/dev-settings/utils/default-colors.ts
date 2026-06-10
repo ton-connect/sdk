@@ -1,67 +1,13 @@
 import type { ColorsSet, Theme } from '@tonconnect/ui-react';
 import { THEME } from '@tonconnect/ui-react';
+// Default palettes come straight from the @tonconnect/ui source
+// (resolved by the shared `src/*` alias in vite.config.ts / tsconfig paths),
+// so the demo never drifts from the real widget defaults.
+import { defaultDarkColorsSet, defaultLightColorsSet } from 'src/app/styles/default-colors';
 
 export const DEFAULT_COLORS_SET: Record<typeof THEME.LIGHT | typeof THEME.DARK, ColorsSet> = {
-    [THEME.LIGHT]: {
-        constant: {
-            black: '#000000',
-            white: '#FFFFFF'
-        },
-        connectButton: {
-            background: '#0098EA',
-            foreground: '#FFFFFF'
-        },
-        accent: '#0098EA',
-        telegramButton: '#0098EA',
-        icon: {
-            primary: '#0F0F0F',
-            secondary: '#7A8999',
-            tertiary: '#C1CAD2',
-            success: '#29CC6A',
-            error: '#F5A73B'
-        },
-        background: {
-            primary: '#FFFFFF',
-            secondary: '#F1F3F5',
-            segment: '#FFFFFF',
-            tint: '#F1F3F5',
-            qr: '#F1F3F5'
-        },
-        text: {
-            primary: '#0F0F0F',
-            secondary: '#6A7785'
-        }
-    },
-    [THEME.DARK]: {
-        constant: {
-            black: '#000000',
-            white: '#FFFFFF'
-        },
-        connectButton: {
-            background: '#0098EA',
-            foreground: '#FFFFFF'
-        },
-        accent: '#E5E5EA',
-        telegramButton: '#31A6F5',
-        icon: {
-            primary: '#E5E5EA',
-            secondary: '#909099',
-            tertiary: '#434347',
-            success: '#29CC6A',
-            error: '#F5A73B'
-        },
-        background: {
-            primary: '#121214',
-            secondary: '#18181A',
-            segment: '#262629',
-            tint: '#222224',
-            qr: '#F1F3F5'
-        },
-        text: {
-            primary: '#E5E5EA',
-            secondary: '#7D7D85'
-        }
-    }
+    [THEME.LIGHT]: defaultLightColorsSet,
+    [THEME.DARK]: defaultDarkColorsSet
 };
 
 export function getDefaultColorsForTheme(theme: Theme): ColorsSet {

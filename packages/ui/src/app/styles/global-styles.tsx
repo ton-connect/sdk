@@ -1,3 +1,4 @@
+/** @jsxImportSource solid-js */
 import { JSXElement } from 'solid-js';
 import { createGlobalStyles } from 'solid-styled-components';
 
