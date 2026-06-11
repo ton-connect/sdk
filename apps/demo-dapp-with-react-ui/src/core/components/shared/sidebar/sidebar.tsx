@@ -267,7 +267,7 @@ const SidebarTooltip = ({
         <span
             data-slot="sidebar-tooltip"
             className={cn(
-                'pointer-events-none absolute left-[calc(100%+0.75rem)] top-1/2 z-50 hidden -translate-y-1/2 whitespace-nowrap rounded-xl border border-tertiary bg-background px-3 py-2 text-sm font-semibold text-foreground shadow-xl group-hover:block group-focus-within:block',
+                'pointer-events-none absolute left-[calc(100%+0.75rem)] top-1/2 z-50 hidden -translate-y-1/2 whitespace-nowrap rounded-xl border border-tertiary bg-background px-3 py-2 text-sm font-semibold text-foreground shadow-xl group-hover:block group-has-[:focus-visible]:block',
                 className
             )}
             {...props}
