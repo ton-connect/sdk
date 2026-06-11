@@ -44,6 +44,34 @@ export class InjectedProvider<T extends string = string> implements InternalProv
         return InjectedProvider.isWindowContainsWallet(this.window, injectedWalletKey);
     }
 
+    /**
+     * Waits until the wallet's JS bridge appears in `window`.
+     * Browser extensions (MV3 content scripts) may inject their bridge after the dapp
+     * code has already started, so a one-shot check at connection restore time produces
+     * false negatives and must not be treated as "wallet is not installed".
+     * @returns true if the wallet is injected before the timeout, false otherwise.
+     */
+    public static async waitForWalletInjection(
+        injectedWalletKey: string,
+        options?: { timeoutMs?: number; intervalMs?: number; signal?: AbortSignal }
+    ): Promise<boolean> {
+        const timeoutMs = options?.timeoutMs ?? 5_000;
+        const intervalMs = options?.intervalMs ?? 100;
+        const startTime = Date.now();
+
+        while (Date.now() - startTime < timeoutMs) {
+            if (options?.signal?.aborted) {
+                return false;
+            }
+            if (InjectedProvider.isWalletInjected(injectedWalletKey)) {
+                return true;
+            }
+            await new Promise<void>(resolve => setTimeout(resolve, intervalMs));
+        }
+
+        return InjectedProvider.isWalletInjected(injectedWalletKey);
+    }
+
     public static isInsideWalletBrowser(injectedWalletKey: string): boolean {
         if (InjectedProvider.isWindowContainsWallet(this.window, injectedWalletKey)) {
             return this.window[injectedWalletKey]!.tonconnect.isWalletBrowser;
