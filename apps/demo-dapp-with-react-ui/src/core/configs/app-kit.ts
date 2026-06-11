@@ -13,7 +13,9 @@ initializeWalletConnect(UniversalConnector, {
     }
 });
 
-export const tonConnectManifestUrl =
-    'https://tonconnect-sdk-demo-dapp.vercel.app/tonconnect-manifest.json';
+// TODO: temporary for the injected-restore repro stand — use the manifest of the
+// current deployment (vercel preview) instead of the prod one, otherwise wallets
+// block the connection as phishing (manifest url mismatch). Revert before merge.
+export const tonConnectManifestUrl = `${window.location.origin}/tonconnect-manifest.json`;
 
 export const tonConnectUiPreferences = { theme: THEME.DARK } as const;
