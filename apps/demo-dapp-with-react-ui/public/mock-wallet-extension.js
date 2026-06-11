@@ -11,6 +11,11 @@
  *                         restoreConnection runs first, InjectedProvider constructor throws
  *                         WalletNotInjectedError and the SDK wipes the stored session)
  *
+ *   ?delay_keys=mytonwallet - real extension bridge keys to delay by the same amount
+ *                         (default: mytonwallet). When delay > 0 the real wallet's
+ *                         window.<key> is hidden/trapped and released after the delay,
+ *                         so the race reproduces with a REAL wallet session too.
+ *
  * The delay persists in localStorage, so a plain F5 keeps the current mode.
  * The panel at the bottom-left shows a timeline of: injection moment, every
  * read/write/remove of the TonConnect session key, and current state.
@@ -21,6 +26,7 @@
     var JS_BRIDGE_KEY = 'mocktonwallet';
     var STATE_KEY = 'mock-wallet-extension_connected';
     var DELAY_KEY = 'mock-wallet-extension_inject-delay';
+    var DELAY_KEYS_KEY = 'mock-wallet-extension_delayed-real-keys';
     var EVENT_ID_KEY = 'mock-wallet-extension_event-id';
     var TC_STORAGE_KEY = 'ton-connect-storage_bridge-connection';
 
@@ -39,6 +45,28 @@
     } else {
         delay = parseInt(localStorage.getItem(DELAY_KEY) || '0', 10) || 0;
     }
+
+    // Real extension bridge keys whose injection we artificially delay by the same
+    // inject_delay, to reproduce the race with a REAL wallet (?delay_keys=a,b to override).
+    var delayedRealKeys;
+    if (params.has('delay_keys')) {
+        delayedRealKeys = params.get('delay_keys');
+        try {
+            localStorage.setItem(DELAY_KEYS_KEY, delayedRealKeys);
+        } catch (e) {
+            /* ignore */
+        }
+    } else {
+        delayedRealKeys = localStorage.getItem(DELAY_KEYS_KEY) || 'mytonwallet';
+    }
+    delayedRealKeys = delayedRealKeys
+        .split(',')
+        .map(function (s) {
+            return s.trim();
+        })
+        .filter(function (s) {
+            return s && s !== JS_BRIDGE_KEY;
+        });
 
     /* ------------------------------------------------------------------ */
     /* Logging + panel                                                     */
@@ -224,12 +252,59 @@
         log('💉 injected window.' + JS_BRIDGE_KEY + ' (delay=' + delay + 'ms)');
     }
 
-    log('mock extension script evaluated, inject_delay=' + delay + 'ms, wallet state: ' + (isConnected() ? 'connected' : 'not connected') + ', stored tc session: ' + (localStorage.getItem(TC_STORAGE_KEY) ? 'present' : 'absent'));
+    /* ------------------------------------------------------------------ */
+    /* Delay injection of REAL extensions (e.g. MyTonWallet)               */
+    /* ------------------------------------------------------------------ */
+    /* A real wallet content script injects window.<key> at document_start,
+       i.e. always before the app bundle — so the race never happens with it.
+       To reproduce the bug with a real wallet we hide its bridge object (if it
+       is already injected) or trap the upcoming assignment, and release it
+       only after inject_delay — emulating a slow MV3 service worker start. */
+    function delayRealWallet(key) {
+        var held;
+        if (Object.prototype.hasOwnProperty.call(window, key) && window[key] !== undefined) {
+            held = window[key];
+            try {
+                delete window[key];
+            } catch (e) {
+                log('⚠️ cannot hide window.' + key + ' (non-configurable), real-wallet delay skipped');
+                return;
+            }
+            log('🪤 window.' + key + ' was already injected — hidden for ' + delay + 'ms');
+        }
+        try {
+            Object.defineProperty(window, key, {
+                configurable: true,
+                get: function () {
+                    return undefined;
+                },
+                set: function (v) {
+                    held = v;
+                    log('🪤 trapped real extension assigning window.' + key + ' — held until +' + delay + 'ms');
+                }
+            });
+        } catch (e) {
+            log('⚠️ cannot trap window.' + key + ': ' + e);
+            return;
+        }
+        setTimeout(function () {
+            delete window[key];
+            if (held !== undefined) {
+                window[key] = held;
+                log('💉 released window.' + key + ' (delay=' + delay + 'ms)');
+            } else {
+                log('trap for window.' + key + ' removed (extension has not injected it)');
+            }
+        }, delay);
+    }
+
+    log('mock extension script evaluated, inject_delay=' + delay + 'ms, wallet state: ' + (isConnected() ? 'connected' : 'not connected') + ', stored tc session: ' + (localStorage.getItem(TC_STORAGE_KEY) ? 'present' : 'absent') + (delayedRealKeys.length ? ', delaying real keys: ' + delayedRealKeys.join(', ') : ''));
 
     if (delay === 0) {
         inject(); // synchronous: guaranteed to beat the app bundle (control case)
     } else {
         setTimeout(inject, delay);
+        delayedRealKeys.forEach(delayRealWallet);
     }
 
     /* ------------------------------------------------------------------ */
@@ -274,7 +349,8 @@
             '<b style="color:#a78bfa">MOCK WALLET EXTENSION</b> &nbsp; key=<code>' + JS_BRIDGE_KEY + '</code><br>' +
             'inject delay: <b>' + delay + 'ms</b> &nbsp; injected: <b style="color:' + (injected ? '#4ade80' : '#f87171') + '">' + injected + '</b> &nbsp; ' +
             'wallet side: <b style="color:' + (isConnected() ? '#4ade80' : '#f87171') + '">' + (isConnected() ? 'connected' : 'not connected') + '</b> &nbsp; ' +
-            'tc session in storage: <b style="color:' + (sessionStored ? '#4ade80' : '#f87171') + '">' + (sessionStored ? 'present' : 'ABSENT') + '</b>';
+            'tc session in storage: <b style="color:' + (sessionStored ? '#4ade80' : '#f87171') + '">' + (sessionStored ? 'present' : 'ABSENT') + '</b>' +
+            (delayedRealKeys.length ? '<br>real keys delayed (when delay&gt;0): <code>' + delayedRealKeys.join(', ') + '</code>' : '');
 
         var buttons =
             '<div style="margin:6px 0">' +
