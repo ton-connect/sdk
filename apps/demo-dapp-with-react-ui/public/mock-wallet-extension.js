@@ -284,6 +284,7 @@
                     return '<button data-delay="' + ms + '" style="margin-right:4px;background:' + (ms === delay ? '#5b21b6' : '#2d2440') + ';color:#fff;border:1px solid #5b21b6;border-radius:4px;padding:1px 8px;cursor:pointer">' + ms + 'ms</button>';
                 })
                 .join('') +
+            '<button data-seed="1" style="margin-left:8px;background:#14532d;color:#fff;border:1px solid #16a34a;border-radius:4px;padding:1px 8px;cursor:pointer">seed mock session</button>' +
             '<button data-reset="1" style="margin-left:8px;background:#7f1d1d;color:#fff;border:1px solid #b91c1c;border-radius:4px;padding:1px 8px;cursor:pointer">reset all</button>' +
             '</div>';
 
@@ -295,6 +296,20 @@
                 setDelayAndReload(parseInt(btn.getAttribute('data-delay'), 10));
             };
         });
+        var seedBtn = panel.querySelector('button[data-seed]');
+        if (seedBtn) {
+            seedBtn.onclick = function () {
+                // emulate "wallet was connected before reload": wallet-side flag +
+                // a stored TonConnect injected session pointing to the mock bridge key
+                setConnected(true);
+                origSetItem.call(
+                    localStorage,
+                    TC_STORAGE_KEY,
+                    JSON.stringify({ type: 'injected', jsBridgeKey: JS_BRIDGE_KEY, nextRpcRequestId: 0 })
+                );
+                location.reload();
+            };
+        }
         var resetBtn = panel.querySelector('button[data-reset]');
         if (resetBtn) {
             resetBtn.onclick = function () {
