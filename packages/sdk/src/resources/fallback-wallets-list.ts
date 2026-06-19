@@ -59,9 +59,9 @@ export const FALLBACK_WALLETS_LIST: WalletInfoDTO[] = [
     },
     {
         app_name: 'mytonwallet',
-        name: 'MyTonWallet',
-        image: 'https://static.mytonwallet.io/icon-256.png',
-        about_url: 'https://mytonwallet.io',
+        name: 'My Wallet',
+        image: 'https://config.ton.org/assets/mytonwallet.png',
+        about_url: 'https://mywallet.io',
         universal_url: 'https://connect.mytonwallet.org',
         deepLink: 'mytonwallet-tc://',
         bridge: [
