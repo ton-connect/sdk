@@ -27,6 +27,36 @@ export const FALLBACK_WALLETS_LIST: WalletInfoDTO[] = [
         ]
     },
     {
+        app_name: 'gramwallet',
+        name: 'Gram Wallet',
+        image: 'https://config.ton.org/assets/gramwallet.png',
+        about_url: 'https://gramwallet.io',
+        universal_url: 'https://connect.gramwallet.io',
+        deepLink: 'gramwallet-tc://',
+        bridge: [
+            {
+                type: 'js',
+                key: 'gramwallet'
+            },
+            {
+                type: 'sse',
+                url: 'https://tonconnectbridge.mytonwallet.org/bridge/'
+            }
+        ],
+        platforms: ['ios', 'android'],
+        features: [
+            {
+                name: 'SendTransaction',
+                maxMessages: 255,
+                extraCurrencySupported: false
+            },
+            {
+                name: 'SignData',
+                types: ['text', 'binary', 'cell']
+            }
+        ]
+    },
+    {
         app_name: 'tonkeeper',
         name: 'Tonkeeper',
         image: 'https://tonkeeper.com/assets/tonconnect-icon.png',
