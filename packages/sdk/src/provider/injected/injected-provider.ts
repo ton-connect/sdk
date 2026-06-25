@@ -118,8 +118,8 @@ export class InjectedProvider<T extends string = string> implements InternalProv
         if (analyticsManager) {
             this.analytics = analyticsManager.scoped({
                 bridge_key: injectedWalletKey,
-                wallet_app_name: this.injectedWallet.deviceInfo.appName,
-                wallet_app_version: this.injectedWallet.deviceInfo.appVersion
+                wallet_app_name: this.injectedWallet.deviceInfo?.appName ?? '',
+                wallet_app_version: this.injectedWallet.deviceInfo?.appVersion ?? ''
             });
         }
     }
