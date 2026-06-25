@@ -14,7 +14,13 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      // Mirrors the vite `src/*` alias: lets the demo import @tonconnect/ui internals
+      // from source instead of keeping copies (see vite.config.ts).
+      "src/*": ["../../packages/ui/src/*"]
+    }
   },
   "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]

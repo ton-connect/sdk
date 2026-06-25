@@ -11,6 +11,7 @@ export {
     SidebarMenuItem,
     SidebarProvider,
     SidebarSeparator,
+    SidebarTooltip,
     SidebarTrigger,
     useSidebar
 } from './sidebar';
