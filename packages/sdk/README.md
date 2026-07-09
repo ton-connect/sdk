@@ -55,7 +55,7 @@ App needs to have its manifest to pass meta information to the wallet. Manifest 
 Best practice is to place the manifest in the root of your app, e.g. `https://myapp.com/tonconnect-manifest.json`. It allows the wallet to handle your app better and improve the UX connected to your app.
 Make sure that manifest is available to GET by its URL.
 
-[See details](https://docs.ton.org/develop/dapps/ton-connect/protocol/requests-responses#app-manifest)
+[See details](https://docs.ton.org/applications/ton-connect/core-concepts#manifest)
 
 If your manifest placed not in the root of your app, you can specify its path:
 ```ts
