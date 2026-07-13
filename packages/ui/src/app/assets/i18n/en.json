@@ -55,7 +55,7 @@
     "walletOn": "Wallet in",
     "recent": "Recent",
     "installed": "Installed",
-    "popular": "Popular"
+    "new": "New"
   },
   "walletModal": {
     "loading": "Loading wallets",

@@ -28,8 +28,8 @@ export const WalletLabeledItem: Component<WalletLabeledItemProps> = props => {
         if ('isPreferred' in props.wallet && props.wallet.isPreferred) {
             return t('walletItem.recent', {}, 'Recent');
         }
-        if (props.wallet.name === 'Tonkeeper') {
-            return t('walletItem.popular', {}, 'Popular');
+        if (props.wallet.appName === 'gramwallet') {
+            return t('walletItem.new', {}, 'New');
         }
 
         if (isWalletUi(props.wallet) && isWalletInfoCurrentlyInjected(props.wallet)) {
