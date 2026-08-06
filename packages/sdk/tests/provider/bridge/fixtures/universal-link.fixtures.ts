@@ -49,6 +49,12 @@ export interface UniversalLinkCase {
     connectRequest: ConnectRequest;
     /** null → connect-only (no embeddedRequest / no req param). */
     txRequest: SendTransactionRequest | null;
+    /**
+     * Payload too large to fit the embedded request into the universal link.
+     * BridgeProvider detects this and retries connect-only, so the overflow is
+     * expected rather than a defect.
+     */
+    exceedsMaxUrlLength?: true;
 }
 
 // ── Test cases ────────────────────────────────────────────────────────────────
@@ -58,6 +64,7 @@ export const CASES: UniversalLinkCase[] = [
 
     {
         label: '2 jetton transfers (items)',
+        exceedsMaxUrlLength: true,
         universalLink: STANDARD_LINK,
         sessionId: SESSION_ID,
         traceId: TRACE_ID,
@@ -241,6 +248,7 @@ export const CASES: UniversalLinkCase[] = [
     },
     {
         label: 'Telegram attach link — TON + jetton transfer (items)',
+        exceedsMaxUrlLength: true,
         universalLink: TG_ATTACH_LINK,
         sessionId: SESSION_ID,
         traceId: TRACE_ID,
@@ -263,6 +271,7 @@ export const CASES: UniversalLinkCase[] = [
     },
     {
         label: 'Telegram attach link — 2 jetton transfers (items)',
+        exceedsMaxUrlLength: true,
         universalLink: TG_ATTACH_LINK,
         sessionId: SESSION_ID,
         traceId: TRACE_ID,

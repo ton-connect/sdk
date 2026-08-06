@@ -135,10 +135,12 @@ try {
         let userRaw = initData.user;
         if (userRaw) {
             let user = JSON.parse(userRaw);
-            if (typeof user.id === 'number' && typeof user.is_premium === 'boolean') {
+            // Telegram omits is_premium entirely for non-premium users, so it cannot
+            // be required here without dropping most of the audience.
+            if (typeof user.id === 'number') {
                 telegramUser = {
                     id: user.id,
-                    isPremium: user.is_premium
+                    isPremium: user.is_premium === true
                 };
             }
         }
