@@ -1,5 +1,15 @@
 # Changelog @tonconnect/ui
 
+## 3.0.2
+
+### Patch Changes
+
+- 3760b0c: Report the Telegram user for non-premium accounts. `getTgUser` required `is_premium` to
+  be a boolean, but Telegram omits the field unless the user has Premium, so every other user was
+  reported as absent.
+- Updated dependencies [3760b0c]
+    - @tonconnect/sdk@4.0.2
+
 ## 3.0.1
 
 ### Patch Changes

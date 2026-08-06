@@ -1,5 +1,12 @@
 # Changelog @tonconnect/ui-react
 
+## 3.0.2
+
+### Patch Changes
+
+- Updated dependencies [3760b0c]
+    - @tonconnect/ui@3.0.2
+
 ## 3.0.1
 
 ### Patch Changes

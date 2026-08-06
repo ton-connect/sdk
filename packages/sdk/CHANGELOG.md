@@ -1,5 +1,13 @@
 # Changelog @tonconnect/sdk
 
+## 4.0.2
+
+### Patch Changes
+
+- 3760b0c: Reject unknown properties inside the `proof` object of a `ton_proof` connect item. The
+  check already existed for the item itself and for its `error` object, so `proof` was the one level
+  that let extras through.
+
 ## 4.0.1
 
 ### Patch Changes
