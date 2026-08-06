@@ -1,5 +1,12 @@
 # Changelog @tonconnect/sdk
 
+## 4.0.1
+
+### Patch Changes
+
+- Sync the bundled fallback wallets list with the live registry: add Gram Wallet, and rename
+  MyTonWallet to My Wallet with its current icon and site.
+
 ## 4.0.0
 
 ### Major Changes

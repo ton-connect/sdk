@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui
 
+## 3.0.1
+
+### Patch Changes
+
+- Replace the Tonkeeper "Popular" badge in the wallet list with a "New" badge on Gram Wallet. The
+  `walletItem.popular` translation key is replaced by `walletItem.new`.
+- Updated dependencies
+    - @tonconnect/sdk@4.0.1
+
 ## 3.0.0
 
 ### Major Changes
