@@ -69,12 +69,12 @@ export const PRESETS: readonly PresetDescriptor[] = [
     {
         id: 'default-tx',
         name: 'Single message',
-        description: 'One TON transfer with payload + stateInit (echo contract).'
+        description: 'One GRAM transfer with payload + stateInit (echo contract).'
     },
     {
         id: 'items-tx',
-        name: 'Items: TON + Jetton',
-        description: 'Items-shaped request combining a TON transfer and a Jetton transfer.'
+        name: 'Items: GRAM + Jetton',
+        description: 'Items-shaped request combining a GRAM transfer and a Jetton transfer.'
     },
     {
         id: 'nft-items-tx',

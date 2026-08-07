@@ -20,7 +20,7 @@ const formatBalance = (nano: bigint): string => {
 };
 
 /**
- * Sidebar tile shown when a wallet is connected: TON balance, truncated
+ * Sidebar tile shown when a wallet is connected: GRAM balance, truncated
  * address with copy, a Details button that opens the {@link WalletInfo} modal,
  * and an external Tonviewer link. Hidden entirely when no wallet is connected.
  */
@@ -60,7 +60,7 @@ export const BalanceCard = () => {
                                 : '0'}
                         </span>
                     )}
-                    <span className="text-base font-medium text-tertiary-foreground">TON</span>
+                    <span className="text-base font-medium text-tertiary-foreground">GRAM</span>
                 </div>
 
                 <div className="mt-3 flex items-center gap-1.5">

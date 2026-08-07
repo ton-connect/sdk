@@ -27,7 +27,7 @@ export function validateCreateJettonRequest(value: unknown): string[] {
     if (typeof amount === 'string' && amount.length > 0) {
         if (!POSITIVE_AMOUNT_PATTERN.test(amount)) {
             issues.push(
-                'amount: must be a positive integer string in nanotons (no sign or decimals)'
+                'amount: must be a positive integer string in nanograms (no sign or decimals)'
             );
         } else if (BigInt(amount) === 0n) {
             issues.push('amount: must be greater than zero');

@@ -10,7 +10,7 @@
  */
 export type RpcStructuredItem = RpcTonItem | RpcJettonItem | RpcNftItem;
 
-/** Native TON transfer in RPC wire form. */
+/** Native GRAM (formerly TON) transfer in RPC wire form. */
 export interface RpcTonItem {
     /** Item discriminator. */
     type: 'ton';
@@ -36,13 +36,13 @@ export interface RpcJettonItem {
     destination: string;
     /** Jetton amount in elementary units (decimal string). */
     amount: string;
-    /** TON value to attach for transfer execution; wallet picks a default when omitted. */
+    /** GRAM value to attach for transfer execution; wallet picks a default when omitted. */
     attachAmount?: string;
-    /** Where to refund excess TON. Defaults to the sender. */
+    /** Where to refund excess GRAM. Defaults to the sender. */
     responseDestination?: string;
     /** Raw one-cell BoC `custom_payload`, base64-encoded. */
     customPayload?: string;
-    /** Nanocoins forwarded to the destination wallet. Defaults to `"1"` nanoTON. */
+    /** Nanocoins forwarded to the destination wallet. Defaults to `"1"` nanogram. */
     forwardAmount?: string;
     /** Raw one-cell BoC `forward_payload`, base64-encoded. */
     forwardPayload?: string;
@@ -58,13 +58,13 @@ export interface RpcNftItem {
     nftAddress: string;
     /** New owner address. */
     newOwner: string;
-    /** TON value to attach for transfer execution; wallet picks a default when omitted. */
+    /** GRAM value to attach for transfer execution; wallet picks a default when omitted. */
     attachAmount?: string;
-    /** Where to refund excess TON. Defaults to the sender. */
+    /** Where to refund excess GRAM. Defaults to the sender. */
     responseDestination?: string;
     /** Raw one-cell BoC `custom_payload`, base64-encoded. */
     customPayload?: string;
-    /** Nanocoins forwarded to the new owner. Defaults to `"1"` nanoTON. */
+    /** Nanocoins forwarded to the new owner. Defaults to `"1"` nanogram. */
     forwardAmount?: string;
     /** Raw one-cell BoC `forward_payload`, base64-encoded. */
     forwardPayload?: string;

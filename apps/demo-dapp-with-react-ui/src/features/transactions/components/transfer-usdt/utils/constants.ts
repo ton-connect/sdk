@@ -13,7 +13,7 @@ export const USDT_MASTER_BY_CHAIN: Record<CHAIN, Address> = {
 export const USDT_DECIMALS = 6;
 export const USDT_TICKER = 'USDT';
 
-export const TON_TICKER = 'TON';
+export const TON_TICKER = 'GRAM';
 
 export const FORWARD_AMOUNT_TON = '0.001';
 export const ATTACHED_AMOUNT_TON = '0.05';
