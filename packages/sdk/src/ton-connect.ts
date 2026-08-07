@@ -488,12 +488,29 @@ export class TonConnect implements ITonConnect {
                         this.analytics
                     );
                     break;
-                case 'injected':
+                case 'injected': {
+                    // The wallet extension may inject its JS bridge after the dapp code has
+                    // already started (e.g. MV3 service worker cold start), so wait for the
+                    // bridge to appear instead of failing immediately and wiping the stored
+                    // session on the very first attempt.
+                    const { jsBridgeKey } =
+                        await this.bridgeConnectionStorage.getInjectedConnection();
+                    await InjectedProvider.waitForWalletInjection(jsBridgeKey, {
+                        signal: abortController.signal
+                    });
+                    if (abortController.signal.aborted) {
+                        this.tracker.trackConnectionRestoringError(
+                            'Connection restoring was aborted',
+                            traceId
+                        );
+                        return;
+                    }
                     provider = await InjectedProvider.fromStorage(
                         this.bridgeConnectionStorage,
                         this.analytics
                     );
                     break;
+                }
                 case 'wallet-connect':
                     provider = await WalletConnectProvider.fromStorage(
                         this.bridgeConnectionStorage
