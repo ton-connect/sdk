@@ -23,10 +23,11 @@ import { BridgePartialSession, BridgeSession } from 'src/provider/bridge/models/
 import { HTTPProvider } from 'src/provider/provider';
 import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { Optional, OptionalTraceable, WithoutId } from 'src/utils/types';
-import { logDebug, logError } from 'src/utils/log';
+import { logDebug, logError, logWarning } from 'src/utils/log';
 import { callForSuccess } from 'src/utils/call-for-success';
 import { createAbortController } from 'src/utils/create-abort-controller';
 import { AnalyticsManager } from 'src/analytics/analytics-manager';
+import { MAX_UNIVERSAL_LINK_LENGTH } from 'src/constants/max-universal-link-length';
 import { Analytics } from 'src/analytics/analytics';
 import { BridgeClientEvent } from 'src/analytics/types';
 import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet/traceable-events';
@@ -79,7 +80,7 @@ export class BridgeProvider implements HTTPProvider {
     // in the SDK (which enforces this cap), while the UI layer independently
     // re-checks the produced link before opening it. Until the length policy
     // is centralised, both constants must be kept in sync.
-    private readonly maxUrlLength = 1024;
+    private readonly maxUrlLength = MAX_UNIVERSAL_LINK_LENGTH;
 
     private readonly optionalOpenGateways = 3;
 
@@ -166,6 +167,21 @@ export class BridgeProvider implements HTTPProvider {
         if (link.length <= this.maxUrlLength) {
             options?.embeddedRequest?.consume();
             return link;
+        }
+
+        // The universal link with the embedded request exceeds the length cap,
+        // so it is dropped and a connect-only link is returned instead. Warn
+        // when this happens to a request that actually carried an embedded
+        // payload — otherwise the dApp only sees `dispatched: false` with no
+        // indication that the link size was the reason (see issue #584).
+        if (embeddedRequest) {
+            logWarning(
+                `Embedded request dropped: universal link is ${String(
+                    link.length
+                )} chars, exceeding the ${String(
+                    this.maxUrlLength
+                )} char limit. Falling back to a connect-only link; the embedded request will not be dispatched.`
+            );
         }
 
         return generateUniversalLink(universalLink, message, {

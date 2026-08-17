@@ -98,4 +98,6 @@ export { Traceable, OptionalTraceable } from './utils/types';
 export { UUIDv7 } from './utils/uuid';
 export { Version7Options, UUIDTypes } from './utils/uuid/types';
 
+export { MAX_UNIVERSAL_LINK_LENGTH } from './constants/max-universal-link-length';
+
 export * from '@tonconnect/protocol';

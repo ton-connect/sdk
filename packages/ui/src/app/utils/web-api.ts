@@ -8,14 +8,12 @@ import { TonConnectUIError } from 'src/errors';
 import { logDebug } from 'src/app/utils/log';
 import { setLastOpenedLink } from 'src/app/state/modals-state';
 import { removeEmbeddedRequestFromUniversalLink } from 'src/app/utils/url-strategy-helpers';
+import { MAX_UNIVERSAL_LINK_LENGTH } from '@tonconnect/sdk';
 
-// NOTE: this duplicates `maxUrlLength` in
-// packages/sdk/src/provider/bridge/bridge-provider.ts. The duplication is a
-// consequence of an architectural shortcoming — the SDK owns universal-link
-// generation (and enforces its own length cap there), while the UI layer
-// independently re-checks the produced link before opening it. Until the
-// length policy is centralised, both constants must be kept in sync.
-export const MAX_LINK_LENGTH = 1024;
+// Re-exported from the SDK, which owns universal-link generation and enforces
+// this same cap there. Kept as a named export for backwards compatibility with
+// existing importers; the value is the single source of truth in the SDK.
+export const MAX_LINK_LENGTH = MAX_UNIVERSAL_LINK_LENGTH;
 
 /**
  * Opens a link in the given target window (defaults to the current tab).
