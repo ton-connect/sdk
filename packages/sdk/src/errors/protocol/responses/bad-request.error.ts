@@ -11,6 +11,8 @@ export class BadRequestError extends TonConnectError {
     constructor(...args: ConstructorParameters<typeof TonConnectError>) {
         super(...args);
 
+        this.setName('BadRequestError');
+
         Object.setPrototypeOf(this, BadRequestError.prototype);
     }
 }

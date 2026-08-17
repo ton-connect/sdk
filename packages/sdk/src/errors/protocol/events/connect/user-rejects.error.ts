@@ -11,6 +11,8 @@ export class UserRejectsError extends TonConnectError {
     constructor(...args: ConstructorParameters<typeof TonConnectError>) {
         super(...args);
 
+        this.setName('UserRejectsError');
+
         Object.setPrototypeOf(this, UserRejectsError.prototype);
     }
 }

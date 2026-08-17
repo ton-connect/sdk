@@ -11,6 +11,8 @@ export class FetchWalletsError extends TonConnectError {
     constructor(...args: ConstructorParameters<typeof TonConnectError>) {
         super(...args);
 
+        this.setName('FetchWalletsError');
+
         Object.setPrototypeOf(this, FetchWalletsError.prototype);
     }
 }

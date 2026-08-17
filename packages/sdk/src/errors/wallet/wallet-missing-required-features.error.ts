@@ -34,6 +34,8 @@ export class WalletMissingRequiredFeaturesError extends TonConnectError<{
     ) {
         super(message, options);
 
+        this.setName('WalletMissingRequiredFeaturesError');
+
         Object.setPrototypeOf(this, WalletMissingRequiredFeaturesError.prototype);
     }
 }

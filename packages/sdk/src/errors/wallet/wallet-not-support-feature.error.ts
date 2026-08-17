@@ -38,6 +38,8 @@ export class WalletNotSupportFeatureError extends TonConnectError {
     ) {
         super(message, options);
 
+        this.setName('WalletNotSupportFeatureError');
+
         Object.setPrototypeOf(this, WalletNotSupportFeatureError.prototype);
     }
 }
