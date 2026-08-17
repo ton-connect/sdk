@@ -11,6 +11,8 @@ export class UnknownAppError extends TonConnectError {
     constructor(...args: ConstructorParameters<typeof TonConnectError>) {
         super(...args);
 
+        this.setName('UnknownAppError');
+
         Object.setPrototypeOf(this, UnknownAppError.prototype);
     }
 }

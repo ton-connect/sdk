@@ -11,6 +11,8 @@ export class ManifestNotFoundError extends TonConnectError {
     constructor(...args: ConstructorParameters<typeof TonConnectError>) {
         super(...args);
 
+        this.setName('ManifestNotFoundError');
+
         Object.setPrototypeOf(this, ManifestNotFoundError.prototype);
     }
 }

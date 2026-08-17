@@ -25,7 +25,8 @@ export class WalletWrongNetworkError extends TonConnectError<{
         }
     ) {
         super(message, options);
-        this.name = 'WalletWrongNetworkError';
+        this.setName('WalletWrongNetworkError');
+
         Object.setPrototypeOf(this, WalletWrongNetworkError.prototype);
     }
 }

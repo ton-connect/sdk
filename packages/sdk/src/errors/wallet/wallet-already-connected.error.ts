@@ -11,6 +11,8 @@ export class WalletAlreadyConnectedError extends TonConnectError {
     constructor(...args: ConstructorParameters<typeof TonConnectError>) {
         super(...args);
 
+        this.setName('WalletAlreadyConnectedError');
+
         Object.setPrototypeOf(this, WalletAlreadyConnectedError.prototype);
     }
 }

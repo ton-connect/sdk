@@ -11,6 +11,8 @@ export class ParseHexError extends TonConnectError {
     constructor(...args: ConstructorParameters<typeof TonConnectError>) {
         super(...args);
 
+        this.setName('ParseHexError');
+
         Object.setPrototypeOf(this, ParseHexError.prototype);
     }
 }

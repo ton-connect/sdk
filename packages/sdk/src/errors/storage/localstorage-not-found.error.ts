@@ -12,6 +12,8 @@ export class LocalstorageNotFoundError extends TonConnectError {
     constructor(...args: ConstructorParameters<typeof TonConnectError>) {
         super(...args);
 
+        this.setName('LocalstorageNotFoundError');
+
         Object.setPrototypeOf(this, LocalstorageNotFoundError.prototype);
     }
 }

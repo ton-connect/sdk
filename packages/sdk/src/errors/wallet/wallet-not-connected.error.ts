@@ -11,6 +11,8 @@ export class WalletNotConnectedError extends TonConnectError {
     constructor(...args: ConstructorParameters<typeof TonConnectError>) {
         super(...args);
 
+        this.setName('WalletNotConnectedError');
+
         Object.setPrototypeOf(this, WalletNotConnectedError.prototype);
     }
 }

@@ -11,6 +11,8 @@ export class ManifestContentErrorError extends TonConnectError {
     constructor(...args: ConstructorParameters<typeof TonConnectError>) {
         super(...args);
 
+        this.setName('ManifestContentErrorError');
+
         Object.setPrototypeOf(this, ManifestContentErrorError.prototype);
     }
 }

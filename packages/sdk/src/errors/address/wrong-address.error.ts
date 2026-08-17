@@ -11,6 +11,8 @@ export class WrongAddressError extends TonConnectError {
     constructor(...args: ConstructorParameters<typeof TonConnectError>) {
         super(...args);
 
+        this.setName('WrongAddressError');
+
         Object.setPrototypeOf(this, WrongAddressError.prototype);
     }
 }
