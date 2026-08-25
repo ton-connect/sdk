@@ -100,6 +100,33 @@ export type ConnectionStartedEvent = TonConnectBaseEvent &
         main_screen: Array<string>;
     };
 
+/**
+ * A connection was initiated against a particular kind of source.
+ *
+ * Emitted by the core SDK on every `connect()`, so unlike `connection-selected-wallet` it is
+ * also present for dApps that do not use `@tonconnect/ui`. Counts initiations rather than user
+ * actions — one journey can produce several rows on a single `trace_id`.
+ *
+ * `client_environment` is empty for dApps that do not supply an environment (i.e. those not
+ * using `@tonconnect/ui`); read it as unknown rather than as web.
+ */
+export type ConnectionInitiatedEvent = TonConnectBaseEvent & {
+    event_name: 'connection-initiated';
+    /**
+     * One of js-embedded, js-injected, http-specific-wallet, http-any-wallet, wallet-connect.
+     * Prefixed by transport, so `js-%` and `http-%` recover that axis without an IN-list.
+     */
+    connection_source_kind: string;
+    /**
+     * Injected bridge key, for js-embedded and js-injected sources.
+     */
+    js_bridge_key?: string;
+    /**
+     * Bridge URL, for an http-specific-wallet source.
+     */
+    bridge_url?: string;
+};
+
 export type ConnectionSelectedWallet = TonConnectBaseEvent &
     Pick<SessionInfo, 'client_id'> & {
         event_name: 'connection-selected-wallet';
@@ -280,6 +307,7 @@ export type JsBridgeError = BaseJsBridgeEvent & {
 
 export type TonConnectEvent =
     | ConnectionStartedEvent
+    | ConnectionInitiatedEvent
     | ConnectionSelectedWallet
     | ConnectionCompletedEvent
     | ConnectionErrorEvent

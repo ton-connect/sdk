@@ -13,6 +13,7 @@ export type {
 } from './tracker/event-dispatcher';
 export {
     createConnectionStartedEvent,
+    createConnectionInitiatedEvent,
     createConnectionErrorEvent,
     createConnectionCompletedEvent,
     createConnectionRestoringStartedEvent,
@@ -36,6 +37,7 @@ export type {
     ConnectionInfo,
     ConnectionEvent,
     ConnectionStartedEvent,
+    ConnectionInitiatedEvent,
     ConnectionCompletedEvent,
     ConnectionErrorEvent,
     ConnectionRestoringEvent,

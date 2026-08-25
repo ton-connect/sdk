@@ -4,6 +4,7 @@ import {
     createConnectionRestoringCompletedEvent,
     createConnectionRestoringErrorEvent,
     createConnectionRestoringStartedEvent,
+    createConnectionInitiatedEvent,
     createConnectionStartedEvent,
     createDisconnectionEvent,
     createRequestVersionEvent,
@@ -41,6 +42,8 @@ export type TonConnectTrackerOptions = {
  *
  * List of events:
  *  * `connection-started`: when a user starts connecting a wallet.
+ *  * `connection-initiated`: when a connection is initiated, carrying the kind of source it
+ *    targets (embedded, injected, wallet-connect, named-wallet, multi-bridge).
  *  * `connection-completed`: when a user successfully connected a wallet.
  *  * `connection-error`: when a user cancels a connection or there is an error during the connection process.
  *  * `connection-restoring-started`: when the dApp starts restoring a connection.
@@ -173,6 +176,19 @@ export class TonConnectTracker {
     ): void {
         try {
             const event = createConnectionStartedEvent(this.version, ...args);
+            this.dispatchUserActionEvent(event);
+        } catch (e) {}
+    }
+
+    /**
+     * Track connection initiated event.
+     * @param args
+     */
+    public trackConnectionInitiated(
+        ...args: WithoutVersion<Parameters<typeof createConnectionInitiatedEvent>>
+    ): void {
+        try {
+            const event = createConnectionInitiatedEvent(this.version, ...args);
             this.dispatchUserActionEvent(event);
         } catch (e) {}
     }

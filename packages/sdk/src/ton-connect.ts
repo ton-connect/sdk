@@ -25,6 +25,7 @@ import {
 } from 'src/errors/wallet';
 import {
     Account,
+    describeWalletConnectionSource,
     EmbeddedRequest,
     RequiredFeatures,
     Wallet,
@@ -426,6 +427,16 @@ export class TonConnect implements ITonConnect {
 
         const traceId = options?.traceId ?? UUIDv7();
         this.tracker.trackConnectionStarted(traceId);
+        // Counts connect initiations, not user actions: a single journey legitimately produces
+        // several of these with different source kinds, sharing one trace id.
+        this.tracker.trackConnectionInitiated(
+            // Wrapped, not passed by reference: `isInsideWalletBrowser` is a plain static that
+            // reads `this.window`, so an unbound call throws — and the tracker swallows it.
+            describeWalletConnectionSource(wallet, key =>
+                InjectedProvider.isInsideWalletBrowser(key)
+            ),
+            traceId
+        );
 
         const peeked = embeddedRequest.peek();
         const wireConsumable = peeked

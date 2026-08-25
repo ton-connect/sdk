@@ -3,9 +3,12 @@ export type { EmbeddedResponse, Wallet } from './wallet';
 export type {
     WalletConnectionSource,
     WalletConnectionSourceHTTP,
+    WalletConnectionSourceInfo,
     WalletConnectionSourceJS,
+    WalletConnectionSourceKind,
     WalletConnectionSourceWalletConnect
 } from './wallet-connection-source';
+export { describeWalletConnectionSource } from './wallet-connection-source';
 export {
     WalletInfo,
     WalletInfoBase,

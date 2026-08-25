@@ -51,6 +51,19 @@ export function bindEventsTo(
         });
     });
 
+    // Core-emitted, so the prefix is `ton-connect-`, not `ton-connect-ui-`. Both prefixes
+    // type-check here; the wrong one silently never fires.
+    eventDispatcher.addEventListener('ton-connect-connection-initiated', event => {
+        const { detail } = event;
+        analytics.emitConnectionInitiated({
+            versions: buildVersionInfo(detail.custom_data),
+            connection_source_kind: detail.connection_source_kind,
+            js_bridge_key: detail.js_bridge_key,
+            bridge_url: detail.bridge_url,
+            trace_id: detail.trace_id ?? undefined
+        });
+    });
+
     eventDispatcher.addEventListener('ton-connect-connection-completed', event => {
         const { detail } = event;
         analytics.emitConnectionCompleted(buildTonConnectEvent(detail));

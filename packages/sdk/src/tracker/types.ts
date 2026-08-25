@@ -10,6 +10,8 @@ import {
     SendTransactionResponse,
     SignDataResponse,
     Wallet,
+    WalletConnectionSourceInfo,
+    WalletConnectionSourceKind,
     hasMessages
 } from 'src/models';
 import { isTelegramUrl } from 'src/utils/url';
@@ -198,6 +200,61 @@ export function createConnectionStartedEvent(
 }
 
 /**
+ * A connection was initiated against a particular kind of source.
+ *
+ * Unlike {@link SelectedWalletEvent}, which only the UI package emits, this fires from the core
+ * SDK on every `connect()` — so it also covers dApps that ship their own wallet picker, deep-link
+ * straight to a wallet, or use `@tonconnect/sdk` without `@tonconnect/ui` at all.
+ *
+ * It counts connect *initiations*, not user actions: a single journey can legitimately produce
+ * several, with different source kinds, sharing one trace id.
+ */
+export type ConnectionInitiatedEvent = {
+    /**
+     * Event type.
+     */
+    type: 'connection-initiated';
+    /**
+     * How the connection was initiated.
+     */
+    connection_source_kind: WalletConnectionSourceKind;
+    /**
+     * Injected bridge key, for `js-embedded` and `js-injected` sources.
+     */
+    js_bridge_key?: string;
+    /**
+     * Bridge URL, for an `http-specific-wallet` source.
+     */
+    bridge_url?: string;
+    /**
+     * Custom data for the connection.
+     */
+    custom_data: Version;
+    /**
+     * Unique identifier used for tracking a specific user flow.
+     */
+    trace_id?: string | null;
+};
+
+/**
+ * Create a connection initiated event.
+ */
+export function createConnectionInitiatedEvent(
+    version: Version,
+    source: WalletConnectionSourceInfo,
+    traceId?: string | null
+): ConnectionInitiatedEvent {
+    return {
+        type: 'connection-initiated',
+        connection_source_kind: source.kind,
+        js_bridge_key: source.jsBridgeKey,
+        bridge_url: source.bridgeUrl,
+        custom_data: createVersionInfo(version),
+        trace_id: traceId ?? null
+    };
+}
+
+/**
  * Successful connection event when a user successfully connected a wallet.
  */
 export type ConnectionCompletedEvent = {
@@ -303,6 +360,7 @@ export function createConnectionErrorEvent(
  */
 export type ConnectionEvent =
     | ConnectionStartedEvent
+    | ConnectionInitiatedEvent
     | ConnectionCompletedEvent
     | ConnectionErrorEvent;
 
