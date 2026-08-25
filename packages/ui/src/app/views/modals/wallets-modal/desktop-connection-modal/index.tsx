@@ -30,9 +30,7 @@ import {
     H2Styled,
     LoaderStyled,
     QRCodeStyled,
-    StyledIconButton,
-    TgButtonStyled,
-    TgImageStyled
+    StyledIconButton
 } from './style';
 import { ConnectorContext } from 'src/app/state/connector.context';
 import {
@@ -48,8 +46,7 @@ import { appState } from 'src/app/state/app.state';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { Link } from 'src/app/components/link';
 import { supportsDesktop, supportsExtension, supportsMobile } from 'src/app/utils/wallets';
-import { AT_WALLET_APP_NAME } from 'src/app/env/AT_WALLET_APP_NAME';
-import { IMG } from 'src/app/env/IMG';
+import { WALT_APP_NAME } from 'src/app/env/WALLET_APP_NAMES';
 import { Translation } from 'src/app/components/typography/Translation';
 import {
     addReturnStrategy,
@@ -95,7 +92,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                 return;
             }
 
-            if (props.wallet.appName !== AT_WALLET_APP_NAME) {
+            if (props.wallet.appName !== WALT_APP_NAME) {
                 setConnectionErrored('connection-declined');
             }
         }
@@ -364,50 +361,37 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                 </Switch>
             </BodyStyled>
 
-            <Show when={props.wallet.appName === AT_WALLET_APP_NAME}>
-                <TgButtonStyled
-                    rightIcon={<TgImageStyled src={IMG.TG} />}
-                    scale="s"
-                    onClick={onClickTelegram}
-                >
-                    <Translation translationKey="walletModal.desktopConnectionModal.openWalletOnTelegram">
-                        Open Wallet in Telegram on desktop
-                    </Translation>
-                </TgButtonStyled>
-            </Show>
-            <Show when={props.wallet.appName !== AT_WALLET_APP_NAME}>
-                <BottomButtonsContainerStyled>
-                    <Show when={mode() !== 'mobile' && supportsMobile(props.wallet)}>
-                        <FooterButton
-                            appearance="secondary"
-                            leftIcon={<MobileIcon />}
-                            onClick={onClickMobile}
-                        >
-                            <Translation translationKey="common.mobile">Mobile</Translation>
-                        </FooterButton>
-                    </Show>
-                    <Show when={mode() !== 'extension' && supportsExtension(props.wallet)}>
-                        <FooterButton
-                            appearance="secondary"
-                            leftIcon={<BrowserIcon />}
-                            onClick={onClickExtension}
-                        >
-                            <Translation translationKey="common.browserExtension">
-                                Browser Extension
-                            </Translation>
-                        </FooterButton>
-                    </Show>
-                    <Show when={mode() !== 'desktop' && supportsDesktop(props.wallet)}>
-                        <FooterButton
-                            appearance="secondary"
-                            leftIcon={<DesktopIcon />}
-                            onClick={onClickDesktop}
-                        >
-                            <Translation translationKey="common.desktop">Desktop</Translation>
-                        </FooterButton>
-                    </Show>
-                </BottomButtonsContainerStyled>
-            </Show>
+            <BottomButtonsContainerStyled>
+                <Show when={mode() !== 'mobile' && supportsMobile(props.wallet)}>
+                    <FooterButton
+                        appearance="secondary"
+                        leftIcon={<MobileIcon />}
+                        onClick={onClickMobile}
+                    >
+                        <Translation translationKey="common.mobile">Mobile</Translation>
+                    </FooterButton>
+                </Show>
+                <Show when={mode() !== 'extension' && supportsExtension(props.wallet)}>
+                    <FooterButton
+                        appearance="secondary"
+                        leftIcon={<BrowserIcon />}
+                        onClick={onClickExtension}
+                    >
+                        <Translation translationKey="common.browserExtension">
+                            Browser Extension
+                        </Translation>
+                    </FooterButton>
+                </Show>
+                <Show when={mode() !== 'desktop' && supportsDesktop(props.wallet)}>
+                    <FooterButton
+                        appearance="secondary"
+                        leftIcon={<DesktopIcon />}
+                        onClick={onClickDesktop}
+                    >
+                        <Translation translationKey="common.desktop">Desktop</Translation>
+                    </FooterButton>
+                </Show>
+            </BottomButtonsContainerStyled>
         </DesktopConnectionModalStyled>
     );
 };

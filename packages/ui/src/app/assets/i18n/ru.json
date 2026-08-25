@@ -10,7 +10,8 @@
     "get": "Скачать",
     "mobile": "Мобильный",
     "browserExtension": "Расширение",
-    "desktop": "Десктоп"
+    "desktop": "Десктоп",
+    "connectTelegram": "Подключить Telegram"
   },
   "button": {
     "connectWallet": "Подключить кошелёк",
@@ -52,7 +53,6 @@
     }
   },
   "walletItem": {
-    "walletOn": "Wallet в",
     "recent": "Недавний",
     "installed": "Установлен",
     "new": "Новый"
@@ -61,15 +61,14 @@
     "loading": "Кошельки загружаются",
     "wallets": "Кошельки",
     "mobileUniversalModal": {
-      "connectYourWallet": "Подключите TON кошелёк",
-      "openWalletOnTelegramOrSelect": "Подключите Wallet в Telegram или выберете другое приложение",
-      "openWalletOnTelegram": "Открыть Wallet в Telegram",
-      "chooseOtherApplication": "Выберите другое приложение",
+      "connectYourWallet": "Подключите TON-кошелёк",
+      "useTelegramWallet": "Используйте свой Telegram-кошелёк",
+      "chooseOtherApplication": "Или выберите другое приложение:",
       "openLink": "Открыть",
       "scan": "Отсканируйте камерой вашего телефона"
     },
     "desktopUniversalModal": {
-      "connectYourWallet": "Подключите TON кошелёк",
+      "connectYourWallet": "Подключите TON-кошелёк",
       "scan": "Отсканируйте QR-код камерой вашего телефона",
       "availableWallets": "Доступные кошельки"
     },
@@ -95,7 +94,6 @@
       "updateWallet": "Обновить {{ name }}",
       "chooseAnotherWallet": "Выбрать другой кошелёк",
       "continueOnDesktop": "Откройте {{ name }} на компьютере…",
-      "openWalletOnTelegram": "Открыть Wallet в Telegram",
       "connectionDeclined": "Подключение отклонено"
     },
     "infoModal": {

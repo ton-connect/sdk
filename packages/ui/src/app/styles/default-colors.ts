@@ -41,7 +41,7 @@ export const defaultDarkColorsSet: ColorsSet = {
         foreground: '#FFFFFF'
     },
     accent: '#E5E5EA',
-    telegramButton: '#31A6F5',
+    telegramButton: '#0E9AF5',
     icon: {
         primary: '#E5E5EA',
         secondary: '#909099',

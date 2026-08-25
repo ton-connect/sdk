@@ -31,6 +31,12 @@ export interface WalletInfoBase {
      */
     features?: Feature[];
 
+    /**
+     * Presentation hints from the registry, so the wallet picker can be restyled without an
+     * SDK release. Absent for most wallets — treat every field as optional.
+     */
+    ui?: WalletInfoUI;
+
     /** Operating systems / browsers the wallet supports. */
     platforms: (
         | 'ios'
@@ -42,6 +48,15 @@ export interface WalletInfoBase {
         | 'firefox'
         | 'safari'
     )[];
+}
+
+/**
+ * Registry-driven presentation hints. These affect how a wallet is rendered, never how it is
+ * connected to, so consumers that don't render a picker can ignore them.
+ */
+export interface WalletInfoUI {
+    /** Render this wallet's promoted button without a background fill. */
+    isButtonTransparent?: boolean;
 }
 
 /**
@@ -137,6 +152,7 @@ export interface WalletInfoDTO {
     )[];
 
     deepLink?: string;
+    ui?: WalletInfoUI;
     bridge: (WalletInfoBridgeRemoteDTO | WalletInfoBridgeInjectedDTO)[];
 }
 

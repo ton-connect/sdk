@@ -32,7 +32,6 @@ import { AllWalletsListModal } from 'src/app/views/modals/wallets-modal/all-wall
 import { LoaderIcon } from 'src/app/components';
 import { LoadableReady } from 'src/models/loadable';
 import { UIWalletInfo } from 'src/app/models/ui-wallet-info';
-import { AT_WALLET_APP_NAME } from 'src/app/env/AT_WALLET_APP_NAME';
 import { DesktopConnectionModal } from 'src/app/views/modals/wallets-modal/desktop-connection-modal';
 import { InfoModal } from 'src/app/views/modals/wallets-modal/info-modal';
 import { MobileConnectionModal } from 'src/app/views/modals/wallets-modal/mobile-connection-modal';
@@ -106,13 +105,6 @@ export const WalletsModal: Component = () => {
             ].concat(walletsList.filter(item => !eqWalletName(item, preferredWalletAppName)));
         }
 
-        const atWallet = walletsList.find(item => eqWalletName(item, AT_WALLET_APP_NAME));
-        if (atWallet) {
-            walletsList = [atWallet].concat(
-                walletsList.filter(item => !eqWalletName(item, AT_WALLET_APP_NAME))
-            );
-        }
-
         const walletsFeaturesRequested =
             tonConnectUI?.walletsRequiredFeatures ?? tonConnectUI?.walletsPreferredFeatures;
 
@@ -150,8 +142,8 @@ export const WalletsModal: Component = () => {
         },
         err => {
             if (err instanceof WalletMissingRequiredFeaturesError) {
-                const errorAppName = err.cause.connectEvent.device.appName.toLowerCase();
-                const wallet = walletsList()?.find(w => w.appName.toLowerCase() === errorAppName);
+                const errorAppName = err.cause.connectEvent.device.appName;
+                const wallet = walletsList()?.find(w => eqWalletName(w, errorAppName));
 
                 if (!wallet) {
                     throw new TonConnectError('Wallet not found');

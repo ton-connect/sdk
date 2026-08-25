@@ -2,23 +2,24 @@ import { WalletInfoDTO } from 'src/models/wallet/wallet-info';
 
 export const FALLBACK_WALLETS_LIST: WalletInfoDTO[] = [
     {
-        app_name: 'telegram-wallet',
-        name: 'Wallet',
-        image: 'https://wallet.tg/images/logo-288.png',
-        about_url: 'https://wallet.tg/',
-        universal_url: 'https://t.me/wallet?attach=wallet',
+        app_name: 'telegram',
+        name: 'Telegram',
+        image: 'https://telegram.org/img/t_logo_2x.png',
+        about_url: 'https://telegram.org',
+        universal_url: 'https://t.me/sendgrams',
+        deepLink: 'tg://sendgrams',
         bridge: [
             {
                 type: 'sse',
-                url: 'https://walletbot.me/tonconnect-bridge/bridge'
+                url: 'https://tonbridge.telegram.org'
             }
         ],
-        platforms: ['ios', 'android', 'macos', 'windows', 'linux'],
+        platforms: ['ios', 'android', 'chrome', 'firefox', 'macos', 'windows', 'linux'],
         features: [
             {
                 name: 'SendTransaction',
                 maxMessages: 255,
-                extraCurrencySupported: true
+                extraCurrencySupported: false
             },
             {
                 name: 'SignData',
@@ -44,6 +45,62 @@ export const FALLBACK_WALLETS_LIST: WalletInfoDTO[] = [
             }
         ],
         platforms: ['ios', 'android'],
+        ui: { isButtonTransparent: true },
+        features: [
+            {
+                name: 'SendTransaction',
+                maxMessages: 255,
+                extraCurrencySupported: false
+            },
+            {
+                name: 'SignData',
+                types: ['text', 'binary', 'cell']
+            }
+        ]
+    },
+    {
+        app_name: 'telegram-wallet',
+        name: 'Walt (ex. Wallet)',
+        image: 'https://wallet.tg/images/logo-288.png',
+        about_url: 'https://walt.io/',
+        universal_url: 'https://t.me/walt?attach=wallet',
+        bridge: [
+            {
+                type: 'sse',
+                url: 'https://walletbot.me/tonconnect-bridge/bridge'
+            }
+        ],
+        platforms: ['ios', 'android', 'macos', 'windows', 'linux'],
+        features: [
+            {
+                name: 'SendTransaction',
+                maxMessages: 255,
+                extraCurrencySupported: true
+            },
+            {
+                name: 'SignData',
+                types: ['text', 'binary', 'cell']
+            }
+        ]
+    },
+    {
+        app_name: 'mytonwallet',
+        name: 'My Wallet',
+        image: 'https://config.ton.org/assets/mytonwallet.png',
+        about_url: 'https://mywallet.io',
+        universal_url: 'https://connect.mytonwallet.org',
+        deepLink: 'mytonwallet-tc://',
+        bridge: [
+            {
+                type: 'js',
+                key: 'mytonwallet'
+            },
+            {
+                type: 'sse',
+                url: 'https://tonconnectbridge.mytonwallet.org/bridge/'
+            }
+        ],
+        platforms: ['chrome', 'windows', 'macos', 'linux', 'ios', 'android', 'firefox'],
         features: [
             {
                 name: 'SendTransaction',
@@ -80,36 +137,6 @@ export const FALLBACK_WALLETS_LIST: WalletInfoDTO[] = [
                 name: 'SendTransaction',
                 maxMessages: 255,
                 extraCurrencySupported: true
-            },
-            {
-                name: 'SignData',
-                types: ['text', 'binary', 'cell']
-            }
-        ]
-    },
-    {
-        app_name: 'mytonwallet',
-        name: 'My Wallet',
-        image: 'https://config.ton.org/assets/mytonwallet.png',
-        about_url: 'https://mywallet.io',
-        universal_url: 'https://connect.mytonwallet.org',
-        deepLink: 'mytonwallet-tc://',
-        bridge: [
-            {
-                type: 'js',
-                key: 'mytonwallet'
-            },
-            {
-                type: 'sse',
-                url: 'https://tonconnectbridge.mytonwallet.org/bridge/'
-            }
-        ],
-        platforms: ['chrome', 'windows', 'macos', 'linux', 'ios', 'android', 'firefox'],
-        features: [
-            {
-                name: 'SendTransaction',
-                maxMessages: 255,
-                extraCurrencySupported: false
             },
             {
                 name: 'SignData',

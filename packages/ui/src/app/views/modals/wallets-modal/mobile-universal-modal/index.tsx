@@ -1,28 +1,23 @@
-import {
-    ConnectAdditionalRequest,
-    isWalletInfoRemote,
-    checkRequiredWalletFeatures
-} from '@tonconnect/sdk';
+import { ConnectAdditionalRequest } from '@tonconnect/sdk';
 import { Component, createMemo, createSignal, For, Show } from 'solid-js';
-import { AtWalletIcon, FourWalletsItem, QRIcon, WalletItem } from 'src/app/components';
+import { FourWalletsItem, QRIcon, TelegramIcon, WalletItem } from 'src/app/components';
 import {
+    ButtonWalletIconStyled,
+    GramWalletButtonStyled,
     H1Styled,
     H2Styled,
     StyledLeftActionButton,
     TelegramButtonStyled,
-    TGImageStyled
+    TelegramH1Styled
 } from './style';
 import { setLastSelectedWalletInfo, setLastVisibleWalletsInfo } from 'src/app/state/modals-state';
 import { appState } from 'src/app/state/app.state';
-import { IMG } from 'src/app/env/IMG';
 import { supportsMobile } from 'src/app/utils/wallets';
-import { AT_WALLET_APP_NAME } from 'src/app/env/AT_WALLET_APP_NAME';
+import { GRAM_WALLET_APP_NAME, TELEGRAM_WALLET_APP_NAME } from 'src/app/env/WALLET_APP_NAMES';
 import { copyToClipboard } from 'src/app/utils/copy-to-clipboard';
-import { TonConnectUIError } from 'src/errors';
 import { MobileUniversalQR } from './mobile-universal-qr';
 import { Translation } from 'src/app/components/typography/Translation';
 import {
-    redirectToTelegram,
     redirectToWallet,
     removeEmbeddedRequestFromUniversalLink
 } from 'src/app/utils/url-strategy-helpers';
@@ -49,20 +44,28 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
     const [firstClick, setFirstClick] = createSignal(true);
     const [universalLink, setUniversalLink] = createSignal<string | null>(null);
     const connector = appState.connector;
+    /** Wallets promoted to their own button above the row, and so kept out of it. */
+    const shortcutAppNames = [TELEGRAM_WALLET_APP_NAME, GRAM_WALLET_APP_NAME];
+
     const walletsList = (): UIWalletInfo[] =>
-        props.walletsList.filter(w => supportsMobile(w) && w.appName !== AT_WALLET_APP_NAME);
+        props.walletsList.filter(w => supportsMobile(w) && !shortcutAppNames.includes(w.appName));
     const shouldShowMoreButton = (): boolean => walletsList().length > 7;
+
+    /** A promoted wallet is only offered when it is actually connectable from this screen. */
+    const shortcutWallet = (appName: string): UIWalletInfo | null =>
+        props.walletsList.find(
+            wallet =>
+                wallet.appName === appName &&
+                supportsMobile(wallet) &&
+                wallet.isSupportRequiredFeatures
+        ) ?? null;
+
+    const telegramWallet = createMemo(() => shortcutWallet(TELEGRAM_WALLET_APP_NAME), null);
+    const gramWallet = createMemo(() => shortcutWallet(GRAM_WALLET_APP_NAME), null);
 
     const walletsBridges = createMemo(() => getUniqueBridges(props.walletsList), null, {
         equals: bridgesIsEqual
     });
-
-    const atWalletSupportFeatures = createMemo(
-        () =>
-            props.walletsList.find(wallet => wallet.appName === AT_WALLET_APP_NAME)
-                ?.isSupportRequiredFeatures ?? false,
-        null
-    );
 
     const getUniversalLink = (options: { useEmbeddedRequest: boolean }): string => {
         let link = universalLink();
@@ -130,45 +133,6 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
         );
     };
 
-    const onSelectTelegram = (): void => {
-        setUniversalLink(null);
-
-        const atWallet = props.walletsList.find(wallet => wallet.appName === AT_WALLET_APP_NAME);
-        if (!atWallet || !isWalletInfoRemote(atWallet)) {
-            throw new TonConnectUIError('@wallet bot not found in the wallets list');
-        }
-
-        const walletSupportsEmbeddedRequest = checkRequiredWalletFeatures(atWallet.features ?? [], {
-            embeddedRequest: {}
-        });
-
-        const embeddedRequest =
-            walletSupportsEmbeddedRequest && 'embeddedRequest' in props.walletModalState
-                ? props.walletModalState.embeddedRequest
-                : undefined;
-
-        const walletLink = connector.connect(
-            {
-                bridgeUrl: atWallet.bridgeUrl,
-                universalLink: atWallet.universalLink
-            },
-            props.additionalRequest,
-            {
-                traceId: props.walletModalState.traceId,
-                embeddedRequest: embeddedRequest ?? undefined
-            }
-        );
-
-        const forceRedirect = !firstClick();
-        setFirstClick(false);
-
-        redirectToTelegram(walletLink, {
-            returnStrategy: appState.returnStrategy,
-            twaReturnUrl: appState.twaReturnUrl,
-            forceRedirect: forceRedirect
-        });
-    };
-
     const onOpenQR = (): void => {
         setShowQR(true);
         setLastSelectedWalletInfo({
@@ -191,12 +155,7 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
     const visibleWallets = createMemo(() => supportedWallets().slice(0, 3), null);
     setLastVisibleWalletsInfo({
         walletsMenu: 'main_screen',
-        wallets: atWalletSupportFeatures()
-            ? [
-                  props.walletsList.find(wallet => wallet.appName === AT_WALLET_APP_NAME)!,
-                  ...visibleWallets()
-              ]
-            : visibleWallets()
+        wallets: visibleWallets()
     });
 
     const fourWalletsItem = createMemo(
@@ -220,26 +179,34 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
             </Show>
             <Show when={!showQR()}>
                 <StyledLeftActionButton icon={<QRIcon />} onClick={onOpenQR} />
-                <H1Styled translationKey="walletModal.mobileUniversalModal.connectYourWallet">
-                    Connect your TON wallet
-                </H1Styled>
-                <Show when={atWalletSupportFeatures()}>
-                    <H2Styled
-                        translationKey="walletModal.mobileUniversalModal.openWalletOnTelegramOrSelect"
-                        maxWidth={320}
-                    >
-                        Use Wallet in Telegram or choose other application
-                    </H2Styled>
+                <Show
+                    when={telegramWallet()}
+                    fallback={
+                        <H1Styled translationKey="walletModal.mobileUniversalModal.connectYourWallet">
+                            Connect your TON wallet
+                        </H1Styled>
+                    }
+                >
+                    <TelegramH1Styled translationKey="walletModal.mobileUniversalModal.useTelegramWallet">
+                        Use your Telegram wallet
+                    </TelegramH1Styled>
                     <TelegramButtonStyled
-                        leftIcon={<AtWalletIcon />}
-                        rightIcon={<TGImageStyled src={IMG.TG} />}
-                        onClick={onSelectTelegram}
-                        scale="s"
+                        icon={<TelegramIcon />}
+                        onClick={() => props.onSelect(telegramWallet()!)}
                     >
-                        <Translation translationKey="walletModal.mobileUniversalModal.openWalletOnTelegram">
-                            Connect Wallet in Telegram
+                        <Translation translationKey="common.connectTelegram">
+                            Connect Telegram
                         </Translation>
                     </TelegramButtonStyled>
+                </Show>
+                <Show when={gramWallet()}>
+                    <GramWalletButtonStyled
+                        transparent={gramWallet()!.ui?.isButtonTransparent}
+                        icon={<ButtonWalletIconStyled src={gramWallet()!.imageUrl} />}
+                        onClick={() => props.onSelect(gramWallet()!)}
+                    >
+                        {gramWallet()!.name}
+                    </GramWalletButtonStyled>
                 </Show>
                 <H2Styled
                     translationKey="walletModal.mobileUniversalModal.chooseOtherApplication"
@@ -247,7 +214,7 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
                     padding={'0 24px 8px 24px'}
                     margin={'0'}
                 >
-                    Choose other application
+                    Or choose another app:
                 </H2Styled>
                 <WalletUlContainer>
                     <For each={shouldShowMoreButton() ? visibleWallets() : supportedWallets()}>
