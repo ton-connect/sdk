@@ -11,7 +11,8 @@ import {
 import { ConnectorContext } from 'src/app/state/connector.context';
 import {
     getSingleWalletModalIsOpened,
-    getSingleWalletModalWalletInfo
+    getSingleWalletModalWalletInfo,
+    singleWalletModalState
 } from 'src/app/state/modals-state';
 import { H1Styled, LoaderContainerStyled, StyledModal } from './style';
 import { useI18n } from '@solid-primitives/i18n';
@@ -23,7 +24,7 @@ import { DesktopConnectionModal } from 'src/app/views/modals/wallets-modal/deskt
 import { InfoModal } from 'src/app/views/modals/wallets-modal/info-modal';
 import { MobileConnectionModal } from 'src/app/views/modals/wallets-modal/mobile-connection-modal';
 import { Dynamic } from 'solid-js/web';
-import { WalletsModalCloseReason } from 'src/models';
+import { WalletsModalCloseReason, WalletsModalState } from 'src/models';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 
 export const SingleWalletModal: Component = () => {
@@ -51,6 +52,18 @@ export const SingleWalletModal: Component = () => {
         return (appState.connectRequestParameters as LoadableReady<ConnectAdditionalRequest>)
             ?.value;
     });
+
+    /**
+     * The connection modals take the wallets-modal state, but the only thing they read from it
+     * on this path is the trace id — the single-wallet flow carries no embedded request. Passing
+     * it keeps the connect calls on the same trace as the `connection-started` event this flow
+     * already emitted, so the two can be correlated downstream.
+     */
+    const connectionModalState = createMemo<WalletsModalState>(() => ({
+        status: 'opened',
+        closeReason: null,
+        traceId: singleWalletModalState().traceId
+    }));
 
     const onClose = (closeReason: WalletsModalCloseReason): void => {
         tonConnectUI.closeSingleWalletModal(closeReason);
@@ -95,6 +108,7 @@ export const SingleWalletModal: Component = () => {
                     <Dynamic
                         component={isMobile() ? MobileConnectionModal : DesktopConnectionModal}
                         wallet={getSingleWalletModalWalletInfo()!} // TODO: remove non-null assertion
+                        walletsModalState={connectionModalState()}
                         additionalRequest={additionalRequest()}
                         onBackClick={() => {}}
                         backDisabled={true}

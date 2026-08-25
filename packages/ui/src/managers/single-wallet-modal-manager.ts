@@ -5,6 +5,8 @@ import {
     isWalletInfoCurrentlyEmbedded,
     isWalletInfoRemote,
     ITonConnect,
+    Traceable,
+    UUIDv7,
     WalletInfoCurrentlyEmbedded,
     WalletInfoRemote
 } from '@tonconnect/sdk';
@@ -89,7 +91,9 @@ export class SingleWalletModalManager implements SingleWalletModal {
      * @throws TonConnectUIError if the specified wallet is not found.
      */
     public async open(wallet: string): Promise<void> {
-        this.tracker.trackConnectionStarted();
+        const traceId = UUIDv7();
+
+        this.tracker.trackConnectionStarted(traceId);
 
         const fetchedWalletsList = await this.connector.getWallets();
         const walletsList = applyWalletsListConfiguration(
@@ -101,7 +105,7 @@ export class SingleWalletModalManager implements SingleWalletModal {
         const embeddedWallet = walletsList.find(isWalletInfoCurrentlyEmbedded);
         const isEmbeddedWalletExist = !!embeddedWallet;
         if (isEmbeddedWalletExist) {
-            return this.connectEmbeddedWallet(embeddedWallet);
+            return this.connectEmbeddedWallet(embeddedWallet, { traceId });
         }
 
         // TODO: move to ITonConnect
@@ -109,7 +113,7 @@ export class SingleWalletModalManager implements SingleWalletModal {
         const externalWallet = externalWallets.find(walletInfo => eqWalletName(walletInfo, wallet));
         const isExternalWalletExist = !!externalWallet;
         if (isExternalWalletExist) {
-            return this.openSingleWalletModal(externalWallet);
+            return this.openSingleWalletModal(externalWallet, { traceId });
         }
 
         const error = `Trying to open modal window with unknown wallet "${wallet}".`;
@@ -144,10 +148,15 @@ export class SingleWalletModalManager implements SingleWalletModal {
      * @param embeddedWallet - Information about the embedded wallet to connect to.
      * @internal
      */
-    private connectEmbeddedWallet(embeddedWallet: WalletInfoCurrentlyEmbedded): void {
+    private connectEmbeddedWallet(
+        embeddedWallet: WalletInfoCurrentlyEmbedded,
+        options: Traceable
+    ): void {
         const connect = (parameters?: ConnectAdditionalRequest): void => {
             setLastSelectedWalletInfo(embeddedWallet);
-            this.connector.connect({ jsBridgeKey: embeddedWallet.jsBridgeKey }, parameters);
+            this.connector.connect({ jsBridgeKey: embeddedWallet.jsBridgeKey }, parameters, {
+                traceId: options.traceId
+            });
         };
 
         const additionalRequest = appState.connectRequestParameters;
@@ -161,12 +170,15 @@ export class SingleWalletModalManager implements SingleWalletModal {
     /**
      * Opens the modal window to connect to a specified wallet, and waits when modal window is opened.
      */
-    public async openSingleWalletModal(wallet: WalletInfoRemote): Promise<void> {
+    public async openSingleWalletModal(
+        wallet: WalletInfoRemote,
+        options?: Traceable
+    ): Promise<void> {
         if (isInTMA()) {
             sendExpand();
         }
 
-        widgetController.openSingleWalletModal(wallet);
+        widgetController.openSingleWalletModal(wallet, { traceId: options?.traceId });
 
         return new Promise<void>(resolve => {
             const unsubscribe = this.onStateChange(state => {
