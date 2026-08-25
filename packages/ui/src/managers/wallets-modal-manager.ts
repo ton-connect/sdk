@@ -151,7 +151,7 @@ export class WalletsModalManager implements WalletsModal {
     ): Promise<void> {
         const traceId = options?.traceId ?? UUIDv7();
 
-        this.tracker.trackConnectionStarted();
+        this.tracker.trackConnectionStarted(traceId);
         const walletsList = await this.connector.getWallets();
         const embeddedWallet = walletsList.find(isWalletInfoCurrentlyEmbedded);
 
