@@ -66,7 +66,10 @@ export function bindEventsTo(
 
     eventDispatcher.addEventListener('ton-connect-connection-completed', event => {
         const { detail } = event;
-        analytics.emitConnectionCompleted(buildTonConnectEvent(detail));
+        analytics.emitConnectionCompleted({
+            ...buildTonConnectEvent(detail),
+            is_restore: detail.is_restore
+        });
     });
     eventDispatcher.addEventListener('ton-connect-connection-error', event => {
         const { detail } = event;

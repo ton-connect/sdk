@@ -148,6 +148,11 @@ export type ConnectionCompletedEvent = TonConnectBaseEvent &
     SessionInfo & {
         event_name: 'connection-completed';
         /**
+         * True when this is a session restore replayed on page load rather than a new
+         * connection. Exclude these before using completions as a connection count.
+         */
+        is_restore?: boolean;
+        /**
          * Time spent to connect to the TON Connect bridge (milliseconds).
          */
         bridge_connect_duration?: number;

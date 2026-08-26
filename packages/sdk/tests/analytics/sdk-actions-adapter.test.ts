@@ -1,7 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { bindEventsTo } from 'src/analytics/sdk-actions-adapter';
 import { EventDispatcher } from 'src/tracker/event-dispatcher';
-import { SdkActionEvent, createConnectionInitiatedEvent } from 'src/tracker/types';
+import {
+    SdkActionEvent,
+    createConnectionCompletedEvent,
+    createConnectionInitiatedEvent
+} from 'src/tracker/types';
 import { Analytics } from 'src/analytics/analytics';
 import { TonConnectEvent } from 'src/analytics/types';
 
@@ -114,5 +118,36 @@ describe('analytics/sdk-actions-adapter: connection-initiated', () => {
             // than as null, which would be written to the wire verbatim.
             trace_id: undefined
         });
+    });
+});
+
+describe('analytics/sdk-actions-adapter: connection-completed', () => {
+    it('forwards is_restore so replayed sessions can be excluded', () => {
+        const dispatcher = createDispatcher();
+        const analytics = createAnalytics();
+        bindEventsTo(dispatcher, analytics);
+
+        dispatcher.emit(
+            'ton-connect-connection-completed',
+            createConnectionCompletedEvent(version, null, null, 'trace-2', true)
+        );
+
+        expect(analytics.emitted[0]!.method).toBe('emitConnectionCompleted');
+        expect(analytics.emitted[0]!.event).toMatchObject({ is_restore: true });
+    });
+
+    it('reports a fresh connection as is_restore false, not absent', () => {
+        const dispatcher = createDispatcher();
+        const analytics = createAnalytics();
+        bindEventsTo(dispatcher, analytics);
+
+        dispatcher.emit(
+            'ton-connect-connection-completed',
+            createConnectionCompletedEvent(version, null, null, 'trace-3')
+        );
+
+        // Explicitly false rather than undefined: the warehouse should be able to filter on the
+        // column without treating a missing value as either case.
+        expect(analytics.emitted[0]!.event).toMatchObject({ is_restore: false });
     });
 });

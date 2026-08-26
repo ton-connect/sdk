@@ -267,6 +267,13 @@ export type ConnectionCompletedEvent = {
      */
     is_success: true;
     /**
+     * `true` when this completion is a replay of a stored session by
+     * `restoreConnection()` rather than a fresh connection. Restores fire on every page load
+     * for an already-connected user, so counting completions without excluding them measures
+     * page views rather than connections.
+     */
+    is_restore: boolean;
+    /**
      * Unique identifier used for tracking a specific user flow.
      */
     trace_id?: string | null;
@@ -283,11 +290,13 @@ export function createConnectionCompletedEvent(
     version: Version,
     wallet: Wallet | null,
     sessionInfo?: SessionInfo | null,
-    traceId?: string | null
+    traceId?: string | null,
+    isRestore?: boolean
 ): ConnectionCompletedEvent {
     return {
         type: 'connection-completed',
         is_success: true,
+        is_restore: !!isRestore,
         trace_id: traceId ?? null,
         ...createConnectionInfo(version, wallet, sessionInfo)
     };

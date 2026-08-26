@@ -1114,7 +1114,8 @@ export class TonConnect implements ITonConnect {
             case 'connect':
                 this.onWalletConnected(e.payload, {
                     traceId: e.traceId,
-                    response: e.response
+                    response: e.response,
+                    restored: e.restored
                 });
                 break;
             case 'connect_error':
@@ -1134,7 +1135,7 @@ export class TonConnect implements ITonConnect {
 
     private onWalletConnected(
         connectEvent: ConnectEventSuccess['payload'],
-        options: Traceable<{ response?: WalletResponse<RpcMethod> }>
+        options: Traceable<{ response?: WalletResponse<RpcMethod>; restored?: boolean }>
     ): void {
         const method = this.pendingEmbeddedRequestMethod;
         this.pendingEmbeddedRequestMethod = undefined;
@@ -1254,7 +1255,12 @@ export class TonConnect implements ITonConnect {
         this.wallet = wallet;
 
         const sessionInfo = this.getSessionInfo();
-        this.tracker.trackConnectionCompleted(wallet, sessionInfo, options?.traceId);
+        this.tracker.trackConnectionCompleted(
+            wallet,
+            sessionInfo,
+            options?.traceId,
+            options?.restored
+        );
     }
 
     private onWalletConnectError(error: TonConnectError): void {
