@@ -291,6 +291,7 @@ export const WalletsModal: Component = () => {
                                     tonConnectUI?.walletsRequiredFeatures ? 'strict' : 'soft'
                                 }
                                 onBack={onSelectUniversal}
+                                traceId={walletsModalState().traceId}
                                 onSelect={wallet => selectWallet(wallet, 'all-wallets-list')}
                             />
                         </Match>
