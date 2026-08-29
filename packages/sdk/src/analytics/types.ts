@@ -143,6 +143,48 @@ export type ConnectionSelectedWallet = TonConnectBaseEvent &
         wallet_redirect_link?: string;
     };
 
+/**
+ * A wallet was picked, but nothing is committed yet — desktop only in practice, where picking a
+ * wallet opens a second screen offering QR, extension and desktop app. A preselection with no
+ * matching wallet-selected on the same trace means the user scanned the default QR.
+ */
+export type WalletPreselectedEvent = TonConnectBaseEvent & {
+    event_name: 'wallet-preselected';
+    wallet_app_name: string;
+    /**
+     * One of universal-modal, all-wallets-list, connection-modal, single-wallet-modal, embedded.
+     */
+    surface: string;
+    /**
+     * One of manual, auto-embedded, auto-dapp-directed. `auto-%` matches every case where no
+     * human clicked in the TON Connect UI.
+     */
+    selection_source: string;
+};
+
+/**
+ * This wallet is the one being connected with. Replaces connection-selected-wallet: emitted from
+ * the click handler with every field supplied by the call site, rather than reconstructed from
+ * ambient UI state afterwards.
+ */
+export type WalletSelectedEvent = TonConnectBaseEvent & {
+    event_name: 'wallet-selected';
+    wallet_app_name: string;
+    /**
+     * One of universal-modal, all-wallets-list, connection-modal, single-wallet-modal, embedded.
+     */
+    surface: string;
+    /**
+     * One of manual, auto-embedded, auto-dapp-directed.
+     */
+    selection_source: string;
+    /**
+     * Transport picked on the desktop connection screen: mobile, desktop or extension. Present
+     * only when surface is connection-modal.
+     */
+    connection_mode?: string;
+};
+
 export type ConnectionCompletedEvent = TonConnectBaseEvent &
     WalletInfo &
     SessionInfo & {
@@ -314,6 +356,8 @@ export type TonConnectEvent =
     | ConnectionStartedEvent
     | ConnectionInitiatedEvent
     | ConnectionSelectedWallet
+    | WalletPreselectedEvent
+    | WalletSelectedEvent
     | ConnectionCompletedEvent
     | ConnectionErrorEvent
     | DisconnectionEvent

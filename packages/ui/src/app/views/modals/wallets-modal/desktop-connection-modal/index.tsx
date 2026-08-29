@@ -186,6 +186,27 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
         });
     };
 
+    /**
+     * The commitment on desktop: the user has picked how to reach the wallet they preselected.
+     *
+     * Wired into the footer buttons' `onClick` rather than into the handlers themselves, because
+     * the mount-time dispatch below calls those same handlers with no user involved — emitting
+     * from inside them would report a selection nobody made.
+     */
+    const trackSelected = (mode: 'mobile' | 'desktop' | 'extension'): void => {
+        const traceId = props.walletsModalState?.traceId;
+
+        if (traceId) {
+            appState.tracker.trackWalletSelected(
+                props.wallet.appName,
+                'connection-modal',
+                'manual',
+                traceId,
+                mode
+            );
+        }
+    };
+
     const onClickExtension = (): void => {
         setConnectionErrored(null);
         setMode('extension');
@@ -381,7 +402,10 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                         <FooterButton
                             appearance="secondary"
                             leftIcon={<MobileIcon />}
-                            onClick={onClickMobile}
+                            onClick={() => {
+                                trackSelected('mobile');
+                                onClickMobile();
+                            }}
                         >
                             <Translation translationKey="common.mobile">Mobile</Translation>
                         </FooterButton>
@@ -390,7 +414,10 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                         <FooterButton
                             appearance="secondary"
                             leftIcon={<BrowserIcon />}
-                            onClick={onClickExtension}
+                            onClick={() => {
+                                trackSelected('extension');
+                                onClickExtension();
+                            }}
                         >
                             <Translation translationKey="common.browserExtension">
                                 Browser Extension
@@ -401,7 +428,10 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                         <FooterButton
                             appearance="secondary"
                             leftIcon={<DesktopIcon />}
-                            onClick={onClickDesktop}
+                            onClick={() => {
+                                trackSelected('desktop');
+                                onClickDesktop();
+                            }}
                         >
                             <Translation translationKey="common.desktop">Desktop</Translation>
                         </FooterButton>

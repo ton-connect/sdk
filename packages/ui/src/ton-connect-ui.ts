@@ -376,6 +376,7 @@ export class TonConnectUI {
         const preferredWalletName = this.preferredWalletStorage.getPreferredWalletAppName();
         setAppState({
             connector: this.connector,
+            tracker: this.tracker,
             preferredWalletAppName: preferredWalletName
         });
 
@@ -866,6 +867,12 @@ export class TonConnectUI {
         options: Traceable
     ): Promise<ConnectedWallet> {
         const connect = (parameters?: ConnectAdditionalRequest): void => {
+            this.tracker.trackWalletSelected(
+                embeddedWallet.appName,
+                'embedded',
+                'auto-embedded',
+                options.traceId
+            );
             setLastSelectedWalletInfo(embeddedWallet);
             this.connector.connect({ jsBridgeKey: embeddedWallet.jsBridgeKey }, parameters, {
                 traceId: options.traceId

@@ -30,7 +30,9 @@ export {
     createResponseVersionEvent,
     createVersionInfo,
     createWalletModalOpenedEvent,
-    createSelectedWalletEvent
+    createSelectedWalletEvent,
+    createWalletPreselectedEvent,
+    createWalletSelectedEvent
 } from './tracker/types';
 export type {
     AuthType,
@@ -62,6 +64,10 @@ export type {
     ResponseVersionEvent,
     WalletModalOpenedEvent,
     SelectedWalletEvent,
+    WalletPreselectedEvent,
+    WalletSelectedEvent,
+    WalletSelectionSurface,
+    WalletSelectionSource,
     VersionEvent,
     Version,
     WithoutVersion,

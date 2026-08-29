@@ -4,7 +4,9 @@ import { EventDispatcher } from 'src/tracker/event-dispatcher';
 import {
     SdkActionEvent,
     createConnectionCompletedEvent,
-    createConnectionInitiatedEvent
+    createConnectionInitiatedEvent,
+    createWalletPreselectedEvent,
+    createWalletSelectedEvent
 } from 'src/tracker/types';
 import { Analytics } from 'src/analytics/analytics';
 import { TonConnectEvent } from 'src/analytics/types';
@@ -149,5 +151,90 @@ describe('analytics/sdk-actions-adapter: connection-completed', () => {
         // Explicitly false rather than undefined: the warehouse should be able to filter on the
         // column without treating a missing value as either case.
         expect(analytics.emitted[0]!.event).toMatchObject({ is_restore: false });
+    });
+});
+
+describe('analytics/sdk-actions-adapter: wallet preselection and selection', () => {
+    it('listens on the ui prefix, not the core prefix', () => {
+        const dispatcher = createDispatcher();
+        bindEventsTo(dispatcher, createAnalytics());
+
+        expect(dispatcher.registered()).toContain('ton-connect-ui-wallet-preselected');
+        expect(dispatcher.registered()).toContain('ton-connect-ui-wallet-selected');
+        expect(dispatcher.registered()).not.toContain('ton-connect-wallet-preselected');
+        expect(dispatcher.registered()).not.toContain('ton-connect-wallet-selected');
+    });
+
+    it('forwards a preselection with its surface and source', () => {
+        const dispatcher = createDispatcher();
+        const analytics = createAnalytics();
+        bindEventsTo(dispatcher, analytics);
+
+        dispatcher.emit(
+            'ton-connect-ui-wallet-preselected',
+            createWalletPreselectedEvent(
+                version,
+                'tonkeeper',
+                'universal-modal',
+                'manual',
+                'trace-4'
+            )
+        );
+
+        expect(analytics.emitted).toEqual([
+            {
+                method: 'emitWalletPreselected',
+                event: {
+                    versions: { '@tonconnect/sdk': '4.0.2', '@tonconnect/ui': '' },
+                    wallet_app_name: 'tonkeeper',
+                    surface: 'universal-modal',
+                    selection_source: 'manual',
+                    trace_id: 'trace-4'
+                }
+            }
+        ]);
+    });
+
+    it('forwards the desktop transport choice as connection_mode', () => {
+        const dispatcher = createDispatcher();
+        const analytics = createAnalytics();
+        bindEventsTo(dispatcher, analytics);
+
+        dispatcher.emit(
+            'ton-connect-ui-wallet-selected',
+            createWalletSelectedEvent(
+                version,
+                'mytonwallet',
+                'connection-modal',
+                'manual',
+                'trace-5',
+                'extension'
+            )
+        );
+
+        expect(analytics.emitted[0]!.method).toBe('emitWalletSelected');
+        expect(analytics.emitted[0]!.event).toMatchObject({
+            wallet_app_name: 'mytonwallet',
+            surface: 'connection-modal',
+            selection_source: 'manual',
+            connection_mode: 'extension'
+        });
+    });
+
+    it('leaves connection_mode undefined where the concept does not apply', () => {
+        const dispatcher = createDispatcher();
+        const analytics = createAnalytics();
+        bindEventsTo(dispatcher, analytics);
+
+        dispatcher.emit(
+            'ton-connect-ui-wallet-selected',
+            createWalletSelectedEvent(version, 'tonkeeper', 'embedded', 'auto-embedded', 'trace-6')
+        );
+
+        expect(analytics.emitted[0]!.event).toMatchObject({
+            surface: 'embedded',
+            selection_source: 'auto-embedded',
+            connection_mode: undefined
+        });
     });
 });

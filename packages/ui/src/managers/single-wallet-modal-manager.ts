@@ -14,6 +14,7 @@ import { appState } from 'src/app/state/app.state';
 import { widgetController } from 'src/app/widget-controller';
 import { SingleWalletModal, SingleWalletModalState } from 'src/models/single-wallet-modal';
 import { isInTMA, sendExpand } from 'src/app/utils/tma-api';
+import { isMobile, updateIsMobile } from 'src/app/hooks/isMobile';
 import { TonConnectUIError } from 'src/errors';
 import { applyWalletsListConfiguration, eqWalletName } from 'src/app/utils/wallets';
 import { TonConnectUITracker } from 'src/tracker/ton-connect-ui-tracker';
@@ -113,6 +114,30 @@ export class SingleWalletModalManager implements SingleWalletModal {
         const externalWallet = externalWallets.find(walletInfo => eqWalletName(walletInfo, wallet));
         const isExternalWalletExist = !!externalWallet;
         if (isExternalWalletExist) {
+            // The dApp named the wallet, so no pick happened in our UI — but the journey is
+            // otherwise a normal one, and follows the same platform rule: on mobile the
+            // connection modal redirects on mount, so this is the commitment; on desktop it opens
+            // a second screen, so it is only a preselection.
+            // Runs before the modal renders, so refresh the signal first, as the modal
+            // components themselves do on open.
+            updateIsMobile();
+
+            if (isMobile()) {
+                this.tracker.trackWalletSelected(
+                    externalWallet.appName,
+                    'single-wallet-modal',
+                    'auto-dapp-directed',
+                    traceId
+                );
+            } else {
+                this.tracker.trackWalletPreselected(
+                    externalWallet.appName,
+                    'single-wallet-modal',
+                    'auto-dapp-directed',
+                    traceId
+                );
+            }
+
             return this.openSingleWalletModal(externalWallet, { traceId });
         }
 
@@ -153,6 +178,12 @@ export class SingleWalletModalManager implements SingleWalletModal {
         options: Traceable
     ): void {
         const connect = (parameters?: ConnectAdditionalRequest): void => {
+            this.tracker.trackWalletSelected(
+                embeddedWallet.appName,
+                'embedded',
+                'auto-embedded',
+                options.traceId
+            );
             setLastSelectedWalletInfo(embeddedWallet);
             this.connector.connect({ jsBridgeKey: embeddedWallet.jsBridgeKey }, parameters, {
                 traceId: options.traceId
