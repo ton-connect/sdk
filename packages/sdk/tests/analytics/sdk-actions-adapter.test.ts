@@ -5,6 +5,7 @@ import {
     SdkActionEvent,
     createConnectionCompletedEvent,
     createConnectionInitiatedEvent,
+    createConnectionLinkGeneratedEvent,
     createWalletPreselectedEvent,
     createWalletSelectedEvent
 } from 'src/tracker/types';
@@ -235,6 +236,34 @@ describe('analytics/sdk-actions-adapter: wallet preselection and selection', () 
             surface: 'embedded',
             selection_source: 'auto-embedded',
             connection_mode: undefined
+        });
+    });
+});
+
+describe('analytics/sdk-actions-adapter: connection-link-generated', () => {
+    it('is a separate event from connection-initiated', () => {
+        const dispatcher = createDispatcher();
+        bindEventsTo(dispatcher, createAnalytics());
+
+        expect(dispatcher.registered()).toContain('ton-connect-connection-link-generated');
+        expect(dispatcher.registered()).toContain('ton-connect-connection-initiated');
+    });
+
+    it('carries the source classification without claiming an initiation', () => {
+        const dispatcher = createDispatcher();
+        const analytics = createAnalytics();
+        bindEventsTo(dispatcher, analytics);
+
+        dispatcher.emit(
+            'ton-connect-connection-link-generated',
+            createConnectionLinkGeneratedEvent(version, { kind: 'http-any-wallet' }, 'trace-7')
+        );
+
+        expect(analytics.emitted).toHaveLength(1);
+        expect(analytics.emitted[0]!.method).toBe('emitConnectionLinkGenerated');
+        expect(analytics.emitted[0]!.event).toMatchObject({
+            connection_source_kind: 'http-any-wallet',
+            trace_id: 'trace-7'
         });
     });
 });

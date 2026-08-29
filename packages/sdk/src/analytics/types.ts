@@ -185,6 +185,22 @@ export type WalletSelectedEvent = TonConnectBaseEvent & {
     connection_mode?: string;
 };
 
+/**
+ * A connect link or QR was built for display, without anyone choosing to connect. Kept separate
+ * from connection-initiated so that counting initiations does not count rendered screens: the
+ * desktop universal modal builds a QR as it renders, and the desktop connection screen rebuilds
+ * one in an effect, both opening real sessions nobody asked for.
+ */
+export type ConnectionLinkGeneratedEvent = TonConnectBaseEvent & {
+    event_name: 'connection-link-generated';
+    /**
+     * One of js-embedded, js-injected, http-specific-wallet, http-any-wallet, wallet-connect.
+     */
+    connection_source_kind: string;
+    js_bridge_key?: string;
+    bridge_url?: string;
+};
+
 export type ConnectionCompletedEvent = TonConnectBaseEvent &
     WalletInfo &
     SessionInfo & {
@@ -355,6 +371,7 @@ export type JsBridgeError = BaseJsBridgeEvent & {
 export type TonConnectEvent =
     | ConnectionStartedEvent
     | ConnectionInitiatedEvent
+    | ConnectionLinkGeneratedEvent
     | ConnectionSelectedWallet
     | WalletPreselectedEvent
     | WalletSelectedEvent

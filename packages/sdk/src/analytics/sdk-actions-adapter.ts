@@ -89,6 +89,17 @@ export function bindEventsTo(
         });
     });
 
+    eventDispatcher.addEventListener('ton-connect-connection-link-generated', event => {
+        const { detail } = event;
+        analytics.emitConnectionLinkGenerated({
+            versions: buildVersionInfo(detail.custom_data),
+            connection_source_kind: detail.connection_source_kind,
+            js_bridge_key: detail.js_bridge_key,
+            bridge_url: detail.bridge_url,
+            trace_id: detail.trace_id ?? undefined
+        });
+    });
+
     eventDispatcher.addEventListener('ton-connect-connection-completed', event => {
         const { detail } = event;
         analytics.emitConnectionCompleted({

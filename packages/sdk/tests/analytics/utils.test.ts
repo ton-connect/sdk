@@ -11,6 +11,7 @@ describe.each([
     // pascalToKebab(method minus 'emit'), while the type side derives the method via
     // KebabToPascal. If these disagree the event silently lands under the wrong name.
     { input: 'ConnectionInitiated', expected: 'connection-initiated' },
+    { input: 'ConnectionLinkGenerated', expected: 'connection-link-generated' },
     { input: 'WalletPreselected', expected: 'wallet-preselected' },
     { input: 'WalletSelected', expected: 'wallet-selected' },
     { input: '', expected: '' }

@@ -14,6 +14,7 @@ export type {
 export {
     createConnectionStartedEvent,
     createConnectionInitiatedEvent,
+    createConnectionLinkGeneratedEvent,
     createConnectionErrorEvent,
     createConnectionCompletedEvent,
     createConnectionRestoringStartedEvent,
@@ -40,6 +41,7 @@ export type {
     ConnectionEvent,
     ConnectionStartedEvent,
     ConnectionInitiatedEvent,
+    ConnectionLinkGeneratedEvent,
     ConnectionCompletedEvent,
     ConnectionErrorEvent,
     ConnectionRestoringEvent,

@@ -106,13 +106,15 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
     const generateUniversalLink = (): void => {
         // TODO: prevent double generation of universal link later and remove try-catch
         try {
+            // Runs from an effect on mount and can re-run; it only produces the QR shown on this
+            // screen, so it is not an initiation the user asked for.
             const universalLink = connector.connect(
                 {
                     universalLink: props.wallet.universalLink,
                     bridgeUrl: props.wallet.bridgeUrl
                 },
                 props.additionalRequest,
-                { traceId: props.walletsModalState?.traceId }
+                { traceId: props.walletsModalState?.traceId, linkDisplayOnly: true }
             );
 
             setUniversalLink(universalLink);

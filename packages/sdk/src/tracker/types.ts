@@ -255,6 +255,63 @@ export function createConnectionInitiatedEvent(
 }
 
 /**
+ * A connect URL or QR code was built for display, without anyone choosing to connect.
+ *
+ * Separate from {@link ConnectionInitiatedEvent} rather than a flag on it, because the two are
+ * only distinguishable by intent and a flag would have to be remembered in every query. The
+ * desktop universal modal builds a QR as it renders, and the desktop connection screen rebuilds
+ * one in an effect — both open a real session, so they are indistinguishable downstream from a
+ * connect a user asked for.
+ *
+ * Carries the same source classification, so QR displays can be counted per wallet or per
+ * bridge without inflating initiations.
+ */
+export type ConnectionLinkGeneratedEvent = {
+    /**
+     * Event type.
+     */
+    type: 'connection-link-generated';
+    /**
+     * How the link would connect, had it been used.
+     */
+    connection_source_kind: WalletConnectionSourceKind;
+    /**
+     * Injected bridge key, for `js-embedded` and `js-injected` sources.
+     */
+    js_bridge_key?: string;
+    /**
+     * Bridge URL, for an `http-specific-wallet` source.
+     */
+    bridge_url?: string;
+    /**
+     * Custom data for the connection.
+     */
+    custom_data: Version;
+    /**
+     * Unique identifier used for tracking a specific user flow.
+     */
+    trace_id?: string | null;
+};
+
+/**
+ * Create a connection link generated event.
+ */
+export function createConnectionLinkGeneratedEvent(
+    version: Version,
+    source: WalletConnectionSourceInfo,
+    traceId?: string | null
+): ConnectionLinkGeneratedEvent {
+    return {
+        type: 'connection-link-generated',
+        connection_source_kind: source.kind,
+        js_bridge_key: source.jsBridgeKey,
+        bridge_url: source.bridgeUrl,
+        custom_data: createVersionInfo(version),
+        trace_id: traceId ?? null
+    };
+}
+
+/**
  * Successful connection event when a user successfully connected a wallet.
  */
 export type ConnectionCompletedEvent = {
@@ -370,6 +427,7 @@ export function createConnectionErrorEvent(
 export type ConnectionEvent =
     | ConnectionStartedEvent
     | ConnectionInitiatedEvent
+    | ConnectionLinkGeneratedEvent
     | ConnectionCompletedEvent
     | ConnectionErrorEvent;
 

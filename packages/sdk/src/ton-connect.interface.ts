@@ -75,8 +75,8 @@ export interface ITonConnect {
      *   `{ bridgeUrl }` entries for a multi-wallet connection.
      * @param request — additional `ConnectItem`s to attach.
      * @param options — `openingDeadlineMS` deadline, `signal` for cancellation,
-     *   `embeddedRequest` to fold an action into the connect URL, and the
-     *   common `traceId` analytics id.
+     *   `embeddedRequest` to fold an action into the connect URL, `linkDisplayOnly` when the
+     *   call only builds a link to display, and the common `traceId` analytics id.
      */
     connect<T extends WalletConnectionSource | Pick<WalletConnectionSourceHTTP, 'bridgeUrl'>[]>(
         wallet: T,
@@ -92,6 +92,12 @@ export interface ITonConnect {
              * @see [Connect-and-act in one tap (docs)](https://docs.ton.org/applications/ton-connect/how-to/embedded-request)
              */
             embeddedRequest?: ConsumableLike<EmbeddedRequest>;
+            /**
+             * Set when this call exists only to render a link or QR code, not because a user
+             * chose to connect. Such calls report `connection-link-generated` instead of
+             * `connection-initiated`, so counting initiations does not count screens.
+             */
+            linkDisplayOnly?: boolean;
         }>
     ): T extends WalletConnectionSourceJS
         ? void

@@ -307,6 +307,12 @@ export class TonConnect implements ITonConnect {
             openingDeadlineMS?: number;
             signal?: AbortSignal;
             embeddedRequest?: ConsumableLike<EmbeddedRequest>;
+            /**
+             * Set when this call exists only to render a link or QR code, not because a user
+             * chose to connect. Such calls report `connection-link-generated` instead of
+             * `connection-initiated`, so counting initiations does not count screens.
+             */
+            linkDisplayOnly?: boolean;
         }>
     ): T extends WalletConnectionSourceJS
         ? void
@@ -323,6 +329,12 @@ export class TonConnect implements ITonConnect {
             openingDeadlineMS?: number;
             signal?: AbortSignal;
             embeddedRequest?: ConsumableLike<EmbeddedRequest>;
+            /**
+             * Set when this call exists only to render a link or QR code, not because a user
+             * chose to connect. Such calls report `connection-link-generated` instead of
+             * `connection-initiated`, so counting initiations does not count screens.
+             */
+            linkDisplayOnly?: boolean;
         }>
     ): T extends WalletConnectionSourceJS
         ? void
@@ -339,11 +351,23 @@ export class TonConnect implements ITonConnect {
                   openingDeadlineMS?: number;
                   signal?: AbortSignal;
                   embeddedRequest?: ConsumableLike<EmbeddedRequest>;
+                  /**
+                   * Set when this call exists only to render a link or QR code, not because a user
+                   * chose to connect. Such calls report `connection-link-generated` instead of
+                   * `connection-initiated`, so counting initiations does not count screens.
+                   */
+                  linkDisplayOnly?: boolean;
               }>,
         additionalOptions?: OptionalTraceable<{
             openingDeadlineMS?: number;
             signal?: AbortSignal;
             embeddedRequest?: ConsumableLike<EmbeddedRequest>;
+            /**
+             * Set when this call exists only to render a link or QR code, not because a user
+             * chose to connect. Such calls report `connection-link-generated` instead of
+             * `connection-initiated`, so counting initiations does not count screens.
+             */
+            linkDisplayOnly?: boolean;
         }>
     ): void | string {
         // TODO: remove deprecated method
@@ -352,6 +376,12 @@ export class TonConnect implements ITonConnect {
             openingDeadlineMS?: number;
             signal?: AbortSignal;
             embeddedRequest?: ConsumableLike<EmbeddedRequest>;
+            /**
+             * Set when this call exists only to render a link or QR code, not because a user
+             * chose to connect. Such calls report `connection-link-generated` instead of
+             * `connection-initiated`, so counting initiations does not count screens.
+             */
+            linkDisplayOnly?: boolean;
         }> = {
             ...additionalOptions
         };
@@ -427,16 +457,19 @@ export class TonConnect implements ITonConnect {
 
         const traceId = options?.traceId ?? UUIDv7();
         this.tracker.trackConnectionStarted(traceId);
-        // Counts connect initiations, not user actions: a single journey legitimately produces
-        // several of these with different source kinds, sharing one trace id.
-        this.tracker.trackConnectionInitiated(
-            // Wrapped, not passed by reference: `isInsideWalletBrowser` is a plain static that
-            // reads `this.window`, so an unbound call throws — and the tracker swallows it.
-            describeWalletConnectionSource(wallet, key =>
-                InjectedProvider.isInsideWalletBrowser(key)
-            ),
-            traceId
+        // Wrapped, not passed by reference: `isInsideWalletBrowser` is a plain static that reads
+        // `this.window`, so an unbound call throws — and the tracker swallows it.
+        const connectionSource = describeWalletConnectionSource(wallet, key =>
+            InjectedProvider.isInsideWalletBrowser(key)
         );
+
+        // A call made only to render a link or QR opens a real session but reflects no choice, so
+        // it is reported separately rather than inflating initiations.
+        if (options?.linkDisplayOnly) {
+            this.tracker.trackConnectionLinkGenerated(connectionSource, traceId);
+        } else {
+            this.tracker.trackConnectionInitiated(connectionSource, traceId);
+        }
 
         const peeked = embeddedRequest.peek();
         const wireConsumable = peeked
@@ -1066,6 +1099,7 @@ export class TonConnect implements ITonConnect {
 
         const analytics = new AnalyticsManager({
             environment: this.environment,
+            analyticsUrl: analyticsSettings?.url,
             mode
         });
         this.analytics = analytics;
