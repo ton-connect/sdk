@@ -91,6 +91,15 @@ export {
     isConnectUrl
 } from './utils/url';
 export { enableQaMode, isQaModeEnabled } from './utils/qa-mode';
+export {
+    getTgUser,
+    getTmaPlatform,
+    getTmaWebAppVersion,
+    isInTMA,
+    isInTelegramBrowser,
+    isTmaPlatform
+} from './utils/tma';
+export type { TmaPlatform } from './utils/tma';
 export { Consumable, ConsumableLike } from './utils/consumable';
 export type { AnalyticsMode } from './analytics/analytics-manager';
 
