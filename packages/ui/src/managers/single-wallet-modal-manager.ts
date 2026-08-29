@@ -15,6 +15,7 @@ import { widgetController } from 'src/app/widget-controller';
 import { SingleWalletModal, SingleWalletModalState } from 'src/models/single-wallet-modal';
 import { isInTMA, sendExpand } from 'src/app/utils/tma-api';
 import { isMobile, updateIsMobile } from 'src/app/hooks/isMobile';
+import { trackWalletPick } from 'src/app/utils/wallet-selection';
 import { TonConnectUIError } from 'src/errors';
 import { applyWalletsListConfiguration, eqWalletName } from 'src/app/utils/wallets';
 import { TonConnectUITracker } from 'src/tracker/ton-connect-ui-tracker';
@@ -122,21 +123,13 @@ export class SingleWalletModalManager implements SingleWalletModal {
             // components themselves do on open.
             updateIsMobile();
 
-            if (isMobile()) {
-                this.tracker.trackWalletSelected(
-                    externalWallet.appName,
-                    'single-wallet-modal',
-                    'auto-dapp-directed',
-                    traceId
-                );
-            } else {
-                this.tracker.trackWalletPreselected(
-                    externalWallet.appName,
-                    'single-wallet-modal',
-                    'auto-dapp-directed',
-                    traceId
-                );
-            }
+            trackWalletPick(this.tracker, {
+                isMobile: isMobile(),
+                walletAppName: externalWallet.appName,
+                surface: 'single-wallet-modal',
+                selectionSource: 'auto-dapp-directed',
+                traceId
+            });
 
             return this.openSingleWalletModal(externalWallet, { traceId });
         }

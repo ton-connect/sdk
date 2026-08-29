@@ -28,6 +28,7 @@ import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { useI18n } from '@solid-primitives/i18n';
 import { appState } from 'src/app/state/app.state';
 import { applyWalletsListConfiguration, eqWalletName } from 'src/app/utils/wallets';
+import { trackWalletPick } from 'src/app/utils/wallet-selection';
 import { isMobile, updateIsMobile } from 'src/app/hooks/isMobile';
 import { AllWalletsListModal } from 'src/app/views/modals/wallets-modal/all-wallets-list-modal';
 import { LoaderIcon } from 'src/app/components';
@@ -186,17 +187,18 @@ export const WalletsModal: Component = () => {
      */
     const selectWallet = (wallet: UIWalletInfo, surface: WalletSelectionSurface): void => {
         const traceId = walletsModalState().traceId;
-        const tracker = appState.tracker;
 
         // No trace means nothing downstream could be correlated with this pick, so emitting would
         // produce a row the warehouse cannot join to anything — the exact defect this event
         // replaces. The modal always carries one in practice; skipping is the safe fallback.
         if (traceId) {
-            if (isMobile()) {
-                tracker.trackWalletSelected(wallet.appName, surface, 'manual', traceId);
-            } else {
-                tracker.trackWalletPreselected(wallet.appName, surface, 'manual', traceId);
-            }
+            trackWalletPick(appState.tracker, {
+                isMobile: isMobile(),
+                walletAppName: wallet.appName,
+                surface,
+                selectionSource: 'manual',
+                traceId
+            });
         }
 
         setSelectedWalletInfo(wallet);
