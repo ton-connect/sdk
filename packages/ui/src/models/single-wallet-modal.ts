@@ -1,4 +1,4 @@
-import { WalletInfoRemote } from '@tonconnect/sdk';
+import { OptionalTraceable, WalletInfoRemote } from '@tonconnect/sdk';
 import { WalletsModalCloseReason } from 'src/models/wallets-modal';
 
 export interface SingleWalletModal {
@@ -59,9 +59,12 @@ export type SingleWalletModalClosed = {
 };
 
 /**
- * Modal window state.
+ * Discriminated union of all modal states, wrapped in `OptionalTraceable`
+ * so consumers can correlate state events with the analytics trace id.
  */
-export type SingleWalletModalState = SingleWalletModalOpened | SingleWalletModalClosed;
+export type SingleWalletModalState = OptionalTraceable<
+    SingleWalletModalOpened | SingleWalletModalClosed
+>;
 
 /**
  * Modal window close reason.

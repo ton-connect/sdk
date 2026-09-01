@@ -245,7 +245,9 @@ export class BridgeProvider implements HTTPProvider {
         }
 
         // notify listeners about stored connection
-        this.listeners.forEach(listener => listener({ ...storedConnection.connectEvent, traceId }));
+        this.listeners.forEach(listener =>
+            listener({ ...storedConnection.connectEvent, traceId, restored: true })
+        );
 
         // wait for the connection to be opened
         try {

@@ -22,6 +22,15 @@ export interface AnalyticsSettings {
      * @default 'telemetry'
      */
     mode?: AnalyticsMode;
+
+    /**
+     * Where to send events. Defaults to the hosted collector.
+     *
+     * Point this at a local endpoint to inspect what the SDK actually emits without reaching
+     * the network — the only way to verify analytics changes locally, since the hosted collector
+     * rejects requests from a development origin.
+     */
+    url?: string;
 }
 
 /**

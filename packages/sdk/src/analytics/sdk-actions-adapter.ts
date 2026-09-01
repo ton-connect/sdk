@@ -51,9 +51,61 @@ export function bindEventsTo(
         });
     });
 
+    // UI-emitted, so the prefix is `ton-connect-ui-`. Both prefixes type-check here; the wrong
+    // one silently never fires.
+    eventDispatcher.addEventListener('ton-connect-ui-wallet-preselected', event => {
+        const { detail } = event;
+        analytics.emitWalletPreselected({
+            versions: buildVersionInfo(detail.custom_data),
+            wallet_app_name: detail.wallet_app_name,
+            surface: detail.surface,
+            selection_source: detail.selection_source,
+            trace_id: detail.trace_id
+        });
+    });
+
+    eventDispatcher.addEventListener('ton-connect-ui-wallet-selected', event => {
+        const { detail } = event;
+        analytics.emitWalletSelected({
+            versions: buildVersionInfo(detail.custom_data),
+            wallet_app_name: detail.wallet_app_name,
+            surface: detail.surface,
+            selection_source: detail.selection_source,
+            connection_mode: detail.connection_mode,
+            trace_id: detail.trace_id
+        });
+    });
+
+    // Core-emitted, so the prefix is `ton-connect-`, not `ton-connect-ui-`. Both prefixes
+    // type-check here; the wrong one silently never fires.
+    eventDispatcher.addEventListener('ton-connect-connection-initiated', event => {
+        const { detail } = event;
+        analytics.emitConnectionInitiated({
+            versions: buildVersionInfo(detail.custom_data),
+            connection_source_kind: detail.connection_source_kind,
+            bridge_key: detail.bridge_key,
+            bridge_url: detail.bridge_url,
+            trace_id: detail.trace_id ?? undefined
+        });
+    });
+
+    eventDispatcher.addEventListener('ton-connect-connection-link-generated', event => {
+        const { detail } = event;
+        analytics.emitConnectionLinkGenerated({
+            versions: buildVersionInfo(detail.custom_data),
+            connection_source_kind: detail.connection_source_kind,
+            bridge_key: detail.bridge_key,
+            bridge_url: detail.bridge_url,
+            trace_id: detail.trace_id ?? undefined
+        });
+    });
+
     eventDispatcher.addEventListener('ton-connect-connection-completed', event => {
         const { detail } = event;
-        analytics.emitConnectionCompleted(buildTonConnectEvent(detail));
+        analytics.emitConnectionCompleted({
+            ...buildTonConnectEvent(detail),
+            is_restore: detail.is_restore
+        });
     });
     eventDispatcher.addEventListener('ton-connect-connection-error', event => {
         const { detail } = event;

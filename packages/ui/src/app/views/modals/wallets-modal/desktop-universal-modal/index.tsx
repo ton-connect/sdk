@@ -38,9 +38,11 @@ export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = prop
     });
 
     setLastSelectedWalletInfo({ openMethod: 'qrcode' });
+    // Built as the modal renders, to show a QR — nobody has chosen to connect yet.
     const request = createMemo(() =>
         connector.connect(walletsBridges(), props.additionalRequest, {
-            traceId: props.walletModalState.traceId
+            traceId: props.walletModalState.traceId,
+            linkDisplayOnly: true
         })
     );
 

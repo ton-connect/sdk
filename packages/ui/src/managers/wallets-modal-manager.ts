@@ -151,7 +151,7 @@ export class WalletsModalManager implements WalletsModal {
     ): Promise<void> {
         const traceId = options?.traceId ?? UUIDv7();
 
-        this.tracker.trackConnectionStarted();
+        this.tracker.trackConnectionStarted(traceId);
         const walletsList = await this.connector.getWallets();
         const embeddedWallet = walletsList.find(isWalletInfoCurrentlyEmbedded);
 
@@ -194,6 +194,12 @@ export class WalletsModalManager implements WalletsModal {
         options: Traceable
     ): void {
         const connect = (parameters?: ConnectAdditionalRequest): void => {
+            this.tracker.trackWalletSelected(
+                embeddedWallet.appName,
+                'embedded',
+                'auto-embedded',
+                options.traceId
+            );
             setLastSelectedWalletInfo(embeddedWallet);
             this.connector.connect({ jsBridgeKey: embeddedWallet.jsBridgeKey }, parameters, {
                 traceId: options.traceId

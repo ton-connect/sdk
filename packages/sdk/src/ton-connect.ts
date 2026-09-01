@@ -25,6 +25,7 @@ import {
 } from 'src/errors/wallet';
 import {
     Account,
+    describeWalletConnectionSource,
     EmbeddedRequest,
     RequiredFeatures,
     Wallet,
@@ -306,6 +307,12 @@ export class TonConnect implements ITonConnect {
             openingDeadlineMS?: number;
             signal?: AbortSignal;
             embeddedRequest?: ConsumableLike<EmbeddedRequest>;
+            /**
+             * Set when this call exists only to render a link or QR code, not because a user
+             * chose to connect. Such calls report `connection-link-generated` instead of
+             * `connection-initiated`, so counting initiations does not count screens.
+             */
+            linkDisplayOnly?: boolean;
         }>
     ): T extends WalletConnectionSourceJS
         ? void
@@ -322,6 +329,12 @@ export class TonConnect implements ITonConnect {
             openingDeadlineMS?: number;
             signal?: AbortSignal;
             embeddedRequest?: ConsumableLike<EmbeddedRequest>;
+            /**
+             * Set when this call exists only to render a link or QR code, not because a user
+             * chose to connect. Such calls report `connection-link-generated` instead of
+             * `connection-initiated`, so counting initiations does not count screens.
+             */
+            linkDisplayOnly?: boolean;
         }>
     ): T extends WalletConnectionSourceJS
         ? void
@@ -338,11 +351,23 @@ export class TonConnect implements ITonConnect {
                   openingDeadlineMS?: number;
                   signal?: AbortSignal;
                   embeddedRequest?: ConsumableLike<EmbeddedRequest>;
+                  /**
+                   * Set when this call exists only to render a link or QR code, not because a user
+                   * chose to connect. Such calls report `connection-link-generated` instead of
+                   * `connection-initiated`, so counting initiations does not count screens.
+                   */
+                  linkDisplayOnly?: boolean;
               }>,
         additionalOptions?: OptionalTraceable<{
             openingDeadlineMS?: number;
             signal?: AbortSignal;
             embeddedRequest?: ConsumableLike<EmbeddedRequest>;
+            /**
+             * Set when this call exists only to render a link or QR code, not because a user
+             * chose to connect. Such calls report `connection-link-generated` instead of
+             * `connection-initiated`, so counting initiations does not count screens.
+             */
+            linkDisplayOnly?: boolean;
         }>
     ): void | string {
         // TODO: remove deprecated method
@@ -351,6 +376,12 @@ export class TonConnect implements ITonConnect {
             openingDeadlineMS?: number;
             signal?: AbortSignal;
             embeddedRequest?: ConsumableLike<EmbeddedRequest>;
+            /**
+             * Set when this call exists only to render a link or QR code, not because a user
+             * chose to connect. Such calls report `connection-link-generated` instead of
+             * `connection-initiated`, so counting initiations does not count screens.
+             */
+            linkDisplayOnly?: boolean;
         }> = {
             ...additionalOptions
         };
@@ -426,6 +457,19 @@ export class TonConnect implements ITonConnect {
 
         const traceId = options?.traceId ?? UUIDv7();
         this.tracker.trackConnectionStarted(traceId);
+        // Wrapped, not passed by reference: `isInsideWalletBrowser` is a plain static that reads
+        // `this.window`, so an unbound call throws — and the tracker swallows it.
+        const connectionSource = describeWalletConnectionSource(wallet, key =>
+            InjectedProvider.isInsideWalletBrowser(key)
+        );
+
+        // A call made only to render a link or QR opens a real session but reflects no choice, so
+        // it is reported separately rather than inflating initiations.
+        if (options?.linkDisplayOnly) {
+            this.tracker.trackConnectionLinkGenerated(connectionSource, traceId);
+        } else {
+            this.tracker.trackConnectionInitiated(connectionSource, traceId);
+        }
 
         const peeked = embeddedRequest.peek();
         const wireConsumable = peeked
@@ -1055,6 +1099,7 @@ export class TonConnect implements ITonConnect {
 
         const analytics = new AnalyticsManager({
             environment: this.environment,
+            analyticsUrl: analyticsSettings?.url,
             mode
         });
         this.analytics = analytics;
@@ -1103,7 +1148,8 @@ export class TonConnect implements ITonConnect {
             case 'connect':
                 this.onWalletConnected(e.payload, {
                     traceId: e.traceId,
-                    response: e.response
+                    response: e.response,
+                    restored: e.restored
                 });
                 break;
             case 'connect_error':
@@ -1123,7 +1169,7 @@ export class TonConnect implements ITonConnect {
 
     private onWalletConnected(
         connectEvent: ConnectEventSuccess['payload'],
-        options: Traceable<{ response?: WalletResponse<RpcMethod> }>
+        options: Traceable<{ response?: WalletResponse<RpcMethod>; restored?: boolean }>
     ): void {
         const method = this.pendingEmbeddedRequestMethod;
         this.pendingEmbeddedRequestMethod = undefined;
@@ -1243,7 +1289,12 @@ export class TonConnect implements ITonConnect {
         this.wallet = wallet;
 
         const sessionInfo = this.getSessionInfo();
-        this.tracker.trackConnectionCompleted(wallet, sessionInfo, options?.traceId);
+        this.tracker.trackConnectionCompleted(
+            wallet,
+            sessionInfo,
+            options?.traceId,
+            options?.restored
+        );
     }
 
     private onWalletConnectError(error: TonConnectError): void {

@@ -10,6 +10,8 @@ import {
     SendTransactionResponse,
     SignDataResponse,
     Wallet,
+    WalletConnectionSourceInfo,
+    WalletConnectionSourceKind,
     hasMessages
 } from 'src/models';
 import { isTelegramUrl } from 'src/utils/url';
@@ -198,6 +200,118 @@ export function createConnectionStartedEvent(
 }
 
 /**
+ * A connection was initiated against a particular kind of source.
+ *
+ * Unlike {@link SelectedWalletEvent}, which only the UI package emits, this fires from the core
+ * SDK on every `connect()` — so it also covers dApps that ship their own wallet picker, deep-link
+ * straight to a wallet, or use `@tonconnect/sdk` without `@tonconnect/ui` at all.
+ *
+ * It counts connect *initiations*, not user actions: a single journey can legitimately produce
+ * several, with different source kinds, sharing one trace id.
+ */
+export type ConnectionInitiatedEvent = {
+    /**
+     * Event type.
+     */
+    type: 'connection-initiated';
+    /**
+     * How the connection was initiated.
+     */
+    connection_source_kind: WalletConnectionSourceKind;
+    /**
+     * Bridge key from the wallets list, for `js-embedded` and `js-injected` sources.
+     */
+    bridge_key?: string;
+    /**
+     * Bridge URL, for an `http-specific-wallet` source.
+     */
+    bridge_url?: string;
+    /**
+     * Custom data for the connection.
+     */
+    custom_data: Version;
+    /**
+     * Unique identifier used for tracking a specific user flow.
+     */
+    trace_id?: string | null;
+};
+
+/**
+ * Create a connection initiated event.
+ */
+export function createConnectionInitiatedEvent(
+    version: Version,
+    source: WalletConnectionSourceInfo,
+    traceId?: string | null
+): ConnectionInitiatedEvent {
+    return {
+        type: 'connection-initiated',
+        connection_source_kind: source.kind,
+        bridge_key: source.jsBridgeKey,
+        bridge_url: source.bridgeUrl,
+        custom_data: createVersionInfo(version),
+        trace_id: traceId ?? null
+    };
+}
+
+/**
+ * A connect URL or QR code was built for display, without anyone choosing to connect.
+ *
+ * Separate from {@link ConnectionInitiatedEvent} rather than a flag on it, because the two are
+ * only distinguishable by intent and a flag would have to be remembered in every query. The
+ * desktop universal modal builds a QR as it renders, and the desktop connection screen rebuilds
+ * one in an effect — both open a real session, so they are indistinguishable downstream from a
+ * connect a user asked for.
+ *
+ * Carries the same source classification, so QR displays can be counted per wallet or per
+ * bridge without inflating initiations.
+ */
+export type ConnectionLinkGeneratedEvent = {
+    /**
+     * Event type.
+     */
+    type: 'connection-link-generated';
+    /**
+     * How the link would connect, had it been used.
+     */
+    connection_source_kind: WalletConnectionSourceKind;
+    /**
+     * Bridge key from the wallets list, for `js-embedded` and `js-injected` sources.
+     */
+    bridge_key?: string;
+    /**
+     * Bridge URL, for an `http-specific-wallet` source.
+     */
+    bridge_url?: string;
+    /**
+     * Custom data for the connection.
+     */
+    custom_data: Version;
+    /**
+     * Unique identifier used for tracking a specific user flow.
+     */
+    trace_id?: string | null;
+};
+
+/**
+ * Create a connection link generated event.
+ */
+export function createConnectionLinkGeneratedEvent(
+    version: Version,
+    source: WalletConnectionSourceInfo,
+    traceId?: string | null
+): ConnectionLinkGeneratedEvent {
+    return {
+        type: 'connection-link-generated',
+        connection_source_kind: source.kind,
+        bridge_key: source.jsBridgeKey,
+        bridge_url: source.bridgeUrl,
+        custom_data: createVersionInfo(version),
+        trace_id: traceId ?? null
+    };
+}
+
+/**
  * Successful connection event when a user successfully connected a wallet.
  */
 export type ConnectionCompletedEvent = {
@@ -209,6 +323,13 @@ export type ConnectionCompletedEvent = {
      * Connection success flag.
      */
     is_success: true;
+    /**
+     * `true` when this completion is a replay of a stored session by
+     * `restoreConnection()` rather than a fresh connection. Restores fire on every page load
+     * for an already-connected user, so counting completions without excluding them measures
+     * page views rather than connections.
+     */
+    is_restore: boolean;
     /**
      * Unique identifier used for tracking a specific user flow.
      */
@@ -226,11 +347,13 @@ export function createConnectionCompletedEvent(
     version: Version,
     wallet: Wallet | null,
     sessionInfo?: SessionInfo | null,
-    traceId?: string | null
+    traceId?: string | null,
+    isRestore?: boolean
 ): ConnectionCompletedEvent {
     return {
         type: 'connection-completed',
         is_success: true,
+        is_restore: !!isRestore,
         trace_id: traceId ?? null,
         ...createConnectionInfo(version, wallet, sessionInfo)
     };
@@ -303,6 +426,8 @@ export function createConnectionErrorEvent(
  */
 export type ConnectionEvent =
     | ConnectionStartedEvent
+    | ConnectionInitiatedEvent
+    | ConnectionLinkGeneratedEvent
     | ConnectionCompletedEvent
     | ConnectionErrorEvent;
 
@@ -920,6 +1045,151 @@ export function createSelectedWalletEvent(
 }
 
 /**
+ * Where in the UI a wallet was picked. Recorded at the click, never inferred — the field this
+ * replaces was a module-level signal's initial value, which is why 93% of rows reported a
+ * "no list shown" default that no code path ever assigned.
+ *
+ * `embedded` means no modal was rendered at all: the dApp is running inside a wallet's own
+ * browser and that wallet was connected directly.
+ */
+export type WalletSelectionSurface =
+    | 'universal-modal'
+    | 'all-wallets-list'
+    | 'connection-modal'
+    | 'single-wallet-modal'
+    | 'embedded';
+
+/**
+ * Who made the choice. The `auto-` prefix groups every non-user-initiated case, so consumers can
+ * exclude them all with a prefix match rather than an exhaustive list.
+ *
+ * - `manual` — a human clicked a wallet in our UI.
+ * - `auto-embedded` — running inside a wallet's browser, so that wallet was chosen by circumstance.
+ * - `auto-dapp-directed` — the dApp named the wallet via `openSingleWalletModal()`; the user may
+ *   well have clicked something, but not in our UI.
+ */
+export type WalletSelectionSource = 'manual' | 'auto-embedded' | 'auto-dapp-directed';
+
+/**
+ * A wallet was picked, but nothing is committed yet.
+ *
+ * Desktop only in practice: picking a wallet there opens a second screen offering QR, browser
+ * extension and desktop app, so the choice is not final. A preselection with no matching
+ * {@link WalletSelectedEvent} on the same trace means the user scanned the default QR.
+ */
+export type WalletPreselectedEvent = {
+    /**
+     * Event type.
+     */
+    type: 'wallet-preselected';
+    /**
+     * Wallet the user picked: 'tonkeeper', 'tonhub', etc.
+     */
+    wallet_app_name: string;
+    /**
+     * Where the pick happened.
+     */
+    surface: WalletSelectionSurface;
+    /**
+     * Who made the choice.
+     */
+    selection_source: WalletSelectionSource;
+    /**
+     * Custom data for the connection.
+     */
+    custom_data: Version;
+    /**
+     * Unique identifier used for tracking a specific user flow.
+     */
+    trace_id: string;
+};
+
+/**
+ * Create a wallet preselected event.
+ */
+export function createWalletPreselectedEvent(
+    version: Version,
+    walletAppName: string,
+    surface: WalletSelectionSurface,
+    selectionSource: WalletSelectionSource,
+    traceId: string
+): WalletPreselectedEvent {
+    return {
+        type: 'wallet-preselected',
+        wallet_app_name: walletAppName,
+        surface,
+        selection_source: selectionSource,
+        custom_data: createVersionInfo(version),
+        trace_id: traceId
+    };
+}
+
+/**
+ * This wallet is the one being connected with.
+ *
+ * On mobile the pick is the commitment — the connection modal redirects to the wallet app on
+ * mount. On desktop it is the later click on the second screen's Mobile / Browser Extension /
+ * Desktop buttons.
+ *
+ * Unlike {@link SelectedWalletEvent}, which it replaces, this is emitted directly from the click
+ * handler with every field supplied by the call site. Nothing here is reconstructed from ambient
+ * state, and `trace_id` is required rather than optional.
+ */
+export type WalletSelectedEvent = {
+    /**
+     * Event type.
+     */
+    type: 'wallet-selected';
+    /**
+     * Wallet being connected with: 'tonkeeper', 'tonhub', etc.
+     */
+    wallet_app_name: string;
+    /**
+     * Where the selection happened.
+     */
+    surface: WalletSelectionSurface;
+    /**
+     * Who made the choice.
+     */
+    selection_source: WalletSelectionSource;
+    /**
+     * Which transport the user picked on the desktop connection screen. Set only when `surface`
+     * is `connection-modal`, because the concept does not exist on the other surfaces.
+     */
+    connection_mode?: 'mobile' | 'desktop' | 'extension';
+    /**
+     * Custom data for the connection.
+     */
+    custom_data: Version;
+    /**
+     * Unique identifier used for tracking a specific user flow.
+     */
+    trace_id: string;
+};
+
+/**
+ * Create a wallet selected event.
+ */
+export function createWalletSelectedEvent(
+    version: Version,
+    walletAppName: string,
+    surface: WalletSelectionSurface,
+    selectionSource: WalletSelectionSource,
+    traceId: string,
+    connectionMode?: 'mobile' | 'desktop' | 'extension'
+): WalletSelectedEvent {
+    return {
+        type: 'wallet-selected',
+        wallet_app_name: walletAppName,
+        surface,
+        selection_source: selectionSource,
+        connection_mode: connectionMode,
+        custom_data: createVersionInfo(version),
+        trace_id: traceId
+    };
+}
+
+/**
  * User action events.
  */
 export type SdkActionEvent =
@@ -930,7 +1200,9 @@ export type SdkActionEvent =
     | TransactionSigningEvent
     | DataSigningEvent
     | WalletModalOpenedEvent
-    | SelectedWalletEvent;
+    | SelectedWalletEvent
+    | WalletPreselectedEvent
+    | WalletSelectedEvent;
 
 /**
  * Parameters without version field.

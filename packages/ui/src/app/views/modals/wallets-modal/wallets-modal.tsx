@@ -6,7 +6,8 @@ import {
     Wallet,
     WalletInfoRemote,
     checkRequiredWalletFeatures,
-    WalletInfo
+    WalletInfo,
+    WalletSelectionSurface
 } from '@tonconnect/sdk';
 import {
     Component,
@@ -27,6 +28,7 @@ import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { useI18n } from '@solid-primitives/i18n';
 import { appState } from 'src/app/state/app.state';
 import { applyWalletsListConfiguration, eqWalletName } from 'src/app/utils/wallets';
+import { trackWalletPick } from 'src/app/utils/wallet-selection';
 import { isMobile, updateIsMobile } from 'src/app/hooks/isMobile';
 import { AllWalletsListModal } from 'src/app/views/modals/wallets-modal/all-wallets-list-modal';
 import { LoaderIcon } from 'src/app/components';
@@ -174,6 +176,34 @@ export const WalletsModal: Component = () => {
         setSelectedTab('universal');
     };
 
+    /**
+     * Records the pick where it happens, with the surface supplied by the caller.
+     *
+     * Mobile and desktop differ in how many decisions the user makes: on mobile the connection
+     * modal redirects to the wallet on mount, so the tap is the commitment; on desktop it opens a
+     * second screen offering QR, extension and desktop app, so the tap is only a preselection and
+     * the commitment — if the user makes one rather than scanning the QR — is recorded later by
+     * the connection modal's footer buttons.
+     */
+    const selectWallet = (wallet: UIWalletInfo, surface: WalletSelectionSurface): void => {
+        const traceId = walletsModalState().traceId;
+
+        // No trace means nothing downstream could be correlated with this pick, so emitting would
+        // produce a row the warehouse cannot join to anything — the exact defect this event
+        // replaces. The modal always carries one in practice; skipping is the safe fallback.
+        if (traceId) {
+            trackWalletPick(appState.tracker, {
+                isMobile: isMobile(),
+                walletAppName: wallet.appName,
+                surface,
+                selectionSource: 'manual',
+                traceId
+            });
+        }
+
+        setSelectedWalletInfo(wallet);
+    };
+
     const onSelectWallet = (wallet: UIWalletInfo): void => {
         setSelectedWalletInfo(wallet);
         widgetController.openWalletsModal();
@@ -247,7 +277,7 @@ export const WalletsModal: Component = () => {
                                 component={
                                     isMobile() ? MobileUniversalModal : DesktopUniversalModal
                                 }
-                                onSelect={setSelectedWalletInfo}
+                                onSelect={wallet => selectWallet(wallet, 'universal-modal')}
                                 walletModalState={walletsModalState()}
                                 walletsList={walletsList()!}
                                 additionalRequest={additionalRequest()!}
@@ -261,7 +291,8 @@ export const WalletsModal: Component = () => {
                                     tonConnectUI?.walletsRequiredFeatures ? 'strict' : 'soft'
                                 }
                                 onBack={onSelectUniversal}
-                                onSelect={setSelectedWalletInfo}
+                                traceId={walletsModalState().traceId}
+                                onSelect={wallet => selectWallet(wallet, 'all-wallets-list')}
                             />
                         </Match>
                     </Switch>

@@ -376,6 +376,7 @@ export class TonConnectUI {
         const preferredWalletName = this.preferredWalletStorage.getPreferredWalletAppName();
         setAppState({
             connector: this.connector,
+            tracker: this.tracker,
             preferredWalletAppName: preferredWalletName
         });
 
@@ -449,7 +450,7 @@ export class TonConnectUI {
         this.tracker.trackWalletModalOpened(
             visibleWallets.wallets.map(wallet => wallet.name),
             sessionId,
-            options?.traceId
+            traceId
         );
     }
 
@@ -866,6 +867,12 @@ export class TonConnectUI {
         options: Traceable
     ): Promise<ConnectedWallet> {
         const connect = (parameters?: ConnectAdditionalRequest): void => {
+            this.tracker.trackWalletSelected(
+                embeddedWallet.appName,
+                'embedded',
+                'auto-embedded',
+                options.traceId
+            );
             setLastSelectedWalletInfo(embeddedWallet);
             this.connector.connect({ jsBridgeKey: embeddedWallet.jsBridgeKey }, parameters, {
                 traceId: options.traceId
@@ -929,7 +936,7 @@ export class TonConnectUI {
         options: WaitWalletConnectionOptions
     ): Promise<ConnectedWallet> {
         return new Promise((resolve, reject) => {
-            this.tracker.trackConnectionStarted();
+            this.tracker.trackConnectionStarted(options.traceId);
             const { ignoreErrors = false, signal = null } = options;
 
             if (signal && signal.aborted) {
@@ -949,7 +956,7 @@ export class TonConnectUI {
                     unsubscribe();
                     reject(new TonConnectUIError('Wallet was not connected'));
                 } else {
-                    this.tracker.trackConnectionCompleted(wallet);
+                    this.tracker.trackConnectionCompleted(wallet, null, options.traceId);
 
                     unsubscribe();
                     resolve(wallet);

@@ -106,13 +106,15 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
     const generateUniversalLink = (): void => {
         // TODO: prevent double generation of universal link later and remove try-catch
         try {
+            // Runs from an effect on mount and can re-run; it only produces the QR shown on this
+            // screen, so it is not an initiation the user asked for.
             const universalLink = connector.connect(
                 {
                     universalLink: props.wallet.universalLink,
                     bridgeUrl: props.wallet.bridgeUrl
                 },
                 props.additionalRequest,
-                { traceId: props.walletsModalState?.traceId }
+                { traceId: props.walletsModalState?.traceId, linkDisplayOnly: true }
             );
 
             setUniversalLink(universalLink);
@@ -184,6 +186,27 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
             twaReturnUrl: appState.twaReturnUrl,
             forceRedirect: forceRedirect
         });
+    };
+
+    /**
+     * The commitment on desktop: the user has picked how to reach the wallet they preselected.
+     *
+     * Wired into the footer buttons' `onClick` rather than into the handlers themselves, because
+     * the mount-time dispatch below calls those same handlers with no user involved — emitting
+     * from inside them would report a selection nobody made.
+     */
+    const trackSelected = (mode: 'mobile' | 'desktop' | 'extension'): void => {
+        const traceId = props.walletsModalState?.traceId;
+
+        if (traceId) {
+            appState.tracker.trackWalletSelected(
+                props.wallet.appName,
+                'connection-modal',
+                'manual',
+                traceId,
+                mode
+            );
+        }
     };
 
     const onClickExtension = (): void => {
@@ -368,7 +391,10 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                 <TgButtonStyled
                     rightIcon={<TgImageStyled src={IMG.TG} />}
                     scale="s"
-                    onClick={onClickTelegram}
+                    onClick={() => {
+                        trackSelected('desktop');
+                        onClickTelegram();
+                    }}
                 >
                     <Translation translationKey="walletModal.desktopConnectionModal.openWalletOnTelegram">
                         Open Wallet in Telegram on desktop
@@ -381,7 +407,10 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                         <FooterButton
                             appearance="secondary"
                             leftIcon={<MobileIcon />}
-                            onClick={onClickMobile}
+                            onClick={() => {
+                                trackSelected('mobile');
+                                onClickMobile();
+                            }}
                         >
                             <Translation translationKey="common.mobile">Mobile</Translation>
                         </FooterButton>
@@ -390,7 +419,10 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                         <FooterButton
                             appearance="secondary"
                             leftIcon={<BrowserIcon />}
-                            onClick={onClickExtension}
+                            onClick={() => {
+                                trackSelected('extension');
+                                onClickExtension();
+                            }}
                         >
                             <Translation translationKey="common.browserExtension">
                                 Browser Extension
@@ -401,7 +433,10 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                         <FooterButton
                             appearance="secondary"
                             leftIcon={<DesktopIcon />}
-                            onClick={onClickDesktop}
+                            onClick={() => {
+                                trackSelected('desktop');
+                                onClickDesktop();
+                            }}
                         >
                             <Translation translationKey="common.desktop">Desktop</Translation>
                         </FooterButton>
