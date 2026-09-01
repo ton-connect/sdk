@@ -391,7 +391,10 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                 <TgButtonStyled
                     rightIcon={<TgImageStyled src={IMG.TG} />}
                     scale="s"
-                    onClick={onClickTelegram}
+                    onClick={() => {
+                        trackSelected('desktop');
+                        onClickTelegram();
+                    }}
                 >
                     <Translation translationKey="walletModal.desktopConnectionModal.openWalletOnTelegram">
                         Open Wallet in Telegram on desktop

@@ -59,6 +59,26 @@ describe('utils/tma: inside a Mini App', () => {
         expect(tma.getTmaWebAppVersion()).toBe('7.2');
     });
 
+    it('ignores an empty platform launch param rather than treating it as a platform', async () => {
+        // With `??` instead of a truthiness check this would keep '' and report being in a Mini
+        // App, because isInTMA only compares the platform against 'unknown'.
+        window.location.hash = '#tgWebAppPlatform=&tgWebAppVersion=7.2';
+
+        const tma = await freshDetection();
+        expect(tma.getTmaPlatform()).toBe('unknown');
+        expect(tma.isInTMA()).toBe(false);
+    });
+
+    it('does not read the version off window.Telegram, matching the original dead fallback', async () => {
+        // versionAtLeast() gates how sendOpenTelegramLink opens links, so this has to keep
+        // behaving as it did before the detection moved into core.
+        (window as { Telegram?: unknown }).Telegram = {
+            WebApp: { platform: 'ios', version: '9.9' }
+        };
+
+        expect((await freshDetection()).getTmaWebAppVersion()).toBe('6.0');
+    });
+
     it('treats a webview proxy with no platform as the Telegram browser', async () => {
         (window as { TelegramWebviewProxy?: unknown }).TelegramWebviewProxy = {
             postEvent: () => {}

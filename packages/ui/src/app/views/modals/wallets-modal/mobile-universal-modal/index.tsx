@@ -131,6 +131,17 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
     };
 
     const onSelectTelegram = (): void => {
+        // The wallet row below deliberately excludes @wallet, so this button is the only route to
+        // it on this screen — and it redirects, so it is a commitment, not a preselection.
+        if (props.walletModalState.traceId) {
+            appState.tracker.trackWalletSelected(
+                AT_WALLET_APP_NAME,
+                'universal-modal',
+                'manual',
+                props.walletModalState.traceId
+            );
+        }
+
         setUniversalLink(null);
 
         const atWallet = props.walletsList.find(wallet => wallet.appName === AT_WALLET_APP_NAME);

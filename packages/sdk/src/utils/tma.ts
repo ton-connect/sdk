@@ -199,12 +199,30 @@ function detect(): TmaEnvironment {
     const initParams = readInitParams();
     const window = getWindow();
 
+    // Both fall back on truthiness, not `??`, so an empty launch param is treated as absent
+    // rather than as a real value. With `??`, an empty tgWebAppPlatform would be kept and
+    // `isInTMA()` would then report true, since it only compares against 'unknown'.
+    let platform: TmaPlatform = 'unknown';
+    if (initParams.tgWebAppPlatform) {
+        platform = initParams.tgWebAppPlatform as TmaPlatform;
+    }
+    if (platform === 'unknown') {
+        platform = window?.Telegram?.WebApp?.platform ?? 'unknown';
+    }
+
+    // Deliberately does NOT consult window.Telegram.WebApp.version. The original guarded that
+    // fallback with `if (!webAppVersion)` after seeding the variable with '6.0', so it could
+    // never run. Reproducing the dead branch keeps `versionAtLeast()` — which decides how
+    // sendOpenTelegramLink opens links — behaving exactly as it does today. Changing it is a
+    // behavioural fix that does not belong in an analytics change.
+    let webAppVersion = '6.0';
+    if (initParams.tgWebAppVersion) {
+        webAppVersion = initParams.tgWebAppVersion;
+    }
+
     cached = {
-        platform:
-            (initParams.tgWebAppPlatform as TmaPlatform | undefined) ??
-            window?.Telegram?.WebApp?.platform ??
-            'unknown',
-        webAppVersion: initParams.tgWebAppVersion ?? window?.Telegram?.WebApp?.version ?? '6.0',
+        platform,
+        webAppVersion,
         telegramUser: readTelegramUser(initParams)
     };
 
