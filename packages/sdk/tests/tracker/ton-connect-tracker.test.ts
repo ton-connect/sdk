@@ -52,7 +52,7 @@ describe('tracker/ton-connect-tracker: trackConnectionInitiated', () => {
         expect(harness.events[0]!.detail).toEqual({
             type: 'connection-initiated',
             connection_source_kind: 'http-specific-wallet',
-            js_bridge_key: undefined,
+            bridge_key: undefined,
             bridge_url: 'https://bridge.tonapi.io/bridge',
             custom_data: { ton_connect_sdk_lib: '4.0.2', ton_connect_ui_lib: null },
             trace_id: 'trace-1'

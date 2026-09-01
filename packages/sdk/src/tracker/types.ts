@@ -219,9 +219,9 @@ export type ConnectionInitiatedEvent = {
      */
     connection_source_kind: WalletConnectionSourceKind;
     /**
-     * Injected bridge key, for `js-embedded` and `js-injected` sources.
+     * Bridge key from the wallets list, for `js-embedded` and `js-injected` sources.
      */
-    js_bridge_key?: string;
+    bridge_key?: string;
     /**
      * Bridge URL, for an `http-specific-wallet` source.
      */
@@ -247,7 +247,7 @@ export function createConnectionInitiatedEvent(
     return {
         type: 'connection-initiated',
         connection_source_kind: source.kind,
-        js_bridge_key: source.jsBridgeKey,
+        bridge_key: source.jsBridgeKey,
         bridge_url: source.bridgeUrl,
         custom_data: createVersionInfo(version),
         trace_id: traceId ?? null
@@ -276,9 +276,9 @@ export type ConnectionLinkGeneratedEvent = {
      */
     connection_source_kind: WalletConnectionSourceKind;
     /**
-     * Injected bridge key, for `js-embedded` and `js-injected` sources.
+     * Bridge key from the wallets list, for `js-embedded` and `js-injected` sources.
      */
-    js_bridge_key?: string;
+    bridge_key?: string;
     /**
      * Bridge URL, for an `http-specific-wallet` source.
      */
@@ -304,7 +304,7 @@ export function createConnectionLinkGeneratedEvent(
     return {
         type: 'connection-link-generated',
         connection_source_kind: source.kind,
-        js_bridge_key: source.jsBridgeKey,
+        bridge_key: source.jsBridgeKey,
         bridge_url: source.bridgeUrl,
         custom_data: createVersionInfo(version),
         trace_id: traceId ?? null

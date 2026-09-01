@@ -95,7 +95,7 @@ describe('analytics/sdk-actions-adapter: connection-initiated', () => {
                 event: {
                     versions: { '@tonconnect/sdk': '4.0.2', '@tonconnect/ui': '' },
                     connection_source_kind: 'js-embedded',
-                    js_bridge_key: 'tonkeeper',
+                    bridge_key: 'tonkeeper',
                     bridge_url: undefined,
                     trace_id: 'trace-1'
                 }
@@ -115,7 +115,7 @@ describe('analytics/sdk-actions-adapter: connection-initiated', () => {
 
         expect(analytics.emitted[0]!.event).toMatchObject({
             connection_source_kind: 'http-any-wallet',
-            js_bridge_key: undefined,
+            bridge_key: undefined,
             bridge_url: undefined,
             // A missing trace id must arrive as undefined so AnalyticsManager mints one, rather
             // than as null, which would be written to the wire verbatim.

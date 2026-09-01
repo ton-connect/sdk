@@ -83,7 +83,7 @@ export function bindEventsTo(
         analytics.emitConnectionInitiated({
             versions: buildVersionInfo(detail.custom_data),
             connection_source_kind: detail.connection_source_kind,
-            js_bridge_key: detail.js_bridge_key,
+            bridge_key: detail.bridge_key,
             bridge_url: detail.bridge_url,
             trace_id: detail.trace_id ?? undefined
         });
@@ -94,7 +94,7 @@ export function bindEventsTo(
         analytics.emitConnectionLinkGenerated({
             versions: buildVersionInfo(detail.custom_data),
             connection_source_kind: detail.connection_source_kind,
-            js_bridge_key: detail.js_bridge_key,
+            bridge_key: detail.bridge_key,
             bridge_url: detail.bridge_url,
             trace_id: detail.trace_id ?? undefined
         });

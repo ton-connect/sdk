@@ -120,7 +120,7 @@ export type ConnectionInitiatedEvent = TonConnectBaseEvent & {
     /**
      * Injected bridge key, for js-embedded and js-injected sources.
      */
-    js_bridge_key?: string;
+    bridge_key?: string;
     /**
      * Bridge URL, for an http-specific-wallet source.
      */
@@ -197,7 +197,7 @@ export type ConnectionLinkGeneratedEvent = TonConnectBaseEvent & {
      * One of js-embedded, js-injected, http-specific-wallet, http-any-wallet, wallet-connect.
      */
     connection_source_kind: string;
-    js_bridge_key?: string;
+    bridge_key?: string;
     bridge_url?: string;
 };
 
