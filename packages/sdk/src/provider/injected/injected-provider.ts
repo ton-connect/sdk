@@ -134,7 +134,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
     }
 
     public connect(message: ConnectRequest, options?: OptionalTraceable): void {
-        this._connect(PROTOCOL_VERSION, message, options);
+        this._connect(PROTOCOL_VERSION, message, options).catch(e => logDebug(e));
     }
 
     public async restoreConnection(options?: OptionalTraceable): Promise<void> {
@@ -199,7 +199,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             } catch (e) {
                 logDebug(e);
 
-                this.sendRequest(
+                void this.sendRequest(
                     {
                         method: 'disconnect',
                         params: []
@@ -413,7 +413,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
                 }
 
                 if (e.event === 'disconnect') {
-                    this.disconnect({ traceId });
+                    this.disconnect({ traceId }).catch(e => logDebug(e));
                 }
             });
             this.analytics?.emitJsBridgeResponse({

@@ -1189,7 +1189,7 @@ export class TonConnect implements ITonConnect {
         );
 
         if (!hasRequiredFeatures) {
-            this.provider?.disconnect();
+            this.provider?.disconnect().catch(e => logDebug(e));
             this.onWalletConnectError(
                 new WalletMissingRequiredFeaturesError(
                     'Wallet does not support required features',
@@ -1213,7 +1213,7 @@ export class TonConnect implements ITonConnect {
         if (this.desiredChainId && wallet.account.chain !== this.desiredChainId) {
             const expectedChainId = this.desiredChainId;
             const actualChainId = wallet.account.chain;
-            this.provider?.disconnect();
+            this.provider?.disconnect().catch(e => logDebug(e));
             this.onWalletConnectError(
                 new WalletWrongNetworkError('Wallet connected to a wrong network', {
                     cause: { expectedChainId, actualChainId }

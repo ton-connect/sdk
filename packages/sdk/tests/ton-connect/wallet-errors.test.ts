@@ -15,7 +15,10 @@ const ADDRESS = '0:' + '3'.repeat(64);
 
 type TrackedEvent = { type: string; error_code?: number | null };
 
-function setup(send: (...args: unknown[]) => unknown) {
+function setup(
+    send: (...args: unknown[]) => unknown,
+    extra: { walletsRequiredFeatures?: unknown; removeItem?: () => Promise<void> } = {}
+) {
     const device = {
         platform: 'iphone',
         appName: KEY,
@@ -62,10 +65,11 @@ function setup(send: (...args: unknown[]) => unknown) {
         storage: {
             setItem: async (k: string, v: string) => void map.set(k, v),
             getItem: async (k: string) => map.get(k) ?? null,
-            removeItem: async (k: string) => void map.delete(k)
+            removeItem: extra.removeItem ?? (async (k: string) => void map.delete(k))
         },
         analytics: { mode: 'off' },
         disableAutoPauseConnection: true,
+        walletsRequiredFeatures: extra.walletsRequiredFeatures as never,
         eventDispatcher: {
             dispatchEvent: async (_name: string, detail: TrackedEvent) => void events.push(detail),
             addEventListener: async () => () => {}
@@ -217,5 +221,36 @@ describe('TonConnect with an injected wallet that rejects', () => {
 
         expect(errors).toHaveLength(1);
         expect(errors[0]).toBeInstanceOf(WalletTransportError);
+    });
+});
+
+describe('TonConnect rejecting an injected wallet on connect', () => {
+    it('reports missing features without an unhandled rejection when cleanup fails', async () => {
+        const ctx = setup(() => undefined, {
+            walletsRequiredFeatures: { sendTransaction: { minMessages: 10 } },
+            removeItem: async () => {
+                throw new Error('storage down');
+            }
+        });
+        const errors: TonConnectError[] = [];
+        ctx.connector.onStatusChange(
+            () => {},
+            e => errors.push(e)
+        );
+        const reasons: unknown[] = [];
+        const record = (reason: unknown): void => void reasons.push(reason);
+        process.on('unhandledRejection', record);
+
+        try {
+            ctx.connector.connect({ jsBridgeKey: KEY });
+            for (let i = 0; i < 3; i++) {
+                await new Promise(resolve => setTimeout(resolve, 0));
+            }
+        } finally {
+            process.off('unhandledRejection', record);
+        }
+
+        expect(errors.map(e => e.name)).toEqual(['WalletMissingRequiredFeaturesError']);
+        expect(reasons).toEqual([]);
     });
 });

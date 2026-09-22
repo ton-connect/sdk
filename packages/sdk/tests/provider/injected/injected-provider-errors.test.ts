@@ -344,3 +344,43 @@ describe('InjectedProvider.disconnect', () => {
         await expect(provider.disconnect()).resolves.toBeUndefined();
     });
 });
+
+async function unhandledRejectionsDuring(action: () => Promise<void>): Promise<unknown[]> {
+    const reasons: unknown[] = [];
+    const record = (reason: unknown): void => void reasons.push(reason);
+    process.on('unhandledRejection', record);
+    try {
+        await action();
+        await settle();
+        await settle();
+    } finally {
+        process.off('unhandledRejection', record);
+    }
+    return reasons;
+}
+
+describe('InjectedProvider wallet-initiated disconnect', () => {
+    it('does not leave an unhandled rejection when connection cleanup fails', async () => {
+        const storage = memoryStorage();
+        let emit: (e: unknown) => void = () => {};
+        const wallet = fakeWallet({
+            listen: vi.fn((callback: (e: unknown) => void) => {
+                emit = callback;
+                return () => {};
+            })
+        });
+        wallet.connect = vi.fn(() => Promise.resolve(connectEventFor(wallet)));
+        const provider = await providerWith(wallet, { storage });
+        provider.connect(connectRequest);
+        await settle();
+        storage.removeItem = async () => {
+            throw new Error('storage down');
+        };
+
+        const reasons = await unhandledRejectionsDuring(async () => {
+            emit({ event: 'disconnect', id: 2, payload: {} });
+        });
+
+        expect(reasons).toEqual([]);
+    });
+});
