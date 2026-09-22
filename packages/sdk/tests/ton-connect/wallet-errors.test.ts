@@ -140,6 +140,29 @@ describe('TonConnect with an injected wallet that rejects', () => {
         expect(tracked[0]!.error_code).toBe(0);
     });
 
+    it('sendTransaction: a malformed wallet error becomes WalletTransportError, tracked once', async () => {
+        const { connector, events } = await connected(() =>
+            Promise.resolve({ id: '0', error: null })
+        );
+
+        const error = await connector.sendTransaction(tx).catch(e => e);
+
+        expect(error).toBeInstanceOf(WalletTransportError);
+        const tracked = failures(events, 'transaction-signing-failed');
+        expect(tracked).toHaveLength(1);
+        expect(tracked[0]!.error_code).toBe(0);
+    });
+
+    it('sendTransaction: a wallet code sent as a string is not read as that code', async () => {
+        const { connector } = await connected(() =>
+            Promise.resolve({ id: '0', error: { code: '300', message: 'No' } })
+        );
+
+        const error = await connector.sendTransaction(tx).catch(e => e);
+
+        expect(error).toBeInstanceOf(WalletTransportError);
+    });
+
     it('sendTransaction: a TonConnectError from the dApp onRequestSent is not tracked', async () => {
         const { connector, events } = await connected(() =>
             Promise.resolve({ id: '0', result: 'boc' })

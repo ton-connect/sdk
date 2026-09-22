@@ -1,8 +1,7 @@
-export interface WalletErrorPayload {
-    code: number;
-    message: string;
-    data?: unknown;
-}
+import {
+    WalletErrorPayload,
+    walletErrorPayloadFrom
+} from 'src/errors/wallet-response/wallet-error-payload';
 
 const CANONICAL_CODE = /^(0|[1-9][0-9]{0,2})$/;
 
@@ -10,23 +9,11 @@ function tagOf(value: unknown): string {
     return Object.prototype.toString.call(value);
 }
 
-function fromStructured(
-    source: Record<string, unknown>,
+function known(
+    payload: WalletErrorPayload | undefined,
     knownCodes: ReadonlySet<number>
 ): WalletErrorPayload | undefined {
-    const code = source.code;
-    if (typeof code !== 'number' || !Number.isSafeInteger(code) || !knownCodes.has(code)) {
-        return undefined;
-    }
-
-    const payload: WalletErrorPayload = {
-        code,
-        message: typeof source.message === 'string' ? source.message : ''
-    };
-    if ('data' in source) {
-        payload.data = source.data;
-    }
-    return payload;
+    return payload && knownCodes.has(payload.code) ? payload : undefined;
 }
 
 /**
@@ -52,8 +39,8 @@ export function legacyWalletErrorFrom(
         }
 
         if (typeof reason === 'number') {
-            return Number.isSafeInteger(reason) && knownCodes.has(reason)
-                ? { code: reason, message: '' }
+            return Number.isSafeInteger(reason)
+                ? known({ code: reason, message: '' }, knownCodes)
                 : undefined;
         }
 
@@ -63,15 +50,14 @@ export function legacyWalletErrorFrom(
                 tagOf(record.error) === '[object Object]'
                     ? (record.error as Record<string, unknown>)
                     : record;
-            return fromStructured(source, knownCodes);
+            return known(walletErrorPayloadFrom(source), knownCodes);
         }
 
         if (typeof reason === 'object' && reason !== null) {
             const message = (reason as { message?: unknown }).message;
-            if (typeof message === 'string' && CANONICAL_CODE.test(message)) {
-                const code = Number(message);
-                return knownCodes.has(code) ? { code, message } : undefined;
-            }
+            return typeof message === 'string' && CANONICAL_CODE.test(message)
+                ? known({ code: Number(message), message }, knownCodes)
+                : undefined;
         }
 
         return undefined;

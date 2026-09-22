@@ -138,7 +138,13 @@ describe('InjectedProvider.sendRequest', () => {
         ['null', null],
         ['a string', 'ok'],
         ['an empty object', {}],
-        ['an object with only an id', { id: '0' }]
+        ['an object with only an id', { id: '0' }],
+        ['a null error', { id: '0', error: null }],
+        ['a text error', { id: '0', error: 'Declined' }],
+        ['an error without a code', { id: '0', error: { message: 'Declined' } }],
+        ['an error with a non-numeric code', { id: '0', error: { code: 'x' } }],
+        ['an error with the code in a string', { id: '0', error: { code: '300' } }],
+        ['an error with a fractional code', { id: '0', error: { code: 300.5 } }]
     ])('turns a wallet response of %s into WalletTransportError', async (_name, value) => {
         const provider = await providerWith(fakeWallet({ send: vi.fn(() => value) }));
 
@@ -283,7 +289,15 @@ describe('InjectedProvider.connect', () => {
         ['null', null],
         ['a string', 'ok'],
         ['an empty object', {}],
-        ['an unknown event', { event: 'transaction', id: 1, payload: {} }]
+        ['an unknown event', { event: 'transaction', id: 1, payload: {} }],
+        ['a connect event without a payload', { event: 'connect', id: 1 }],
+        ['a connect event without items', { event: 'connect', id: 1, payload: { device: {} } }],
+        ['a connect event without a device', { event: 'connect', id: 1, payload: { items: [] } }],
+        ['a connect_error event without a payload', { event: 'connect_error', id: 1 }],
+        [
+            'a connect_error event without a code',
+            { event: 'connect_error', id: 1, payload: { message: 'No' } }
+        ]
     ])('attaches WalletTransportError when connect resolves %s', async (_name, value) => {
         const provider = await providerWith(fakeWallet({ connect: () => Promise.resolve(value) }));
         const events = captureEvents(provider);
@@ -323,6 +337,21 @@ describe('InjectedProvider.connect', () => {
         await settle();
 
         expect(events.map(e => e.event)).toEqual(['connect']);
+    });
+});
+
+describe('InjectedProvider.restoreConnection', () => {
+    it('does not subscribe to a wallet that restores with a malformed connect event', async () => {
+        const storage = memoryStorage();
+        const wallet = fakeWallet({
+            restoreConnection: () => Promise.resolve({ event: 'connect', id: 1 })
+        });
+        const provider = await providerWith(wallet, { storage });
+        vi.spyOn(console, 'error').mockImplementation(() => {});
+
+        await provider.restoreConnection();
+
+        expect(wallet.listen).not.toHaveBeenCalled();
     });
 });
 

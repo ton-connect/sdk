@@ -9,7 +9,6 @@ import {
 } from 'src/errors/wallet-response/wallet-response-to-error';
 import {
     AppRequest,
-    ConnectEvent,
     ConnectEventError,
     ConnectRequest,
     RpcMethod,
@@ -26,7 +25,7 @@ import { getWindow, getWindowEntries } from 'src/utils/web-api';
 import { PROTOCOL_VERSION } from 'src/resources/protocol';
 import { WalletInfoCurrentlyInjected } from 'src/models';
 import { logDebug } from 'src/utils/log';
-import { isWalletResponse } from 'src/parsers/rpc-parser';
+import { connectEventFrom, walletResponseFrom } from 'src/parsers/wallet-answer-parser';
 import { Analytics } from 'src/analytics/analytics';
 import { AnalyticsManager } from 'src/analytics/analytics-manager';
 import { JsBridgeEvent } from 'src/analytics/types';
@@ -146,14 +145,15 @@ export class InjectedProvider<T extends string = string> implements InternalProv
                 js_bridge_method: 'restoreConnection',
                 trace_id: traceId
             });
-            const connectEvent = await this.injectedWallet.restoreConnection();
+            const answer: unknown = await this.injectedWallet.restoreConnection();
             this.analytics?.emitJsBridgeResponse({
                 js_bridge_method: 'restoreConnection',
                 trace_id: traceId
             });
-            logDebug('Injected Provider restoring connection response', connectEvent);
+            logDebug('Injected Provider restoring connection response', answer);
 
-            if (connectEvent.event === 'connect') {
+            const connectEvent = connectEventFrom(answer);
+            if (connectEvent?.event === 'connect') {
                 this.makeSubscriptions({ traceId });
                 this.listeners.forEach(listener => listener({ ...connectEvent, traceId }));
             } else {
@@ -288,22 +288,23 @@ export class InjectedProvider<T extends string = string> implements InternalProv
         // Handlers go on before the dApp callback runs, so a callback that throws cannot
         // leave the wallet's later rejection unhandled.
         const settled = pending.then(
-            response => {
-                if (!isWalletResponse(response)) {
+            answer => {
+                const response = walletResponseFrom<T>(answer);
+                if (!response) {
                     this.analytics?.emitJsBridgeError({
                         js_bridge_method: 'send',
-                        error_message: describeRejection(response)
+                        error_message: describeRejection(answer)
                     });
                     throw new WalletTransportError(
                         'Injected wallet answered without a TON Connect response',
-                        { cause: response }
+                        { cause: answer }
                     );
                 }
 
                 this.analytics?.emitJsBridgeResponse({
                     js_bridge_method: 'send'
                 });
-                logDebug('Wallet message received:', response);
+                logDebug('Wallet message received:', answer);
                 return response;
             },
             reason => {
@@ -344,7 +345,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
     ): Promise<void> {
         const traceId = options?.traceId ?? UUIDv7();
 
-        let connectEvent: OptionalTraceable<ConnectEvent>;
+        let answer: unknown;
         try {
             logDebug(
                 `Injected Provider connect request: protocolVersion: ${protocolVersion}, message:`,
@@ -354,7 +355,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
                 js_bridge_method: 'connect',
                 trace_id: traceId
             });
-            connectEvent = await this.injectedWallet.connect(protocolVersion, message);
+            answer = await this.injectedWallet.connect(protocolVersion, message);
         } catch (e) {
             this.analytics?.emitJsBridgeError({
                 js_bridge_method: 'connect',
@@ -380,17 +381,18 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             return;
         }
 
-        if (!isConnectAnswer(connectEvent)) {
+        const connectEvent = connectEventFrom(answer);
+        if (!connectEvent) {
             this.analytics?.emitJsBridgeError({
                 js_bridge_method: 'connect',
-                error_message: describeRejection(connectEvent),
+                error_message: describeRejection(answer),
                 trace_id: traceId
             });
             this.emitConnectFailure(
-                connectEvent,
+                answer,
                 new WalletTransportError(
                     'Injected wallet answered the connection without a TON Connect event',
-                    { cause: connectEvent }
+                    { cause: answer }
                 ),
                 traceId
             );
@@ -473,15 +475,6 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             nextRpcRequestId: 0
         });
     }
-}
-
-/** The only answers a connect call can have: a `connect` or a `connect_error` event. */
-function isConnectAnswer(value: unknown): value is ConnectEvent {
-    if (typeof value !== 'object' || value === null) {
-        return false;
-    }
-    const event = (value as { event?: unknown }).event;
-    return event === 'connect' || event === 'connect_error';
 }
 
 function describeRejection(reason: unknown): string {
