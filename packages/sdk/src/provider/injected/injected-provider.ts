@@ -12,6 +12,7 @@ import {
     ConnectEventError,
     ConnectRequest,
     RpcMethod,
+    WalletEvent,
     WalletResponse
 } from '@tonconnect/protocol';
 import {
@@ -420,6 +421,27 @@ export class InjectedProvider<T extends string = string> implements InternalProv
         }
     }
 
+    /** Forwards an event the wallet sent on its own; a malformed connect event is a failed connection. */
+    private emitWalletEvent(e: OptionalTraceable<WalletEvent>, traceId: string): void {
+        if (e.event !== 'connect' && e.event !== 'connect_error') {
+            this.listeners.forEach(listener => listener({ ...e, traceId }));
+            return;
+        }
+
+        const connectEvent = connectEventFrom(e);
+        if (!connectEvent) {
+            this.emitConnectFailure(
+                e,
+                new WalletTransportError('Injected wallet sent a malformed TON Connect event', {
+                    cause: e
+                }),
+                traceId
+            );
+            return;
+        }
+        this.listeners.forEach(listener => listener({ ...connectEvent, traceId }));
+    }
+
     /** Reports a connection failure that has no wallet error code behind it. */
     private emitConnectFailure(cause: unknown, error: TonConnectError, traceId: string): void {
         const payload = { code: 0, message: describeRejection(cause) };
@@ -443,11 +465,14 @@ export class InjectedProvider<T extends string = string> implements InternalProv
         });
         try {
             this.unsubscribeCallback = this.injectedWallet.listen(e => {
-                const traceId = e.traceId ?? UUIDv7();
                 logDebug('Wallet message received:', e);
+                if (typeof e !== 'object' || e === null) {
+                    return;
+                }
+                const traceId = e.traceId ?? UUIDv7();
 
                 if (this.listenSubscriptions) {
-                    this.listeners.forEach(listener => listener({ ...e, traceId }));
+                    this.emitWalletEvent(e, traceId);
                 }
 
                 if (e.event === 'disconnect') {

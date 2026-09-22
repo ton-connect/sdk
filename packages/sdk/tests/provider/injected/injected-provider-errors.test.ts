@@ -458,6 +458,64 @@ describe('InjectedProvider wallet-initiated disconnect', () => {
     });
 });
 
+describe('InjectedProvider wallet-initiated events', () => {
+    async function connectedWithEmitter() {
+        let emit: (e: unknown) => void = () => {};
+        const wallet = fakeWallet({
+            listen: vi.fn((callback: (e: unknown) => void) => {
+                emit = callback;
+                return () => {};
+            })
+        });
+        wallet.connect = vi.fn(() => Promise.resolve(connectEventFor(wallet)));
+        const provider = await providerWith(wallet);
+        provider.connect(connectRequest);
+        await settle();
+        const events = captureEvents(provider);
+        return { emit, events };
+    }
+
+    it.each([
+        ['a connect event without a payload', { event: 'connect', id: 3 }],
+        ['a connect_error event without a code', { event: 'connect_error', id: 3, payload: {} }]
+    ])('reports %s as WalletTransportError', async (_name, event) => {
+        const { emit, events } = await connectedWithEmitter();
+
+        emit(event);
+
+        const attached = attachedErrorOf(connectErrorOf(events));
+        expect(attached).toBeInstanceOf(WalletTransportError);
+        expect(attached!.cause).toBe(event);
+    });
+
+    it.each([
+        [
+            'a connect_error event',
+            { event: 'connect_error', id: 3, payload: { code: 300, message: 'No' } }
+        ],
+        ['a disconnect event', { event: 'disconnect', id: 3, payload: {} }],
+        ['an event this SDK does not know', { event: 'transaction', id: 3, payload: {} }]
+    ])('forwards %s as is', async (_name, event) => {
+        const { emit, events } = await connectedWithEmitter();
+
+        emit(event);
+
+        expect(events).toHaveLength(1);
+        expect(events[0]).toMatchObject(event);
+        expect(attachedErrorOf(events[0]!.payload ?? {})).toBeUndefined();
+    });
+
+    it.each([
+        ['null', null],
+        ['a string', 'connect']
+    ])('ignores %s without throwing into the wallet', async (_name, value) => {
+        const { emit, events } = await connectedWithEmitter();
+
+        expect(() => emit(value)).not.toThrow();
+        expect(events).toHaveLength(0);
+    });
+});
+
 describe('InjectedProvider.sendRequest when the dApp onRequestSent throws', () => {
     // A plain function, not vi.fn: a spy attaches its own handler to the promise it
     // returns, which would hide an unhandled rejection.
