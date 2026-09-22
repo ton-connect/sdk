@@ -20,3 +20,9 @@ export abstract class RpcParser<T extends RpcMethod> {
         return 'error' in response;
     }
 }
+
+/** `id` of a wallet response, when the provider kept it. */
+export function responseIdOf(response: object): string | undefined {
+    const id = (response as { id?: unknown }).id;
+    return id === undefined || id === null ? undefined : String(id);
+}
