@@ -6,9 +6,9 @@ import { TonConnectUIReactError } from './ton-connect-ui-react.error';
  * provider near the top of your React tree.
  */
 export class TonConnectProviderNotSetError extends TonConnectUIReactError {
+    static readonly errorName: string = 'TonConnectProviderNotSetError';
+
     constructor(...args: ConstructorParameters<typeof Error>) {
         super(...args);
-
-        Object.setPrototypeOf(this, TonConnectProviderNotSetError.prototype);
     }
 }

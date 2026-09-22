@@ -7,9 +7,9 @@ import { TonConnectUIError } from '@tonconnect/ui';
  * `catch (e instanceof TonConnectError)` branch covers them all.
  */
 export class TonConnectUIReactError extends TonConnectUIError {
+    static readonly errorName: string = 'TonConnectUIReactError';
+
     constructor(...args: ConstructorParameters<typeof Error>) {
         super(...args);
-
-        Object.setPrototypeOf(this, TonConnectUIReactError.prototype);
     }
 }

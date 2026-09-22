@@ -16,6 +16,13 @@
 export class TonConnectError<T = unknown> extends Error {
     private static prefix = '[TON_CONNECT_SDK_ERROR]';
 
+    /**
+     * Class name as a string literal, so it survives the class renaming a dApp's
+     * minifier applies. Every SDK error class declares its own; it becomes the
+     * error's `name` and the name in its `message`.
+     */
+    static readonly errorName: string = 'TonConnectError';
+
     protected get info(): string {
         return '';
     }
@@ -28,10 +35,28 @@ export class TonConnectError<T = unknown> extends Error {
     ) {
         super(message, options);
 
-        this.message = `${TonConnectError.prefix} ${this.constructor.name}${
+        Object.setPrototypeOf(this, new.target.prototype);
+
+        const name = errorNameOf(new.target);
+        Object.defineProperty(this, 'name', {
+            value: name,
+            writable: true,
+            configurable: true,
+            enumerable: false
+        });
+
+        this.message = `${TonConnectError.prefix} ${name}${
             this.info ? ': ' + this.info : ''
         }${message ? '\n' + message : ''}`;
-
-        Object.setPrototypeOf(this, TonConnectError.prototype);
     }
+}
+
+/**
+ * A subclass declared outside the SDK without its own `errorName` keeps its
+ * runtime class name instead of inheriting its parent's.
+ */
+function errorNameOf(ErrorClass: typeof TonConnectError): string {
+    return Object.prototype.hasOwnProperty.call(ErrorClass, 'errorName')
+        ? ErrorClass.errorName
+        : ErrorClass.name;
 }
