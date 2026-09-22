@@ -16,6 +16,8 @@ import { TonConnectError } from 'src/errors/ton-connect.error';
 export class WalletMissingRequiredFeaturesError extends TonConnectError<{
     connectEvent: ConnectEventSuccess['payload'];
 }> {
+    static readonly errorName: string = 'WalletMissingRequiredFeaturesError';
+
     declare cause: {
         connectEvent: ConnectEventSuccess['payload'];
     };
@@ -33,7 +35,5 @@ export class WalletMissingRequiredFeaturesError extends TonConnectError<{
         }
     ) {
         super(message, options);
-
-        Object.setPrototypeOf(this, WalletMissingRequiredFeaturesError.prototype);
     }
 }

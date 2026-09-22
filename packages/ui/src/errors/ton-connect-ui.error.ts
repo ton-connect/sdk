@@ -19,9 +19,9 @@ import { TonConnectError } from '@tonconnect/sdk';
  * ```
  */
 export class TonConnectUIError extends TonConnectError {
+    static readonly errorName: string = 'TonConnectUIError';
+
     constructor(...args: ConstructorParameters<typeof Error>) {
         super(...args);
-
-        Object.setPrototypeOf(this, TonConnectUIError.prototype);
     }
 }

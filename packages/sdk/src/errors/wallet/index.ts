@@ -4,3 +4,4 @@ export { WalletNotInjectedError } from './wallet-not-injected.error';
 export { WalletNotSupportFeatureError } from './wallet-not-support-feature.error';
 export { WalletMissingRequiredFeaturesError } from './wallet-missing-required-features.error';
 export { WalletWrongNetworkError } from './wallet-wrong-network.error';
+export { WalletTransportError } from './wallet-transport.error';

@@ -684,3 +684,52 @@ export function validateTonProofItemReply(data: unknown): ValidationResult {
 
     return null;
 }
+
+function validateTonAddressItemReply(item: Record<string, unknown>): ValidationResult {
+    if (!isValidAddress(item.address)) {
+        return "Invalid 'ton_addr.address'";
+    }
+    if (!isValidNetwork(item.network)) {
+        return "Invalid 'ton_addr.network'";
+    }
+    return null;
+}
+
+function validateDeviceFeatures(device: unknown): ValidationResult {
+    if (!isValidObject(device)) {
+        return "Invalid 'device'";
+    }
+    if (!isValidArray(device.features)) {
+        return "Invalid 'device.features'";
+    }
+    return null;
+}
+
+/**
+ * The payload of a `connect` event, down to the fields the SDK itself relies on:
+ * every item has a name, `ton_addr` has a valid address and network, and `device`
+ * lists its features. Fields the SDK only passes on to the dApp are not checked,
+ * since real wallets omit some of them: Tonkeeper sends `ton_addr` without
+ * `publicKey` for multisig wallets. `ton_proof` is checked by
+ * {@link validateTonProofItemReply}.
+ */
+export function validateConnectEventPayload(data: unknown): ValidationResult {
+    if (!isValidObject(data)) {
+        return 'connect payload must be an object';
+    }
+    if (!isValidArray(data.items)) {
+        return "Invalid 'items'";
+    }
+    for (const item of data.items) {
+        if (!isValidObject(item) || !isValidString(item.name)) {
+            return 'Every connect item must be an object with a name';
+        }
+        if (item.name === 'ton_addr') {
+            const error = validateTonAddressItemReply(item);
+            if (error) {
+                return error;
+            }
+        }
+    }
+    return validateDeviceFeatures(data.device);
+}

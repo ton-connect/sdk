@@ -6,7 +6,8 @@ import {
     validateConnectAdditionalRequest,
     validateSignDataPayload,
     validateTonProofItemReply,
-    validateEmbeddedRequest
+    validateEmbeddedRequest,
+    validateConnectEventPayload
 } from 'src/validation/schemas';
 import { toUserFriendlyAddress } from 'src/utils/address';
 
@@ -955,6 +956,62 @@ describe('validation/schemas', () => {
 
         it('returns null when the inner request validates cleanly', () => {
             expect(validateEmbeddedRequest(validSendTransaction)).toBeNull();
+        });
+    });
+
+    describe('validateConnectEventPayload', () => {
+        const device = {
+            platform: 'iphone',
+            appName: 'tonkeeper',
+            appVersion: '5.0.0',
+            maxProtocolVersion: 2,
+            features: []
+        };
+        const tonAddr = {
+            name: 'ton_addr',
+            address: RAW_ADDRESS,
+            network: CHAIN.MAINNET,
+            walletStateInit: '',
+            publicKey: ''
+        };
+
+        it.each([
+            ['ton_addr and device', { items: [tonAddr], device }],
+            ['no items the SDK reads', { items: [], device }],
+            ['an item this SDK does not know', { items: [tonAddr, { name: 'other' }], device }],
+            [
+                'a multisig ton_addr without publicKey and walletStateInit',
+                {
+                    items: [{ name: 'ton_addr', address: RAW_ADDRESS, network: CHAIN.MAINNET }],
+                    device
+                }
+            ],
+            ['a device that only lists features', { items: [tonAddr], device: { features: [] } }]
+        ])('accepts a payload with %s', (_name, payload) => {
+            expect(validateConnectEventPayload(payload)).toBeNull();
+        });
+
+        it.each([
+            ['not an object', 'connect'],
+            ['no items', { device }],
+            ['a null item', { items: [null], device }],
+            ['an item without a name', { items: [{}], device }],
+            [
+                'ton_addr without an address',
+                { items: [{ ...tonAddr, address: undefined }], device }
+            ],
+            [
+                'ton_addr with a malformed address',
+                { items: [{ ...tonAddr, address: 'x' }], device }
+            ],
+            ['ton_addr without a network', { items: [{ ...tonAddr, network: undefined }], device }],
+            ['no device', { items: [tonAddr] }],
+            [
+                'a device without features',
+                { items: [tonAddr], device: { ...device, features: undefined } }
+            ]
+        ])('rejects a payload with %s', (_name, payload) => {
+            expect(validateConnectEventPayload(payload)).toEqual(expect.any(String));
         });
     });
 });
