@@ -1,4 +1,24 @@
 /**
+ * The error a wallet returned, as it arrived. Present only on errors built
+ * from a wallet response.
+ */
+export interface WalletErrorDetail {
+    /** Wallet error code from the TON Connect spec. */
+    code: number;
+    /** Wallet error message; empty when the wallet sent none. */
+    message: string;
+    /** Wallet-provided `data`, when present. */
+    data?: unknown;
+    /** `id` of the wallet response, when present. */
+    responseId?: string;
+    /**
+     * Set when the wallet rejected the request instead of answering with an
+     * error response, and the SDK rebuilt the response from the rejection.
+     */
+    normalized?: true;
+}
+
+/**
  * Base class for every error thrown by `@tonconnect/sdk`. Catch it to handle
  * TON Connect failures uniformly.
  *
@@ -23,6 +43,12 @@ export class TonConnectError<T = unknown> extends Error {
      */
     static readonly errorName: string = 'TonConnectError';
 
+    /**
+     * The wallet's own error, when this error was built from a wallet
+     * response. Absent for errors raised by the SDK itself.
+     */
+    declare readonly walletError?: WalletErrorDetail;
+
     protected get info(): string {
         return '';
     }
@@ -31,6 +57,7 @@ export class TonConnectError<T = unknown> extends Error {
         message?: string,
         options?: {
             cause?: T;
+            walletError?: WalletErrorDetail;
         }
     ) {
         super(message, options);
@@ -44,6 +71,15 @@ export class TonConnectError<T = unknown> extends Error {
             configurable: true,
             enumerable: false
         });
+
+        if (options?.walletError) {
+            Object.defineProperty(this, 'walletError', {
+                value: options.walletError,
+                writable: false,
+                configurable: true,
+                enumerable: false
+            });
+        }
 
         this.message = `${TonConnectError.prefix} ${name}${
             this.info ? ': ' + this.info : ''
