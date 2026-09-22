@@ -692,26 +692,12 @@ function validateTonAddressItemReply(item: Record<string, unknown>): ValidationR
     if (!isValidNetwork(item.network)) {
         return "Invalid 'ton_addr.network'";
     }
-    if (typeof item.walletStateInit !== 'string') {
-        return "Invalid 'ton_addr.walletStateInit'";
-    }
-    if (typeof item.publicKey !== 'string') {
-        return "Invalid 'ton_addr.publicKey'";
-    }
     return null;
 }
 
-function validateDeviceInfo(device: unknown): ValidationResult {
+function validateDeviceFeatures(device: unknown): ValidationResult {
     if (!isValidObject(device)) {
         return "Invalid 'device'";
-    }
-    for (const key of ['platform', 'appName', 'appVersion'] as const) {
-        if (typeof device[key] !== 'string') {
-            return `Invalid 'device.${key}'`;
-        }
-    }
-    if (!isValidNumber(device.maxProtocolVersion)) {
-        return "Invalid 'device.maxProtocolVersion'";
     }
     if (!isValidArray(device.features)) {
         return "Invalid 'device.features'";
@@ -720,9 +706,12 @@ function validateDeviceInfo(device: unknown): ValidationResult {
 }
 
 /**
- * The payload of a `connect` event, down to the fields the SDK reads: every item
- * has a name, `ton_addr` has its account fields, and `device` is a full `DeviceInfo`.
- * `ton_proof` is checked separately by {@link validateTonProofItemReply}.
+ * The payload of a `connect` event, down to the fields the SDK itself relies on:
+ * every item has a name, `ton_addr` has a valid address and network, and `device`
+ * lists its features. Fields the SDK only passes on to the dApp are not checked,
+ * since real wallets omit some of them: Tonkeeper sends `ton_addr` without
+ * `publicKey` for multisig wallets. `ton_proof` is checked by
+ * {@link validateTonProofItemReply}.
  */
 export function validateConnectEventPayload(data: unknown): ValidationResult {
     if (!isValidObject(data)) {
@@ -742,5 +731,5 @@ export function validateConnectEventPayload(data: unknown): ValidationResult {
             }
         }
     }
-    return validateDeviceInfo(data.device);
+    return validateDeviceFeatures(data.device);
 }

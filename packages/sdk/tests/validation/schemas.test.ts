@@ -978,7 +978,15 @@ describe('validation/schemas', () => {
         it.each([
             ['ton_addr and device', { items: [tonAddr], device }],
             ['no items the SDK reads', { items: [], device }],
-            ['an item this SDK does not know', { items: [tonAddr, { name: 'other' }], device }]
+            ['an item this SDK does not know', { items: [tonAddr, { name: 'other' }], device }],
+            [
+                'a multisig ton_addr without publicKey and walletStateInit',
+                {
+                    items: [{ name: 'ton_addr', address: RAW_ADDRESS, network: CHAIN.MAINNET }],
+                    device
+                }
+            ],
+            ['a device that only lists features', { items: [tonAddr], device: { features: [] } }]
         ])('accepts a payload with %s', (_name, payload) => {
             expect(validateConnectEventPayload(payload)).toBeNull();
         });
@@ -997,28 +1005,10 @@ describe('validation/schemas', () => {
                 { items: [{ ...tonAddr, address: 'x' }], device }
             ],
             ['ton_addr without a network', { items: [{ ...tonAddr, network: undefined }], device }],
-            [
-                'ton_addr without walletStateInit',
-                { items: [{ ...tonAddr, walletStateInit: 1 }], device }
-            ],
-            ['ton_addr without publicKey', { items: [{ ...tonAddr, publicKey: null }], device }],
             ['no device', { items: [tonAddr] }],
             [
                 'a device without features',
                 { items: [tonAddr], device: { ...device, features: undefined } }
-            ],
-            ['a device without appName', { items: [tonAddr], device: { ...device, appName: 1 } }],
-            [
-                'a device without appVersion',
-                { items: [tonAddr], device: { ...device, appVersion: null } }
-            ],
-            [
-                'a device without platform',
-                { items: [tonAddr], device: { ...device, platform: undefined } }
-            ],
-            [
-                'a device without maxProtocolVersion',
-                { items: [tonAddr], device: { ...device, maxProtocolVersion: '2' } }
             ]
         ])('rejects a payload with %s', (_name, payload) => {
             expect(validateConnectEventPayload(payload)).toEqual(expect.any(String));
