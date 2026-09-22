@@ -26,6 +26,7 @@ import { getWindow, getWindowEntries } from 'src/utils/web-api';
 import { PROTOCOL_VERSION } from 'src/resources/protocol';
 import { WalletInfoCurrentlyInjected } from 'src/models';
 import { logDebug } from 'src/utils/log';
+import { isWalletResponse } from 'src/parsers/rpc-parser';
 import { Analytics } from 'src/analytics/analytics';
 import { AnalyticsManager } from 'src/analytics/analytics-manager';
 import { JsBridgeEvent } from 'src/analytics/types';
@@ -199,6 +200,8 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             } catch (e) {
                 logDebug(e);
 
+                // onRequestSent finalizes once the request is out, so a send that never settles
+                // still lets disconnect() resolve; the trailing finalize covers earlier failures.
                 void this.sendRequest(
                     {
                         method: 'disconnect',
@@ -286,7 +289,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
         // leave the wallet's later rejection unhandled.
         const settled = pending.then(
             response => {
-                if (typeof response !== 'object' || response === null) {
+                if (!isWalletResponse(response)) {
                     this.analytics?.emitJsBridgeError({
                         js_bridge_method: 'send',
                         error_message: describeRejection(response)
@@ -377,7 +380,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             return;
         }
 
-        if (typeof connectEvent !== 'object' || connectEvent === null) {
+        if (!isConnectAnswer(connectEvent)) {
             this.analytics?.emitJsBridgeError({
                 js_bridge_method: 'connect',
                 error_message: describeRejection(connectEvent),
@@ -470,6 +473,15 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             nextRpcRequestId: 0
         });
     }
+}
+
+/** The only answers a connect call can have: a `connect` or a `connect_error` event. */
+function isConnectAnswer(value: unknown): value is ConnectEvent {
+    if (typeof value !== 'object' || value === null) {
+        return false;
+    }
+    const event = (value as { event?: unknown }).event;
+    return event === 'connect' || event === 'connect_error';
 }
 
 function describeRejection(reason: unknown): string {

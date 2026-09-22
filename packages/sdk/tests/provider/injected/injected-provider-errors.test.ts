@@ -136,7 +136,9 @@ describe('InjectedProvider.sendRequest', () => {
     it.each([
         ['undefined', undefined],
         ['null', null],
-        ['a string', 'ok']
+        ['a string', 'ok'],
+        ['an empty object', {}],
+        ['an object with only an id', { id: '0' }]
     ])('turns a wallet response of %s into WalletTransportError', async (_name, value) => {
         const provider = await providerWith(fakeWallet({ send: vi.fn(() => value) }));
 
@@ -144,6 +146,15 @@ describe('InjectedProvider.sendRequest', () => {
 
         expect(error).toBeInstanceOf(WalletTransportError);
         expect(error.cause).toBe(value);
+    });
+
+    it.each([
+        ['a result', { id: '0', result: 'boc' }],
+        ['an error', { id: '0', error: { code: 300, message: 'Declined' } }]
+    ])('passes a wallet response carrying %s through', async (_name, response) => {
+        const provider = await providerWith(fakeWallet({ send: vi.fn(() => response) }));
+
+        await expect(provider.sendRequest(request)).resolves.toEqual(response);
     });
 
     it('turns a failing request id store into WalletTransportError', async () => {
@@ -270,7 +281,9 @@ describe('InjectedProvider.connect', () => {
     it.each([
         ['undefined', undefined],
         ['null', null],
-        ['a string', 'ok']
+        ['a string', 'ok'],
+        ['an empty object', {}],
+        ['an unknown event', { event: 'transaction', id: 1, payload: {} }]
     ])('attaches WalletTransportError when connect resolves %s', async (_name, value) => {
         const provider = await providerWith(fakeWallet({ connect: () => Promise.resolve(value) }));
         const events = captureEvents(provider);
@@ -281,6 +294,23 @@ describe('InjectedProvider.connect', () => {
         const attached = attachedErrorOf(connectErrorOf(events));
         expect(attached).toBeInstanceOf(WalletTransportError);
         expect(attached!.cause).toBe(value);
+    });
+
+    it('passes a connect_error event from the wallet through as is', async () => {
+        const answer = {
+            event: 'connect_error',
+            id: 1,
+            payload: { code: 300, message: 'Declined' }
+        };
+        const provider = await providerWith(fakeWallet({ connect: () => Promise.resolve(answer) }));
+        const events = captureEvents(provider);
+
+        provider.connect(connectRequest);
+        await settle();
+
+        const payload = connectErrorOf(events);
+        expect(payload).toEqual(answer.payload);
+        expect(attachedErrorOf(payload)).toBeUndefined();
     });
 
     it('emits the wallet connect event once when everything succeeds', async () => {

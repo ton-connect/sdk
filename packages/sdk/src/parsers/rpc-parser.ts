@@ -26,3 +26,8 @@ export function responseIdOf(response: object): string | undefined {
     const id = (response as { id?: unknown }).id;
     return id === undefined || id === null ? undefined : String(id);
 }
+
+/** A wallet answer shaped like a TON Connect response: an object carrying `result` or `error`. */
+export function isWalletResponse(value: unknown): value is object {
+    return typeof value === 'object' && value !== null && ('result' in value || 'error' in value);
+}
