@@ -1,10 +1,15 @@
 import { WalletNotInjectedError } from 'src/errors/wallet/wallet-not-injected.error';
+import { TonConnectError } from 'src/errors/ton-connect.error';
 import { WalletTransportError } from 'src/errors/wallet/wallet-transport.error';
 import { legacyWalletErrorFrom } from 'src/errors/wallet-response/legacy-wallet-error';
-import { markNormalized } from 'src/errors/wallet-response/marks';
-import { RPC_WALLET_ERROR_CODES } from 'src/errors/wallet-response/wallet-response-to-error';
+import { attachError, markNormalized } from 'src/errors/wallet-response/marks';
+import {
+    CONNECT_WALLET_ERROR_CODES,
+    RPC_WALLET_ERROR_CODES
+} from 'src/errors/wallet-response/wallet-response-to-error';
 import {
     AppRequest,
+    ConnectEvent,
     ConnectEventError,
     ConnectRequest,
     RpcMethod,
@@ -173,15 +178,24 @@ export class InjectedProvider<T extends string = string> implements InternalProv
 
     public async disconnect(options?: OptionalTraceable): Promise<void> {
         const traceId = options?.traceId ?? UUIDv7();
-        return new Promise(resolve => {
-            const onRequestSent = (): void => {
-                this.closeAllListeners();
-                this.connectionStorage.removeConnection().then(resolve);
+        return new Promise((resolve, reject) => {
+            let finalized = false;
+            const finalize = (): void => {
+                if (finalized) {
+                    return;
+                }
+                finalized = true;
+                try {
+                    this.closeAllListeners();
+                } catch (e) {
+                    logDebug(e);
+                }
+                this.connectionStorage.removeConnection().then(resolve, reject);
             };
 
             try {
                 this.injectedWallet.disconnect();
-                onRequestSent();
+                finalize();
             } catch (e) {
                 logDebug(e);
 
@@ -190,8 +204,10 @@ export class InjectedProvider<T extends string = string> implements InternalProv
                         method: 'disconnect',
                         params: []
                     },
-                    { onRequestSent, traceId }
-                );
+                    { onRequestSent: finalize, traceId }
+                )
+                    .catch(logDebug)
+                    .then(finalize);
             }
         });
     }
@@ -315,6 +331,8 @@ export class InjectedProvider<T extends string = string> implements InternalProv
         options?: OptionalTraceable
     ): Promise<void> {
         const traceId = options?.traceId ?? UUIDv7();
+
+        let connectEvent: OptionalTraceable<ConnectEvent>;
         try {
             logDebug(
                 `Injected Provider connect request: protocolVersion: ${protocolVersion}, message:`,
@@ -324,34 +342,59 @@ export class InjectedProvider<T extends string = string> implements InternalProv
                 js_bridge_method: 'connect',
                 trace_id: traceId
             });
-            const connectEvent = await this.injectedWallet.connect(protocolVersion, message);
+            connectEvent = await this.injectedWallet.connect(protocolVersion, message);
             this.analytics?.emitJsBridgeResponse({
                 js_bridge_method: 'connect'
             });
             logDebug('Injected Provider connect response:', connectEvent);
+        } catch (e) {
+            this.analytics?.emitJsBridgeError({
+                js_bridge_method: 'connect',
+                error_message: describeRejection(e),
+                trace_id: traceId
+            });
+            logDebug('Injected Provider connect error:', e);
 
+            const legacy = legacyWalletErrorFrom(e, CONNECT_WALLET_ERROR_CODES);
+            const payload = legacy ?? { code: 0, message: describeRejection(e) };
+            if (legacy) {
+                markNormalized(payload);
+            } else {
+                attachError(
+                    payload,
+                    new WalletTransportError(
+                        'Injected wallet rejected the connection without a TON Connect event',
+                        { cause: e }
+                    )
+                );
+            }
+            this.emitConnectError(payload, traceId);
+            return;
+        }
+
+        try {
             if (connectEvent.event === 'connect') {
                 await this.updateSession();
                 this.makeSubscriptions({ traceId });
             }
             this.listeners.forEach(listener => listener({ ...connectEvent, traceId }));
         } catch (e) {
-            this.analytics?.emitJsBridgeError({
-                js_bridge_method: 'connect',
-                error_message: String(e),
-                trace_id: traceId
-            });
             logDebug('Injected Provider connect error:', e);
-            const connectEventError: WithoutId<ConnectEventError> = {
-                event: 'connect_error',
-                payload: {
-                    code: 0,
-                    message: e?.toString()
-                }
-            };
-
-            this.listeners.forEach(listener => listener({ ...connectEventError, traceId }));
+            const payload = { code: 0, message: describeRejection(e) };
+            attachError(
+                payload,
+                new TonConnectError('Injected connection could not be completed', { cause: e })
+            );
+            this.emitConnectError(payload, traceId);
         }
+    }
+
+    private emitConnectError(payload: { code: number; message: string }, traceId: string): void {
+        const connectEventError = {
+            event: 'connect_error',
+            payload
+        } as WithoutId<ConnectEventError>;
+        this.listeners.forEach(listener => listener({ ...connectEventError, traceId }));
     }
 
     private makeSubscriptions(options: Traceable): void {

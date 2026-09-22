@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-import { WalletTransportError } from 'src/errors';
-import { isNormalized } from 'src/errors/wallet-response/marks';
+import { TonConnectError, WalletTransportError } from 'src/errors';
+import { attachedErrorOf, isNormalized } from 'src/errors/wallet-response/marks';
 import { InjectedProvider } from 'src/provider/injected/injected-provider';
 import { BridgeConnectionStorage } from 'src/storage/bridge-connection-storage';
 import { IStorage } from 'src/storage/models/storage.interface';
@@ -187,5 +187,160 @@ describe('InjectedProvider.sendRequest', () => {
         expect(debugLabels()).toContain('Wallet message received:');
         expect(analytics.emitJsBridgeResponse).toHaveBeenCalledTimes(1);
         expect(analytics.emitJsBridgeError).not.toHaveBeenCalled();
+    });
+});
+
+type CapturedEvent = { event: string; payload?: { code: number; message: string } };
+
+function captureEvents(provider: InjectedProvider): CapturedEvent[] {
+    const events: CapturedEvent[] = [];
+    provider.listen(e => events.push(e as unknown as CapturedEvent));
+    return events;
+}
+
+async function settle(): Promise<void> {
+    await new Promise(resolve => setTimeout(resolve, 0));
+}
+
+const connectRequest = {
+    manifestUrl: 'https://example.com/m.json',
+    items: [{ name: 'ton_addr' as const }]
+};
+
+function connectEventFor(wallet: ReturnType<typeof fakeWallet>) {
+    return { event: 'connect', id: 1, payload: { items: [], device: wallet.deviceInfo } };
+}
+
+function connectErrorOf(events: CapturedEvent[]): { code: number; message: string } {
+    const errors = events.filter(e => e.event === 'connect_error');
+    expect(errors).toHaveLength(1);
+    return errors[0]!.payload!;
+}
+
+describe('InjectedProvider.connect', () => {
+    it('normalizes a legacy numeric rejection into connect_error with the code', async () => {
+        const provider = await providerWith(
+            fakeWallet({ connect: vi.fn(() => Promise.reject(new Error('300'))) })
+        );
+        const events = captureEvents(provider);
+
+        provider.connect(connectRequest);
+        await settle();
+
+        const payload = connectErrorOf(events);
+        expect(payload).toEqual({ code: 300, message: '300' });
+        expect(isNormalized(payload)).toBe(true);
+    });
+
+    it('attaches WalletTransportError for a non-TON-Connect rejection', async () => {
+        const reason = new TypeError('bridge crashed');
+        const provider = await providerWith(
+            fakeWallet({ connect: vi.fn(() => Promise.reject(reason)) })
+        );
+        const events = captureEvents(provider);
+
+        provider.connect(connectRequest);
+        await settle();
+
+        const payload = connectErrorOf(events);
+        expect(payload.code).toBe(0);
+        const attached = attachedErrorOf(payload);
+        expect(attached).toBeInstanceOf(WalletTransportError);
+        expect(attached!.cause).toBe(reason);
+    });
+
+    it('does not read a failure after a successful connect as a wallet code', async () => {
+        const storage = memoryStorage();
+        const wallet = fakeWallet();
+        wallet.connect = vi.fn(() => Promise.resolve(connectEventFor(wallet)));
+        const provider = await providerWith(wallet, { storage });
+        storage.setItem = async () => {
+            throw new Error('300');
+        };
+        const events = captureEvents(provider);
+
+        provider.connect(connectRequest);
+        await settle();
+
+        const payload = connectErrorOf(events);
+        expect(isNormalized(payload)).toBe(false);
+        const attached = attachedErrorOf(payload)!;
+        expect(attached.constructor).toBe(TonConnectError);
+        expect(attached.walletError).toBeUndefined();
+    });
+
+    it('emits the wallet connect event once when everything succeeds', async () => {
+        const wallet = fakeWallet();
+        wallet.connect = vi.fn(() => Promise.resolve(connectEventFor(wallet)));
+        const provider = await providerWith(wallet);
+        const events = captureEvents(provider);
+
+        provider.connect(connectRequest);
+        await settle();
+
+        expect(events.map(e => e.event)).toEqual(['connect']);
+    });
+});
+
+describe('InjectedProvider.disconnect', () => {
+    it.each([
+        ['wallet disconnect works', fakeWallet()],
+        [
+            'wallet disconnect throws and send is missing',
+            fakeWallet({
+                disconnect: vi.fn(() => {
+                    throw new Error('x');
+                }),
+                send: undefined
+            })
+        ],
+        [
+            'wallet disconnect throws and send rejects',
+            fakeWallet({
+                disconnect: vi.fn(() => {
+                    throw new Error('x');
+                }),
+                send: vi.fn(() => Promise.reject(new Error('y')))
+            })
+        ],
+        [
+            'wallet disconnect throws and send never settles',
+            fakeWallet({
+                disconnect: vi.fn(() => {
+                    throw new Error('x');
+                }),
+                send: vi.fn(() => new Promise(() => {}))
+            })
+        ]
+    ])('settles and clears the connection when %s', async (_name, wallet) => {
+        const storage = memoryStorage();
+        const provider = await providerWith(wallet, { storage });
+
+        await expect(provider.disconnect()).resolves.toBeUndefined();
+        expect(await storage.getItem('ton-connect-storage_bridge-connection')).toBeNull();
+    });
+
+    it('rejects instead of hanging when connection cleanup fails', async () => {
+        const storage = memoryStorage();
+        const provider = await providerWith(fakeWallet(), { storage });
+        storage.removeItem = async () => {
+            throw new Error('storage down');
+        };
+
+        await expect(provider.disconnect()).rejects.toThrow('storage down');
+    });
+
+    it('settles when the wallet unsubscribe throws', async () => {
+        const wallet = fakeWallet({
+            listen: vi.fn(() => () => {
+                throw new Error('unsubscribe');
+            })
+        });
+        wallet.connect = vi.fn(() => Promise.resolve(connectEventFor(wallet)));
+        const provider = await providerWith(wallet);
+        provider.connect(connectRequest);
+        await settle();
+
+        await expect(provider.disconnect()).resolves.toBeUndefined();
     });
 });
