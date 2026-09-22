@@ -12,6 +12,8 @@ import { TonConnectUI } from 'src/ton-connect-ui';
 const KEY = 'testwallet';
 const ADDRESS = '0:' + '3'.repeat(64);
 
+// Wallet methods that reject are plain functions, not vi.fn: a spy attaches its own
+// handler to every promise it returns, which would hide an unhandled rejection.
 function injectWallet(send: () => unknown): void {
     const device = {
         platform: 'iphone',
@@ -43,7 +45,7 @@ function injectWallet(send: () => unknown): void {
                 }
             })),
             restoreConnection: vi.fn(),
-            send: vi.fn(send),
+            send,
             listen: vi.fn(() => () => {}),
             disconnect: vi.fn()
         }

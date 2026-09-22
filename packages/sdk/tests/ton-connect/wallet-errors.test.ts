@@ -15,6 +15,8 @@ const ADDRESS = '0:' + '3'.repeat(64);
 
 type TrackedEvent = { type: string; error_code?: number | null };
 
+// Wallet methods that reject are plain functions, not vi.fn: a spy attaches its own
+// handler to every promise it returns, which would hide an unhandled rejection.
 function setup(
     send: (...args: unknown[]) => unknown,
     extra: { walletsRequiredFeatures?: unknown; removeItem?: () => Promise<void> } = {}
@@ -52,7 +54,7 @@ function setup(
             }
         })),
         restoreConnection: vi.fn(),
-        send: vi.fn(send),
+        send,
         listen: vi.fn(() => () => {}),
         disconnect: vi.fn()
     };
@@ -156,6 +158,24 @@ describe('TonConnect with an injected wallet that rejects', () => {
         expect(failures(events, 'transaction-signing-failed')).toHaveLength(0);
     });
 
+    it('sendTransaction: a WalletTransportError thrown by the dApp onRequestSent is not tracked', async () => {
+        const { connector, events } = await connected(() =>
+            Promise.resolve({ id: '0', result: 'boc' })
+        );
+        const own = new WalletTransportError('rethrown by the dApp');
+
+        const error = await connector
+            .sendTransaction(tx, {
+                onRequestSent: () => {
+                    throw own;
+                }
+            })
+            .catch(e => e);
+
+        expect(error).toBe(own);
+        expect(failures(events, 'transaction-signing-failed')).toHaveLength(0);
+    });
+
     it('signData: 400 with data keeps the wallet error and is tracked once', async () => {
         const { connector, events } = await connected(() =>
             Promise.resolve({ id: '0', error: { code: 400, message: 'nope', data: { m: 1 } } })
@@ -192,7 +212,7 @@ describe('TonConnect with an injected wallet that rejects', () => {
 
     it('connect: Error("300") reaches the status error handler as UserRejectsError', async () => {
         const ctx = setup(() => undefined);
-        ctx.wallet.connect = vi.fn(() => Promise.reject(new Error('300'))) as never;
+        ctx.wallet.connect = () => Promise.reject(new Error('300')) as never;
         const errors: TonConnectError[] = [];
         ctx.connector.onStatusChange(
             () => {},
@@ -209,7 +229,7 @@ describe('TonConnect with an injected wallet that rejects', () => {
 
     it('connect: a text rejection reaches the status error handler as WalletTransportError', async () => {
         const ctx = setup(() => undefined);
-        ctx.wallet.connect = vi.fn(() => Promise.reject(new Error('closed'))) as never;
+        ctx.wallet.connect = () => Promise.reject(new Error('closed')) as never;
         const errors: TonConnectError[] = [];
         ctx.connector.onStatusChange(
             () => {},

@@ -17,6 +17,8 @@ function memoryStorage(): IStorage {
     };
 }
 
+// Wallet methods that reject are plain functions, not vi.fn: a spy attaches its own
+// handler to every promise it returns, which would hide an unhandled rejection.
 function fakeWallet(overrides: Record<string, unknown> = {}) {
     return {
         deviceInfo: {
@@ -85,7 +87,7 @@ afterEach(() => {
 describe('InjectedProvider.sendRequest', () => {
     it('resolves a legacy numeric rejection as a marked error response with the request id', async () => {
         const { analytics, manager } = fakeAnalytics();
-        const wallet = fakeWallet({ send: vi.fn(() => Promise.reject(new Error('300'))) });
+        const wallet = fakeWallet({ send: () => Promise.reject(new Error('300')) });
         const provider = await providerWith(wallet, { analyticsManager: manager });
 
         const response = (await provider.sendRequest(request)) as { id: string; error: object };
@@ -100,9 +102,7 @@ describe('InjectedProvider.sendRequest', () => {
 
     it('rejects a non-TON-Connect rejection as WalletTransportError keeping the cause', async () => {
         const reason = new Error('Отменено пользователем');
-        const provider = await providerWith(
-            fakeWallet({ send: vi.fn(() => Promise.reject(reason)) })
-        );
+        const provider = await providerWith(fakeWallet({ send: () => Promise.reject(reason) }));
 
         const error = await provider.sendRequest(request).catch(e => e);
 
@@ -220,7 +220,7 @@ function connectErrorOf(events: CapturedEvent[]): { code: number; message: strin
 describe('InjectedProvider.connect', () => {
     it('normalizes a legacy numeric rejection into connect_error with the code', async () => {
         const provider = await providerWith(
-            fakeWallet({ connect: vi.fn(() => Promise.reject(new Error('300'))) })
+            fakeWallet({ connect: () => Promise.reject(new Error('300')) })
         );
         const events = captureEvents(provider);
 
@@ -234,9 +234,7 @@ describe('InjectedProvider.connect', () => {
 
     it('attaches WalletTransportError for a non-TON-Connect rejection', async () => {
         const reason = new TypeError('bridge crashed');
-        const provider = await providerWith(
-            fakeWallet({ connect: vi.fn(() => Promise.reject(reason)) })
-        );
+        const provider = await providerWith(fakeWallet({ connect: () => Promise.reject(reason) }));
         const events = captureEvents(provider);
 
         provider.connect(connectRequest);
@@ -267,6 +265,22 @@ describe('InjectedProvider.connect', () => {
         const attached = attachedErrorOf(payload)!;
         expect(attached.constructor).toBe(TonConnectError);
         expect(attached.walletError).toBeUndefined();
+    });
+
+    it.each([
+        ['undefined', undefined],
+        ['null', null],
+        ['a string', 'ok']
+    ])('attaches WalletTransportError when connect resolves %s', async (_name, value) => {
+        const provider = await providerWith(fakeWallet({ connect: () => Promise.resolve(value) }));
+        const events = captureEvents(provider);
+
+        provider.connect(connectRequest);
+        await settle();
+
+        const attached = attachedErrorOf(connectErrorOf(events));
+        expect(attached).toBeInstanceOf(WalletTransportError);
+        expect(attached!.cause).toBe(value);
     });
 
     it('emits the wallet connect event once when everything succeeds', async () => {
@@ -300,7 +314,7 @@ describe('InjectedProvider.disconnect', () => {
                 disconnect: vi.fn(() => {
                     throw new Error('x');
                 }),
-                send: vi.fn(() => Promise.reject(new Error('y')))
+                send: () => Promise.reject(new Error('y'))
             })
         ],
         [
@@ -382,5 +396,35 @@ describe('InjectedProvider wallet-initiated disconnect', () => {
         });
 
         expect(reasons).toEqual([]);
+    });
+});
+
+describe('InjectedProvider.sendRequest when the dApp onRequestSent throws', () => {
+    // A plain function, not vi.fn: a spy attaches its own handler to the promise it
+    // returns, which would hide an unhandled rejection.
+    it('still handles the wallet rejection that arrives afterwards', async () => {
+        const { analytics, manager } = fakeAnalytics();
+        let rejectSend: (reason: unknown) => void = () => {};
+        const send = (): Promise<never> =>
+            new Promise((_resolve, reject) => {
+                rejectSend = reject;
+            });
+        const provider = await providerWith(fakeWallet({ send }), { analyticsManager: manager });
+        const own = new Error('dapp callback');
+
+        const reasons = await unhandledRejectionsDuring(async () => {
+            const error = await provider
+                .sendRequest(request, {
+                    onRequestSent: () => {
+                        throw own;
+                    }
+                })
+                .catch(e => e);
+            expect(error).toBe(own);
+            rejectSend(new Error('300'));
+        });
+
+        expect(reasons).toEqual([]);
+        expect(analytics.emitJsBridgeError).toHaveBeenCalledTimes(1);
     });
 });

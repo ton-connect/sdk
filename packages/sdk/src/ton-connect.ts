@@ -725,10 +725,24 @@ export class TonConnect implements ITonConnect {
         options: OptionalTraceable<{ onRequestSent?: () => void; signal?: AbortSignal }>,
         trackFailure: (message: string) => void
     ): Promise<TraceableWalletResponse<T>> {
+        // Decided by where the error was thrown, not by its class: a dApp may rethrow
+        // an SDK error from its own callback.
+        let dappCallbackFailed = false;
+        const onRequestSent =
+            options.onRequestSent &&
+            ((): void => {
+                try {
+                    options.onRequestSent!();
+                } catch (e) {
+                    dappCallbackFailed = true;
+                    throw e;
+                }
+            });
+
         try {
-            return await this.provider!.sendRequest(request, options);
+            return await this.provider!.sendRequest(request, { ...options, onRequestSent });
         } catch (e) {
-            if (e instanceof WalletTransportError) {
+            if (e instanceof WalletTransportError && !dappCallbackFailed) {
                 trackFailure(e.message);
             }
             throw e;
