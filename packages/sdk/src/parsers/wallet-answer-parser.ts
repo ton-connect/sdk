@@ -1,5 +1,6 @@
 import { ConnectEvent, RpcMethod, WalletResponse } from '@tonconnect/protocol';
 import { walletErrorPayloadFrom } from 'src/errors/wallet-response/wallet-error-payload';
+import { validateConnectEventPayload } from 'src/validation/schemas';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === 'object' && value !== null;
@@ -24,8 +25,9 @@ export function walletResponseFrom<T extends RpcMethod>(
 }
 
 /**
- * A wallet answer to `connect`, read as a TON Connect event: `connect` with
- * items and device, or `connect_error` with a payload that has a readable code.
+ * A wallet answer to `connect`, read as a TON Connect event: `connect` whose
+ * payload passes {@link validateConnectEventPayload}, or `connect_error` with a
+ * payload that has a readable code.
  * The error payload comes back normalized; anything else is `undefined`.
  */
 export function connectEventFrom(value: unknown): ConnectEvent | undefined {
@@ -33,8 +35,7 @@ export function connectEventFrom(value: unknown): ConnectEvent | undefined {
         return undefined;
     }
     if (value.event === 'connect') {
-        const payload = value.payload;
-        return isRecord(payload) && Array.isArray(payload.items) && isRecord(payload.device)
+        return validateConnectEventPayload(value.payload) === null
             ? (value as unknown as ConnectEvent)
             : undefined;
     }

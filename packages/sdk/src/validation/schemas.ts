@@ -684,3 +684,63 @@ export function validateTonProofItemReply(data: unknown): ValidationResult {
 
     return null;
 }
+
+function validateTonAddressItemReply(item: Record<string, unknown>): ValidationResult {
+    if (!isValidAddress(item.address)) {
+        return "Invalid 'ton_addr.address'";
+    }
+    if (!isValidNetwork(item.network)) {
+        return "Invalid 'ton_addr.network'";
+    }
+    if (typeof item.walletStateInit !== 'string') {
+        return "Invalid 'ton_addr.walletStateInit'";
+    }
+    if (typeof item.publicKey !== 'string') {
+        return "Invalid 'ton_addr.publicKey'";
+    }
+    return null;
+}
+
+function validateDeviceInfo(device: unknown): ValidationResult {
+    if (!isValidObject(device)) {
+        return "Invalid 'device'";
+    }
+    for (const key of ['platform', 'appName', 'appVersion'] as const) {
+        if (typeof device[key] !== 'string') {
+            return `Invalid 'device.${key}'`;
+        }
+    }
+    if (!isValidNumber(device.maxProtocolVersion)) {
+        return "Invalid 'device.maxProtocolVersion'";
+    }
+    if (!isValidArray(device.features)) {
+        return "Invalid 'device.features'";
+    }
+    return null;
+}
+
+/**
+ * The payload of a `connect` event, down to the fields the SDK reads: every item
+ * has a name, `ton_addr` has its account fields, and `device` is a full `DeviceInfo`.
+ * `ton_proof` is checked separately by {@link validateTonProofItemReply}.
+ */
+export function validateConnectEventPayload(data: unknown): ValidationResult {
+    if (!isValidObject(data)) {
+        return 'connect payload must be an object';
+    }
+    if (!isValidArray(data.items)) {
+        return "Invalid 'items'";
+    }
+    for (const item of data.items) {
+        if (!isValidObject(item) || !isValidString(item.name)) {
+            return 'Every connect item must be an object with a name';
+        }
+        if (item.name === 'ton_addr') {
+            const error = validateTonAddressItemReply(item);
+            if (error) {
+                return error;
+            }
+        }
+    }
+    return validateDeviceInfo(data.device);
+}

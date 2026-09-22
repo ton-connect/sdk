@@ -293,6 +293,14 @@ describe('InjectedProvider.connect', () => {
         ['a connect event without a payload', { event: 'connect', id: 1 }],
         ['a connect event without items', { event: 'connect', id: 1, payload: { device: {} } }],
         ['a connect event without a device', { event: 'connect', id: 1, payload: { items: [] } }],
+        [
+            'a connect event whose ton_addr has no address',
+            {
+                event: 'connect',
+                id: 1,
+                payload: { items: [{ name: 'ton_addr' }], device: fakeWallet().deviceInfo }
+            }
+        ],
         ['a connect_error event without a payload', { event: 'connect_error', id: 1 }],
         [
             'a connect_error event without a code',
@@ -468,11 +476,12 @@ describe('InjectedProvider wallet-initiated events', () => {
             })
         });
         wallet.connect = vi.fn(() => Promise.resolve(connectEventFor(wallet)));
-        const provider = await providerWith(wallet);
+        const storage = memoryStorage();
+        const provider = await providerWith(wallet, { storage });
         provider.connect(connectRequest);
         await settle();
         const events = captureEvents(provider);
-        return { emit, events };
+        return { emit, events, provider, storage };
     }
 
     it.each([
@@ -503,6 +512,49 @@ describe('InjectedProvider wallet-initiated events', () => {
         expect(events).toHaveLength(1);
         expect(events[0]).toMatchObject(event);
         expect(attachedErrorOf(events[0]!.payload ?? {})).toBeUndefined();
+    });
+
+    it.each([
+        [
+            'a connect event',
+            { event: 'connect', id: 3, payload: { items: [], device: fakeWallet().deviceInfo } }
+        ],
+        ['a disconnect event', { event: 'disconnect', id: 3, payload: {} }]
+    ])('does not throw a listener failure on %s back into the wallet', async (_name, event) => {
+        const { emit, provider } = await connectedWithEmitter();
+        provider.listen(() => {
+            throw new Error('listener failed');
+        });
+
+        expect(() => emit(event)).not.toThrow();
+    });
+
+    it('reports a listener failure on a connect event as a failed connection', async () => {
+        const { emit, events, provider } = await connectedWithEmitter();
+        const failure = new Error('ton_addr connection item was not found');
+        provider.listen(e => {
+            if (e.event === 'connect') {
+                throw failure;
+            }
+        });
+
+        emit({ event: 'connect', id: 3, payload: { items: [], device: fakeWallet().deviceInfo } });
+
+        const attached = attachedErrorOf(connectErrorOf(events))!;
+        expect(attached.constructor).toBe(TonConnectError);
+        expect(attached.cause).toBe(failure);
+    });
+
+    it('still clears the connection when a listener fails on a disconnect event', async () => {
+        const { emit, provider, storage } = await connectedWithEmitter();
+        provider.listen(() => {
+            throw new Error('listener failed');
+        });
+
+        emit({ event: 'disconnect', id: 3, payload: {} });
+        await settle();
+
+        expect(await storage.getItem('ton-connect-storage_bridge-connection')).toBeNull();
     });
 
     it.each([

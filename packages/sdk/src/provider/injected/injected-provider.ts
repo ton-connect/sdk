@@ -439,7 +439,16 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             );
             return;
         }
-        this.listeners.forEach(listener => listener({ ...connectEvent, traceId }));
+
+        try {
+            this.listeners.forEach(listener => listener({ ...connectEvent, traceId }));
+        } catch (e) {
+            this.emitConnectFailure(
+                e,
+                new TonConnectError('Injected connection could not be completed', { cause: e }),
+                traceId
+            );
+        }
     }
 
     /** Reports a connection failure that has no wallet error code behind it. */
@@ -472,7 +481,12 @@ export class InjectedProvider<T extends string = string> implements InternalProv
                 const traceId = e.traceId ?? UUIDv7();
 
                 if (this.listenSubscriptions) {
-                    this.emitWalletEvent(e, traceId);
+                    // This runs inside the wallet's own code, so a listener failure stops here.
+                    try {
+                        this.emitWalletEvent(e, traceId);
+                    } catch (err) {
+                        logDebug('Injected Provider could not deliver a wallet event:', err);
+                    }
                 }
 
                 if (e.event === 'disconnect') {
