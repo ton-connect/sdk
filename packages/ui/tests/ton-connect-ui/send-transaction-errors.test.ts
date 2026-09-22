@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { beforeAll, describe, it, expect, vi } from 'vitest';
 import {
     TonConnect,
