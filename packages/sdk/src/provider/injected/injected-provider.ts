@@ -1,4 +1,8 @@
 import { WalletNotInjectedError } from 'src/errors/wallet/wallet-not-injected.error';
+import { WalletTransportError } from 'src/errors/wallet/wallet-transport.error';
+import { legacyWalletErrorFrom } from 'src/errors/wallet-response/legacy-wallet-error';
+import { markNormalized } from 'src/errors/wallet-response/marks';
+import { RPC_WALLET_ERROR_CODES } from 'src/errors/wallet-response/wallet-response-to-error';
 import {
     AppRequest,
     ConnectEventError,
@@ -243,30 +247,66 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             options.traceId = optionsOrOnRequestSent?.traceId ?? UUIDv7();
         }
 
-        const id = (await this.connectionStorage.getNextRpcRequestId()).toString();
-        await this.connectionStorage.increaseNextRpcRequestId();
+        let id: string;
+        let pending: Promise<WalletResponse<T>>;
+        try {
+            id = (await this.connectionStorage.getNextRpcRequestId()).toString();
+            await this.connectionStorage.increaseNextRpcRequestId();
 
-        logDebug('Send injected-bridge request:', { ...request, id });
-        this.analytics?.emitJsBridgeCall({
-            js_bridge_method: 'send'
-        });
-        const result = this.injectedWallet.send<T>({ ...request, id } as AppRequest<T>);
-        result
-            .then(response => {
+            logDebug('Send injected-bridge request:', { ...request, id });
+            this.analytics?.emitJsBridgeCall({
+                js_bridge_method: 'send'
+            });
+            pending = Promise.resolve(
+                this.injectedWallet.send<T>({ ...request, id } as AppRequest<T>)
+            );
+        } catch (e) {
+            throw new WalletTransportError('Could not send the request to the injected wallet', {
+                cause: e
+            });
+        }
+
+        options.onRequestSent?.();
+
+        return pending.then(
+            response => {
+                if (typeof response !== 'object' || response === null) {
+                    this.analytics?.emitJsBridgeError({
+                        js_bridge_method: 'send',
+                        error_message: describeRejection(response)
+                    });
+                    throw new WalletTransportError(
+                        'Injected wallet answered without a TON Connect response',
+                        { cause: response }
+                    );
+                }
+
                 this.analytics?.emitJsBridgeResponse({
                     js_bridge_method: 'send'
                 });
                 logDebug('Wallet message received:', response);
-            })
-            .catch(error => {
+                return response;
+            },
+            reason => {
                 this.analytics?.emitJsBridgeError({
                     js_bridge_method: 'send',
-                    error_message: String(error)
+                    error_message: describeRejection(reason)
                 });
-            });
-        options?.onRequestSent?.();
 
-        return result;
+                const error = legacyWalletErrorFrom(reason, RPC_WALLET_ERROR_CODES);
+                if (!error) {
+                    throw new WalletTransportError(
+                        'Injected wallet rejected the request without a TON Connect error response',
+                        { cause: reason }
+                    );
+                }
+
+                markNormalized(error);
+                const response = { id, error } as WalletResponse<T>;
+                logDebug('Wallet request rejected, normalized:', response);
+                return response;
+            }
+        );
     }
 
     private async _connect(
@@ -353,5 +393,13 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             jsBridgeKey: this.injectedWalletKey,
             nextRpcRequestId: 0
         });
+    }
+}
+
+function describeRejection(reason: unknown): string {
+    try {
+        return String(reason);
+    } catch {
+        return Object.prototype.toString.call(reason);
     }
 }
