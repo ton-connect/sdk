@@ -7,6 +7,7 @@ import { Translateable } from 'src/app/models/translateable';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { CHAIN, toUserFriendlyAddress } from '@tonconnect/sdk';
 import { copyToClipboard } from 'src/app/utils/copy-to-clipboard';
+import { logDebug } from 'src/app/utils/log';
 import { AccountButtonDropdownStyled, MenuButtonStyled, UlStyled } from './style';
 
 const MenuItemText: Component<{ children: string } & Translateable> = props => (
@@ -36,7 +37,7 @@ export const AccountButtonDropdown: Component<AccountButtonDropdownProps> = prop
     };
 
     const onDisconnect = (): void => {
-        tonConnectUi.disconnect();
+        tonConnectUi.disconnect().catch(e => logDebug(e));
         props.onClose();
     };
 

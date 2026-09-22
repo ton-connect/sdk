@@ -42,6 +42,7 @@ import { Dynamic } from 'solid-js/web';
 import { WalletsModalCloseReason } from 'src/models';
 import { DesktopFeatureNotSupportModal } from './feature-not-supoprt-modal';
 import { widgetController } from 'src/app/widget-controller';
+import { logDebug } from 'src/app/utils/log';
 import { ChooseSupportedFeatureWalletsModal } from 'src/models/wallets-modal';
 
 export const WalletsModal: Component = () => {
@@ -223,7 +224,7 @@ export const WalletsModal: Component = () => {
                                 currentWallet={tonConnectUI?.wallet as Wallet}
                                 onSelect={onSelectWallet}
                                 onSelectAllWallets={onSelectAllWallets}
-                                onDisconnect={() => connector.disconnect()}
+                                onDisconnect={() => connector.disconnect().catch(e => logDebug(e))}
                                 walletsModalState={
                                     walletsModalState() as ChooseSupportedFeatureWalletsModal
                                 }
