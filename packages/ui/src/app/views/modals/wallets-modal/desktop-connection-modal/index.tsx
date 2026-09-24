@@ -1,6 +1,6 @@
 import {
     ConnectAdditionalRequest,
-    isTelegramUrl,
+    isTelegramMiniAppUrl,
     isWalletInfoCurrentlyInjected,
     WalletMissingRequiredFeaturesError,
     WalletWrongNetworkError,
@@ -149,7 +149,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
 
         setMode('desktop');
 
-        if (isTelegramUrl(universalLink())) {
+        if (isTelegramMiniAppUrl(universalLink())) {
             onClickTelegram();
         } else {
             const forceRedirect = !firstClick();

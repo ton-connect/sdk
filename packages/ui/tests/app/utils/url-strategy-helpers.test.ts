@@ -61,6 +61,11 @@ describe.each([
             'https://t.me/wallet/start?startapp=tonconnect-v__2-id__session123-trace--5Fid__trace123'
     },
     {
+        link: 'https://t.me/sendgrams',
+        params: { traceId: 'trace123', sessionId: 'session123' },
+        expected: 'https://t.me/sendgrams?id=session123&trace_id=trace123'
+    },
+    {
         link: 'https://t.me/wallet/start?startapp=tonconnect-v__2-id__ccf67f691306f64a6ad690facfef8c8e6a6a020ec8997019ae01a91eac490872-r__--7B--22manifestUrl--22--3A--22https--3A--2F--2Ftonconnect--2Dsdk--2Ddemo--2Ddapp--2Evercel--2Eapp--2Ftonconnect--2Dmanifest--2Ejson--22--2C--22items--22--3A--5B--7B--22name--22--3A--22ton--5Faddr--22--7D--2C--7B--22name--22--3A--22ton--5Fproof--22--2C--22payload--22--3A--22865f264e46f69ffcc9c8464ff4ee7b446d5caa9058f93bd7748a1c1505a51dbf--22--7D--5D--7D-ret__none',
         params: {
             traceId: '019a3107-22f1-713c-9496-14904c306ba8',

@@ -11,7 +11,7 @@ import {
 import { WithDataAttributes } from 'src/app/models/with-data-attributes';
 import { useDataAttributes } from 'src/app/hooks/use-data-attributes';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
-import { isTelegramUrl } from '@tonconnect/sdk';
+import { isTelegramMiniAppUrl, isTelegramUrl } from '@tonconnect/sdk';
 import { appState } from 'src/app/state/app.state';
 import { action, isErrorAction, isSuccessAction } from 'src/app/state/modals-state';
 import { isInTMA } from 'src/app/utils/tma-api';
@@ -85,7 +85,7 @@ export const ActionModal: Component<ActionModalProps> = props => {
             traceId: currentAction.traceId
         });
 
-        if (isTelegramUrl(universalLink)) {
+        if (isTelegramMiniAppUrl(universalLink)) {
             redirectToTelegram(linkWithSessionId, {
                 returnStrategy: returnStrategy,
                 twaReturnUrl:

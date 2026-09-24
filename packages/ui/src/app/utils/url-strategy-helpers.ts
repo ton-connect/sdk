@@ -16,8 +16,20 @@ import {
 import {
     decodeTelegramUrlParameters,
     encodeTelegramUrlParameters,
+    isTelegramMiniAppUrl,
     isTelegramUrl
 } from '@tonconnect/sdk';
+
+/**
+ * Whether this link carries the TON Connect payload inside `startapp` instead
+ * of as plain query parameters. The packing belongs to the link in hand rather
+ * than to the wallet: a mini-app link acquires it once the payload is added,
+ * a link already rewritten to `tg://resolve` keeps it, and a native Telegram
+ * surface never has it.
+ */
+function hasTelegramPackedParams(url: string): boolean {
+    return isTelegramUrl(url) && new URL(url).searchParams.has('startapp');
+}
 
 /**
  * Adds a return strategy to a url.
@@ -43,7 +55,7 @@ export function addReturnStrategy(
 
     const newUrl = addQueryParameter(url, 'ret', returnStrategy);
 
-    if (!isTelegramUrl(url)) {
+    if (!hasTelegramPackedParams(url)) {
         return newUrl;
     }
 
@@ -573,7 +585,7 @@ export function enrichUniversalLink(
         traceId: string;
     }
 ): string {
-    if (!isTelegramUrl(universalLink)) {
+    if (!isTelegramMiniAppUrl(universalLink)) {
         return addQueryParametersIfNotPresented(universalLink, {
             id: params.sessionId,
             trace_id: params.traceId
@@ -636,7 +648,7 @@ export function removeEmbeddedRequestFromUniversalLink(universalLink: string) {
 }
 
 export function removeParamsFromUniversalLink(universalLink: string, params: string[]): string {
-    if (!isTelegramUrl(universalLink)) {
+    if (!hasTelegramPackedParams(universalLink)) {
         return removeQueryParameters(universalLink, params);
     }
 
