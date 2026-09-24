@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { encodeTelegramUrlParameters, decodeTelegramUrlParameters } from 'src/utils/url';
+import {
+    encodeTelegramUrlParameters,
+    decodeTelegramUrlParameters,
+    isTelegramMiniAppUrl
+} from 'src/utils/url';
 
 const BASE_URL = 'https://t.me/wallet/start?startapp=tonconnect-';
 const CONNECT_PARAMS =
@@ -32,5 +36,20 @@ describe.each([
         const encodedParams = encodeTelegramUrlParameters(params);
         const decodedParams = decodeTelegramUrlParameters(encodedParams);
         expect(decodedParams).toEqual(params);
+    });
+});
+
+describe.each([
+    { link: 'https://t.me/wallet/start', expected: true },
+    { link: 'https://t.me/wallet?attach=wallet', expected: true },
+    { link: 'https://t.me/wallet/start?startapp=tonconnect', expected: true },
+    { link: 'https://t.me/sendgrams', expected: false },
+    { link: 'https://t.me/sendgrams?startapp=tonconnect', expected: false },
+    { link: 'https://app.tonkeeper.com/ton-connect', expected: false },
+    { link: 'tg://sendgrams', expected: false },
+    { link: undefined, expected: false }
+])('urls: isTelegramMiniAppUrl', ({ link, expected }) => {
+    it(`returns ${String(expected)} for ${String(link)}`, () => {
+        expect(isTelegramMiniAppUrl(link)).toBe(expected);
     });
 });

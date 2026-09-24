@@ -1,6 +1,6 @@
 import {
     ConnectAdditionalRequest,
-    isTelegramUrl,
+    isTelegramMiniAppUrl,
     WalletInfoRemote,
     WalletWrongNetworkError,
     WalletMissingRequiredFeaturesError,
@@ -146,7 +146,7 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
 
     const onRetry = (): void => {
         const currentUniversalLink = getUniversalLink(true);
-        if (isTelegramUrl(currentUniversalLink)) {
+        if (isTelegramMiniAppUrl(currentUniversalLink)) {
             return onClickTelegram(currentUniversalLink);
         }
 

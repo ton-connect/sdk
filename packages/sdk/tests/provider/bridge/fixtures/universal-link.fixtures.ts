@@ -21,6 +21,8 @@ export const STANDARD_LINK = 'tc://';
 export const TG_DIRECT_LINK = 'https://t.me/wallet/start';
 /** Legacy Telegram attach-param link (converted to direct internally). */
 export const TG_ATTACH_LINK = 'https://t.me/wallet?attach=wallet';
+/** Native Telegram surface: a t.me link with no mini app behind it. */
+export const TG_NATIVE_LINK = 'https://t.me/sendgrams';
 
 // ── Connect request variants ──────────────────────────────────────────────────
 
@@ -375,6 +377,17 @@ export const CASES: UniversalLinkCase[] = [
     {
         label: 'no-proof: Telegram attach link — connect-only (no embeddedRequest)',
         universalLink: TG_ATTACH_LINK,
+        sessionId: SESSION_ID,
+        traceId: TRACE_ID,
+        connectRequest: NO_PROOF_CONNECT,
+        txRequest: null
+    },
+
+    // ── Native Telegram surface ─ no mini app, so no startapp packing ─────
+
+    {
+        label: 'Telegram native link — connect-only (no embeddedRequest)',
+        universalLink: TG_NATIVE_LINK,
         sessionId: SESSION_ID,
         traceId: TRACE_ID,
         connectRequest: NO_PROOF_CONNECT,

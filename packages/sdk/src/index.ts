@@ -76,6 +76,7 @@ export { toUserFriendlyAddress } from './utils/address';
 export { checkRequiredWalletFeatures } from './utils/feature-support';
 export {
     isTelegramUrl,
+    isTelegramMiniAppUrl,
     encodeTelegramUrlParameters,
     decodeTelegramUrlParameters,
     isConnectUrl

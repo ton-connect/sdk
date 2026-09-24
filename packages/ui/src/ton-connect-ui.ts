@@ -14,7 +14,7 @@ import {
     Consumable
 } from '@tonconnect/sdk';
 import {
-    isTelegramUrl,
+    isTelegramMiniAppUrl,
     isWalletInfoCurrentlyEmbedded,
     ITonConnect,
     SendTransactionRequest,
@@ -834,7 +834,7 @@ export class TonConnectUI {
                 traceId
             });
 
-            if (isTelegramUrl(this.walletInfo.universalLink)) {
+            if (isTelegramMiniAppUrl(this.walletInfo.universalLink)) {
                 redirectToTelegram(linkWithSessionId, {
                     returnStrategy,
                     twaReturnUrl: twaReturnUrl || appState.twaReturnUrl,

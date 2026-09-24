@@ -24,6 +24,28 @@ export function isTelegramUrl(link: string | undefined): link is string {
 }
 
 /**
+ * Type guard for the subset of Telegram links that address a mini app rather
+ * than a native Telegram surface. TON Connect parameters travel inside
+ * `startapp`, which only a mini app ever receives, so this guard — not
+ * {@link isTelegramUrl} — is what selects the mini-app transport. A mini-app
+ * link either names the bot and the app in its path (`t.me/<bot>/<app>`) or
+ * asks for the attachment menu (`?attach=`), which resolves to the same pair.
+ */
+export function isTelegramMiniAppUrl(link: string | undefined): link is string {
+    if (!isTelegramUrl(link)) {
+        return false;
+    }
+
+    const url = new URL(link);
+    if (url.searchParams.has('attach')) {
+        return true;
+    }
+
+    const [, bot, appName] = url.pathname.split('/');
+    return !!bot && !!appName;
+}
+
+/**
  * Type guard that returns `true` when `link` looks like a TON Connect connect
  * URL — i.e. it carries the `ton_addr` request item (raw or
  * Telegram-encoded). Useful for discriminating handler URLs in deep-link
