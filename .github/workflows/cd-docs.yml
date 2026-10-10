@@ -1,0 +1,53 @@
+name: Docs redirects
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: docs-release
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read .nvmrc
+        run: echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_ENV
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '${{ env.NVMRC }}'
+          cache: 'pnpm'
+
+      - run: pnpm i --frozen-lockfile
+      - run: pnpm turbo run build --filter='./packages/*'
+      - run: pnpm generateDocs
+      - run: node --test .github/scripts/docs-redirect-stubs.test.js
+
+      - name: Snapshot current Pages tree
+        run: |
+          git fetch --no-tags origin docs/release
+          mkdir -p "$RUNNER_TEMP/old"
+          git archive FETCH_HEAD docs | tar -x -C "$RUNNER_TEMP/old"
+
+      - name: Build stubs
+        run: node .github/scripts/docs-redirect-stubs.js "$RUNNER_TEMP/old/docs" docs "$RUNNER_TEMP/publish/docs" https://docs.ton-connect.io/sdk/
+
+      - name: Publish to docs/release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd "$RUNNER_TEMP/publish"
+          git init -q -b docs/release
+          git add docs
+          git -c user.name="github-actions[bot]" -c user.email="41898283+github-actions[bot]@users.noreply.github.com" commit -q -m "Publish docs redirects for ${GITHUB_SHA::8}"
+          git push --force "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" docs/release
