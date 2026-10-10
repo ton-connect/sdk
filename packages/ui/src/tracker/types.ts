@@ -31,6 +31,7 @@ export {
     createResponseVersionEvent,
     createConnectionStartedEvent,
     createConnectionErrorEvent,
+    createConnectionInitiatedEvent,
     createConnectionCompletedEvent,
     createConnectionRestoringStartedEvent,
     createConnectionRestoringErrorEvent,

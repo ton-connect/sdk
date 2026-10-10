@@ -104,8 +104,9 @@ export type ConnectionStartedEvent = TonConnectBaseEvent &
  * A connection was initiated against a particular kind of source.
  *
  * Emitted by the core SDK on every `connect()`, so unlike `connection-selected-wallet` it is
- * also present for dApps that do not use `@tonconnect/ui`. Counts initiations rather than user
- * actions — one journey can produce several rows on a single `trace_id`.
+ * also present for dApps that do not use `@tonconnect/ui`, and by the UI when a user opens a
+ * link that was built for display. Counts initiations rather than user actions — one journey
+ * can produce several rows on a single `trace_id`.
  */
 export type ConnectionInitiatedEvent = TonConnectBaseEvent & {
     event_name: 'connection-initiated';

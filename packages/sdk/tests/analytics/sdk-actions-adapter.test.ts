@@ -67,12 +67,36 @@ function createAnalytics(): Analytics<TonConnectEvent> & {
 const version = { ton_connect_sdk_lib: '4.0.2', ton_connect_ui_lib: null };
 
 describe('analytics/sdk-actions-adapter: connection-initiated', () => {
-    it('listens on the core prefix, not the ui prefix', () => {
+    it('listens on both prefixes: the core SDK emits on connect(), the UI on opening a shown link', () => {
         const dispatcher = createDispatcher();
         bindEventsTo(dispatcher, createAnalytics());
 
         expect(dispatcher.registered()).toContain('ton-connect-connection-initiated');
-        expect(dispatcher.registered()).not.toContain('ton-connect-ui-connection-initiated');
+        expect(dispatcher.registered()).toContain('ton-connect-ui-connection-initiated');
+    });
+
+    it('forwards the ui-prefixed event exactly as the core one', () => {
+        const dispatcher = createDispatcher();
+        const analytics = createAnalytics();
+        bindEventsTo(dispatcher, analytics);
+
+        dispatcher.emit(
+            'ton-connect-ui-connection-initiated',
+            createConnectionInitiatedEvent(version, { kind: 'http-any-wallet' }, 'trace-4')
+        );
+
+        expect(analytics.emitted).toEqual([
+            {
+                method: 'emitConnectionInitiated',
+                event: {
+                    versions: { '@tonconnect/sdk': '4.0.2', '@tonconnect/ui': '' },
+                    connection_source_kind: 'http-any-wallet',
+                    bridge_key: undefined,
+                    bridge_url: undefined,
+                    trace_id: 'trace-4'
+                }
+            }
+        ]);
     });
 
     it('forwards the source classification to emitConnectionInitiated', () => {

@@ -74,9 +74,12 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
                     ? props.walletModalState.embeddedRequest
                     : undefined;
 
+            // Only rendering the QR can fill the cache: Open Link and Copy Link are buttons on
+            // that screen. Opening the link is reported by onSelectUniversal.
             link = connector.connect(walletsBridges(), props.additionalRequest, {
                 traceId: props.walletModalState.traceId,
-                embeddedRequest: embeddedRequest ?? undefined
+                embeddedRequest: embeddedRequest ?? undefined,
+                linkDisplayOnly: true
             });
         }
 
@@ -112,6 +115,13 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
     };
 
     const onSelectUniversal = (): void => {
+        // The link was reported as display-only when the QR built it; opening it is the
+        // initiation, and the universal `tc://` link is answered by any wallet.
+        appState.tracker.trackConnectionInitiated(
+            { kind: 'http-any-wallet' },
+            props.walletModalState.traceId
+        );
+
         const forceRedirect = !firstClick();
         setFirstClick(false);
 

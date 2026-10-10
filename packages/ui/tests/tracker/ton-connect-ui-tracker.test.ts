@@ -2,6 +2,7 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import {
     BrowserEventDispatcher,
+    ConnectionInitiatedEvent,
     WalletPreselectedEvent,
     WalletSelectedEvent
 } from '@tonconnect/sdk';
@@ -89,5 +90,25 @@ describe('tracker/ton-connect-ui-tracker: trackWalletSelected', () => {
 
         expect(h.events[0]!.detail.connection_mode).toBeUndefined();
         expect(h.events[0]!.detail.selection_source).toBe('auto-embedded');
+    });
+});
+
+describe('tracker/ton-connect-ui-tracker: trackConnectionInitiated', () => {
+    it('dispatches under the ui prefix with the source and trace supplied by the caller', async () => {
+        const h = harness<ConnectionInitiatedEvent>('ton-connect-ui-connection-initiated');
+        dispose = h.dispose;
+
+        h.tracker.trackConnectionInitiated({ kind: 'http-any-wallet' }, 'trace-4');
+        await Promise.resolve();
+
+        expect(h.events).toHaveLength(1);
+        expect(h.events[0]!.detail).toEqual({
+            type: 'connection-initiated',
+            connection_source_kind: 'http-any-wallet',
+            bridge_key: undefined,
+            bridge_url: undefined,
+            custom_data: { ton_connect_sdk_lib: null, ton_connect_ui_lib: '3.0.2' },
+            trace_id: 'trace-4'
+        });
     });
 });

@@ -1,5 +1,10 @@
 import { EventDispatcher } from 'src/tracker/event-dispatcher';
-import { ConnectionInfo, SdkActionEvent, Version } from 'src/tracker/types';
+import {
+    ConnectionInfo,
+    ConnectionInitiatedEvent,
+    SdkActionEvent,
+    Version
+} from 'src/tracker/types';
 import { Analytics } from 'src/analytics/analytics';
 import { TonConnectEvent } from 'src/analytics/types';
 
@@ -76,9 +81,9 @@ export function bindEventsTo(
         });
     });
 
-    // Core-emitted, so the prefix is `ton-connect-`, not `ton-connect-ui-`. Both prefixes
-    // type-check here; the wrong one silently never fires.
-    eventDispatcher.addEventListener('ton-connect-connection-initiated', event => {
+    // Emitted by the core SDK on `connect()` and by the UI when a user opens a link that was
+    // built for display, so both prefixes are bound; an unbound one silently never fires.
+    const forwardConnectionInitiated = (event: CustomEvent<ConnectionInitiatedEvent>): void => {
         const { detail } = event;
         analytics.emitConnectionInitiated({
             versions: buildVersionInfo(detail.custom_data),
@@ -87,7 +92,15 @@ export function bindEventsTo(
             bridge_url: detail.bridge_url,
             trace_id: detail.trace_id ?? undefined
         });
-    });
+    };
+    eventDispatcher.addEventListener(
+        'ton-connect-connection-initiated',
+        forwardConnectionInitiated
+    );
+    eventDispatcher.addEventListener(
+        'ton-connect-ui-connection-initiated',
+        forwardConnectionInitiated
+    );
 
     eventDispatcher.addEventListener('ton-connect-connection-link-generated', event => {
         const { detail } = event;

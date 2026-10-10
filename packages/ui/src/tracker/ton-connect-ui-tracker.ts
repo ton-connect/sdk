@@ -1,6 +1,7 @@
 import {
     createConnectionCompletedEvent,
     createConnectionErrorEvent,
+    createConnectionInitiatedEvent,
     createConnectionRestoringCompletedEvent,
     createConnectionRestoringErrorEvent,
     createConnectionRestoringStartedEvent,
@@ -56,6 +57,7 @@ export type TonConnectUITrackerOptions = {
  *  * `wallet-preselected`: when a user picks a wallet but has not committed yet
  *    (desktop, where a second screen follows).
  *  * `wallet-selected`: when a wallet becomes the one being connected with.
+ *  * `connection-initiated`: when a user opens a connect link that was built only for display.
  *  * `connection-completed`: when a user successfully connected a wallet.
  *  * `connection-error`: when a user cancels a connection or there is an error during the connection process.
  *  * `connection-restoring-started`: when the dApp starts restoring a connection.
@@ -248,6 +250,22 @@ export class TonConnectUITracker {
     ): void {
         try {
             const event = createWalletSelectedEvent(this.version, ...args);
+            this.dispatchUserActionEvent(event);
+        } catch (e) {
+            logError(e);
+        }
+    }
+
+    /**
+     * Track connection initiated event — the user opened a link that `connect()` built only for
+     * display, which the core SDK had therefore reported as `connection-link-generated`.
+     * @param args
+     */
+    public trackConnectionInitiated(
+        ...args: WithoutVersion<Parameters<typeof createConnectionInitiatedEvent>>
+    ): void {
+        try {
+            const event = createConnectionInitiatedEvent(this.version, ...args);
             this.dispatchUserActionEvent(event);
         } catch (e) {
             logError(e);
