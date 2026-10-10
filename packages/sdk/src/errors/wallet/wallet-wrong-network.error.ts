@@ -11,6 +11,8 @@ export class WalletWrongNetworkError extends TonConnectError<{
     expectedChainId: string;
     actualChainId: string;
 }> {
+    static readonly errorName: string = 'WalletWrongNetworkError';
+
     declare cause: {
         /** Chain id the dApp asked for. */
         expectedChainId: string;
@@ -25,7 +27,5 @@ export class WalletWrongNetworkError extends TonConnectError<{
         }
     ) {
         super(message, options);
-        this.name = 'WalletWrongNetworkError';
-        Object.setPrototypeOf(this, WalletWrongNetworkError.prototype);
     }
 }

@@ -4,5 +4,5 @@ export * from './storage';
 export * from './wallets-manager';
 export * from './address';
 export * from './binary';
-export { TonConnectError } from './ton-connect.error';
+export { TonConnectError, type WalletErrorDetail } from './ton-connect.error';
 export { UnknownError } from './unknown.error';
