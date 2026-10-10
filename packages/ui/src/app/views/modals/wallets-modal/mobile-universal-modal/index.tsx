@@ -62,6 +62,7 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
 
     const telegramWallet = createMemo(() => shortcutWallet(TELEGRAM_WALLET_APP_NAME), null);
     const gramWallet = createMemo(() => shortcutWallet(GRAM_WALLET_APP_NAME), null);
+    const hasShortcut = (): boolean => !!telegramWallet() || !!gramWallet();
 
     const walletsBridges = createMemo(() => getUniqueBridges(props.walletsList), null, {
         equals: bridgesIsEqual
@@ -221,12 +222,16 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
                     </GramWalletButtonStyled>
                 </Show>
                 <H2Styled
-                    translationKey="walletModal.mobileUniversalModal.chooseOtherApplication"
+                    translationKey={
+                        hasShortcut()
+                            ? 'walletModal.mobileUniversalModal.chooseOtherApplication'
+                            : 'walletModal.mobileUniversalModal.chooseApplication'
+                    }
                     maxWidth={342}
                     padding={'0 24px 8px 24px'}
                     margin={'0'}
                 >
-                    Or choose another app:
+                    {hasShortcut() ? 'Or choose another app:' : 'Choose an app:'}
                 </H2Styled>
                 <WalletUlContainer>
                     <For each={shouldShowMoreButton() ? visibleWallets() : supportedWallets()}>

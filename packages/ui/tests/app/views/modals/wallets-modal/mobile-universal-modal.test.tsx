@@ -149,3 +149,30 @@ describe('views/mobile-universal-modal: visible wallets', () => {
         });
     });
 });
+
+describe('views/mobile-universal-modal: row heading', () => {
+    it.each([
+        ['a promoted button is shown', true, 'Or choose another app:'],
+        ['no promoted button is shown', false, 'Choose an app:']
+    ])('reads correctly when %s', (_, telegramSupported, heading) => {
+        const walletsList = [
+            {
+                ...remoteWallet('telegram', ['ios', 'android']),
+                isSupportRequiredFeatures: telegramSupported
+            },
+            { ...remoteWallet('tonkeeper', ['ios', 'android']), isSupportRequiredFeatures: true }
+        ];
+        const h = mountModal(() => (
+            <MobileUniversalModal
+                walletsList={walletsList}
+                additionalRequest={{}}
+                walletModalState={OPENED}
+                onSelect={() => {}}
+                onSelectAllWallets={() => {}}
+            />
+        ));
+        dispose = h.dispose;
+
+        expect(h.root.querySelector('[data-tc-h2="true"]')?.textContent).toBe(heading);
+    });
+});

@@ -64,6 +64,7 @@
       "connectYourWallet": "Подключите TON-кошелёк",
       "useTelegramWallet": "Используйте свой Telegram-кошелёк",
       "chooseOtherApplication": "Или выберите другое приложение:",
+      "chooseApplication": "Выберите приложение:",
       "openLink": "Открыть",
       "scan": "Отсканируйте камерой вашего телефона"
     },

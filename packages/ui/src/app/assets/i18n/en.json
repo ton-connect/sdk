@@ -64,6 +64,7 @@
       "connectYourWallet": "Connect your TON wallet",
       "useTelegramWallet": "Use your Telegram wallet",
       "chooseOtherApplication": "Or choose another app:",
+      "chooseApplication": "Choose an app:",
       "openLink": "Open Link",
       "scan": "Scan with your mobile wallet"
     },
