@@ -5,7 +5,6 @@ import { GRAM_WALLET_APP_NAME } from 'src/app/env/WALLET_APP_NAMES';
 import { WalletItem } from 'src/app/components';
 import { isWalletInfoCurrentlyInjected } from '@tonconnect/sdk';
 import { useI18n } from '@solid-primitives/i18n';
-import { splitWalletName } from 'src/app/utils/wallets';
 
 export interface WalletLabeledItemProps extends Styleable {
     wallet:
@@ -36,13 +35,11 @@ export const WalletLabeledItem: Component<WalletLabeledItemProps> = props => {
         return undefined;
     };
 
-    const nameParts = (): ReturnType<typeof splitWalletName> => splitWalletName(props.wallet.name);
-
     return (
         <WalletItem
             icon={props.wallet.imageUrl}
-            name={nameParts().name}
-            secondLine={walletsSecondLine() ?? nameParts().note}
+            name={props.wallet.name}
+            secondLine={walletsSecondLine()}
             secondLineColorPrimary={false}
             onClick={() => props.onClick()}
             class={props.class}
