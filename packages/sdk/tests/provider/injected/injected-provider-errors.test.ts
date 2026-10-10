@@ -466,6 +466,32 @@ describe('InjectedProvider wallet-initiated disconnect', () => {
     });
 });
 
+describe('InjectedProvider with a wallet whose disconnect rejects', () => {
+    function rejectingWallet() {
+        const wallet = fakeWallet({ disconnect: () => Promise.reject(new Error('x')) });
+        wallet.connect = vi.fn(() => Promise.resolve(connectEventFor(wallet)));
+        return wallet;
+    }
+
+    it('disconnect() leaves no unhandled rejection', async () => {
+        const provider = await providerWith(rejectingWallet());
+
+        const reasons = await unhandledRejectionsDuring(() => provider.disconnect());
+
+        expect(reasons).toEqual([]);
+    });
+
+    it('closeConnection() leaves no unhandled rejection', async () => {
+        const provider = await providerWith(rejectingWallet());
+        provider.connect(connectRequest);
+        await settle();
+
+        const reasons = await unhandledRejectionsDuring(async () => provider.closeConnection());
+
+        expect(reasons).toEqual([]);
+    });
+});
+
 describe('InjectedProvider wallet-initiated events', () => {
     async function connectedWithEmitter() {
         let emit: (e: unknown) => void = () => {};

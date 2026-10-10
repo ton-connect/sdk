@@ -173,9 +173,14 @@ export class InjectedProvider<T extends string = string> implements InternalProv
 
     public closeConnection(): void {
         if (this.listenSubscriptions) {
-            this.injectedWallet.disconnect();
+            this.disconnectWallet();
         }
         this.closeAllListeners();
+    }
+
+    // Typed as void, but a wallet may still return a promise that rejects.
+    private disconnectWallet(): void {
+        Promise.resolve(this.injectedWallet.disconnect()).catch(logDebug);
     }
 
     public async disconnect(options?: OptionalTraceable): Promise<void> {
@@ -196,7 +201,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
             };
 
             try {
-                this.injectedWallet.disconnect();
+                this.disconnectWallet();
                 finalize();
             } catch (e) {
                 logDebug(e);
