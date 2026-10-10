@@ -1,6 +1,6 @@
 import { styled } from 'solid-styled-components';
-import { Button } from 'src/app/components/button';
 import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
+import { mediaNotTouch, mediaTouch } from 'src/app/styles/media';
 
 // `100vh` always exceeds half the button's height, so the browser clamps it to a pill.
 // `none` still opts out of rounding entirely, as the dApp asked for.
@@ -18,27 +18,41 @@ const borders: BorderRadiusConfig = {
  * 15px Telegram glyph vs a 24px wallet icon) can't make one button taller than another. It
  * matches the tallest content — a 24px wallet icon plus 14px padding — so equalising grows the
  * shorter button instead of shrinking the taller one.
+ *
+ * A plain `button` rather than `Button`: goober emits a rule once, so the `ButtonStyled` rule the
+ * header connect button emitted earlier would outrank the colours each variant sets.
  */
-export const ConnectButtonStyled = styled(Button)`
+export const ConnectButtonStyled = styled.button`
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 100%;
     height: 52px;
     border-radius: ${props => borders[props.theme!.borderRadius]};
     padding: 0 16px;
+    border: none;
+    cursor: pointer;
+
+    transition: transform 0.125s ease-in-out;
+
+    ${mediaNotTouch} {
+        &:hover {
+            transform: scale(1.02);
+        }
+    }
+
+    &:active {
+        transform: scale(0.98);
+    }
+
+    ${mediaTouch} {
+        &:active {
+            transform: scale(0.96);
+        }
+    }
 `;
 
-/**
- * Keeps the button icon inline with the label, centred as a single unit. The icon can't be
- * passed as the `Button` `leftIcon` — that switches the button to `justify-content: space-between`,
- * which pushes the icon to the far edge instead.
- *
- * Typography lives here rather than on the button: `Button` brings its own `font-size`/`font-weight`
- * from the shared `ButtonStyled`, and which of the two single-class rules wins depends on
- * stylesheet insertion order, which goober varies (it prepends when a generated class is passed
- * down, and skips re-inserting CSS it has already emitted). This element has no competing rule,
- * so the result is the same on every render.
- */
+/** Keeps the button icon inline with the label, centred as a single unit. */
 export const ButtonLabelStyled = styled.span`
     display: inline-flex;
     align-items: center;

@@ -21,7 +21,12 @@ export interface ConnectButtonProps extends Styleable {
  */
 export const ConnectButton: Component<ConnectButtonProps> = props => {
     return (
-        <ConnectButtonStyled class={props.class} onClick={() => props.onClick()} scale="s">
+        <ConnectButtonStyled
+            type="button"
+            class={props.class}
+            onClick={() => props.onClick()}
+            data-tc-button="true"
+        >
             <ButtonLabelStyled>
                 {props.icon}
                 {props.children}
