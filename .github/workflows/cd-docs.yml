@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Read .nvmrc
-        run: echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_ENV
+        run: echo "NVMRC=$(cat .nvmrc)" >> "$GITHUB_ENV"
 
       - uses: pnpm/action-setup@v4
 
