@@ -163,7 +163,7 @@ export class InjectedProvider<T extends string = string> implements InternalProv
         } catch (e) {
             this.analytics?.emitJsBridgeError({
                 js_bridge_method: 'restoreConnection',
-                error_message: String(e),
+                error_message: describeRejection(e),
                 trace_id: traceId
             });
             await this.connectionStorage.removeConnection();
@@ -484,23 +484,11 @@ export class InjectedProvider<T extends string = string> implements InternalProv
         });
         try {
             this.unsubscribeCallback = this.injectedWallet.listen(e => {
-                logDebug('Wallet message received:', e);
-                if (typeof e !== 'object' || e === null) {
-                    return;
-                }
-                const traceId = e.traceId ?? UUIDv7();
-
-                if (this.listenSubscriptions) {
-                    // This runs inside the wallet's own code, so a listener failure stops here.
-                    try {
-                        this.emitWalletEvent(e, traceId);
-                    } catch (err) {
-                        logDebug('Injected Provider could not deliver a wallet event:', err);
-                    }
-                }
-
-                if (e.event === 'disconnect') {
-                    this.disconnect({ traceId }).catch(e => logDebug(e));
+                // This runs inside the wallet's own code, so nothing may throw back into it.
+                try {
+                    this.onWalletEvent(e);
+                } catch (err) {
+                    logDebug('Injected Provider could not handle a wallet event:', err);
                 }
             });
             this.analytics?.emitJsBridgeResponse({
@@ -510,10 +498,31 @@ export class InjectedProvider<T extends string = string> implements InternalProv
         } catch (err) {
             this.analytics?.emitJsBridgeError({
                 js_bridge_method: 'listen',
-                error_message: String(err),
+                error_message: describeRejection(err),
                 trace_id: options.traceId
             });
             throw err;
+        }
+    }
+
+    private onWalletEvent(e: OptionalTraceable<WalletEvent>): void {
+        logDebug('Wallet message received:', e);
+        if (typeof e !== 'object' || e === null) {
+            return;
+        }
+        const traceId = e.traceId ?? UUIDv7();
+
+        // A listener failure must not keep a disconnect event from clearing the connection.
+        if (this.listenSubscriptions) {
+            try {
+                this.emitWalletEvent(e, traceId);
+            } catch (err) {
+                logDebug('Injected Provider could not deliver a wallet event:', err);
+            }
+        }
+
+        if (e.event === 'disconnect') {
+            this.disconnect({ traceId }).catch(e => logDebug(e));
         }
     }
 
@@ -530,6 +539,10 @@ function describeRejection(reason: unknown): string {
     try {
         return String(reason);
     } catch {
-        return Object.prototype.toString.call(reason);
+        try {
+            return Object.prototype.toString.call(reason);
+        } catch {
+            return '[unreadable value]';
+        }
     }
 }

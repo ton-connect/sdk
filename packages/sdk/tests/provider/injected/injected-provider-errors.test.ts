@@ -109,6 +109,23 @@ describe('InjectedProvider.sendRequest', () => {
         expect(analytics.emitJsBridgeResponse).not.toHaveBeenCalled();
     });
 
+    it('rejects a rejection that cannot even be printed as WalletTransportError', async () => {
+        const { proxy, revoke } = Proxy.revocable({}, {});
+        revoke();
+        const { analytics, manager } = fakeAnalytics();
+        const provider = await providerWith(fakeWallet({ send: () => Promise.reject(proxy) }), {
+            analyticsManager: manager
+        });
+
+        const error = await provider.sendRequest(request).catch(e => e);
+
+        expect(error).toBeInstanceOf(WalletTransportError);
+        expect(error.cause).toBe(proxy);
+        expect(analytics.emitJsBridgeError).toHaveBeenCalledWith(
+            expect.objectContaining({ error_message: '[unreadable value]' })
+        );
+    });
+
     it('rejects a non-TON-Connect rejection as WalletTransportError keeping the cause', async () => {
         const reason = new Error('Отменено пользователем');
         const provider = await providerWith(fakeWallet({ send: () => Promise.reject(reason) }));
@@ -649,6 +666,12 @@ describe('InjectedProvider wallet-initiated events', () => {
         await settle();
 
         expect(await storage.getItem('ton-connect-storage_bridge-connection')).toBeNull();
+    });
+
+    it('does not throw an event whose reads throw back into the wallet', async () => {
+        const { emit } = await connectedWithEmitter();
+
+        expect(() => emit(withThrowingRead({ id: 3 }, 'event'))).not.toThrow();
     });
 
     it.each([
