@@ -110,6 +110,7 @@ export const SingleWalletModal: Component = () => {
                         wallet={getSingleWalletModalWalletInfo()!} // TODO: remove non-null assertion
                         walletsModalState={connectionModalState()}
                         additionalRequest={additionalRequest()}
+                        selectionSource="auto-dapp-directed"
                         onBackClick={() => {}}
                         backDisabled={true}
                     />

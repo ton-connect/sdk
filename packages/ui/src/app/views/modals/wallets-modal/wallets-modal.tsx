@@ -268,6 +268,7 @@ export const WalletsModal: Component = () => {
                                 walletsModalState={walletsModalState()}
                                 wallet={selectedWalletInfo()! as WalletInfoRemote}
                                 additionalRequest={additionalRequest()}
+                                selectionSource="manual"
                                 onBackClick={clearSelectedWalletInfo}
                                 defaultError={selectedWalletError()}
                             />

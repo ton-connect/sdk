@@ -5,7 +5,8 @@ import {
     WalletMissingRequiredFeaturesError,
     WalletWrongNetworkError,
     WalletInfoInjectable,
-    WalletInfoRemote
+    WalletInfoRemote,
+    WalletSelectionSource
 } from '@tonconnect/sdk';
 import {
     Component,
@@ -62,6 +63,11 @@ export interface DesktopConnectionProps {
     additionalRequest?: ConnectAdditionalRequest;
     walletsModalState?: WalletsModalState;
     wallet: WalletInfoRemote | (WalletInfoRemote & WalletInfoInjectable);
+    /**
+     * Who preselected the wallet. Reported on the selection the mount makes for a wallet that has
+     * no QR to show, where no footer click will follow.
+     */
+    selectionSource: WalletSelectionSource;
     onBackClick: () => void;
     backDisabled?: boolean;
     defaultError?: 'missing-features' | 'connection-declined' | 'not-supported' | null;
@@ -189,20 +195,20 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
     };
 
     /**
-     * The commitment on desktop: the user has picked how to reach the wallet they preselected.
-     *
-     * Wired into the footer buttons' `onClick` rather than into the handlers themselves, because
-     * the mount-time dispatch below calls those same handlers with no user involved — emitting
-     * from inside them would report a selection nobody made.
+     * The commitment on desktop. Kept out of the handlers, which Retry and the mount dispatch
+     * reuse: a retry repeats a choice already recorded, and a mount that only shows a QR is none.
      */
-    const trackSelected = (mode: 'mobile' | 'desktop' | 'extension'): void => {
+    const trackSelected = (
+        mode: 'mobile' | 'desktop' | 'extension',
+        selectionSource: WalletSelectionSource
+    ): void => {
         const traceId = props.walletsModalState?.traceId;
 
         if (traceId) {
             appState.tracker.trackWalletSelected(
                 props.wallet.appName,
                 'connection-modal',
-                'manual',
+                selectionSource,
                 traceId,
                 mode
             );
@@ -224,11 +230,17 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
         }
     };
 
+    // With no QR to show, the mount is the commitment, so it records a selection with the source
+    // of the preselection it completes.
     if (supportsMobile(props.wallet)) {
         onClickMobile();
     } else if (supportsExtension(props.wallet)) {
+        if (isWalletInfoCurrentlyInjected(props.wallet)) {
+            trackSelected('extension', props.selectionSource);
+        }
         onClickExtension();
     } else {
+        trackSelected('desktop', props.selectionSource);
         onClickDesktop();
     }
 
@@ -392,7 +404,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                     rightIcon={<TgImageStyled src={IMG.TG} />}
                     scale="s"
                     onClick={() => {
-                        trackSelected('desktop');
+                        trackSelected('desktop', 'manual');
                         onClickTelegram();
                     }}
                 >
@@ -408,7 +420,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                             appearance="secondary"
                             leftIcon={<MobileIcon />}
                             onClick={() => {
-                                trackSelected('mobile');
+                                trackSelected('mobile', 'manual');
                                 onClickMobile();
                             }}
                         >
@@ -420,7 +432,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                             appearance="secondary"
                             leftIcon={<BrowserIcon />}
                             onClick={() => {
-                                trackSelected('extension');
+                                trackSelected('extension', 'manual');
                                 onClickExtension();
                             }}
                         >
@@ -434,7 +446,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                             appearance="secondary"
                             leftIcon={<DesktopIcon />}
                             onClick={() => {
-                                trackSelected('desktop');
+                                trackSelected('desktop', 'manual');
                                 onClickDesktop();
                             }}
                         >
