@@ -8,9 +8,9 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 /**
  * A wallet answer to a request, read as a TON Connect response: an object with
- * `result`, or with an `error` payload that has a readable code. The error
- * payload comes back normalized; anything else, including an object whose
- * reads throw, is `undefined`.
+ * a non-null `result`, or with an `error` payload that has a readable code.
+ * The answer comes back as a copy read once, with the error payload normalized;
+ * anything else, including an object whose reads throw, is `undefined`.
  */
 export function walletResponseFrom<T extends RpcMethod>(
     value: unknown
@@ -23,7 +23,13 @@ export function walletResponseFrom<T extends RpcMethod>(
             const error = walletErrorPayloadFrom(value.error);
             return error ? ({ ...value, error } as unknown as WalletResponse<T>) : undefined;
         }
-        return 'result' in value ? (value as unknown as WalletResponse<T>) : undefined;
+        if (!('result' in value)) {
+            return undefined;
+        }
+        const result = value.result;
+        return result === undefined || result === null
+            ? undefined
+            : ({ ...value, result } as unknown as WalletResponse<T>);
     } catch {
         return undefined;
     }
@@ -42,8 +48,9 @@ export function connectEventFrom(value: unknown): ConnectEvent | undefined {
             return undefined;
         }
         if (value.event === 'connect') {
-            return validateConnectEventPayload(value.payload) === null
-                ? (value as unknown as ConnectEvent)
+            const payload = value.payload;
+            return validateConnectEventPayload(payload) === null
+                ? ({ ...value, payload } as unknown as ConnectEvent)
                 : undefined;
         }
         if (value.event === 'connect_error') {

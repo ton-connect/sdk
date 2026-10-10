@@ -215,6 +215,19 @@ describe('InjectedProvider.sendRequest', () => {
         expect(analytics.emitJsBridgeError).not.toHaveBeenCalled();
     });
 
+    it.each([
+        ['whose result read throws', withThrowingRead({ id: '0' }, 'result')],
+        ['with an undefined result', { id: '0', result: undefined }],
+        ['with a null result', { id: '0', result: null }]
+    ])('rejects an answer %s as WalletTransportError', async (_name, answer) => {
+        const provider = await providerWith(fakeWallet({ send: () => Promise.resolve(answer) }));
+
+        const error = await provider.sendRequest(request).catch(e => e);
+
+        expect(error).toBeInstanceOf(WalletTransportError);
+        expect(error.cause).toBe(answer);
+    });
+
     it('rejects an answer whose reads throw as WalletTransportError', async () => {
         const answer = withThrowingRead({ id: '0' }, 'error');
         const provider = await providerWith(fakeWallet({ send: () => Promise.resolve(answer) }));
@@ -521,6 +534,25 @@ describe('InjectedProvider with a wallet whose disconnect rejects', () => {
         const reasons = await unhandledRejectionsDuring(async () => provider.closeConnection());
 
         expect(reasons).toEqual([]);
+    });
+});
+
+describe('InjectedProvider with a wallet whose disconnect throws synchronously', () => {
+    it('closeConnection() does not throw and still unsubscribes from the wallet', async () => {
+        const unsubscribe = vi.fn();
+        const wallet = fakeWallet({
+            listen: vi.fn(() => unsubscribe),
+            disconnect: () => {
+                throw new Error('x');
+            }
+        });
+        wallet.connect = vi.fn(() => Promise.resolve(connectEventFor(wallet)));
+        const provider = await providerWith(wallet);
+        provider.connect(connectRequest);
+        await settle();
+
+        expect(() => provider.closeConnection()).not.toThrow();
+        expect(unsubscribe).toHaveBeenCalledTimes(1);
     });
 });
 

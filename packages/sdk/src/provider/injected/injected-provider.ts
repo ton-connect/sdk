@@ -173,12 +173,17 @@ export class InjectedProvider<T extends string = string> implements InternalProv
 
     public closeConnection(): void {
         if (this.listenSubscriptions) {
-            this.disconnectWallet();
+            try {
+                this.disconnectWallet();
+            } catch (e) {
+                logDebug(e);
+            }
         }
         this.closeAllListeners();
     }
 
-    // Typed as void, but a wallet may still return a promise that rejects.
+    // Typed as void, but a wallet may still return a promise that rejects. A synchronous
+    // throw is left to the caller, as disconnect() falls back to the protocol request on it.
     private disconnectWallet(): void {
         Promise.resolve(this.injectedWallet.disconnect()).catch(logDebug);
     }
