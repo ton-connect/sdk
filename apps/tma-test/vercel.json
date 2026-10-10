@@ -1,0 +1,15 @@
+{
+  "redirects": [
+    {
+      "source": "/:path((?!tonconnect-manifest\\.json$).*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "tma-debug.vercel.app"
+        }
+      ],
+      "destination": "https://tma-debug.ton-connect.io/:path",
+      "permanent": true
+    }
+  ]
+}
