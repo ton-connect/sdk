@@ -1,14 +1,14 @@
 {
   "redirects": [
     {
-      "source": "/:path*",
+      "source": "/:path(.*)",
       "has": [
         {
           "type": "host",
           "value": "tonconnect-sdk-docs.vercel.app"
         }
       ],
-      "destination": "https://docs.ton-connect.io/sdk/:path*",
+      "destination": "https://docs.ton-connect.io/sdk/:path",
       "permanent": true
     },
     {
