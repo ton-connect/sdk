@@ -175,7 +175,7 @@ export class WalletsListManager {
                 features: walletConfigDTO.features,
                 ui:
                     walletConfigDTO.ui && typeof walletConfigDTO.ui === 'object'
-                        ? { isButtonTransparent: !!walletConfigDTO.ui.isButtonTransparent }
+                        ? { isButtonTransparent: walletConfigDTO.ui.isButtonTransparent === true }
                         : undefined
             };
 
