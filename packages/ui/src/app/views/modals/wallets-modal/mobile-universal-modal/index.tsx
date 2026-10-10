@@ -165,7 +165,9 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
     const visibleWallets = createMemo(() => supportedWallets().slice(0, 3), null);
     setLastVisibleWalletsInfo({
         walletsMenu: 'main_screen',
-        wallets: visibleWallets()
+        wallets: [telegramWallet(), gramWallet(), ...visibleWallets()].filter(
+            (wallet): wallet is UIWalletInfo => !!wallet
+        )
     });
 
     const fourWalletsItem = createMemo(
