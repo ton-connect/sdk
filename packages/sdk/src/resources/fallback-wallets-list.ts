@@ -10,6 +10,10 @@ export const FALLBACK_WALLETS_LIST: WalletInfoDTO[] = [
         deepLink: 'tg://sendgrams',
         bridge: [
             {
+                type: 'js',
+                key: 'telegram'
+            },
+            {
                 type: 'sse',
                 url: 'https://tonbridge.telegram.org'
             }
@@ -61,7 +65,7 @@ export const FALLBACK_WALLETS_LIST: WalletInfoDTO[] = [
     {
         app_name: 'telegram-wallet',
         name: 'Walt (ex. Wallet)',
-        image: 'https://wallet.tg/images/logo-288.png',
+        image: 'https://config.ton.org/assets/telegram_wallet.png',
         about_url: 'https://walt.io/',
         universal_url: 'https://t.me/walt?attach=wallet',
         bridge: [
@@ -84,10 +88,41 @@ export const FALLBACK_WALLETS_LIST: WalletInfoDTO[] = [
         ]
     },
     {
+        app_name: 'tonkeeper',
+        name: 'Keeper',
+        image: 'https://tonkeeper.com/assets/tonconnect-icon.png',
+        tondns: 'tonkeeper.ton',
+        about_url: 'https://tonkeeper.com',
+        universal_url: 'https://app.tonkeeper.com/ton-connect',
+        deepLink: 'tonkeeper-tc://',
+        bridge: [
+            {
+                type: 'sse',
+                url: 'https://bridge.tonapi.io/bridge'
+            },
+            {
+                type: 'js',
+                key: 'tonkeeper'
+            }
+        ],
+        platforms: ['ios', 'android', 'chrome', 'firefox', 'macos', 'windows', 'linux'],
+        features: [
+            {
+                name: 'SendTransaction',
+                maxMessages: 255,
+                extraCurrencySupported: true
+            },
+            {
+                name: 'SignData',
+                types: ['text', 'binary', 'cell']
+            }
+        ]
+    },
+    {
         app_name: 'mytonwallet',
         name: 'My Wallet',
         image: 'https://config.ton.org/assets/mytonwallet.png',
-        about_url: 'https://mywallet.io',
+        about_url: 'https://mywallet.io/?utm_source=tc',
         universal_url: 'https://connect.mytonwallet.org',
         deepLink: 'mytonwallet-tc://',
         bridge: [
@@ -106,37 +141,6 @@ export const FALLBACK_WALLETS_LIST: WalletInfoDTO[] = [
                 name: 'SendTransaction',
                 maxMessages: 255,
                 extraCurrencySupported: false
-            },
-            {
-                name: 'SignData',
-                types: ['text', 'binary', 'cell']
-            }
-        ]
-    },
-    {
-        app_name: 'tonkeeper',
-        name: 'Tonkeeper',
-        image: 'https://tonkeeper.com/assets/tonconnect-icon.png',
-        tondns: 'tonkeeper.ton',
-        about_url: 'https://tonkeeper.com',
-        universal_url: 'https://app.tonkeeper.com/ton-connect',
-        deepLink: 'tonkeeper-tc://',
-        bridge: [
-            {
-                type: 'sse',
-                url: 'https://bridge.tonapi.io/bridge'
-            },
-            {
-                type: 'js',
-                key: 'tonkeeper'
-            }
-        ],
-        platforms: ['ios', 'android', 'chrome', 'firefox', 'macos'],
-        features: [
-            {
-                name: 'SendTransaction',
-                maxMessages: 255,
-                extraCurrencySupported: true
             },
             {
                 name: 'SignData',
