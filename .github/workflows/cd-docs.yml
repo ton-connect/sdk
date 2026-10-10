@@ -7,7 +7,6 @@ on:
 
 permissions:
   contents: write
-  pages: write
 
 concurrency:
   group: docs-release
@@ -52,9 +51,3 @@ jobs:
           git add docs
           git -c user.name="github-actions[bot]" -c user.email="41898283+github-actions[bot]@users.noreply.github.com" commit -q -m "Publish docs redirects for ${GITHUB_SHA::8}"
           git push --force "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" docs/release
-
-      # A push made with GITHUB_TOKEN does not start a Pages build on its own.
-      - name: Request Pages build
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh api -X POST "repos/${GITHUB_REPOSITORY}/pages/builds"
