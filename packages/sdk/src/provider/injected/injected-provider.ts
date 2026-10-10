@@ -145,7 +145,9 @@ export class InjectedProvider<T extends string = string> implements InternalProv
 
             if (connectEvent.event === 'connect') {
                 this.makeSubscriptions({ traceId });
-                this.listeners.forEach(listener => listener({ ...connectEvent, traceId }));
+                this.listeners.forEach(listener =>
+                    listener({ ...connectEvent, traceId, restored: true })
+                );
             } else {
                 await this.connectionStorage.removeConnection();
             }

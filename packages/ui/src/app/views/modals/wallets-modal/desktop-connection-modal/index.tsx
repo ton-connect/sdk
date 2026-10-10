@@ -5,7 +5,8 @@ import {
     WalletMissingRequiredFeaturesError,
     WalletWrongNetworkError,
     WalletInfoInjectable,
-    WalletInfoRemote
+    WalletInfoRemote,
+    WalletSelectionSource
 } from '@tonconnect/sdk';
 import {
     Component,
@@ -62,6 +63,11 @@ export interface DesktopConnectionProps {
     additionalRequest?: ConnectAdditionalRequest;
     walletsModalState?: WalletsModalState;
     wallet: WalletInfoRemote | (WalletInfoRemote & WalletInfoInjectable);
+    /**
+     * Who preselected the wallet. Reported on the selection the mount makes for a wallet that has
+     * no QR to show, where no footer click will follow.
+     */
+    selectionSource: WalletSelectionSource;
     onBackClick: () => void;
     backDisabled?: boolean;
     defaultError?: 'missing-features' | 'connection-declined' | 'not-supported' | null;
@@ -106,17 +112,28 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
     const generateUniversalLink = (): void => {
         // TODO: prevent double generation of universal link later and remove try-catch
         try {
+            // Reported as display-only whichever handler runs it; when the link is then opened,
+            // trackLinkOpened reports that as the initiation.
             const universalLink = connector.connect(
                 {
                     universalLink: props.wallet.universalLink,
                     bridgeUrl: props.wallet.bridgeUrl
                 },
                 props.additionalRequest,
-                { traceId: props.walletsModalState?.traceId }
+                { traceId: props.walletsModalState?.traceId, linkDisplayOnly: true }
             );
 
             setUniversalLink(universalLink);
         } catch (e) {}
+    };
+
+    // One rule for this screen: a link that is only rendered is link-generated, a link the user
+    // opens is initiated, so the report sits where the redirect happens.
+    const trackLinkOpened = (): void => {
+        appState.tracker.trackConnectionInitiated(
+            { kind: 'http-specific-wallet', bridgeUrl: props.wallet.bridgeUrl },
+            props.walletsModalState?.traceId
+        );
     };
 
     createEffect(() => {
@@ -155,6 +172,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
             const forceRedirect = !firstClick();
             setFirstClick(false);
 
+            trackLinkOpened();
             redirectToWallet(
                 universalLink()!,
                 props.wallet.deepLink,
@@ -179,11 +197,33 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
             ...props.wallet,
             openMethod: 'universal-link'
         });
+        trackLinkOpened();
         redirectToTelegram(universalLink()!, {
             returnStrategy: appState.returnStrategy,
             twaReturnUrl: appState.twaReturnUrl,
             forceRedirect: forceRedirect
         });
+    };
+
+    /**
+     * The commitment on desktop. Kept out of the handlers, which Retry and the mount dispatch
+     * reuse: a retry repeats a choice already recorded, and a mount that only shows a QR is none.
+     */
+    const trackSelected = (
+        mode: 'mobile' | 'desktop' | 'extension',
+        selectionSource: WalletSelectionSource
+    ): void => {
+        const traceId = props.walletsModalState?.traceId;
+
+        if (traceId) {
+            appState.tracker.trackWalletSelected(
+                props.wallet.appName,
+                'connection-modal',
+                selectionSource,
+                traceId,
+                mode
+            );
+        }
     };
 
     const onClickExtension = (): void => {
@@ -201,11 +241,17 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
         }
     };
 
+    // With no QR to show, the mount is the commitment, so it records a selection with the source
+    // of the preselection it completes.
     if (supportsMobile(props.wallet)) {
         onClickMobile();
     } else if (supportsExtension(props.wallet)) {
+        if (isWalletInfoCurrentlyInjected(props.wallet)) {
+            trackSelected('extension', props.selectionSource);
+        }
         onClickExtension();
     } else {
+        trackSelected('desktop', props.selectionSource);
         onClickDesktop();
     }
 
@@ -368,7 +414,10 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                 <TgButtonStyled
                     rightIcon={<TgImageStyled src={IMG.TG} />}
                     scale="s"
-                    onClick={onClickTelegram}
+                    onClick={() => {
+                        trackSelected('desktop', 'manual');
+                        onClickTelegram();
+                    }}
                 >
                     <Translation translationKey="walletModal.desktopConnectionModal.openWalletOnTelegram">
                         Open Wallet in Telegram on desktop
@@ -381,7 +430,10 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                         <FooterButton
                             appearance="secondary"
                             leftIcon={<MobileIcon />}
-                            onClick={onClickMobile}
+                            onClick={() => {
+                                trackSelected('mobile', 'manual');
+                                onClickMobile();
+                            }}
                         >
                             <Translation translationKey="common.mobile">Mobile</Translation>
                         </FooterButton>
@@ -390,7 +442,10 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                         <FooterButton
                             appearance="secondary"
                             leftIcon={<BrowserIcon />}
-                            onClick={onClickExtension}
+                            onClick={() => {
+                                trackSelected('extension', 'manual');
+                                onClickExtension();
+                            }}
                         >
                             <Translation translationKey="common.browserExtension">
                                 Browser Extension
@@ -401,7 +456,10 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                         <FooterButton
                             appearance="secondary"
                             leftIcon={<DesktopIcon />}
-                            onClick={onClickDesktop}
+                            onClick={() => {
+                                trackSelected('desktop', 'manual');
+                                onClickDesktop();
+                            }}
                         >
                             <Translation translationKey="common.desktop">Desktop</Translation>
                         </FooterButton>

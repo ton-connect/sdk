@@ -13,6 +13,8 @@ export type {
 } from './tracker/event-dispatcher';
 export {
     createConnectionStartedEvent,
+    createConnectionInitiatedEvent,
+    createConnectionLinkGeneratedEvent,
     createConnectionErrorEvent,
     createConnectionCompletedEvent,
     createConnectionRestoringStartedEvent,
@@ -29,13 +31,17 @@ export {
     createResponseVersionEvent,
     createVersionInfo,
     createWalletModalOpenedEvent,
-    createSelectedWalletEvent
+    createSelectedWalletEvent,
+    createWalletPreselectedEvent,
+    createWalletSelectedEvent
 } from './tracker/types';
 export type {
     AuthType,
     ConnectionInfo,
     ConnectionEvent,
     ConnectionStartedEvent,
+    ConnectionInitiatedEvent,
+    ConnectionLinkGeneratedEvent,
     ConnectionCompletedEvent,
     ConnectionErrorEvent,
     ConnectionRestoringEvent,
@@ -60,6 +66,10 @@ export type {
     ResponseVersionEvent,
     WalletModalOpenedEvent,
     SelectedWalletEvent,
+    WalletPreselectedEvent,
+    WalletSelectedEvent,
+    WalletSelectionSurface,
+    WalletSelectionSource,
     VersionEvent,
     Version,
     WithoutVersion,
@@ -81,6 +91,15 @@ export {
     isConnectUrl
 } from './utils/url';
 export { enableQaMode, isQaModeEnabled } from './utils/qa-mode';
+export {
+    getTgUser,
+    getTmaPlatform,
+    getTmaWebAppVersion,
+    isInTMA,
+    isInTelegramBrowser,
+    isTmaPlatform
+} from './utils/tma';
+export type { TmaPlatform } from './utils/tma';
 export { Consumable, ConsumableLike } from './utils/consumable';
 export type { AnalyticsMode } from './analytics/analytics-manager';
 

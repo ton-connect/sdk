@@ -4,8 +4,15 @@ import { THEME } from 'src/models';
 import { SendTransactionRequest, TonConnect } from '@tonconnect/sdk';
 
 async function dev(): Promise<void> {
+    // The hosted collector answers 400 to everything sent from a development origin, so analytics
+    // cannot be verified against it locally. Run `node tools/analytics-sink.mjs` and open
+    // http://localhost:3000/?analyticsUrl=http://localhost:3100/events to see exactly what the
+    // SDK would send. A query parameter rather than an env var so it needs no restart.
+    const analyticsUrl = new URLSearchParams(window.location.search).get('analyticsUrl');
+
     const connector = new TonConnect({
-        manifestUrl: 'https://demo-dapp.walletbot.net/demo-dapp/tonconnect-manifest.json'
+        manifestUrl: 'https://demo-dapp.walletbot.net/demo-dapp/tonconnect-manifest.json',
+        analytics: analyticsUrl ? { url: analyticsUrl } : undefined
     });
     const tonConnectUI = new TonConnectUI({
         connector,

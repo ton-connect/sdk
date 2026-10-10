@@ -1,8 +1,9 @@
 import { IEnvironment } from 'src/environment/models/environment.interface';
+import { getTgUser, isInTMA } from 'src/utils/tma';
 
 export class DefaultEnvironment implements IEnvironment {
     getClientEnvironment() {
-        return '';
+        return isInTMA() ? 'miniapp' : 'web';
     }
 
     getBrowser() {
@@ -18,6 +19,6 @@ export class DefaultEnvironment implements IEnvironment {
     }
 
     getTelegramUser() {
-        return undefined;
+        return getTgUser();
     }
 }

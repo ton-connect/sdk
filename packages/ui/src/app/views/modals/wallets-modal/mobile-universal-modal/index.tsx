@@ -74,9 +74,12 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
                     ? props.walletModalState.embeddedRequest
                     : undefined;
 
+            // Only rendering the QR can fill the cache: Open Link and Copy Link are buttons on
+            // that screen. Opening the link is reported by onSelectUniversal.
             link = connector.connect(walletsBridges(), props.additionalRequest, {
                 traceId: props.walletModalState.traceId,
-                embeddedRequest: embeddedRequest ?? undefined
+                embeddedRequest: embeddedRequest ?? undefined,
+                linkDisplayOnly: true
             });
         }
 
@@ -112,6 +115,13 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
     };
 
     const onSelectUniversal = (): void => {
+        // The link was reported as display-only when the QR built it; opening it is the
+        // initiation, and the universal `tc://` link is answered by any wallet.
+        appState.tracker.trackConnectionInitiated(
+            { kind: 'http-any-wallet' },
+            props.walletModalState.traceId
+        );
+
         const forceRedirect = !firstClick();
         setFirstClick(false);
 
@@ -131,6 +141,17 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
     };
 
     const onSelectTelegram = (): void => {
+        // The wallet row below deliberately excludes @wallet, so this button is the only route to
+        // it on this screen — and it redirects, so it is a commitment, not a preselection.
+        if (props.walletModalState.traceId) {
+            appState.tracker.trackWalletSelected(
+                AT_WALLET_APP_NAME,
+                'universal-modal',
+                'manual',
+                props.walletModalState.traceId
+            );
+        }
+
         setUniversalLink(null);
 
         const atWallet = props.walletsList.find(wallet => wallet.appName === AT_WALLET_APP_NAME);

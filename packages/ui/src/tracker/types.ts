@@ -6,7 +6,9 @@ import {
     TransactionSigningEvent,
     VersionEvent,
     WalletModalOpenedEvent,
-    SelectedWalletEvent
+    SelectedWalletEvent,
+    WalletPreselectedEvent,
+    WalletSelectedEvent
 } from '@tonconnect/sdk';
 
 /**
@@ -20,13 +22,16 @@ export type UserActionEvent =
     | TransactionSigningEvent
     | DataSigningEvent
     | WalletModalOpenedEvent
-    | SelectedWalletEvent;
+    | SelectedWalletEvent
+    | WalletPreselectedEvent
+    | WalletSelectedEvent;
 
 export {
     createRequestVersionEvent,
     createResponseVersionEvent,
     createConnectionStartedEvent,
     createConnectionErrorEvent,
+    createConnectionInitiatedEvent,
     createConnectionCompletedEvent,
     createConnectionRestoringStartedEvent,
     createConnectionRestoringErrorEvent,
@@ -36,5 +41,7 @@ export {
     createTransactionSigningFailedEvent,
     createTransactionSignedEvent,
     createWalletModalOpenedEvent,
-    createSelectedWalletEvent
+    createSelectedWalletEvent,
+    createWalletPreselectedEvent,
+    createWalletSelectedEvent
 } from '@tonconnect/sdk';

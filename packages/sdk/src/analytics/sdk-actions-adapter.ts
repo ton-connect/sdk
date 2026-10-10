@@ -1,5 +1,10 @@
 import { EventDispatcher } from 'src/tracker/event-dispatcher';
-import { ConnectionInfo, SdkActionEvent, Version } from 'src/tracker/types';
+import {
+    ConnectionInfo,
+    ConnectionInitiatedEvent,
+    SdkActionEvent,
+    Version
+} from 'src/tracker/types';
 import { Analytics } from 'src/analytics/analytics';
 import { TonConnectEvent } from 'src/analytics/types';
 
@@ -51,9 +56,69 @@ export function bindEventsTo(
         });
     });
 
+    // UI-emitted, so the prefix is `ton-connect-ui-`. Both prefixes type-check here; the wrong
+    // one silently never fires.
+    eventDispatcher.addEventListener('ton-connect-ui-wallet-preselected', event => {
+        const { detail } = event;
+        analytics.emitWalletPreselected({
+            versions: buildVersionInfo(detail.custom_data),
+            wallet_app_name: detail.wallet_app_name,
+            surface: detail.surface,
+            selection_source: detail.selection_source,
+            trace_id: detail.trace_id
+        });
+    });
+
+    eventDispatcher.addEventListener('ton-connect-ui-wallet-selected', event => {
+        const { detail } = event;
+        analytics.emitWalletSelected({
+            versions: buildVersionInfo(detail.custom_data),
+            wallet_app_name: detail.wallet_app_name,
+            surface: detail.surface,
+            selection_source: detail.selection_source,
+            connection_mode: detail.connection_mode,
+            trace_id: detail.trace_id
+        });
+    });
+
+    // Emitted by the core SDK on `connect()` and by the UI when a user opens a link that was
+    // built for display, so both prefixes are bound; an unbound one silently never fires.
+    const forwardConnectionInitiated = (event: CustomEvent<ConnectionInitiatedEvent>): void => {
+        const { detail } = event;
+        analytics.emitConnectionInitiated({
+            versions: buildVersionInfo(detail.custom_data),
+            connection_source_kind: detail.connection_source_kind,
+            bridge_key: detail.bridge_key,
+            bridge_url: detail.bridge_url,
+            trace_id: detail.trace_id ?? undefined
+        });
+    };
+    eventDispatcher.addEventListener(
+        'ton-connect-connection-initiated',
+        forwardConnectionInitiated
+    );
+    eventDispatcher.addEventListener(
+        'ton-connect-ui-connection-initiated',
+        forwardConnectionInitiated
+    );
+
+    eventDispatcher.addEventListener('ton-connect-connection-link-generated', event => {
+        const { detail } = event;
+        analytics.emitConnectionLinkGenerated({
+            versions: buildVersionInfo(detail.custom_data),
+            connection_source_kind: detail.connection_source_kind,
+            bridge_key: detail.bridge_key,
+            bridge_url: detail.bridge_url,
+            trace_id: detail.trace_id ?? undefined
+        });
+    });
+
     eventDispatcher.addEventListener('ton-connect-connection-completed', event => {
         const { detail } = event;
-        analytics.emitConnectionCompleted(buildTonConnectEvent(detail));
+        analytics.emitConnectionCompleted({
+            ...buildTonConnectEvent(detail),
+            is_restore: detail.is_restore
+        });
     });
     eventDispatcher.addEventListener('ton-connect-connection-error', event => {
         const { detail } = event;
