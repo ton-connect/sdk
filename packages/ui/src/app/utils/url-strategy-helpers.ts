@@ -16,20 +16,8 @@ import {
 import {
     decodeTelegramUrlParameters,
     encodeTelegramUrlParameters,
-    isTelegramMiniAppUrl,
     isTelegramUrl
 } from '@tonconnect/sdk';
-
-/**
- * Whether this link carries the TON Connect payload inside `startapp` instead
- * of as plain query parameters. The packing belongs to the link in hand rather
- * than to the wallet: a mini-app link acquires it once the payload is added,
- * a link already rewritten to `tg://resolve` keeps it, and a native Telegram
- * surface never has it.
- */
-function hasTelegramPackedParams(url: string): boolean {
-    return isTelegramUrl(url) && new URL(url).searchParams.has('startapp');
-}
 
 /**
  * Adds a return strategy to a url.
@@ -55,7 +43,7 @@ export function addReturnStrategy(
 
     const newUrl = addQueryParameter(url, 'ret', returnStrategy);
 
-    if (!hasTelegramPackedParams(url)) {
+    if (!isTelegramUrl(url)) {
         return newUrl;
     }
 
@@ -585,7 +573,7 @@ export function enrichUniversalLink(
         traceId: string;
     }
 ): string {
-    if (!isTelegramMiniAppUrl(universalLink)) {
+    if (!isTelegramUrl(universalLink)) {
         return addQueryParametersIfNotPresented(universalLink, {
             id: params.sessionId,
             trace_id: params.traceId
@@ -648,7 +636,7 @@ export function removeEmbeddedRequestFromUniversalLink(universalLink: string) {
 }
 
 export function removeParamsFromUniversalLink(universalLink: string, params: string[]): string {
-    if (!hasTelegramPackedParams(universalLink)) {
+    if (!isTelegramUrl(universalLink)) {
         return removeQueryParameters(universalLink, params);
     }
 
@@ -714,9 +702,10 @@ function buildQueryParams(params: Record<string, string | null | undefined>): st
  * Converts a direct link to a deep link.
  * @param directLink
  */
-function convertToTGDeepLink(directLink: string): string {
+export function convertToTGDeepLink(directLink: string): string {
     const parsed = new URL(directLink);
     const [, domain, appname] = parsed.pathname.split('/');
     const startapp = parsed.searchParams.get('startapp');
-    return `tg://resolve?domain=${domain}&appname=${appname}&startapp=${startapp}`;
+    const app = appname ? `&appname=${appname}` : '';
+    return `tg://resolve?domain=${domain}${app}&startapp=${startapp}`;
 }

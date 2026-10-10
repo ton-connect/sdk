@@ -1,6 +1,6 @@
 import { Base64, ConnectRequest, WireEmbeddedRequest } from '@tonconnect/protocol';
 import { Traceable } from 'src/utils/types';
-import { encodeTelegramUrlParameters, isTelegramMiniAppUrl } from 'src/utils/url';
+import { encodeTelegramUrlParameters, isTelegramUrl } from 'src/utils/url';
 import { PROTOCOL_VERSION } from 'src/resources/protocol';
 import { toBase64Url } from 'src/utils/base64';
 
@@ -9,7 +9,7 @@ export function generateUniversalLink(
     message: ConnectRequest,
     options: Traceable<{ sessionId: string; embeddedRequest?: WireEmbeddedRequest }>
 ): string {
-    if (isTelegramMiniAppUrl(universalLink)) {
+    if (isTelegramUrl(universalLink)) {
         return generateTGUniversalLink(universalLink, message, options);
     }
 

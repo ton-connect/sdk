@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 
 import {
+    convertToTGDeepLink,
     enrichUniversalLink,
     removeParamsFromUniversalLink,
     removeEmbeddedRequestFromUniversalLink
@@ -59,11 +60,6 @@ describe.each([
         params: { traceId: 'trace123', sessionId: 'session123' },
         expected:
             'https://t.me/wallet/start?startapp=tonconnect-v__2-id__session123-trace--5Fid__trace123'
-    },
-    {
-        link: 'https://t.me/sendgrams',
-        params: { traceId: 'trace123', sessionId: 'session123' },
-        expected: 'https://t.me/sendgrams?id=session123&trace_id=trace123'
     },
     {
         link: 'https://t.me/wallet/start?startapp=tonconnect-v__2-id__ccf67f691306f64a6ad690facfef8c8e6a6a020ec8997019ae01a91eac490872-r__--7B--22manifestUrl--22--3A--22https--3A--2F--2Ftonconnect--2Dsdk--2Ddemo--2Ddapp--2Evercel--2Eapp--2Ftonconnect--2Dmanifest--2Ejson--22--2C--22items--22--3A--5B--7B--22name--22--3A--22ton--5Faddr--22--7D--2C--7B--22name--22--3A--22ton--5Fproof--22--2C--22payload--22--3A--22865f264e46f69ffcc9c8464ff4ee7b446d5caa9058f93bd7748a1c1505a51dbf--22--7D--5D--7D-ret__none',
@@ -167,5 +163,20 @@ describe.each([
     it('should return valid url', () => {
         const result = removeEmbeddedRequestFromUniversalLink(link);
         expect(result).toBe(expected);
+    });
+});
+
+describe.each([
+    {
+        link: 'https://t.me/wallet/start?startapp=tonconnect-v__2-id__abc',
+        expected: 'tg://resolve?domain=wallet&appname=start&startapp=tonconnect-v__2-id__abc'
+    },
+    {
+        link: 'https://t.me/sendgrams?startapp=tonconnect-v__2-id__abc',
+        expected: 'tg://resolve?domain=sendgrams&startapp=tonconnect-v__2-id__abc'
+    }
+])('convertToTGDeepLink', ({ link, expected }) => {
+    it('should name the app only when the link has one', () => {
+        expect(convertToTGDeepLink(link)).toBe(expected);
     });
 });
