@@ -4,11 +4,7 @@
  * other wallet; only their placement in the modal is hardcoded.
  */
 
-/**
- * Built-in Telegram wallet, promoted to the primary button.
- *
- * TODO: not in the live registry yet — see the matching entry in `fallback-wallets-list.ts`.
- */
+/** Built-in Telegram wallet, promoted to the primary button. */
 export const TELEGRAM_WALLET_APP_NAME = 'telegram';
 
 /** Gram Wallet, promoted to the secondary button. */
