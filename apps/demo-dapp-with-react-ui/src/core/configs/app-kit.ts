@@ -13,7 +13,6 @@ initializeWalletConnect(UniversalConnector, {
     }
 });
 
-export const tonConnectManifestUrl =
-    'https://tonconnect-sdk-demo-dapp.vercel.app/tonconnect-manifest.json';
+export const tonConnectManifestUrl = 'https://demo.ton-connect.io/tonconnect-manifest.json';
 
 export const tonConnectUiPreferences = { theme: THEME.DARK } as const;
