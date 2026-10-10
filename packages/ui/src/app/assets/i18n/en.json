@@ -10,7 +10,8 @@
     "get": "GET",
     "mobile": "Mobile",
     "browserExtension": "Browser Extension",
-    "desktop": "Desktop"
+    "desktop": "Desktop",
+    "connectTelegram": "Connect Telegram"
   },
   "button": {
     "connectWallet": "Connect Wallet",
@@ -52,7 +53,6 @@
     }
   },
   "walletItem": {
-    "walletOn": "Wallet in",
     "recent": "Recent",
     "installed": "Installed",
     "new": "New"
@@ -62,9 +62,9 @@
     "wallets": "Wallets",
     "mobileUniversalModal": {
       "connectYourWallet": "Connect your TON wallet",
-      "openWalletOnTelegramOrSelect": "Use Wallet in Telegram or choose other application",
-      "openWalletOnTelegram": "Connect Wallet in Telegram",
-      "chooseOtherApplication": "Choose other application",
+      "useTelegramWallet": "Use your Telegram wallet",
+      "chooseOtherApplication": "Or choose another app:",
+      "chooseApplication": "Choose an app:",
       "openLink": "Open Link",
       "scan": "Scan with your mobile wallet"
     },
@@ -95,7 +95,6 @@
       "updateWallet": "Update {{ name }}",
       "chooseAnotherWallet": "Choose Another Wallet",
       "continueOnDesktop": "Continue in {{ name }} on desktop…",
-      "openWalletOnTelegram": "Connect Wallet in Telegram on desktop",
       "connectionDeclined": "Connection declined"
     },
     "infoModal": {

@@ -2,6 +2,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { MobileUniversalModal } from 'src/app/views/modals/wallets-modal/mobile-universal-modal';
 import { redirectToWallet } from 'src/app/utils/url-strategy-helpers';
+import { lastVisibleWalletsInfo } from 'src/app/state/modals-state';
 import { clickButton, mountModal, OPENED, remoteWallet, Recorders } from './harness';
 
 vi.mock('src/app/utils/url-strategy-helpers', async importOriginal => ({
@@ -83,5 +84,95 @@ describe('views/mobile-universal-modal: universal link', () => {
 
         expect(h.trackConnectionInitiated).not.toHaveBeenCalled();
         expect(h.connect).toHaveBeenCalledTimes(1);
+    });
+});
+
+describe('views/mobile-universal-modal: promoted wallets', () => {
+    it.each([
+        ['telegram', 'Connect Telegram'],
+        ['gramwallet', 'gramwallet']
+    ])('routes the %s button through onSelect alone', (appName, label) => {
+        const onSelect = vi.fn();
+        const promoted = {
+            ...remoteWallet(appName, ['ios', 'android']),
+            isSupportRequiredFeatures: true
+        };
+        const other = {
+            ...remoteWallet('tonkeeper', ['ios', 'android']),
+            isSupportRequiredFeatures: true
+        };
+        const h = mountModal(() => (
+            <MobileUniversalModal
+                walletsList={[promoted, other]}
+                additionalRequest={{}}
+                walletModalState={OPENED}
+                onSelect={onSelect}
+                onSelectAllWallets={() => {}}
+            />
+        ));
+        dispose = h.dispose;
+
+        clickButton(h.root, label);
+
+        expect(onSelect.mock.calls).toEqual([[promoted]]);
+        expect(h.connect).not.toHaveBeenCalled();
+        expect(h.trackWalletSelected).not.toHaveBeenCalled();
+        expect(h.trackConnectionInitiated).not.toHaveBeenCalled();
+    });
+});
+
+describe('views/mobile-universal-modal: visible wallets', () => {
+    it('reports the promoted buttons ahead of the row on the main screen', () => {
+        const [telegram, gram, tonkeeper, mytonwallet] = [
+            'telegram',
+            'gramwallet',
+            'tonkeeper',
+            'mytonwallet'
+        ].map(appName => ({
+            ...remoteWallet(appName, ['ios', 'android']),
+            isSupportRequiredFeatures: true
+        }));
+        const h = mountModal(() => (
+            <MobileUniversalModal
+                walletsList={[tonkeeper!, telegram!, mytonwallet!, gram!]}
+                additionalRequest={{}}
+                walletModalState={OPENED}
+                onSelect={() => {}}
+                onSelectAllWallets={() => {}}
+            />
+        ));
+        dispose = h.dispose;
+
+        expect(lastVisibleWalletsInfo()).toEqual({
+            walletsMenu: 'main_screen',
+            wallets: [telegram, gram, tonkeeper, mytonwallet]
+        });
+    });
+});
+
+describe('views/mobile-universal-modal: row heading', () => {
+    it.each([
+        ['a promoted button is shown', true, 'Or choose another app:'],
+        ['no promoted button is shown', false, 'Choose an app:']
+    ])('reads correctly when %s', (_, telegramSupported, heading) => {
+        const walletsList = [
+            {
+                ...remoteWallet('telegram', ['ios', 'android']),
+                isSupportRequiredFeatures: telegramSupported
+            },
+            { ...remoteWallet('tonkeeper', ['ios', 'android']), isSupportRequiredFeatures: true }
+        ];
+        const h = mountModal(() => (
+            <MobileUniversalModal
+                walletsList={walletsList}
+                additionalRequest={{}}
+                walletModalState={OPENED}
+                onSelect={() => {}}
+                onSelectAllWallets={() => {}}
+            />
+        ));
+        dispose = h.dispose;
+
+        expect(h.root.querySelector('[data-tc-h2="true"]')?.textContent).toBe(heading);
     });
 });

@@ -23,6 +23,7 @@ import {
 } from './style';
 
 import { UIWalletInfo } from 'src/app/models/ui-wallet-info';
+import { eqWalletName } from 'src/app/utils/wallets';
 import {
     // FourWalletsItem,
     // WalletLabeledItem,
@@ -34,7 +35,6 @@ import { checkRequiredWalletFeatures, Wallet } from '@tonconnect/sdk';
 import { RestoreInfoModal } from './restore-info-modal';
 import { ChooseSupportedFeatureWalletsModal } from 'src/models/wallets-modal';
 import { Translation } from 'src/app/components/typography/Translation';
-import { AT_WALLET_APP_NAME } from 'src/app/env/AT_WALLET_APP_NAME';
 
 interface DesktopFeatureNotSupportModalProps {
     walletsList: UIWalletInfo[];
@@ -67,21 +67,12 @@ export const DesktopFeatureNotSupportModal: Component<
     // });
 
     const currentWalletUI = createMemo(() =>
-        props.walletsList.find(
-            wallet =>
-                wallet.appName === props.currentWallet.device.appName ||
-                wallet.name === props.currentWallet.device.appName
-        )
+        props.walletsList.find(wallet => eqWalletName(wallet, props.currentWallet.device.appName))
     );
 
-    const currentWalletName = createMemo(() => {
-        const appName = currentWalletUI()?.appName ?? props.currentWallet.device.appName;
-        if (appName === AT_WALLET_APP_NAME) {
-            return 'Wallet in Telegram';
-        }
-
-        return currentWalletUI()?.name ?? props.currentWallet.device.appName;
-    });
+    const currentWalletName = createMemo(
+        () => currentWalletUI()?.name ?? props.currentWallet.device.appName
+    );
 
     const currentWalletVersionNotSupported = createMemo(() => {
         const currentWalletUIVar = currentWalletUI();

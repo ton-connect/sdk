@@ -30,9 +30,10 @@ export type Recorders = {
  * recorders. The root is attached to the document because Solid delegates click handlers to it.
  */
 export function mountModal(
-    ui: () => JSX.Element
+    ui: () => JSX.Element,
+    connectLink: string = CONNECT_LINK
 ): Recorders & { root: HTMLElement; dispose: () => void } {
-    const connect = vi.fn(() => CONNECT_LINK);
+    const connect = vi.fn(() => connectLink);
     const connector = { connect, onStatusChange: () => () => {} } as unknown as ITonConnect;
     const trackWalletSelected = vi.fn();
     const trackConnectionInitiated = vi.fn();

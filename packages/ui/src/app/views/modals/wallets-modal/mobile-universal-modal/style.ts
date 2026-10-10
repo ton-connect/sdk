@@ -1,15 +1,30 @@
 import { styled } from 'solid-styled-components';
-import { Button, H1, H2, IconButton, Image } from 'src/app/components';
+import {
+    Button,
+    ConnectButton,
+    H1,
+    H2,
+    IconButton,
+    Image,
+    TelegramConnectButton
+} from 'src/app/components';
 import { mediaNotTouch, mediaTouch } from 'src/app/styles/media';
 import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
 
-const borders: BorderRadiusConfig = {
-    m: '16px',
-    s: '12px',
-    none: '0'
-};
+/** Both connect buttons span the modal, inset from its edges. */
+const fullWidth = `
+    margin-left: 28px;
+    margin-right: 28px;
+    width: calc(100% - 56px);
 
-const tgBorders: BorderRadiusConfig = {
+    @media (max-width: 375px) {
+        margin-left: 16px;
+        margin-right: 16px;
+        width: calc(100% - 32px);
+    }
+`;
+
+const iconBorders: BorderRadiusConfig = {
     m: '6px',
     s: '6px',
     none: '0'
@@ -52,6 +67,13 @@ export const H1Styled = styled(H1)`
     padding: 0 24px;
 `;
 
+/** Title of the Telegram-first screen, which has no subtitle under it. */
+export const TelegramH1Styled = styled(H1)`
+    margin-top: 38px;
+    margin-bottom: 20px;
+    padding: 0 24px;
+`;
+
 export const H2Styled = styled(H2)<{
     maxWidth?: number;
     minHeight?: string;
@@ -71,29 +93,23 @@ export const ButtonStyled = styled(Button)`
     margin: 0 auto;
 `;
 
-export const TelegramButtonStyled = styled(Button)`
-    margin: 0 28px 24px;
-    width: calc(100% - 56px);
-    border-radius: ${props => borders[props.theme!.borderRadius]};
-    padding: 14px 16px 14px 14px;
-    background-color: ${props => props.theme!.colors.telegramButton};
-
-    color: ${props => props.theme!.colors.constant.white};
-    font-weight: 500;
-    font-size: 16px;
-    line-height: 20px;
-
-    @media (max-width: 375px) {
-        margin: 0 16px 24px;
-        width: calc(100% - 32px);
-    }
+export const TelegramButtonStyled = styled(TelegramConnectButton)`
+    ${fullWidth}
+    margin-bottom: 12px;
 `;
 
-export const TGImageStyled = styled(Image)`
-    background-color: transparent;
-    border-radius: ${props => tgBorders[props.theme!.borderRadius]};
+export const GramWalletButtonStyled = styled(ConnectButton)<{ transparent?: boolean }>`
+    ${fullWidth}
+    margin-bottom: 24px;
+    background-color: ${props =>
+        props.transparent ? 'transparent' : props.theme!.colors.background.tint};
+    color: ${props => props.theme!.colors.text.primary};
+`;
+
+export const ButtonWalletIconStyled = styled(Image)`
     width: 24px;
     height: 24px;
+    border-radius: ${props => iconBorders[props.theme!.borderRadius]};
 `;
 
 export const StyledLeftActionButton = styled(IconButton)`

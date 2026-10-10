@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, afterEach, Mock } from 'vitest';
 import { DesktopConnectionModal } from 'src/app/views/modals/wallets-modal/desktop-connection-modal';
 import { redirectToTelegram, redirectToWallet } from 'src/app/utils/url-strategy-helpers';
-import { AT_WALLET_APP_NAME } from 'src/app/env/AT_WALLET_APP_NAME';
+import { WALT_APP_NAME } from 'src/app/env/WALLET_APP_NAMES';
 import { clickButton, CONNECT_LINK, mountModal, OPENED, remoteWallet } from './harness';
 
 vi.mock('src/app/utils/url-strategy-helpers', async importOriginal => ({
@@ -182,23 +182,30 @@ describe('views/desktop-connection-modal: opening the link', () => {
         expect(redirectToWallet).toHaveBeenCalledTimes(1);
     });
 
-    it('reports the Telegram button the same way for @wallet', () => {
-        const wallet = remoteWallet(AT_WALLET_APP_NAME, ['ios', 'android', 'macos', 'windows']);
-        const h = mountModal(() => (
-            <DesktopConnectionModal
-                wallet={wallet}
-                walletsModalState={OPENED}
-                selectionSource="manual"
-                onBackClick={() => {}}
-            />
-        ));
+    it('reports the Desktop button the same way for a Telegram-hosted wallet', () => {
+        const wallet = remoteWallet(WALT_APP_NAME, ['ios', 'android', 'macos', 'windows']);
+        const h = mountModal(
+            () => (
+                <DesktopConnectionModal
+                    wallet={wallet}
+                    walletsModalState={OPENED}
+                    selectionSource="manual"
+                    onBackClick={() => {}}
+                />
+            ),
+            'https://t.me/wallet/start?startapp=tonconnect-v__2-id__abc'
+        );
         dispose = h.dispose;
 
-        clickButton(h.root, 'Telegram on desktop');
+        clickButton(h.root, 'Desktop');
 
         expect(h.trackConnectionInitiated.mock.calls).toEqual(initiated(wallet.bridgeUrl));
+        expect(h.trackWalletSelected.mock.calls).toEqual([
+            [WALT_APP_NAME, 'connection-modal', 'manual', 'trace-1', 'desktop']
+        ]);
         expect(h.connect).toHaveBeenCalledTimes(1);
         expect(redirectToTelegram).toHaveBeenCalledTimes(1);
+        expect(redirectToWallet).not.toHaveBeenCalled();
     });
 
     it('reports the Desktop button reached from extension mode once, for the link it opens', () => {

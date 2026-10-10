@@ -1,5 +1,6 @@
 export { Image } from './image';
 export { Button } from './button';
+export { ConnectButton, TelegramConnectButton } from './connect-button';
 export { Modal } from './modal';
 export { IconButton } from './icon-button';
 export { TabBar } from './tab-bar';

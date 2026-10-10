@@ -1,27 +1,5 @@
 import { styled } from 'solid-styled-components';
-import {
-    Button,
-    ErrorIcon,
-    H1,
-    H2,
-    IconButton,
-    LoaderIcon,
-    Image,
-    QRCode
-} from 'src/app/components';
-import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
-
-const tgButtonBorders: BorderRadiusConfig = {
-    m: '16px',
-    s: '12px',
-    none: '0'
-};
-
-const tgIconBorders: BorderRadiusConfig = {
-    m: '6px',
-    s: '6px',
-    none: '0'
-};
+import { Button, ErrorIcon, H1, H2, IconButton, LoaderIcon, QRCode } from 'src/app/components';
 
 export const DesktopConnectionModalStyled = styled.div`
     display: flex;
@@ -87,20 +65,4 @@ export const BodyTextStyled = styled(H2)`
     color: ${props => props.theme!.colors.text.secondary};
     text-align: center;
     margin-bottom: 20px;
-`;
-
-export const TgButtonStyled = styled(Button)`
-    margin-top: -8px;
-    margin-bottom: 24px;
-    width: 100%;
-    padding: 12px 12px 12px 20px;
-    border-radius: ${props => tgButtonBorders[props.theme!.borderRadius]};
-    font-size: 16px;
-    line-height: 20px;
-`;
-
-export const TgImageStyled = styled(Image)`
-    width: 32px;
-    height: 32px;
-    border-radius: ${props => tgIconBorders[props.theme!.borderRadius]};
 `;

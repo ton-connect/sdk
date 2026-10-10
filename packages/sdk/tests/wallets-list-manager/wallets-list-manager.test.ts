@@ -5,6 +5,7 @@ import { defaultWalletsList, walletsListWithWrongWallet, wrongWalletsList } from
 import { FALLBACK_WALLETS_LIST } from 'src/resources/fallback-wallets-list';
 import { FetchWalletsError } from 'src/errors';
 import { logError } from 'src/utils/log';
+import { WalletInfoDTO } from 'src/models/wallet/wallet-info';
 
 vi.mock('../../src/utils/log', () => {
     return {
@@ -83,6 +84,18 @@ describe('Wallets list manager tests', () => {
         expect(walletsList).toEqual(
             walletsListManager['walletConfigDTOListToWalletConfigList'](FALLBACK_WALLETS_LIST)
         );
+    });
+
+    it('Should keep the ui hint only when it is a boolean', () => {
+        const parseUi = (isButtonTransparent: unknown) =>
+            walletsListManager['walletConfigDTOListToWalletConfigList']([
+                { ...FALLBACK_WALLETS_LIST[0]!, ui: { isButtonTransparent } } as WalletInfoDTO
+            ])[0]!.ui;
+
+        expect(parseUi(true)).toEqual({ isButtonTransparent: true });
+        expect(parseUi(false)).toEqual({ isButtonTransparent: false });
+        expect(parseUi('false')).toEqual({ isButtonTransparent: false });
+        expect(parseUi(1)).toEqual({ isButtonTransparent: false });
     });
 
     it('Should parse custom wallets list', async () => {

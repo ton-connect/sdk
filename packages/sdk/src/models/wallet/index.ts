@@ -17,6 +17,7 @@ export {
     WalletInfoCurrentlyEmbedded,
     WalletInfoRemote,
     WalletInfoInjected,
+    WalletInfoUI,
     isWalletInfoCurrentlyInjected,
     isWalletInfoCurrentlyEmbedded,
     isWalletInfoInjectable,

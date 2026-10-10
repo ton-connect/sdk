@@ -172,7 +172,11 @@ export class WalletsListManager {
                 aboutUrl: walletConfigDTO.about_url,
                 tondns: walletConfigDTO.tondns,
                 platforms: walletConfigDTO.platforms,
-                features: walletConfigDTO.features
+                features: walletConfigDTO.features,
+                ui:
+                    walletConfigDTO.ui && typeof walletConfigDTO.ui === 'object'
+                        ? { isButtonTransparent: walletConfigDTO.ui.isButtonTransparent === true }
+                        : undefined
             };
 
             walletConfigDTO.bridge.forEach(bridge => {
