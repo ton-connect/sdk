@@ -112,8 +112,8 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
     const generateUniversalLink = (): void => {
         // TODO: prevent double generation of universal link later and remove try-catch
         try {
-            // Runs from an effect on mount and can re-run; it only produces the QR shown on this
-            // screen, so it is not an initiation the user asked for.
+            // Reported as display-only whichever handler runs it; when the link is then opened,
+            // trackLinkOpened reports that as the initiation.
             const universalLink = connector.connect(
                 {
                     universalLink: props.wallet.universalLink,
@@ -125,6 +125,15 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
 
             setUniversalLink(universalLink);
         } catch (e) {}
+    };
+
+    // One rule for this screen: a link that is only rendered is link-generated, a link the user
+    // opens is initiated, so the report sits where the redirect happens.
+    const trackLinkOpened = (): void => {
+        appState.tracker.trackConnectionInitiated(
+            { kind: 'http-specific-wallet', bridgeUrl: props.wallet.bridgeUrl },
+            props.walletsModalState?.traceId
+        );
     };
 
     createEffect(() => {
@@ -163,6 +172,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
             const forceRedirect = !firstClick();
             setFirstClick(false);
 
+            trackLinkOpened();
             redirectToWallet(
                 universalLink()!,
                 props.wallet.deepLink,
@@ -187,6 +197,7 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
             ...props.wallet,
             openMethod: 'universal-link'
         });
+        trackLinkOpened();
         redirectToTelegram(universalLink()!, {
             returnStrategy: appState.returnStrategy,
             twaReturnUrl: appState.twaReturnUrl,

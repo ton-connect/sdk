@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach, Mock } from 'vitest';
 import { DesktopConnectionModal } from 'src/app/views/modals/wallets-modal/desktop-connection-modal';
-import { redirectToWallet } from 'src/app/utils/url-strategy-helpers';
-import { clickButton, mountModal, OPENED, remoteWallet } from './harness';
+import { redirectToTelegram, redirectToWallet } from 'src/app/utils/url-strategy-helpers';
+import { AT_WALLET_APP_NAME } from 'src/app/env/AT_WALLET_APP_NAME';
+import { clickButton, CONNECT_LINK, mountModal, OPENED, remoteWallet } from './harness';
 
 vi.mock('src/app/utils/url-strategy-helpers', async importOriginal => ({
     ...(await importOriginal<object>()),
@@ -148,5 +149,102 @@ describe('views/desktop-connection-modal: footer', () => {
         expect(h.trackWalletSelected.mock.calls).toEqual([
             ['tonkeeper', 'connection-modal', 'manual', 'trace-1', 'extension']
         ]);
+    });
+});
+
+/**
+ * Every `connect()` on this screen builds a QR and is reported as display-only, so the three
+ * ways of opening that link — the Desktop button, the @wallet Telegram button, and the Desktop
+ * button reached from extension mode, which builds the link and opens it in one go — have to
+ * report the initiation themselves, as the mobile Open Link does.
+ */
+describe('views/desktop-connection-modal: opening the link', () => {
+    const initiated = (bridgeUrl: string): unknown[][] => [
+        [{ kind: 'http-specific-wallet', bridgeUrl }, 'trace-1']
+    ];
+
+    it('reports the Desktop button as the initiation of the link the QR was built from', () => {
+        const wallet = remoteWallet('tonkeeper', ['ios', 'android', 'macos', 'windows', 'linux']);
+        const h = mountModal(() => (
+            <DesktopConnectionModal
+                wallet={wallet}
+                walletsModalState={OPENED}
+                selectionSource="manual"
+                onBackClick={() => {}}
+            />
+        ));
+        dispose = h.dispose;
+
+        clickButton(h.root, 'Desktop');
+
+        expect(h.trackConnectionInitiated.mock.calls).toEqual(initiated(wallet.bridgeUrl));
+        expect(h.connect).toHaveBeenCalledTimes(1);
+        expect(redirectToWallet).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports the Telegram button the same way for @wallet', () => {
+        const wallet = remoteWallet(AT_WALLET_APP_NAME, ['ios', 'android', 'macos', 'windows']);
+        const h = mountModal(() => (
+            <DesktopConnectionModal
+                wallet={wallet}
+                walletsModalState={OPENED}
+                selectionSource="manual"
+                onBackClick={() => {}}
+            />
+        ));
+        dispose = h.dispose;
+
+        clickButton(h.root, 'Telegram on desktop');
+
+        expect(h.trackConnectionInitiated.mock.calls).toEqual(initiated(wallet.bridgeUrl));
+        expect(h.connect).toHaveBeenCalledTimes(1);
+        expect(redirectToTelegram).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports the Desktop button reached from extension mode once, for the link it opens', () => {
+        const wallet = remoteWallet('mytonwallet', ['chrome', 'macos', 'windows', 'linux'], {
+            jsBridgeKey: 'mytonwallet',
+            injected: true
+        });
+        const h = mountModal(() => (
+            <DesktopConnectionModal
+                wallet={wallet}
+                walletsModalState={OPENED}
+                selectionSource="manual"
+                onBackClick={() => {}}
+            />
+        ));
+        dispose = h.dispose;
+
+        clickButton(h.root, 'Desktop');
+
+        expect(h.connect).toHaveBeenCalledTimes(2);
+        expect(h.connect.mock.calls[1]![2]).toMatchObject({ linkDisplayOnly: true });
+        expect(h.trackConnectionInitiated.mock.calls).toEqual(initiated(wallet.bridgeUrl));
+        expect((redirectToWallet as Mock).mock.calls[0]![0]).toBe(CONNECT_LINK);
+    });
+
+    it('does not report the Mobile button reached from extension mode, which only shows a QR', () => {
+        const wallet = remoteWallet('tonkeeper', ['ios', 'android', 'chrome'], {
+            jsBridgeKey: 'tonkeeper',
+            injected: true
+        });
+        const h = mountModal(() => (
+            <DesktopConnectionModal
+                wallet={wallet}
+                walletsModalState={OPENED}
+                selectionSource="manual"
+                onBackClick={() => {}}
+            />
+        ));
+        dispose = h.dispose;
+
+        clickButton(h.root, 'Browser Extension');
+        clickButton(h.root, 'Mobile');
+
+        expect(h.connect).toHaveBeenCalledTimes(3);
+        expect(h.connect.mock.calls[2]![2]).toMatchObject({ linkDisplayOnly: true });
+        expect(h.trackConnectionInitiated).not.toHaveBeenCalled();
+        expect(redirectToWallet).not.toHaveBeenCalled();
     });
 });

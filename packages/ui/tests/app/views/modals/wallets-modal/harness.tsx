@@ -17,6 +17,8 @@ export const OPENED: WalletsModalState = {
     traceId: 'trace-1'
 };
 
+export const CONNECT_LINK = 'https://app.tonkeeper.com/ton-connect?v=2&id=abc&r=%7B%7D';
+
 export type Recorders = {
     connect: Mock;
     trackWalletSelected: Mock;
@@ -30,7 +32,7 @@ export type Recorders = {
 export function mountModal(
     ui: () => JSX.Element
 ): Recorders & { root: HTMLElement; dispose: () => void } {
-    const connect = vi.fn(() => 'https://app.tonkeeper.com/ton-connect?v=2&id=abc&r=%7B%7D');
+    const connect = vi.fn(() => CONNECT_LINK);
     const connector = { connect, onStatusChange: () => () => {} } as unknown as ITonConnect;
     const trackWalletSelected = vi.fn();
     const trackConnectionInitiated = vi.fn();
