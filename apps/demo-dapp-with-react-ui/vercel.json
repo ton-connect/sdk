@@ -1,4 +1,28 @@
 {
+  "redirects": [
+    {
+      "source": "/:path((?!tonconnect-manifest\\.json$|tc-verify\\.json$|api/).*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "tonconnect-sdk-demo-dapp.vercel.app"
+        }
+      ],
+      "destination": "https://demo.ton-connect.io/:path",
+      "permanent": true
+    },
+    {
+      "source": "/:path((?!tonconnect-manifest\\.json$|tc-verify\\.json$|api/).*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "tonconnect-sdk-demo-dapp-no-qa.vercel.app"
+        }
+      ],
+      "destination": "https://demo.ton-connect.io/:path",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/((?!api/).*)",
