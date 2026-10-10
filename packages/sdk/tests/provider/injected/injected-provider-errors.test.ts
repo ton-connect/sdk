@@ -49,6 +49,15 @@ function fakeAnalytics() {
     return { analytics, manager: { scoped: () => analytics } };
 }
 
+function withThrowingRead(base: Record<string, unknown>, key: string): Record<string, unknown> {
+    return Object.defineProperty({ ...base }, key, {
+        enumerable: true,
+        get() {
+            throw new Error('read failed');
+        }
+    });
+}
+
 async function providerWith(
     wallet: Record<string, unknown>,
     options: { storage?: IStorage; analyticsManager?: unknown } = {}
@@ -205,6 +214,16 @@ describe('InjectedProvider.sendRequest', () => {
         expect(analytics.emitJsBridgeResponse).toHaveBeenCalledTimes(1);
         expect(analytics.emitJsBridgeError).not.toHaveBeenCalled();
     });
+
+    it('rejects an answer whose reads throw as WalletTransportError', async () => {
+        const answer = withThrowingRead({ id: '0' }, 'error');
+        const provider = await providerWith(fakeWallet({ send: () => Promise.resolve(answer) }));
+
+        const error = await provider.sendRequest(request).catch(e => e);
+
+        expect(error).toBeInstanceOf(WalletTransportError);
+        expect(error.cause).toBe(answer);
+    });
 });
 
 type CapturedEvent = { event: string; payload?: { code: number; message: string } };
@@ -345,6 +364,19 @@ describe('InjectedProvider.connect', () => {
         await settle();
 
         expect(events.map(e => e.event)).toEqual(['connect']);
+    });
+
+    it('attaches WalletTransportError for a connect answer whose reads throw', async () => {
+        const answer = withThrowingRead({ id: 1 }, 'event');
+        const provider = await providerWith(fakeWallet({ connect: () => Promise.resolve(answer) }));
+        const events = captureEvents(provider);
+
+        provider.connect(connectRequest);
+        await settle();
+
+        const attached = attachedErrorOf(connectErrorOf(events));
+        expect(attached).toBeInstanceOf(WalletTransportError);
+        expect(attached!.cause).toBe(answer);
     });
 });
 
@@ -512,7 +544,11 @@ describe('InjectedProvider wallet-initiated events', () => {
 
     it.each([
         ['a connect event without a payload', { event: 'connect', id: 3 }],
-        ['a connect_error event without a code', { event: 'connect_error', id: 3, payload: {} }]
+        ['a connect_error event without a code', { event: 'connect_error', id: 3, payload: {} }],
+        [
+            'a connect_error event whose payload read throws',
+            withThrowingRead({ event: 'connect_error', id: 3 }, 'payload')
+        ]
     ])('reports %s as WalletTransportError', async (_name, event) => {
         const { emit, events } = await connectedWithEmitter();
 
