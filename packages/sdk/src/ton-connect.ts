@@ -386,26 +386,13 @@ export class TonConnect implements ITonConnect {
             ...additionalOptions
         };
 
-        if (
-            typeof requestOrOptions === 'object' &&
-            requestOrOptions !== null &&
-            'tonProof' in requestOrOptions
-        ) {
-            options.request = requestOrOptions;
-        }
-
-        if (
-            typeof requestOrOptions === 'object' &&
-            requestOrOptions !== null &&
-            ('openingDeadlineMS' in requestOrOptions ||
-                'signal' in requestOrOptions ||
-                'request' in requestOrOptions ||
-                'traceId' in requestOrOptions)
-        ) {
-            options.request = requestOrOptions?.request;
-            options.openingDeadlineMS = requestOrOptions?.openingDeadlineMS;
-            options.signal = requestOrOptions?.signal;
-            options.embeddedRequest = requestOrOptions?.embeddedRequest;
+        if (typeof requestOrOptions === 'object' && requestOrOptions !== null) {
+            if ('tonProof' in requestOrOptions) {
+                options.request = requestOrOptions;
+            } else {
+                // Copied whole, so an option added to the type cannot be dropped here.
+                Object.assign(options, requestOrOptions);
+            }
         }
 
         const embeddedRequest = new Consumable(options.embeddedRequest);
