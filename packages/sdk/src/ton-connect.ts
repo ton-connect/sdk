@@ -1,10 +1,13 @@
 import {
+    AppRequest,
     ChainId,
     CONNECT_ITEM_ERROR_CODES,
     ConnectEventSuccess,
     ConnectItem,
     ConnectRequest,
+    SEND_TRANSACTION_ERROR_CODES,
     SendTransactionRpcResponseSuccess,
+    SIGN_DATA_ERROR_CODES,
     SignDataPayload,
     SignDataRpcResponseSuccess,
     SignMessageRpcResponseSuccess,
@@ -21,10 +24,12 @@ import { TonConnectError } from 'src/errors/ton-connect.error';
 import {
     WalletAlreadyConnectedError,
     WalletNotConnectedError,
-    WalletMissingRequiredFeaturesError
+    WalletMissingRequiredFeaturesError,
+    WalletTransportError
 } from 'src/errors/wallet';
 import {
     Account,
+    describeWalletConnectionSource,
     EmbeddedRequest,
     RequiredFeatures,
     Wallet,
@@ -63,7 +68,7 @@ import { ITonConnect } from 'src/ton-connect.interface';
 import { WalletWrongNetworkError } from 'src/errors/wallet/wallet-wrong-network.error';
 import { getDocument, getOriginWithPath, getWebPageManifest } from 'src/utils/web-api';
 import { WalletsListManager } from 'src/wallets-list-manager';
-import { OptionalTraceable, Traceable } from 'src/utils/types';
+import { OptionalTraceable, Traceable, WithoutId } from 'src/utils/types';
 import {
     checkSendTransactionSupport,
     checkRequiredWalletFeatures,
@@ -95,7 +100,7 @@ import { BridgePartialSession, BridgeSession } from 'src/provider/bridge/models/
 import { IEnvironment } from 'src/environment/models/environment.interface';
 import { DefaultEnvironment } from 'src/environment/default-environment';
 import { UUIDv7 } from 'src/utils/uuid';
-import { TraceableWalletEvent } from 'src/models/wallet/traceable-events';
+import { TraceableWalletEvent, TraceableWalletResponse } from 'src/models/wallet/traceable-events';
 import { WalletConnectProvider } from 'src/provider/wallet-connect/wallet-connect-provider';
 import { wireRequestParser } from 'src/parsers/wire-request-parser';
 import { Consumable, ConsumableLike } from 'src/utils/consumable';
@@ -306,6 +311,12 @@ export class TonConnect implements ITonConnect {
             openingDeadlineMS?: number;
             signal?: AbortSignal;
             embeddedRequest?: ConsumableLike<EmbeddedRequest>;
+            /**
+             * Set when this call exists only to render a link or QR code, not because a user
+             * chose to connect. Such calls report `connection-link-generated` instead of
+             * `connection-initiated`, so counting initiations does not count screens.
+             */
+            linkDisplayOnly?: boolean;
         }>
     ): T extends WalletConnectionSourceJS
         ? void
@@ -322,6 +333,12 @@ export class TonConnect implements ITonConnect {
             openingDeadlineMS?: number;
             signal?: AbortSignal;
             embeddedRequest?: ConsumableLike<EmbeddedRequest>;
+            /**
+             * Set when this call exists only to render a link or QR code, not because a user
+             * chose to connect. Such calls report `connection-link-generated` instead of
+             * `connection-initiated`, so counting initiations does not count screens.
+             */
+            linkDisplayOnly?: boolean;
         }>
     ): T extends WalletConnectionSourceJS
         ? void
@@ -338,11 +355,23 @@ export class TonConnect implements ITonConnect {
                   openingDeadlineMS?: number;
                   signal?: AbortSignal;
                   embeddedRequest?: ConsumableLike<EmbeddedRequest>;
+                  /**
+                   * Set when this call exists only to render a link or QR code, not because a user
+                   * chose to connect. Such calls report `connection-link-generated` instead of
+                   * `connection-initiated`, so counting initiations does not count screens.
+                   */
+                  linkDisplayOnly?: boolean;
               }>,
         additionalOptions?: OptionalTraceable<{
             openingDeadlineMS?: number;
             signal?: AbortSignal;
             embeddedRequest?: ConsumableLike<EmbeddedRequest>;
+            /**
+             * Set when this call exists only to render a link or QR code, not because a user
+             * chose to connect. Such calls report `connection-link-generated` instead of
+             * `connection-initiated`, so counting initiations does not count screens.
+             */
+            linkDisplayOnly?: boolean;
         }>
     ): void | string {
         // TODO: remove deprecated method
@@ -351,30 +380,23 @@ export class TonConnect implements ITonConnect {
             openingDeadlineMS?: number;
             signal?: AbortSignal;
             embeddedRequest?: ConsumableLike<EmbeddedRequest>;
+            /**
+             * Set when this call exists only to render a link or QR code, not because a user
+             * chose to connect. Such calls report `connection-link-generated` instead of
+             * `connection-initiated`, so counting initiations does not count screens.
+             */
+            linkDisplayOnly?: boolean;
         }> = {
             ...additionalOptions
         };
 
-        if (
-            typeof requestOrOptions === 'object' &&
-            requestOrOptions !== null &&
-            'tonProof' in requestOrOptions
-        ) {
-            options.request = requestOrOptions;
-        }
-
-        if (
-            typeof requestOrOptions === 'object' &&
-            requestOrOptions !== null &&
-            ('openingDeadlineMS' in requestOrOptions ||
-                'signal' in requestOrOptions ||
-                'request' in requestOrOptions ||
-                'traceId' in requestOrOptions)
-        ) {
-            options.request = requestOrOptions?.request;
-            options.openingDeadlineMS = requestOrOptions?.openingDeadlineMS;
-            options.signal = requestOrOptions?.signal;
-            options.embeddedRequest = requestOrOptions?.embeddedRequest;
+        if (typeof requestOrOptions === 'object' && requestOrOptions !== null) {
+            if ('tonProof' in requestOrOptions) {
+                options.request = requestOrOptions;
+            } else {
+                // Copied whole, so an option added to the type cannot be dropped here.
+                Object.assign(options, requestOrOptions);
+            }
         }
 
         const embeddedRequest = new Consumable(options.embeddedRequest);
@@ -426,6 +448,19 @@ export class TonConnect implements ITonConnect {
 
         const traceId = options?.traceId ?? UUIDv7();
         this.tracker.trackConnectionStarted(traceId);
+        // Wrapped, not passed by reference: `isInsideWalletBrowser` is a plain static that reads
+        // `this.window`, so an unbound call throws — and the tracker swallows it.
+        const connectionSource = describeWalletConnectionSource(wallet, key =>
+            InjectedProvider.isInsideWalletBrowser(key)
+        );
+
+        // A call made only to render a link or QR opens a real session but reflects no choice, so
+        // it is reported separately rather than inflating initiations.
+        if (options?.linkDisplayOnly) {
+            this.tracker.trackConnectionLinkGenerated(connectionSource, traceId);
+        } else {
+            this.tracker.trackConnectionInitiated(connectionSource, traceId);
+        }
 
         const peeked = embeddedRequest.peek();
         const wireConsumable = peeked
@@ -673,13 +708,22 @@ export class TonConnect implements ITonConnect {
             ? this.buildItemsRpcPayload(transaction, from, network)
             : this.buildMessagesRpcPayload(transaction, from, network);
 
-        const response = await this.provider!.sendRequest(
+        const response = await this.sendRequestTrackingTransport(
             sendTransactionParser.convertToRpcRequest(rpcPayload),
             {
                 onRequestSent: options.onRequestSent,
                 signal: abortController.signal,
                 traceId
-            }
+            },
+            message =>
+                this.tracker.trackTransactionSigningFailed(
+                    this.wallet,
+                    transaction,
+                    message,
+                    SEND_TRANSACTION_ERROR_CODES.UNKNOWN_ERROR,
+                    sessionInfo,
+                    traceId
+                )
         );
 
         if (sendTransactionParser.isError(response)) {
@@ -699,6 +743,41 @@ export class TonConnect implements ITonConnect {
         );
         this.tracker.trackTransactionSigned(this.wallet, transaction, result, sessionInfo, traceId);
         return { ...result, traceId: response.traceId };
+    }
+
+    /**
+     * Sends a request to the wallet and reports a failure that produced no
+     * wallet response through `trackFailure` before rethrowing it. Wallet error
+     * responses are tracked by the caller, and a failure of the dApp's own
+     * `onRequestSent` is not a signing failure, so both pass through here.
+     */
+    private async sendRequestTrackingTransport<T extends RpcMethod>(
+        request: WithoutId<AppRequest<T>>,
+        options: OptionalTraceable<{ onRequestSent?: () => void; signal?: AbortSignal }>,
+        trackFailure: (message: string) => void
+    ): Promise<TraceableWalletResponse<T>> {
+        // Decided by where the error was thrown, not by its class: a dApp may rethrow
+        // an SDK error from its own callback.
+        let dappCallbackFailed = false;
+        const onRequestSent =
+            options.onRequestSent &&
+            ((): void => {
+                try {
+                    options.onRequestSent!();
+                } catch (e) {
+                    dappCallbackFailed = true;
+                    throw e;
+                }
+            });
+
+        try {
+            return await this.provider!.sendRequest(request, { ...options, onRequestSent });
+        } catch (e) {
+            if (e instanceof WalletTransportError && !dappCallbackFailed) {
+                trackFailure(e.message);
+            }
+            throw e;
+        }
     }
 
     private extractRequiredFeatures(
@@ -769,14 +848,23 @@ export class TonConnect implements ITonConnect {
             });
         }
 
-        const response = await this.provider!.sendRequest(
+        const response = await this.sendRequestTrackingTransport(
             signDataParser.convertToRpcRequest({
                 ...data,
                 ...(data.type === 'cell' ? { cell: normalizeBase64(data.cell) } : {}),
                 from,
                 network
             }),
-            { onRequestSent: options?.onRequestSent, signal: abortController.signal, traceId }
+            { onRequestSent: options?.onRequestSent, signal: abortController.signal, traceId },
+            message =>
+                this.tracker.trackDataSigningFailed(
+                    this.wallet,
+                    data,
+                    message,
+                    SIGN_DATA_ERROR_CODES.UNKNOWN_ERROR,
+                    sessionInfo,
+                    traceId
+                )
         );
 
         if (signDataParser.isError(response)) {
@@ -1055,6 +1143,7 @@ export class TonConnect implements ITonConnect {
 
         const analytics = new AnalyticsManager({
             environment: this.environment,
+            analyticsUrl: analyticsSettings?.url,
             mode
         });
         this.analytics = analytics;
@@ -1103,7 +1192,8 @@ export class TonConnect implements ITonConnect {
             case 'connect':
                 this.onWalletConnected(e.payload, {
                     traceId: e.traceId,
-                    response: e.response
+                    response: e.response,
+                    restored: e.restored
                 });
                 break;
             case 'connect_error':
@@ -1123,7 +1213,7 @@ export class TonConnect implements ITonConnect {
 
     private onWalletConnected(
         connectEvent: ConnectEventSuccess['payload'],
-        options: Traceable<{ response?: WalletResponse<RpcMethod> }>
+        options: Traceable<{ response?: WalletResponse<RpcMethod>; restored?: boolean }>
     ): void {
         const method = this.pendingEmbeddedRequestMethod;
         this.pendingEmbeddedRequestMethod = undefined;
@@ -1146,7 +1236,7 @@ export class TonConnect implements ITonConnect {
         );
 
         if (!hasRequiredFeatures) {
-            this.provider?.disconnect();
+            this.provider?.disconnect().catch(e => logDebug(e));
             this.onWalletConnectError(
                 new WalletMissingRequiredFeaturesError(
                     'Wallet does not support required features',
@@ -1170,7 +1260,7 @@ export class TonConnect implements ITonConnect {
         if (this.desiredChainId && wallet.account.chain !== this.desiredChainId) {
             const expectedChainId = this.desiredChainId;
             const actualChainId = wallet.account.chain;
-            this.provider?.disconnect();
+            this.provider?.disconnect().catch(e => logDebug(e));
             this.onWalletConnectError(
                 new WalletWrongNetworkError('Wallet connected to a wrong network', {
                     cause: { expectedChainId, actualChainId }
@@ -1243,7 +1333,12 @@ export class TonConnect implements ITonConnect {
         this.wallet = wallet;
 
         const sessionInfo = this.getSessionInfo();
-        this.tracker.trackConnectionCompleted(wallet, sessionInfo, options?.traceId);
+        this.tracker.trackConnectionCompleted(
+            wallet,
+            sessionInfo,
+            options?.traceId,
+            options?.restored
+        );
     }
 
     private onWalletConnectError(error: TonConnectError): void {

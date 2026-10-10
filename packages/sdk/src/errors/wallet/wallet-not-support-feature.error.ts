@@ -14,6 +14,8 @@ import { RequiredFeatures } from 'src/models';
  * @see [`Feature` (Connect spec)](https://github.com/ton-blockchain/ton-connect/blob/main/spec/connect.md#feature)
  */
 export class WalletNotSupportFeatureError extends TonConnectError {
+    static readonly errorName: string = 'WalletNotSupportFeatureError';
+
     declare cause: {
         requiredFeature: {
             featureName: FeatureName;
@@ -37,7 +39,5 @@ export class WalletNotSupportFeatureError extends TonConnectError {
         }
     ) {
         super(message, options);
-
-        Object.setPrototypeOf(this, WalletNotSupportFeatureError.prototype);
     }
 }

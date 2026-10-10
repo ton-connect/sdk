@@ -3,193 +3,43 @@ import { TonConnectUIError } from 'src/errors';
 import { logDebug, logError } from 'src/app/utils/log';
 import { setLastOpenedLink } from 'src/app/state/modals-state';
 import { removeEmbeddedRequestFromUniversalLink } from 'src/app/utils/url-strategy-helpers';
+import { getTmaWebAppVersion, isInTMA } from '@tonconnect/sdk';
 
-type TmaPlatform = 'android' | 'ios' | 'macos' | 'tdesktop' | 'weba' | 'web' | 'unknown';
-
-type TelegramWebviewProxy = {
-    postEvent(eventType: string, eventData: string): void;
-};
-
-type TelegramWebview = unknown;
+/**
+ * Telegram messaging. The environment *detection* that used to live here now lives in
+ * `@tonconnect/sdk`, so a dApp on the bare SDK reports the same `client_environment` as one
+ * using this package — previously only this file could tell a Mini App from a web page, and
+ * core reported an empty value.
+ *
+ * Re-exported below so this module stays the single import site for TMA concerns in the UI.
+ */
+export {
+    getTgUser,
+    getTmaPlatform,
+    isInTMA,
+    isInTelegramBrowser,
+    isTmaPlatform
+} from '@tonconnect/sdk';
 
 declare global {
     interface External {
         notify: (message: string) => void;
     }
 
+    // Declared again here rather than relied on from core: api-extractor does not carry
+    // `declare global` into the rolled-up types, so the messaging half below would not see it.
     interface Window {
-        TelegramWebviewProxy?: TelegramWebviewProxy;
-        TelegramWebview?: TelegramWebview;
-        Telegram?: {
-            WebApp?: {
-                platform?: TmaPlatform;
-                version?: string;
-            };
+        TelegramWebviewProxy?: {
+            postEvent(eventType: string, eventData: string): void;
         };
     }
-}
-
-let initParams: Record<string, string> = {};
-try {
-    let locationHash = location.hash.toString();
-    initParams = urlParseHashParams(locationHash);
-} catch (e) {}
-
-function sessionStorageSet(key: string, value: string) {
-    try {
-        const window = getWindow();
-        return window?.sessionStorage?.setItem(key, value);
-    } catch (e) {}
-}
-
-function sessionStorageGet(key: string) {
-    try {
-        const window = getWindow();
-        return JSON.parse(window?.sessionStorage?.getItem?.(key)!);
-    } catch (e) {}
-    return null;
-}
-
-function updateFromStoredParams(key: string) {
-    try {
-        const storedParams = sessionStorageGet(key);
-        if (storedParams) {
-            for (const key in storedParams) {
-                if (typeof initParams[key] === 'undefined') {
-                    initParams[key] = storedParams[key];
-                }
-            }
-        }
-    } catch {}
-}
-
-function updateFromStoredRawParams(key: string) {
-    try {
-        const window = getWindow();
-        let raw = window?.sessionStorage?.getItem?.(key);
-        if (!raw) {
-            return;
-        }
-
-        try {
-            const parsedJsonRaw = JSON.parse(raw);
-            if (typeof parsedJsonRaw === 'string') {
-                raw = parsedJsonRaw;
-            } else {
-                return;
-            }
-        } catch (e) {}
-
-        const storedParams = urlParseQueryString(raw);
-        for (const paramKey in storedParams) {
-            const value = storedParams[paramKey];
-            if (value != null && typeof initParams[paramKey] === 'undefined') {
-                initParams[paramKey] = value;
-            }
-        }
-    } catch {}
-}
-
-const LAUNCH_PARAMS_STORAGE_KEY = 'ton-connect-session_storage_launchParams';
-
-updateFromStoredRawParams('tapps/launchParams');
-updateFromStoredParams('__telegram__initParams');
-updateFromStoredParams(LAUNCH_PARAMS_STORAGE_KEY);
-
-try {
-    if (Object.entries(initParams).length > 0) {
-        sessionStorageSet(LAUNCH_PARAMS_STORAGE_KEY, JSON.stringify(initParams));
-    }
-} catch (e) {}
-
-let tmaPlatform: TmaPlatform = 'unknown';
-if (initParams?.tgWebAppPlatform) {
-    tmaPlatform = (initParams.tgWebAppPlatform as TmaPlatform) ?? 'unknown';
-}
-if (tmaPlatform === 'unknown') {
-    const window = getWindow();
-    tmaPlatform = window?.Telegram?.WebApp?.platform ?? 'unknown';
-}
-
-let webAppVersion = '6.0';
-if (initParams?.tgWebAppVersion) {
-    webAppVersion = initParams.tgWebAppVersion;
-}
-if (!webAppVersion) {
-    const window = getWindow();
-    webAppVersion = window?.Telegram?.WebApp?.version ?? '6.0';
-}
-
-const initDataRaw = initParams?.tgWebAppData;
-
-type TelegramUser = {
-    id: number;
-    isPremium: boolean;
-};
-
-let telegramUser: TelegramUser | undefined = undefined;
-
-try {
-    if (initDataRaw) {
-        let initData = urlParseQueryString(initDataRaw);
-        let userRaw = initData.user;
-        if (userRaw) {
-            let user = JSON.parse(userRaw);
-            // Telegram omits is_premium entirely for non-premium users, so it cannot
-            // be required here without dropping most of the audience.
-            if (typeof user.id === 'number') {
-                telegramUser = {
-                    id: user.id,
-                    isPremium: user.is_premium === true
-                };
-            }
-        }
-    }
-} catch (e) {}
-
-/**
- * Returns telegram user parsed from telegram initData.
- */
-export function getTgUser(): TelegramUser | undefined {
-    return telegramUser;
-}
-
-/**
- * Returns the detected TMA platform string.
- */
-export function getTmaPlatform(): TmaPlatform {
-    return tmaPlatform;
 }
 
 /**
  * Returns the detected TMA WebApp version, or null when not in a Mini App.
  */
 export function getWebAppVersion(): string | null {
-    return isInTMA() ? webAppVersion : null;
-}
-
-/**
- * Returns true if the app is running in TMA on the specified platform.
- * @param platforms
- */
-export function isTmaPlatform(...platforms: TmaPlatform[]): boolean {
-    return platforms.includes(tmaPlatform);
-}
-
-/**
- * Returns true if the app is running in TMA.
- */
-export function isInTMA(): boolean {
-    return tmaPlatform !== 'unknown' || !!getWindow()?.TelegramWebviewProxy;
-}
-
-/**
- * Returns true if the app is running in the Telegram browser.
- */
-export function isInTelegramBrowser(): boolean {
-    const isTelegramWebview = !!getWindow()?.TelegramWebview;
-
-    return (isInTMA() || isTelegramWebview) && tmaPlatform === 'unknown';
+    return isInTMA() ? getTmaWebAppVersion() : null;
 }
 
 /**
@@ -273,54 +123,6 @@ function postEvent(eventType: string, eventData: object): void {
     }
 }
 
-function urlParseHashParams(locationHash: string): Record<string, string> {
-    locationHash = locationHash.replace(/^#/, '');
-    let params: Record<string, string> = {};
-    if (!locationHash.length) {
-        return params;
-    }
-    if (locationHash.indexOf('=') < 0 && locationHash.indexOf('?') < 0) {
-        params._path = urlSafeDecode(locationHash);
-        return params;
-    }
-    let qIndex = locationHash.indexOf('?');
-    if (qIndex >= 0) {
-        let pathParam = locationHash.substr(0, qIndex);
-        params._path = urlSafeDecode(pathParam);
-        locationHash = locationHash.substr(qIndex + 1);
-    }
-    let query_params = urlParseQueryString(locationHash);
-    for (let k in query_params) {
-        params[k] = query_params[k]!;
-    }
-    return params;
-}
-
-function urlSafeDecode(urlencoded: string): string {
-    try {
-        urlencoded = urlencoded.replace(/\+/g, '%20');
-        return decodeURIComponent(urlencoded);
-    } catch (e) {
-        return urlencoded;
-    }
-}
-
-function urlParseQueryString(queryString: string): Record<string, string | null> {
-    let params: Record<string, string | null> = {};
-    if (!queryString.length) {
-        return params;
-    }
-    let queryStringParams = queryString.split('&');
-    let i, param, paramName, paramValue;
-    for (i = 0; i < queryStringParams.length; i++) {
-        param = queryStringParams[i]!.split('=');
-        paramName = urlSafeDecode(param[0]!);
-        paramValue = param[1] == null ? null : urlSafeDecode(param[1]);
-        params[paramName] = paramValue;
-    }
-    return params;
-}
-
 function versionCompare(v1: string | undefined, v2: string | undefined): 0 | 1 | -1 {
     if (typeof v1 !== 'string') v1 = '';
     if (typeof v2 !== 'string') v2 = '';
@@ -339,5 +141,5 @@ function versionCompare(v1: string | undefined, v2: string | undefined): 0 | 1 |
 }
 
 function versionAtLeast(ver: string): boolean {
-    return versionCompare(webAppVersion, ver) >= 0;
+    return versionCompare(getTmaWebAppVersion(), ver) >= 0;
 }

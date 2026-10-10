@@ -32,6 +32,13 @@ export interface DesktopSelectWalletModalProps {
     onBack: () => void;
 
     onSelect: (walletInfo: UIWalletInfo) => void;
+
+    /**
+     * Analytics trace for the open modal. Needed here because the WalletConnect entry connects
+     * directly rather than going through `onSelect`, so it is the one pick this screen has to
+     * report itself.
+     */
+    traceId?: string;
 }
 
 export const AllWalletsListModal: Component<DesktopSelectWalletModalProps> = props => {
@@ -40,10 +47,23 @@ export const AllWalletsListModal: Component<DesktopSelectWalletModalProps> = pro
     const connector = appState.connector;
     const additionalRequest = appState.connectRequestParameters;
 
-    const connectWalletConnect = () => {
+    const connectWalletConnect = (): void => {
+        // Reported as a selection on both platforms, unlike a wallet tile: WalletConnect hands
+        // off to its own picker immediately, so our connection screen — the thing that makes a
+        // desktop pick only a preselection — never renders.
+        if (props.traceId) {
+            appState.tracker.trackWalletSelected(
+                WALLET_CONNECT_APP_NAME,
+                'all-wallets-list',
+                'manual',
+                props.traceId
+            );
+        }
+
         connector.connect(
             { type: 'wallet-connect' },
-            additionalRequest?.state === 'ready' ? additionalRequest.value : undefined
+            additionalRequest?.state === 'ready' ? additionalRequest.value : undefined,
+            { traceId: props.traceId }
         );
     };
 

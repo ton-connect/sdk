@@ -41,10 +41,11 @@ export const widgetController = {
                 closeReason: reason
             })
         ),
-    openSingleWalletModal: (walletInfo: WalletInfoRemote): void => {
+    openSingleWalletModal: (walletInfo: WalletInfoRemote, options?: OptionalTraceable): void => {
         void setTimeout(() =>
             setSingleWalletModalState({
                 status: 'opened',
+                traceId: options?.traceId,
                 closeReason: null,
                 walletInfo: walletInfo
             })

@@ -32,16 +32,16 @@ The app manifest must be **available over the public internet** via HTTPS. All U
 
 ## 📄 Example Manifest (demo-dapp-with-react-ui)
 
-Here’s a working [example of a tonconnect-manifest.json](https://tonconnect-sdk-demo-dapp.vercel.app/tonconnect-manifest.json
+Here’s a working [example of a tonconnect-manifest.json](https://demo.ton-connect.io/tonconnect-manifest.json
 ):
 
 ```json
 {
-  "url": "https://tonconnect-sdk-demo-dapp.vercel.app/",
+  "url": "https://demo.ton-connect.io/",
   "name": "Demo Dapp with React UI",
-  "iconUrl": "https://tonconnect-sdk-demo-dapp.vercel.app/apple-touch-icon.png",
-  "termsOfUseUrl": "https://tonconnect-sdk-demo-dapp.vercel.app/terms-of-use.txt",
-  "privacyPolicyUrl": "https://tonconnect-sdk-demo-dapp.vercel.app/privacy-policy.txt"
+  "iconUrl": "https://demo.ton-connect.io/apple-touch-icon.png",
+  "termsOfUseUrl": "https://demo.ton-connect.io/terms-of-use.txt",
+  "privacyPolicyUrl": "https://demo.ton-connect.io/privacy-policy.txt"
 }
 ```
 

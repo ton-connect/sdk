@@ -220,6 +220,7 @@ export class WalletConnectProvider implements InternalProvider {
 
             await this.onConnect(connector, {
                 includeTonProof: false,
+                restored: true,
                 traceId,
                 signal: abortController.signal
             });
@@ -452,7 +453,7 @@ export class WalletConnectProvider implements InternalProvider {
 
     private async onConnect(
         connector: UniversalConnector,
-        options: Traceable<{ includeTonProof?: boolean; signal?: AbortSignal }>
+        options: Traceable<{ includeTonProof?: boolean; signal?: AbortSignal; restored?: boolean }>
     ) {
         if (options.signal?.aborted) {
             logDebug('WalletConnect onConnect aborted');
@@ -548,7 +549,12 @@ export class WalletConnectProvider implements InternalProvider {
             id: DEFAULT_EVENT_ID
         });
 
-        this.emit({ event: 'connect', payload, traceId: options.traceId });
+        this.emit({
+            event: 'connect',
+            payload,
+            traceId: options.traceId,
+            restored: options.restored
+        });
 
         await this.storeConnection();
     }

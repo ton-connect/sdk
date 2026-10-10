@@ -10,7 +10,7 @@ Debug tool to verify TON Connect detects Telegram Mini App correctly regardless 
 
 Test on different platforms:
 - Telegram Mini App: [t.me/tc_twa_demo_bot/debug](https://t.me/tc_twa_demo_bot/debug)
-- Telegram Browser: [tma-debug.vercel.app](https://tma-debug.vercel.app/)
+- Telegram Browser: [tma-debug.ton-connect.io](https://tma-debug.ton-connect.io/)
 
 To retest — close and reopen. Last scenario auto-restarts via `sessionStorage`.
 
@@ -44,4 +44,4 @@ For Telegram testing: expose via [ngrok](https://ngrok.com/) or [Caddy](https://
 
 ## Deployment
 
-Production: [tma-debug.vercel.app](https://tma-debug.vercel.app/) and [t.me/tc_twa_demo_bot/debug](https://t.me/tc_twa_demo_bot/debug). Preview deploys are created automatically on each PR.
+Production: [tma-debug.ton-connect.io](https://tma-debug.ton-connect.io/) and [t.me/tc_twa_demo_bot/debug](https://t.me/tc_twa_demo_bot/debug). Preview deploys are created automatically on each PR.

@@ -3,7 +3,8 @@
   "version": "3.0.2",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build"
+    "build": "tsc && vite build",
+    "test": "vitest run"
   },
   "repository": {
     "type": "git",
@@ -49,7 +50,8 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "typescript": "^5.9.2",
     "vite": "^7.0.6",
-    "vite-plugin-dts": "^4.5.4"
+    "vite-plugin-dts": "^4.5.4",
+    "vitest": "^3.2.4"
   },
   "dependencies": {
     "@tonconnect/ui": "workspace:*"
