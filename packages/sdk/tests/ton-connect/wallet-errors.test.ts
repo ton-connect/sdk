@@ -163,6 +163,21 @@ describe('TonConnect with an injected wallet that rejects', () => {
         expect(error).toBeInstanceOf(WalletTransportError);
     });
 
+    it('sendTransaction: an Error instance with a code in the response becomes UserRejectsError', async () => {
+        const walletError = Object.assign(new Error('Reject request'), { code: 300 });
+        const { connector, events } = await connected(() =>
+            Promise.resolve({ id: '0', error: walletError })
+        );
+
+        const error = await connector.sendTransaction(tx).catch(e => e);
+
+        expect(error).toBeInstanceOf(UserRejectsError);
+        expect(error.walletError).toMatchObject({ code: 300, message: 'Reject request' });
+        const tracked = failures(events, 'transaction-signing-failed');
+        expect(tracked).toHaveLength(1);
+        expect(tracked[0]!.error_code).toBe(300);
+    });
+
     it('sendTransaction: a TonConnectError from the dApp onRequestSent is not tracked', async () => {
         const { connector, events } = await connected(() =>
             Promise.resolve({ id: '0', result: 'boc' })

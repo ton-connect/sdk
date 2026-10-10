@@ -5,11 +5,12 @@ export interface WalletErrorPayload {
 }
 
 /**
- * The error payload of a wallet answer: a plain object whose `code` is a safe
+ * The error payload of a wallet answer: an object whose `code` is a safe
  * integer. `message` falls back to an empty string and `data` is kept as is.
+ * An `Error` instance qualifies, as the Tonkeeper extension resolves `{ error }` with one.
  */
 export function walletErrorPayloadFrom(value: unknown): WalletErrorPayload | undefined {
-    if (Object.prototype.toString.call(value) !== '[object Object]') {
+    if (typeof value !== 'object' || value === null || Array.isArray(value)) {
         return undefined;
     }
 

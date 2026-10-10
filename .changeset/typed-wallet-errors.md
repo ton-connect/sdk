@@ -4,7 +4,7 @@
 
 Wallet errors are easier to handle and to read in production.
 
-Error classes keep their names in minified bundles: `error.name` and the name in `error.message` come from a static `errorName` on each class instead of the runtime class name, so a dApp no longer sees mangled names like `e` or `Kf`. `name` is now a non-enumerable own property on every SDK error, including `WalletWrongNetworkError`, where it used to be enumerable.
+`error.name` is now the class name on every SDK error, for example `UserRejectsError`, where it used to be `"Error"` on every class except `WalletWrongNetworkError`. It comes from a static `errorName` on each class, as does the name in `error.message`, so minified bundles no longer show mangled names like `e` or `Kf`. Error trackers that group by name and message will file SDK errors under new groups. `name` is a non-enumerable own property on every SDK error, including `WalletWrongNetworkError`, where it used to be enumerable.
 
 Errors built from a wallet response carry the wallet's own error in `walletError` (`code`, `message`, `data` and the response id). Wallet code 400 maps to the new `MethodNotSupportedError` instead of `UnknownError`.
 
