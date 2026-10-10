@@ -702,9 +702,10 @@ function buildQueryParams(params: Record<string, string | null | undefined>): st
  * Converts a direct link to a deep link.
  * @param directLink
  */
-function convertToTGDeepLink(directLink: string): string {
+export function convertToTGDeepLink(directLink: string): string {
     const parsed = new URL(directLink);
     const [, domain, appname] = parsed.pathname.split('/');
     const startapp = parsed.searchParams.get('startapp');
-    return `tg://resolve?domain=${domain}&appname=${appname}&startapp=${startapp}`;
+    const app = appname ? `&appname=${appname}` : '';
+    return `tg://resolve?domain=${domain}${app}&startapp=${startapp}`;
 }

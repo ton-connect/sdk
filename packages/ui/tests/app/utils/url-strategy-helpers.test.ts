@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 
 import {
+    convertToTGDeepLink,
     enrichUniversalLink,
     removeParamsFromUniversalLink,
     removeEmbeddedRequestFromUniversalLink
@@ -162,5 +163,20 @@ describe.each([
     it('should return valid url', () => {
         const result = removeEmbeddedRequestFromUniversalLink(link);
         expect(result).toBe(expected);
+    });
+});
+
+describe.each([
+    {
+        link: 'https://t.me/wallet/start?startapp=tonconnect-v__2-id__abc',
+        expected: 'tg://resolve?domain=wallet&appname=start&startapp=tonconnect-v__2-id__abc'
+    },
+    {
+        link: 'https://t.me/sendgrams?startapp=tonconnect-v__2-id__abc',
+        expected: 'tg://resolve?domain=sendgrams&startapp=tonconnect-v__2-id__abc'
+    }
+])('convertToTGDeepLink', ({ link, expected }) => {
+    it('should name the app only when the link has one', () => {
+        expect(convertToTGDeepLink(link)).toBe(expected);
     });
 });
