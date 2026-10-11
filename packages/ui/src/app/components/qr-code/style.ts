@@ -97,11 +97,11 @@ export const QrCodeWrapper = styled.div`
     }
 `;
 
+// No backdrop: the modules under the logo are not drawn, and a square would cut the shapes around it
 export const ImageBackground = styled.div`
     position: absolute;
     width: ${toPx(imgSizeDefault)};
     height: ${toPx(imgSizeDefault)};
-    background: ${props => props.theme!.colors.background.qr};
 
     display: flex;
     align-items: center;

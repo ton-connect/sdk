@@ -17,6 +17,7 @@ import { Styleable } from 'src/app/models/styleable';
 import { toPx } from 'src/app/utils/css';
 import { CopyLightIcon, SuccessIcon, Text } from 'src/app/components';
 import { animate } from 'src/app/utils/animate';
+import { QrHole, renderSquircleQr } from './squircle-qr';
 
 export interface QRCodeProps extends Styleable {
     sourceUrl: string;
@@ -39,22 +40,25 @@ export const QRCode: Component<QRCodeProps> = props => {
         const qr = qrcode(0, errorCorrectionLevel);
         qr.addData(props.sourceUrl);
         qr.make();
-        qrCodeCanvasRef!.innerHTML = qr.createSvgTag(cellSize, 0);
-        const qrSize = qrCodeCanvasRef!.firstElementChild!.clientWidth;
+        const qrSize = qr.getModuleCount() * cellSize;
 
         const scale = Math.round((qrNormalSize / qrSize) * 100000) / 100000;
+        let hole: QrHole | undefined;
 
         if (imageRef) {
             const imgSize = Math.ceil(imgSizeDefault / (scale * cellSize)) * cellSize;
-            const imgOffset = toPx(Math.ceil((qrSize - imgSize) / (2 * cellSize)) * cellSize);
-            imageRef.style.top = imgOffset;
-            imageRef.style.left = imgOffset;
+            const imgOffset = Math.ceil((qrSize - imgSize) / (2 * cellSize)) * cellSize;
+            imageRef.style.top = toPx(imgOffset);
+            imageRef.style.left = toPx(imgOffset);
             imageRef.style.height = toPx(imgSize);
             imageRef.style.width = toPx(imgSize);
 
+            // The modules under the logo are left out, so the shapes round off around it
+            hole = { start: imgOffset / cellSize, size: imgSize / cellSize };
             setPicSize(Math.round(picSizeDefault / scale));
         }
 
+        qrCodeCanvasRef!.innerHTML = renderSquircleQr(qr, cellSize, hole);
         qrCodeWrapperRef!.style.transform = `scale(${scale})`;
     });
 
