@@ -15,7 +15,7 @@ Add the script to your HTML file:
 
 ℹ️ If you don't want auto-update the library, pass concrete version instead of `latest`, e.g. 
 ```html
-<script src="https://unpkg.com/@tonconnect/sdk@0.0.34/dist/tonconnect-sdk.min.js"></script>
+<script src="https://unpkg.com/@tonconnect/sdk@5.0.0/dist/tonconnect-sdk.min.js"></script>
 ```
 
 You can find `TonConnect` in global variable `TonConnectSDK`, e.g.
@@ -27,6 +27,8 @@ You can find `TonConnect` in global variable `TonConnectSDK`, e.g.
 
 ## Installation with npm
 `npm i @tonconnect/sdk`
+
+> Starting with 5.0.0, `@tonconnect/sdk`, `@tonconnect/ui` and `@tonconnect/ui-react` are released under one version number, and `@tonconnect/ui` pins the exact `@tonconnect/sdk` version (`@tonconnect/ui-react` pins the exact `@tonconnect/ui`). If your app depends on more than one of them, upgrade them together to the same version. Otherwise two copies of the SDK are installed, and `instanceof` checks with error classes from one copy fail for errors thrown by the other.
 
 # Usage
 ## Init connector and call restoreConnection. If user connected his wallet before, connector will restore the connection
@@ -83,6 +85,8 @@ const connector = new TonConnect({
 | **telemetry** (default) | Analytics used for technical research and issue debugging. |
 | **full**                | Full analytics events.                                     |
 
+`analytics.url` sets the endpoint events are sent to (default `https://analytics.ton.org/events`), e.g. `analytics: { mode: 'full', url: 'http://localhost:8080/events' }` to inspect them with a local collector.
+
 ## Subscribe to the connection status changes
 ```js
 const unsubscribe = connector.onStatusChange(
@@ -113,6 +117,7 @@ const walletsList = await connector.getWallets();
     jsBridgeKey?: string;
     injected?: boolean; // true if this wallet is injected to the webpage
     embedded?: boolean; // true if the dapp is opened inside this wallet's browser
+    ui?: { isButtonTransparent?: boolean }; // presentation hints from the wallets registry
 }[] 
  */
 ```
@@ -176,6 +181,12 @@ const universalLink = connector.connect(walletConnectionSource);
 ```
 
 Then you have to show this link to user as QR code, or use it as a deeplink. You will receive an update in `connector.onStatusChange` when user approves connection in the wallet.
+
+If you build the link only to display it before the user chose to connect, e.g. a QR code rendered with the page, pass `linkDisplayOnly: true`. The call is then reported as `connection-link-generated` instead of `connection-initiated` (see [Tracking](#tracking)):
+
+```ts
+const universalLink = connector.connect(walletConnectionSource, { linkDisplayOnly: true });
+```
 
 ### Initialize injected wallet connection
 ```ts
@@ -258,7 +269,7 @@ try {
     const someTxData = await myAppExplorerService.getTransaction(result.boc);
     alert('Transaction was sent successfully', someTxData);
 } catch (e) {
-    if (e instanceof UserRejectedError) {
+    if (e instanceof UserRejectsError) {
         alert('You rejected the transaction. Please confirm it to send to the blockchain');
     } else {
         alert('Unknown error happened', e);
@@ -380,7 +391,7 @@ try {
     const result = await connector.signData(textData);
     console.log('Signed:', result);
 } catch (e) {
-    if (e instanceof UserRejectedError) {
+    if (e instanceof UserRejectsError) {
         console.log('User rejected signing');
     } else {
         console.error('Error:', e);
@@ -420,7 +431,7 @@ try {
     const result = await connector.signData(binaryData);
     console.log('Signed:', result);
 } catch (e) {
-    if (e instanceof UserRejectedError) {
+    if (e instanceof UserRejectsError) {
         console.log('User rejected signing');
     } else {
         console.error('Error:', e);
@@ -452,7 +463,7 @@ try {
     const result = await connector.signData(cellData);
     console.log('Signed:', result);
 } catch (e) {
-    if (e instanceof UserRejectedError) {
+    if (e instanceof UserRejectsError) {
         console.log('User rejected signing');
     } else {
         console.error('Error:', e);
@@ -484,6 +495,47 @@ After receiving the signed data, you need to verify the signature to ensure it's
 
 **For complete technical details:** See the [Sign Data specification](https://github.com/ton-blockchain/ton-connect/blob/main/requests-responses.md#sign-data) for full signature verification requirements.
 
+## Error handling
+
+SDK errors extend `TonConnectError`, and `error.name` is the class name (e.g. `'UserRejectsError'`), also in minified bundles. `sendTransaction`, `signData` and `signMessage` throw them; connection errors are passed to the error callback of `onStatusChange`.
+
+An error the wallet returns is mapped by its code, and the wallet's own error is kept in `walletError` (`code`, `message`, `data`, `responseId`):
+
+| Wallet code | Error class                                      |
+|-------------|--------------------------------------------------|
+| 0           | `UnknownError` (also any code not listed here)   |
+| 1           | `BadRequestError`                                |
+| 2           | `ManifestNotFoundError` (connection only)        |
+| 3           | `ManifestContentErrorError` (connection only)    |
+| 100         | `UnknownAppError`                                |
+| 300         | `UserRejectsError`                               |
+| 400         | `MethodNotSupportedError`                        |
+
+If an injected wallet rejects the request instead of answering with an error response, a known code in the rejection (e.g. `new Error(300)` or `{ code: 300 }`) is mapped the same way and `walletError.normalized` is `true`. Any other failure of an injected wallet becomes `WalletTransportError` with the original value in `cause`.
+
+```ts
+import {
+    MethodNotSupportedError,
+    TonConnectError,
+    UserRejectsError,
+    WalletTransportError
+} from '@tonconnect/sdk';
+
+try {
+    await connector.sendTransaction(transaction);
+} catch (e) {
+    if (e instanceof UserRejectsError) {
+        // the user declined the request in the wallet
+    } else if (e instanceof MethodNotSupportedError) {
+        // the wallet does not support this method
+    } else if (e instanceof WalletTransportError) {
+        console.error('Injected wallet failed:', e.cause);
+    } else if (e instanceof TonConnectError) {
+        console.error(e.name, e.walletError?.code, e.message);
+    }
+}
+```
+
 ## Disconnect wallet
 Note that if you want to change connected wallet, you should disconnect current one firstly. Also make sure that you've waited for `restoreConnection()` promise resolved before call `disconnect()`;
 
@@ -505,6 +557,29 @@ import { toUserFriendlyAddress } from '@tonconnect/sdk';
 const rawAddress = connector.wallet.account.address; // like '0:abcdef123456789...'
 const bouncableUserFriendlyAddress = toUserFriendlyAddress(rawAddress);
 const testnetOnlyBouncableUserFriendlyAddress = toUserFriendlyAddress(rawAddress, true);
+```
+
+## Detect Telegram Mini App
+Use these helpers to check whether the app runs inside Telegram:
+
+```ts
+import {
+    getTgUser,
+    getTmaPlatform,
+    getTmaWebAppVersion,
+    isInTelegramBrowser,
+    isInTMA,
+    isTmaPlatform
+} from '@tonconnect/sdk';
+
+if (isInTMA()) {
+    const platform = getTmaPlatform(); // 'android' | 'ios' | 'macos' | 'tdesktop' | 'weba' | 'web' | 'unknown'
+    const isMobile = isTmaPlatform('android', 'ios');
+    const webAppVersion = getTmaWebAppVersion(); // '6.0' if Telegram did not pass a version
+    const user = getTgUser(); // { id, isPremium } from the launch parameters, or undefined
+}
+
+const inTelegramBrowser = isInTelegramBrowser(); // Telegram in-app browser, not a Mini App
 ```
 
 # Backend authorization
@@ -636,6 +711,8 @@ Tracker for TonConnect user actions, such as transaction signing, connection, et
 
 List of events:
 * `connection-started`: when a user starts connecting a wallet.
+* `connection-initiated`: when `connect()` is called, with the kind of connection source it targets.
+* `connection-link-generated`: when `connect()` is called with `linkDisplayOnly: true`, instead of `connection-initiated`.
 * `connection-completed`: when a user successfully connected a wallet.
 * `connection-error`: when a user cancels a connection or there is an error during the connection process.
 * `connection-restoring-started`: when the dApp starts restoring a connection.

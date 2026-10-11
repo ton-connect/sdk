@@ -19,6 +19,8 @@ You can find more details and the protocol specification in the [docs](https://d
 ## Installation with npm
 `npm i @tonconnect/ui-react`
 
+> Starting with 5.0.0, `@tonconnect/sdk`, `@tonconnect/ui` and `@tonconnect/ui-react` are released under one version number, and `@tonconnect/ui-react` pins the exact `@tonconnect/ui` version (`@tonconnect/ui` pins the exact `@tonconnect/sdk`). If your app depends on more than one of them, upgrade them together to the same version. Otherwise two copies of the SDK are installed, and `instanceof` checks with error classes from one copy fail for errors thrown by the other.
+
 # Usage
 
 ## Add TonConnectUIProvider
@@ -138,6 +140,8 @@ You can configure analytics collection via the `analytics` prop:
 | **off**                 | Analytics turned off. No events are collected or sent.     |
 | **telemetry** (default) | Analytics used for technical research and issue debugging. |
 | **full**                | Full analytics events.                                     |
+
+`analytics.url` sets the endpoint events are sent to (default `https://analytics.ton.org/events`), e.g. `analytics={{ mode: 'full', url: 'http://localhost:8080/events' }}` to inspect them with a local collector.
 
 ## Add TonConnect Button
 TonConnect Button is universal UI component for initializing connection. After wallet is connected it transforms to a wallet menu.
