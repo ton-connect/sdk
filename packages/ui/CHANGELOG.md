@@ -1,15 +1,23 @@
 # Changelog @tonconnect/ui
 
+## 5.0.1
+
+### Patch Changes
+
+- Shows a 3D diamond in the universal QR code and above the Telegram button on mobile, draws the QR
+  code with squircle shapes and adds a shine to the Connect Telegram button.
+
 ## 5.0.0
 
 ### Major Changes
 
-- Aligns `@tonconnect/sdk`, `@tonconnect/ui` and `@tonconnect/ui-react` on one major version line. The code is the same as in sdk 4.1.0, ui 3.1.0 and ui-react 3.1.0.
+- Aligns `@tonconnect/sdk`, `@tonconnect/ui` and `@tonconnect/ui-react` on one major version line.
+  The code is the same as in sdk 4.1.0, ui 3.1.0 and ui-react 3.1.0.
 
 ### Patch Changes
 
 - Updated dependencies
-  - @tonconnect/sdk@5.0.0
+    - @tonconnect/sdk@5.0.0
 
 ## 3.1.0
 

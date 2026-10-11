@@ -1,15 +1,23 @@
 # Changelog @tonconnect/ui-react
 
-## 5.0.0
-
-### Major Changes
-
-- Aligns `@tonconnect/sdk`, `@tonconnect/ui` and `@tonconnect/ui-react` on one major version line. The code is the same as in sdk 4.1.0, ui 3.1.0 and ui-react 3.1.0.
+## 5.0.1
 
 ### Patch Changes
 
 - Updated dependencies
-  - @tonconnect/ui@5.0.0
+    - @tonconnect/ui@5.0.1
+
+## 5.0.0
+
+### Major Changes
+
+- Aligns `@tonconnect/sdk`, `@tonconnect/ui` and `@tonconnect/ui-react` on one major version line.
+  The code is the same as in sdk 4.1.0, ui 3.1.0 and ui-react 3.1.0.
+
+### Patch Changes
+
+- Updated dependencies
+    - @tonconnect/ui@5.0.0
 
 ## 3.1.0
 
