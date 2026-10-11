@@ -22,7 +22,7 @@ Add the script to your HTML file:
 
 ℹ️ If you don't want auto-update the library, pass concrete version instead of `latest`, e.g.
 ```html
-<script src="https://unpkg.com/@tonconnect/ui@0.0.9/dist/tonconnect-ui.min.js"></script>
+<script src="https://unpkg.com/@tonconnect/ui@5.0.0/dist/tonconnect-ui.min.js"></script>
 ```
 
 You can find `TonConnectUI` in global variable `TON_CONNECT_UI`, e.g.
@@ -38,6 +38,8 @@ You can find `TonConnectUI` in global variable `TON_CONNECT_UI`, e.g.
 
 ## Installation with npm
 `npm i @tonconnect/ui`
+
+> `@tonconnect/ui` depends on an exact `@tonconnect/sdk` version, and `@tonconnect/ui-react` on an exact `@tonconnect/ui` version. If your app also depends on `@tonconnect/sdk` directly, keep it at the version your `@tonconnect/ui` pins, so that `npm ls @tonconnect/sdk` shows a single copy. With two copies installed, `instanceof` checks with error classes from one copy fail for errors thrown by the other.
 
 # Usage
 
@@ -108,6 +110,8 @@ const tonConnectUI = new TonConnectUI({
 | **telemetry** (default) | Analytics used for technical research and issue debugging. |
 | **full**                | Full analytics events.                                     |
 
+`analytics.url` sets the endpoint events are sent to (default `https://analytics.ton.org/events`), e.g. `analytics: { mode: 'full', url: 'http://localhost:8080/events' }` to inspect them with a local collector.
+
 See all available options:
 
 [TonConnectUiOptionsWithManifest](https://docs.ton.org/applications/ton-connect/api-reference/ui)
@@ -150,6 +154,7 @@ const walletsList = await tonConnectUI.getWallets();
     jsBridgeKey?: string;
     injected?: boolean; // true if this wallet is injected to the webpage
     embedded?: boolean; // true if the dapp is opened inside this wallet's browser
+    ui?: Record<string, unknown>; // presentation hints from the wallets registry
 }[] 
  */
 ```
@@ -334,6 +339,24 @@ try {
     console.error(e);
 }
 ```
+
+### Error handling
+
+Wallet errors are thrown as typed SDK errors, which `@tonconnect/ui` re-exports, e.g. `UserRejectsError` when the user declines the request. This also applies to an injected wallet that rejects the request with a known error code instead of answering with an error response. `TonConnectUIError` is thrown for UI-side failures, such as no connected wallet or a closed modal. All of them extend `TonConnectError`, and `error.name` is the class name.
+
+```ts
+import { UserRejectsError } from '@tonconnect/ui';
+
+try {
+    await tonConnectUI.sendTransaction(transaction);
+} catch (e) {
+    if (e instanceof UserRejectsError) {
+        // the user declined the transaction in the wallet
+    }
+}
+```
+
+See [Error handling](https://github.com/ton-connect/sdk/tree/main/packages/sdk#error-handling) in the SDK README for the wallet error codes and `walletError`.
 
 ### Trace ID for analytics
 
@@ -738,7 +761,9 @@ It means, that you need to specify the return strategy as a link to your TMA tha
 
 ```ts
 tonConnectUI.uiOptions = {
-    twaReturnUrl: 'https://t.me/durov'
+    actionsConfiguration: {
+        twaReturnUrl: 'https://t.me/durov'
+    }
 };
 ```
 
@@ -752,7 +777,7 @@ let finalReturnStrategy;
 // Determine if the provided link opens Telegram (using protocols tg:// or domain t.me).
 if (isLinkToTelegram('https://example.com')) {
     // In the Telegram Mini Apps environment,
-    if (isInTWA()) {
+    if (isInTMA()) {
         // preference is given to 'twaReturnUrl',
         finalReturnStrategy = actionsConfiguration.twaReturnUrl;
 
@@ -1133,7 +1158,12 @@ tonConnectUI.setConnectionNetwork(undefined);
 Tracker for TonConnect user actions, such as transaction signing, connection, etc.
 
 List of events:
+* `wallet-modal-opened`: when `tonConnectUI.openModal()` is called, which the connect button uses. Inside a wallet's embedded browser no modal is shown and the wallet connects directly, but the event is still sent.
+* `selected-wallet`: when a user picks a wallet in the modal or opens its connect link.
+* `wallet-preselected`: when a user picks a wallet on desktop, where a screen with connection options follows.
+* `wallet-selected`: when a wallet becomes the one being connected with.
 * `connection-started`: when a user starts connecting a wallet.
+* `connection-initiated`: when a user opens a connect link that was built only for display, such as the link behind a QR code.
 * `connection-completed`: when a user successfully connected a wallet.
 * `connection-error`: when a user cancels a connection or there is an error during the connection process.
 * `connection-restoring-started`: when the dApp starts restoring a connection.
@@ -1154,6 +1184,8 @@ window.addEventListener('ton-connect-ui-transaction-sent-for-signature', (event)
     console.log('Transaction init', event.detail);
 });
 ```
+
+The underlying SDK connector dispatches its own events with the `ton-connect-` prefix, e.g. `ton-connect-connection-link-generated`. See the [SDK events list](https://github.com/ton-connect/sdk/tree/main/packages/sdk#track-events).
 
 ## Use custom event dispatcher
 
