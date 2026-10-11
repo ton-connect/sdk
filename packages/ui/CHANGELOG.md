@@ -1,5 +1,38 @@
 # Changelog @tonconnect/ui
 
+## 3.1.0
+
+### Minor Changes
+
+- 591a478: The mobile wallets modal shows Telegram and Gram Wallet as their own buttons above the
+  wallets row, and `WalletInfo` gains an optional `ui` field that carries registry presentation
+  hints such as `isButtonTransparent`.
+- 3fc3022: UI error classes report their class name in `error.name`, where it used to be `"Error"`,
+  and keep it in minified bundles, and a wallet that rejects an injected request with a known error
+  code now reaches the dApp as a typed SDK error such as `UserRejectsError` instead of
+  `TonConnectUIError: Unhandled error`.
+- b38ae3c: Analytics record how the user picks a wallet. `wallet-preselected`, `wallet-selected`,
+  `connection-initiated` and `connection-link-generated` are sent at the moment of the action and
+  carry the selection surface, the selection source and the kind of connection source, and
+  `connection-completed` carries `is_restore`. The existing `connection-selected-wallet` event is
+  unchanged.
+
+    Telegram Mini App detection moves from `@tonconnect/ui` into `@tonconnect/sdk` and is exported
+    (`isInTMA`, `isInTelegramBrowser`, `isTmaPlatform`, `getTmaPlatform`, `getTmaWebAppVersion`,
+    `getTgUser`), so a dApp on the bare SDK reports `client_environment` too. `connect()` accepts
+    `linkDisplayOnly` for a link built only to be shown, and `analytics.url` sets the analytics
+    endpoint.
+
+### Patch Changes
+
+- c44e3cf: Stop sending `appname=undefined` in the Telegram deep link for a wallet whose
+  `universal_url` has no app segment, such as `https://t.me/sendgrams`. The link now reads
+  `tg://resolve?domain=sendgrams&startapp=...`.
+- Updated dependencies [591a478]
+- Updated dependencies [3fc3022]
+- Updated dependencies [b38ae3c]
+    - @tonconnect/sdk@4.1.0
+
 ## 3.0.2
 
 ### Patch Changes

@@ -1,5 +1,22 @@
 # Changelog @tonconnect/ui-react
 
+## 3.1.0
+
+### Minor Changes
+
+- 3fc3022: UI error classes report their class name in `error.name`, where it used to be `"Error"`,
+  and keep it in minified bundles, and a wallet that rejects an injected request with a known error
+  code now reaches the dApp as a typed SDK error such as `UserRejectsError` instead of
+  `TonConnectUIError: Unhandled error`.
+
+### Patch Changes
+
+- Updated dependencies [591a478]
+- Updated dependencies [c44e3cf]
+- Updated dependencies [3fc3022]
+- Updated dependencies [b38ae3c]
+    - @tonconnect/ui@3.1.0
+
 ## 3.0.2
 
 ### Patch Changes
