@@ -14,12 +14,10 @@ You can find more details and the protocol specification in the [docs](https://d
 
 [Latest API documentation](https://docs.ton.org/applications/ton-connect/api-reference/ui-react)
 
-# Getting started
-
 ## Installation with npm
 `npm i @tonconnect/ui-react`
 
-> Starting with 5.0.0, `@tonconnect/sdk`, `@tonconnect/ui` and `@tonconnect/ui-react` are released under one version number, and `@tonconnect/ui-react` pins the exact `@tonconnect/ui` version (`@tonconnect/ui` pins the exact `@tonconnect/sdk`). If your app depends on more than one of them, upgrade them together to the same version. Otherwise two copies of the SDK are installed, and `instanceof` checks with error classes from one copy fail for errors thrown by the other.
+> `@tonconnect/ui-react` depends on an exact `@tonconnect/ui` version, and `@tonconnect/ui` on an exact `@tonconnect/sdk` version. If your app also depends on `@tonconnect/ui` or `@tonconnect/sdk` directly, keep them at the versions `@tonconnect/ui-react` pins, so that `npm ls @tonconnect/sdk` shows a single copy. With two copies installed, `instanceof` checks with error classes from one copy fail for errors thrown by the other.
 
 # Usage
 

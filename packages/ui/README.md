@@ -39,7 +39,7 @@ You can find `TonConnectUI` in global variable `TON_CONNECT_UI`, e.g.
 ## Installation with npm
 `npm i @tonconnect/ui`
 
-> Starting with 5.0.0, `@tonconnect/sdk`, `@tonconnect/ui` and `@tonconnect/ui-react` are released under one version number, and `@tonconnect/ui` pins the exact `@tonconnect/sdk` version (`@tonconnect/ui-react` pins the exact `@tonconnect/ui`). If your app depends on more than one of them, upgrade them together to the same version. Otherwise two copies of the SDK are installed, and `instanceof` checks with error classes from one copy fail for errors thrown by the other.
+> `@tonconnect/ui` depends on an exact `@tonconnect/sdk` version, and `@tonconnect/ui-react` on an exact `@tonconnect/ui` version. If your app also depends on `@tonconnect/sdk` directly, keep it at the version your `@tonconnect/ui` pins, so that `npm ls @tonconnect/sdk` shows a single copy. With two copies installed, `instanceof` checks with error classes from one copy fail for errors thrown by the other.
 
 # Usage
 
@@ -761,7 +761,9 @@ It means, that you need to specify the return strategy as a link to your TMA tha
 
 ```ts
 tonConnectUI.uiOptions = {
-    twaReturnUrl: 'https://t.me/durov'
+    actionsConfiguration: {
+        twaReturnUrl: 'https://t.me/durov'
+    }
 };
 ```
 
@@ -775,7 +777,7 @@ let finalReturnStrategy;
 // Determine if the provided link opens Telegram (using protocols tg:// or domain t.me).
 if (isLinkToTelegram('https://example.com')) {
     // In the Telegram Mini Apps environment,
-    if (isInTWA()) {
+    if (isInTMA()) {
         // preference is given to 'twaReturnUrl',
         finalReturnStrategy = actionsConfiguration.twaReturnUrl;
 

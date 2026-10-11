@@ -28,7 +28,7 @@ You can find `TonConnect` in global variable `TonConnectSDK`, e.g.
 ## Installation with npm
 `npm i @tonconnect/sdk`
 
-> Starting with 5.0.0, `@tonconnect/sdk`, `@tonconnect/ui` and `@tonconnect/ui-react` are released under one version number, and `@tonconnect/ui` pins the exact `@tonconnect/sdk` version (`@tonconnect/ui-react` pins the exact `@tonconnect/ui`). If your app depends on more than one of them, upgrade them together to the same version. Otherwise two copies of the SDK are installed, and `instanceof` checks with error classes from one copy fail for errors thrown by the other.
+> `@tonconnect/ui` depends on an exact `@tonconnect/sdk` version, and `@tonconnect/ui-react` on an exact `@tonconnect/ui` version. If your app also depends on `@tonconnect/sdk` directly, keep it at the version your `@tonconnect/ui` pins, so that `npm ls @tonconnect/sdk` shows a single copy. With two copies installed, `instanceof` checks with error classes from one copy fail for errors thrown by the other.
 
 # Usage
 ## Init connector and call restoreConnection. If user connected his wallet before, connector will restore the connection
@@ -665,7 +665,7 @@ You can use the SDK in frontend apps and in backend apps created with NodeJS.
 ## Init connector
 When you use the SDK in backend, you have to pass `manifestUrl` and `IStorage` implementation to the TonConnect constructor.
 
-[See more about the manifest](##add-the-tonconnect-manifest).
+[See more about the manifest](#add-the-tonconnect-manifest).
 
 ```ts
 import TonConnect from '@tonconnect/sdk';
