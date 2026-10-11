@@ -34,7 +34,7 @@ You can find `TonConnect` in global variable `TonConnectSDK`, e.g.
 ## Init connector and call restoreConnection. If user connected his wallet before, connector will restore the connection
 
 ```ts
-import TonConnect from '@tonconnect/sdk';
+import TonConnect, { UserRejectsError } from '@tonconnect/sdk';
 
 const connector = new TonConnect();
 
@@ -579,7 +579,7 @@ if (isInTMA() && !isInTelegramBrowser()) {
     const user = getTgUser(); // { id, isPremium } from the launch parameters, or undefined
 }
 
-const inTelegramBrowser = isInTelegramBrowser(); // Telegram in-app browser; isInTMA() is true there as well
+const inTelegramBrowser = isInTelegramBrowser(); // Telegram in-app browser; isInTMA() can be true there too
 ```
 
 # Backend authorization
