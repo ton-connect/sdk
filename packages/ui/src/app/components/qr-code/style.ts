@@ -108,6 +108,10 @@ export const ImageBackground = styled.div`
     justify-content: center;
 `;
 
+export const LogoStyled = styled.div`
+    display: flex;
+`;
+
 export const ImageStyled = styled(Image)<{ size: number }>`
     width: ${props => toPx(props.size)};
     height: ${props => toPx(props.size)};

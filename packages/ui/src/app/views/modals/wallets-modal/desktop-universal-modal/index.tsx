@@ -10,8 +10,8 @@ import { ConnectAdditionalRequest } from '@tonconnect/sdk';
 import { appState } from 'src/app/state/app.state';
 import { setLastSelectedWalletInfo, setLastVisibleWalletsInfo } from 'src/app/state/modals-state';
 import { FourWalletsItem, H1, WalletLabeledItem } from 'src/app/components';
+import { QrDiamond } from '../qr-diamond';
 import { UIWalletInfo } from 'src/app/models/ui-wallet-info';
-import { IMG } from 'src/app/env/IMG';
 
 import { addReturnStrategy } from 'src/app/utils/url-strategy-helpers';
 import { bridgesIsEqual, getUniqueBridges } from 'src/app/utils/bridge';
@@ -79,7 +79,7 @@ export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = prop
             <QRCodeStyled
                 sourceUrl={addReturnStrategy(request()!, 'none')}
                 disableCopy={popupOpened()}
-                imageUrl={IMG.TON}
+                logo={<QrDiamond />}
             />
             <H2AvailableWalletsStyled translationKey="walletModal.desktopUniversalModal.availableWallets">
                 Available wallets

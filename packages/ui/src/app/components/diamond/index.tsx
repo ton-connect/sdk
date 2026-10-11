@@ -8,7 +8,11 @@ import { DiamondCoverStyled, DiamondSlotStyled, DiamondStillStyled, DiamondStyle
 
 export interface DiamondProps extends Styleable {
     size: number;
+    /** How much the diamond grows under the pointer or a finger. */
+    hoverScale?: number;
 }
+
+const DEFAULT_HOVER_SCALE = 1.7;
 
 /**
  * The blue diamond of the Telegram apps: a 3D model that turns and can be dragged, or its still image
@@ -29,7 +33,9 @@ export const Diamond: Component<DiamondProps> = props => {
 
         let coverTimeout: ReturnType<typeof setTimeout> | undefined;
 
-        attachDiamond(slot, props.size, {
+        const layout = { size: props.size, hoverScale: props.hoverScale ?? DEFAULT_HOVER_SCALE };
+
+        attachDiamond(slot, layout, {
             onFirstFrame: () => {
                 setCover('fading');
                 coverTimeout = setTimeout(() => setCover('gone'), STILL_FADE_DURATION * 1000);

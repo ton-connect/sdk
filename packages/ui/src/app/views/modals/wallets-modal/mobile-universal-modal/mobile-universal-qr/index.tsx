@@ -1,7 +1,7 @@
 import { Component } from 'solid-js';
 import { H1Styled, H2Styled, QrCodeWrapper, ButtonsWrapper, ActionButton } from './style';
 import { QRCode } from 'src/app/components';
-import { IMG } from 'src/app/env/IMG';
+import { QrDiamond } from '../../qr-diamond';
 
 import { addReturnStrategy } from 'src/app/utils/url-strategy-helpers';
 import { Translation } from 'src/app/components/typography/Translation';
@@ -24,7 +24,7 @@ export const MobileUniversalQR: Component<MobileUniversalQRProps> = props => {
             </H2Styled>
             <QrCodeWrapper>
                 <QRCode
-                    imageUrl={IMG.TON}
+                    logo={<QrDiamond />}
                     sourceUrl={addReturnStrategy(props.universalLink, 'none')}
                     disableCopy
                 />

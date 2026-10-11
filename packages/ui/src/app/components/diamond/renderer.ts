@@ -21,6 +21,11 @@ type Animation = {
     onEnd?: () => void;
 };
 
+export type DiamondLayout = {
+    size: number;
+    hoverScale: number;
+};
+
 export type DiamondCallbacks = {
     onFirstFrame: () => void;
     onError: () => void;
@@ -28,7 +33,7 @@ export type DiamondCallbacks = {
 
 type Renderer = {
     hasDrawn: () => boolean;
-    attach: (container: HTMLElement, size: number, callbacks: DiamondCallbacks) => void;
+    attach: (container: HTMLElement, layout: DiamondLayout, callbacks: DiamondCallbacks) => void;
 };
 
 /**
@@ -63,7 +68,6 @@ const TAP_MIN_ANGLE = 40;
 const TAP_ANGLE_SPREAD = 30;
 const TOUCH_SLOP = 8;
 // Under the pointer or a finger the diamond grows; the transition in `style.ts` takes this long
-const HOVER_SCALE = 1.7;
 const HOVER_TRANSITION_DURATION = 200;
 // Device pixels, so the diamond turns as fast as in the Android app on a screen of the same density
 const DRAG_YAW_SPEED = 0.5;
@@ -80,7 +84,7 @@ let renderer: Renderer | undefined;
  */
 export function attachDiamond(
     container: HTMLElement,
-    size: number,
+    layout: DiamondLayout,
     callbacks: DiamondCallbacks
 ): void {
     if (getIsDiamond3dDegraded()) {
@@ -95,7 +99,7 @@ export function attachDiamond(
         return;
     }
 
-    renderer.attach(container, size, callbacks);
+    renderer.attach(container, layout, callbacks);
 }
 
 /** Whether a diamond put on the page now shows the model at once, with no still in its place. */
@@ -122,6 +126,7 @@ function createRenderer(): Renderer | undefined {
 
     let scene: DiamondScene | undefined;
     let callbacks: DiamondCallbacks | undefined;
+    let hoverScale = 1;
     let frameId: number | undefined;
     let lastFrameTime: number | undefined;
     let time = 0;
@@ -307,8 +312,8 @@ function createRenderer(): Renderer | undefined {
 
     function grow(): void {
         clearTimeout(shrinkTimeout);
-        resolutionScale = HOVER_SCALE;
-        canvas.style.transform = `scale(${HOVER_SCALE})`;
+        resolutionScale = hoverScale;
+        canvas.style.transform = `scale(${hoverScale})`;
     }
 
     // The buffer stays large until the diamond has shrunk back
@@ -381,8 +386,9 @@ function createRenderer(): Renderer | undefined {
 
     return {
         hasDrawn: () => hasDrawn,
-        attach(container, size, attachCallbacks) {
+        attach(container, { size, hoverScale: attachHoverScale }, attachCallbacks) {
             callbacks = attachCallbacks;
+            hoverScale = attachHoverScale;
             // Before the first frame the kick waits for the still to fade out
             spinStart = hasDrawn ? time : undefined;
             // A modal closed under the pointer took the grown diamond with it

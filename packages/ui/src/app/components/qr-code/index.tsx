@@ -1,10 +1,11 @@
-import { Component, createEffect, createSignal, Show } from 'solid-js';
+import { children, Component, createEffect, createSignal, JSXElement, Show } from 'solid-js';
 import {
     CopiedBoxStyled,
     CopyIconButton,
     ImageBackground,
     ImageStyled,
     imgSizeDefault,
+    LogoStyled,
     picSizeDefault,
     QrCodeBackground,
     QrCodeWrapper,
@@ -22,6 +23,8 @@ import { QrHole, renderSquircleQr } from './squircle-qr';
 export interface QRCodeProps extends Styleable {
     sourceUrl: string;
     imageUrl?: string;
+    /** Laid over the middle in place of `imageUrl`. Its clicks are its own and do not copy the link. */
+    logo?: JSXElement;
     disableCopy?: boolean;
 }
 
@@ -31,6 +34,8 @@ export const QRCode: Component<QRCodeProps> = props => {
     let imageRef: HTMLDivElement | undefined;
 
     const [copyButtonOpened, setCopyButtonOpened] = createSignal(false);
+    // Resolved once: reading an element prop again would create the element again
+    const logo = children(() => props.logo);
 
     const [picSize, setPicSize] = createSignal(picSizeDefault);
 
@@ -78,9 +83,16 @@ export const QRCode: Component<QRCodeProps> = props => {
         <QrCodeBackground class={props.class} onClick={onCopyClick}>
             <QrCodeWrapper ref={qrCodeWrapperRef}>
                 <div ref={qrCodeCanvasRef} />
-                <Show when={props.imageUrl}>
+                <Show when={props.imageUrl || logo()}>
                     <ImageBackground ref={imageRef}>
-                        <ImageStyled src={props.imageUrl!} alt="" size={picSize()} />
+                        <Show
+                            when={logo()}
+                            fallback={<ImageStyled src={props.imageUrl!} alt="" size={picSize()} />}
+                        >
+                            <LogoStyled onClick={(e: MouseEvent) => e.stopPropagation()}>
+                                {logo()}
+                            </LogoStyled>
+                        </Show>
                     </ImageBackground>
                 </Show>
             </QrCodeWrapper>
