@@ -8,6 +8,7 @@ import {
     H2Styled,
     StyledLeftActionButton,
     TelegramButtonStyled,
+    TelegramDiamondStyled,
     TelegramH1Styled
 } from './style';
 import { setLastSelectedWalletInfo, setLastVisibleWalletsInfo } from 'src/app/state/modals-state';
@@ -26,6 +27,10 @@ import { WalletUlContainer } from 'src/app/components/wallet-item/style';
 import { UIWalletInfo } from 'src/app/models/ui-wallet-info';
 import { WalletsModalState } from 'src/models';
 import { logDebug } from 'src/app/utils/log';
+
+const DIAMOND_SIZE = 120;
+// Gram Wallet shines together with the Telegram button, fainter
+const GRAM_WALLET_SHINE_OPACITY = 0.085;
 
 interface MobileUniversalModalProps {
     walletsList: UIWalletInfo[];
@@ -200,10 +205,12 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
                         </H1Styled>
                     }
                 >
+                    <TelegramDiamondStyled size={DIAMOND_SIZE} />
                     <TelegramH1Styled translationKey="walletModal.mobileUniversalModal.useTelegramWallet">
                         Use your Telegram wallet
                     </TelegramH1Styled>
                     <TelegramButtonStyled
+                        shiny
                         icon={<TelegramIcon />}
                         onClick={() => props.onSelect(telegramWallet()!)}
                     >
@@ -215,6 +222,8 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
                 <Show when={gramWallet()}>
                     <GramWalletButtonStyled
                         transparent={gramWallet()!.ui?.isButtonTransparent}
+                        shiny={!gramWallet()!.ui?.isButtonTransparent}
+                        shineOpacity={GRAM_WALLET_SHINE_OPACITY}
                         icon={<ButtonWalletIconStyled src={gramWallet()!.imageUrl} />}
                         onClick={() => props.onSelect(gramWallet()!)}
                     >

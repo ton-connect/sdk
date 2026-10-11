@@ -1,10 +1,11 @@
-import { Component, createEffect, createSignal, Show } from 'solid-js';
+import { children, Component, createEffect, createSignal, JSXElement, Show } from 'solid-js';
 import {
     CopiedBoxStyled,
     CopyIconButton,
     ImageBackground,
     ImageStyled,
     imgSizeDefault,
+    LogoStyled,
     picSizeDefault,
     QrCodeBackground,
     QrCodeWrapper,
@@ -17,10 +18,13 @@ import { Styleable } from 'src/app/models/styleable';
 import { toPx } from 'src/app/utils/css';
 import { CopyLightIcon, SuccessIcon, Text } from 'src/app/components';
 import { animate } from 'src/app/utils/animate';
+import { QrHole, renderSquircleQr } from './squircle-qr';
 
 export interface QRCodeProps extends Styleable {
     sourceUrl: string;
     imageUrl?: string;
+    /** Laid over the middle in place of `imageUrl`. Its clicks are its own and do not copy the link. */
+    logo?: JSXElement;
     disableCopy?: boolean;
 }
 
@@ -30,6 +34,8 @@ export const QRCode: Component<QRCodeProps> = props => {
     let imageRef: HTMLDivElement | undefined;
 
     const [copyButtonOpened, setCopyButtonOpened] = createSignal(false);
+    // Resolved once: reading an element prop again would create the element again
+    const logo = children(() => props.logo);
 
     const [picSize, setPicSize] = createSignal(picSizeDefault);
 
@@ -39,22 +45,25 @@ export const QRCode: Component<QRCodeProps> = props => {
         const qr = qrcode(0, errorCorrectionLevel);
         qr.addData(props.sourceUrl);
         qr.make();
-        qrCodeCanvasRef!.innerHTML = qr.createSvgTag(cellSize, 0);
-        const qrSize = qrCodeCanvasRef!.firstElementChild!.clientWidth;
+        const qrSize = qr.getModuleCount() * cellSize;
 
         const scale = Math.round((qrNormalSize / qrSize) * 100000) / 100000;
+        let hole: QrHole | undefined;
 
         if (imageRef) {
             const imgSize = Math.ceil(imgSizeDefault / (scale * cellSize)) * cellSize;
-            const imgOffset = toPx(Math.ceil((qrSize - imgSize) / (2 * cellSize)) * cellSize);
-            imageRef.style.top = imgOffset;
-            imageRef.style.left = imgOffset;
+            const imgOffset = Math.ceil((qrSize - imgSize) / (2 * cellSize)) * cellSize;
+            imageRef.style.top = toPx(imgOffset);
+            imageRef.style.left = toPx(imgOffset);
             imageRef.style.height = toPx(imgSize);
             imageRef.style.width = toPx(imgSize);
 
+            // The modules under the logo are left out, so the shapes round off around it
+            hole = { start: imgOffset / cellSize, size: imgSize / cellSize };
             setPicSize(Math.round(picSizeDefault / scale));
         }
 
+        qrCodeCanvasRef!.innerHTML = renderSquircleQr(qr, cellSize, hole);
         qrCodeWrapperRef!.style.transform = `scale(${scale})`;
     });
 
@@ -74,9 +83,16 @@ export const QRCode: Component<QRCodeProps> = props => {
         <QrCodeBackground class={props.class} onClick={onCopyClick}>
             <QrCodeWrapper ref={qrCodeWrapperRef}>
                 <div ref={qrCodeCanvasRef} />
-                <Show when={props.imageUrl}>
+                <Show when={props.imageUrl || logo()}>
                     <ImageBackground ref={imageRef}>
-                        <ImageStyled src={props.imageUrl!} alt="" size={picSize()} />
+                        <Show
+                            when={logo()}
+                            fallback={<ImageStyled src={props.imageUrl!} alt="" size={picSize()} />}
+                        >
+                            <LogoStyled onClick={(e: MouseEvent) => e.stopPropagation()}>
+                                {logo()}
+                            </LogoStyled>
+                        </Show>
                     </ImageBackground>
                 </Show>
             </QrCodeWrapper>

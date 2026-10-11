@@ -1,7 +1,8 @@
+import cn from 'classnames';
 import { Component, JSXElement } from 'solid-js';
 import { styled } from 'solid-styled-components';
 import { Styleable } from 'src/app/models/styleable';
-import { ButtonLabelStyled, ConnectButtonStyled } from './style';
+import { ButtonLabelStyled, ConnectButtonStyled, shinyClass } from './style';
 
 export interface ConnectButtonProps extends Styleable {
     /** Rendered inline, immediately before the label. */
@@ -10,6 +11,12 @@ export interface ConnectButtonProps extends Styleable {
     onClick: () => void;
 
     children: JSXElement;
+
+    /** Draws attention with a light band crossing the button every two seconds. */
+    shiny?: boolean;
+
+    /** Dims the band, from 0 to 1. */
+    shineOpacity?: number;
 }
 
 /**
@@ -23,7 +30,8 @@ export const ConnectButton: Component<ConnectButtonProps> = props => {
     return (
         <ConnectButtonStyled
             type="button"
-            class={props.class}
+            class={cn(props.class, props.shiny && shinyClass)}
+            style={{ '--tc-shine-opacity': props.shineOpacity?.toString() }}
             onClick={() => props.onClick()}
             data-tc-button="true"
         >

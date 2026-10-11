@@ -8,6 +8,7 @@ import solid from 'vite-plugin-solid';
 import tailwindcss from '@tailwindcss/vite';
 
 import { handleFindTransactionDevRequest } from './src/server/dev-find-transaction-handler';
+import { serveDiamondModel } from '../../packages/ui/tools/serve-diamond-model';
 
 // https://vitejs.dev/config/
 
@@ -103,6 +104,7 @@ export default defineConfig({
         }),
         react(),
         tailwindcss(),
+        serveDiamondModel(),
         {
             name: 'dev-find-transaction-api',
             apply: 'serve',

@@ -1,4 +1,4 @@
-import { styled } from 'solid-styled-components';
+import { css, keyframes, styled } from 'solid-styled-components';
 import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
 import { mediaNotTouch, mediaTouch } from 'src/app/styles/media';
 
@@ -62,4 +62,53 @@ export const ButtonLabelStyled = styled.span`
     font-weight: 500;
     font-size: 16px;
     line-height: 20px;
+`;
+
+// Crosses in the first 0.75 s of every 2 s
+const shine = keyframes`
+    0% {
+        transform: translateX(-100%);
+    }
+    37.5%,
+    100% {
+        transform: translateX(100%);
+    }
+`;
+
+/**
+ * A light band crosses the button, then stays off it for as long, as on the upgrade buttons of the
+ * Telegram apps. `--tc-shine-opacity` dims the band.
+ */
+export const shinyClass = css`
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+        content: '';
+
+        position: absolute;
+        top: 0;
+        left: 0;
+
+        width: 100%;
+        height: 100%;
+
+        pointer-events: none;
+
+        opacity: var(--tc-shine-opacity, 1);
+        background: linear-gradient(
+            to right,
+            transparent 0%,
+            rgba(232, 232, 232, 0.3) 50%,
+            transparent 100%
+        );
+
+        animation: ${shine} 2s ease-out infinite;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        &::before {
+            display: none;
+        }
+    }
 `;

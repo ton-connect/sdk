@@ -56,7 +56,8 @@ export const Modal: Component<ModalProps> = props => {
                 const duration = isDevice('mobile') ? 200 : 100;
 
                 animate(el, [{ opacity: 0 }, { opacity: 1 }], {
-                    duration
+                    duration,
+                    easing: 'ease-out'
                 });
 
                 if (isDevice('mobile')) {
@@ -64,7 +65,8 @@ export const Modal: Component<ModalProps> = props => {
                         el.firstElementChild!,
                         [{ transform: 'translateY(390px)' }, { transform: 'translateY(0)' }],
                         {
-                            duration
+                            duration,
+                            easing: 'ease-out'
                         }
                     );
                 }
