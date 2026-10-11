@@ -1158,7 +1158,7 @@ tonConnectUI.setConnectionNetwork(undefined);
 Tracker for TonConnect user actions, such as transaction signing, connection, etc.
 
 List of events:
-* `wallet-modal-opened`: when the wallets modal is opened with `tonConnectUI.openModal()`, which the connect button uses.
+* `wallet-modal-opened`: when `tonConnectUI.openModal()` is called, which the connect button uses. Inside a wallet's embedded browser no modal is shown and the wallet connects directly, but the event is still sent.
 * `selected-wallet`: when a user picks a wallet in the modal or opens its connect link.
 * `wallet-preselected`: when a user picks a wallet on desktop, where a screen with connection options follows.
 * `wallet-selected`: when a wallet becomes the one being connected with.
