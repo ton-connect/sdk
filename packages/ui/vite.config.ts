@@ -3,6 +3,7 @@ import * as path from 'path';
 import { defineConfig } from 'vite';
 import solidPlugin from 'vite-plugin-solid';
 import devtools from 'solid-devtools/vite';
+import { serveDiamondModel } from './tools/serve-diamond-model';
 // @ts-ignore
 import * as packageJson from './package.json';
 
@@ -13,7 +14,8 @@ export default defineConfig({
         devtools({
             autoname: true
         }),
-        solidPlugin({ extensions: ['ts'] })
+        solidPlugin({ extensions: ['ts'] }),
+        serveDiamondModel()
     ],
     resolve: {
         alias: {

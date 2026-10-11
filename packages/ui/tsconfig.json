@@ -4,6 +4,7 @@
     "target": "ES6",
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
+    "module": "esnext",
     "types": ["vite/client", "node"],
     "emitDeclarationOnly": true,
     "noEmit": false,

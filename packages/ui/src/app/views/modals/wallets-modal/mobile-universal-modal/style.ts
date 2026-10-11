@@ -2,6 +2,7 @@ import { styled } from 'solid-styled-components';
 import {
     Button,
     ConnectButton,
+    Diamond,
     H1,
     H2,
     IconButton,
@@ -67,9 +68,13 @@ export const H1Styled = styled(H1)`
     padding: 0 24px;
 `;
 
-/** Title of the Telegram-first screen, which has no subtitle under it. */
+export const TelegramDiamondStyled = styled(Diamond)`
+    margin: 0 auto 4px;
+`;
+
+/** Title of the Telegram-first screen, which has the diamond above it and no subtitle under it. */
 export const TelegramH1Styled = styled(H1)`
-    margin-top: 38px;
+    margin-top: 0;
     margin-bottom: 20px;
     padding: 0 24px;
 `;
