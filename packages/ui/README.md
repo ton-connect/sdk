@@ -154,7 +154,7 @@ const walletsList = await tonConnectUI.getWallets();
     jsBridgeKey?: string;
     injected?: boolean; // true if this wallet is injected to the webpage
     embedded?: boolean; // true if the dapp is opened inside this wallet's browser
-    ui?: { isButtonTransparent?: boolean }; // presentation hints from the wallets registry
+    ui?: Record<string, unknown>; // presentation hints from the wallets registry
 }[] 
  */
 ```
