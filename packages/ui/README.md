@@ -1158,12 +1158,12 @@ tonConnectUI.setConnectionNetwork(undefined);
 Tracker for TonConnect user actions, such as transaction signing, connection, etc.
 
 List of events:
-* `wallet-modal-opened`: when the wallets modal is opened.
+* `wallet-modal-opened`: when the wallets modal is opened with `tonConnectUI.openModal()`, which the connect button uses.
 * `selected-wallet`: when a user picks a wallet in the modal or opens its connect link.
 * `wallet-preselected`: when a user picks a wallet on desktop, where a screen with connection options follows.
 * `wallet-selected`: when a wallet becomes the one being connected with.
 * `connection-started`: when a user starts connecting a wallet.
-* `connection-initiated`: when a user opens a connect link or QR code that was built only for display.
+* `connection-initiated`: when a user opens a connect link that was built only for display, such as the link behind a QR code.
 * `connection-completed`: when a user successfully connected a wallet.
 * `connection-error`: when a user cancels a connection or there is an error during the connection process.
 * `connection-restoring-started`: when the dApp starts restoring a connection.

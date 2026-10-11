@@ -497,7 +497,7 @@ After receiving the signed data, you need to verify the signature to ensure it's
 
 ## Error handling
 
-SDK errors extend `TonConnectError`, and `error.name` is the class name (e.g. `'UserRejectsError'`), also in minified bundles. `sendTransaction`, `signData` and `signMessage` throw them; connection errors are passed to the error callback of `onStatusChange`.
+SDK errors extend `TonConnectError`, and `error.name` is the class name (e.g. `'UserRejectsError'`), also in minified bundles. `sendTransaction`, `signData` and `signMessage` throw them. `connect()` throws for invalid arguments, an already connected wallet or a wallet that is not injected; errors the wallet returns while connecting go to the error callback of `onStatusChange`.
 
 An error the wallet returns is mapped by its code, and the wallet's own error is kept in `walletError` (`code`, `message`, `data`, `responseId`):
 
@@ -511,7 +511,7 @@ An error the wallet returns is mapped by its code, and the wallet's own error is
 | 300         | `UserRejectsError`                               |
 | 400         | `MethodNotSupportedError`                        |
 
-If an injected wallet rejects the request instead of answering with an error response, a known code in the rejection (e.g. `new Error(300)` or `{ code: 300 }`) is mapped the same way and `walletError.normalized` is `true`. Any other failure of an injected wallet becomes `WalletTransportError` with the original value in `cause`.
+If an injected wallet rejects the request instead of answering with an error response, a known code in the rejection (e.g. `new Error(300)` or `{ code: 300 }`) is mapped the same way and `walletError.normalized` is `true`. Any other rejection or non-TON-Connect answer from an injected wallet becomes `WalletTransportError`, with the original value in `cause` where the JavaScript engine supports error causes.
 
 ```ts
 import {
@@ -529,7 +529,7 @@ try {
     } else if (e instanceof MethodNotSupportedError) {
         // the wallet does not support this method
     } else if (e instanceof WalletTransportError) {
-        console.error('Injected wallet failed:', e.cause);
+        console.error('Injected wallet call failed:', e.cause);
     } else if (e instanceof TonConnectError) {
         console.error(e.name, e.walletError?.code, e.message);
     }
@@ -572,14 +572,14 @@ import {
     isTmaPlatform
 } from '@tonconnect/sdk';
 
-if (isInTMA()) {
+if (isInTMA() && !isInTelegramBrowser()) {
     const platform = getTmaPlatform(); // 'android' | 'ios' | 'macos' | 'tdesktop' | 'weba' | 'web' | 'unknown'
     const isMobile = isTmaPlatform('android', 'ios');
-    const webAppVersion = getTmaWebAppVersion(); // '6.0' if Telegram did not pass a version
+    const webAppVersion = getTmaWebAppVersion(); // '6.0' if the launch parameters carry no version
     const user = getTgUser(); // { id, isPremium } from the launch parameters, or undefined
 }
 
-const inTelegramBrowser = isInTelegramBrowser(); // Telegram in-app browser, not a Mini App
+const inTelegramBrowser = isInTelegramBrowser(); // Telegram in-app browser; isInTMA() is true there as well
 ```
 
 # Backend authorization
@@ -712,7 +712,7 @@ Tracker for TonConnect user actions, such as transaction signing, connection, et
 List of events:
 * `connection-started`: when a user starts connecting a wallet.
 * `connection-initiated`: when `connect()` is called, with the kind of connection source it targets.
-* `connection-link-generated`: when `connect()` is called with `linkDisplayOnly: true`, instead of `connection-initiated`.
+* `connection-link-generated`: when `connect()` is called with `linkDisplayOnly: true`, instead of `connection-initiated`. `connection-started` is still sent for such calls.
 * `connection-completed`: when a user successfully connected a wallet.
 * `connection-error`: when a user cancels a connection or there is an error during the connection process.
 * `connection-restoring-started`: when the dApp starts restoring a connection.
