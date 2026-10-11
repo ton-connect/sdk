@@ -69,9 +69,11 @@ const TAP_ANGLE_SPREAD = 30;
 const TOUCH_SLOP = 8;
 // Under the pointer or a finger the diamond grows; the transition in `style.ts` takes this long
 const HOVER_TRANSITION_DURATION = 200;
-// Device pixels, so the diamond turns as fast as in the Android app on a screen of the same density
-const DRAG_YAW_SPEED = 0.5;
-const DRAG_PITCH_SPEED = 0.05;
+// Degrees per pixel dragged across the screen, however much the diamond has grown
+const DRAG_YAW_SPEED = 0.75;
+const DRAG_PITCH_SPEED = 0.25;
+// A finger tilts it more gently
+const TOUCH_DRAG_PITCH_SPEED = 0.1;
 
 // One canvas for the page: the next diamond takes it over as it is, so a modal opened again shows the
 // diamond at once, and a closing modal keeps it until it leaves the page
@@ -267,8 +269,8 @@ function createRenderer(): Renderer | undefined {
         isPressed = true;
         isDragging = false;
         animation = undefined;
-        startX = lastX = e.offsetX;
-        startY = lastY = e.offsetY;
+        startX = lastX = e.clientX;
+        startY = lastY = e.clientY;
         canvas.setPointerCapture(e.pointerId);
     }
 
@@ -284,17 +286,19 @@ function createRenderer(): Renderer | undefined {
         }
 
         if (!isDragging) {
-            if (Math.hypot(e.offsetX - startX, e.offsetY - startY) <= TOUCH_SLOP) {
+            if (Math.hypot(e.clientX - startX, e.clientY - startY) <= TOUCH_SLOP) {
                 return;
             }
 
             isDragging = true;
         }
 
-        yaw += (e.offsetX - lastX) * pixelRatio * DRAG_YAW_SPEED;
-        pitch += (e.offsetY - lastY) * pixelRatio * DRAG_PITCH_SPEED;
-        lastX = e.offsetX;
-        lastY = e.offsetY;
+        yaw += (e.clientX - lastX) * DRAG_YAW_SPEED;
+        pitch +=
+            (e.clientY - lastY) *
+            (e.pointerType === 'touch' ? TOUCH_DRAG_PITCH_SPEED : DRAG_PITCH_SPEED);
+        lastX = e.clientX;
+        lastY = e.clientY;
     }
 
     function handlePointerUp(e: PointerEvent): void {
