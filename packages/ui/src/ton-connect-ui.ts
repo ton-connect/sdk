@@ -35,7 +35,6 @@ import { PreferredWalletStorage, WalletInfoStorage } from 'src/storage';
 import {
     createMacrotaskAsync,
     getSystemTheme,
-    preloadImages,
     subscribeToThemeChange
 } from 'src/app/utils/web-api';
 import { TonConnectUiOptions } from 'src/models/ton-connect-ui-options';
@@ -60,7 +59,6 @@ import type {
     EmbeddedSignMessageResponse
 } from 'src/models/embedded-response';
 import { applyWalletsListConfiguration, eqWalletName } from 'src/app/utils/wallets';
-import { uniq } from 'src/app/utils/array';
 import { Loadable } from 'src/models/loadable';
 import { WalletsModalManager } from 'src/managers/wallets-modal-manager';
 import { TransactionModalManager } from 'src/managers/transaction-modal-manager';
@@ -349,8 +347,6 @@ export class TonConnectUI {
         this._walletsPreferredFeatures = options.walletsPreferredFeatures;
 
         this.walletsList = this.getWallets();
-
-        this.walletsList.then(list => preloadImages(uniq(list.map(item => item.imageUrl))));
 
         const rootId = this.normalizeWidgetRoot(options?.widgetRootId);
 
