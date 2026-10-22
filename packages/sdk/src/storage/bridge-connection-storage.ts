@@ -15,6 +15,7 @@ import {
     isPendingConnectionHttpRaw
 } from 'src/provider/bridge/models/bridge-connection';
 import { IStorage } from 'src/storage/models/storage.interface';
+import { isWalletInfoRemote } from 'src/models/wallet/wallet-info';
 import { logDebug } from 'src/utils/log';
 import { WalletsListManager } from 'src/wallets-list-manager';
 
@@ -43,7 +44,8 @@ export class BridgeConnectionStorage {
                 connectEvent: connection.connectEvent,
                 session: rawSession,
                 lastWalletEventId: connection.lastWalletEventId,
-                nextRpcRequestId: connection.nextRpcRequestId
+                nextRpcRequestId: connection.nextRpcRequestId,
+                walletAppName: connection.walletAppName
             };
             return this.storage.setItem(this.storeKey, JSON.stringify(rawConnection));
         }
@@ -82,6 +84,7 @@ export class BridgeConnectionStorage {
                     connectEvent: connection.connectEvent,
                     lastWalletEventId: connection.lastWalletEventId,
                     nextRpcRequestId: connection.nextRpcRequestId,
+                    walletAppName: connection.walletAppName,
                     session: {
                         sessionCrypto,
                         bridgeUrl: connection.session.bridgeUrl,
@@ -225,11 +228,30 @@ export class BridgeConnectionStorage {
         return 0;
     }
 
+    public async findWalletAppName(
+        bridgeUrl: string,
+        universalLink: string
+    ): Promise<string | undefined> {
+        try {
+            const wallets = await this.walletsListManager.getWallets();
+            return wallets.find(
+                wallet =>
+                    isWalletInfoRemote(wallet) &&
+                    wallet.bridgeUrl === bridgeUrl &&
+                    wallet.universalLink === universalLink
+            )?.appName;
+        } catch (error) {
+            logDebug('Failed to find the connected wallet in the wallets list', error);
+            return undefined;
+        }
+    }
+
     private async actualizeBridgeConnection(
         connection: BridgeConnectionHttp
     ): Promise<BridgeConnectionHttp> {
         try {
-            const appName = connection.connectEvent.payload.device.appName;
+            const appName =
+                connection.walletAppName ?? connection.connectEvent.payload.device.appName;
             const wallet = await this.walletsListManager.getRemoteWallet(appName);
 
             if (wallet.bridgeUrl === connection.session.bridgeUrl) {

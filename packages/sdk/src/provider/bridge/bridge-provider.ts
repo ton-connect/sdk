@@ -45,11 +45,13 @@ export class BridgeProvider implements HTTPProvider {
         if (isPendingConnectionHttp(connection)) {
             return new BridgeProvider(storage, connection.connectionSource, analyticsManager);
         }
-        return new BridgeProvider(
+        const provider = new BridgeProvider(
             storage,
             { bridgeUrl: connection.session.bridgeUrl },
             analyticsManager
         );
+        provider.walletAppName = connection.walletAppName;
+        return provider;
     }
 
     public readonly type = 'http';
@@ -62,6 +64,8 @@ export class BridgeProvider implements HTTPProvider {
     >();
 
     private session: BridgeSession | BridgePartialSession | null = null;
+
+    private walletAppName: string | undefined;
 
     private gateway: BridgeGateway | null = null;
 
@@ -545,12 +549,22 @@ export class BridgeProvider implements HTTPProvider {
             }
         };
 
+        const source = this.walletConnectionSource;
+        if (!Array.isArray(source) && source.universalLink) {
+            this.walletAppName =
+                (await this.connectionStorage.findWalletAppName(
+                    this.session.bridgeUrl,
+                    source.universalLink
+                )) ?? this.walletAppName;
+        }
+
         await this.connectionStorage.storeConnection({
             type: 'http',
             session: this.session,
             lastWalletEventId: connectEvent.id,
             connectEvent: connectEventToSave,
-            nextRpcRequestId: 0
+            nextRpcRequestId: 0,
+            walletAppName: this.walletAppName
         });
     }
 
