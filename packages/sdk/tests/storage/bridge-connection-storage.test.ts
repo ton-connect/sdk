@@ -176,12 +176,27 @@ describe('BridgeConnectionStorage bridge actualization', () => {
             bridgeUrl: PICKED_BRIDGE,
             universalLink: PICKED_LINK
         });
+        await vi.waitFor(() => expect(provider['walletAppName']).toBe('picked-wallet'));
 
         await receiveConnectEvent(provider, 1);
 
         const stored: BridgeConnectionHttpRaw = JSON.parse((await storage.getItem(STORE_KEY))!);
         expect(stored.walletAppName).toBe('picked-wallet');
         expect(await restoredBridgeUrl(stored)).toBe(PICKED_BRIDGE);
+    });
+
+    it('stores the connection without waiting for a wallets list request that never completes', async () => {
+        fetchMocker.mockIf(WALLETS_LIST_SOURCE, () => new Promise(() => {}));
+        const provider = new BridgeProvider(connectionStorage, {
+            bridgeUrl: PICKED_BRIDGE,
+            universalLink: PICKED_LINK
+        });
+
+        await receiveConnectEvent(provider, 1);
+
+        const stored: BridgeConnectionHttpRaw = JSON.parse((await storage.getItem(STORE_KEY))!);
+        expect(stored.session.bridgeUrl).toBe(PICKED_BRIDGE);
+        expect(stored.walletAppName).toBeUndefined();
     });
 
     it('keeps the picked wallet when a restored connection receives another connect event', async () => {

@@ -99,6 +99,21 @@ export class BridgeProvider implements HTTPProvider {
         private readonly analyticsManager?: AnalyticsManager
     ) {
         this.analytics = this.analyticsManager?.scoped();
+        // Started with the provider so that a connect event never waits for the wallets list.
+        void this.lookUpWalletAppName();
+    }
+
+    private async lookUpWalletAppName(): Promise<void> {
+        const source = this.walletConnectionSource;
+        if (Array.isArray(source) || !source.universalLink) {
+            return;
+        }
+
+        const walletAppName = await this.connectionStorage.findWalletAppName(
+            source.bridgeUrl,
+            source.universalLink
+        );
+        this.walletAppName = walletAppName ?? this.walletAppName;
     }
 
     public connect(
@@ -548,15 +563,6 @@ export class BridgeProvider implements HTTPProvider {
                 items: [tonAddrItem]
             }
         };
-
-        const source = this.walletConnectionSource;
-        if (!Array.isArray(source) && source.universalLink) {
-            this.walletAppName =
-                (await this.connectionStorage.findWalletAppName(
-                    this.session.bridgeUrl,
-                    source.universalLink
-                )) ?? this.walletAppName;
-        }
 
         await this.connectionStorage.storeConnection({
             type: 'http',
