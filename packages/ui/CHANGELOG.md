@@ -1,5 +1,12 @@
 # Changelog @tonconnect/ui
 
+## 5.0.2
+
+### Patch Changes
+
+- The Get a Wallet button on the wallets modal's info screen opens the Gram Wallet site in place of
+  the ton.org wallets catalogue page, which no longer exists.
+
 ## 5.0.1
 
 ### Patch Changes

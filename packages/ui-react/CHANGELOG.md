@@ -1,5 +1,12 @@
 # Changelog @tonconnect/ui-react
 
+## 5.0.2
+
+### Patch Changes
+
+- Updated dependencies
+    - @tonconnect/ui@5.0.2
+
 ## 5.0.1
 
 ### Patch Changes
