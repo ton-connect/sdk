@@ -57,7 +57,7 @@ function validatePositiveNanoAmount(amount: unknown, field: string, issues: stri
 
     if (!POSITIVE_AMOUNT_PATTERN.test(amount)) {
         issues.push(
-            `${field}: amount must be a positive integer string in nanotons (no sign or decimals)`
+            `${field}: amount must be a positive integer string in nanograms (no sign or decimals)`
         );
         return;
     }

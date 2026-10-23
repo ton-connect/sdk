@@ -1,5 +1,5 @@
 /**
- * Structured items describe **what** the transaction should do (send TON,
+ * Structured items describe **what** the transaction should do (send GRAM,
  * transfer a jetton, transfer an NFT) and let the wallet build the BoC.
  *
  * Wallets advertise structured-item support through the
@@ -11,7 +11,7 @@
 export type StructuredItem = TonItem | JettonItem | NftItem;
 
 /**
- * Native TON transfer.
+ * Native GRAM (formerly TON) transfer.
  */
 export interface TonItem {
     type: 'ton';
@@ -23,7 +23,7 @@ export interface TonItem {
      */
     address: string;
 
-    /** Nanocoins to send, as a decimal string (e.g. `"5000000"` for 0.005 TON). */
+    /** Nanocoins to send, as a decimal string (e.g. `"5000000"` for 0.005 GRAM). */
     amount: string;
 
     /** Optional one-cell BoC body, base64-encoded. Omit for a plain transfer. */
@@ -45,7 +45,7 @@ export interface TonItem {
 /**
  * [TEP-74](https://github.com/ton-blockchain/TEPs/blob/master/text/0074-jettons-standard.md)
  * jetton transfer. The wallet resolves the user's jetton-wallet address from
- * `master`, builds the transfer body and attaches enough TON to pay for the
+ * `master`, builds the transfer body and attaches enough GRAM to pay for the
  * jetton-wallet execution.
  */
 export interface JettonItem {
@@ -61,11 +61,11 @@ export interface JettonItem {
     amount: string;
 
     /**
-     * Nanocoins of TON to attach to the jetton-wallet call.
+     * Nanocoins of GRAM to attach to the jetton-wallet call.
      */
     attachAmount?: string;
 
-    /** Where to refund excess TON. Defaults to the sender. */
+    /** Where to refund excess GRAM. Defaults to the sender. */
     responseDestination?: string;
 
     /** Raw one-cell BoC `custom_payload`, base64-encoded. */
@@ -73,7 +73,7 @@ export interface JettonItem {
 
     /**
      * Nanocoins forwarded to the destination wallet — drives the
-     * `transfer_notification` to the recipient. Defaults to `"1"` nanoTON.
+     * `transfer_notification` to the recipient. Defaults to `"1"` nanogram.
      */
     forwardAmount?: string;
 
@@ -99,11 +99,11 @@ export interface NftItem {
     newOwner: string;
 
     /**
-     * Nanocoins of TON to attach.
+     * Nanocoins of GRAM to attach.
      */
     attachAmount?: string;
 
-    /** Where to refund excess TON. */
+    /** Where to refund excess GRAM. */
     responseDestination?: string;
 
     /** Raw one-cell BoC `custom_payload`, base64-encoded. */

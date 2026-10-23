@@ -5,7 +5,7 @@ import { createTonClient } from '../utils/create-ton-client';
 import { isSupportedChain } from '../utils/ton-endpoints';
 
 /**
- * Reads the native TON balance of `address` (nanoton) via the active wallet's
+ * Reads the native GRAM (formerly Toncoin) balance of `address` (nanogram) via the active wallet's
  * chain endpoint. Returns the raw `bigint` — callers format as needed.
  */
 export const useTonBalance = (address: string | undefined) => {
