@@ -66,7 +66,7 @@ export function timeout<T>(fn: Deferrable<T>, options?: DeferOptions): Promise<T
             { once: true }
         );
 
-        const deferOptions = { timeout, abort: abortController.signal };
+        const deferOptions: DeferOptions = { timeout, signal: abortController.signal };
         await fn(
             (...args) => {
                 clearTimeout(timeoutId);

@@ -63,11 +63,6 @@ export class BridgeGateway {
         return eventSource?.readyState !== EventSource.OPEN;
     }
 
-    private get isConnecting(): boolean {
-        const eventSource = this.eventSource.current();
-        return eventSource?.readyState === EventSource.CONNECTING;
-    }
-
     private readonly bridgeGatewayStorage: HttpBridgeGatewayStorage;
     private readonly analytics?: Analytics<BridgeClientEvent, 'bridge_url' | 'client_id'>;
 
@@ -215,11 +210,6 @@ export class BridgeGateway {
     }
 
     private async errorsHandler(eventSource: EventSource, e: Event): Promise<EventSource | void> {
-        if (this.isConnecting) {
-            eventSource.close();
-            throw new TonConnectError('Bridge error, failed to connect');
-        }
-
         if (this.isReady) {
             try {
                 this.errorsListener(e);
@@ -227,6 +217,8 @@ export class BridgeGateway {
             return;
         }
 
+        // A dropped open stream arrives here as CONNECTING. The SDK reopens it itself rather than
+        // leave it to the browser, whose retry would reuse the stale last_event_id in the URL.
         if (this.isClosed) {
             eventSource.close();
             logDebug(`Bridge reconnecting, ${this.defaultReconnectDelay}ms delay`);
