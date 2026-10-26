@@ -137,6 +137,59 @@ describe('BridgeGateway', () => {
         expect(listener).not.toHaveBeenCalled();
     });
 
+    it('retries a reconnect attempt that misses its opening deadline', async () => {
+        const storage = memoryStorage();
+        const listener = vi.fn();
+        gateway = new BridgeGateway(storage, BRIDGE_URL, 'client', listener, vi.fn());
+
+        const registered = gateway.registerSession({ openingDeadlineMS: 1000 });
+        await flush();
+        const [first] = FakeEventSource.instances;
+        first!.open();
+        await registered;
+        first!.emit(payload, '42');
+        await flush();
+
+        first!.drop();
+        await vi.advanceTimersByTimeAsync(RECONNECT_DELAY_MS);
+        await flush();
+        const timedOut = FakeEventSource.instances[1]!;
+        await vi.advanceTimersByTimeAsync(1000);
+        await flush();
+        expect(timedOut.readyState).toBe(FakeEventSource.CLOSED);
+
+        await vi.advanceTimersByTimeAsync(RECONNECT_DELAY_MS);
+        await flush();
+        expect(FakeEventSource.instances).toHaveLength(3);
+        const third = FakeEventSource.instances[2]!;
+        expect(new URL(third.url).searchParams.get('last_event_id')).toBe('42');
+
+        third.open();
+        await flush();
+        third.emit(payload, '43');
+        await flush();
+        expect(listener).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not retry a reconnect attempt cancelled by a pause', async () => {
+        gateway = new BridgeGateway(memoryStorage(), BRIDGE_URL, 'client', vi.fn(), vi.fn());
+
+        const registered = gateway.registerSession({ openingDeadlineMS: 1000 });
+        await flush();
+        FakeEventSource.instances[0]!.open();
+        await registered;
+
+        FakeEventSource.instances[0]!.drop();
+        await vi.advanceTimersByTimeAsync(RECONNECT_DELAY_MS);
+        await flush();
+        expect(FakeEventSource.instances).toHaveLength(2);
+
+        gateway.pause();
+        await vi.advanceTimersByTimeAsync(5 * RECONNECT_DELAY_MS);
+        await flush();
+        expect(FakeEventSource.instances).toHaveLength(2);
+    });
+
     it('retries a first attempt that fails before opening', async () => {
         gateway = new BridgeGateway(memoryStorage(), BRIDGE_URL, 'client', vi.fn(), vi.fn());
 
