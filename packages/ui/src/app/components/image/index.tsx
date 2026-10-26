@@ -1,4 +1,4 @@
-import { Component, createEffect, createSignal, Show } from 'solid-js';
+import { Component, createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { ImagePlaceholder } from './style';
 import { Styleable } from 'src/app/models/styleable';
 
@@ -11,8 +11,35 @@ export const Image: Component<ImageProps> = props => {
     let imgRef: HTMLImageElement | undefined;
 
     const [image, setImage] = createSignal<HTMLImageElement | null>(null);
+    const [shouldLoad, setShouldLoad] = createSignal(false);
+
+    onMount(() => {
+        // Lazily load the image only when its placeholder is about to become visible,
+        // instead of downloading every image eagerly on mount.
+        if (typeof IntersectionObserver === 'undefined' || !imgRef) {
+            setShouldLoad(true);
+            return;
+        }
+
+        const observer = new IntersectionObserver(
+            entries => {
+                if (entries.some(entry => entry.isIntersecting)) {
+                    observer.disconnect();
+                    setShouldLoad(true);
+                }
+            },
+            { rootMargin: '150px' }
+        );
+
+        observer.observe(imgRef);
+        onCleanup(() => observer.disconnect());
+    });
 
     createEffect(() => {
+        if (!shouldLoad()) {
+            return;
+        }
+
         const img = new window.Image();
         img.src = props.src;
         img.alt = props.alt || '';
@@ -22,12 +49,16 @@ export const Image: Component<ImageProps> = props => {
         }
 
         if (img.complete) {
-            return setImage(img);
+            setImage(img);
+            return;
         }
 
-        img.addEventListener('load', () => setImage(img));
+        const onLoad = (): void => {
+            setImage(img);
+        };
+        img.addEventListener('load', onLoad);
 
-        return () => img.removeEventListener('load', () => setImage(img));
+        onCleanup(() => img.removeEventListener('load', onLoad));
     });
 
     return (
