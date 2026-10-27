@@ -1,11 +1,17 @@
 import { describe, it, expect } from 'vitest';
 import { generateUniversalLink } from 'src/provider/bridge/universal-link';
 import { wireRequestParser } from 'src/parsers/wire-request-parser';
+import { MAX_UNIVERSAL_LINK_LENGTH } from 'src/constants/max-universal-link-length';
 import { CASES } from './fixtures/universal-link.fixtures';
 
-// Mirrors BridgeProvider.maxUrlLength: above it the embedded request is dropped
-// and the connect-only link is used instead.
-const MAX_LENGTH = 1024;
+// The single source of truth for the length cap (issue #584): the same constant
+// BridgeProvider uses to decide when to drop the embedded request. Imported here
+// instead of re-declaring `1024` so the test cannot silently drift from the SDK.
+const MAX_LENGTH = MAX_UNIVERSAL_LINK_LENGTH;
+
+it('MAX_UNIVERSAL_LINK_LENGTH is the shared 1024-char cap', () => {
+    expect(MAX_UNIVERSAL_LINK_LENGTH).toBe(1024);
+});
 
 describe.each(CASES)(
     'generateUniversalLink — $label',
