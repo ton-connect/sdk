@@ -283,7 +283,7 @@ export class BridgeProvider implements HTTPProvider {
         request: WithoutId<AppRequest<T>>,
         onRequestSent?: () => void
     ): Promise<WithoutId<WalletResponse<T>>>;
-    public sendRequest<T extends RpcMethod>(
+    public async sendRequest<T extends RpcMethod>(
         request: WithoutId<AppRequest<T>>,
         optionsOrOnRequestSent?:
             | (() => void)
@@ -309,46 +309,47 @@ export class BridgeProvider implements HTTPProvider {
         }
         options.traceId ??= UUIDv7();
 
-        return new Promise(async (resolve, reject) => {
-            if (!this.gateway || !this.session || !('walletPublicKey' in this.session)) {
-                throw new TonConnectError('Trying to send bridge request without session');
-            }
+        if (!this.gateway || !this.session || !('walletPublicKey' in this.session)) {
+            throw new TonConnectError('Trying to send bridge request without session');
+        }
 
-            const id = (await this.connectionStorage.getNextRpcRequestId()).toString();
-            await this.connectionStorage.increaseNextRpcRequestId();
+        const id = (await this.connectionStorage.getNextRpcRequestId()).toString();
+        await this.connectionStorage.increaseNextRpcRequestId();
 
-            logDebug('Send http-bridge request:', { ...request, id });
+        logDebug('Send http-bridge request:', { ...request, id });
 
-            const encodedRequest = this.session!.sessionCrypto.encrypt(
-                JSON.stringify({ ...request, id }),
-                hexToByteArray(this.session.walletPublicKey)
-            );
+        const encodedRequest = this.session.sessionCrypto.encrypt(
+            JSON.stringify({ ...request, id }),
+            hexToByteArray(this.session.walletPublicKey)
+        );
 
-            try {
-                this.analytics?.emitBridgeClientMessageSent({
-                    bridge_url: this.gateway.bridgeUrl,
-                    client_id: this.session.sessionCrypto.sessionId,
-                    wallet_id: this.session.walletPublicKey,
-                    message_id: id,
-                    request_type: request.method,
-                    trace_id: options.traceId
-                });
-                await this.gateway.send(
-                    encodedRequest,
-                    this.session.walletPublicKey,
-                    request.method,
-                    {
-                        attempts: options?.attempts,
-                        signal: options?.signal,
-                        traceId: options.traceId
-                    }
-                );
-                options?.onRequestSent?.();
-                this.pendingRequests.set(id.toString(), resolve);
-            } catch (e) {
-                reject(e);
-            }
+        // SSE can deliver the wallet's reply before the POST completes or the
+        // dApp's onRequestSent callback returns. Register before either can run.
+        const response = new Promise<TraceableWalletResponse<T>>(resolve => {
+            this.pendingRequests.set(id, resolve);
         });
+
+        try {
+            this.analytics?.emitBridgeClientMessageSent({
+                bridge_url: this.gateway.bridgeUrl,
+                client_id: this.session.sessionCrypto.sessionId,
+                wallet_id: this.session.walletPublicKey,
+                message_id: id,
+                request_type: request.method,
+                trace_id: options.traceId
+            });
+            await this.gateway.send(encodedRequest, this.session.walletPublicKey, request.method, {
+                attempts: options?.attempts,
+                signal: options?.signal,
+                traceId: options.traceId
+            });
+            options?.onRequestSent?.();
+        } catch (e) {
+            this.pendingRequests.delete(id);
+            throw e;
+        }
+
+        return response;
     }
 
     public closeConnection(): void {
