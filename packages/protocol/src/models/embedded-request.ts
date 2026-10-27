@@ -121,7 +121,7 @@ export interface WireMessage {
  */
 export type WireItem = WireTonItem | WireJettonItem | WireNftItem;
 
-/** Structured item: native TON transfer. */
+/** Structured item: native Gram (formerly Toncoin) transfer. */
 export interface WireTonItem {
     /** item type discriminator */
     t: 'ton';
@@ -147,9 +147,9 @@ export interface WireJettonItem {
     d: string;
     /** jetton amount in elementary units */
     am: string;
-    /** TON to attach for fees (wallet estimates if omitted) */
+    /** GRAM to attach for fees (wallet estimates if omitted) */
     aa?: string;
-    /** where to send excess TON (defaults to sender) */
+    /** where to send excess GRAM (defaults to sender) */
     rd?: string;
     /** optional custom_payload cell BoC, base64 */
     cp?: string;
@@ -169,9 +169,9 @@ export interface WireNftItem {
     na: string;
     /** new owner address */
     no: string;
-    /** TON to attach for fees */
+    /** GRAM to attach for fees */
     aa?: string;
-    /** where to send excess TON (defaults to sender) */
+    /** where to send excess GRAM (defaults to sender) */
     rd?: string;
     /** optional custom_payload cell BoC, base64 */
     cp?: string;

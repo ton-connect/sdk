@@ -17,7 +17,7 @@ export type SendTransactionFeatureDeprecated = 'SendTransaction';
 /**
  * Item kinds a wallet may accept inside `sendTransaction.items` /
  * `signMessage.items`. Maps to the structured wallet-built transfers:
- * native TON, [TEP-74](https://github.com/ton-blockchain/TEPs/blob/master/text/0074-jettons-standard.md) jetton,
+ * native GRAM (formerly TON), [TEP-74](https://github.com/ton-blockchain/TEPs/blob/master/text/0074-jettons-standard.md) jetton,
  * [TEP-62](https://github.com/ton-blockchain/TEPs/blob/master/text/0062-nft-standard.md) NFT.
  */
 export type StructuredItemType = 'ton' | 'jetton' | 'nft';
