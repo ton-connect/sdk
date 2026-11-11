@@ -14,6 +14,7 @@ import {
     isPendingConnectionHttp,
     isPendingConnectionHttpRaw
 } from 'src/provider/bridge/models/bridge-connection';
+import { isWalletInfoRemote } from 'src/models/wallet/wallet-info';
 import { IStorage } from 'src/storage/models/storage.interface';
 import { logDebug } from 'src/utils/log';
 import { WalletsListManager } from 'src/wallets-list-manager';
@@ -225,16 +226,29 @@ export class BridgeConnectionStorage {
         return 0;
     }
 
+    /**
+     * Moves a restored session to its wallet's current bridge, but only once the wallets list
+     * stops advertising the bridge the session was opened on, i.e. the wallet has migrated.
+     * The wallet is found by its self-reported `device.appName`, which can name a different
+     * list entry (Telegram's wallet reports "gramwallet"), so a bridge some wallet still uses
+     * is never left for a guess.
+     */
     private async actualizeBridgeConnection(
         connection: BridgeConnectionHttp
     ): Promise<BridgeConnectionHttp> {
         try {
-            const appName = connection.connectEvent.payload.device.appName;
-            const wallet = await this.walletsListManager.getRemoteWallet(appName);
+            const walletsList = await this.walletsListManager.getWallets();
+            const isBridgeStillListed = walletsList.some(
+                wallet =>
+                    isWalletInfoRemote(wallet) && wallet.bridgeUrl === connection.session.bridgeUrl
+            );
 
-            if (wallet.bridgeUrl === connection.session.bridgeUrl) {
+            if (isBridgeStillListed) {
                 return connection;
             }
+
+            const appName = connection.connectEvent.payload.device.appName;
+            const wallet = await this.walletsListManager.getRemoteWallet(appName);
 
             const actualizedConnection = {
                 ...connection,
