@@ -14,7 +14,7 @@ import {
     isPendingConnectionHttp,
     isPendingConnectionHttpRaw
 } from 'src/provider/bridge/models/bridge-connection';
-import { isWalletInfoRemote } from 'src/models/wallet/wallet-info';
+import { isWalletInfoRemote, WalletInfoRemote } from 'src/models/wallet/wallet-info';
 import { IStorage } from 'src/storage/models/storage.interface';
 import { logDebug } from 'src/utils/log';
 import { WalletsListManager } from 'src/wallets-list-manager';
@@ -44,7 +44,8 @@ export class BridgeConnectionStorage {
                 connectEvent: connection.connectEvent,
                 session: rawSession,
                 lastWalletEventId: connection.lastWalletEventId,
-                nextRpcRequestId: connection.nextRpcRequestId
+                nextRpcRequestId: connection.nextRpcRequestId,
+                walletAppName: connection.walletAppName
             };
             return this.storage.setItem(this.storeKey, JSON.stringify(rawConnection));
         }
@@ -83,6 +84,7 @@ export class BridgeConnectionStorage {
                     connectEvent: connection.connectEvent,
                     lastWalletEventId: connection.lastWalletEventId,
                     nextRpcRequestId: connection.nextRpcRequestId,
+                    walletAppName: connection.walletAppName,
                     session: {
                         sessionCrypto,
                         bridgeUrl: connection.session.bridgeUrl,
@@ -226,29 +228,49 @@ export class BridgeConnectionStorage {
         return 0;
     }
 
+    public async getRemoteWallets(): Promise<WalletInfoRemote[]> {
+        try {
+            const wallets = await this.walletsListManager.getWallets();
+            return wallets.filter(isWalletInfoRemote);
+        } catch (error) {
+            logDebug('Failed to load the wallets list', error);
+            return [];
+        }
+    }
+
     /**
-     * Moves a restored session to its wallet's current bridge, but only once the wallets list
-     * stops advertising the bridge the session was opened on, i.e. the wallet has migrated.
-     * The wallet is found by its self-reported `device.appName`, which can name a different
-     * list entry (Telegram's wallet reports "gramwallet"), so a bridge some wallet still uses
-     * is never left for a guess.
+     * Moves a restored session to the current bridge of the wallet it was connected through.
+     * Sessions without that wallet in the list only know the self-reported `device.appName`,
+     * which can name a different list entry (Telegram's wallet reports "gramwallet"), so they move
+     * only once the wallets list stops advertising their bridge, i.e. the wallet has migrated.
      */
     private async actualizeBridgeConnection(
         connection: BridgeConnectionHttp
     ): Promise<BridgeConnectionHttp> {
         try {
-            const walletsList = await this.walletsListManager.getWallets();
-            const isBridgeStillListed = walletsList.some(
-                wallet =>
-                    isWalletInfoRemote(wallet) && wallet.bridgeUrl === connection.session.bridgeUrl
+            const remoteWallets = (await this.walletsListManager.getWallets()).filter(
+                isWalletInfoRemote
+            );
+            const connectedWallet = remoteWallets.find(
+                wallet => wallet.appName === connection.walletAppName
             );
 
-            if (isBridgeStillListed) {
+            if (
+                !connectedWallet &&
+                remoteWallets.some(wallet => wallet.bridgeUrl === connection.session.bridgeUrl)
+            ) {
                 return connection;
             }
 
-            const appName = connection.connectEvent.payload.device.appName;
-            const wallet = await this.walletsListManager.getRemoteWallet(appName);
+            const wallet =
+                connectedWallet ??
+                (await this.walletsListManager.getRemoteWallet(
+                    connection.connectEvent.payload.device.appName
+                ));
+
+            if (wallet.bridgeUrl === connection.session.bridgeUrl) {
+                return connection;
+            }
 
             const actualizedConnection = {
                 ...connection,
