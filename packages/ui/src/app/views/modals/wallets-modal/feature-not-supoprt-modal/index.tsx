@@ -168,7 +168,7 @@ export const DesktopFeatureNotSupportModal: Component<
                                 </Translation>
                             </Button>
                         </Link>
-                        <Link href="https://tonkeeper.helpscoutdocs.com/article/102-w5" blank>
+                        <Link href="https://docs.ton.org/contracts/standard/wallets/v5" blank>
                             <Button leftIcon={<LinkIcon />}>
                                 <Translation translationKey="walletModal.featureNotSupported.version.aboutW5">
                                     About W5
