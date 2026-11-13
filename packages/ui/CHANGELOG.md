@@ -1,5 +1,17 @@
 # Changelog @tonconnect/ui
 
+## 5.0.3
+
+### Patch Changes
+
+- 74f28ab: The "About W5" button in the "wallet doesn't support this feature" modal opened a
+  Tonkeeper help article that no longer exists. It now opens the Wallet V5 page of the TON
+  documentation.
+- Updated dependencies [7f94cae]
+- Updated dependencies [348f69c]
+- Updated dependencies [750e55d]
+    - @tonconnect/sdk@5.0.1
+
 ## 5.0.2
 
 ### Patch Changes

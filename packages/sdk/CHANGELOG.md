@@ -1,10 +1,36 @@
 # Changelog @tonconnect/sdk
 
+## 5.0.1
+
+### Patch Changes
+
+- 7f94cae: Move a restored HTTP connection to the new bridge of the wallet it was connected through,
+  also when that wallet leaves a bridge other wallets still use. At connect time the SDK records the
+  wallets-list entry on the session's bridge that the wallet reports itself as, else the one the
+  user picked, else the only entry on that bridge. Connections without a recorded entry, including
+  those stored by older versions, keep their bridge while the wallets list still advertises it.
+- 348f69c: Reconnect the bridge event stream after it drops. When an open SSE stream was cut, for
+  example by a bridge instance restarting, the SDK cancelled the browser's own reconnect and opened
+  no new stream, so wallet responses stopped reaching the dApp until the tab was hidden and shown
+  again or the page was reloaded. The SDK now reopens the stream after 2 seconds from the last
+  received event id. A connection attempt that misses its opening deadline is now closed at the
+  deadline instead of staying open and recording the ids of messages it drops, and a reconnect
+  attempt that misses it is retried after 2 seconds. Such an attempt now rejects with a
+  `TimeoutError` rather than an abort error.
+- 750e55d: Keep a restored session on its bridge while the wallets list still advertises that
+  bridge. On restore the SDK looked the wallet up by the `device.appName` it reported and moved the
+  session to that list entry's bridge. Telegram's wallet reports `gramwallet`, so after a Mini App
+  was reopened its session was moved to Gram Wallet's bridge and requests such as `sendTransaction`
+  never reached the wallet. The SDK now moves a session only once its bridge is gone from the list,
+  which is when the wallet has migrated. A session that was already moved stays on the wrong bridge:
+  the user has to disconnect and connect the wallet again.
+
 ## 5.0.0
 
 ### Major Changes
 
-- Aligns `@tonconnect/sdk`, `@tonconnect/ui` and `@tonconnect/ui-react` on one major version line. The code is the same as in sdk 4.1.0, ui 3.1.0 and ui-react 3.1.0.
+- Aligns `@tonconnect/sdk`, `@tonconnect/ui` and `@tonconnect/ui-react` on one major version line.
+  The code is the same as in sdk 4.1.0, ui 3.1.0 and ui-react 3.1.0.
 
 ## 4.1.0
 
