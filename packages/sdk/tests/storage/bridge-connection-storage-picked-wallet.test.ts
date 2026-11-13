@@ -115,6 +115,12 @@ describe('BridgeConnectionStorage picked wallet', () => {
         expect(await restoredBridgeUrl(stored)).toBe(PICKED_BRIDGE);
     });
 
+    it('moves a session off a bridge another wallet still uses once the picked wallet leaves it', async () => {
+        const stored = storedConnection(OTHER_BRIDGE, 'picked-wallet', 'picked-wallet');
+
+        expect(await restoredBridgeUrl(stored)).toBe(PICKED_BRIDGE);
+    });
+
     it('keeps the wallet across later writes of the connection', async () => {
         await storage.setItem(
             STORE_KEY,

@@ -2,8 +2,8 @@
 '@tonconnect/sdk': patch
 ---
 
-Move a restored HTTP connection to the new bridge of the wallet the user picked when that wallet
-migrates. The SDK found the wallet by the `device.appName` it reports, which can name another list
-entry, and then moved the session to that entry's bridge. The picked wallet's `app_name` is now
-stored at connect time and used instead; connections stored by older versions still fall back to
-`device.appName`.
+Move a restored HTTP connection to the new bridge of the wallet the user picked, also when that
+wallet leaves a bridge other wallets still use. The picked wallet's `app_name` is now stored at
+connect time and used instead of the self-reported `device.appName`, which can name another list
+entry. Connections stored by older versions keep their bridge while the wallets list still
+advertises it.
