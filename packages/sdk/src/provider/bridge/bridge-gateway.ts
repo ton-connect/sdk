@@ -9,7 +9,7 @@ import '@tonconnect/isomorphic-fetch';
 import { callForSuccess } from 'src/utils/call-for-success';
 import { logDebug, logError } from 'src/utils/log';
 import { createResource } from 'src/utils/resource';
-import { timeout } from 'src/utils/timeout';
+import { timeout, TimeoutError } from 'src/utils/timeout';
 import { createAbortController } from 'src/utils/create-abort-controller';
 import { AnalyticsManager } from 'src/analytics/analytics-manager';
 import { Analytics } from 'src/analytics/analytics';
@@ -61,11 +61,6 @@ export class BridgeGateway {
     private get isClosed(): boolean {
         const eventSource = this.eventSource.current();
         return eventSource?.readyState !== EventSource.OPEN;
-    }
-
-    private get isConnecting(): boolean {
-        const eventSource = this.eventSource.current();
-        return eventSource?.readyState === EventSource.CONNECTING;
     }
 
     private readonly bridgeGatewayStorage: HttpBridgeGatewayStorage;
@@ -215,11 +210,6 @@ export class BridgeGateway {
     }
 
     private async errorsHandler(eventSource: EventSource, e: Event): Promise<EventSource | void> {
-        if (this.isConnecting) {
-            eventSource.close();
-            throw new TonConnectError('Bridge error, failed to connect');
-        }
-
         if (this.isReady) {
             try {
                 this.errorsListener(e);
@@ -227,10 +217,22 @@ export class BridgeGateway {
             return;
         }
 
+        // A dropped open stream arrives here as CONNECTING. The SDK reopens it itself rather than
+        // leave it to the browser, whose retry would reuse the stale last_event_id in the URL.
         if (this.isClosed) {
             eventSource.close();
-            logDebug(`Bridge reconnecting, ${this.defaultReconnectDelay}ms delay`);
-            return await this.eventSource.recreate(this.defaultReconnectDelay);
+            // Only a missed opening deadline is retried: any other failure means a pause, a close
+            // or a newer attempt has taken the stream over.
+            for (;;) {
+                logDebug(`Bridge reconnecting, ${this.defaultReconnectDelay}ms delay`);
+                try {
+                    return await this.eventSource.recreate(this.defaultReconnectDelay);
+                } catch (err) {
+                    if (!(err instanceof TimeoutError)) {
+                        throw err;
+                    }
+                }
+            }
         }
 
         throw new TonConnectError('Bridge error, unknown state');
@@ -386,7 +388,7 @@ async function createEventSource(config: CreateEventSourceConfig): Promise<Event
                 config.messageHandler(event);
             };
 
-            config.signal?.addEventListener('abort', () => {
+            signal.addEventListener('abort', () => {
                 eventSource.close();
                 reject(new TonConnectError('Bridge connection aborted'));
             });

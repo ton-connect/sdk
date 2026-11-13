@@ -17,6 +17,13 @@ export type DeferOptions = {
 };
 
 /**
+ * The rejection reason of {@link timeout} once its deadline passes.
+ */
+export class TimeoutError extends TonConnectError {
+    static readonly errorName: string = 'TimeoutError';
+}
+
+/**
  * Represents a deferrable action that can be executed asynchronously.
  *
  * @template T The type of the value returned by the deferrable action.
@@ -52,8 +59,9 @@ export function timeout<T>(fn: Deferrable<T>, options?: DeferOptions): Promise<T
         let timeoutId: ReturnType<typeof setTimeout> | undefined;
         if (typeof timeout !== 'undefined') {
             timeoutId = setTimeout(() => {
+                // Rejects before aborting, or the abort listener reports the timeout as a cancellation.
+                reject(new TimeoutError(`Timeout after ${timeout}ms`));
                 abortController.abort();
-                reject(new TonConnectError(`Timeout after ${timeout}ms`));
             }, timeout);
         }
 
@@ -66,7 +74,7 @@ export function timeout<T>(fn: Deferrable<T>, options?: DeferOptions): Promise<T
             { once: true }
         );
 
-        const deferOptions = { timeout, abort: abortController.signal };
+        const deferOptions: DeferOptions = { timeout, signal: abortController.signal };
         await fn(
             (...args) => {
                 clearTimeout(timeoutId);
