@@ -14,7 +14,7 @@ import {
     isPendingConnectionHttp,
     isPendingConnectionHttpRaw
 } from 'src/provider/bridge/models/bridge-connection';
-import { isWalletInfoRemote } from 'src/models/wallet/wallet-info';
+import { isWalletInfoRemote, WalletInfoRemote } from 'src/models/wallet/wallet-info';
 import { IStorage } from 'src/storage/models/storage.interface';
 import { logDebug } from 'src/utils/log';
 import { WalletsListManager } from 'src/wallets-list-manager';
@@ -228,27 +228,19 @@ export class BridgeConnectionStorage {
         return 0;
     }
 
-    public async findWalletAppName(
-        bridgeUrl: string,
-        universalLink: string
-    ): Promise<string | undefined> {
+    public async getRemoteWallets(): Promise<WalletInfoRemote[]> {
         try {
             const wallets = await this.walletsListManager.getWallets();
-            return wallets.find(
-                wallet =>
-                    isWalletInfoRemote(wallet) &&
-                    wallet.bridgeUrl === bridgeUrl &&
-                    wallet.universalLink === universalLink
-            )?.appName;
+            return wallets.filter(isWalletInfoRemote);
         } catch (error) {
-            logDebug('Failed to find the connected wallet in the wallets list', error);
-            return undefined;
+            logDebug('Failed to load the wallets list', error);
+            return [];
         }
     }
 
     /**
      * Moves a restored session to the current bridge of the wallet it was connected through.
-     * Sessions stored before that wallet was recorded only know the self-reported `device.appName`,
+     * Sessions without that wallet in the list only know the self-reported `device.appName`,
      * which can name a different list entry (Telegram's wallet reports "gramwallet"), so they move
      * only once the wallets list stops advertising their bridge, i.e. the wallet has migrated.
      */
@@ -256,22 +248,25 @@ export class BridgeConnectionStorage {
         connection: BridgeConnectionHttp
     ): Promise<BridgeConnectionHttp> {
         try {
-            if (!connection.walletAppName) {
-                const walletsList = await this.walletsListManager.getWallets();
-                const isBridgeStillListed = walletsList.some(
-                    wallet =>
-                        isWalletInfoRemote(wallet) &&
-                        wallet.bridgeUrl === connection.session.bridgeUrl
-                );
+            const remoteWallets = (await this.walletsListManager.getWallets()).filter(
+                isWalletInfoRemote
+            );
+            const connectedWallet = remoteWallets.find(
+                wallet => wallet.appName === connection.walletAppName
+            );
 
-                if (isBridgeStillListed) {
-                    return connection;
-                }
+            if (
+                !connectedWallet &&
+                remoteWallets.some(wallet => wallet.bridgeUrl === connection.session.bridgeUrl)
+            ) {
+                return connection;
             }
 
-            const appName =
-                connection.walletAppName ?? connection.connectEvent.payload.device.appName;
-            const wallet = await this.walletsListManager.getRemoteWallet(appName);
+            const wallet =
+                connectedWallet ??
+                (await this.walletsListManager.getRemoteWallet(
+                    connection.connectEvent.payload.device.appName
+                ));
 
             if (wallet.bridgeUrl === connection.session.bridgeUrl) {
                 return connection;

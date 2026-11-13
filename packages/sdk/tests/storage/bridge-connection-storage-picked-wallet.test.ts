@@ -27,6 +27,7 @@ function wallet(appName: string, universalUrl: string, bridgeUrl: string): objec
 
 const walletsList = [
     wallet('picked-wallet', PICKED_LINK, PICKED_BRIDGE),
+    wallet('sibling-wallet', 'https://sibling.test/connect', PICKED_BRIDGE),
     wallet('other-wallet', 'https://other.test/connect', OTHER_BRIDGE)
 ];
 
@@ -135,24 +136,25 @@ describe('BridgeConnectionStorage picked wallet', () => {
         expect(stored.session.bridgeUrl).toBe(PICKED_BRIDGE);
     });
 
-    it('finds the wallet only by its own bridge and universal link', async () => {
-        expect(await connectionStorage.findWalletAppName(PICKED_BRIDGE, PICKED_LINK)).toBe(
-            'picked-wallet'
-        );
-        expect(
-            await connectionStorage.findWalletAppName(OTHER_BRIDGE, PICKED_LINK)
-        ).toBeUndefined();
+    it('falls back to the device app name when the recorded wallet left the list', async () => {
+        const stored = storedConnection(RETIRED_BRIDGE, 'other-wallet', 'gone-wallet');
+
+        expect(await restoredBridgeUrl(stored)).toBe(OTHER_BRIDGE);
     });
 
-    const receiveConnectEvent = async (provider: BridgeProvider, id: number): Promise<void> => {
+    const receiveConnectEvent = async (
+        provider: BridgeProvider,
+        id: number,
+        { deviceAppName = 'other-wallet', bridgeUrl = PICKED_BRIDGE } = {}
+    ): Promise<void> => {
         const dappCrypto = new SessionCrypto();
         const walletCrypto = new SessionCrypto();
         const connectEvent = {
             event: 'connect',
             id,
-            payload: { items: [tonAddr], device: device('other-wallet') }
+            payload: { items: [tonAddr], device: device(deviceAppName) }
         };
-        provider['session'] = { sessionCrypto: dappCrypto, bridgeUrl: PICKED_BRIDGE };
+        provider['session'] = { sessionCrypto: dappCrypto, bridgeUrl };
 
         await provider['gatewayListener']({
             from: walletCrypto.sessionId,
@@ -170,13 +172,52 @@ describe('BridgeConnectionStorage picked wallet', () => {
             bridgeUrl: PICKED_BRIDGE,
             universalLink: PICKED_LINK
         });
-        await vi.waitFor(() => expect(provider['walletAppName']).toBe('picked-wallet'));
+        await vi.waitFor(() => expect(provider['remoteWallets']).not.toHaveLength(0));
 
         await receiveConnectEvent(provider, 1);
 
         const stored: BridgeConnectionHttpRaw = JSON.parse((await storage.getItem(STORE_KEY))!);
         expect(stored.walletAppName).toBe('picked-wallet');
         expect(await restoredBridgeUrl(stored)).toBe(PICKED_BRIDGE);
+    });
+
+    it('records the wallet that answered when it shares a bridge with the picked one', async () => {
+        const provider = new BridgeProvider(connectionStorage, {
+            bridgeUrl: PICKED_BRIDGE,
+            universalLink: PICKED_LINK
+        });
+        await vi.waitFor(() => expect(provider['remoteWallets']).not.toHaveLength(0));
+
+        await receiveConnectEvent(provider, 1, { deviceAppName: 'sibling-wallet' });
+
+        const stored: BridgeConnectionHttpRaw = JSON.parse((await storage.getItem(STORE_KEY))!);
+        expect(stored.walletAppName).toBe('sibling-wallet');
+    });
+
+    it('records the only wallet on the bridge a universal connection was answered on', async () => {
+        const provider = new BridgeProvider(connectionStorage, [
+            { bridgeUrl: PICKED_BRIDGE },
+            { bridgeUrl: OTHER_BRIDGE }
+        ]);
+        await vi.waitFor(() => expect(provider['remoteWallets']).not.toHaveLength(0));
+
+        await receiveConnectEvent(provider, 1, {
+            deviceAppName: 'unlisted-wallet',
+            bridgeUrl: OTHER_BRIDGE
+        });
+
+        const stored: BridgeConnectionHttpRaw = JSON.parse((await storage.getItem(STORE_KEY))!);
+        expect(stored.walletAppName).toBe('other-wallet');
+    });
+
+    it('records no wallet when an unlisted wallet answers a universal connection on a shared bridge', async () => {
+        const provider = new BridgeProvider(connectionStorage, [{ bridgeUrl: PICKED_BRIDGE }]);
+        await vi.waitFor(() => expect(provider['remoteWallets']).not.toHaveLength(0));
+
+        await receiveConnectEvent(provider, 1, { deviceAppName: 'unlisted-wallet' });
+
+        const stored: BridgeConnectionHttpRaw = JSON.parse((await storage.getItem(STORE_KEY))!);
+        expect(stored.walletAppName).toBeUndefined();
     });
 
     it('stores the connection without waiting for a wallets list request that never completes', async () => {

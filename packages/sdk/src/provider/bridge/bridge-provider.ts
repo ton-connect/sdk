@@ -13,6 +13,7 @@ import {
 } from '@tonconnect/protocol';
 import { TonConnectError } from 'src/errors/ton-connect.error';
 import { WalletConnectionSourceHTTP } from 'src/models/wallet/wallet-connection-source';
+import { WalletInfoRemote } from 'src/models/wallet/wallet-info';
 import { BridgeGateway } from 'src/provider/bridge/bridge-gateway';
 import {
     BridgeConnectionHttp,
@@ -67,6 +68,8 @@ export class BridgeProvider implements HTTPProvider {
 
     private walletAppName: string | undefined;
 
+    private remoteWallets: WalletInfoRemote[] = [];
+
     private gateway: BridgeGateway | null = null;
 
     private pendingGateways: BridgeGateway[] = [];
@@ -100,20 +103,27 @@ export class BridgeProvider implements HTTPProvider {
     ) {
         this.analytics = this.analyticsManager?.scoped();
         // Started with the provider so that a connect event never waits for the wallets list.
-        void this.lookUpWalletAppName();
+        void this.connectionStorage.getRemoteWallets().then(wallets => {
+            this.remoteWallets = wallets;
+        });
     }
 
-    private async lookUpWalletAppName(): Promise<void> {
+    /**
+     * Names the wallets-list entry that answered on `bridgeUrl`: the one the wallet reports itself
+     * as, else the one the user picked, else the only entry on that bridge.
+     */
+    private identifyConnectedWallet(bridgeUrl: string, deviceAppName: string): string | undefined {
+        const walletsOnBridge = this.remoteWallets.filter(wallet => wallet.bridgeUrl === bridgeUrl);
         const source = this.walletConnectionSource;
-        if (Array.isArray(source) || !source.universalLink) {
-            return;
-        }
+        const pickedWallet = Array.isArray(source)
+            ? undefined
+            : walletsOnBridge.find(wallet => wallet.universalLink === source.universalLink);
 
-        const walletAppName = await this.connectionStorage.findWalletAppName(
-            source.bridgeUrl,
-            source.universalLink
-        );
-        this.walletAppName = walletAppName ?? this.walletAppName;
+        return (
+            walletsOnBridge.find(wallet => wallet.appName === deviceAppName) ??
+            pickedWallet ??
+            (walletsOnBridge.length === 1 ? walletsOnBridge[0] : undefined)
+        )?.appName;
     }
 
     public connect(
@@ -570,7 +580,11 @@ export class BridgeProvider implements HTTPProvider {
             lastWalletEventId: connectEvent.id,
             connectEvent: connectEventToSave,
             nextRpcRequestId: 0,
-            walletAppName: this.walletAppName
+            walletAppName:
+                this.identifyConnectedWallet(
+                    this.session.bridgeUrl,
+                    connectEvent.payload.device.appName
+                ) ?? this.walletAppName
         });
     }
 

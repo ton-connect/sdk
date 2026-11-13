@@ -26,7 +26,7 @@ export interface BridgeConnectionHttp {
     type: 'http';
     lastWalletEventId?: number;
     nextRpcRequestId: number;
-    /** `app_name` of the wallets-list entry the user connected through; `device.appName` is self-reported and may name another entry. */
+    /** `app_name` of the wallets-list entry the wallet connected as on the session's bridge; `device.appName` alone may name an entry on another bridge. */
     walletAppName?: string;
     connectEvent: {
         event: 'connect';
