@@ -32,7 +32,9 @@ export const CreateJettonInfo: FC<CreateJettonInfoProps> = ({
         </InfoBlock.Row>
 
         <InfoBlock.Row data-testid={`${testIdPrefix}-ton-row`}>
-            <InfoBlock.Label data-testid={`${testIdPrefix}-ton-label`}>TON Balance</InfoBlock.Label>
+            <InfoBlock.Label data-testid={`${testIdPrefix}-ton-label`}>
+                GRAM Balance
+            </InfoBlock.Label>
             {isTonBalanceLoading ? (
                 <InfoBlock.ValueSkeleton data-testid={`${testIdPrefix}-ton-balance-skeleton`} />
             ) : (

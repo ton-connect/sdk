@@ -55,7 +55,7 @@ export const TransferInfo: FC<TransferInfoProps> = ({
             </InfoBlock.Row>
 
             <InfoBlock.Row data-testid={`${testIdPrefix}-ton-row`}>
-                <InfoBlock.Label>TON balance</InfoBlock.Label>
+                <InfoBlock.Label>GRAM balance</InfoBlock.Label>
                 {isTonBalanceLoading ? (
                     <InfoBlock.ValueSkeleton data-testid={`${testIdPrefix}-ton-balance-skeleton`} />
                 ) : (
