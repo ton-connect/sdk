@@ -66,6 +66,8 @@ export class BridgeGateway {
     private readonly bridgeGatewayStorage: HttpBridgeGatewayStorage;
     private readonly analytics?: Analytics<BridgeClientEvent, 'bridge_url' | 'client_id'>;
 
+    private connectFailureListener: (() => void) | null = null;
+
     constructor(
         storage: IStorage,
         public readonly bridgeUrl: string,
@@ -195,6 +197,16 @@ export class BridgeGateway {
         this.errorsListener = errorsListener;
     }
 
+    /**
+     * Sets the listener called each time the event source reports an error while no stream is
+     * open: a first attempt that fails, a stream that drops, a reconnect that fails. An attempt
+     * that only misses its opening deadline is not reported. The gateway goes on reconnecting by
+     * itself; the call only says the bridge is not reachable now.
+     */
+    public setConnectFailureListener(listener: () => void): void {
+        this.connectFailureListener = listener;
+    }
+
     private async post(url: URL, body: string, signal?: AbortSignal): Promise<Response> {
         const response = await fetch(url, {
             method: 'post',
@@ -221,6 +233,9 @@ export class BridgeGateway {
         // leave it to the browser, whose retry would reuse the stale last_event_id in the URL.
         if (this.isClosed) {
             eventSource.close();
+            try {
+                this.connectFailureListener?.();
+            } catch (e) {}
             // Only a missed opening deadline is retried: any other failure means a pause, a close
             // or a newer attempt has taken the stream over.
             for (;;) {
