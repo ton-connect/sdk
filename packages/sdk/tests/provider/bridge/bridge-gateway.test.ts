@@ -207,6 +207,32 @@ describe('BridgeGateway', () => {
         expect(await outcome).toBe('rejected');
     });
 
+    it('reports a connection attempt that fails before opening', async () => {
+        gateway = new BridgeGateway(memoryStorage(), BRIDGE_URL, 'client', vi.fn(), vi.fn());
+        const listener = vi.fn();
+        gateway.setConnectFailureListener(listener);
+
+        gateway.registerSession().catch(() => undefined);
+        await flush();
+        FakeEventSource.instances[0]!.drop();
+        await flush();
+
+        expect(listener).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not report a connection that opens', async () => {
+        gateway = new BridgeGateway(memoryStorage(), BRIDGE_URL, 'client', vi.fn(), vi.fn());
+        const listener = vi.fn();
+        gateway.setConnectFailureListener(listener);
+
+        const registered = gateway.registerSession();
+        await flush();
+        FakeEventSource.instances[0]!.open();
+        await registered;
+
+        expect(listener).not.toHaveBeenCalled();
+    });
+
     it('does not reconnect while paused and resumes from the last stored event id', async () => {
         const storage = memoryStorage();
         gateway = new BridgeGateway(storage, BRIDGE_URL, 'client', vi.fn(), vi.fn());
