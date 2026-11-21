@@ -623,15 +623,20 @@ export class BridgeProvider implements HTTPProvider {
                 return gateway;
             });
 
-            // Wait until the specified optional gateways are opened, not necessarily all gateways
+            // Wait until all gateways but the optional ones have opened or reported an error
             const gatewaysToWaitFor = Math.max(
                 this.pendingGateways.length - this.optionalOpenGateways,
                 1
             );
 
             await waitForSome(
-                this.pendingGateways.map(bridge =>
-                    callForSuccess(
+                this.pendingGateways.map(bridge => {
+                    // The retries below never settle for a bridge that cannot be reached, so
+                    // such a bridge is waited for only until its first connection error.
+                    const failedToConnect = new Promise<void>(resolve =>
+                        bridge.setConnectFailureListener(resolve)
+                    );
+                    const opened = callForSuccess(
                         (_options): Promise<void> => {
                             if (!this.pendingGateways.some(item => item === bridge)) {
                                 return bridge.close();
@@ -649,8 +654,10 @@ export class BridgeProvider implements HTTPProvider {
                             delayMs: this.defaultRetryTimeoutMS,
                             signal: options?.signal
                         }
-                    )
-                ),
+                    );
+
+                    return Promise.race([opened, failedToConnect]);
+                }),
                 gatewaysToWaitFor
             );
 
