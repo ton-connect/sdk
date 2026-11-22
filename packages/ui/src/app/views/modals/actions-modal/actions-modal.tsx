@@ -5,6 +5,7 @@ import {
     action,
     confirmActionNames,
     errorActionNames,
+    isConfirmAction,
     setAction,
     successActionNames
 } from 'src/app/state/modals-state';
@@ -19,11 +20,19 @@ import { MessageSignedModal } from './message-signed-modal';
 import { SignMessageCanceledModal } from './sign-message-canceled-modal';
 
 export const ActionsModal: Component = () => {
+    // Closing the modal aborts a request the wallet goes on showing, so while the wallet has not
+    // answered only an explicit close may do that.
+    const isWaitingForWallet = (): boolean => {
+        const currentAction = action();
+        return currentAction !== null && isConfirmAction(currentAction);
+    };
+
     return (
         <Modal
             opened={action() !== null && action()?.openModal === true}
             enableAndroidBackHandler={appState.enableAndroidBackHandler}
             onClose={() => setAction(null)}
+            persistent={isWaitingForWallet()}
             showFooter={false}
             data-tc-actions-modal-container="true"
         >

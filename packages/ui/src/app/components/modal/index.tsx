@@ -36,11 +36,26 @@ export interface ModalProps extends Styleable, WithDataAttributes {
     onClose: () => void;
     onClickQuestion?: () => void;
     showFooter: boolean;
+    /**
+     * Keeps the modal open on a click outside it and on the Android back button. The close button
+     * and Escape still call `onClose`.
+     *
+     * The back button's history entry is spent on the press it ignores, and is not pushed again:
+     * Chrome skips all of a page's entries on Back once it pushes one without a user gesture. So
+     * one press is absorbed, and a later one is the page's own.
+     */
+    persistent?: boolean;
 }
 
 export const Modal: Component<ModalProps> = props => {
     const theme = useTheme();
     const dataAttrs = useDataAttributes(props);
+
+    const dismiss = (): void => {
+        if (!props.persistent) {
+            props.onClose();
+        }
+    };
 
     createEffect(() => {
         if (props.opened) {
@@ -110,11 +125,11 @@ export const Modal: Component<ModalProps> = props => {
                                 }
                             `
                         )}
-                        use:clickOutside={() => props.onClose()}
+                        use:clickOutside={() => dismiss()}
                         use:keyPressed={() => props.onClose()}
                         use:androidBackHandler={{
                             isEnabled: props.enableAndroidBackHandler,
-                            onClose: () => props.onClose()
+                            onClose: () => dismiss()
                         }}
                     >
                         <ModalBodyStyled class={props.class}>
