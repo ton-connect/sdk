@@ -1,5 +1,14 @@
 # Changelog @tonconnect/ui
 
+## 5.0.4
+
+### Patch Changes
+
+- Updated dependencies [61690d9]
+- Updated dependencies [61690d9]
+- Updated dependencies [460abd4]
+    - @tonconnect/sdk@5.0.2
+
 ## 5.0.3
 
 ### Patch Changes
