@@ -638,8 +638,10 @@ export class BridgeProvider implements HTTPProvider {
                     );
                     const opened = callForSuccess(
                         (_options): Promise<void> => {
+                            // A gateway out of the pending list is either closed already or the
+                            // one the wallet answered through, so it is left as it is.
                             if (!this.pendingGateways.some(item => item === bridge)) {
-                                return bridge.close();
+                                return Promise.resolve();
                             }
 
                             return bridge.registerSession({

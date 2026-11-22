@@ -47,6 +47,7 @@ export function createResource<T extends EventSource, Args extends any[]>(
     let currentPromise: Promise<T> | null = null;
     let currentSignal: AbortSignal | null = null;
     let abortController: AbortController | null = null;
+    let disposals = 0;
 
     // create a new resource
     const create = async (signal?: AbortSignal, ...args: Args): Promise<T> => {
@@ -82,6 +83,7 @@ export function createResource<T extends EventSource, Args extends any[]>(
     // dispose the current resource
     const dispose = async (): Promise<void> => {
         try {
+            disposals++;
             const resource = currentResource;
             currentResource = null;
 
@@ -105,10 +107,14 @@ export function createResource<T extends EventSource, Args extends any[]>(
         const promise = currentPromise;
         const args = currentArgs;
         const signal = currentSignal;
+        const disposalsBefore = disposals;
 
         await delay(delayMs);
 
+        // Disposing an already disposed resource changes none of the values compared below,
+        // so disposals are counted as well.
         if (
+            disposalsBefore === disposals &&
             resource === currentResource &&
             promise === currentPromise &&
             args === currentArgs &&

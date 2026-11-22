@@ -16,23 +16,37 @@ const { FakeEventSource } = vi.hoisted(() => {
             FakeEventSource.instances.push(this);
         }
 
+        private closedBySdk = false;
+
         close(): void {
             this.readyState = FakeEventSource.CLOSED;
+            this.closedBySdk = true;
         }
 
         open(): void {
+            this.assertNotClosedBySdk();
             this.readyState = FakeEventSource.OPEN;
             this.onopen?.({ type: 'open' });
         }
 
         emit(data: string, lastEventId: string): void {
+            this.assertNotClosedBySdk();
             this.onmessage?.({ data, lastEventId });
         }
 
         // A browser closes the source before firing `error` when the first attempt fails.
         fail(): void {
+            this.assertNotClosedBySdk();
             this.readyState = FakeEventSource.CLOSED;
             void this.onerror?.({ type: 'error' });
+        }
+
+        // A closed source fires nothing, so a test driving one would pass without the SDK
+        // having made the attempt it is about.
+        private assertNotClosedBySdk(): void {
+            if (this.closedBySdk) {
+                throw new Error(`The SDK has closed the stream to ${this.url}`);
+            }
         }
     }
 
@@ -82,6 +96,53 @@ describe('BridgeProvider restoring a pending connection', () => {
             throw new Error(`No EventSource was created for ${bridgeUrl}`);
         }
         return instance;
+    };
+
+    const attemptsOf = (bridgeUrl: string) =>
+        FakeEventSource.instances.filter(i => i.url.startsWith(bridgeUrl));
+
+    const retryOf = (bridgeUrl: string) => {
+        const attempts = attemptsOf(bridgeUrl);
+        if (attempts.length < 2) {
+            throw new Error(`No connection to ${bridgeUrl} was retried`);
+        }
+        return attempts[attempts.length - 1]!;
+    };
+
+    const waitForReconnect = async (): Promise<void> => {
+        await vi.advanceTimersByTimeAsync(RECONNECT_DELAY_MS);
+        await flush();
+    };
+
+    const walletMessage = (walletCrypto: SessionCrypto, sessionId: string, payload: object) =>
+        JSON.stringify({
+            from: walletCrypto.sessionId,
+            message: Base64.encode(
+                walletCrypto.encrypt(JSON.stringify(payload), hexToByteArray(sessionId))
+            )
+        });
+
+    const connectEvent = {
+        event: 'connect',
+        id: 1,
+        payload: {
+            items: [
+                {
+                    name: 'ton_addr',
+                    address: '0:' + '0'.repeat(64),
+                    network: '-239',
+                    walletStateInit: '',
+                    publicKey: '0'.repeat(64)
+                }
+            ],
+            device: {
+                platform: 'android',
+                appName: 'wallet',
+                appVersion: '1.0.0',
+                maxProtocolVersion: 2,
+                features: []
+            }
+        }
     };
 
     const startRestore = async (): Promise<void> => {
@@ -160,57 +221,57 @@ describe('BridgeProvider restoring a pending connection', () => {
         expect(finished).toBe(true);
     });
 
-    it('connects a wallet that answers through a bridge that was unreachable at first', async () => {
-        await startRestore();
-        const events: { event: string }[] = [];
-        provider!.listen(e => events.push(e));
-        const walletBridge = bridgeUrls[0]!;
+    describe('when the wallet answers through a bridge that was unreachable at first', () => {
+        let events: { event: string }[];
+        let walletStream: InstanceType<typeof FakeEventSource>;
 
-        bridgeUrls.forEach(url => instanceOf(url).fail());
+        beforeEach(async () => {
+            await startRestore();
+            events = [];
+            provider!.listen(e => events.push(e));
+
+            bridgeUrls.forEach(url => instanceOf(url).fail());
+            await flush();
+            expect(finished).toBe(true);
+            await waitForReconnect();
+
+            walletStream = retryOf(bridgeUrls[0]!);
+            walletStream.open();
+            walletStream.emit(
+                walletMessage(new SessionCrypto(), sessionCrypto.sessionId, connectEvent),
+                '1'
+            );
+        });
+
+        it('connects the wallet', async () => {
+            await vi.waitFor(() => expect(events.map(e => e.event)).toEqual(['connect']));
+        });
+
+        it('keeps the stream of that bridge open', async () => {
+            await vi.waitFor(() => expect(events.map(e => e.event)).toEqual(['connect']));
+            await waitForReconnect();
+            await waitForReconnect();
+
+            expect(attemptsOf(bridgeUrls[0]!)).toHaveLength(2);
+            expect(walletStream.readyState).toBe(FakeEventSource.OPEN);
+        });
+    });
+
+    it('opens no stream once the connection is closed while it was being resumed', async () => {
+        await startRestore();
+        bridgeUrls.slice(0, 3).forEach(url => instanceOf(url).open());
         await flush();
         expect(finished).toBe(true);
 
-        const firstAttempts = FakeEventSource.instances.length;
-        await vi.advanceTimersByTimeAsync(RECONNECT_DELAY_MS);
-        await flush();
-        const retry = FakeEventSource.instances
-            .slice(firstAttempts)
-            .find(i => i.url.startsWith(walletBridge));
-        expect(retry).toBeDefined();
-        retry!.open();
-        await flush();
+        provider!.pause();
+        provider!.unPause().catch(() => {});
+        provider!.closeConnection();
+        const created = FakeEventSource.instances.length;
+        await waitForReconnect();
 
-        const walletCrypto = new SessionCrypto();
-        const connectEvent = {
-            event: 'connect',
-            id: 1,
-            payload: {
-                items: [
-                    {
-                        name: 'ton_addr',
-                        address: '0:' + '0'.repeat(64),
-                        network: '-239',
-                        walletStateInit: '',
-                        publicKey: '0'.repeat(64)
-                    }
-                ],
-                device: {
-                    platform: 'android',
-                    appName: 'wallet',
-                    appVersion: '1.0.0',
-                    maxProtocolVersion: 2,
-                    features: []
-                }
-            }
-        };
-        const message = Base64.encode(
-            walletCrypto.encrypt(
-                JSON.stringify(connectEvent),
-                hexToByteArray(sessionCrypto.sessionId)
-            )
-        );
-        retry!.emit(JSON.stringify({ from: walletCrypto.sessionId, message }), '1');
-
-        await vi.waitFor(() => expect(events.map(e => e.event)).toEqual(['connect']));
+        expect(FakeEventSource.instances).toHaveLength(created);
+        expect(
+            FakeEventSource.instances.filter(i => i.readyState !== FakeEventSource.CLOSED)
+        ).toHaveLength(0);
     });
 });
