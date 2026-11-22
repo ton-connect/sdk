@@ -1,5 +1,29 @@
 # Changelog @tonconnect/sdk
 
+## 5.0.2
+
+### Patch Changes
+
+- 61690d9: Stop a connection that is closed right after being resumed from reopening its bridge
+  streams. When a connection was paused, resumed and then closed before the resume took effect, the
+  pending resume still opened the streams of the closed connection, and some of them stayed open
+  with nothing listening to them.
+- 61690d9: Keep the bridge stream of a wallet that answers a pending connection through a bridge
+  that failed to connect at first. If the wallet answered while a retry of the failed attempt was
+  still scheduled, that retry closed the stream the SDK had just chosen for the connection and
+  nothing reopened it: `connected` stayed `true` while events and responses from the wallet stopped
+  reaching the dApp.
+- 460abd4: Stop waiting for unreachable bridges when a pending connection is restored. A connection
+  that was started but not completed, for example by opening the wallets modal on desktop and
+  closing it, is restored on every page load for 5 minutes, and the restore waited until all of its
+  bridges but three had opened. A bridge that could not be reached was never counted, so with more
+  than three such bridges in the wallets list `restoreConnection()` only returned at its 12-second
+  deadline, and `connectionRestored` in `@tonconnect/ui` and `useIsConnectionRestored()` in
+  `@tonconnect/ui-react` stayed unresolved for that long. A bridge is now waited for until it opens
+  or a connection attempt to it ends in an error. It is still retried every 2 seconds in the
+  background, so a wallet that answers through it later still connects. A bridge that stays silent,
+  with neither an answer nor an error, is waited for as before.
+
 ## 5.0.1
 
 ### Patch Changes
