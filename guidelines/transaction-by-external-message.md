@@ -40,7 +40,7 @@ export function getNormalizedExtMessageHash(message: Message) {
         .endCell()
         .hash();
 }
-````
+```
 
 ## 🔁 Retrying API Calls
 
