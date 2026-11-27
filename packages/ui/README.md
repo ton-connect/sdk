@@ -155,6 +155,7 @@ const walletsList = await tonConnectUI.getWallets();
     injected?: boolean; // true if this wallet is injected to the webpage
     embedded?: boolean; // true if the dapp is opened inside this wallet's browser
     ui?: Record<string, unknown>; // presentation hints from the wallets registry
+    rank?: number; // 1-based place the wallets registry prefers for this wallet in wallet pickers
 }[] 
  */
 ```
@@ -1069,6 +1070,7 @@ You can customize the list of displayed wallets: change order, exclude wallets o
 
 ### Extend wallets list
 Pass custom wallets array to extend the wallets list. Passed wallets will be added to the end of the original wallets list.  
+A custom wallet can take a `rank`, the 1-based place it asks for in the modal's wallet lists, like the wallets of the registry: `rank: 1` lists it first after the "Recent" and installed wallets, and wallets sharing a rank are shuffled each time the modal opens.
 
 You can define custom wallet with `jsBridgeKey` (wallet = browser extension or there is a wallet dapp browser) or with `bridgeUrl` and `universalLink` pair (for http-connection compatible wallets), or pass all of these properties. 
 ```ts

@@ -179,6 +179,12 @@ export class WalletsListManager {
                         : undefined
             };
 
+            // A rank the picker cannot use is dropped rather than failing the whole wallet.
+            const rank = walletConfigDTO.rank;
+            if (typeof rank === 'number' && Number.isInteger(rank) && rank >= 1) {
+                walletConfig.rank = rank;
+            }
+
             walletConfigDTO.bridge.forEach(bridge => {
                 if (bridge.type === 'sse') {
                     (walletConfig as WalletInfoRemote).bridgeUrl = bridge.url;

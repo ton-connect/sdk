@@ -27,7 +27,11 @@ import { H1Styled, LoaderContainerStyled, StyledModal } from './style';
 import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { useI18n } from '@solid-primitives/i18n';
 import { appState } from 'src/app/state/app.state';
-import { applyWalletsListConfiguration, eqWalletName } from 'src/app/utils/wallets';
+import {
+    applyWalletsListConfiguration,
+    eqWalletName,
+    shuffleRankTies
+} from 'src/app/utils/wallets';
 import { trackWalletPick } from 'src/app/utils/wallet-selection';
 import { isMobile, updateIsMobile } from 'src/app/hooks/isMobile';
 import { AllWalletsListModal } from 'src/app/views/modals/wallets-modal/all-wallets-list-modal';
@@ -53,6 +57,7 @@ export const WalletsModal: Component = () => {
     createEffect(() => {
         if (getWalletsModalIsOpened()) {
             updateIsMobile();
+            rankTieDraws = [];
             refetchWallets();
         } else {
             setSelectedWalletInfo(null);
@@ -68,6 +73,23 @@ export const WalletsModal: Component = () => {
     const [fetchedWalletsList, { refetch: refetchWallets }] = createResource(() => {
         return tonConnectUI!.getWallets();
     });
+
+    /**
+     * Wallets sharing a rank are put in a random order once per opening, so every screen shows
+     * them alike until the modal closes. The order is drawn on the merged list, so includeWallets
+     * entries take part. The memo below re-runs while the modal is open, on any uiOptions update
+     * for one, so it replays the draws this opening has made instead of drawing again.
+     */
+    let rankTieDraws: number[] = [];
+    const replayRankTieDraws = (): (() => number) => {
+        let next = 0;
+        return () => {
+            if (next === rankTieDraws.length) {
+                rankTieDraws.push(Math.random());
+            }
+            return rankTieDraws[next++]!;
+        };
+    };
 
     const [selectedWalletInfo, setSelectedWalletInfo] = createSignal<UIWalletInfo | null>(null);
     const [selectedWalletError, setSelectedWalletError] = createSignal<
@@ -89,9 +111,9 @@ export const WalletsModal: Component = () => {
             return null;
         }
 
-        let walletsList = applyWalletsListConfiguration(
-            fetchedWalletsList(),
-            appState.walletsListConfiguration
+        let walletsList = shuffleRankTies(
+            applyWalletsListConfiguration(fetchedWalletsList(), appState.walletsListConfiguration),
+            replayRankTieDraws()
         );
 
         const injectedWallets: WalletInfo[] = walletsList.filter(isWalletInfoCurrentlyInjected);

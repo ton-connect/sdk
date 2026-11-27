@@ -27,7 +27,7 @@ import {
 } from './style';
 import { setLastSelectedWalletInfo, setLastVisibleWalletsInfo } from 'src/app/state/modals-state';
 import { appState } from 'src/app/state/app.state';
-import { supportsMobile } from 'src/app/utils/wallets';
+import { orderWalletsByRank, supportsMobile } from 'src/app/utils/wallets';
 import { GRAM_WALLET_APP_NAME, TELEGRAM_WALLET_APP_NAME } from 'src/app/env/WALLET_APP_NAMES';
 import { copyToClipboard } from 'src/app/utils/copy-to-clipboard';
 import { MobileUniversalQR } from './mobile-universal-qr';
@@ -224,7 +224,7 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
     };
 
     const supportedWallets = createMemo(
-        () => walletsList().filter(wallet => wallet.isSupportRequiredFeatures),
+        () => orderWalletsByRank(walletsList().filter(wallet => wallet.isSupportRequiredFeatures)),
         null
     );
 
@@ -242,9 +242,18 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
         })
     );
 
+    /**
+     * The tile previews the wallets that follow the visible ones on All Wallets, which lists the
+     * supported wallets first and the others after them, each by rank.
+     */
     const fourWalletsItem = createMemo(
         () =>
-            walletsList()
+            [
+                ...supportedWallets(),
+                ...orderWalletsByRank(
+                    walletsList().filter(wallet => !wallet.isSupportRequiredFeatures)
+                )
+            ]
                 .filter(wallet => !visibleWallets().find(w => w.appName === wallet.appName))
                 .slice(0, 4),
         null

@@ -10,7 +10,7 @@ import {
     WalletsNotSupportedNotifierText
 } from './style';
 import { isMobile } from 'src/app/hooks/isMobile';
-import { supportsMobile } from 'src/app/utils/wallets';
+import { orderWalletsByRank, supportsMobile } from 'src/app/utils/wallets';
 import { ScrollContainer } from 'src/app/components/scroll-container';
 import { ExclamationIcon } from 'src/app/components/icons/exclamation-icon';
 import { Transition } from 'solid-transition-group';
@@ -91,14 +91,14 @@ export const AllWalletsListModal: Component<DesktopSelectWalletModalProps> = pro
         isMobile() ? props.walletsList.filter(supportsMobile) : props.walletsList;
 
     const supportedWallets = (): UIWalletInfo[] =>
-        walletsList().filter(wallet => wallet.isSupportRequiredFeatures);
+        orderWalletsByRank(walletsList().filter(wallet => wallet.isSupportRequiredFeatures));
     setLastVisibleWalletsInfo({
         walletsMenu: 'other_wallets',
         wallets: supportedWallets()
     });
 
     const unsupportedWallets = (): UIWalletInfo[] =>
-        walletsList().filter(wallet => !wallet.isSupportRequiredFeatures);
+        orderWalletsByRank(walletsList().filter(wallet => !wallet.isSupportRequiredFeatures));
 
     return (
         <DesktopSelectWalletModalStyled data-tc-wallets-modal-list="true">

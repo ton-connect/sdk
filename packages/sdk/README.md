@@ -118,6 +118,7 @@ const walletsList = await connector.getWallets();
     injected?: boolean; // true if this wallet is injected to the webpage
     embedded?: boolean; // true if the dapp is opened inside this wallet's browser
     ui?: Record<string, unknown>; // presentation hints from the wallets registry
+    rank?: number; // 1-based place the wallets registry prefers for this wallet in wallet pickers
 }[] 
  */
 ```
