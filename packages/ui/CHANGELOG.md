@@ -28,6 +28,16 @@
 
 ### Patch Changes
 
+- b3f1565: A screen of the modal that is fading out after being replaced, and the modal itself while
+  it closes, can no longer be focused, pressed from the keyboard or reached by screen readers. They
+  kept their controls for the length of the fade, so a second Enter could press a wallet tile that
+  had already been replaced.
+- b3f1565: The shine over the Gram Wallet and Telegram icons in the wallets lists passes twice once
+  the modal has settled, then stops, like the shine of the "Connect Telegram" button. It used to
+  come back every 6 seconds for as long as the modal stayed open.
+- b3f1565: When the user asks for reduced transparency or more contrast, the All Wallets screen now
+  gets the solid surface the other screens get. It kept a slightly see-through background, without
+  the blur, because a rule of its own outranked the solid one.
 - 00a2f9e: Wallet tiles show a wallet's name without its bracketed note, so "Walt (ex. Wallet)"
   reads "Walt" with no "ex. Wallet" line under it.
 - Updated dependencies [00a2f9e]
