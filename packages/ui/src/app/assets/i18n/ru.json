@@ -96,7 +96,9 @@
       "updateWallet": "Обновить {{ name }}",
       "chooseAnotherWallet": "Выбрать другой кошелёк",
       "continueOnDesktop": "Откройте {{ name }} на компьютере…",
-      "connectionDeclined": "Подключение отклонено"
+      "connectionDeclined": "Подключение отклонено",
+      "openDesktop": "Открыть {{ name }} Desktop",
+      "openExtension": "Открыть расширение {{ name }}"
     },
     "infoModal": {
       "whatIsAWallet": "Что такое кошелёк?",

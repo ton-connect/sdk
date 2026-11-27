@@ -96,7 +96,9 @@
       "updateWallet": "Update {{ name }}",
       "chooseAnotherWallet": "Choose Another Wallet",
       "continueOnDesktop": "Continue in {{ name }} on desktop…",
-      "connectionDeclined": "Connection declined"
+      "connectionDeclined": "Connection declined",
+      "openDesktop": "Open {{ name }} Desktop",
+      "openExtension": "Open {{ name }} Browser Extension"
     },
     "infoModal": {
       "whatIsAWallet": "What is a wallet",

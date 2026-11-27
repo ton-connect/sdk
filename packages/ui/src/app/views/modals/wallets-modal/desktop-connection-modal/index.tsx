@@ -20,6 +20,7 @@ import {
     useContext
 } from 'solid-js';
 import {
+    AccentFooterButton,
     BodyStyled,
     BodyTextStyled,
     BottomButtonsContainerStyled,
@@ -46,7 +47,12 @@ import {
 import { appState } from 'src/app/state/app.state';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { Link } from 'src/app/components/link';
-import { supportsDesktop, supportsExtension, supportsMobile } from 'src/app/utils/wallets';
+import {
+    stripWalletNameNote,
+    supportsDesktop,
+    supportsExtension,
+    supportsMobile
+} from 'src/app/utils/wallets';
 import { WALT_APP_NAME } from 'src/app/env/WALLET_APP_NAMES';
 import { Translation } from 'src/app/components/typography/Translation';
 import {
@@ -238,6 +244,30 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
         }
     };
 
+    const onFooterClickExtension = (): void => {
+        trackSelected('extension', 'manual');
+        onClickExtension();
+    };
+
+    const onFooterClickDesktop = (): void => {
+        trackSelected('desktop', 'manual');
+        onClickDesktop();
+    };
+
+    /**
+     * Under the QR the Mobile chip is hidden, so a wallet with only one of a browser extension and
+     * a desktop app leaves a single chip there. Being the one way on from the QR besides scanning
+     * it, that chip is drawn as the screen's main action and says what it opens.
+     */
+    const isLoneQrChip = (): boolean =>
+        mode() === 'mobile' &&
+        !connectionErrored() &&
+        supportsExtension(props.wallet) !== supportsDesktop(props.wallet);
+
+    // The accent label reads as a phrase, so a bracketed note such as "(ex. Wallet)" is left to
+    // the title above it.
+    const accentLabelName = (): string => stripWalletNameNote(props.wallet.name);
+
     // With no QR to show, the mount is the commitment, so it records a selection with the source
     // of the preselection it completes.
     if (supportsMobile(props.wallet)) {
@@ -421,30 +451,61 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                     </FooterButton>
                 </Show>
                 <Show when={mode() !== 'extension' && supportsExtension(props.wallet)}>
-                    <FooterButton
-                        appearance="secondary"
-                        leftIcon={<BrowserIcon />}
-                        onClick={() => {
-                            trackSelected('extension', 'manual');
-                            onClickExtension();
-                        }}
+                    <Show
+                        when={isLoneQrChip()}
+                        fallback={
+                            <FooterButton
+                                appearance="secondary"
+                                leftIcon={<BrowserIcon />}
+                                onClick={onFooterClickExtension}
+                            >
+                                <Translation translationKey="common.browserExtension">
+                                    Browser Extension
+                                </Translation>
+                            </FooterButton>
+                        }
                     >
-                        <Translation translationKey="common.browserExtension">
-                            Browser Extension
-                        </Translation>
-                    </FooterButton>
+                        <AccentFooterButton
+                            icon={<BrowserIcon fill="currentColor" />}
+                            onClick={onFooterClickExtension}
+                            data-tc-connection-accent-button="true"
+                        >
+                            <Translation
+                                translationKey="walletModal.desktopConnectionModal.openExtension"
+                                translationValues={{ name: accentLabelName() }}
+                            >
+                                Open {accentLabelName()} Browser Extension
+                            </Translation>
+                        </AccentFooterButton>
+                    </Show>
                 </Show>
                 <Show when={mode() !== 'desktop' && supportsDesktop(props.wallet)}>
-                    <FooterButton
-                        appearance="secondary"
-                        leftIcon={<DesktopIcon />}
-                        onClick={() => {
-                            trackSelected('desktop', 'manual');
-                            onClickDesktop();
-                        }}
+                    <Show
+                        when={isLoneQrChip()}
+                        fallback={
+                            <FooterButton
+                                appearance="secondary"
+                                leftIcon={<DesktopIcon />}
+                                onClick={onFooterClickDesktop}
+                            >
+                                <Translation translationKey="common.desktop">Desktop</Translation>
+                            </FooterButton>
+                        }
                     >
-                        <Translation translationKey="common.desktop">Desktop</Translation>
-                    </FooterButton>
+                        <AccentFooterButton
+                            icon={<DesktopIcon fill="currentColor" />}
+                            lowerIcon
+                            onClick={onFooterClickDesktop}
+                            data-tc-connection-accent-button="true"
+                        >
+                            <Translation
+                                translationKey="walletModal.desktopConnectionModal.openDesktop"
+                                translationValues={{ name: accentLabelName() }}
+                            >
+                                Open {accentLabelName()} Desktop
+                            </Translation>
+                        </AccentFooterButton>
+                    </Show>
                 </Show>
             </BottomButtonsContainerStyled>
         </DesktopConnectionModalStyled>

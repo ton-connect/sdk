@@ -2,9 +2,11 @@ import cn from 'classnames';
 import { Component, JSXElement } from 'solid-js';
 import { styled } from 'solid-styled-components';
 import { Styleable } from 'src/app/models/styleable';
+import { WithDataAttributes } from 'src/app/models/with-data-attributes';
+import { useDataAttributes } from 'src/app/hooks/use-data-attributes';
 import { ButtonLabelStyled, ConnectButtonStyled, shinyClass } from './style';
 
-export interface ConnectButtonProps extends Styleable {
+export interface ConnectButtonProps extends Styleable, WithDataAttributes {
     /** Rendered inline, immediately before the label. */
     icon: JSXElement;
 
@@ -27,6 +29,8 @@ export interface ConnectButtonProps extends Styleable {
  * Callers style it for their screen with `styled(ConnectButton)`.
  */
 export const ConnectButton: Component<ConnectButtonProps> = props => {
+    const dataAttrs = useDataAttributes(props);
+
     return (
         <ConnectButtonStyled
             type="button"
@@ -34,6 +38,7 @@ export const ConnectButton: Component<ConnectButtonProps> = props => {
             style={{ '--tc-shine-opacity': props.shineOpacity?.toString() }}
             onClick={() => props.onClick()}
             data-tc-button="true"
+            {...dataAttrs}
         >
             <ButtonLabelStyled>
                 {props.icon}

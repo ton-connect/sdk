@@ -1,5 +1,14 @@
 import { styled } from 'solid-styled-components';
-import { Button, ErrorIcon, H1, H2, IconButton, LoaderIcon, QRCode } from 'src/app/components';
+import {
+    Button,
+    ErrorIcon,
+    H1,
+    H2,
+    IconButton,
+    LoaderIcon,
+    QRCode,
+    TelegramConnectButton
+} from 'src/app/components';
 
 export const DesktopConnectionModalStyled = styled.div`
     display: flex;
@@ -50,6 +59,34 @@ export const BottomButtonsContainerStyled = styled(ButtonsContainerStyled)`
 
 export const FooterButton = styled(Button)`
     margin-bottom: 24px;
+`;
+
+/**
+ * The only footer chip under the QR, drawn as the mobile screen's "Connect Telegram" button. It
+ * hugs its label instead of spanning the modal, and keeps the chips' gap below it.
+ *
+ * A long wallet name can wrap the label to two lines, which the button's height fits. The icon
+ * then flows with the text, so it stays next to the first word instead of alone at the edge, and
+ * both lines stay centred.
+ */
+export const AccentFooterButton = styled(TelegramConnectButton)<{ lowerIcon?: boolean }>`
+    width: auto;
+    padding: 0 24px;
+    margin-bottom: 24px;
+
+    & > span {
+        display: block;
+        text-align: center;
+        text-wrap: balance;
+    }
+
+    & > span > svg {
+        display: inline-block;
+        vertical-align: top;
+        /* Centred in the 20px line. lowerIcon takes an icon whose glyph leaves more room below it
+           than above, the laptop, 1px further down, so that its base sits on the text baseline. */
+        margin: ${props => (props.lowerIcon ? '3px' : '2px')} 8px 0 0;
+    }
 `;
 
 export const LoaderStyled = styled(LoaderIcon)`

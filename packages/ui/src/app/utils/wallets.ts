@@ -59,7 +59,8 @@ export function eqWalletName(wallet1: { name: string; appName: string }, name?: 
 
 /**
  * The wallet tile fits one line of name and keeps its second line for labels such as "Recent", so
- * a trailing bracketed note such as "(ex. Wallet)" is dropped from the name the tile shows.
+ * a trailing bracketed note such as "(ex. Wallet)" is dropped from the name the tile shows. Labels
+ * that put the name inside a phrase, such as "Open Walt Desktop", drop it too.
  */
 export function stripWalletNameNote(name: string): string {
     const match = /^(.+?)\s*\([^()]+\)$/.exec(name);

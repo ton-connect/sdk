@@ -255,3 +255,110 @@ describe('views/desktop-connection-modal: opening the link', () => {
         expect(redirectToWallet).not.toHaveBeenCalled();
     });
 });
+
+/**
+ * Under the QR the Mobile chip is hidden, so a wallet with only a desktop app or only a browser
+ * extension besides its mobile app has a single chip left there, which becomes the accent button.
+ */
+describe('views/desktop-connection-modal: lone footer chip', () => {
+    const ACCENT = '[data-tc-connection-accent-button="true"]';
+
+    function accentLabels(root: HTMLElement): (string | null)[] {
+        return Array.from(root.querySelectorAll(ACCENT)).map(button => button.textContent);
+    }
+
+    function chipLabels(root: HTMLElement): (string | null)[] {
+        return Array.from(root.querySelectorAll('button[data-tc-button="true"]'))
+            .filter(button => !button.matches(ACCENT))
+            .map(button => button.textContent);
+    }
+
+    function mount(
+        wallet: ReturnType<typeof remoteWallet>,
+        defaultError?: 'connection-declined'
+    ): ReturnType<typeof mountModal> {
+        const h = mountModal(() => (
+            <DesktopConnectionModal
+                wallet={wallet}
+                walletsModalState={OPENED}
+                selectionSource="auto-dapp-directed"
+                onBackClick={() => {}}
+                defaultError={defaultError}
+            />
+        ));
+        dispose = h.dispose;
+        return h;
+    }
+
+    it('turns a lone Desktop chip into an Open Desktop button that opens the app', () => {
+        const wallet = {
+            ...remoteWallet('telegram', ['ios', 'android', 'macos', 'windows', 'linux']),
+            name: 'Telegram'
+        };
+        const h = mount(wallet);
+
+        expect(accentLabels(h.root)).toEqual(['Open Telegram Desktop']);
+        expect(chipLabels(h.root)).toEqual([]);
+
+        h.root.querySelector<HTMLButtonElement>(ACCENT)!.click();
+
+        expect(h.trackWalletSelected.mock.calls).toEqual([
+            ['telegram', 'connection-modal', 'manual', 'trace-1', 'desktop']
+        ]);
+        expect(h.trackConnectionInitiated).toHaveBeenCalledTimes(1);
+        expect((redirectToWallet as Mock).mock.calls[0]![0]).toBe(CONNECT_LINK);
+        expect(accentLabels(h.root)).toEqual([]);
+        expect(chipLabels(h.root)).toEqual(['Retry', 'Get Telegram', 'Mobile']);
+    });
+
+    it('turns a lone Browser Extension chip into an Open Browser Extension button', () => {
+        const wallet = {
+            ...remoteWallet('gramwallet', ['ios', 'android', 'chrome'], {
+                jsBridgeKey: 'gramwallet',
+                injected: true
+            }),
+            name: 'Gram Wallet'
+        };
+        const h = mount(wallet);
+
+        expect(accentLabels(h.root)).toEqual(['Open Gram Wallet Browser Extension']);
+        expect(chipLabels(h.root)).toEqual([]);
+
+        h.root.querySelector<HTMLButtonElement>(ACCENT)!.click();
+
+        expect(h.trackWalletSelected.mock.calls).toEqual([
+            ['gramwallet', 'connection-modal', 'manual', 'trace-1', 'extension']
+        ]);
+        expect(h.connect.mock.calls[1]![0]).toEqual({ jsBridgeKey: 'gramwallet' });
+    });
+
+    it('leaves the bracketed note of the name to the title', () => {
+        const wallet = {
+            ...remoteWallet(WALT_APP_NAME, ['ios', 'android', 'macos', 'windows', 'linux']),
+            name: 'Walt (ex. Wallet)'
+        };
+        const h = mount(wallet);
+
+        expect(accentLabels(h.root)).toEqual(['Open Walt Desktop']);
+        expect(h.root.querySelector('h1')?.textContent).toBe('Walt (ex. Wallet)');
+    });
+
+    it('keeps two chips grey', () => {
+        const wallet = remoteWallet('tonkeeper', ['ios', 'android', 'chrome', 'macos'], {
+            jsBridgeKey: 'tonkeeper',
+            injected: false
+        });
+        const h = mount(wallet);
+
+        expect(accentLabels(h.root)).toEqual([]);
+        expect(chipLabels(h.root)).toEqual(['Browser Extension', 'Desktop']);
+    });
+
+    it('keeps a lone chip grey while an error replaces the QR', () => {
+        const wallet = remoteWallet('telegram', ['ios', 'android', 'macos', 'windows', 'linux']);
+        const h = mount(wallet, 'connection-declined');
+
+        expect(accentLabels(h.root)).toEqual([]);
+        expect(chipLabels(h.root)).toEqual(['Retry', 'Desktop']);
+    });
+});
