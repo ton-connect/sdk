@@ -155,6 +155,7 @@ const walletsList = await tonConnectUI.getWallets();
     injected?: boolean; // true if this wallet is injected to the webpage
     embedded?: boolean; // true if the dapp is opened inside this wallet's browser
     ui?: Record<string, unknown>; // presentation hints from the wallets registry
+    rank?: number; // 1-based place the wallets registry prefers for this wallet in wallet pickers
 }[] 
  */
 ```
@@ -966,6 +967,28 @@ const tonConnectUI = new TonConnectUI({
 
 [See all available options](https://docs.ton.org/applications/ton-connect/api-reference/ui)
 
+#### Show Gram Wallet as a separate button
+On the mobile wallets screen, Gram Wallet is listed in the wallets row like any other wallet. Set `withSecondaryButton` to show it as its own button under "Connect Telegram" instead. Default is `false`.
+
+```ts
+tonConnectUI.uiOptions = {
+        uiPreferences: {
+            withSecondaryButton: true
+        }
+    };
+```
+
+#### Fold the wallets row away
+On the mobile wallets screen, set `isCompact` to fold the wallets row away under the "Connect Telegram" button (and the Gram Wallet button, with `withSecondaryButton`). An "Other wallets" button, which shows the icons of the first wallets of the row, unfolds it in place of the "Or choose another app:" heading. When neither button is shown, or no wallet is left for the row, the row is always shown. The row starts folded each time the modal opens. Default is `false`.
+
+```ts
+tonConnectUI.uiOptions = {
+        uiPreferences: {
+            isCompact: true
+        }
+    };
+```
+
 #### Combine options
 It is possible to change all required options at the same time:
 
@@ -1005,7 +1028,6 @@ UI components:
 | Mobile selected wallet's modal page  | `[data-tc-wallets-modal-connection-mobile="true"]`  | Content of the selected wallet's modal page on mobile.                                                                |
 | Desktop selected wallet's modal page | `[data-tc-wallets-modal-connection-desktop="true"]` | Content of the selected wallet's modal page on desktop.                                                               |
 | Wallets list modal page              | `[data-tc-wallets-modal-list="true"]`               | Content of the modal page with all available wallets list (desktop and mobile).                                       |
-| Info modal page                      | `[data-tc-wallets-modal-info="true"]`               | Content of the modal page with "What is a wallet information".                                                        |
 | Action modal container               | `[data-tc-actions-modal-container="true"]`          | Container of the modal window that opens when you call `sendTransaction` or other action.                             |
 | Confirm transaction modal content    | `[data-tc-confirm-modal="true"]`                    | Content of the modal window asking for confirmation of the action in the wallet.                                      |
 | "Transaction sent" modal content     | `[data-tc-transaction-sent-modal="true"]`           | Content of the modal window informing that the transaction was successfully sent.                                     |
@@ -1047,6 +1069,7 @@ You can customize the list of displayed wallets: change order, exclude wallets o
 
 ### Extend wallets list
 Pass custom wallets array to extend the wallets list. Passed wallets will be added to the end of the original wallets list.  
+A custom wallet can take a `rank`, the 1-based place it asks for in the modal's wallet lists, like the wallets of the registry: `rank: 1` lists it first after the "Recent" and installed wallets, and wallets sharing a rank are shuffled each time the modal opens.
 
 You can define custom wallet with `jsBridgeKey` (wallet = browser extension or there is a wallet dapp browser) or with `bridgeUrl` and `universalLink` pair (for http-connection compatible wallets), or pass all of these properties. 
 ```ts

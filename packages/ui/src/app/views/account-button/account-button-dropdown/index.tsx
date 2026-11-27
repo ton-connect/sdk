@@ -11,7 +11,7 @@ import { logDebug } from 'src/app/utils/log';
 import { AccountButtonDropdownStyled, MenuButtonStyled, UlStyled } from './style';
 
 const MenuItemText: Component<{ children: string } & Translateable> = props => (
-    <Text translationKey={props.translationKey} fontSize="15px" fontWeight="590">
+    <Text translationKey={props.translationKey} fontSize="15px" fontWeight="500">
         {props.children}
     </Text>
 );

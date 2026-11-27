@@ -1,13 +1,14 @@
 {
   "common": {
     "close": "Close",
+    "back": "Back",
     "openWallet": "Open wallet",
     "copyLink": "Copy Link",
     "linkCopied": "Link Copied",
     "copied": "Copied",
     "yourWallet": "Your Wallet",
     "retry": "Retry",
-    "get": "GET",
+    "get": "Get",
     "mobile": "Mobile",
     "browserExtension": "Browser Extension",
     "desktop": "Desktop",
@@ -55,7 +56,8 @@
   "walletItem": {
     "recent": "Recent",
     "installed": "Installed",
-    "new": "New"
+    "viewAllLine1": "View all",
+    "viewAllLine2": "wallets"
   },
   "walletModal": {
     "loading": "Loading wallets",
@@ -65,6 +67,7 @@
       "useTelegramWallet": "Use your Telegram wallet",
       "chooseOtherApplication": "Or choose another app:",
       "chooseApplication": "Choose an app:",
+      "otherWallets": "Other wallets",
       "openLink": "Open Link",
       "scan": "Scan with your mobile wallet"
     },
@@ -75,7 +78,7 @@
     },
     "mobileConnectionModal": {
       "showQR": "Show QR Code",
-      "scanQR": "Scan the QR code below with your phone’s or {{ name }}’s camera",
+      "scanQR": "Scan the QR code with your phone’s or {{ name }}’s camera",
       "missingFeatures": "Please update {{ name }}, your version does not support required features for this dApp",
       "wrongNetwork": "Connected wallet is on a different network. Please switch network in {{ name }} and try again",
       "notSupportedWallet": "{{ name }} doesn’t support the requested action. Please connect another wallet that supports it",
@@ -85,7 +88,7 @@
       "connectionDeclined": "Connection declined"
     },
     "desktopConnectionModal": {
-      "scanQR": "Scan the QR code below with your phone’s or {{ name }}’s camera",
+      "scanQR": "Scan the QR code with your phone’s or {{ name }}’s camera",
       "continueInExtension": "Continue in {{ name }} browser extension…",
       "dontHaveExtension": "Seems you don't have installed {{ name }} browser extension",
       "missingFeatures": "Please update {{ name }}, your version does not support required features for this dApp",
@@ -95,17 +98,10 @@
       "updateWallet": "Update {{ name }}",
       "chooseAnotherWallet": "Choose Another Wallet",
       "continueOnDesktop": "Continue in {{ name }} on desktop…",
-      "connectionDeclined": "Connection declined"
-    },
-    "infoModal": {
-      "whatIsAWallet": "What is a wallet",
-      "secureDigitalAssets": "Secure digital assets storage",
-      "walletProtects": "A wallet protects and manages your digital assets including TON, tokens and collectables.",
-      "controlIdentity": "Control your Web3 identity",
-      "manageIdentity": "Manage your digital identity and access decentralized applications with ease. Maintain control over your data and engage securely in the blockchain ecosystem.",
-      "effortlessCryptoTransactions": "Effortless crypto transactions",
-      "easilySend": "Easily send, receive, monitor your cryptocurrencies. Streamline your operations with decentralized applications.",
-      "getAWallet": "Get a Wallet"
+      "connectionDeclined": "Connection declined",
+      "openDesktop": "Open {{ name }} Desktop",
+      "openExtension": "Open {{ name }} Browser Extension",
+      "openInTelegramDesktop": "Open in Telegram Desktop"
     },
     "restoreModal": {
       "title": "Restore",

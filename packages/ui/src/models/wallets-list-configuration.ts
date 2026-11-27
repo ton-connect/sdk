@@ -9,7 +9,10 @@ export type WalletsListConfiguration = {
      * Extra wallets to append to the picker. Use this for wallets not yet
      * in the canonical
      * [wallets-list registry](https://github.com/ton-connect/wallets-list).
-     * Entries appear after the registry wallets.
+     * Entries appear after the registry wallets, unless they carry a
+     * `rank`, which places them among the registry wallets as it places
+     * those. An entry named like a registry wallet replaces that wallet,
+     * rank included.
      */
     includeWallets?: UIWallet[];
 };

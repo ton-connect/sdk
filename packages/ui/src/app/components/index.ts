@@ -13,3 +13,4 @@ export { FourWalletsItem } from './wallet-item/four-wallets';
 export { WalletLabeledItem } from './wallet-item/wallet-labeled-item';
 export { ScrollContainer } from './scroll-container';
 export { Link } from './link';
+export { WalletStatusIcon } from './wallet-status-icon';

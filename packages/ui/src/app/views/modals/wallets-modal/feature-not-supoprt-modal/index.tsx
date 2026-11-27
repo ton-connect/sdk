@@ -35,6 +35,7 @@ import { checkRequiredWalletFeatures, Wallet } from '@tonconnect/sdk';
 import { RestoreInfoModal } from './restore-info-modal';
 import { ChooseSupportedFeatureWalletsModal } from 'src/models/wallets-modal';
 import { Translation } from 'src/app/components/typography/Translation';
+import { stripWalletNameNote } from 'src/app/utils/wallets';
 
 interface DesktopFeatureNotSupportModalProps {
     walletsList: UIWalletInfo[];
@@ -133,10 +134,12 @@ export const DesktopFeatureNotSupportModal: Component<
 
                         <DescriptionStyled
                             translationKey="walletModal.featureNotSupported.disconnect.description"
-                            translationValues={{ name: selectedWallet()!.name }}
+                            translationValues={{
+                                name: stripWalletNameNote(selectedWallet()!.name)
+                            }}
                         >
                             You will be disconnected from your current wallet and redirected to
-                            connect {selectedWallet()?.name}.
+                            connect {stripWalletNameNote(selectedWallet()?.name ?? '')}.
                         </DescriptionStyled>
 
                         <DisconnectButtonStyled onClick={() => handleDisconnect()}>

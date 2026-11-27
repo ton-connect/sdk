@@ -7,6 +7,7 @@ export const H2Styled = styled.h2`
     line-height: 22px;
 
     text-align: center;
+    text-wrap: balance;
 
     color: ${props => props.theme!.colors.text.secondary};
 

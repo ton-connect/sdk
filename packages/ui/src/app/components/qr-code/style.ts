@@ -2,11 +2,12 @@ import { styled } from 'solid-styled-components';
 import { Image } from 'src/app/components';
 import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
 import { toPx } from 'src/app/utils/css';
-import { mediaNotTouch, mediaTouch } from 'src/app/styles/media';
+import { mediaNotTouch, mediaTouch, sheetLayout } from 'src/app/styles/media';
+import { PRESS_TRANSITION } from 'src/app/styles/motion';
 
 const backgroundBorders: BorderRadiusConfig = {
-    m: '16px',
-    s: '12px',
+    m: '28px',
+    s: '14px',
     none: '0'
 };
 
@@ -16,12 +17,20 @@ const imageBorders: BorderRadiusConfig = {
     none: '0'
 };
 
+/** The side of the code where the box is no wider than it needs to be. */
 export const qrNormalSize = 256;
 export const imgSizeDefault = 60;
 
 export const picSizeDefault = 48;
 
-const qrPaddingTop = 24;
+/** The white margin around the code, the same on every side. */
+const qrPadding = 16;
+// With the copy button in the corner the margin is wide enough to hold it clear of the code
+const qrPaddingWithCopy = 40;
+// In dialogs the box stops a little wider than the default code, with room for the copy button
+const qrBoxMaxSize = qrNormalSize + qrPaddingWithCopy * 2;
+// On phones the code is a little smaller than the default, centred in the sheet
+const qrSheetBoxSize = 272;
 
 export const CopyIconButton = styled.div`
     width: 52px;
@@ -34,7 +43,7 @@ export const CopyIconButton = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.125s ease-in-out;
+    transition: ${PRESS_TRANSITION};
 `;
 
 export const QrCodeBackground = styled.button`
@@ -44,9 +53,19 @@ export const QrCodeBackground = styled.button`
     position: relative;
     background-color: ${props => props.theme!.colors.background.qr};
     border-radius: ${props => backgroundBorders[props.theme!.borderRadius]};
-    padding: ${toPx(qrPaddingTop)} 0;
-    height: ${toPx(qrNormalSize + qrPaddingTop * 2)};
+    padding: ${toPx(qrPadding)};
+
+    &[data-tc-qr-copy='true'] {
+        padding: ${toPx(qrPaddingWithCopy)};
+    }
     width: 100%;
+    max-width: ${toPx(qrBoxMaxSize)};
+    aspect-ratio: 1;
+    margin: 0 auto;
+
+    ${sheetLayout} {
+        max-width: ${toPx(qrSheetBoxSize)};
+    }
 
     overflow: hidden;
     cursor: pointer;
@@ -75,8 +94,13 @@ export const QrCodeBackground = styled.button`
     }
 `;
 
+/**
+ * The code at its drawn size, scaled to fit by a transform. It must not shrink in the layout first:
+ * squeezed, the code would be narrower than the space its logo is placed in, and the logo off-centre.
+ */
 export const QrCodeWrapper = styled.div`
     position: relative;
+    flex-shrink: 0;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -108,8 +132,13 @@ export const ImageBackground = styled.div`
     justify-content: center;
 `;
 
+/** Centred on the cleared middle even when it is larger than it, as the diamond's box is. */
 export const LogoStyled = styled.div`
+    position: absolute;
+    top: 50%;
+    left: 50%;
     display: flex;
+    transform: translate(-50%, -50%);
 `;
 
 export const ImageStyled = styled(Image)<{ size: number }>`

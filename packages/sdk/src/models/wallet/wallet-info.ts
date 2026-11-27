@@ -37,6 +37,14 @@ export interface WalletInfoBase {
      */
     ui?: WalletInfoUI;
 
+    /**
+     * 1-based position the registry prefers for the wallet in wallet pickers. Wallets sharing a
+     * rank are ordered randomly each time a picker opens, and wallets without one keep their
+     * registry order around the ranked ones. Always a positive integer: the SDK drops any other
+     * value the registry gives.
+     */
+    rank?: number;
+
     /** Operating systems / browsers the wallet supports. */
     platforms: (
         | 'ios'
@@ -153,6 +161,7 @@ export interface WalletInfoDTO {
 
     deepLink?: string;
     ui?: WalletInfoUI;
+    rank?: number;
     bridge: (WalletInfoBridgeRemoteDTO | WalletInfoBridgeInjectedDTO)[];
 }
 

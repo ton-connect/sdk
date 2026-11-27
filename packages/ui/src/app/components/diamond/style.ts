@@ -29,7 +29,7 @@ export const DiamondSlotStyled = styled.div`
     height: 100%;
 `;
 
-// The transition lasts `HOVER_TRANSITION_DURATION` from `renderer.ts`
+// Its scale while pressed is a spring that `renderer.ts` steps frame by frame, so it has no transition
 export const diamondCanvasClass = css`
     touch-action: none;
     cursor: pointer;
@@ -38,6 +38,4 @@ export const diamondCanvasClass = css`
     -webkit-touch-callout: none;
 
     display: block;
-
-    transition: transform 0.2s ease-out;
 `;

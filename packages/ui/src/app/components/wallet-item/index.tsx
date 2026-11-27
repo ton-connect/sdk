@@ -1,7 +1,7 @@
-import { Component, createEffect, JSXElement, onMount } from 'solid-js';
+import { Component, JSXElement } from 'solid-js';
 import { BadgeStyled, ImageStyled, StyledSecondLine, StyledText, WalletItemStyled } from './style';
 import { Styleable } from 'src/app/models/styleable';
-import { splitWalletName } from 'src/app/utils/wallets';
+import { stripWalletNameNote } from 'src/app/utils/wallets';
 
 export interface WalletItemProps extends Styleable {
     icon: string | JSXElement;
@@ -9,43 +9,17 @@ export interface WalletItemProps extends Styleable {
     secondLine?: string;
     secondLineColorPrimary?: boolean;
     badgeUrl?: string;
+    /** A soft glow behind the icon on the phone sheet (Gram Wallet). */
+    glow?: boolean;
+    /** A shine passing over the icon now and then (Gram Wallet and Telegram). */
+    shine?: boolean;
+    /** The icon is drawn as a circle (Telegram). */
+    round?: boolean;
     onClick: () => void;
 }
 
 export const WalletItem: Component<WalletItemProps> = props => {
-    let ctxRef: HTMLDivElement | null = null;
-
-    // adjust letter spacing to fit the wallet name in the item
-    const adjustLetterSpacing = (): void => {
-        // we can't set `ref` on the `StyledText` directly, so we use a context ref
-        const name = ctxRef?.querySelector('div');
-        if (name && name.scrollWidth > name.clientWidth) {
-            let spacing = 0;
-            const minSpacing = -0.4;
-            const step = 0.05;
-            // reduce letter spacing until the text fits
-            while (name.scrollWidth > name.clientWidth && spacing >= minSpacing) {
-                spacing -= step;
-                name.style.letterSpacing = `${spacing}px`;
-            }
-            // adjust spacing one more time to make sure the text fits
-            if (spacing !== 0) {
-                spacing -= step;
-                name.style.letterSpacing = `${spacing}px`;
-            }
-        }
-    };
-
-    const nameParts = (): ReturnType<typeof splitWalletName> => splitWalletName(props.name);
-    const secondLine = (): string | undefined => props.secondLine ?? nameParts().note;
-    const secondLineColorPrimary = (): boolean =>
-        props.secondLine !== undefined && (props.secondLineColorPrimary ?? true);
-
-    onMount(() => adjustLetterSpacing());
-
-    createEffect(() => {
-        adjustLetterSpacing();
-    });
+    const name = (): string => stripWalletNameNote(props.name);
 
     return (
         <WalletItemStyled
@@ -56,17 +30,18 @@ export const WalletItem: Component<WalletItemProps> = props => {
             {typeof props.icon === 'string' ? (
                 <ImageStyled
                     src={props.icon}
+                    glow={!!props.glow}
+                    shine={!!props.shine}
+                    round={!!props.round}
                     badge={props.badgeUrl && <BadgeStyled src={props.badgeUrl} />}
                 />
             ) : (
                 props.icon
             )}
-            <div ref={el => (ctxRef = el)}>
-                <StyledText>{nameParts().name}</StyledText>
-            </div>
-            {secondLine() && (
-                <StyledSecondLine colorPrimary={secondLineColorPrimary()}>
-                    {secondLine()}
+            <StyledText>{name()}</StyledText>
+            {props.secondLine && (
+                <StyledSecondLine colorPrimary={props.secondLineColorPrimary ?? true}>
+                    {props.secondLine}
                 </StyledSecondLine>
             )}
         </WalletItemStyled>

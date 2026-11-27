@@ -1,6 +1,7 @@
 import { styled } from 'solid-styled-components';
 import { WalletImage } from './wallet-image';
 import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
+import { chip } from 'src/app/styles/chip';
 
 const containerBorders: BorderRadiusConfig = {
     m: '16px',
@@ -14,13 +15,17 @@ const walletBorders: BorderRadiusConfig = {
     none: '0'
 };
 
+/**
+ * The folder of the "View all wallets" tile: the translucent pill of the secondary buttons, so the
+ * sheet shows through it instead of a solid grey square that clashes with some backgrounds.
+ */
 export const FourWalletsCard = styled.div`
     width: 60px;
     height: 60px;
     padding: 8px;
     margin-bottom: 8px;
     border-radius: ${props => containerBorders[props.theme!.borderRadius]};
-    background-color: ${props => props.theme!.colors.background.tint};
+    ${props => chip(props.theme!, 0.5)}
     display: grid;
     grid-template: 1fr 1fr / 1fr 1fr;
     gap: 4px;

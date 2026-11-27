@@ -59,3 +59,10 @@ export function mediaMinMax(pxMin: number, pxMax: number): string {
 export const mediaTouch = '@media (hover: none)';
 
 export const mediaNotTouch = '@media not all and (hover: none)';
+
+/**
+ * Selector for styles of the phone sheet. The modal marks itself with the layout its content was
+ * chosen for (`isMobile()`), so a phone screen is never drawn inside the desktop dialog, as it
+ * would be on a tablet or a phone held sideways if the styles followed the width alone.
+ */
+export const sheetLayout = "[data-tc-layout='sheet'] &";

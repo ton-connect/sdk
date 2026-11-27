@@ -18,6 +18,7 @@ import { ErrorSignDataNotification } from './error-sign-data-notification';
 import { SuccessSignDataNotification } from './success-sign-data-notification';
 import { SuccessSignMessageNotification } from './success-sign-message-notification';
 import { ErrorSignMessageNotification } from './error-sign-message-notification';
+import { EASE_STANDARD } from 'src/app/styles/motion';
 
 export interface NotificationsProps extends Styleable {}
 
@@ -35,7 +36,8 @@ export const Notifications: Component<NotificationsProps> = props => {
                             { opacity: 1, transform: 'translateY(-8px)' }
                         ],
                         {
-                            duration: 200
+                            duration: 260,
+                            easing: EASE_STANDARD
                         }
                     );
                 }}
@@ -47,7 +49,8 @@ export const Notifications: Component<NotificationsProps> = props => {
                             { opacity: 0, transform: 'translateY(-30px)' }
                         ],
                         {
-                            duration: 200
+                            duration: 260,
+                            easing: EASE_STANDARD
                         }
                     );
                     a.finished.then(done);

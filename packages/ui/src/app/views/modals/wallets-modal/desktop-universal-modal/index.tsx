@@ -16,6 +16,7 @@ import { UIWalletInfo } from 'src/app/models/ui-wallet-info';
 import { addReturnStrategy } from 'src/app/utils/url-strategy-helpers';
 import { bridgesIsEqual, getUniqueBridges } from 'src/app/utils/bridge';
 import { WalletsModalState } from 'src/models';
+import { orderWalletsByRank } from 'src/app/utils/wallets';
 
 interface DesktopUniversalModalProps {
     additionalRequest: ConnectAdditionalRequest;
@@ -47,7 +48,10 @@ export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = prop
     );
 
     const supportedWallets = createMemo(
-        () => props.walletsList.filter(wallet => wallet.isSupportRequiredFeatures),
+        () =>
+            orderWalletsByRank(
+                props.walletsList.filter(wallet => wallet.isSupportRequiredFeatures)
+            ),
         null
     );
 
@@ -57,9 +61,18 @@ export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = prop
         wallets: visibleWallets()
     });
 
+    /**
+     * The tile previews the wallets that follow the visible ones on All Wallets, which lists the
+     * supported wallets first and the others after them, each by rank.
+     */
     const fourWalletsItem = createMemo(
         () =>
-            props.walletsList
+            [
+                ...supportedWallets(),
+                ...orderWalletsByRank(
+                    props.walletsList.filter(wallet => !wallet.isSupportRequiredFeatures)
+                )
+            ]
                 .filter(wallet => !visibleWallets().find(w => w.appName === wallet.appName))
                 .slice(0, 4),
         null
@@ -73,14 +86,14 @@ export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = prop
             <H1 translationKey="walletModal.desktopUniversalModal.connectYourWallet">
                 Connect your wallet
             </H1>
-            <H2Styled translationKey="walletModal.desktopUniversalModal.scan">
-                Scan with your mobile wallet
-            </H2Styled>
             <QRCodeStyled
                 sourceUrl={addReturnStrategy(request()!, 'none')}
                 disableCopy={popupOpened()}
                 logo={<QrDiamond />}
             />
+            <H2Styled translationKey="walletModal.desktopUniversalModal.scan">
+                Scan with your mobile wallet
+            </H2Styled>
             <H2AvailableWalletsStyled translationKey="walletModal.desktopUniversalModal.availableWallets">
                 Available wallets
             </H2AvailableWalletsStyled>
@@ -96,8 +109,6 @@ export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = prop
                     )}
                 </For>
                 <FourWalletsItem
-                    labelLine1="View all"
-                    labelLine2="wallets"
                     images={fourWalletsItem().map(i => i.imageUrl)}
                     onClick={() => props.onSelectAllWallets()}
                 />

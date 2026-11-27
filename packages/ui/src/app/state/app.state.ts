@@ -21,6 +21,10 @@ export type AppState = {
     twaReturnUrl: `${string}://${string}` | undefined;
     preferredWalletAppName: string | undefined;
     enableAndroidBackHandler: boolean;
+    /** `uiPreferences.withSecondaryButton`: Gram Wallet gets its own button on mobile. */
+    withSecondaryButton: boolean;
+    /** `uiPreferences.isCompact`: the mobile wallets row is folded behind a toggle. */
+    isCompact: boolean;
     walletsRequiredFeatures: RequiredFeatures | undefined;
     walletsPreferredFeatures: RequiredFeatures | undefined;
 };
@@ -31,5 +35,7 @@ export const [appState, setAppState] = createStore<AppState>({
     returnStrategy: 'back',
     twaReturnUrl: undefined,
     walletsListConfiguration: {},
-    enableAndroidBackHandler: true
+    enableAndroidBackHandler: true,
+    withSecondaryButton: false,
+    isCompact: false
 } as AppState);

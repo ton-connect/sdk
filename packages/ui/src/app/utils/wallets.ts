@@ -1,4 +1,4 @@
-import { WalletInfo, TonConnect } from '@tonconnect/sdk';
+import { WalletInfo, TonConnect, isWalletInfoCurrentlyInjected } from '@tonconnect/sdk';
 import { UIWallet } from 'src/models/ui-wallet';
 import { WalletsListConfiguration } from 'src/models';
 import { mergeConcat } from 'src/app/utils/array';
@@ -58,14 +58,85 @@ export function eqWalletName(wallet1: { name: string; appName: string }, name?: 
 }
 
 /**
- * The wallet tile fits one line of name, so a bracketed note such as "(ex. Wallet)" moves to the
- * second line.
+ * The wallet tile fits one line of name and keeps its second line for labels such as "Recent", so
+ * a trailing bracketed note such as "(ex. Wallet)" is dropped from the name the tile shows. Labels
+ * that put the name inside a phrase, such as "Open Walt Desktop", drop it too.
  */
-export function splitWalletName(name: string): { name: string; note?: string } {
-    const match = /^(.+?)\s*\(([^()]+)\)$/.exec(name);
-    if (!match?.[1] || !match[2]) {
-        return { name };
+export function stripWalletNameNote(name: string): string {
+    const match = /^(.+?)\s*\([^()]+\)$/.exec(name);
+    return match?.[1] ?? name;
+}
+
+/** The wallet's rank, or null when it has none: wallets from includeWallets skip the SDK's check. */
+function getWalletRank(wallet: { rank?: number }): number | null {
+    const rank = wallet.rank;
+    return typeof rank === 'number' && Number.isInteger(rank) && rank >= 1 ? rank : null;
+}
+
+/**
+ * Puts the wallets that share a rank in a random order among the places they hold, leaving every
+ * other wallet where it is. Of two such wallets, the second comes first when `random()` is below
+ * 0.5, and any number of them is shuffled fairly.
+ */
+export function shuffleRankTies<T extends { rank?: number }>(
+    wallets: readonly T[],
+    random: () => number = Math.random
+): T[] {
+    const placesByRank = new Map<number, number[]>();
+    wallets.forEach((wallet, place) => {
+        const rank = getWalletRank(wallet);
+        if (rank !== null) {
+            placesByRank.set(rank, (placesByRank.get(rank) ?? []).concat(place));
+        }
+    });
+
+    const shuffled = wallets.slice();
+    placesByRank.forEach(places => {
+        for (let i = places.length - 1; i > 0; i--) {
+            const j = Math.floor(random() * (i + 1));
+            const [a, b] = [places[i]!, places[j]!];
+            [shuffled[a], shuffled[b]] = [shuffled[b]!, shuffled[a]!];
+        }
+    });
+
+    return shuffled;
+}
+
+/**
+ * Orders the wallets a screen lists by their registry rank, the 1-based place each asks for in
+ * that list. The wallets the modal pins to the front, the "Recent" one and those injected into
+ * the page, keep their places there. A wallet whose place is taken gets the next free one, so
+ * wallets sharing a rank follow each other in their incoming order, and wallets without a rank
+ * fill the free places in theirs. Without ranks, the order is left as it is.
+ */
+export function orderWalletsByRank<T extends WalletInfo & { isPreferred?: boolean }>(
+    wallets: readonly T[]
+): T[] {
+    const firstUnpinned = wallets.findIndex(
+        wallet => !wallet.isPreferred && !isWalletInfoCurrentlyInjected(wallet)
+    );
+    const pinnedCount = firstUnpinned === -1 ? wallets.length : firstUnpinned;
+    const others = wallets.slice(pinnedCount);
+
+    const ranked = others
+        .filter(wallet => getWalletRank(wallet) !== null)
+        .sort((a, b) => getWalletRank(a)! - getWalletRank(b)!);
+    if (!ranked.length) {
+        return wallets.slice();
+    }
+    const unranked = others.filter(wallet => getWalletRank(wallet) === null);
+
+    const ordered = wallets.slice(0, pinnedCount);
+    let nextRanked = 0;
+    let nextUnranked = 0;
+    while (ordered.length < wallets.length) {
+        const rankedWallet = ranked[nextRanked];
+        const isRankedWalletDue =
+            !!rankedWallet &&
+            (getWalletRank(rankedWallet)! <= ordered.length + 1 ||
+                nextUnranked === unranked.length);
+        ordered.push(isRankedWalletDue ? ranked[nextRanked++]! : unranked[nextUnranked++]!);
     }
 
-    return { name: match[1], note: match[2] };
+    return ordered;
 }

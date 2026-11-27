@@ -98,6 +98,47 @@ describe('Wallets list manager tests', () => {
         expect(parseUi(1)).toEqual({ isButtonTransparent: false });
     });
 
+    describe('rank', () => {
+        const parseWallet = (rank: unknown) =>
+            walletsListManager['walletConfigDTOListToWalletConfigList']([
+                { ...FALLBACK_WALLETS_LIST[0]!, rank } as WalletInfoDTO
+            ])[0]!;
+
+        it.each([1, 3, 12])('Should keep rank %s', rank => {
+            expect(parseWallet(rank).rank).toBe(rank);
+        });
+
+        it.each([undefined, null, 0, -1, 1.5, NaN, Infinity, '3', true, {}])(
+            'Should drop rank %s',
+            rank => {
+                expect(parseWallet(rank)).not.toHaveProperty('rank');
+            }
+        );
+
+        it('Should keep a wallet whose rank is wrong in the wallets list', async () => {
+            const [tonkeeper, ...rest] = defaultWalletsList.source;
+            mockFetch([{ ...tonkeeper, rank: 'first' }, ...rest]);
+
+            const walletsList = await walletsListManager.getWallets();
+
+            expect(logError).toBeCalledTimes(0);
+            expect(walletsList).toEqual(defaultWalletsList.parsed);
+            expect(walletsList[0]).not.toHaveProperty('rank');
+        });
+
+        it('Should pass a valid rank through the wallets list', async () => {
+            const [tonkeeper, ...rest] = defaultWalletsList.source;
+            mockFetch([...rest, { ...tonkeeper, rank: 2 }]);
+
+            const walletsList = await walletsListManager.getWallets();
+
+            expect(walletsList.map(wallet => [wallet.appName, wallet.rank])).toEqual([
+                ...rest.map(wallet => [wallet.app_name, undefined]),
+                ['tonkeeper', 2]
+            ]);
+        });
+    });
+
     it('Should parse custom wallets list', async () => {
         const walletsListSourceString = process.env.VITE_WALLETS_LIST;
 

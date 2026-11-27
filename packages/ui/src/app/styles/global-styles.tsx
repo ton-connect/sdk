@@ -1,12 +1,15 @@
 /** @jsxImportSource solid-js */
 import { JSXElement } from 'solid-js';
 import { createGlobalStyles } from 'solid-styled-components';
+import { FONT_FAMILY, injectFontFaces } from 'src/app/styles/fonts';
 
 export const globalStylesTag = 'tc-root';
 export const disableScrollClass = 'tc-disable-scroll';
 export const usingMouseClass = 'tc-using-mouse';
 
 export const GlobalStyles = (): JSXElement => {
+    injectFontFaces();
+
     document.body.addEventListener('mousedown', () => document.body.classList.add(usingMouseClass));
 
     document.body.addEventListener('keydown', event => {
@@ -21,7 +24,7 @@ export const GlobalStyles = (): JSXElement => {
         padding: 0;
         box-sizing: border-box;
         
-        font-family: -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica Neue', Arial, Tahoma, Verdana, sans-serif;
+        font-family: '${FONT_FAMILY}', -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica Neue', Arial, Tahoma, Verdana, sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;        
         -webkit-tap-highlight-color: transparent;

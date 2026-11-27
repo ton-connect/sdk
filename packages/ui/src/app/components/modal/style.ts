@@ -1,14 +1,27 @@
-import { css, styled } from 'solid-styled-components';
+import { css, DefaultTheme, styled } from 'solid-styled-components';
+import { sheetIconButton } from 'src/app/components/icon-button/style';
 import { IconButton } from 'src/app/components/icon-button';
-import { media } from 'src/app/styles/media';
 import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
-import { rgba } from 'src/app/utils/css';
+import { THEME } from 'src/models/THEME';
+import { sheetLayout } from 'src/app/styles/media';
 
 export const borders: BorderRadiusConfig = {
     m: '24px',
     s: '16px',
     none: '0'
 };
+
+/** Corners of the phone sheet, which floats clear of the screen edges like Telegram's sheets. */
+export const sheetBorders: BorderRadiusConfig = {
+    m: '40px',
+    s: '28px',
+    none: '0'
+};
+
+/** Dims the dApp page under the modal; lighter in light themes, where the glass is pale. */
+export function overlayColor(theme: DefaultTheme): string {
+    return theme.theme === THEME.DARK ? 'rgba(0, 0, 0, 0.42)' : 'rgba(10, 14, 22, 0.2)';
+}
 
 export const ModalBackgroundStyled = styled.div`
     display: flex;
@@ -18,26 +31,29 @@ export const ModalBackgroundStyled = styled.div`
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: ${props => overlayColor(props.theme!)};
     padding: 20px 0;
     overflow-y: auto;
 
-    ${media('mobile')} {
+    &[data-tc-layout='sheet'] {
         padding-bottom: 0;
     }
 `;
 
+/**
+ * On phones the sheet floats 8px above the bottom edge, as iOS sheets do: the home indicator sits
+ * over its bottom padding rather than pushing the whole sheet up by the safe area.
+ */
 export const ModalWrapperClass = css`
-    box-shadow:
-        0 4px 16px rgba(0, 0, 0, 0.08),
-        0 16px 64px rgba(0, 0, 0, 0.16);
     width: fit-content;
     margin: auto;
+    overflow: hidden;
 
-    ${media('mobile')} {
-        width: 100%;
+    ${sheetLayout} {
+        width: calc(100% - 16px);
+        max-width: 440px;
         height: fit-content;
-        margin: auto 0 0 0;
+        margin: auto auto 8px;
     }
 `;
 
@@ -47,15 +63,9 @@ export const ModalBodyStyled = styled.div`
     width: 416px;
     padding: 44px 56px 24px;
 
-    box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.04);
-
-    background-color: ${props => props.theme!.colors.background.primary};
-    border-radius: ${props => borders[props.theme!.borderRadius]};
-
-    ${media('mobile')} {
+    ${sheetLayout} {
         width: 100%;
-        border-radius: ${props => borders[props.theme!.borderRadius]}
-            ${props => borders[props.theme!.borderRadius]} 0 0;
+        padding-top: 20px;
     }
 `;
 
@@ -63,17 +73,8 @@ export const CloseButtonStyled = styled(IconButton)`
     position: absolute;
     right: 16px;
     top: 16px;
-`;
 
-export const ModalFooterStyled = styled.div`
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 16px 16px 18px;
-    border-radius: 0 0 ${props => borders[props.theme!.borderRadius]}
-        ${props => borders[props.theme!.borderRadius]};
-`;
-
-export const QuestionButtonStyled = styled(IconButton)`
-    background-color: ${props => rgba(props.theme!.colors.icon.secondary, 0.12)};
+    ${sheetLayout} {
+        ${sheetIconButton}
+    }
 `;

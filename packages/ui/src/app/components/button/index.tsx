@@ -5,7 +5,7 @@ import { WithDataAttributes } from 'src/app/models/with-data-attributes';
 import { useDataAttributes } from 'src/app/hooks/use-data-attributes';
 
 export interface ButtonProps extends Styleable, WithDataAttributes {
-    appearance?: 'primary' | 'flat' | 'secondary';
+    appearance?: 'primary' | 'flat' | 'secondary' | 'filled' | 'plain';
     scale?: 's' | 'm';
     leftIcon?: JSXElement;
     rightIcon?: JSXElement;
