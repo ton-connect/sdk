@@ -1,5 +1,15 @@
 # Changelog @tonconnect/sdk
 
+## 5.1.0
+
+### Minor Changes
+
+- 00a2f9e: `WalletInfo` gains an optional `rank` field from the wallets registry, and the wallets
+  modal places wallets by it in the mobile wallets row, the desktop "Available wallets" list, the
+  "View all wallets" tile and the All Wallets screen, shuffling the wallets that share a rank each
+  time it opens. The "View all wallets" tile now previews the supported wallets ahead of the others,
+  as All Wallets lists them.
+
 ## 5.0.2
 
 ### Patch Changes

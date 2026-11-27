@@ -1,5 +1,24 @@
 # Changelog @tonconnect/ui-react
 
+## 6.0.0
+
+### Major Changes
+
+- The redesigned connect modal is a new major version: dApps that do not set
+  `uiPreferences.withSecondaryButton` no longer get a separate Gram Wallet button under "Connect
+  Telegram", and the "What is a wallet" screen and the modal footer are gone.
+
+### Patch Changes
+
+- Updated dependencies [00a2f9e]
+- Updated dependencies
+- Updated dependencies [00a2f9e]
+- Updated dependencies [00a2f9e]
+- Updated dependencies [00a2f9e]
+- Updated dependencies [00a2f9e]
+- Updated dependencies [00a2f9e]
+    - @tonconnect/ui@6.0.0
+
 ## 5.0.4
 
 ### Patch Changes
