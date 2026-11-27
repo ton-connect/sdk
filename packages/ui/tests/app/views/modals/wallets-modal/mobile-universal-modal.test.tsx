@@ -2,8 +2,12 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { MobileUniversalModal } from 'src/app/views/modals/wallets-modal/mobile-universal-modal';
 import { redirectToWallet } from 'src/app/utils/url-strategy-helpers';
-import { lastVisibleWalletsInfo } from 'src/app/state/modals-state';
+import { lastVisibleWalletsInfo, setWalletsModalState } from 'src/app/state/modals-state';
 import { setAppState } from 'src/app/state/app.state';
+import { WalletsModal } from 'src/app/views/modals/wallets-modal/wallets-modal';
+import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
+import { updateIsMobile } from 'src/app/hooks/isMobile';
+import { TonConnectUI } from 'src/ton-connect-ui';
 import { UIWalletInfo } from 'src/app/models/ui-wallet-info';
 import { clickButton, mountModal, OPENED, remoteWallet, Recorders } from './harness';
 
@@ -25,7 +29,7 @@ vi.mock('src/app/utils/copy-to-clipboard', () => ({
 let dispose: (() => void) | undefined;
 afterEach(() => {
     dispose?.();
-    setAppState({ withSecondaryButton: false });
+    setAppState({ withSecondaryButton: false, isCompact: false });
     vi.clearAllMocks();
 });
 
@@ -272,5 +276,175 @@ describe('views/mobile-universal-modal: row heading', () => {
         dispose = h.dispose;
 
         expect(h.root.querySelector('[data-tc-h2="true"]')?.textContent).toBe(heading);
+    });
+});
+
+describe('views/mobile-universal-modal: compact row', () => {
+    const [telegram, gram, tonkeeper, mytonwallet] = [
+        'telegram',
+        'gramwallet',
+        'tonkeeper',
+        'mytonwallet'
+    ].map(supported);
+
+    function toggle(root: HTMLElement): HTMLButtonElement | null {
+        return root.querySelector<HTMLButtonElement>('[data-tc-wallets-row-toggle="true"]');
+    }
+
+    /** Whether the tiles are hidden, which also keeps them out of the tab order. */
+    function isRowHidden(root: HTMLElement): boolean {
+        const tile = root.querySelector('[data-tc-wallet-item="true"]')!;
+        return getComputedStyle(tile).visibility === 'hidden';
+    }
+
+    it('shows the heading and the row unless the option is set', () => {
+        const root = mountList([telegram!, tonkeeper!, mytonwallet!]);
+
+        expect(toggle(root)).toBeNull();
+        expect(root.querySelector('[data-tc-h2="true"]')?.textContent).toBe(
+            'Or choose another app:'
+        );
+        expect(isRowHidden(root)).toBe(false);
+    });
+
+    it('folds the row behind a toggle that replaces the heading', () => {
+        setAppState({ isCompact: true });
+        const root = mountList([telegram!, tonkeeper!, mytonwallet!]);
+        const button = toggle(root)!;
+
+        expect(button.type).toBe('button');
+        expect(button.textContent).toBe('Or choose another app');
+        expect(button.getAttribute('aria-expanded')).toBe('false');
+        const row = document.getElementById(button.getAttribute('aria-controls')!)!;
+        expect(row.querySelectorAll('[data-tc-wallet-item="true"]')).toHaveLength(2);
+        expect(isRowHidden(root)).toBe(true);
+        expect(lastVisibleWalletsInfo()).toEqual({
+            walletsMenu: 'main_screen',
+            wallets: [telegram]
+        });
+    });
+
+    it('unfolds the row on click, and folds it back on the next one', () => {
+        setAppState({ isCompact: true });
+        const root = mountList([telegram!, tonkeeper!, mytonwallet!]);
+
+        toggle(root)!.click();
+
+        expect(toggle(root)!.getAttribute('aria-expanded')).toBe('true');
+        expect(isRowHidden(root)).toBe(false);
+        expect(lastVisibleWalletsInfo()).toEqual({
+            walletsMenu: 'main_screen',
+            wallets: [telegram, tonkeeper, mytonwallet]
+        });
+
+        toggle(root)!.click();
+
+        expect(toggle(root)!.getAttribute('aria-expanded')).toBe('false');
+        expect(isRowHidden(root)).toBe(true);
+        expect(lastVisibleWalletsInfo().wallets).toEqual([telegram]);
+    });
+
+    it('shows the row as usual when no button is shown above it', () => {
+        setAppState({ isCompact: true });
+        const root = mountList([
+            { ...telegram!, isSupportRequiredFeatures: false },
+            tonkeeper!,
+            mytonwallet!
+        ]);
+
+        expect(toggle(root)).toBeNull();
+        expect(root.querySelector('[data-tc-h2="true"]')?.textContent).toBe('Choose an app:');
+        expect(isRowHidden(root)).toBe(false);
+    });
+
+    it('offers no toggle when the row has no tile to unfold', () => {
+        setAppState({ isCompact: true });
+        const root = mountList([telegram!, { ...tonkeeper!, isSupportRequiredFeatures: false }]);
+
+        expect(toggle(root)).toBeNull();
+    });
+
+    it.each([false, true])(
+        'reports every tile the row draws, with no View all tile (isCompact %s)',
+        isCompact => {
+            setAppState({ isCompact });
+            const others = ['a', 'b', 'c', 'd', 'e'].map(supported);
+            const root = mountList([telegram!, ...others]);
+
+            toggle(root)?.click();
+
+            expect(lastVisibleWalletsInfo().wallets).toEqual([telegram, ...others]);
+        }
+    );
+
+    it('folds the row under the Gram Wallet button with withSecondaryButton', () => {
+        setAppState({ isCompact: true, withSecondaryButton: true });
+        const root = mountList([telegram!, gram!, tonkeeper!, mytonwallet!]);
+
+        expect(buttonLabels(root)).toEqual(['Connect Telegram', 'gramwallet']);
+        expect(toggle(root)!.getAttribute('aria-expanded')).toBe('false');
+        expect(isRowHidden(root)).toBe(true);
+        expect(lastVisibleWalletsInfo().wallets).toEqual([telegram, gram]);
+    });
+});
+
+describe('views/mobile-universal-modal: compact row inside the modal', () => {
+    const wallets = ['telegram', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'].map(supported);
+    const desktopWidth = window.innerWidth;
+
+    async function settle(): Promise<void> {
+        await new Promise(resolve => setTimeout(resolve, 0));
+    }
+
+    async function setOpened(opened: boolean): Promise<void> {
+        setWalletsModalState(
+            opened ? OPENED : { status: 'closed', closeReason: 'action-cancelled' }
+        );
+        await settle();
+    }
+
+    function toggle(root: HTMLElement): HTMLButtonElement {
+        return root.querySelector<HTMLButtonElement>('[data-tc-wallets-row-toggle="true"]')!;
+    }
+
+    afterEach(async () => {
+        await setOpened(false);
+        window.innerWidth = desktopWidth;
+        updateIsMobile();
+    });
+
+    it('keeps the row unfolded on the way back from All Wallets, until the modal closes', async () => {
+        window.innerWidth = 390;
+        setAppState({ isCompact: true });
+        const tonConnectUI = {
+            getWallets: async () => wallets,
+            closeModal: () => {}
+        } as unknown as TonConnectUI;
+        const h = mountModal(() => (
+            <TonConnectUiContext.Provider value={tonConnectUI}>
+                <WalletsModal />
+            </TonConnectUiContext.Provider>
+        ));
+        dispose = h.dispose;
+
+        await setOpened(true);
+        toggle(h.root).click();
+        h.root
+            .querySelector<HTMLElement>(
+                '[data-tc-wallets-modal-universal-mobile="true"] li:last-child [data-tc-wallet-item="true"]'
+            )!
+            .click();
+        h.root
+            .querySelector<HTMLElement>(
+                '[data-tc-wallets-modal-list="true"] [data-tc-icon-button="true"]'
+            )!
+            .click();
+
+        expect(toggle(h.root).getAttribute('aria-expanded')).toBe('true');
+
+        await setOpened(false);
+        await setOpened(true);
+
+        expect(toggle(h.root).getAttribute('aria-expanded')).toBe('false');
     });
 });

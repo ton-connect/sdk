@@ -1,15 +1,29 @@
 import { ConnectAdditionalRequest } from '@tonconnect/sdk';
-import { Component, createMemo, createSignal, For, Show } from 'solid-js';
-import { FourWalletsItem, QRIcon, TelegramIcon, WalletItem } from 'src/app/components';
+import { useI18n } from '@solid-primitives/i18n';
+import {
+    Component,
+    createEffect,
+    createMemo,
+    createSignal,
+    createUniqueId,
+    For,
+    Show
+} from 'solid-js';
+import { ArrowIcon, FourWalletsItem, QRIcon, TelegramIcon, WalletItem } from 'src/app/components';
 import {
     ButtonWalletIconStyled,
     GramWalletButtonStyled,
     H1Styled,
     H2Styled,
+    RowToggleChevronStyled,
+    RowToggleHeadingStyled,
+    RowToggleStyled,
+    RowToggleTailStyled,
     StyledLeftActionButton,
     TelegramButtonStyled,
     TelegramDiamondStyled,
-    TelegramH1Styled
+    TelegramH1Styled,
+    WalletsRowFoldStyled
 } from './style';
 import { setLastSelectedWalletInfo, setLastVisibleWalletsInfo } from 'src/app/state/modals-state';
 import { appState } from 'src/app/state/app.state';
@@ -42,9 +56,18 @@ interface MobileUniversalModalProps {
     onSelect: (walletInfo: UIWalletInfo) => void;
 
     onSelectAllWallets: () => void;
+
+    /**
+     * Whether the folded wallets row is open. The modal keeps it, so the row stays open while the
+     * user visits another screen of the modal and comes back; without it, this screen keeps it.
+     */
+    rowUnfolded?: boolean;
+
+    onRowUnfoldedChange?: (unfolded: boolean) => void;
 }
 
 export const MobileUniversalModal: Component<MobileUniversalModalProps> = props => {
+    const [t] = useI18n();
     const [showQR, setShowQR] = createSignal(false);
     const [firstClick, setFirstClick] = createSignal(true);
     const [universalLink, setUniversalLink] = createSignal<string | null>(null);
@@ -74,6 +97,37 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
         null
     );
     const hasShortcut = (): boolean => !!telegramWallet() || !!gramWallet();
+
+    /**
+     * `isCompact` folds the row away behind its heading, as long as a button above it leaves
+     * the screen something to offer and the row has a tile to unfold. The row starts folded
+     * whenever the modal is opened.
+     */
+    const isRowFoldable = (): boolean =>
+        appState.isCompact &&
+        hasShortcut() &&
+        (supportedWallets().length > 0 || shouldShowMoreButton());
+    const [ownRowUnfolded, setOwnRowUnfolded] = createSignal(false);
+    const isRowUnfolded = (): boolean => props.rowUnfolded ?? ownRowUnfolded();
+    const setIsRowUnfolded = (unfolded: boolean): void => {
+        if (props.onRowUnfoldedChange) {
+            props.onRowUnfoldedChange(unfolded);
+        } else {
+            setOwnRowUnfolded(unfolded);
+        }
+    };
+    const isRowShown = (): boolean => !isRowFoldable() || isRowUnfolded();
+    const rowId = createUniqueId();
+    /** Split before the last word, which the chevron is kept with when the label wraps. */
+    const rowToggleLabel = createMemo(() => {
+        const label = t(
+            'walletModal.mobileUniversalModal.chooseOtherApplicationToggle',
+            {},
+            'Or choose another app'
+        );
+        const lastWordStart = label.lastIndexOf(' ') + 1;
+        return { head: label.slice(0, lastWordStart), lastWord: label.slice(lastWordStart) };
+    });
 
     const walletsBridges = createMemo(() => getUniqueBridges(props.walletsList), null, {
         equals: bridgesIsEqual
@@ -175,12 +229,18 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
     );
 
     const visibleWallets = createMemo(() => supportedWallets().slice(0, 3), null);
-    setLastVisibleWalletsInfo({
-        walletsMenu: 'main_screen',
-        wallets: [telegramWallet(), gramWallet(), ...visibleWallets()].filter(
-            (wallet): wallet is UIWalletInfo => !!wallet
-        )
-    });
+    /** The wallet tiles the row draws: the first ones before View all, or all of them. */
+    const rowWallets = (): UIWalletInfo[] =>
+        shouldShowMoreButton() ? visibleWallets() : supportedWallets();
+    // The row tiles are only seen once the row is unfolded.
+    createEffect(() =>
+        setLastVisibleWalletsInfo({
+            walletsMenu: 'main_screen',
+            wallets: [telegramWallet(), gramWallet(), ...(isRowShown() ? rowWallets() : [])].filter(
+                (wallet): wallet is UIWalletInfo => !!wallet
+            )
+        })
+    );
 
     const fourWalletsItem = createMemo(
         () =>
@@ -237,41 +297,71 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
                         {gramWallet()!.name}
                     </GramWalletButtonStyled>
                 </Show>
-                <H2Styled
-                    translationKey={
-                        hasShortcut()
-                            ? 'walletModal.mobileUniversalModal.chooseOtherApplication'
-                            : 'walletModal.mobileUniversalModal.chooseApplication'
+                <Show
+                    when={isRowFoldable()}
+                    fallback={
+                        <H2Styled
+                            translationKey={
+                                hasShortcut()
+                                    ? 'walletModal.mobileUniversalModal.chooseOtherApplication'
+                                    : 'walletModal.mobileUniversalModal.chooseApplication'
+                            }
+                            maxWidth={342}
+                            padding={'0 24px 8px 24px'}
+                            margin={'0'}
+                        >
+                            {hasShortcut() ? 'Or choose another app:' : 'Choose an app:'}
+                        </H2Styled>
                     }
-                    maxWidth={342}
-                    padding={'0 24px 8px 24px'}
-                    margin={'0'}
                 >
-                    {hasShortcut() ? 'Or choose another app:' : 'Choose an app:'}
-                </H2Styled>
-                <WalletUlContainer>
-                    <For each={shouldShowMoreButton() ? visibleWallets() : supportedWallets()}>
-                        {wallet => (
-                            <li>
-                                <WalletItem
-                                    icon={wallet.imageUrl}
-                                    name={wallet.name}
-                                    onClick={() => props.onSelect(wallet)}
-                                />
-                            </li>
-                        )}
-                    </For>
-                    <Show when={shouldShowMoreButton()}>
-                        <li>
-                            <FourWalletsItem
-                                labelLine1="View all"
-                                labelLine2="wallets"
-                                images={fourWalletsItem().map(i => i.imageUrl)}
-                                onClick={() => props.onSelectAllWallets()}
-                            />
-                        </li>
-                    </Show>
-                </WalletUlContainer>
+                    <RowToggleHeadingStyled>
+                        <RowToggleStyled
+                            type="button"
+                            aria-expanded={isRowUnfolded()}
+                            aria-controls={rowId}
+                            onClick={() => setIsRowUnfolded(!isRowUnfolded())}
+                            data-tc-wallets-row-toggle="true"
+                        >
+                            {rowToggleLabel().head}
+                            <RowToggleTailStyled>
+                                {rowToggleLabel().lastWord}
+                                <RowToggleChevronStyled
+                                    expanded={isRowUnfolded()}
+                                    aria-hidden="true"
+                                >
+                                    <ArrowIcon direction="right" fill="currentColor" />
+                                </RowToggleChevronStyled>
+                            </RowToggleTailStyled>
+                        </RowToggleStyled>
+                    </RowToggleHeadingStyled>
+                </Show>
+                <WalletsRowFoldStyled id={rowId} expanded={isRowShown()}>
+                    <div>
+                        <WalletUlContainer>
+                            <For each={rowWallets()}>
+                                {wallet => (
+                                    <li>
+                                        <WalletItem
+                                            icon={wallet.imageUrl}
+                                            name={wallet.name}
+                                            onClick={() => props.onSelect(wallet)}
+                                        />
+                                    </li>
+                                )}
+                            </For>
+                            <Show when={shouldShowMoreButton()}>
+                                <li>
+                                    <FourWalletsItem
+                                        labelLine1="View all"
+                                        labelLine2="wallets"
+                                        images={fourWalletsItem().map(i => i.imageUrl)}
+                                        onClick={() => props.onSelectAllWallets()}
+                                    />
+                                </li>
+                            </Show>
+                        </WalletUlContainer>
+                    </div>
+                </WalletsRowFoldStyled>
             </Show>
         </div>
     );

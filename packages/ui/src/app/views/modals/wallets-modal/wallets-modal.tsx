@@ -58,6 +58,7 @@ export const WalletsModal: Component = () => {
             setSelectedWalletInfo(null);
             setSelectedTab('universal');
             setInfoTab(false);
+            setIsWalletsRowUnfolded(false);
         }
     });
 
@@ -74,6 +75,9 @@ export const WalletsModal: Component = () => {
     >(null);
     const [selectedTab, setSelectedTab] = createSignal<'universal' | 'all-wallets'>('universal');
     const [infoTab, setInfoTab] = createSignal(false);
+    // Kept here rather than on the mobile screen, which is rebuilt every time the user comes back
+    // to it, so the folded row stays open until the modal closes.
+    const [isWalletsRowUnfolded, setIsWalletsRowUnfolded] = createSignal(false);
 
     const walletsModalIsWalletNotSupportFeature = createMemo(() => {
         const state = walletsModalState();
@@ -276,6 +280,8 @@ export const WalletsModal: Component = () => {
                                 walletsList={walletsList()!}
                                 additionalRequest={additionalRequest()!}
                                 onSelectAllWallets={onSelectAllWallets}
+                                rowUnfolded={isWalletsRowUnfolded()}
+                                onRowUnfoldedChange={setIsWalletsRowUnfolded}
                             />
                         </Match>
                         <Match when={selectedTab() === 'all-wallets'}>

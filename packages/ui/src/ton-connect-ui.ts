@@ -294,6 +294,10 @@ export class TonConnectUI {
                 merged.withSecondaryButton = options.uiPreferences.withSecondaryButton;
             }
 
+            if (options.uiPreferences?.isCompact !== undefined) {
+                merged.isCompact = options.uiPreferences.isCompact;
+            }
+
             return merged;
         });
     }

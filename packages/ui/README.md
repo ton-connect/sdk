@@ -977,6 +977,17 @@ tonConnectUI.uiOptions = {
     };
 ```
 
+#### Fold the wallets row away
+On the mobile wallets screen, set `isCompact` to fold the wallets row away under the "Connect Telegram" button (and the Gram Wallet button, with `withSecondaryButton`). The "Or choose another app:" heading becomes an "Or choose another app ›" toggle that unfolds the row. When neither button is shown, the row is always shown. Default is `false`.
+
+```ts
+tonConnectUI.uiOptions = {
+        uiPreferences: {
+            isCompact: true
+        }
+    };
+```
+
 #### Combine options
 It is possible to change all required options at the same time:
 

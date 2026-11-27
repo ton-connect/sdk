@@ -49,4 +49,14 @@ export interface UIPreferences {
      * @default false
      */
     withSecondaryButton?: boolean;
+
+    /**
+     * Fold the wallets row of the mobile wallets screen away under the "Connect Telegram" button
+     * (and the Gram Wallet button with `withSecondaryButton`). The row heading becomes an
+     * "Or choose another app ›" toggle that unfolds the row. It only applies when one of those
+     * buttons is shown; without them, the row is always shown.
+     *
+     * @default false
+     */
+    isCompact?: boolean;
 }

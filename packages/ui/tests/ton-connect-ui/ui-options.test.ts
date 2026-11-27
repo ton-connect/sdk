@@ -4,8 +4,9 @@ import { TonConnect } from '@tonconnect/sdk';
 
 import { TonConnectUI } from 'src/ton-connect-ui';
 import { appState, setAppState } from 'src/app/state/app.state';
+import { UIPreferences } from 'src/models/ui-preferences';
 
-function createUI(withSecondaryButton?: boolean): TonConnectUI {
+function createUI(uiPreferences?: UIPreferences): TonConnectUI {
     const connector = new TonConnect({
         manifestUrl: 'https://example.com/tonconnect-manifest.json',
         storage: {
@@ -18,7 +19,7 @@ function createUI(withSecondaryButton?: boolean): TonConnectUI {
     return new TonConnectUI({
         connector,
         restoreConnection: false,
-        uiPreferences: withSecondaryButton === undefined ? undefined : { withSecondaryButton }
+        uiPreferences
     });
 }
 
@@ -38,30 +39,33 @@ beforeAll(() => {
     })) as typeof window.matchMedia;
 });
 
-describe('TonConnectUI.uiOptions: uiPreferences.withSecondaryButton', () => {
-    // appState is one store for the whole file, and the tests below turn the option on.
-    beforeEach(() => setAppState({ withSecondaryButton: false }));
+describe.each(['withSecondaryButton', 'isCompact'] as const)(
+    'TonConnectUI.uiOptions: uiPreferences.%s',
+    option => {
+        // appState is one store for the whole file, and the tests below turn the option on.
+        beforeEach(() => setAppState({ [option]: false }));
 
-    it('is off unless the dApp turns it on', () => {
-        createUI();
+        it('is off unless the dApp turns it on', () => {
+            createUI();
 
-        expect(appState.withSecondaryButton).toBe(false);
-    });
+            expect(appState[option]).toBe(false);
+        });
 
-    it('survives updates that leave it out', () => {
-        const ui = createUI(true);
+        it('survives updates that leave it out', () => {
+            const ui = createUI({ [option]: true });
 
-        ui.uiOptions = { language: 'ru' };
-        ui.uiOptions = { uiPreferences: { borderRadius: 's' } };
+            ui.uiOptions = { language: 'ru' };
+            ui.uiOptions = { uiPreferences: { borderRadius: 's' } };
 
-        expect(appState.withSecondaryButton).toBe(true);
-    });
+            expect(appState[option]).toBe(true);
+        });
 
-    it('can be turned off again', () => {
-        const ui = createUI(true);
+        it('can be turned off again', () => {
+            const ui = createUI({ [option]: true });
 
-        ui.uiOptions = { uiPreferences: { withSecondaryButton: false } };
+            ui.uiOptions = { uiPreferences: { [option]: false } };
 
-        expect(appState.withSecondaryButton).toBe(false);
-    });
-});
+            expect(appState[option]).toBe(false);
+        });
+    }
+);
