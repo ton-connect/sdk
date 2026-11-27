@@ -15,7 +15,7 @@ export interface ConnectButtonProps extends Styleable, WithDataAttributes {
 
     children: JSXElement;
 
-    /** Draws attention with a light band crossing the button every two seconds. */
+    /** Draws attention with a light band crossing the button twice, then stopping. */
     shiny?: boolean;
 
     /** Dims the band, from 0 to 1. */

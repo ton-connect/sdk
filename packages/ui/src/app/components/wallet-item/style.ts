@@ -84,16 +84,16 @@ export const WalletItemStyled = styled.button`
 
 /**
  * The connect button's shine (`shinyClass`): a soft band as wide as the icon crosses it from left to
- * right in the first 0.75 s of every 6 s, so it catches the eye now and then without flickering.
- * The band sits in the middle third of a background three times the icon's width, so at either end
- * of its run it is wholly off the icon.
+ * right in the first 0.75 s of each 3 s iteration, so it catches the eye without flickering. The
+ * band sits in the middle third of a background three times the icon's width, so at either end of
+ * its run it is wholly off the icon.
  */
 const iconShine = keyframes`
     0% {
         background-position: 100% 0;
     }
 
-    12.5%,
+    25%,
     100% {
         background-position: 0% 0;
     }
@@ -102,10 +102,11 @@ const iconShine = keyframes`
 /**
  * The wallet's icon. With `glow` (the wallet the lists lead with) a soft halo of the connect blue
  * spreads out from under it on the phone sheet; the desktop dialog leaves it out. With `shine` a
- * gentle shine passes over it now and then; with reduced motion the shine stays still, off the
- * icon. The shine has a layer of its own (`will-change`), so Safari does not redraw the glass sheet
- * around it. `round` is for an icon drawn as a circle, such as Telegram's, so the shine and the
- * edge keep to the circle.
+ * gentle shine passes over it twice once the modal has settled, then stops, as on the connect
+ * button: endless motion next to the wallet names would distract and fails WCAG 2.2.2. With reduced
+ * motion the shine stays still, off the icon. The shine has a layer of its own (`will-change`), so
+ * Safari does not redraw the glass sheet around it. `round` is for an icon drawn as a circle, such
+ * as Telegram's, so the shine and the edge keep to the circle.
  */
 export const ImageStyled = styled(WalletImage)<{
     glow?: boolean;
@@ -149,7 +150,7 @@ export const ImageStyled = styled(WalletImage)<{
                 no-repeat;
             background-size: 300% 100%;
             background-position: 100% 0;
-            animation: ${iconShine} 6s ease-out 1.5s infinite;
+            animation: ${iconShine} 3s ease-out 1.5s 2 both;
             will-change: transform;
         }
 

@@ -11,7 +11,7 @@ export interface WalletItemProps extends Styleable {
     badgeUrl?: string;
     /** A soft glow behind the icon on the phone sheet (Gram Wallet). */
     glow?: boolean;
-    /** A shine passing over the icon now and then (Gram Wallet and Telegram). */
+    /** A shine passing over the icon twice, then stopping (Gram Wallet and Telegram). */
     shine?: boolean;
     /** The icon is drawn as a circle (Telegram). */
     round?: boolean;
