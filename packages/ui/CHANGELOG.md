@@ -1,5 +1,38 @@
 # Changelog @tonconnect/ui
 
+## 6.0.0
+
+### Major Changes
+
+- The redesigned connect modal is a new major version: dApps that do not set
+  `uiPreferences.withSecondaryButton` no longer get a separate Gram Wallet button under "Connect
+  Telegram", and the "What is a wallet" screen and the modal footer are gone.
+
+### Minor Changes
+
+- 00a2f9e: The new `uiPreferences.isCompact` option folds the wallets row of the mobile wallets
+  modal away behind an "Or choose another app ›" toggle under the "Connect Telegram" button.
+- 00a2f9e: The connect modal is redesigned: Google Sans, a frosted-glass sheet and the new palette,
+  new buttons, QR code and status screens, crossfading screens with a sheet that follows their
+  height, an "Other wallets" pill for `isCompact`, and the "What is a wallet" info screen removed.
+- 00a2f9e: On the desktop wallet screen, a lone platform button under the QR code becomes a blue
+  "Open {wallet} Desktop" or "Open {wallet} Browser Extension" button, styled like "Connect
+  Telegram".
+- 00a2f9e: The mobile wallets modal lists Gram Wallet in the wallets row by default; the new
+  `uiPreferences.withSecondaryButton` option brings back its own button under "Connect Telegram".
+- 00a2f9e: `WalletInfo` gains an optional `rank` field from the wallets registry, and the wallets
+  modal places wallets by it in the mobile wallets row, the desktop "Available wallets" list, the
+  "View all wallets" tile and the All Wallets screen, shuffling the wallets that share a rank each
+  time it opens. The "View all wallets" tile now previews the supported wallets ahead of the others,
+  as All Wallets lists them.
+
+### Patch Changes
+
+- 00a2f9e: Wallet tiles show a wallet's name without its bracketed note, so "Walt (ex. Wallet)"
+  reads "Walt" with no "ex. Wallet" line under it.
+- Updated dependencies [00a2f9e]
+    - @tonconnect/sdk@5.1.0
+
 ## 5.0.4
 
 ### Patch Changes
