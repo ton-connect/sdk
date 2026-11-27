@@ -98,9 +98,13 @@ export const ButtonStyled = styled(Button)`
     margin: 0 auto;
 `;
 
-export const TelegramButtonStyled = styled(TelegramConnectButton)`
+/**
+ * Stacks 12px above the Gram Wallet button. Without that button under it, it keeps the 24px the
+ * Gram Wallet button would leave before the row heading.
+ */
+export const TelegramButtonStyled = styled(TelegramConnectButton)<{ followedByButton?: boolean }>`
     ${fullWidth}
-    margin-bottom: 12px;
+    margin-bottom: ${props => (props.followedByButton ? '12px' : '24px')};
 `;
 
 export const GramWalletButtonStyled = styled(ConnectButton)<{ transparent?: boolean }>`

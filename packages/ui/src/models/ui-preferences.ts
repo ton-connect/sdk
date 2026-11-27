@@ -41,4 +41,12 @@ export interface UIPreferences {
      * `ColorsSet`; missing values fall back to the built-in palette.
      */
     colorsSet?: Partial<Record<THEME, PartialColorsSet>>;
+
+    /**
+     * Show Gram Wallet as its own button under "Connect Telegram" on the mobile wallets screen.
+     * When `false`, Gram Wallet is listed in the wallets row like any other wallet.
+     *
+     * @default false
+     */
+    withSecondaryButton?: boolean;
 }

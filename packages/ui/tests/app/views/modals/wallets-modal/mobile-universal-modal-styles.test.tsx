@@ -3,6 +3,7 @@ import { describe, it, expect, afterEach } from 'vitest';
 import { Button } from 'src/app/components';
 import { MobileUniversalModal } from 'src/app/views/modals/wallets-modal/mobile-universal-modal';
 import { themeState } from 'src/app/state/theme-state';
+import { setAppState } from 'src/app/state/app.state';
 import { UIWalletInfo } from 'src/app/models/ui-wallet-info';
 import { mountModal, OPENED, remoteWallet } from './harness';
 
@@ -20,6 +21,7 @@ Object.assign(window, {
 const disposers: (() => void)[] = [];
 afterEach(() => {
     disposers.splice(0).forEach(dispose => dispose());
+    setAppState({ withSecondaryButton: false });
 });
 
 function cssColor(value: string): string {
@@ -38,7 +40,8 @@ function buttonLabelled(root: HTMLElement, label: string): HTMLButtonElement {
     return button;
 }
 
-function mountScreen(isButtonTransparent: boolean): HTMLElement {
+function mountScreen(isButtonTransparent = false, withSecondaryButton = true): HTMLElement {
+    setAppState({ withSecondaryButton });
     const wallet = (appName: string): UIWalletInfo => ({
         ...remoteWallet(appName, ['ios', 'android']),
         isSupportRequiredFeatures: true
@@ -82,5 +85,21 @@ describe('views/mobile-universal-modal: promoted button styles', () => {
 
         expect(gram.backgroundColor).toBe('rgba(0, 0, 0, 0)');
         expect(gram.color).toBe(cssColor(themeState.colors.text.primary));
+    });
+
+    it('stacks Connect Telegram close above the Gram Wallet button', () => {
+        const root = mountScreen();
+        const telegram = getComputedStyle(buttonLabelled(root, 'Connect Telegram'));
+        const gram = getComputedStyle(buttonLabelled(root, 'gramwallet'));
+
+        expect(telegram.marginBottom).toBe('12px');
+        expect(gram.marginBottom).toBe('24px');
+    });
+
+    it('keeps the Gram Wallet button gap under Connect Telegram when it is the only button', () => {
+        const root = mountScreen(false, false);
+        const telegram = getComputedStyle(buttonLabelled(root, 'Connect Telegram'));
+
+        expect(telegram.marginBottom).toBe('24px');
     });
 });

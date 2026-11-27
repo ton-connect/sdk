@@ -290,6 +290,10 @@ export class TonConnectUI {
                 merged.enableAndroidBackHandler = options.enableAndroidBackHandler;
             }
 
+            if (options.uiPreferences?.withSecondaryButton !== undefined) {
+                merged.withSecondaryButton = options.uiPreferences.withSecondaryButton;
+            }
+
             return merged;
         });
     }

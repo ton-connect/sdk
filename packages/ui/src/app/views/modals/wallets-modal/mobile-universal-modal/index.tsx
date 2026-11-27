@@ -50,10 +50,13 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
     const [universalLink, setUniversalLink] = createSignal<string | null>(null);
     const connector = appState.connector;
     /** Wallets promoted to their own button above the row, and so kept out of it. */
-    const shortcutAppNames = [TELEGRAM_WALLET_APP_NAME, GRAM_WALLET_APP_NAME];
+    const shortcutAppNames = (): string[] =>
+        appState.withSecondaryButton
+            ? [TELEGRAM_WALLET_APP_NAME, GRAM_WALLET_APP_NAME]
+            : [TELEGRAM_WALLET_APP_NAME];
 
     const walletsList = (): UIWalletInfo[] =>
-        props.walletsList.filter(w => supportsMobile(w) && !shortcutAppNames.includes(w.appName));
+        props.walletsList.filter(w => supportsMobile(w) && !shortcutAppNames().includes(w.appName));
     const shouldShowMoreButton = (): boolean => walletsList().length > 7;
 
     /** A promoted wallet is only offered when it is actually connectable from this screen. */
@@ -66,7 +69,10 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
         ) ?? null;
 
     const telegramWallet = createMemo(() => shortcutWallet(TELEGRAM_WALLET_APP_NAME), null);
-    const gramWallet = createMemo(() => shortcutWallet(GRAM_WALLET_APP_NAME), null);
+    const gramWallet = createMemo(
+        () => (appState.withSecondaryButton ? shortcutWallet(GRAM_WALLET_APP_NAME) : null),
+        null
+    );
     const hasShortcut = (): boolean => !!telegramWallet() || !!gramWallet();
 
     const walletsBridges = createMemo(() => getUniqueBridges(props.walletsList), null, {
@@ -210,6 +216,7 @@ export const MobileUniversalModal: Component<MobileUniversalModalProps> = props 
                         Use your Telegram wallet
                     </TelegramH1Styled>
                     <TelegramButtonStyled
+                        followedByButton={!!gramWallet()}
                         shiny
                         icon={<TelegramIcon />}
                         onClick={() => props.onSelect(telegramWallet()!)}

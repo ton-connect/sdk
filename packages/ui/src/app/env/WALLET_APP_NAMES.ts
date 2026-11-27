@@ -7,7 +7,7 @@
 /** Built-in Telegram wallet, promoted to the primary button. */
 export const TELEGRAM_WALLET_APP_NAME = 'telegram';
 
-/** Gram Wallet, promoted to the secondary button. */
+/** Gram Wallet, promoted to the secondary button with `uiPreferences.withSecondaryButton`. */
 export const GRAM_WALLET_APP_NAME = 'gramwallet';
 
 /** Walt, the Telegram-hosted wallet formerly branded "@wallet". */

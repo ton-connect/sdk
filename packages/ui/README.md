@@ -966,6 +966,17 @@ const tonConnectUI = new TonConnectUI({
 
 [See all available options](https://docs.ton.org/applications/ton-connect/api-reference/ui)
 
+#### Show Gram Wallet as a separate button
+On the mobile wallets screen, Gram Wallet is listed in the wallets row like any other wallet. Set `withSecondaryButton` to show it as its own button under "Connect Telegram" instead. Default is `false`.
+
+```ts
+tonConnectUI.uiOptions = {
+        uiPreferences: {
+            withSecondaryButton: true
+        }
+    };
+```
+
 #### Combine options
 It is possible to change all required options at the same time:
 
