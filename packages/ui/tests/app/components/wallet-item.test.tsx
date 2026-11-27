@@ -6,23 +6,30 @@ import { mountModal } from '../views/modals/wallets-modal/harness';
 let dispose: (() => void) | undefined;
 afterEach(() => dispose?.());
 
-function renderedLines(name: string, secondLine?: string): string[] {
+function renderItem(name: string, secondLine?: string): Element {
     const h = mountModal(() => (
         <WalletItem icon="" name={name} secondLine={secondLine} onClick={() => {}} />
     ));
     dispose = h.dispose;
-    const item = h.root.querySelector('[data-tc-wallet-item]')!;
-    return [...item.querySelectorAll('div')]
+    return h.root.querySelector('[data-tc-wallet-item]')!;
+}
+
+function renderedLines(name: string, secondLine?: string): string[] {
+    return [...renderItem(name, secondLine).querySelectorAll('div')]
         .filter(el => el.children.length === 0)
         .map(el => el.textContent ?? '');
 }
 
 describe('WalletItem name', () => {
-    it('moves a bracketed note to the second line', () => {
-        expect(renderedLines('Walt (ex. Wallet)')).toEqual(['Walt', 'ex. Wallet']);
+    it('drops a bracketed note from the name', () => {
+        expect(renderedLines('Walt (ex. Wallet)')).toEqual(['Walt']);
     });
 
-    it('keeps an explicit second line over the note', () => {
+    it('does not show the bracketed note anywhere in the tile', () => {
+        expect(renderItem('Walt (ex. Wallet)').textContent).toBe('Walt');
+    });
+
+    it('keeps an explicit second line under the shortened name', () => {
         expect(renderedLines('Walt (ex. Wallet)', 'New')).toEqual(['Walt', 'New']);
     });
 

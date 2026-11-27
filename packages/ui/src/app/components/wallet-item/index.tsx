@@ -1,7 +1,7 @@
 import { Component, createEffect, JSXElement, onMount } from 'solid-js';
 import { BadgeStyled, ImageStyled, StyledSecondLine, StyledText, WalletItemStyled } from './style';
 import { Styleable } from 'src/app/models/styleable';
-import { splitWalletName } from 'src/app/utils/wallets';
+import { stripWalletNameNote } from 'src/app/utils/wallets';
 
 export interface WalletItemProps extends Styleable {
     icon: string | JSXElement;
@@ -36,10 +36,7 @@ export const WalletItem: Component<WalletItemProps> = props => {
         }
     };
 
-    const nameParts = (): ReturnType<typeof splitWalletName> => splitWalletName(props.name);
-    const secondLine = (): string | undefined => props.secondLine ?? nameParts().note;
-    const secondLineColorPrimary = (): boolean =>
-        props.secondLine !== undefined && (props.secondLineColorPrimary ?? true);
+    const name = (): string => stripWalletNameNote(props.name);
 
     onMount(() => adjustLetterSpacing());
 
@@ -62,11 +59,11 @@ export const WalletItem: Component<WalletItemProps> = props => {
                 props.icon
             )}
             <div ref={el => (ctxRef = el)}>
-                <StyledText>{nameParts().name}</StyledText>
+                <StyledText>{name()}</StyledText>
             </div>
-            {secondLine() && (
-                <StyledSecondLine colorPrimary={secondLineColorPrimary()}>
-                    {secondLine()}
+            {props.secondLine && (
+                <StyledSecondLine colorPrimary={props.secondLineColorPrimary ?? true}>
+                    {props.secondLine}
                 </StyledSecondLine>
             )}
         </WalletItemStyled>

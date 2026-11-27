@@ -58,14 +58,10 @@ export function eqWalletName(wallet1: { name: string; appName: string }, name?: 
 }
 
 /**
- * The wallet tile fits one line of name, so a bracketed note such as "(ex. Wallet)" moves to the
- * second line.
+ * The wallet tile fits one line of name and keeps its second line for labels such as "Recent", so
+ * a trailing bracketed note such as "(ex. Wallet)" is dropped from the name the tile shows.
  */
-export function splitWalletName(name: string): { name: string; note?: string } {
-    const match = /^(.+?)\s*\(([^()]+)\)$/.exec(name);
-    if (!match?.[1] || !match[2]) {
-        return { name };
-    }
-
-    return { name: match[1], note: match[2] };
+export function stripWalletNameNote(name: string): string {
+    const match = /^(.+?)\s*\([^()]+\)$/.exec(name);
+    return match?.[1] ?? name;
 }
