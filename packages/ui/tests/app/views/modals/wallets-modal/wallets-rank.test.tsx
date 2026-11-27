@@ -10,7 +10,9 @@ import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { UIWalletInfo } from 'src/app/models/ui-wallet-info';
 import { TonConnectUI } from 'src/ton-connect-ui';
 import { setAppState } from 'src/app/state/app.state';
-import { mountModal, OPENED, remoteWallet } from './harness';
+import { mountModal, OPENED, remoteWallet, shareOneStyleSheet } from './harness';
+
+shareOneStyleSheet();
 
 /**
  * A rank is the place a wallet asks for in the list each screen shows, so it is applied after the

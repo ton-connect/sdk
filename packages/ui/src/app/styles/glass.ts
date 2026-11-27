@@ -8,6 +8,10 @@ const supportsBlur =
 // dense enough to read on any page; these queries only add a solid surface where they exist.
 const reducedTransparency =
     '@media (prefers-reduced-transparency: reduce), (prefers-contrast: more)';
+// The All wallets sheet, which is denser. Its rule outranks a plain one, so whatever has to win
+// over it, such as the solid surface, needs a rule of its own for it too. Its own rule, not a
+// selector list with the plain one: a browser without `:has()` would drop the whole list.
+const denserSheet = "&:has([data-tc-wallets-modal-list='true'])";
 
 /**
  * Translucent surface that blurs the dApp page behind it, so busy content turns into soft colour,
@@ -42,7 +46,7 @@ export function glassSurface(theme: DefaultTheme): string {
             -webkit-backdrop-filter: blur(48px) saturate(${isDark ? 130 : 140}%);
             backdrop-filter: blur(48px) saturate(${isDark ? 130 : 140}%);
 
-            &:has([data-tc-wallets-modal-list='true']) {
+            ${denserSheet} {
                 background-color: ${rgba(base, 0.94)};
             }
         }
@@ -51,6 +55,10 @@ export function glassSurface(theme: DefaultTheme): string {
             background-color: ${base};
             -webkit-backdrop-filter: none;
             backdrop-filter: none;
+
+            ${denserSheet} {
+                background-color: ${base};
+            }
         }
     `;
 }

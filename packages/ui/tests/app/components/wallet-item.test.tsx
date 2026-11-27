@@ -83,6 +83,21 @@ describe('WalletLabeledItem', () => {
         expect(boxShadow === '' || boxShadow === 'none').toBe(true);
     });
 
+    // Endless motion beside the names would distract, and WCAG 2.2.2 would ask for a way to stop it
+    it.each(['gramwallet', 'telegram'])('passes the shine over the icon of %s twice', appName => {
+        const icon = renderIcon(appName, 'sheet');
+        const emitted = Array.from(document.querySelectorAll('style'))
+            .map(style => style.textContent ?? '')
+            .join('');
+        const shine = Array.from(icon.classList)
+            .map(name => emitted.match(new RegExp(`\\.${name}::before\\{[^}]*animation:([^;}]+)`)))
+            .find(Boolean)![1]!
+            .split(' ');
+
+        expect(shine).not.toContain('infinite');
+        expect(shine.filter(part => /^\d+$/.test(part))).toEqual(['2']);
+    });
+
     // So the shine over Telegram's round icon keeps to the circle
     it.each([
         ['telegram', true],

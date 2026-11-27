@@ -17,6 +17,23 @@ export const OPENED: WalletsModalState = {
     traceId: 'trace-1'
 };
 
+/**
+ * Hands goober the one `<style id="_goober">` a browser would find. jsdom has no named access on
+ * `window`, so goober would otherwise give every rule a `<style>` of its own and never dedupe them,
+ * and since jsdom works out each computed style from every rule on the page, and every `Text`
+ * reads its own once mounted, a test would slow down with each test before it in the file. Call it
+ * once at the top of a file. Goober then inserts each rule once, so whatever rendered earlier in
+ * the file decides which of two equally specific rules wins.
+ */
+export function shareOneStyleSheet(): void {
+    Object.assign(window, {
+        _goober: Object.assign(document.head.appendChild(document.createElement('style')), {
+            id: '_goober',
+            innerHTML: ' '
+        })
+    });
+}
+
 export const CONNECT_LINK = 'https://app.tonkeeper.com/ton-connect?v=2&id=abc&r=%7B%7D';
 
 export type Recorders = {

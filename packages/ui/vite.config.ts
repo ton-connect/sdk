@@ -66,7 +66,7 @@ export default defineConfig({
         }
     },
     test: {
-        // The modal tests wait for its real transitions, which a CI runner stretches past the 5 s default.
+        // Room for CI runners, where the tests that mount the whole modal run several times slower.
         testTimeout: 15000,
         typecheck: {
             tsconfig: './tsconfig.test.json'

@@ -80,6 +80,38 @@ describe('Crossfade', () => {
         ]);
     });
 
+    // Its buttons are still in the document while it fades, but they belong to a replaced screen
+    it('keeps the old screen out of reach of the keyboard and screen readers while it fades', async () => {
+        const { root, show } = mount();
+
+        show('b');
+        await flush();
+
+        expect(root.querySelector('[data-screen="a"]')!.hasAttribute('inert')).toBe(true);
+        expect(root.querySelector('[data-screen="b"]')!.hasAttribute('inert')).toBe(false);
+    });
+
+    // So nothing has to take inert off again: a screen that comes back is drawn anew
+    it('brings a screen back as a new element while its old one still fades', async () => {
+        const { root, show } = mount();
+        const first = root.querySelector('[data-screen="a"]');
+
+        show('b');
+        await flush();
+        show('a');
+        await flush();
+
+        const back = root.querySelector('[data-screen="a"]')!;
+        expect(back).not.toBe(first);
+        expect(back.hasAttribute('inert')).toBe(false);
+
+        finishAll();
+        await flush();
+
+        expect(screens(root)).toEqual(['a']);
+        expect(root.querySelector('[data-screen="a"]')).toBe(back);
+    });
+
     it('removes the old screen once it has faded out', async () => {
         const { root, show } = mount();
 

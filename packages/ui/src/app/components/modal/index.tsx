@@ -182,8 +182,10 @@ export const Modal: Component<ModalProps> = props => {
             }}
             onExit={(el, done) => {
                 const exit = sheetMotion('exit');
-                // The page takes clicks again as soon as the modal starts leaving
+                // The page takes clicks again as soon as the modal starts leaving, and the modal's
+                // controls can no longer be pressed, focused or found by screen readers
                 (el as HTMLElement).style.pointerEvents = 'none';
+                el.setAttribute('inert', '');
 
                 const backgroundAnimation = animate(
                     el,

@@ -45,6 +45,10 @@ function fadeOut(el: Element, done: () => void): void {
 
     // A screen replaced before it had faded in fades out from where it got to, not from full
     const from = Number(getComputedStyle(el).opacity || 1);
+    // It has been replaced: for the rest of its fade nothing on it can be pressed, focused (a
+    // control that has focus loses it) or found by screen readers. Browsers without `inert` still
+    // get the `pointer-events: none` below.
+    el.setAttribute('inert', '');
     freezeInPlace(el);
     animate(el, [{ opacity: from }, { opacity: 0 }], {
         duration: FADE_OUT_DURATION,

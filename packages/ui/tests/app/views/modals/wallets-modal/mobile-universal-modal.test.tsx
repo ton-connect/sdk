@@ -9,7 +9,16 @@ import { TonConnectUiContext } from 'src/app/state/ton-connect-ui.context';
 import { updateIsMobile } from 'src/app/hooks/isMobile';
 import { TonConnectUI } from 'src/ton-connect-ui';
 import { UIWalletInfo } from 'src/app/models/ui-wallet-info';
-import { clickButton, mountModal, OPENED, remoteWallet, Recorders } from './harness';
+import {
+    clickButton,
+    mountModal,
+    OPENED,
+    remoteWallet,
+    Recorders,
+    shareOneStyleSheet
+} from './harness';
+
+shareOneStyleSheet();
 
 vi.mock('src/app/utils/url-strategy-helpers', async importOriginal => ({
     ...(await importOriginal<object>()),
