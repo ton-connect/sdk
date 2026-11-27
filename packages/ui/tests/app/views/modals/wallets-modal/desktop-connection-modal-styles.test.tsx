@@ -2,16 +2,9 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { DesktopConnectionModal } from 'src/app/views/modals/wallets-modal/desktop-connection-modal';
 import { setThemeState, themeState } from 'src/app/state/theme-state';
-import { mountModal, OPENED, remoteWallet } from './harness';
+import { mountModal, OPENED, remoteWallet, shareOneStyleSheet } from './harness';
 
-// jsdom has no named access on window, so goober would give every rule a <style> of its own and
-// never dedupe; hand it the single sheet a browser finds, where insertion order decides ties.
-Object.assign(window, {
-    _goober: Object.assign(document.head.appendChild(document.createElement('style')), {
-        id: '_goober',
-        innerHTML: ' '
-    })
-});
+shareOneStyleSheet();
 
 // Kept apart from the other modal tests: goober inserts each rule once, so whatever rendered
 // earlier in the file decides which of two equally specific rules wins.
