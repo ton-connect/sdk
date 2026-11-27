@@ -1,5 +1,6 @@
 import { styled } from 'solid-styled-components';
 import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
+import { PRESS_TRANSITION } from 'src/app/styles/motion';
 
 const wrapperBorderRadius: BorderRadiusConfig = {
     m: '22px',
@@ -40,7 +41,7 @@ export const SliderStyled = styled.div<{ right: boolean }>`
 
     transform: ${props => (props.right ? 'translateX(100%)' : 'translateX(0)')};
 
-    transition: transform 0.13s ease-in-out;
+    transition: ${PRESS_TRANSITION};
 `;
 
 export const InputStyled = styled.input`
@@ -53,7 +54,7 @@ export const LabelStyled = styled.label<{ isActive: boolean }>`
 
     cursor: ${props => (props.isActive ? 'default' : 'pointer')};
 
-    transition: transform 0.13s ease-in-out;
+    transition: ${PRESS_TRANSITION};
 
     &:hover {
         transform: ${props => (props.isActive ? 'none' : 'scale(1.025)')};

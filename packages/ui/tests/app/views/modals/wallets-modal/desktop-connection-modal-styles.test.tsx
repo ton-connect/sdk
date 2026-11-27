@@ -50,10 +50,11 @@ describe('views/desktop-connection-modal: accent footer button styles', () => {
 
         expect(style.backgroundColor).toBe(cssColor(themeState.colors.telegramButton));
         expect(style.color).toBe(cssColor(themeState.colors.constant.white));
-        expect(style.height).toBe('52px');
+        expect(style.minHeight).toBe('54px');
         expect(style.borderRadius).toBe('100vh');
         expect(style.width).toBe('auto');
-        expect(style.padding).toBe('0px 24px');
+        expect(style.padding).toBe('8px 16px');
+        expect(style.maxWidth).toBe('336px');
         expect(style.marginBottom).toBe('24px');
         expect(button.querySelector('path')?.getAttribute('fill')).toBe('currentColor');
     });
@@ -66,7 +67,7 @@ describe('views/desktop-connection-modal: accent footer button styles', () => {
         expect(getComputedStyle(label.querySelector('svg')!).display).toBe('inline-block');
     });
 
-    it('lowers the laptop 1px onto the baseline and leaves the globe centred', () => {
+    it('lowers the laptop 1px below the globe, onto the text baseline', () => {
         const laptop = mountAccentButton().querySelector('svg')!;
         const globe = mountAccentButton(['ios', 'android', 'chrome']).querySelector('svg')!;
 

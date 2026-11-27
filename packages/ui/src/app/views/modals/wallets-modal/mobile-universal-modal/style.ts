@@ -1,6 +1,6 @@
+import { sheetIconButton } from 'src/app/components/icon-button/style';
 import { styled } from 'solid-styled-components';
 import {
-    Button,
     ConnectButton,
     Diamond,
     H1,
@@ -9,14 +9,18 @@ import {
     Image,
     TelegramConnectButton
 } from 'src/app/components';
-import { mediaNotTouch, mediaTouch } from 'src/app/styles/media';
 import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
+import { plainFill } from 'src/app/components/button/style';
+import { WalletImage } from 'src/app/components/wallet-item/wallet-image';
+import { mixColor } from 'src/app/utils/css';
+import { THEME } from 'src/models/THEME';
+import { EASE_STANDARD } from 'src/app/styles/motion';
 
 /** Both connect buttons span the modal, inset from its edges. */
 const fullWidth = `
-    margin-left: 28px;
-    margin-right: 28px;
-    width: calc(100% - 56px);
+    margin-left: 20px;
+    margin-right: 20px;
+    width: calc(100% - 40px);
 
     @media (max-width: 375px) {
         margin-left: 16px;
@@ -25,42 +29,11 @@ const fullWidth = `
     }
 `;
 
-const iconBorders: BorderRadiusConfig = {
-    m: '6px',
-    s: '6px',
+const toggleBorders: BorderRadiusConfig = {
+    m: '22px',
+    s: '12px',
     none: '0'
 };
-
-export const OtherOptionButton = styled.li`
-    width: 82px;
-    min-width: 82px;
-    height: 124px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 8px 4px;
-
-    text-align: center;
-    cursor: pointer;
-
-    transition: transform 0.1s ease-in-out;
-
-    ${mediaNotTouch} {
-        &:hover {
-            transform: scale(1.04);
-        }
-    }
-
-    &:active {
-        transform: scale(0.96);
-    }
-
-    ${mediaTouch} {
-        &:active {
-            transform: scale(0.92);
-        }
-    }
-`;
 
 export const H1Styled = styled(H1)`
     margin-top: 38px;
@@ -70,130 +43,57 @@ export const H1Styled = styled(H1)`
 
 export const TelegramDiamondStyled = styled(Diamond)`
     margin: 0 auto 4px;
+    filter: drop-shadow(0 8px 28px rgba(40, 120, 255, 0.45));
 `;
 
 /** Title of the Telegram-first screen, which has the diamond above it and no subtitle under it. */
 export const TelegramH1Styled = styled(H1)`
     margin-top: 0;
-    margin-bottom: 20px;
+    margin-bottom: 22px;
     padding: 0 24px;
+    font-size: 22px;
+    line-height: 28px;
+    letter-spacing: -0.35px;
 `;
 
 export const H2Styled = styled(H2)<{
     maxWidth?: number;
-    minHeight?: string;
     padding?: string;
     margin?: string;
 }>`
     margin: ${props => props.margin ?? '0 0 28px 0'};
     padding: ${props => props.padding ?? '0 24px'};
-    min-height: ${props => props.padding ?? '44px'};
     max-width: ${props => props.maxWidth}px;
     margin-left: ${props => (props.maxWidth ? 'auto' : '0px')};
     margin-right: ${props => (props.maxWidth ? 'auto' : '0px')};
+    font-size: 14px;
+    line-height: 18px;
 `;
 
-const ROW_FOLD_DURATION = '0.25s';
-const ROW_FOLD_TRANSITION = `${ROW_FOLD_DURATION} ease-out`;
-
-/**
- * Room the row toggle adds above its text, for a taller tap target. The heading's negative top
- * margin takes it back out of the gap under the button above, so the text sits where the plain
- * heading's text does.
- */
-const ROW_TOGGLE_TOP_INSET = '11px';
-
-/** The row heading of `isCompact`, which holds the toggle as an accordion heading does. */
-export const RowToggleHeadingStyled = styled(H2)`
-    display: flex;
-    justify-content: center;
-    max-width: 342px;
-    margin: -${ROW_TOGGLE_TOP_INSET} auto 0;
-    padding: 0;
-`;
-
-/** Reads as the heading it replaces; only the chevron after the text tells it apart. */
-export const RowToggleStyled = styled.button`
-    padding: ${ROW_TOGGLE_TOP_INSET} 24px 8px;
-    border: none;
-    background: none;
-    cursor: pointer;
-
-    font: inherit;
-    color: inherit;
-    text-align: inherit;
-`;
-
-/** Keeps the chevron on the line of the label's last word when the label wraps. */
-export const RowToggleTailStyled = styled.span`
-    white-space: nowrap;
-`;
-
-/** Points to the right while the row is folded, and down while it is open. */
-export const RowToggleChevronStyled = styled.span<{ expanded: boolean }>`
-    display: inline-block;
-    width: 16px;
-    height: 16px;
-    margin-left: 2px;
-    vertical-align: middle;
-    transform: rotate(${props => (props.expanded ? '90deg' : '0deg')});
-    transition: transform ${ROW_FOLD_TRANSITION};
-
-    @media (prefers-reduced-motion: reduce) {
-        transition: none;
-    }
-
-    > svg {
-        display: block;
-    }
-`;
-
-/**
- * Folds the row to no height at all. Grid rows can animate to and from the row's own height,
- * which `height` cannot. While folded, the row is hidden, so its tiles can neither be focused nor
- * reached by assistive technology; when it folds, it is only hidden once the animation ends.
- * The bottom padding keeps the folded toggle off the modal footer, as the open row's own padding
- * does. A margin would collapse out of the modal body and show in the footer's colour.
- */
-export const WalletsRowFoldStyled = styled.div<{ expanded: boolean }>`
-    display: grid;
-    grid-template-rows: ${props => (props.expanded ? '1fr' : '0fr')};
-    padding-bottom: ${props => (props.expanded ? '0' : '16px')};
-    visibility: ${props => (props.expanded ? 'visible' : 'hidden')};
-    transition:
-        grid-template-rows ${ROW_FOLD_TRANSITION},
-        padding-bottom ${ROW_FOLD_TRANSITION},
-        visibility 0s ${props => (props.expanded ? '0s' : ROW_FOLD_DURATION)};
-
-    @media (prefers-reduced-motion: reduce) {
-        transition: none;
-    }
-
-    > div {
-        min-height: 0;
-        overflow: hidden;
-    }
-`;
-
-export const ButtonStyled = styled(Button)`
-    display: block;
-    margin: 0 auto;
-`;
-
-/**
- * Stacks 12px above the Gram Wallet button. Without that button under it, it keeps the 24px the
- * Gram Wallet button would leave before the row heading.
- */
-export const TelegramButtonStyled = styled(TelegramConnectButton)<{ followedByButton?: boolean }>`
+export const TelegramButtonStyled = styled(TelegramConnectButton)`
     ${fullWidth}
-    margin-bottom: ${props => (props.followedByButton ? '12px' : '24px')};
+    margin-bottom: 10px;
 `;
 
-export const GramWalletButtonStyled = styled(ConnectButton)<{ transparent?: boolean }>`
+const iconBorders: BorderRadiusConfig = {
+    m: '6px',
+    s: '6px',
+    none: '0'
+};
+
+/**
+ * Gram Wallet's own button under Telegram's, with `withSecondaryButton`: the neutral pill of the
+ * modal's secondary buttons, or no fill at all when the wallets registry asks for a transparent one.
+ * Without the Telegram button it follows the title directly, and keeps the 22px the Telegram button
+ * would leave under it.
+ */
+export const GramWalletButtonStyled = styled(ConnectButton)<{
+    transparent?: boolean;
+    afterTitle?: boolean;
+}>`
     ${fullWidth}
-    margin-bottom: 24px;
-    background-color: ${props =>
-        props.transparent ? 'transparent' : props.theme!.colors.background.tint};
+    margin-top: ${props => (props.afterTitle ? '18px' : '0')};
+    ${props => (props.transparent ? 'background: transparent;' : plainFill(props.theme!))}
     color: ${props => props.theme!.colors.text.primary};
 `;
 
@@ -207,4 +107,109 @@ export const StyledLeftActionButton = styled(IconButton)`
     position: absolute;
     top: 16px;
     left: 16px;
+    ${sheetIconButton}
+`;
+
+/** With `isCompact`, the button under the promoted buttons that folds the wallets row away and back. */
+export const OtherWalletsToggleStyled = styled.button`
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    margin: 22px auto 10px;
+    padding: 0 16px 0 18px;
+    border-radius: ${props => toggleBorders[props.theme!.borderRadius]};
+    ${props => plainFill(props.theme!)}
+    color: ${props => props.theme!.colors.text.primary};
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 20px;
+    cursor: pointer;
+`;
+
+/**
+ * The first wallets of the row as a stack of icons before the toggle's label, the first one in
+ * front and the next ones tucked behind it in row order, each 2px smaller than the one before it (20,
+ * 18 and 16px). The front icon sits 18px from the toggle's left edge, where the label starts once
+ * the wallets are unfolded below and the stack fades and folds away. The 2px padding keeps the
+ * icons' rings clear of the clipping, and the negative margins take it back out of the layout.
+ */
+export const ToggleWalletsStyled = styled.span<{ open: boolean }>`
+    display: flex;
+    align-items: center;
+    isolation: isolate;
+    overflow: hidden;
+    padding: 2px;
+    margin: -2px ${props => (props.open ? '-8px' : '0')} -2px -2px;
+    max-width: ${props => (props.open ? '0' : '56px')};
+    opacity: ${props => (props.open ? 0 : 1)};
+    transition:
+        max-width 0.42s ${EASE_STANDARD},
+        margin 0.42s ${EASE_STANDARD},
+        opacity 0.24s ${EASE_STANDARD};
+
+    & > * {
+        flex-shrink: 0;
+    }
+
+    & > * + * {
+        margin-left: -10px;
+    }
+
+    & > :nth-child(1) {
+        z-index: 3;
+    }
+
+    & > :nth-child(2) {
+        z-index: 2;
+        width: 18px;
+        height: 18px;
+        border-radius: 5.5px;
+    }
+
+    & > :nth-child(3) {
+        width: 16px;
+        height: 16px;
+        border-radius: 5px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        transition: none;
+    }
+`;
+
+/**
+ * One icon of the stack, ringed in the colour of the pill under it so each icon stands clear of the
+ * one it covers.
+ */
+export const ToggleWalletImageStyled = styled(WalletImage)`
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    box-shadow: 0 0 0 2px
+        ${props =>
+            props.theme!.theme === THEME.DARK
+                ? mixColor(
+                      props.theme!.colors.background.tint,
+                      props.theme!.colors.icon.secondary,
+                      0.14
+                  )
+                : '#FFFFFF'};
+`;
+
+/** A small chevron beside the toggle's label that turns over as the wallets unfold. */
+export const ToggleChevronStyled = styled.span<{ open: boolean }>`
+    display: flex;
+
+    & > svg {
+        width: 12px;
+        height: 12px;
+    }
+
+    transition: transform 0.42s ${EASE_STANDARD};
+    transform: rotate(${props => (props.open ? '180deg' : '0deg')});
+
+    @media (prefers-reduced-motion: reduce) {
+        transition: none;
+    }
 `;

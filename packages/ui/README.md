@@ -979,7 +979,7 @@ tonConnectUI.uiOptions = {
 ```
 
 #### Fold the wallets row away
-On the mobile wallets screen, set `isCompact` to fold the wallets row away under the "Connect Telegram" button (and the Gram Wallet button, with `withSecondaryButton`). The "Or choose another app:" heading becomes an "Or choose another app ›" toggle that unfolds the row. When neither button is shown, the row is always shown. Default is `false`.
+On the mobile wallets screen, set `isCompact` to fold the wallets row away under the "Connect Telegram" button (and the Gram Wallet button, with `withSecondaryButton`). An "Other wallets" button, which shows the icons of the first wallets of the row, unfolds it in place of the "Or choose another app:" heading. When neither button is shown, or no wallet is left for the row, the row is always shown. The row starts folded each time the modal opens. Default is `false`.
 
 ```ts
 tonConnectUI.uiOptions = {
@@ -1028,7 +1028,6 @@ UI components:
 | Mobile selected wallet's modal page  | `[data-tc-wallets-modal-connection-mobile="true"]`  | Content of the selected wallet's modal page on mobile.                                                                |
 | Desktop selected wallet's modal page | `[data-tc-wallets-modal-connection-desktop="true"]` | Content of the selected wallet's modal page on desktop.                                                               |
 | Wallets list modal page              | `[data-tc-wallets-modal-list="true"]`               | Content of the modal page with all available wallets list (desktop and mobile).                                       |
-| Info modal page                      | `[data-tc-wallets-modal-info="true"]`               | Content of the modal page with "What is a wallet information".                                                        |
 | Action modal container               | `[data-tc-actions-modal-container="true"]`          | Container of the modal window that opens when you call `sendTransaction` or other action.                             |
 | Confirm transaction modal content    | `[data-tc-confirm-modal="true"]`                    | Content of the modal window asking for confirmation of the action in the wallet.                                      |
 | "Transaction sent" modal content     | `[data-tc-transaction-sent-modal="true"]`           | Content of the modal window informing that the transaction was successfully sent.                                     |

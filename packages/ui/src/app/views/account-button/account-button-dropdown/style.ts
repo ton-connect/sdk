@@ -1,5 +1,6 @@
 import { styled } from 'solid-styled-components';
 import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
+import { EASE_STANDARD, PRESS_TRANSITION } from 'src/app/styles/motion';
 
 const hoverBorders: BorderRadiusConfig = {
     m: '8px',
@@ -42,8 +43,8 @@ export const MenuButtonStyled = styled.button`
     cursor: pointer;
 
     transition:
-        background-color,
-        transform 0.1s ease-in-out;
+        background-color 0.2s ${EASE_STANDARD},
+        ${PRESS_TRANSITION};
 
     &:hover {
         background-color: ${props => props.theme!.colors.background.secondary};

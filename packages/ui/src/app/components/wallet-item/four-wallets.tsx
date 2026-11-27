@@ -1,19 +1,21 @@
 import { Component, For } from 'solid-js';
+import { useI18n } from '@solid-primitives/i18n';
 import { WalletItem } from './index';
 import { FourWalletsCard, FourWalletsImage } from './four-wallets.style';
 
 interface FourWallets {
-    labelLine1: string;
-    labelLine2: string;
     images: string[];
     onClick: () => void;
 }
 
+/** The tile that opens the full wallets list, labelled "View all wallets" in the modal's language. */
 export const FourWalletsItem: Component<FourWallets> = props => {
+    const [t] = useI18n();
+
     return (
         <WalletItem
-            name={props.labelLine1}
-            secondLine={props.labelLine2}
+            name={t('walletItem.viewAllLine1', {}, 'View all')}
+            secondLine={t('walletItem.viewAllLine2', {}, 'wallets')}
             icon={
                 <FourWalletsCard>
                     <For each={[0, 1, 2, 3]}>

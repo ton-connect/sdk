@@ -1,6 +1,8 @@
 import { styled } from 'solid-styled-components';
 import { Button, ErrorIcon, H1, H2, IconButton, Text } from 'src/app/components';
 import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
+import { sheetIconButton } from 'src/app/components/icon-button/style';
+import { sheetLayout } from 'src/app/styles/media';
 
 const borders: BorderRadiusConfig = {
     m: '16px',
@@ -23,6 +25,10 @@ export const StyledIconButton = styled(IconButton)`
     position: absolute;
     top: 16px;
     left: 16px;
+
+    ${sheetLayout} {
+        ${sheetIconButton}
+    }
 `;
 
 export const TitleStyled = styled(H1)`

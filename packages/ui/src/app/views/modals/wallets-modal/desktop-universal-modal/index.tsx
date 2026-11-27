@@ -86,14 +86,14 @@ export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = prop
             <H1 translationKey="walletModal.desktopUniversalModal.connectYourWallet">
                 Connect your wallet
             </H1>
-            <H2Styled translationKey="walletModal.desktopUniversalModal.scan">
-                Scan with your mobile wallet
-            </H2Styled>
             <QRCodeStyled
                 sourceUrl={addReturnStrategy(request()!, 'none')}
                 disableCopy={popupOpened()}
                 logo={<QrDiamond />}
             />
+            <H2Styled translationKey="walletModal.desktopUniversalModal.scan">
+                Scan with your mobile wallet
+            </H2Styled>
             <H2AvailableWalletsStyled translationKey="walletModal.desktopUniversalModal.availableWallets">
                 Available wallets
             </H2AvailableWalletsStyled>
@@ -109,8 +109,6 @@ export const DesktopUniversalModal: Component<DesktopUniversalModalProps> = prop
                     )}
                 </For>
                 <FourWalletsItem
-                    labelLine1="View all"
-                    labelLine2="wallets"
                     images={fourWalletsItem().map(i => i.imageUrl)}
                     onClick={() => props.onSelectAllWallets()}
                 />

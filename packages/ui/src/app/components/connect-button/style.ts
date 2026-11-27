@@ -1,6 +1,7 @@
 import { css, keyframes, styled } from 'solid-styled-components';
 import { BorderRadiusConfig } from 'src/app/models/border-radius-config';
 import { mediaNotTouch, mediaTouch } from 'src/app/styles/media';
+import { PRESS_TRANSITION } from 'src/app/styles/motion';
 
 // `100vh` always exceeds half the button's height, so the browser clamps it to a pill.
 // `none` still opts out of rounding entirely, as the dApp asked for.
@@ -14,10 +15,11 @@ const borders: BorderRadiusConfig = {
  * Geometry shared by the full-width connect buttons; each variant adds its own colours, and
  * each screen adds its own width and margins.
  *
- * The height is fixed rather than derived from padding so that icons of different sizes (the
+ * The height is set rather than derived from padding so that icons of different sizes (the
  * 15px Telegram glyph vs a 24px wallet icon) can't make one button taller than another. It
  * matches the tallest content — a 24px wallet icon plus 14px padding — so equalising grows the
- * shorter button instead of shrinking the taller one.
+ * shorter button instead of shrinking the taller one. It is a minimum, so text enlarged by the
+ * system can still grow the button instead of being cut.
  *
  * A plain `button` rather than `Button`: goober emits a rule once, so the `ButtonStyled` rule the
  * header connect button emitted earlier would outrank the colours each variant sets.
@@ -27,13 +29,13 @@ export const ConnectButtonStyled = styled.button`
     align-items: center;
     justify-content: center;
     width: 100%;
-    height: 52px;
+    min-height: 54px;
     border-radius: ${props => borders[props.theme!.borderRadius]};
     padding: 0 16px;
     border: none;
     cursor: pointer;
 
-    transition: transform 0.125s ease-in-out;
+    transition: ${PRESS_TRANSITION};
 
     ${mediaNotTouch} {
         &:hover {
@@ -59,9 +61,10 @@ export const ButtonLabelStyled = styled.span`
     justify-content: center;
     gap: 8px;
 
-    font-weight: 500;
-    font-size: 16px;
-    line-height: 20px;
+    font-weight: 600;
+    font-size: 17px;
+    line-height: 22px;
+    letter-spacing: -0.2px;
 `;
 
 // Crosses in the first 0.75 s of every 2 s
@@ -76,8 +79,9 @@ const shine = keyframes`
 `;
 
 /**
- * A light band crosses the button, then stays off it for as long, as on the upgrade buttons of the
- * Telegram apps. `--tc-shine-opacity` dims the band.
+ * A light band crosses the button twice once the modal has settled, as on the upgrade buttons of
+ * the Telegram apps, then stops: endless motion next to text distracts and fails WCAG 2.2.2.
+ * `--tc-shine-opacity` dims the band.
  */
 export const shinyClass = css`
     position: relative;
@@ -103,7 +107,8 @@ export const shinyClass = css`
             transparent 100%
         );
 
-        animation: ${shine} 2s ease-out infinite;
+        transform: translateX(-100%);
+        animation: ${shine} 2s ease-out 0.6s 2 both;
     }
 
     @media (prefers-reduced-motion: reduce) {

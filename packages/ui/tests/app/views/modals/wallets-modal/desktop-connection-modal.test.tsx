@@ -332,7 +332,7 @@ describe('views/desktop-connection-modal: lone footer chip', () => {
         expect(h.connect.mock.calls[1]![0]).toEqual({ jsBridgeKey: 'gramwallet' });
     });
 
-    it('leaves the bracketed note of the name to the title', () => {
+    it('drops the bracketed note of the name from the label and the title', () => {
         const wallet = {
             ...remoteWallet(WALT_APP_NAME, ['ios', 'android', 'macos', 'windows', 'linux']),
             name: 'Walt (ex. Wallet)'
@@ -340,7 +340,18 @@ describe('views/desktop-connection-modal: lone footer chip', () => {
         const h = mount(wallet);
 
         expect(accentLabels(h.root)).toEqual(['Open Walt Desktop']);
-        expect(h.root.querySelector('h1')?.textContent).toBe('Walt (ex. Wallet)');
+        expect(h.root.querySelector('h1')?.textContent).toBe('Walt');
+    });
+
+    it('says it opens Telegram Desktop for a wallet that lives in Telegram', () => {
+        const wallet = {
+            ...remoteWallet(WALT_APP_NAME, ['ios', 'android', 'macos', 'windows', 'linux']),
+            name: 'Walt (ex. Wallet)',
+            universalLink: 'https://t.me/walt?attach=wallet'
+        };
+        const h = mount(wallet);
+
+        expect(accentLabels(h.root)).toEqual(['Open in Telegram Desktop']);
     });
 
     it('keeps two chips grey', () => {

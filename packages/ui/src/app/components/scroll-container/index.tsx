@@ -1,6 +1,6 @@
-import { Component, createSignal, JSXElement } from 'solid-js';
+import { Component, createSignal, JSXElement, onCleanup } from 'solid-js';
 import { Styleable } from 'src/app/models/styleable';
-import { ScrollContainerStyled, ScrollDivider } from './style';
+import { ScrollContainerStyled } from './style';
 import windowHeight from 'src/app/hooks/windowSize';
 import { isMobile } from 'src/app/hooks/isMobile';
 
@@ -10,10 +10,22 @@ export interface ScrollContainerProps extends Styleable {
 }
 
 export const ScrollContainer: Component<ScrollContainerProps> = props => {
-    const [scrolled, setScrolled] = createSignal(false);
+    const [fadeTop, setFadeTop] = createSignal(false);
+    const [fadeBottom, setFadeBottom] = createSignal(false);
 
-    const onScroll = (e: Event): void => {
-        setScrolled((e.target as HTMLUListElement).scrollTop > 0);
+    // An edge fades only while there is more to scroll past it.
+    const updateEdges = (el: HTMLElement): void => {
+        setFadeTop(el.scrollTop > 0);
+        setFadeBottom(el.scrollTop + el.clientHeight < el.scrollHeight - 1);
+    };
+
+    const watchEdges = (el: HTMLDivElement): void => {
+        requestAnimationFrame(() => updateEdges(el));
+        if (typeof ResizeObserver !== 'undefined') {
+            const observer = new ResizeObserver(() => updateEdges(el));
+            observer.observe(el);
+            onCleanup(() => observer.disconnect());
+        }
     };
 
     const offset = (): number => (isMobile() ? 150 : 200);
@@ -22,11 +34,15 @@ export const ScrollContainer: Component<ScrollContainerProps> = props => {
         props.maxHeight !== undefined ? `${props.maxHeight}px` : `${windowHeight() - offset()}px`;
 
     return (
-        <>
-            <ScrollDivider isShown={scrolled()} />
-            <ScrollContainerStyled maxHeight={maxHeight()} onScroll={onScroll} class={props.class}>
-                {props.children}
-            </ScrollContainerStyled>
-        </>
+        <ScrollContainerStyled
+            ref={watchEdges}
+            maxHeight={maxHeight()}
+            fadeTop={fadeTop()}
+            fadeBottom={fadeBottom()}
+            onScroll={e => updateEdges(e.currentTarget)}
+            class={props.class}
+        >
+            {props.children}
+        </ScrollContainerStyled>
     );
 };

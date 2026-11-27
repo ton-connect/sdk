@@ -1,6 +1,7 @@
 import { Component, createSignal, For, Show } from 'solid-js';
 import {
     DesktopSelectWalletModalStyled,
+    FirstWalletsUl,
     WalletsUl,
     H1Styled,
     StyledIconButton,
@@ -23,6 +24,12 @@ import { isInTMA } from 'src/app/utils/tma-api';
 import { isWalletConnectInitialized } from '@tonconnect/sdk';
 import { WALLET_CONNECT_APP_NAME, WALLET_CONNECT_WALLET_NAME } from 'src/app/env/WALLET_CONNECT';
 import { IMG } from 'src/app/env/IMG';
+import { TELEGRAM_WALLET_APP_NAME } from 'src/app/env/WALLET_APP_NAMES';
+import { EASE_STANDARD } from 'src/app/styles/motion';
+
+function hasTelegram(wallets: UIWalletInfo[]): boolean {
+    return wallets.some(wallet => wallet.appName === TELEGRAM_WALLET_APP_NAME);
+}
 
 export interface DesktopSelectWalletModalProps {
     walletsList: UIWalletInfo[];
@@ -105,12 +112,13 @@ export const AllWalletsListModal: Component<DesktopSelectWalletModalProps> = pro
             <StyledIconButton icon="arrow" onClick={() => props.onBack()} />
             <H1Styled translationKey="walletModal.wallets">Wallets</H1Styled>
             <ScrollContainer maxHeight={maxHeight()}>
-                <WalletsUl>
+                <FirstWalletsUl>
                     <For each={supportedWallets()}>
                         {wallet => (
                             <li>
                                 <WalletLabeledItemStyled
                                     wallet={wallet}
+                                    besideTelegram={hasTelegram(supportedWallets())}
                                     onClick={() => props.onSelect(wallet)}
                                 />
                             </li>
@@ -127,7 +135,7 @@ export const AllWalletsListModal: Component<DesktopSelectWalletModalProps> = pro
                             onClick={connectWalletConnect}
                         />
                     </Show>
-                </WalletsUl>
+                </FirstWalletsUl>
                 <Show when={unsupportedWallets().length > 0 && props.featureCheckMode !== 'hide'}>
                     <WalletsNotSupportedNotifier>
                         <WalletsNotSupportedNotifierText translationKey="walletModal.allWallets.walletsBelowNotSupported">
@@ -142,6 +150,7 @@ export const AllWalletsListModal: Component<DesktopSelectWalletModalProps> = pro
                                 <li>
                                     <WalletLabeledItemStyled
                                         wallet={wallet}
+                                        besideTelegram={hasTelegram(unsupportedWallets())}
                                         onClick={() => handleSelectWallet(wallet)}
                                         withOpacity={props.featureCheckMode === 'strict'}
                                     />
@@ -158,8 +167,8 @@ export const AllWalletsListModal: Component<DesktopSelectWalletModalProps> = pro
                                     { opacity: 1, transform: 'translate(-50%, 0)' }
                                 ],
                                 {
-                                    duration: 150,
-                                    easing: 'ease-out'
+                                    duration: 220,
+                                    easing: EASE_STANDARD
                                 }
                             );
                         }}
@@ -171,8 +180,8 @@ export const AllWalletsListModal: Component<DesktopSelectWalletModalProps> = pro
                                     { opacity: 0, transform: 'translate(-50%, 44px)' }
                                 ],
                                 {
-                                    duration: 150,
-                                    easing: 'ease-out'
+                                    duration: 220,
+                                    easing: EASE_STANDARD
                                 }
                             ).finished.then(() => {
                                 done();

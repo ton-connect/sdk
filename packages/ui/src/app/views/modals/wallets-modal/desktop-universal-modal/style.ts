@@ -8,12 +8,6 @@ const borders: BorderRadiusConfig = {
     none: '0'
 };
 
-const hoverBorders: BorderRadiusConfig = {
-    m: '8px',
-    s: '4px',
-    none: '0'
-};
-
 export const DesktopUniversalModalStyled = styled.div`
     display: flex;
     flex-direction: column;
@@ -21,10 +15,12 @@ export const DesktopUniversalModalStyled = styled.div`
     padding-bottom: 16px;
 `;
 
+/** The caption under the QR code, as on the phone. */
 export const H2Styled = styled(H2)`
     max-width: 320px;
-    margin-top: 2px;
-    margin-bottom: 20px;
+    margin-bottom: 28px;
+    font-size: 13px;
+    line-height: 17px;
 `;
 
 export const H2AvailableWalletsStyled = styled(H2)`
@@ -32,7 +28,8 @@ export const H2AvailableWalletsStyled = styled(H2)`
 `;
 
 export const QRCodeStyled = styled(QRCode)`
-    margin-bottom: 24px;
+    margin-top: 24px;
+    margin-bottom: 14px;
 `;
 
 export const WalletsContainerStyled = styled.ul`
@@ -75,29 +72,6 @@ export const PopupWrapperStyled = styled.ul`
     background-color: ${props => props.theme!.colors.background.primary};
     border-radius: ${props => borders[props.theme!.borderRadius]};
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.16);
-`;
-
-export const ExtensionLiStyled = styled.li`
-    padding: 8px;
-
-    display: flex;
-    align-items: center;
-    gap: 8px;
-
-    cursor: pointer;
-    border-radius: ${props => hoverBorders[props.theme!.borderRadius]};
-
-    transition:
-        background-color,
-        transform 0.1s ease-in-out;
-
-    &:hover {
-        background-color: ${props => props.theme!.colors.background.secondary};
-    }
-
-    &:active {
-        transform: scale(0.96);
-    }
 `;
 
 export const ImageStyled = styled(Image)`

@@ -1,27 +1,28 @@
+import { sheetLayout } from 'src/app/styles/media';
+import { sheetHeaderTitle, sheetIconButton } from 'src/app/components/icon-button/style';
 import { styled } from 'solid-styled-components';
 import { Button, H1, H2, IconButton, WalletLabeledItem } from 'src/app/components';
-import { media } from 'src/app/styles/media';
 
+/**
+ * The list scrolls right down to the sheet's bottom edge, fading out there, with no empty band under
+ * it: the negative margin takes back the modal's bottom padding.
+ */
 export const DesktopSelectWalletModalStyled = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin-bottom: -24px;
+
+    ${sheetLayout} {
+        margin-bottom: -16px;
+    }
 `;
 
 export const H1Styled = styled(H1)`
-    margin-bottom: 18px;
-`;
+    margin-bottom: 2px;
 
-export const ScrollDivider = styled.div<{ isShown: boolean }>`
-    height: 1px;
-    margin: 0 -24px;
-    width: calc(100% + 48px);
-    opacity: 0.12;
-    background: ${props => (props.isShown ? props.theme!.colors.icon.secondary : 'transparent')};
-    transition: background 0.15s ease-in-out;
-
-    ${media('mobile')} {
-        width: 100%;
+    ${sheetLayout} {
+        ${sheetHeaderTitle}
     }
 `;
 
@@ -33,7 +34,7 @@ export const WalletsUl = styled.ul`
     row-gap: 8px;
     justify-content: center;
     width: 100%;
-    padding: 0 0 16px;
+    padding: 0 0 24px;
     align-self: flex-start;
     max-width: 400px;
     margin: 0 auto;
@@ -48,11 +49,11 @@ export const WalletsUl = styled.ul`
         width: 100%;
     }
 
-    ${media('mobile')} {
+    ${sheetLayout} {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 0;
-        padding: 8px 12px 16px;
+        padding: 8px 12px 24px;
         max-width: none;
 
         > li {
@@ -76,6 +77,23 @@ export const StyledIconButton = styled(IconButton)`
     position: absolute;
     top: 16px;
     left: 16px;
+
+    ${sheetLayout} {
+        ${sheetIconButton}
+    }
+`;
+
+/**
+ * The first list starts with the gap under the title inside the scrolling area rather than above
+ * it, so on the phone the glow behind Gram Wallet's icon, when Telegram is not beside it, is not
+ * cut off at the area's top edge.
+ */
+export const FirstWalletsUl = styled(WalletsUl)`
+    padding-top: 16px;
+
+    ${sheetLayout} {
+        padding-top: 24px;
+    }
 `;
 
 export const WalletLabeledItemStyled = styled(WalletLabeledItem)<{ withOpacity?: boolean }>`
@@ -92,7 +110,7 @@ export const WalletsNotSupportedNotifier = styled.div`
     color: ${props => props.theme!.colors.text.secondary};
     background: ${props => props.theme!.colors.background.tint};
 
-    ${media('mobile')} {
+    ${sheetLayout} {
         margin-left: 16px;
         margin-right: 16px;
     }

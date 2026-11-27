@@ -19,6 +19,7 @@ import { Transition } from 'solid-transition-group';
 import { useTheme } from 'solid-styled-components';
 import { globalStylesTag } from 'src/app/styles/global-styles';
 import { animate } from 'src/app/utils/animate';
+import { EASE_STANDARD } from 'src/app/styles/motion';
 
 interface AccountButtonProps {}
 
@@ -109,7 +110,7 @@ export const AccountButton: Component<AccountButtonProps> = () => {
                             translationKey="button.connectWallet"
                             fontSize="15px"
                             lineHeight="18px"
-                            fontWeight="590"
+                            fontWeight="500"
                             color={theme.colors.connectButton.foreground}
                         >
                             Connect wallet
@@ -124,7 +125,7 @@ export const AccountButton: Component<AccountButtonProps> = () => {
                             data-tc-dropdown-button="true"
                             scale="s"
                         >
-                            <Text fontSize="15px" fontWeight="590" lineHeight="18px">
+                            <Text fontSize="15px" fontWeight="500" lineHeight="18px">
                                 {normalizedAddress()}
                             </Text>
                             <ArrowIcon direction="bottom" />
@@ -149,7 +150,8 @@ export const AccountButton: Component<AccountButtonProps> = () => {
                                                 { opacity: 1, transform: 'translateY(0)' }
                                             ],
                                             {
-                                                duration: 150
+                                                duration: 220,
+                                                easing: EASE_STANDARD
                                             }
                                         );
                                     }}
@@ -161,7 +163,8 @@ export const AccountButton: Component<AccountButtonProps> = () => {
                                                 { opacity: 0, transform: 'translateY(-8px)' }
                                             ],
                                             {
-                                                duration: 150
+                                                duration: 220,
+                                                easing: EASE_STANDARD
                                             }
                                         );
                                         a.finished.then(done);

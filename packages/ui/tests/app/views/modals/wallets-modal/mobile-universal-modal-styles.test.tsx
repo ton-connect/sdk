@@ -63,43 +63,59 @@ function mountScreen(isButtonTransparent = false, withSecondaryButton = true): H
     return h.root;
 }
 
-describe('views/mobile-universal-modal: promoted button styles', () => {
+describe('views/mobile-universal-modal: Telegram button styles', () => {
     it('keeps its own colours and shape when the dApp rendered a small primary button first', () => {
         disposers.push(mountModal(() => <Button scale="s">Connect wallet</Button>).dispose);
-        const root = mountScreen(false);
+        const root = mountScreen();
 
         const telegram = getComputedStyle(buttonLabelled(root, 'Connect Telegram'));
         expect(telegram.backgroundColor).toBe(cssColor(themeState.colors.telegramButton));
         expect(telegram.color).toBe(cssColor(themeState.colors.constant.white));
         expect(telegram.display).toBe('flex');
-        expect(telegram.height).toBe('52px');
-
-        const gram = getComputedStyle(buttonLabelled(root, 'gramwallet'));
-        expect(gram.backgroundColor).toBe(cssColor(themeState.colors.background.tint));
-        expect(gram.color).toBe(cssColor(themeState.colors.text.primary));
-        expect(gram.display).toBe('flex');
+        expect(telegram.minHeight).toBe('54px');
     });
 
-    it('drops the Gram Wallet fill when the registry marks the button transparent', () => {
-        const gram = getComputedStyle(buttonLabelled(mountScreen(true), 'gramwallet'));
-
-        expect(gram.backgroundColor).toBe('rgba(0, 0, 0, 0)');
-        expect(gram.color).toBe(cssColor(themeState.colors.text.primary));
-    });
-
-    it('stacks Connect Telegram close above the Gram Wallet button', () => {
+    it('stacks Connect Telegram 10px above the Gram Wallet button', () => {
         const root = mountScreen();
         const telegram = getComputedStyle(buttonLabelled(root, 'Connect Telegram'));
-        const gram = getComputedStyle(buttonLabelled(root, 'gramwallet'));
 
-        expect(telegram.marginBottom).toBe('12px');
-        expect(gram.marginBottom).toBe('24px');
+        expect(telegram.marginBottom).toBe('10px');
+        expect(buttonLabelled(root, 'gramwallet')).toBeTruthy();
     });
 
-    it('keeps the Gram Wallet button gap under Connect Telegram when it is the only button', () => {
+    it('fills the Gram Wallet button unless the wallets registry asks for a transparent one', () => {
+        const filled = getComputedStyle(buttonLabelled(mountScreen(false), 'gramwallet'));
+        const transparent = getComputedStyle(buttonLabelled(mountScreen(true), 'gramwallet'));
+
+        expect(filled.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
+        expect(transparent.backgroundColor).toBe('rgba(0, 0, 0, 0)');
+    });
+
+    it('keeps the 22px gap under the title above the Gram Wallet button when Telegram is not offered', () => {
+        setAppState({ withSecondaryButton: true });
+        const wallet = (appName: string, supported = true): UIWalletInfo => ({
+            ...remoteWallet(appName, ['ios', 'android']),
+            isSupportRequiredFeatures: supported
+        });
+        const h = mountModal(() => (
+            <MobileUniversalModal
+                walletsList={[wallet('telegram', false), wallet('gramwallet'), wallet('tonkeeper')]}
+                additionalRequest={{}}
+                walletModalState={OPENED}
+                onSelect={() => {}}
+                onSelectAllWallets={() => {}}
+            />
+        ));
+        disposers.push(h.dispose);
+
+        expect(getComputedStyle(buttonLabelled(h.root, 'gramwallet')).marginTop).toBe('18px');
+        expect(getComputedStyle(buttonLabelled(mountScreen(), 'gramwallet')).marginTop).toBe('0px');
+    });
+
+    it('keeps the same gap under Connect Telegram without the Gram Wallet button', () => {
         const root = mountScreen(false, false);
         const telegram = getComputedStyle(buttonLabelled(root, 'Connect Telegram'));
 
-        expect(telegram.marginBottom).toBe('24px');
+        expect(telegram.marginBottom).toBe('10px');
     });
 });

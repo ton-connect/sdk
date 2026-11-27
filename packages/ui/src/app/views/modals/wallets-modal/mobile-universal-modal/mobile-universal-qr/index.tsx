@@ -19,9 +19,6 @@ export const MobileUniversalQR: Component<MobileUniversalQRProps> = props => {
             <H1Styled translationKey="walletModal.mobileUniversalModal.connectYourWallet">
                 Connect your TON wallet
             </H1Styled>
-            <H2Styled translationKey="walletModal.mobileUniversalModal.scan">
-                Scan with your mobile wallet
-            </H2Styled>
             <QrCodeWrapper>
                 <QRCode
                     logo={<QrDiamond />}
@@ -29,6 +26,9 @@ export const MobileUniversalQR: Component<MobileUniversalQRProps> = props => {
                     disableCopy
                 />
             </QrCodeWrapper>
+            <H2Styled translationKey="walletModal.mobileUniversalModal.scan">
+                Scan with your mobile wallet
+            </H2Styled>
             <ButtonsWrapper>
                 <ActionButton appearance="secondary" onClick={() => props.onOpenLink()}>
                     <Translation translationKey="walletModal.mobileUniversalModal.openLink">

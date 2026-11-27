@@ -17,7 +17,6 @@ import {
     createSignal,
     Match,
     onCleanup,
-    Show,
     Switch,
     useContext
 } from 'solid-js';
@@ -36,10 +35,10 @@ import { trackWalletPick } from 'src/app/utils/wallet-selection';
 import { isMobile, updateIsMobile } from 'src/app/hooks/isMobile';
 import { AllWalletsListModal } from 'src/app/views/modals/wallets-modal/all-wallets-list-modal';
 import { LoaderIcon } from 'src/app/components';
+import { Crossfade } from 'src/app/components/crossfade';
 import { LoadableReady } from 'src/models/loadable';
 import { UIWalletInfo } from 'src/app/models/ui-wallet-info';
 import { DesktopConnectionModal } from 'src/app/views/modals/wallets-modal/desktop-connection-modal';
-import { InfoModal } from 'src/app/views/modals/wallets-modal/info-modal';
 import { MobileConnectionModal } from 'src/app/views/modals/wallets-modal/mobile-connection-modal';
 import { MobileUniversalModal } from 'src/app/views/modals/wallets-modal/mobile-universal-modal';
 import { DesktopUniversalModal } from 'src/app/views/modals/wallets-modal/desktop-universal-modal';
@@ -62,7 +61,6 @@ export const WalletsModal: Component = () => {
         } else {
             setSelectedWalletInfo(null);
             setSelectedTab('universal');
-            setInfoTab(false);
             setIsWalletsRowUnfolded(false);
         }
     });
@@ -96,7 +94,6 @@ export const WalletsModal: Component = () => {
         'missing-features' | 'not-supported' | null
     >(null);
     const [selectedTab, setSelectedTab] = createSignal<'universal' | 'all-wallets'>('universal');
-    const [infoTab, setInfoTab] = createSignal(false);
     // Kept here rather than on the mobile screen, which is rebuilt every time the user comes back
     // to it, so the folded row stays open until the modal closes.
     const [isWalletsRowUnfolded, setIsWalletsRowUnfolded] = createSignal(false);
@@ -106,13 +103,18 @@ export const WalletsModal: Component = () => {
         return 'type' in state && state.type === 'wallet-not-support-feature';
     });
 
+    // While the list is fetched again on opening, the one fetched before stays on screen, so the
+    // modal does not show its loading screen for a moment and crossfade back
     const walletsList = createMemo<UIWalletInfo[] | null>(() => {
-        if (fetchedWalletsList.state !== 'ready') {
+        if (fetchedWalletsList.state !== 'ready' && fetchedWalletsList.state !== 'refreshing') {
             return null;
         }
 
         let walletsList = shuffleRankTies(
-            applyWalletsListConfiguration(fetchedWalletsList(), appState.walletsListConfiguration),
+            applyWalletsListConfiguration(
+                fetchedWalletsList.latest!,
+                appState.walletsListConfiguration
+            ),
             replayRankTieDraws()
         );
 
@@ -236,7 +238,6 @@ export const WalletsModal: Component = () => {
     onCleanup(() => {
         setSelectedWalletInfo(null);
         setSelectedWalletError(null);
-        setInfoTab(false);
     });
 
     onCleanup(unsubscribe);
@@ -246,80 +247,69 @@ export const WalletsModal: Component = () => {
             opened={getWalletsModalIsOpened()}
             enableAndroidBackHandler={appState.enableAndroidBackHandler}
             onClose={() => onClose('action-cancelled')}
-            onClickQuestion={() => setInfoTab(v => !v)}
-            showFooter={!walletsModalIsWalletNotSupportFeature()}
             data-tc-wallets-modal-container="true"
         >
-            <Show when={infoTab()}>
-                <InfoModal onBackClick={() => setInfoTab(false)} />
-            </Show>
-
-            <Show when={!infoTab()}>
-                <Show when={additionalRequestLoading() || !walletsList()}>
-                    <H1Styled translationKey="walletModal.loading">
-                        Wallets list is loading
-                    </H1Styled>
-                    <LoaderContainerStyled>
-                        <LoaderIcon size="m" />
-                    </LoaderContainerStyled>
-                </Show>
-
-                <Show when={!additionalRequestLoading() && walletsList()}>
-                    <Switch>
-                        <Match when={walletsModalIsWalletNotSupportFeature()}>
-                            <DesktopFeatureNotSupportModal
-                                walletsList={walletsList()!}
-                                currentWallet={tonConnectUI?.wallet as Wallet}
-                                onSelect={onSelectWallet}
-                                onSelectAllWallets={onSelectAllWallets}
-                                onDisconnect={() => connector.disconnect().catch(e => logDebug(e))}
-                                walletsModalState={
-                                    walletsModalState() as ChooseSupportedFeatureWalletsModal
-                                }
-                                onClose={() => onClose('action-cancelled')}
-                            />
-                        </Match>
-                        <Match when={selectedWalletInfo()}>
-                            <Dynamic
-                                component={
-                                    isMobile() ? MobileConnectionModal : DesktopConnectionModal
-                                }
-                                walletsModalState={walletsModalState()}
-                                wallet={selectedWalletInfo()! as WalletInfoRemote}
-                                additionalRequest={additionalRequest()}
-                                selectionSource="manual"
-                                onBackClick={clearSelectedWalletInfo}
-                                defaultError={selectedWalletError()}
-                            />
-                        </Match>
-                        <Match when={selectedTab() === 'universal'}>
-                            <Dynamic
-                                component={
-                                    isMobile() ? MobileUniversalModal : DesktopUniversalModal
-                                }
-                                onSelect={wallet => selectWallet(wallet, 'universal-modal')}
-                                walletModalState={walletsModalState()}
-                                walletsList={walletsList()!}
-                                additionalRequest={additionalRequest()!}
-                                onSelectAllWallets={onSelectAllWallets}
-                                rowUnfolded={isWalletsRowUnfolded()}
-                                onRowUnfoldedChange={setIsWalletsRowUnfolded}
-                            />
-                        </Match>
-                        <Match when={selectedTab() === 'all-wallets'}>
-                            <AllWalletsListModal
-                                walletsList={walletsList()!}
-                                featureCheckMode={
-                                    tonConnectUI?.walletsRequiredFeatures ? 'strict' : 'soft'
-                                }
-                                onBack={onSelectUniversal}
-                                traceId={walletsModalState().traceId}
-                                onSelect={wallet => selectWallet(wallet, 'all-wallets-list')}
-                            />
-                        </Match>
-                    </Switch>
-                </Show>
-            </Show>
+            <Crossfade>
+                <Switch>
+                    <Match when={additionalRequestLoading() || !walletsList()}>
+                        <div>
+                            <H1Styled translationKey="walletModal.loading">
+                                Wallets list is loading
+                            </H1Styled>
+                            <LoaderContainerStyled>
+                                <LoaderIcon size="m" />
+                            </LoaderContainerStyled>
+                        </div>
+                    </Match>
+                    <Match when={walletsModalIsWalletNotSupportFeature()}>
+                        <DesktopFeatureNotSupportModal
+                            walletsList={walletsList()!}
+                            currentWallet={tonConnectUI?.wallet as Wallet}
+                            onSelect={onSelectWallet}
+                            onSelectAllWallets={onSelectAllWallets}
+                            onDisconnect={() => connector.disconnect().catch(e => logDebug(e))}
+                            walletsModalState={
+                                walletsModalState() as ChooseSupportedFeatureWalletsModal
+                            }
+                            onClose={() => onClose('action-cancelled')}
+                        />
+                    </Match>
+                    <Match when={selectedWalletInfo()}>
+                        <Dynamic
+                            component={isMobile() ? MobileConnectionModal : DesktopConnectionModal}
+                            walletsModalState={walletsModalState()}
+                            wallet={selectedWalletInfo()! as WalletInfoRemote}
+                            additionalRequest={additionalRequest()}
+                            selectionSource="manual"
+                            onBackClick={clearSelectedWalletInfo}
+                            defaultError={selectedWalletError()}
+                        />
+                    </Match>
+                    <Match when={selectedTab() === 'universal'}>
+                        <Dynamic
+                            component={isMobile() ? MobileUniversalModal : DesktopUniversalModal}
+                            onSelect={wallet => selectWallet(wallet, 'universal-modal')}
+                            walletModalState={walletsModalState()}
+                            walletsList={walletsList()!}
+                            additionalRequest={additionalRequest()!}
+                            onSelectAllWallets={onSelectAllWallets}
+                            rowUnfolded={isWalletsRowUnfolded()}
+                            onRowUnfoldedChange={setIsWalletsRowUnfolded}
+                        />
+                    </Match>
+                    <Match when={selectedTab() === 'all-wallets'}>
+                        <AllWalletsListModal
+                            walletsList={walletsList()!}
+                            featureCheckMode={
+                                tonConnectUI?.walletsRequiredFeatures ? 'strict' : 'soft'
+                            }
+                            onBack={onSelectUniversal}
+                            traceId={walletsModalState().traceId}
+                            onSelect={wallet => selectWallet(wallet, 'all-wallets-list')}
+                        />
+                    </Match>
+                </Switch>
+            </Crossfade>
         </StyledModal>
     );
 };

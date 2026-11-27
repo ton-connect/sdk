@@ -1,10 +1,20 @@
 import { styled } from 'solid-styled-components';
-import { media } from 'src/app/styles/media';
 
-export const ScrollContainerStyled = styled.div<{ maxHeight: string }>`
+/**
+ * Content fades out at an edge it can still scroll past, as in the iOS lists, instead of being
+ * cut by a hard line or a divider.
+ */
+export const ScrollContainerStyled = styled.div<{
+    maxHeight: string;
+    fadeTop: boolean;
+    fadeBottom: boolean;
+}>`
     width: 100%;
     overflow-y: auto;
     max-height: ${props => props.maxHeight};
+
+    -webkit-mask-image: ${props => edgeMask(props.fadeTop, props.fadeBottom)};
+    mask-image: ${props => edgeMask(props.fadeTop, props.fadeBottom)};
 
     scrollbar-width: none;
     &&::-webkit-scrollbar {
@@ -20,16 +30,13 @@ export const ScrollContainerStyled = styled.div<{ maxHeight: string }>`
     }
 `;
 
-export const ScrollDivider = styled.div<{ isShown: boolean }>`
-    height: 1px;
-    margin: 0 -24px;
-    width: calc(100% + 48px);
-    opacity: 0.08;
-    background: ${props => (props.isShown ? props.theme!.colors.icon.secondary : 'transparent')};
-    transition: background 0.15s ease-in-out;
-
-    ${media('mobile')} {
-        width: 100%;
-        margin: 0;
+function edgeMask(top: boolean, bottom: boolean): string {
+    if (!top && !bottom) {
+        return 'none';
     }
-`;
+    return `linear-gradient(
+        to bottom,
+        ${top ? 'transparent 0, #000 16px' : '#000 0'},
+        ${bottom ? '#000 calc(100% - 28px), transparent 100%' : '#000 100%'}
+    )`;
+}

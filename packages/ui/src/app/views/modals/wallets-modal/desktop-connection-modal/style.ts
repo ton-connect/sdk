@@ -17,7 +17,7 @@ export const DesktopConnectionModalStyled = styled.div`
 
 export const BodyStyled = styled.div<{ qr: boolean }>`
     flex: 1;
-    margin-top: ${props => (props.qr ? '0' : '18px')};
+    margin-top: ${props => (props.qr ? '24px' : '18px')};
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -25,8 +25,16 @@ export const BodyStyled = styled.div<{ qr: boolean }>`
     min-height: 232px;
 `;
 
+/** What the body shows for the chosen way to connect, centred in it as the body centres its content. */
+export const ModeStyled = styled.div`
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+`;
+
 export const QRCodeStyled = styled(QRCode)`
-    margin-bottom: 24px;
+    margin-bottom: 14px;
 `;
 
 export const H1Styled = styled(H1)`
@@ -34,10 +42,16 @@ export const H1Styled = styled(H1)`
     margin: 0 auto 2px;
 `;
 
+/**
+ * The caption under the QR code, as on the phone: what to scan it with. It takes the body's full
+ * width, so the longer instruction with the wallet's name fits on two lines.
+ */
 export const H2Styled = styled(H2)`
-    max-width: 288px;
+    max-width: 304px;
     text-align: center;
-    margin: 0 auto 20px;
+    margin: 0 auto 24px;
+    font-size: 13px;
+    line-height: 17px;
 `;
 
 export const StyledIconButton = styled(IconButton)`
@@ -63,15 +77,16 @@ export const FooterButton = styled(Button)`
 
 /**
  * The only footer chip under the QR, drawn as the mobile screen's "Connect Telegram" button. It
- * hugs its label instead of spanning the modal, and keeps the chips' gap below it.
+ * hugs its label, no wider than the QR card above it, and keeps the chips' gap below it.
  *
- * A long wallet name can wrap the label to two lines, which the button's height fits. The icon
+ * A long wallet name can wrap the label to two lines, and the button grows to fit them. The icon
  * then flows with the text, so it stays next to the first word instead of alone at the edge, and
  * both lines stay centred.
  */
 export const AccentFooterButton = styled(TelegramConnectButton)<{ lowerIcon?: boolean }>`
     width: auto;
-    padding: 0 24px;
+    max-width: 336px;
+    padding: 8px 16px;
     margin-bottom: 24px;
 
     & > span {
@@ -83,8 +98,9 @@ export const AccentFooterButton = styled(TelegramConnectButton)<{ lowerIcon?: bo
     & > span > svg {
         display: inline-block;
         vertical-align: top;
-        /* Centred in the 20px line. lowerIcon takes an icon whose glyph leaves more room below it
-           than above, the laptop, 1px further down, so that its base sits on the text baseline. */
+        /* Centred on the letters of the label's 22px line. lowerIcon takes an icon whose glyph
+           leaves more room below it than above, the laptop, 1px further down, so that its base
+           stands on the text baseline. */
         margin: ${props => (props.lowerIcon ? '3px' : '2px')} 8px 0 0;
     }
 `;

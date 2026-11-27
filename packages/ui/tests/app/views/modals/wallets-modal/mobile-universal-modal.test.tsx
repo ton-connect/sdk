@@ -125,7 +125,7 @@ describe('views/mobile-universal-modal: universal link', () => {
     });
 });
 
-describe('views/mobile-universal-modal: promoted wallets', () => {
+describe('views/mobile-universal-modal: Telegram and Gram Wallet', () => {
     it.each([
         ['telegram', 'Connect Telegram'],
         ['gramwallet', 'gramwallet']
@@ -291,10 +291,9 @@ describe('views/mobile-universal-modal: compact row', () => {
         return root.querySelector<HTMLButtonElement>('[data-tc-wallets-row-toggle="true"]');
     }
 
-    /** Whether the tiles are hidden, which also keeps them out of the tab order. */
+    /** Whether the row is folded away: its tiles are then not in the document at all. */
     function isRowHidden(root: HTMLElement): boolean {
-        const tile = root.querySelector('[data-tc-wallet-item="true"]')!;
-        return getComputedStyle(tile).visibility === 'hidden';
+        return !root.querySelector('[data-tc-wallet-item="true"]');
     }
 
     it('shows the heading and the row unless the option is set', () => {
@@ -313,18 +312,36 @@ describe('views/mobile-universal-modal: compact row', () => {
         const button = toggle(root)!;
 
         expect(button.type).toBe('button');
-        expect(button.textContent).toBe('Or choose another app');
+        expect(button.textContent).toBe('Other wallets');
         expect(button.getAttribute('aria-expanded')).toBe('false');
-        const row = document.getElementById(button.getAttribute('aria-controls')!)!;
-        expect(row.querySelectorAll('[data-tc-wallet-item="true"]')).toHaveLength(2);
+        expect(root.querySelector('[data-tc-h2="true"]')).toBeNull();
         expect(isRowHidden(root)).toBe(true);
         expect(lastVisibleWalletsInfo()).toEqual({
             walletsMenu: 'main_screen',
             wallets: [telegram]
         });
+
+        button.click();
+
+        const row = document.getElementById(button.getAttribute('aria-controls')!)!;
+        expect(row.querySelectorAll('[data-tc-wallet-item="true"]')).toHaveLength(2);
     });
 
-    it('unfolds the row on click, and folds it back on the next one', () => {
+    // The toggle previews what it unfolds: an icon per wallet, up to three, hidden from readers
+    it('stacks the icons of the folded wallets on the toggle until they unfold', () => {
+        setAppState({ isCompact: true });
+        const root = mountList([telegram!, gram!, tonkeeper!, mytonwallet!]);
+        const stack = toggle(root)!.querySelector('[aria-hidden="true"]')!;
+
+        expect(stack.children).toHaveLength(3);
+        expect(getComputedStyle(stack).opacity).toBe('1');
+
+        toggle(root)!.click();
+
+        expect(getComputedStyle(stack).opacity).toBe('0');
+    });
+
+    it('unfolds the row on click, and folds it back on the next one', async () => {
         setAppState({ isCompact: true });
         const root = mountList([telegram!, tonkeeper!, mytonwallet!]);
 
@@ -338,6 +355,8 @@ describe('views/mobile-universal-modal: compact row', () => {
         });
 
         toggle(root)!.click();
+        // The row leaves once its fold animation has finished
+        await Promise.resolve();
 
         expect(toggle(root)!.getAttribute('aria-expanded')).toBe('false');
         expect(isRowHidden(root)).toBe(true);

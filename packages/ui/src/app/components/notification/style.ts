@@ -7,10 +7,12 @@ const borders: BorderRadiusConfig = {
     s: '8px',
     none: '0'
 };
+/** The icon sits on the header line, so one-line and multi-line notifications both look level. */
 export const NotificationStyled = styled.div`
     width: 256px;
-    padding: 12px 16px;
+    padding: 14px 16px;
     display: flex;
+    align-items: flex-start;
     gap: 9px;
 
     background-color: ${props => props.theme!.colors.background.primary};

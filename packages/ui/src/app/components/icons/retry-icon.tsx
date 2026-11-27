@@ -8,7 +8,8 @@ interface RetryIconProps {
 
 export const RetryIcon: Component<RetryIconProps> = props => {
     const theme = useTheme();
-    const fill = (): string => props.fill || theme.colors.accent;
+    // Blue like the label of the default button these icons sit in.
+    const fill = (): string => props.fill || theme.colors.connectButton.background;
 
     return (
         <svg

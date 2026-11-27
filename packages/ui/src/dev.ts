@@ -8,7 +8,16 @@ async function dev(): Promise<void> {
     // cannot be verified against it locally. Run `node tools/analytics-sink.mjs` and open
     // http://localhost:3000/?analyticsUrl=http://localhost:3100/events to see exactly what the
     // SDK would send. A query parameter rather than an env var so it needs no restart.
-    const analyticsUrl = new URLSearchParams(window.location.search).get('analyticsUrl');
+    const params = new URLSearchParams(window.location.search);
+    const analyticsUrl = params.get('analyticsUrl');
+    // Lets one dev server show every look of the modal:
+    // ?theme=light&lang=en&compact=1&secondary=1&radius=none&open=1&bg=1
+    const theme = params.get('theme') === 'light' ? THEME.LIGHT : THEME.DARK;
+    const language = params.get('lang') === 'en' ? 'en' : 'ru';
+    const isCompact = params.get('compact') === '1';
+    const withSecondaryButton = params.get('secondary') === '1';
+    const radius = params.get('radius');
+    const borderRadius = radius === 's' || radius === 'none' ? radius : 'm';
 
     const connector = new TonConnect({
         manifestUrl: 'https://demo-dapp.walletbot.net/demo-dapp/tonconnect-manifest.json',
@@ -23,10 +32,12 @@ async function dev(): Promise<void> {
             twaReturnUrl: 'https://google.com'
         },
         uiPreferences: {
-            theme: THEME.DARK,
-            borderRadius: 'm'
+            theme,
+            borderRadius,
+            isCompact,
+            withSecondaryButton
         },
-        language: 'ru',
+        language,
         restoreConnection: true
         /*walletsListConfiguration: {
             includeWallets: [
@@ -50,6 +61,27 @@ async function dev(): Promise<void> {
             value: { tonProof: 'tonProofPayload' + Math.random().toString() }
         });
     }, 3000);*/
+
+    // The glass needs something behind it to show; ?bg=1 fills the page with colour blocks.
+    if (params.get('bg') === '1') {
+        document.body.style.background = theme === THEME.DARK ? '#0d0f13' : '#f2f3f7';
+        const blocks = ['#ff9a3c', '#6a5cff', '#00d68f', '#ff5f6d', '#8e2de2', '#f7971e']
+            .map(
+                colour =>
+                    `<div style="height:150px;border-radius:20px;padding:12px;font:600 15px sans-serif;color:#fff;background:linear-gradient(135deg, ${colour}, #1f6feb)">Item ${colour}</div>`
+            )
+            .join('');
+        document
+            .getElementById('content')!
+            .insertAdjacentHTML(
+                'afterend',
+                `<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px">${blocks}</div>`
+            );
+    }
+
+    if (params.get('open') === '1') {
+        tonConnectUI.openModal();
+    }
 
     tonConnectUI.onStatusChange(wallet => {
         document.getElementById('content')!.textContent = wallet ? JSON.stringify(wallet) : wallet;

@@ -1,14 +1,14 @@
+import { sheetLayout } from 'src/app/styles/media';
 import { styled } from 'solid-styled-components';
-import { H1, Modal, TabBar, Text } from 'src/app/components';
-import { media } from 'src/app/styles/media';
+import { H1, Modal, TabBar } from 'src/app/components';
 
 export const StyledModal = styled(Modal)`
     padding-left: 24px;
     padding-right: 24px;
     padding-top: 18px;
-    padding-bottom: 0;
+    padding-bottom: 16px;
 
-    ${media('mobile')} {
+    ${sheetLayout} {
         padding-left: 0;
         padding-right: 0;
     }
@@ -17,7 +17,7 @@ export const StyledModal = styled(Modal)`
 export const H1Styled = styled(H1)`
     margin-top: 12px;
 
-    ${media('mobile')} {
+    ${sheetLayout} {
         padding: 0 10px;
     }
 `;
@@ -28,16 +28,10 @@ export const LoaderContainerStyled = styled.div`
     display: flex;
     justify-content: center;
 
-    ${media('mobile')} {
+    ${sheetLayout} {
         height: 160px;
         align-items: center;
     }
-`;
-
-export const TabTextStyled = styled(Text)`
-    min-width: 84px;
-    text-align: center;
-    font-weight: 590;
 `;
 
 export const TabBarStyled = styled(TabBar)`

@@ -31,9 +31,11 @@ import {
     H1Styled,
     H2Styled,
     LoaderStyled,
+    ModeStyled,
     QRCodeStyled,
     StyledIconButton
 } from './style';
+import { Crossfade } from 'src/app/components/crossfade';
 import { ConnectorContext } from 'src/app/state/connector.context';
 import {
     BrowserIcon,
@@ -53,7 +55,7 @@ import {
     supportsExtension,
     supportsMobile
 } from 'src/app/utils/wallets';
-import { WALT_APP_NAME } from 'src/app/env/WALLET_APP_NAMES';
+import { TELEGRAM_WALLET_APP_NAME, WALT_APP_NAME } from 'src/app/env/WALLET_APP_NAMES';
 import { Translation } from 'src/app/components/typography/Translation';
 import {
     addReturnStrategy,
@@ -77,6 +79,16 @@ export interface DesktopConnectionProps {
 }
 
 export const DesktopConnectionModal: Component<DesktopConnectionProps> = props => {
+    /** The wallet's name as this screen shows it, without a note such as Walt's "(ex. Wallet)". */
+    const walletName = (): string => stripWalletNameNote(props.wallet.name);
+    /**
+     * A wallet that lives in Telegram, such as Walt, has no desktop app of its own: its "desktop"
+     * link opens Telegram Desktop, and the accent button says so rather than naming an app that
+     * does not exist.
+     */
+    const opensInTelegram = (): boolean =>
+        props.wallet.appName !== TELEGRAM_WALLET_APP_NAME &&
+        isTelegramUrl(props.wallet.universalLink);
     const [mode, setMode] = createSignal<'mobile' | 'desktop' | 'extension'>('mobile');
 
     const [connectionErrored, setConnectionErrored] = createSignal<
@@ -264,10 +276,6 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
         !connectionErrored() &&
         supportsExtension(props.wallet) !== supportsDesktop(props.wallet);
 
-    // The accent label reads as a phrase, so a bracketed note such as "(ex. Wallet)" is left to
-    // the title above it.
-    const accentLabelName = (): string => stripWalletNameNote(props.wallet.name);
-
     // With no QR to show, the mount is the commitment, so it records a selection with the source
     // of the preselection it completes.
     if (supportsMobile(props.wallet)) {
@@ -287,154 +295,174 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
             <Show when={!props.backDisabled}>
                 <StyledIconButton icon="arrow" onClick={() => props.onBackClick()} />
             </Show>
-            <H1Styled>{props.wallet.name}</H1Styled>
-            <Show when={mode() === 'mobile' && !connectionErrored()}>
-                <H2Styled
-                    translationKey="walletModal.desktopConnectionModal.scanQR"
-                    translationValues={{ name: props.wallet.name }}
-                >
-                    Scan the QR code below with your phone’s or {props.wallet.name}’s camera
-                </H2Styled>
-            </Show>
+            <H1Styled>{walletName()}</H1Styled>
 
             <BodyStyled qr={mode() === 'mobile'}>
-                <Switch>
-                    <Match when={connectionErrored()}>
-                        <ErrorIconStyled size="s" />
-                        <Switch>
-                            <Match when={connectionErrored() === 'missing-features'}>
-                                <BodyTextStyled
-                                    translationKey="walletModal.desktopConnectionModal.missingFeatures"
-                                    translationValues={{ name: props.wallet.name }}
-                                >
-                                    Please update Wallet, your version does not support required
-                                    features for this dApp
-                                </BodyTextStyled>
-                            </Match>
-                            <Match when={connectionErrored() === 'connection-declined'}>
-                                <BodyTextStyled translationKey="walletModal.desktopConnectionModal.connectionDeclined">
-                                    Connection declined
-                                </BodyTextStyled>
-                            </Match>
-                            <Match when={connectionErrored() === 'not-supported'}>
-                                <BodyTextStyled
-                                    translationKey="walletModal.desktopConnectionModal.notSupportedWallet"
-                                    translationValues={{ name: props.wallet.name }}
-                                >
-                                    {props.wallet.name} doesn’t support the requested action. Please
-                                    connect another wallet that supports it.
-                                </BodyTextStyled>
-                            </Match>
-                            <Match when={connectionErrored() === 'wrong-network'}>
-                                <BodyTextStyled
-                                    translationKey="walletModal.desktopConnectionModal.wrongNetwork"
-                                    translationValues={{ name: props.wallet.name }}
-                                >
-                                    Connected wallet is on a different network. Please switch
-                                    network in {props.wallet.name} and try again.
-                                </BodyTextStyled>
-                            </Match>
-                        </Switch>
-                        <ButtonsContainerStyled>
-                            <Show when={connectionErrored() !== 'not-supported'}>
-                                <Button
-                                    leftIcon={<RetryIcon />}
-                                    onClick={
-                                        mode() === 'extension' ? onClickExtension : onClickDesktop
-                                    }
-                                >
-                                    <Translation translationKey="common.retry">Retry</Translation>
-                                </Button>
-                            </Show>
-                            <Show when={connectionErrored() === 'missing-features'}>
-                                <Link href={props.wallet.aboutUrl} blank>
-                                    <Button leftIcon={<LinkIcon />}>
-                                        <Translation
-                                            translationKey="walletModal.desktopConnectionModal.updateWallet"
-                                            translationValues={{ name: props.wallet.name }}
+                <Crossfade>
+                    <Switch>
+                        <Match when={connectionErrored()}>
+                            <ModeStyled>
+                                <ErrorIconStyled size="s" />
+                                <Switch>
+                                    <Match when={connectionErrored() === 'missing-features'}>
+                                        <BodyTextStyled
+                                            translationKey="walletModal.desktopConnectionModal.missingFeatures"
+                                            translationValues={{ name: walletName() }}
                                         >
-                                            Update {props.wallet.name}
-                                        </Translation>
-                                    </Button>
-                                </Link>
-                            </Show>
-                            <Show when={connectionErrored() === 'not-supported'}>
-                                <Button onClick={() => props.onBackClick()}>
-                                    <Translation translationKey="walletModal.desktopConnectionModal.chooseAnotherWallet">
-                                        Choose Another Wallet
-                                    </Translation>
-                                </Button>
-                            </Show>
-                        </ButtonsContainerStyled>
-                    </Match>
-                    <Match when={mode() === 'mobile'}>
-                        <QRCodeStyled
-                            disableCopy={false}
-                            sourceUrl={addReturnStrategy(universalLink()!, 'none')}
-                            imageUrl={props.wallet.imageUrl}
-                        />
-                    </Match>
-                    <Match when={mode() === 'extension'}>
-                        <Show when={isWalletInfoCurrentlyInjected(props.wallet)}>
-                            <LoaderStyled size="s" />
-                            <BodyTextStyled
-                                translationKey="walletModal.desktopConnectionModal.continueInExtension"
-                                translationValues={{ name: props.wallet.name }}
-                            >
-                                Continue in {props.wallet.name} browser extension…
-                            </BodyTextStyled>
-                            <ButtonsContainerStyled>
-                                <Button leftIcon={<RetryIcon />} onClick={onClickExtension}>
-                                    <Translation translationKey="common.retry">Retry</Translation>
-                                </Button>
-                            </ButtonsContainerStyled>
-                        </Show>
-                        <Show when={!isWalletInfoCurrentlyInjected(props.wallet)}>
-                            <BodyTextStyled
-                                translationKey="walletModal.desktopConnectionModal.dontHaveExtension"
-                                translationValues={{ name: props.wallet.name }}
-                            >
-                                Seems you don't have installed {props.wallet.name} browser extension
-                            </BodyTextStyled>
-                            <ButtonsContainerStyled>
-                                <Link href={props.wallet.aboutUrl} blank>
-                                    <Button rightIcon={<LinkIcon />} onClick={onClickExtension}>
-                                        <Translation
-                                            translationKey="walletModal.desktopConnectionModal.getWallet"
-                                            translationValues={{ name: props.wallet.name }}
+                                            Please update Wallet, your version does not support
+                                            required features for this dApp
+                                        </BodyTextStyled>
+                                    </Match>
+                                    <Match when={connectionErrored() === 'connection-declined'}>
+                                        <BodyTextStyled translationKey="walletModal.desktopConnectionModal.connectionDeclined">
+                                            Connection declined
+                                        </BodyTextStyled>
+                                    </Match>
+                                    <Match when={connectionErrored() === 'not-supported'}>
+                                        <BodyTextStyled
+                                            translationKey="walletModal.desktopConnectionModal.notSupportedWallet"
+                                            translationValues={{ name: walletName() }}
                                         >
-                                            Get {props.wallet.name}
-                                        </Translation>
-                                    </Button>
-                                </Link>
-                            </ButtonsContainerStyled>
-                        </Show>
-                    </Match>
-                    <Match when={mode() === 'desktop'}>
-                        <LoaderIcon size="m" />
-                        <BodyTextStyled
-                            translationKey="walletModal.desktopConnectionModal.continueOnDesktop"
-                            translationValues={{ name: props.wallet.name }}
-                        >
-                            Continue in {props.wallet.name} on desktop…
-                        </BodyTextStyled>
-                        <ButtonsContainerStyled>
-                            <Button leftIcon={<RetryIcon />} onClick={onClickDesktop}>
-                                <Translation translationKey="common.retry">Retry</Translation>
-                            </Button>
-                            <Link href={props.wallet.aboutUrl} blank>
-                                <Button rightIcon={<LinkIcon />}>
-                                    <Translation
-                                        translationKey="walletModal.desktopConnectionModal.getWallet"
-                                        translationValues={{ name: props.wallet.name }}
+                                            {walletName()} doesn’t support the requested action.
+                                            Please connect another wallet that supports it.
+                                        </BodyTextStyled>
+                                    </Match>
+                                    <Match when={connectionErrored() === 'wrong-network'}>
+                                        <BodyTextStyled
+                                            translationKey="walletModal.desktopConnectionModal.wrongNetwork"
+                                            translationValues={{ name: walletName() }}
+                                        >
+                                            Connected wallet is on a different network. Please
+                                            switch network in {walletName()} and try again.
+                                        </BodyTextStyled>
+                                    </Match>
+                                </Switch>
+                                <ButtonsContainerStyled>
+                                    <Show when={connectionErrored() !== 'not-supported'}>
+                                        <Button
+                                            leftIcon={<RetryIcon />}
+                                            onClick={
+                                                mode() === 'extension'
+                                                    ? onClickExtension
+                                                    : onClickDesktop
+                                            }
+                                        >
+                                            <Translation translationKey="common.retry">
+                                                Retry
+                                            </Translation>
+                                        </Button>
+                                    </Show>
+                                    <Show when={connectionErrored() === 'missing-features'}>
+                                        <Link href={props.wallet.aboutUrl} blank>
+                                            <Button leftIcon={<LinkIcon />}>
+                                                <Translation
+                                                    translationKey="walletModal.desktopConnectionModal.updateWallet"
+                                                    translationValues={{ name: walletName() }}
+                                                >
+                                                    Update {walletName()}
+                                                </Translation>
+                                            </Button>
+                                        </Link>
+                                    </Show>
+                                    <Show when={connectionErrored() === 'not-supported'}>
+                                        <Button onClick={() => props.onBackClick()}>
+                                            <Translation translationKey="walletModal.desktopConnectionModal.chooseAnotherWallet">
+                                                Choose Another Wallet
+                                            </Translation>
+                                        </Button>
+                                    </Show>
+                                </ButtonsContainerStyled>
+                            </ModeStyled>
+                        </Match>
+                        <Match when={mode() === 'mobile'}>
+                            <ModeStyled>
+                                <QRCodeStyled
+                                    disableCopy={false}
+                                    sourceUrl={addReturnStrategy(universalLink()!, 'none')}
+                                    imageUrl={props.wallet.imageUrl}
+                                />
+                                <H2Styled
+                                    translationKey="walletModal.desktopConnectionModal.scanQR"
+                                    translationValues={{ name: walletName() }}
+                                >
+                                    Scan the QR code with your phone’s or {walletName()}’s camera
+                                </H2Styled>
+                            </ModeStyled>
+                        </Match>
+                        <Match when={mode() === 'extension'}>
+                            <ModeStyled>
+                                <Show when={isWalletInfoCurrentlyInjected(props.wallet)}>
+                                    <LoaderStyled size="s" />
+                                    <BodyTextStyled
+                                        translationKey="walletModal.desktopConnectionModal.continueInExtension"
+                                        translationValues={{ name: walletName() }}
                                     >
-                                        Get {props.wallet.name}
-                                    </Translation>
-                                </Button>
-                            </Link>
-                        </ButtonsContainerStyled>
-                    </Match>
-                </Switch>
+                                        Continue in {walletName()} browser extension…
+                                    </BodyTextStyled>
+                                    <ButtonsContainerStyled>
+                                        <Button leftIcon={<RetryIcon />} onClick={onClickExtension}>
+                                            <Translation translationKey="common.retry">
+                                                Retry
+                                            </Translation>
+                                        </Button>
+                                    </ButtonsContainerStyled>
+                                </Show>
+                                <Show when={!isWalletInfoCurrentlyInjected(props.wallet)}>
+                                    <BodyTextStyled
+                                        translationKey="walletModal.desktopConnectionModal.dontHaveExtension"
+                                        translationValues={{ name: walletName() }}
+                                    >
+                                        Seems you don't have installed {walletName()} browser
+                                        extension
+                                    </BodyTextStyled>
+                                    <ButtonsContainerStyled>
+                                        <Link href={props.wallet.aboutUrl} blank>
+                                            <Button
+                                                leftIcon={<LinkIcon />}
+                                                onClick={onClickExtension}
+                                            >
+                                                <Translation
+                                                    translationKey="walletModal.desktopConnectionModal.getWallet"
+                                                    translationValues={{ name: walletName() }}
+                                                >
+                                                    Get {walletName()}
+                                                </Translation>
+                                            </Button>
+                                        </Link>
+                                    </ButtonsContainerStyled>
+                                </Show>
+                            </ModeStyled>
+                        </Match>
+                        <Match when={mode() === 'desktop'}>
+                            <ModeStyled>
+                                <LoaderIcon size="m" />
+                                <BodyTextStyled
+                                    translationKey="walletModal.desktopConnectionModal.continueOnDesktop"
+                                    translationValues={{ name: walletName() }}
+                                >
+                                    Continue in {walletName()} on desktop…
+                                </BodyTextStyled>
+                                <ButtonsContainerStyled>
+                                    <Button leftIcon={<RetryIcon />} onClick={onClickDesktop}>
+                                        <Translation translationKey="common.retry">
+                                            Retry
+                                        </Translation>
+                                    </Button>
+                                    <Link href={props.wallet.aboutUrl} blank>
+                                        <Button leftIcon={<LinkIcon />}>
+                                            <Translation
+                                                translationKey="walletModal.desktopConnectionModal.getWallet"
+                                                translationValues={{ name: walletName() }}
+                                            >
+                                                Get {walletName()}
+                                            </Translation>
+                                        </Button>
+                                    </Link>
+                                </ButtonsContainerStyled>
+                            </ModeStyled>
+                        </Match>
+                    </Switch>
+                </Crossfade>
             </BodyStyled>
 
             <BottomButtonsContainerStyled>
@@ -472,9 +500,9 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                         >
                             <Translation
                                 translationKey="walletModal.desktopConnectionModal.openExtension"
-                                translationValues={{ name: accentLabelName() }}
+                                translationValues={{ name: walletName() }}
                             >
-                                Open {accentLabelName()} Browser Extension
+                                Open {walletName()} Browser Extension
                             </Translation>
                         </AccentFooterButton>
                     </Show>
@@ -498,12 +526,21 @@ export const DesktopConnectionModal: Component<DesktopConnectionProps> = props =
                             onClick={onFooterClickDesktop}
                             data-tc-connection-accent-button="true"
                         >
-                            <Translation
-                                translationKey="walletModal.desktopConnectionModal.openDesktop"
-                                translationValues={{ name: accentLabelName() }}
+                            <Show
+                                when={!opensInTelegram()}
+                                fallback={
+                                    <Translation translationKey="walletModal.desktopConnectionModal.openInTelegramDesktop">
+                                        Open in Telegram Desktop
+                                    </Translation>
+                                }
                             >
-                                Open {accentLabelName()} Desktop
-                            </Translation>
+                                <Translation
+                                    translationKey="walletModal.desktopConnectionModal.openDesktop"
+                                    translationValues={{ name: walletName() }}
+                                >
+                                    Open {walletName()} Desktop
+                                </Translation>
+                            </Show>
                         </AccentFooterButton>
                     </Show>
                 </Show>

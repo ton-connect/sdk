@@ -273,6 +273,21 @@ describe('views/wallets-modal: wallets sharing a rank', () => {
         expect(tileNames(root)).toEqual(['a', 'tonkeeper', 'mytonwallet', 'View allwallets']);
     });
 
+    it('keeps the registry names in the wallets data, notes and all', async () => {
+        window.innerWidth = 390;
+        const root = mountWalletsModal();
+        const walt = { ...wallet('walt'), name: 'Walt (ex. Wallet)' };
+        registry.splice(0, 1, walt);
+        try {
+            await open();
+
+            expect(tileNames(root)[0]).toBe('Walt');
+            expect(lastVisibleWalletsInfo().wallets[0]!.name).toBe('Walt (ex. Wallet)');
+        } finally {
+            registry.splice(0, 1, wallet('a'));
+        }
+    });
+
     it('draws includeWallets entries together with the registry wallets sharing their rank', async () => {
         window.innerWidth = 390;
         // With every draw at 0.2, the last of the three rank 2 wallets comes out second.

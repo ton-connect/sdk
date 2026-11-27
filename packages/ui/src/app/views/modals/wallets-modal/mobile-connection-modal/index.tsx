@@ -19,18 +19,21 @@ import {
 import {
     BodyStyled,
     BodyTextStyled,
+    StatusTextStyled,
     ButtonsContainerStyled,
-    ErrorIconStyled,
     FooterButton,
     FooterStyled,
     H1Styled,
     ImageStyled,
-    LoaderStyled,
+    WalletStatusIconStyled,
     MobileConnectionModalStyled,
+    StatusStyled,
     StyledIconButton
 } from './style';
+import { Crossfade } from 'src/app/components/crossfade';
 import { ConnectorContext } from 'src/app/state/connector.context';
 import { Button, H3, Link, LinkIcon, QRIcon, RetryIcon } from 'src/app/components';
+import { buttonBlue } from 'src/app/components/button/style';
 import { appState } from 'src/app/state/app.state';
 import { setLastSelectedWalletInfo } from 'src/app/state/modals-state';
 import { useTheme } from 'solid-styled-components';
@@ -44,6 +47,8 @@ import {
 import { copyToClipboard } from 'src/app/utils/copy-to-clipboard';
 import { WalletsModalState } from 'src/models';
 import { logDebug } from 'src/app/utils/log';
+import { TELEGRAM_WALLET_APP_NAME } from 'src/app/env/WALLET_APP_NAMES';
+import { stripWalletNameNote } from 'src/app/utils/wallets';
 
 export interface MobileConnectionProps {
     additionalRequest?: ConnectAdditionalRequest;
@@ -55,6 +60,8 @@ export interface MobileConnectionProps {
 }
 
 export const MobileConnectionModal: Component<MobileConnectionProps> = props => {
+    /** The wallet's name as this screen shows it, without a note such as Walt's "(ex. Wallet)". */
+    const walletName = (): string => stripWalletNameNote(props.wallet.name);
     const theme = useTheme();
     const [firstClick, setFirstClick] = createSignal(true);
     const [showQR, setShowQR] = createSignal(false);
@@ -218,141 +225,236 @@ export const MobileConnectionModal: Component<MobileConnectionProps> = props => 
             <Show when={!props.backDisabled || showQR()}>
                 <StyledIconButton icon="arrow" onClick={onBack} />
             </Show>
-            <Show when={showQR()}>
-                <MobileConnectionQR
-                    universalLink={getUniversalLink(false)}
-                    walletInfo={props.wallet}
-                    onOpenLink={onRetry}
-                    onCopy={onCopy}
-                    isCopiedShown={isCopiedShown()}
-                />
-            </Show>
-            <Show when={!showQR()}>
-                <H1Styled>{props.wallet.name}</H1Styled>
+            <Crossfade>
+                <Show
+                    when={!showQR()}
+                    fallback={
+                        <div>
+                            <MobileConnectionQR
+                                universalLink={getUniversalLink(false)}
+                                walletInfo={props.wallet}
+                                onOpenLink={onRetry}
+                                onCopy={onCopy}
+                                isCopiedShown={isCopiedShown()}
+                            />
+                        </div>
+                    }
+                >
+                    <div>
+                        <H1Styled>{walletName()}</H1Styled>
 
-                <BodyStyled>
-                    <Show when={connectionErrored()}>
-                        <ErrorIconStyled size="s" />
-
-                        <Switch>
-                            <Match when={connectionErrored() === 'missing-features'}>
-                                <BodyTextStyled
-                                    translationKey="walletModal.mobileConnectionModal.missingFeatures"
-                                    translationValues={{ name: props.wallet.name }}
-                                >
-                                    Please update Wallet, your version does not support required
-                                    features for this dApp
-                                </BodyTextStyled>
-                            </Match>
-                            <Match when={connectionErrored() === 'connection-declined'}>
-                                <BodyTextStyled translationKey="walletModal.mobileConnectionModal.connectionDeclined">
-                                    Connection declined
-                                </BodyTextStyled>
-                            </Match>
-                            <Match when={connectionErrored() === 'wrong-network'}>
-                                <BodyTextStyled
-                                    translationKey="walletModal.mobileConnectionModal.wrongNetwork"
-                                    translationValues={{ name: props.wallet.name }}
-                                >
-                                    Connected wallet is on a different network. Please switch
-                                    network in {props.wallet.name} and try again.
-                                </BodyTextStyled>
-                            </Match>
-                            <Match when={connectionErrored() === 'not-supported'}>
-                                <BodyTextStyled
-                                    translationKey="walletModal.mobileConnectionModal.notSupportedWallet"
-                                    translationValues={{ name: props.wallet.name }}
-                                >
-                                    {props.wallet.name} doesn't support the requested action. Please
-                                    connect another wallet that supports it.
-                                </BodyTextStyled>
-                            </Match>
-                        </Switch>
-                        <ButtonsContainerStyled>
-                            <Switch>
-                                <Match when={connectionErrored() === 'missing-features'}>
-                                    <Button leftIcon={<RetryIcon />} onClick={onRetry}>
-                                        <Translation translationKey="common.retry">
-                                            Retry
-                                        </Translation>
-                                    </Button>
-                                    <Link href={props.wallet.aboutUrl} blank>
-                                        <Button leftIcon={<LinkIcon />}>
-                                            <Translation
-                                                translationKey="walletModal.mobileConnectionModal.updateWallet"
-                                                translationValues={{ name: props.wallet.name }}
+                        <BodyStyled>
+                            <Crossfade>
+                                <Show
+                                    when={connectionErrored()}
+                                    fallback={
+                                        <StatusStyled>
+                                            <WalletStatusIconStyled
+                                                src={props.wallet.imageUrl}
+                                                status="waiting"
+                                                round={
+                                                    props.wallet.appName ===
+                                                    TELEGRAM_WALLET_APP_NAME
+                                                }
+                                            />
+                                            <BodyTextStyled
+                                                translationKey="walletModal.mobileConnectionModal.continueIn"
+                                                translationValues={{ name: walletName() }}
                                             >
-                                                Update {props.wallet.name}
-                                            </Translation>
-                                        </Button>
-                                    </Link>
-                                </Match>
-                                <Match when={connectionErrored() === 'not-supported'}>
-                                    <Button onClick={() => props.onBackClick()}>
-                                        <Translation translationKey="walletModal.mobileConnectionModal.chooseAnotherWallet">
-                                            Choose Another Wallet
-                                        </Translation>
-                                    </Button>
-                                </Match>
-                                <Match when={connectionErrored() === 'wrong-network'}>
-                                    <Button leftIcon={<RetryIcon />} onClick={onRetry}>
-                                        <Translation translationKey="common.retry">
-                                            Retry
-                                        </Translation>
-                                    </Button>
-                                </Match>
-                                <Match when={connectionErrored() === 'connection-declined'}>
-                                    <Button leftIcon={<RetryIcon />} onClick={onRetry}>
-                                        <Translation translationKey="common.retry">
-                                            Retry
-                                        </Translation>
-                                    </Button>
-                                    <Button
-                                        leftIcon={<QRIcon fill={theme.colors.accent} />}
-                                        onClick={onOpenQR}
-                                    >
-                                        <Translation translationKey="walletModal.mobileConnectionModal.showQR">
-                                            Show QR Code
-                                        </Translation>
-                                    </Button>
-                                </Match>
-                            </Switch>
-                        </ButtonsContainerStyled>
-                    </Show>
-                    <Show when={!connectionErrored()}>
-                        <LoaderStyled size="s" />
-                        <BodyTextStyled
-                            translationKey="walletModal.mobileConnectionModal.continueIn"
-                            translationValues={{ name: props.wallet.name }}
-                        >
-                            Continue in {props.wallet.name}…
-                        </BodyTextStyled>
-                        <ButtonsContainerStyled>
-                            <Button leftIcon={<RetryIcon />} onClick={onRetry}>
-                                <Translation translationKey="common.retry">Retry</Translation>
-                            </Button>
-                            <Button
-                                leftIcon={<QRIcon fill={theme.colors.accent} />}
-                                onClick={onOpenQR}
-                            >
-                                <Translation translationKey="walletModal.mobileConnectionModal.showQR">
-                                    Show QR Code
-                                </Translation>
-                            </Button>
-                        </ButtonsContainerStyled>
-                    </Show>
-                </BodyStyled>
+                                                Continue in {walletName()}…
+                                            </BodyTextStyled>
+                                            <ButtonsContainerStyled>
+                                                <Button
+                                                    leftIcon={
+                                                        <RetryIcon fill={buttonBlue(theme)} />
+                                                    }
+                                                    onClick={onRetry}
+                                                >
+                                                    <Translation translationKey="common.retry">
+                                                        Retry
+                                                    </Translation>
+                                                </Button>
+                                                <Button
+                                                    leftIcon={<QRIcon fill={buttonBlue(theme)} />}
+                                                    onClick={onOpenQR}
+                                                >
+                                                    <Translation translationKey="walletModal.mobileConnectionModal.showQR">
+                                                        Show QR Code
+                                                    </Translation>
+                                                </Button>
+                                            </ButtonsContainerStyled>
+                                        </StatusStyled>
+                                    }
+                                >
+                                    <StatusStyled>
+                                        <WalletStatusIconStyled
+                                            src={props.wallet.imageUrl}
+                                            status="error"
+                                            round={
+                                                props.wallet.appName === TELEGRAM_WALLET_APP_NAME
+                                            }
+                                        />
 
-                <FooterStyled>
-                    <ImageStyled src={props.wallet.imageUrl} />
-                    <H3>{props.wallet.name}</H3>
-                    <FooterButton href={props.wallet.aboutUrl} blank>
-                        <Button>
-                            <Translation translationKey="common.get">GET</Translation>
-                        </Button>
-                    </FooterButton>
-                </FooterStyled>
-            </Show>
+                                        <Switch>
+                                            <Match
+                                                when={connectionErrored() === 'missing-features'}
+                                            >
+                                                <StatusTextStyled
+                                                    translationKey="walletModal.mobileConnectionModal.missingFeatures"
+                                                    translationValues={{ name: walletName() }}
+                                                >
+                                                    Please update Wallet, your version does not
+                                                    support required features for this dApp
+                                                </StatusTextStyled>
+                                            </Match>
+                                            <Match
+                                                when={connectionErrored() === 'connection-declined'}
+                                            >
+                                                <StatusTextStyled translationKey="walletModal.mobileConnectionModal.connectionDeclined">
+                                                    Connection declined
+                                                </StatusTextStyled>
+                                            </Match>
+                                            <Match when={connectionErrored() === 'wrong-network'}>
+                                                <StatusTextStyled
+                                                    translationKey="walletModal.mobileConnectionModal.wrongNetwork"
+                                                    translationValues={{ name: walletName() }}
+                                                >
+                                                    Connected wallet is on a different network.
+                                                    Please switch network in {walletName()} and try
+                                                    again.
+                                                </StatusTextStyled>
+                                            </Match>
+                                            <Match when={connectionErrored() === 'not-supported'}>
+                                                <StatusTextStyled
+                                                    translationKey="walletModal.mobileConnectionModal.notSupportedWallet"
+                                                    translationValues={{ name: walletName() }}
+                                                >
+                                                    {walletName()} doesn't support the requested
+                                                    action. Please connect another wallet that
+                                                    supports it.
+                                                </StatusTextStyled>
+                                            </Match>
+                                        </Switch>
+                                        <ButtonsContainerStyled>
+                                            <Switch>
+                                                <Match
+                                                    when={
+                                                        connectionErrored() === 'missing-features'
+                                                    }
+                                                >
+                                                    <Button
+                                                        appearance="filled"
+                                                        leftIcon={
+                                                            <RetryIcon
+                                                                fill={
+                                                                    theme.colors.connectButton
+                                                                        .foreground
+                                                                }
+                                                            />
+                                                        }
+                                                        onClick={onRetry}
+                                                    >
+                                                        <Translation translationKey="common.retry">
+                                                            Retry
+                                                        </Translation>
+                                                    </Button>
+                                                    <Link href={props.wallet.aboutUrl} blank>
+                                                        <Button leftIcon={<LinkIcon />}>
+                                                            <Translation
+                                                                translationKey="walletModal.mobileConnectionModal.updateWallet"
+                                                                translationValues={{
+                                                                    name: walletName()
+                                                                }}
+                                                            >
+                                                                Update {walletName()}
+                                                            </Translation>
+                                                        </Button>
+                                                    </Link>
+                                                </Match>
+                                                <Match
+                                                    when={connectionErrored() === 'not-supported'}
+                                                >
+                                                    <Button
+                                                        appearance="filled"
+                                                        onClick={() => props.onBackClick()}
+                                                    >
+                                                        <Translation translationKey="walletModal.mobileConnectionModal.chooseAnotherWallet">
+                                                            Choose Another Wallet
+                                                        </Translation>
+                                                    </Button>
+                                                </Match>
+                                                <Match
+                                                    when={connectionErrored() === 'wrong-network'}
+                                                >
+                                                    <Button
+                                                        appearance="filled"
+                                                        leftIcon={
+                                                            <RetryIcon
+                                                                fill={
+                                                                    theme.colors.connectButton
+                                                                        .foreground
+                                                                }
+                                                            />
+                                                        }
+                                                        onClick={onRetry}
+                                                    >
+                                                        <Translation translationKey="common.retry">
+                                                            Retry
+                                                        </Translation>
+                                                    </Button>
+                                                </Match>
+                                                <Match
+                                                    when={
+                                                        connectionErrored() ===
+                                                        'connection-declined'
+                                                    }
+                                                >
+                                                    <Button
+                                                        appearance="filled"
+                                                        leftIcon={
+                                                            <RetryIcon
+                                                                fill={
+                                                                    theme.colors.connectButton
+                                                                        .foreground
+                                                                }
+                                                            />
+                                                        }
+                                                        onClick={onRetry}
+                                                    >
+                                                        <Translation translationKey="common.retry">
+                                                            Retry
+                                                        </Translation>
+                                                    </Button>
+                                                    <Button
+                                                        leftIcon={
+                                                            <QRIcon fill={buttonBlue(theme)} />
+                                                        }
+                                                        onClick={onOpenQR}
+                                                    >
+                                                        <Translation translationKey="walletModal.mobileConnectionModal.showQR">
+                                                            Show QR Code
+                                                        </Translation>
+                                                    </Button>
+                                                </Match>
+                                            </Switch>
+                                        </ButtonsContainerStyled>
+                                    </StatusStyled>
+                                </Show>
+                            </Crossfade>
+                        </BodyStyled>
+
+                        <FooterStyled>
+                            <ImageStyled src={props.wallet.imageUrl} />
+                            <H3>{walletName()}</H3>
+                            <FooterButton href={props.wallet.aboutUrl} blank>
+                                <Button appearance="plain">
+                                    <Translation translationKey="common.get">Get</Translation>
+                                </Button>
+                            </FooterButton>
+                        </FooterStyled>
+                    </div>
+                </Show>
+            </Crossfade>
         </MobileConnectionModalStyled>
     );
 };

@@ -126,7 +126,7 @@ export const ActionModal: Component<ActionModalProps> = props => {
                 }
             >
                 <LoaderButtonStyled disabled={true} data-tc-connect-button-loading="true">
-                    <LoaderIconStyled />
+                    <LoaderIconStyled fill="currentColor" />
                 </LoaderButtonStyled>
             </Show>
             <Show when={executed()}>

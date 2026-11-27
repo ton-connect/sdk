@@ -1,4 +1,12 @@
-import { children, Component, createEffect, createSignal, JSXElement, Show } from 'solid-js';
+import {
+    children,
+    Component,
+    createEffect,
+    createSignal,
+    JSXElement,
+    onCleanup,
+    Show
+} from 'solid-js';
 import {
     CopiedBoxStyled,
     CopyIconButton,
@@ -19,6 +27,7 @@ import { toPx } from 'src/app/utils/css';
 import { CopyLightIcon, SuccessIcon, Text } from 'src/app/components';
 import { animate } from 'src/app/utils/animate';
 import { QrHole, renderSquircleQr } from './squircle-qr';
+import { EASE_STANDARD } from 'src/app/styles/motion';
 
 export interface QRCodeProps extends Styleable {
     sourceUrl: string;
@@ -38,6 +47,23 @@ export const QRCode: Component<QRCodeProps> = props => {
     const logo = children(() => props.logo);
 
     const [picSize, setPicSize] = createSignal(picSizeDefault);
+    // The code fills the square box inside its margin, so the margin is the same on every side
+    const [qrSide, setQrSide] = createSignal(qrNormalSize);
+
+    const fillBox = (box: HTMLElement): void => {
+        if (typeof ResizeObserver === 'undefined') {
+            return;
+        }
+
+        const observer = new ResizeObserver(([entry]) => {
+            const side = Math.floor(Math.min(entry!.contentRect.width, entry!.contentRect.height));
+            if (side > 0) {
+                setQrSide(side);
+            }
+        });
+        observer.observe(box);
+        onCleanup(() => observer.disconnect());
+    };
 
     createEffect(() => {
         const errorCorrectionLevel = 'L';
@@ -47,12 +73,18 @@ export const QRCode: Component<QRCodeProps> = props => {
         qr.make();
         const qrSize = qr.getModuleCount() * cellSize;
 
-        const scale = Math.round((qrNormalSize / qrSize) * 100000) / 100000;
+        const scale = Math.round((qrSide() / qrSize) * 100000) / 100000;
         let hole: QrHole | undefined;
 
         if (imageRef) {
-            const imgSize = Math.ceil(imgSizeDefault / (scale * cellSize)) * cellSize;
-            const imgOffset = Math.ceil((qrSize - imgSize) / (2 * cellSize)) * cellSize;
+            // The cleared middle takes the parity of the module count, so it sits exactly centred
+            const modules = qrSize / cellSize;
+            let imgModules = Math.ceil(imgSizeDefault / (scale * cellSize));
+            if ((modules - imgModules) % 2 !== 0) {
+                imgModules += 1;
+            }
+            const imgSize = imgModules * cellSize;
+            const imgOffset = ((modules - imgModules) / 2) * cellSize;
             imageRef.style.top = toPx(imgOffset);
             imageRef.style.left = toPx(imgOffset);
             imageRef.style.height = toPx(imgSize);
@@ -80,7 +112,12 @@ export const QRCode: Component<QRCodeProps> = props => {
     };
 
     return (
-        <QrCodeBackground class={props.class} onClick={onCopyClick}>
+        <QrCodeBackground
+            class={props.class}
+            data-tc-qr-copy={!props.disableCopy}
+            ref={fillBox}
+            onClick={onCopyClick}
+        >
             <QrCodeWrapper ref={qrCodeWrapperRef}>
                 <div ref={qrCodeCanvasRef} />
                 <Show when={props.imageUrl || logo()}>
@@ -105,8 +142,8 @@ export const QRCode: Component<QRCodeProps> = props => {
                             { opacity: 1, transform: 'translate(-50%, 0)' }
                         ],
                         {
-                            duration: 150,
-                            easing: 'ease-out'
+                            duration: 220,
+                            easing: EASE_STANDARD
                         }
                     );
                 }}
@@ -118,8 +155,8 @@ export const QRCode: Component<QRCodeProps> = props => {
                             { opacity: 0, transform: 'translate(-50%, 44px)' }
                         ],
                         {
-                            duration: 150,
-                            easing: 'ease-out'
+                            duration: 220,
+                            easing: EASE_STANDARD
                         }
                     ).finished.then(() => {
                         done();
