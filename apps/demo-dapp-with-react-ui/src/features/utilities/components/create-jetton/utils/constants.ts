@@ -1,1 +1,1 @@
-export const TON_TICKER = 'TON';
+export const TON_TICKER = 'GRAM';
